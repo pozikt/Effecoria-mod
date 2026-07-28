@@ -17,7 +17,10 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Vex;
+import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.entity.projectile.windcharge.WindCharge;
 import net.minecraft.world.level.block.Blocks;
@@ -51,8 +54,11 @@ public final class SpellEffectExecutor {
             case "wind_charge" -> windCharge(caster, effect, power);
             case "water_stream" -> waterStream(caster, effect, power);
             case "vitality" -> vitality(caster, effect, power);
-            case "thorn_lash" -> thornLash(caster, effect, power);
+            case "evoker_fangs" -> evokerFangs(caster, effect, power);
             case "root_bind" -> rootBind(caster, effect, power);
+            case "soul_drain" -> soulDrain(caster, effect, power);
+            case "wither_touch" -> witherTouch(caster, effect, power);
+            case "shade_summon" -> shadeSummon(caster, effect, power);
             default -> {}
         }
     }
@@ -223,11 +229,41 @@ public final class SpellEffectExecutor {
         level.playSound(null, caster.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.7f, 1.4f);
     }
 
-    /** Poisoned thorn strike at a living target. */
-    private static void thornLash(ServerPlayer caster, SpellEffectEntry effect, float power) {
+    /** Evoker-style fang line along the caster's look vector. */
+    private static void evokerFangs(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        int count = effect.params().has("count") ? effect.params().get("count").getAsInt() : 8;
+        double spacing = effect.params().has("spacing") ? effect.params().get("spacing").getAsDouble() : 0.9;
+        int warmup = effect.params().has("warmup_ticks") ? effect.params().get("warmup_ticks").getAsInt() : 15;
+        int stagger = effect.params().has("stagger_ticks") ? effect.params().get("stagger_ticks").getAsInt() : 2;
+        count = Math.min(20, Math.max(3, Math.round(count * (0.85f + power / 120f))));
+
+        Vec3 look = caster.getLookAngle();
+        Vec3 horizontal = new Vec3(look.x, 0, look.z);
+        if (horizontal.lengthSqr() < 1.0E-4) {
+            horizontal = new Vec3(caster.getLookAngle().x, 0, caster.getLookAngle().z);
+        }
+        horizontal = horizontal.normalize();
+        float yRot = (float) (Math.atan2(horizontal.x, horizontal.z) * (180.0 / Math.PI));
+
+        for (int i = 0; i < count; i++) {
+            double along = (i + 1) * spacing;
+            double x = caster.getX() + horizontal.x * along;
+            double z = caster.getZ() + horizontal.z * along;
+            double y = findGroundY(level, x, caster.getY(), z);
+            EvokerFangs fangs = new EvokerFangs(level, x, y, z, yRot, warmup + i * stagger, caster);
+            level.addFreshEntity(fangs);
+        }
+
+        level.playSound(null, caster.blockPosition(), SoundEvents.EVOKER_PREPARE_ATTACK, SoundSource.PLAYERS, 1f, 1f);
+        level.playSound(null, caster.blockPosition(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.8f, 1.1f);
+    }
+
+    /** Drain life from a target into the caster — external Ψ siphon. */
+    private static void soulDrain(ServerPlayer caster, SpellEffectEntry effect, float power) {
         ServerLevel level = caster.serverLevel();
         float damage = effect.params().get("damage").getAsFloat();
-        int poisonTicks = effect.params().get("poison_ticks").getAsInt();
+        float healRatio = effect.params().has("heal_ratio") ? effect.params().get("heal_ratio").getAsFloat() : 0.5f;
         double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 10;
 
         LivingEntity target = raycastLiving(caster, range);
@@ -237,9 +273,68 @@ public final class SpellEffectExecutor {
 
         float scaledDamage = damage * (power / 50f);
         target.hurt(caster.level().damageSources().magic(), scaledDamage);
-        target.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
-        spawnOrganicParticles(level, target.position().add(0, 1, 0));
-        level.playSound(null, target.blockPosition(), SoundEvents.PLAYER_HURT_SWEET_BERRY_BUSH, SoundSource.PLAYERS, 1f, 0.9f);
+        caster.heal(scaledDamage * healRatio);
+        spawnNecroParticles(level, target.position().add(0, 1, 0));
+        level.playSound(null, target.blockPosition(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.7f, 0.8f);
+    }
+
+    /** Withering touch — necrotic damage over time. */
+    private static void witherTouch(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        float damage = effect.params().get("damage").getAsFloat();
+        int witherTicks = effect.params().get("wither_ticks").getAsInt();
+        double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 10;
+
+        LivingEntity target = raycastLiving(caster, range);
+        if (target == null) {
+            return;
+        }
+
+        float scaledDamage = damage * (power / 50f);
+        target.hurt(caster.level().damageSources().wither(), scaledDamage);
+        target.addEffect(new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
+        spawnNecroParticles(level, target.position().add(0, 1, 0));
+        level.playSound(null, target.blockPosition(), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.7f, 1.2f);
+    }
+
+    /** Summon a short-lived shade (vex relay) bound to the caster. */
+    private static void shadeSummon(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        int lifetime = effect.params().has("lifetime_ticks") ? effect.params().get("lifetime_ticks").getAsInt() : 400;
+        lifetime = Math.round(lifetime * (0.9f + power / 150f));
+
+        Vec3 look = caster.getLookAngle().normalize();
+        double spawnX = caster.getX() + look.x * 1.5;
+        double spawnZ = caster.getZ() + look.z * 1.5;
+        double spawnY = caster.getY() + 1.0;
+
+        Vex shade = EntityType.VEX.create(level);
+        if (shade == null) {
+            return;
+        }
+        shade.moveTo(spawnX, spawnY, spawnZ, caster.getYRot(), 0f);
+        shade.setBoundOrigin(BlockPos.containing(spawnX, spawnY, spawnZ));
+        shade.setLimitedLife(lifetime);
+        LivingEntity target = raycastLiving(caster, 12);
+        if (target != null) {
+            shade.setTarget(target);
+        }
+        level.addFreshEntity(shade);
+
+        spawnNecroParticles(level, new Vec3(spawnX, spawnY, spawnZ));
+        level.playSound(null, caster.blockPosition(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 1f, 0.85f);
+    }
+
+    private static double findGroundY(ServerLevel level, double x, double referenceY, double z) {
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        int startY = (int) Math.floor(referenceY) + 2;
+        for (int dy = 0; dy < 12; dy++) {
+            pos.set((int) Math.floor(x), startY - dy, (int) Math.floor(z));
+            if (!level.getBlockState(pos).isAir() && level.getBlockState(pos).isSolidRender(level, pos)) {
+                return pos.getY() + 1;
+            }
+        }
+        return referenceY;
     }
 
     /** Root a target in place and optionally bloom nearby crops. */
@@ -289,6 +384,11 @@ public final class SpellEffectExecutor {
     private static void spawnOrganicParticles(ServerLevel level, Vec3 pos) {
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.x, pos.y, pos.z, 12, 0.3, 0.4, 0.3, 0.02);
         level.sendParticles(ParticleTypes.COMPOSTER, pos.x, pos.y, pos.z, 6, 0.2, 0.3, 0.2, 0.01);
+    }
+
+    private static void spawnNecroParticles(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ParticleTypes.SOUL, pos.x, pos.y, pos.z, 14, 0.3, 0.4, 0.3, 0.02);
+        level.sendParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 8, 0.15, 0.2, 0.15, 0.01);
     }
 
     private static Entity raycastEntity(ServerPlayer caster, double range) {

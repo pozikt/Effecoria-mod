@@ -12,7 +12,7 @@ public enum MagicSchool implements StringRepresentable {
     ELEMENTAL("elemental", 22.3f),
     /** ~1–10 Hz — organic / Orkanum tissue magic */
     ORGANIC("organic", 5f),
-    /** ~40–100 Hz — necromancy (external Ψ relay; later) */
+    /** ~40–100 Hz — necromancy via external Ψ relay */
     NECROMANCY("necromancy", 55f),
     /** ~100+ Hz — spatial (later) */
     SPATIAL("spatial", 120f),
@@ -35,7 +35,7 @@ public enum MagicSchool implements StringRepresentable {
 
     /** Schools available for player initiation right now. */
     public boolean isPlayable() {
-        return this == MENTAL || this == ELEMENTAL || this == ORGANIC;
+        return this == MENTAL || this == ELEMENTAL || this == ORGANIC || this == NECROMANCY;
     }
 
     @Override

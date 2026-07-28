@@ -1,5 +1,6 @@
 package com.effecoria.core.phi;
 
+import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.formula.PhiSample;
 
 import net.minecraft.core.BlockPos;
@@ -60,9 +61,11 @@ public final class PhiFieldService {
         return 1f;
     }
 
-    /** Solar Φ peak while the sun is above the horizon. */
+    /** Solar Φ peak by day; weak stellar flux at night. */
     private static float timeFactor(Level level) {
-        return level.isDay() ? 1.1f : 1.0f;
+        return level.isDay()
+                ? BalanceConfig.PHI_DAY_MULTIPLIER.get().floatValue()
+                : BalanceConfig.PHI_NIGHT_MULTIPLIER.get().floatValue();
     }
 
     /** Phase 2 will use lead tags; for now detect heavy stone enclosure as crude ZNΦ. */

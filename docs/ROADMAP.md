@@ -18,7 +18,8 @@ Lore reference: [Effecoria encyclopedia](https://github.com/pozikt/Effecoria).
 | ✅ | Initiation via Resonance Focus (Elemental / Mental / Organic) |
 | ✅ | 9 spells + cast pipeline + JSON loader |
 | ✅ | Elemental rework: fireball, wind charge, water stream |
-| ✅ | Organic starter trio: vitality, thorn lash, root bind |
+| ✅ | Organic starter trio: vitality, fang wave, root bind |
+| ✅ | Necromancy starter trio: soul drain, wither touch, shade summon |
 | ✅ | Creative god mode (`creative_god_mode` in config) |
 | ✅ | Water stream extinguishes fire |
 

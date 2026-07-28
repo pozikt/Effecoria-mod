@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:shade_summon",
+  "school": "necromancy",
+  "frequency_hz": 48.0,
+  "base_cost": 16,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.12,
+  "min_phi": 0.25,
+  "effects": [
+    { "type": "effecoria:shade_summon", "lifetime_ticks": 400 }
+  ]
+}

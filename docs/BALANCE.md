@@ -37,8 +37,11 @@ Spell-specific values live in JSON under `data/effecoria/spells/`.
 | vitality_pulse | 12 | 0.04 |
 | thorn_lash | 10 | 0.07 |
 | root_bind | 11 | 0.05 |
+| soul_drain | 12 | 0.09 |
+| wither_touch | 10 | 0.08 |
+| shade_summon | 16 | 0.12 |
 
-## Φ-field sampling (Phase 1 plan)
+## Φ-field sampling
 
 | Factor | Multiplier |
 |--------|------------|
@@ -46,7 +49,7 @@ Spell-specific values live in JSON under `data/effecoria/spells/`.
 | Deep underground | 0.7 |
 | Nether | 1.2 |
 | End | 0.5 |
-| Night (overworld) | 1.0 |
+| Night (overworld) | 0.5 |
 | Day (sun visible) | 1.1 |
 | Inside lead tag radius | 0.0 (ZNΦ) |
 

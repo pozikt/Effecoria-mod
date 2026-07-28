@@ -54,9 +54,17 @@ public final class BalanceConfig {
             .comment("In creative mode: infinite Φ, free casts, full Ψ, no backlash (for testing)")
             .define("creative_god_mode", true);
 
+    public static final ModConfigSpec.DoubleValue PHI_DAY_MULTIPLIER = BUILDER
+            .comment("Φ multiplier while the sun is above the horizon (solar flux)")
+            .defineInRange("phi_day_multiplier", 1.1, 0.0, 5.0);
+
+    public static final ModConfigSpec.DoubleValue PHI_NIGHT_MULTIPLIER = BUILDER
+            .comment("Φ multiplier at night — less stellar flux reaches the surface")
+            .defineInRange("phi_night_multiplier", 0.5, 0.0, 5.0);
+
     public static final ModConfigSpec.IntValue BREATHING_CALM_TICKS_PER_TIER = BUILDER
-            .comment("Calm-breath counter steps per tier (progression ticks, not game ticks; lower = faster)")
-            .defineInRange("breathing_calm_ticks_per_tier", 1, 1, 1000);
+            .comment("Calm-breath counter steps per tier (progression ticks, not game ticks)")
+            .defineInRange("breathing_calm_ticks_per_tier", 200, 1, 10000);
 
     public static final ModConfigSpec.IntValue BREATHING_MAX_TIER = BUILDER
             .comment("Maximum breathing technique tier")
@@ -64,31 +72,31 @@ public final class BalanceConfig {
 
     public static final ModConfigSpec.DoubleValue TRAINING_XP_SPRINT = BUILDER
             .comment("Training XP gained per progression tick while sprinting on ground")
-            .defineInRange("training_xp_sprint", 50.0, 0.0, 1000.0);
+            .defineInRange("training_xp_sprint", 0.08, 0.0, 1000.0);
 
     public static final ModConfigSpec.DoubleValue TRAINING_XP_SWIM = BUILDER
             .comment("Training XP gained per progression tick while swimming")
-            .defineInRange("training_xp_swim", 30.0, 0.0, 1000.0);
+            .defineInRange("training_xp_swim", 0.05, 0.0, 1000.0);
 
     public static final ModConfigSpec.DoubleValue TRAINING_XP_THRESHOLD = BUILDER
             .comment("Training XP required for one soul/psi milestone")
-            .defineInRange("training_xp_threshold", 1.0, 0.1, 10000.0);
+            .defineInRange("training_xp_threshold", 100.0, 1.0, 10000.0);
 
     public static final ModConfigSpec.DoubleValue TRAINING_SOUL_GAIN = BUILDER
             .comment("Ψ_soul increase per training milestone")
-            .defineInRange("training_soul_gain", 0.25, 0.0, 5.0);
+            .defineInRange("training_soul_gain", 0.03, 0.0, 5.0);
 
     public static final ModConfigSpec.DoubleValue TRAINING_MAX_SOUL = BUILDER
             .comment("Maximum Ψ_soul from training")
-            .defineInRange("training_max_soul", 5.0, 1.0, 50.0);
+            .defineInRange("training_max_soul", 2.0, 1.0, 50.0);
 
     public static final ModConfigSpec.DoubleValue TRAINING_MAX_PSI_GAIN = BUILDER
             .comment("Max Ψ increase per training milestone")
-            .defineInRange("training_max_psi_gain", 25.0, 0.0, 500.0);
+            .defineInRange("training_max_psi_gain", 5.0, 0.0, 500.0);
 
     public static final ModConfigSpec.DoubleValue TRAINING_MAX_PSI_CAP = BUILDER
             .comment("Maximum Ψ capacity from training")
-            .defineInRange("training_max_psi_cap", 500.0, 10.0, 10000.0);
+            .defineInRange("training_max_psi_cap", 150.0, 10.0, 10000.0);
 
     public static final ModConfigSpec SPEC = BUILDER.build();
 }

@@ -8,7 +8,7 @@ Magic is **not** a separate ruleset — it is Φ-field conversion through the Ψ
 
 ## MVP scope (Phase 1)
 
-**Magic schools:** Elemental, Mental, Organic  
+**Magic schools:** Elemental, Mental, Organic, Necromancy  
 **Initiation:** `resonance_focus` ritual fixes one school forever  
 **Resources:** Ψ bar (internal), Φ indicator (environmental)
 
@@ -33,8 +33,16 @@ Magic is **not** a separate ruleset — it is Φ-field conversion through the Ψ
 | ID | Effect | Lore note |
 |----|--------|-----------|
 | `vitality_pulse` | Heal + regen | Orkanum tissue mend |
-| `thorn_lash` | Damage + poison | Plant toxin channel |
+| `thorn_lash` | Evoker fang wave | Plant-channelled ground spikes |
 | `root_bind` | Root target + bloom crops | Ultra-low frequency growth field |
+
+### Necromancy spells
+
+| ID | Effect | Lore note |
+|----|--------|-----------|
+| `soul_drain` | Drain HP → heal caster | External Ψ siphon |
+| `wither_touch` | Damage + wither | Necrotic frequency band |
+| `shade_summon` | Summon bound vex shade | Short-lived Ψ relay |
 
 ## Systems deferred by phase
 

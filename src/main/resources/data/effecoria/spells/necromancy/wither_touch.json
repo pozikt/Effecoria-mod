@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:wither_touch",
+  "school": "necromancy",
+  "frequency_hz": 58.0,
+  "base_cost": 10,
+  "power_multiplier": 0.95,
+  "side_entropy": 0.08,
+  "min_phi": 0.2,
+  "effects": [
+    { "type": "effecoria:wither_touch", "damage": 4, "wither_ticks": 100, "range": 10 }
+  ]
+}

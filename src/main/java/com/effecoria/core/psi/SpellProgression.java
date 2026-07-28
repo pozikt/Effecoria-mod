@@ -24,6 +24,10 @@ public final class SpellProgression {
                     id("vitality_pulse"),
                     id("thorn_lash"),
                     id("root_bind"));
+            case NECROMANCY -> List.of(
+                    id("soul_drain"),
+                    id("wither_touch"),
+                    id("shade_summon"));
             default -> List.of();
         };
     }
