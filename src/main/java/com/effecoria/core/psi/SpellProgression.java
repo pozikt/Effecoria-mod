@@ -28,6 +28,18 @@ public final class SpellProgression {
                     id("soul_drain"),
                     id("wither_touch"),
                     id("shade_summon"));
+            case SPATIAL -> List.of(
+                    id("blink"),
+                    id("rift_yank"),
+                    id("phase_veil"));
+            case CORRUPTION -> List.of(
+                    id("corrupt_mark"),
+                    id("binding_seal"),
+                    id("blight_pulse"));
+            case SEALS -> List.of(
+                    id("trap_seal"),
+                    id("fortify_seal"),
+                    id("glow_seal"));
             default -> List.of();
         };
     }

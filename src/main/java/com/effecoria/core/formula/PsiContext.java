@@ -18,10 +18,16 @@ public record PsiContext(
         float biologyQ,
         float frequencyHz,
         MagicSchool school,
-        float entropyB) {
+        float entropyB,
+        float breathingMastery,
+        int essence) {
 
     public static PsiContext defaultHuman(MagicSchool school) {
-        return new PsiContext(1f, 50f, 0.6f, school.nominalFrequencyHz(), school, 0f);
+        return new PsiContext(1f, 50f, 0.6f, school.nominalFrequencyHz(), school, 0f, 0f, 0);
+    }
+
+    public float mastery() {
+        return Mastery.factor(breathingMastery, essence);
     }
 
     public boolean hasAffinity(MagicSchool required) {

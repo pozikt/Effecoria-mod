@@ -1,6 +1,7 @@
 package com.effecoria.core.psi;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.core.seal.ChunkSealData;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -40,6 +41,27 @@ public final class ModAttachments {
                     })
                     .copyOnDeath()
                     .sync((holder, player) -> holder == player, PlayerPsiData.STREAM_CODEC)
+                    .build());
+
+    public static final Supplier<AttachmentType<ChunkSealData>> CHUNK_SEALS = ATTACHMENT_TYPES.register(
+            "chunk_seals",
+            () -> AttachmentType.builder(ChunkSealData::new)
+                    .serialize(new IAttachmentSerializer<>() {
+                        @Override
+                        public ChunkSealData read(IAttachmentHolder holder, Tag tag, HolderLookup.Provider provider) {
+                            ChunkSealData data = new ChunkSealData();
+                            if (tag instanceof CompoundTag compound) {
+                                data.load(provider, compound);
+                            }
+                            return data;
+                        }
+
+                        @Override
+                        public Tag write(ChunkSealData attachment, HolderLookup.Provider provider) {
+                            return attachment.save(provider);
+                        }
+                    })
+                    .sync(ChunkSealData.STREAM_CODEC)
                     .build());
 
     public static void register(IEventBus modEventBus) {

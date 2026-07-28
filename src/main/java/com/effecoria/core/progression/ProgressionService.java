@@ -3,39 +3,39 @@ package com.effecoria.core.progression;
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.psi.PlayerPsiData;
 
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-/** Passive progression: calm breathing tiers and physical training. */
+/** Passive progression: breathing meditation and physical training. */
 public final class ProgressionService {
     private ProgressionService() {}
 
     public static void tick(ServerPlayer player, PlayerPsiData data) {
-        tickBreathing(player, data);
+        tickBreathingMeditation(player, data);
         tickTraining(player, data);
     }
 
-    private static void tickBreathing(ServerPlayer player, PlayerPsiData data) {
-        int maxTier = BalanceConfig.BREATHING_MAX_TIER.get();
-        int ticksPerTier = BalanceConfig.BREATHING_CALM_TICKS_PER_TIER.get();
+    /** Standing calm — gradual breathing mastery (meditation). */
+    private static void tickBreathingMeditation(ServerPlayer player, PlayerPsiData data) {
+        if (!data.initiated()) {
+            return;
+        }
 
-        boolean calm = player.onGround()
+        boolean meditating = player.onGround()
                 && !player.isSprinting()
                 && !player.isInWater()
+                && !player.isPassenger()
                 && player.getAirSupply() >= player.getMaxAirSupply() - 10;
 
-        if (calm && data.breathingTier() < maxTier) {
-            data.addCalmBreathTicks(1);
-            if (data.calmBreathTicks() >= ticksPerTier) {
-                int newTier = data.breathingTier() + 1;
-                data.setBreathingTier(newTier);
-                data.resetCalmBreathTicks();
-                player.displayClientMessage(
-                        Component.translatable("message.effecoria.breathing_tier_up", newTier),
-                        true);
-            }
-        } else if (!calm) {
-            data.resetCalmBreathTicks();
+        if (!meditating || data.breathingMastery() >= BreathingService.maxMastery()) {
+            return;
+        }
+
+        float before = data.breathingMastery();
+        float gained = BreathingService.addMastery(
+                data,
+                BalanceConfig.BREATHING_MEDITATION_GAIN.get().floatValue());
+        if (gained > 0f) {
+            BreathingService.notifyMilestones(player, before, data.breathingMastery());
         }
     }
 
@@ -63,11 +63,15 @@ public final class ProgressionService {
             if (data.maxPsi() < maxPsi) {
                 data.setMaxPsi(Math.min(maxPsi, data.maxPsi() + psiGain));
             }
+            int essenceGain = BalanceConfig.ESSENCE_PER_TRAINING_MILESTONE.get();
+            if (essenceGain > 0) {
+                data.addEssence(essenceGain);
+            }
         }
 
         if (data.soulStrength() > soulBefore || data.maxPsi() > maxPsiBefore) {
             player.displayClientMessage(
-                    Component.translatable(
+                    net.minecraft.network.chat.Component.translatable(
                             "message.effecoria.training_milestone",
                             String.format("%.2f", data.soulStrength()),
                             (int) data.maxPsi()),

@@ -3,6 +3,7 @@ package com.effecoria.command;
 import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.magic.MagicSchool;
 import com.effecoria.core.phi.PhiFieldService;
+import com.effecoria.core.progression.BreathingService;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
@@ -10,17 +11,28 @@ import com.effecoria.core.psi.SpellProgression;
 import com.effecoria.magic.CastPipeline;
 import com.effecoria.magic.SpellRegistry;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.Locale;
+
 public final class EffecoriaCommands {
+    private static final SuggestionProvider<CommandSourceStack> STAT_SUGGESTIONS = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(new String[]{
+                    "psi", "max_psi", "essence", "breathing", "soul", "biology_q",
+                    "phi_mult", "entropy", "training_xp"
+            }, builder);
+
     private EffecoriaCommands() {}
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -37,7 +49,16 @@ public final class EffecoriaCommands {
                         .then(Commands.argument("spell", ResourceLocationArgument.id())
                                 .executes(ctx -> cast(ctx.getSource(), ResourceLocationArgument.getId(ctx, "spell")))))
                 .then(Commands.literal("spells")
-                        .executes(ctx -> listSpells(ctx.getSource()))));
+                        .executes(ctx -> listSpells(ctx.getSource())))
+                .then(Commands.literal("set")
+                        .requires(source -> source.hasPermission(2))
+                        .then(Commands.argument("stat", StringArgumentType.word())
+                                .suggests(STAT_SUGGESTIONS)
+                                .then(Commands.argument("value", FloatArgumentType.floatArg(0f))
+                                        .executes(ctx -> setStat(
+                                                ctx.getSource(),
+                                                StringArgumentType.getString(ctx, "stat"),
+                                                FloatArgumentType.getFloat(ctx, "value")))))));
     }
 
     private static int debug(CommandSourceStack source) throws CommandSyntaxException {
@@ -56,10 +77,72 @@ public final class EffecoriaCommands {
                 data.initiated()), false);
         source.sendSuccess(() -> Component.translatable(
                 "message.effecoria.debug_progression",
-                data.breathingTier(),
+                BreathingService.formatTotalPercent(data.breathingMastery()),
+                data.essence(),
+                String.format("%.2f", data.mastery()),
                 String.format("%.1f", data.trainingXp()),
                 String.format("%.2f", data.soulStrength()),
                 String.format("%.2f", data.effectiveBiologyQ())), false);
+        source.sendSuccess(() -> Component.translatable(
+                "message.effecoria.debug_mult",
+                String.format("%.2f", data.phiMultiplier())), false);
+        return 1;
+    }
+
+    private static int setStat(CommandSourceStack source, String statName, float value) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        PlayerPsiData data = PsiHelper.get(player);
+        String stat = statName.toLowerCase(Locale.ROOT);
+        String display;
+
+        switch (stat) {
+            case "psi", "current_psi" -> {
+                data.setCurrentPsi(value);
+                display = String.format("Ψ = %.1f", data.currentPsi());
+            }
+            case "max_psi" -> {
+                data.setMaxPsi(value);
+                display = String.format("max Ψ = %.1f", data.maxPsi());
+            }
+            case "essence" -> {
+                data.setEssence(Math.round(value));
+                display = "essence = " + data.essence();
+            }
+            case "breathing", "breathing_mastery" -> {
+                float mastery = value > 1f ? value / 100f : value;
+                data.setBreathingMastery(mastery);
+                display = "breathing = " + BreathingService.formatTotalPercent(data.breathingMastery()) + "%";
+            }
+            case "soul", "soul_strength" -> {
+                data.setSoulStrength(value);
+                display = String.format("Ψ_soul = %.2f", data.soulStrength());
+            }
+            case "biology_q", "q" -> {
+                data.setBiologyQ(value);
+                display = String.format("Q_biology = %.2f", data.biologyQ());
+            }
+            case "phi_mult", "phi", "phi_multiplier" -> {
+                data.setPhiMultiplier(value);
+                display = String.format("Φ mult = ×%.2f", data.phiMultiplier());
+            }
+            case "entropy", "entropy_b" -> {
+                data.setEntropyB(value);
+                display = String.format("entropy = %.2f", data.entropyB());
+            }
+            case "training_xp", "train_xp" -> {
+                data.setTrainingXp(value);
+                display = String.format("training XP = %.1f", data.trainingXp());
+            }
+            default -> {
+                source.sendFailure(Component.translatable("message.effecoria.invalid_stat"));
+                return 0;
+            }
+        }
+
+        PsiHelper.set(player, data);
+        player.syncData(ModAttachments.PSI.get());
+        String finalDisplay = display;
+        source.sendSuccess(() -> Component.translatable("message.effecoria.stat_set", finalDisplay), true);
         return 1;
     }
 

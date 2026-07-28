@@ -28,8 +28,10 @@ public final class PlayerPsiData {
                 ByteBufCodecs.BOOL.encode(buf, data.initiated);
                 ByteBufCodecs.INT.encode(buf, data.selectedSpellIndex);
                 ByteBufCodecs.VAR_LONG.encode(buf, data.phiSenseUntil);
-                ByteBufCodecs.INT.encode(buf, data.breathingTier);
+                ByteBufCodecs.FLOAT.encode(buf, data.breathingMastery);
                 ByteBufCodecs.FLOAT.encode(buf, data.trainingXp);
+                ByteBufCodecs.INT.encode(buf, data.essence);
+                ByteBufCodecs.FLOAT.encode(buf, data.phiMultiplier);
                 ByteBufCodecs.INT.encode(buf, data.knownSpells.size());
                 for (ResourceLocation spell : data.knownSpells) {
                     ResourceLocation.STREAM_CODEC.encode(buf, spell);
@@ -47,8 +49,10 @@ public final class PlayerPsiData {
                 data.initiated = ByteBufCodecs.BOOL.decode(buf);
                 data.selectedSpellIndex = ByteBufCodecs.INT.decode(buf);
                 data.phiSenseUntil = ByteBufCodecs.VAR_LONG.decode(buf);
-                data.breathingTier = ByteBufCodecs.INT.decode(buf);
+                data.breathingMastery = ByteBufCodecs.FLOAT.decode(buf);
                 data.trainingXp = ByteBufCodecs.FLOAT.decode(buf);
+                data.essence = ByteBufCodecs.INT.decode(buf);
+                data.phiMultiplier = ByteBufCodecs.FLOAT.decode(buf);
                 int spellCount = ByteBufCodecs.INT.decode(buf);
                 data.knownSpells = new ArrayList<>(spellCount);
                 for (int i = 0; i < spellCount; i++) {
@@ -68,9 +72,10 @@ public final class PlayerPsiData {
     private int selectedSpellIndex;
     private List<ResourceLocation> knownSpells = new ArrayList<>();
     private long phiSenseUntil;
-    private int breathingTier;
-    private int calmBreathTicks;
+    private float breathingMastery;
     private float trainingXp;
+    private int essence;
+    private float phiMultiplier = 1f;
 
     public static PlayerPsiData createDefault() {
         PlayerPsiData data = new PlayerPsiData();
@@ -123,21 +128,47 @@ public final class PlayerPsiData {
         return phiSenseUntil;
     }
 
-    public int breathingTier() {
-        return breathingTier;
-    }
-
-    public int calmBreathTicks() {
-        return calmBreathTicks;
+    public float breathingMastery() {
+        return breathingMastery;
     }
 
     public float trainingXp() {
         return trainingXp;
     }
 
+    public int essence() {
+        return essence;
+    }
+
+    public float phiMultiplier() {
+        return phiMultiplier;
+    }
+
+    public void addEssence(int amount) {
+        this.essence = Math.max(0, this.essence + amount);
+    }
+
+    public void setEssence(int amount) {
+        this.essence = Math.max(0, amount);
+    }
+
+    public void setPhiMultiplier(float value) {
+        this.phiMultiplier = Math.max(0f, value);
+    }
+
+    public void setBiologyQ(float value) {
+        this.biologyQ = Math.max(0f, value);
+    }
+
+    public float mastery() {
+        return com.effecoria.core.formula.Mastery.factor(breathingMastery, essence);
+    }
+
     /** Orkanum efficiency with breathing technique bonus. */
     public float effectiveBiologyQ() {
-        float breathingMult = 1f + breathingTier * 0.15f;
+        float cap = BalanceConfig.BREATHING_MAX_MASTERY.get().floatValue();
+        float normalized = cap > 0f ? Math.min(1f, breathingMastery / cap) : 0f;
+        float breathingMult = 1f + normalized * BalanceConfig.BREATHING_BIOLOGY_BONUS_MAX.get().floatValue();
         return biologyQ * breathingMult;
     }
 
@@ -166,20 +197,17 @@ public final class PlayerPsiData {
         this.currentPsi = Math.min(this.currentPsi, this.maxPsi);
     }
 
-    public void setBreathingTier(int tier) {
-        this.breathingTier = Math.clamp(tier, 0, 2);
-    }
-
-    public void addCalmBreathTicks(int ticks) {
-        this.calmBreathTicks += ticks;
-    }
-
-    public void resetCalmBreathTicks() {
-        this.calmBreathTicks = 0;
+    public void setBreathingMastery(float value) {
+        float cap = BalanceConfig.BREATHING_MAX_MASTERY.get().floatValue();
+        this.breathingMastery = Math.clamp(value, 0f, cap);
     }
 
     public void addTrainingXp(float amount) {
         this.trainingXp = Math.max(0f, this.trainingXp + amount);
+    }
+
+    public void setTrainingXp(float amount) {
+        this.trainingXp = Math.max(0f, amount);
     }
 
     public void setSelectedSpellIndex(int index) {
@@ -218,7 +246,6 @@ public final class PlayerPsiData {
         this.selectedSpellIndex = 0;
         this.entropyB = 0f;
         this.phiSenseUntil = 0L;
-        this.calmBreathTicks = 0;
         if (resetResources) {
             this.maxPsi = BalanceConfig.DEFAULT_MAX_PSI.get().floatValue();
             this.currentPsi = BalanceConfig.DEFAULT_STARTING_PSI.get().floatValue();
@@ -239,8 +266,10 @@ public final class PlayerPsiData {
         tag.putBoolean("initiated", initiated);
         tag.putInt("selectedSpellIndex", selectedSpellIndex);
         tag.putLong("phiSenseUntil", phiSenseUntil);
-        tag.putInt("breathingTier", breathingTier);
+        tag.putFloat("breathingMastery", breathingMastery);
         tag.putFloat("trainingXp", trainingXp);
+        tag.putInt("essence", essence);
+        tag.putFloat("phiMultiplier", phiMultiplier);
 
         ListTag spellList = new ListTag();
         for (ResourceLocation spell : knownSpells) {
@@ -261,8 +290,17 @@ public final class PlayerPsiData {
         initiated = tag.getBoolean("initiated");
         selectedSpellIndex = tag.getInt("selectedSpellIndex");
         phiSenseUntil = tag.getLong("phiSenseUntil");
-        breathingTier = tag.contains("breathingTier") ? tag.getInt("breathingTier") : 0;
+        if (tag.contains("breathingMastery")) {
+            breathingMastery = tag.getFloat("breathingMastery");
+        } else if (tag.contains("breathingTier")) {
+            breathingMastery = tag.getInt("breathingTier") * 0.5f;
+        } else {
+            breathingMastery = 0f;
+        }
+        setBreathingMastery(breathingMastery);
         trainingXp = tag.contains("trainingXp") ? tag.getFloat("trainingXp") : 0f;
+        essence = tag.contains("essence") ? tag.getInt("essence") : 0;
+        phiMultiplier = tag.contains("phiMultiplier") ? tag.getFloat("phiMultiplier") : 1f;
 
         knownSpells = new ArrayList<>();
         ListTag spellList = tag.getList("knownSpells", Tag.TAG_STRING);
@@ -272,6 +310,15 @@ public final class PlayerPsiData {
                 spellId = ResourceLocation.fromNamespaceAndPath("effecoria", "water_stream");
             }
             knownSpells.add(spellId);
+        }
+
+        // Old saves used school id "seals" for combat corruption spells.
+        if (school == MagicSchool.SEALS && knownSpells.stream().anyMatch(id ->
+                id.getPath().equals("corrupt_mark")
+                        || id.getPath().equals("blight_pulse")
+                        || (id.getPath().equals("binding_seal") && knownSpells.size() <= 3))) {
+            school = MagicSchool.CORRUPTION;
+            frequencyHz = school.nominalFrequencyHz();
         }
     }
 
@@ -288,9 +335,10 @@ public final class PlayerPsiData {
         copy.selectedSpellIndex = selectedSpellIndex;
         copy.knownSpells = new ArrayList<>(knownSpells);
         copy.phiSenseUntil = phiSenseUntil;
-        copy.breathingTier = breathingTier;
-        copy.calmBreathTicks = calmBreathTicks;
+        copy.breathingMastery = breathingMastery;
         copy.trainingXp = trainingXp;
+        copy.essence = essence;
+        copy.phiMultiplier = phiMultiplier;
         return copy;
     }
 }

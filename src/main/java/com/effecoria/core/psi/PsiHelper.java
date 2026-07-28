@@ -24,7 +24,9 @@ public final class PsiHelper {
                 data.effectiveBiologyQ(),
                 data.frequencyHz(),
                 data.school(),
-                data.entropyB());
+                data.entropyB(),
+                data.breathingMastery(),
+                data.essence());
     }
 
     public static void initiate(Player player, MagicSchool school) {

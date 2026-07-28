@@ -11,6 +11,7 @@ import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.effect.SpellEffectExecutor;
+import com.effecoria.magic.CastDelivery;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -56,12 +57,20 @@ public final class CastPipeline {
             return CastResult.CANNOT_CAST;
         }
 
-        float cost = godMode ? 0f : FormulaEngine.spellCost(ctx, phi, spell);
+        float fullCost = godMode ? 0f : FormulaEngine.spellCost(ctx, phi, spell);
         float power = FormulaEngine.spellPower(ctx, phi, spell);
 
+        CastDelivery delivery = SpellEffectExecutor.applyAll(player, spell, power);
+
         if (!godMode) {
-            data.setCurrentPsi(data.currentPsi() - cost);
-            float newEntropy = FormulaEngine.accumulateEntropy(data.entropyB(), power, spell.sideEntropyRatio());
+            float costFraction = delivery == CastDelivery.WHIFF_NO_TARGET || delivery == CastDelivery.WHIFF_NO_BLOCK
+                    ? BalanceConfig.WHIFF_COST_FRACTION.get().floatValue()
+                    : 1f;
+            float actualCost = fullCost * costFraction;
+            data.setCurrentPsi(data.currentPsi() - actualCost);
+
+            float entropyPower = delivery == CastDelivery.FULL ? power : actualCost;
+            float newEntropy = FormulaEngine.accumulateEntropy(data.entropyB(), entropyPower, spell.sideEntropyRatio());
             data.setEntropyB(newEntropy);
 
             if (FormulaEngine.isBacklashTriggered(newEntropy)) {
@@ -70,13 +79,23 @@ public final class CastPipeline {
             }
         }
 
-        SpellEffectExecutor.applyAll(player, spell, power);
         PsiHelper.set(player, data);
         player.syncData(ModAttachments.PSI.get());
 
-        player.displayClientMessage(
-                Component.translatable("message.effecoria.cast_success", Component.translatable("spell.effecoria." + spellId.getPath())),
-                true);
+        Component spellName = Component.translatable("spell.effecoria." + spellId.getPath());
+        if (delivery == CastDelivery.WHIFF_NO_TARGET || delivery == CastDelivery.WHIFF_NO_BLOCK) {
+            int whiffPercent = Math.round(BalanceConfig.WHIFF_COST_FRACTION.get().floatValue() * 100f);
+            String key = delivery == CastDelivery.WHIFF_NO_BLOCK
+                    ? "message.effecoria.cast_whiff_block"
+                    : "message.effecoria.cast_whiff";
+            player.displayClientMessage(
+                    Component.translatable(key, spellName, whiffPercent),
+                    true);
+        } else {
+            player.displayClientMessage(
+                    Component.translatable("message.effecoria.cast_success", spellName),
+                    true);
+        }
         return CastResult.SUCCESS;
     }
 

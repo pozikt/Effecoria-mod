@@ -24,6 +24,7 @@ public final class ModCreativeTabs {
                     .displayItems((params, output) -> {
                         output.accept(ModItems.ESSENITE_ORE.get());
                         output.accept(ModItems.RESONANCE_FOCUS.get());
+                        output.accept(ModItems.BREATHING_SCROLL.get());
                     })
                     .build());
 }

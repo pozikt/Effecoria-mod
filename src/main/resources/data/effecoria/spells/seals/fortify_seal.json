@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:fortify_seal",
+  "school": "seals",
+  "frequency_hz": 0.4,
+  "base_cost": 14,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.06,
+  "min_phi": 0.2,
+  "effects": [
+    { "type": "effecoria:place_fortify_seal", "range": 8, "duration_ticks": -1 }
+  ]
+}

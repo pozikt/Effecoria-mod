@@ -45,16 +45,17 @@ public final class FormulaEngine {
                 * phi.effectiveValue()
                 * resonance
                 * spell.powerMultiplier()
+                * ctx.mastery()
                 * BalanceConfig.SPELL_POWER_SCALE.get().floatValue();
     }
 
     /**
-     * cost = base_cost × (1 + cost_factor × (1 - Φ_local))
+     * cost = base_cost × low_Φ_penalty × mastery_cost_reduction
      */
     public static float spellCost(PsiContext ctx, PhiSample phi, SpellDefinition spell) {
         float phiPenalty = 1f + BalanceConfig.LOW_PHI_COST_FACTOR.get().floatValue()
                 * (1f - Math.min(1f, phi.effectiveValue()));
-        return spell.baseCost() * phiPenalty;
+        return spell.baseCost() * phiPenalty * Mastery.costMultiplier(ctx.mastery());
     }
 
     /**

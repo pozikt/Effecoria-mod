@@ -5,10 +5,15 @@ import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.core.magic.SpellEffectEntry;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
+import com.effecoria.core.seal.SealService;
+import com.effecoria.core.seal.SealTypes;
+import com.effecoria.magic.CastDelivery;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -32,6 +37,7 @@ import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -40,42 +46,185 @@ import java.util.HashSet;
 import java.util.Set;
 
 public final class SpellEffectExecutor {
+    private static final Set<String> TARGETED_EFFECTS = Set.of(
+            "telekinesis",
+            "mind_sting",
+            "soul_drain",
+            "wither_touch",
+            "shade_summon",
+            "root_bind",
+            "rift_yank",
+            "corrupt_mark",
+            "binding_seal");
+
+    private static final Set<String> BLOCK_SEAL_EFFECTS = Set.of(
+            "place_trap_seal",
+            "place_fortify_seal",
+            "place_glow_seal");
+
     private SpellEffectExecutor() {}
 
-    public static void applyAll(ServerPlayer caster, SpellDefinition spell, float power) {
+    public static boolean requiresTarget(SpellDefinition spell) {
         for (SpellEffectEntry effect : spell.effects()) {
-            apply(caster, effect, power);
+            if (TARGETED_EFFECTS.contains(effect.type().getPath())) {
+                return true;
+            }
         }
+        return false;
     }
 
-    private static void apply(ServerPlayer caster, SpellEffectEntry effect, float power) {
+    public static boolean requiresBlockTarget(SpellDefinition spell) {
+        for (SpellEffectEntry effect : spell.effects()) {
+            if (BLOCK_SEAL_EFFECTS.contains(effect.type().getPath())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static CastDelivery applyAll(ServerPlayer caster, SpellDefinition spell, float power) {
+        LivingEntity target = null;
+        if (requiresTarget(spell)) {
+            target = resolveTarget(caster, spell);
+            if (target == null) {
+                notifyNoTarget(caster);
+                return CastDelivery.WHIFF_NO_TARGET;
+            }
+        }
+
+        BlockPos blockTarget = null;
+        if (requiresBlockTarget(spell)) {
+            blockTarget = resolveBlockTarget(caster, spell);
+            if (blockTarget == null) {
+                notifyNoBlock(caster);
+                return CastDelivery.WHIFF_NO_BLOCK;
+            }
+        }
+
+        for (SpellEffectEntry effect : spell.effects()) {
+            apply(caster, effect, power, target, blockTarget);
+        }
+        return CastDelivery.FULL;
+    }
+
+    private static LivingEntity resolveTarget(ServerPlayer caster, SpellDefinition spell) {
+        double range = 12;
+        for (SpellEffectEntry effect : spell.effects()) {
+            if (!TARGETED_EFFECTS.contains(effect.type().getPath())) {
+                continue;
+            }
+            if (effect.params().has("range")) {
+                range = Math.max(range, effect.params().get("range").getAsDouble());
+            }
+        }
+        return findSpellTarget(caster, range);
+    }
+
+    private static BlockPos resolveBlockTarget(ServerPlayer caster, SpellDefinition spell) {
+        double range = 8;
+        for (SpellEffectEntry effect : spell.effects()) {
+            if (!BLOCK_SEAL_EFFECTS.contains(effect.type().getPath())) {
+                continue;
+            }
+            if (effect.params().has("range")) {
+                range = Math.max(range, effect.params().get("range").getAsDouble());
+            }
+        }
+        HitResult hit = caster.pick(range, 0f, false);
+        if (hit.getType() != HitResult.Type.BLOCK || !(hit instanceof BlockHitResult blockHit)) {
+            return null;
+        }
+        BlockPos pos = blockHit.getBlockPos();
+        if (caster.level().getBlockState(pos).isAir()) {
+            return null;
+        }
+        return pos;
+    }
+
+    private static void apply(
+            ServerPlayer caster,
+            SpellEffectEntry effect,
+            float power,
+            LivingEntity target,
+            BlockPos blockTarget) {
         switch (effect.type().getPath()) {
-            case "telekinesis" -> telekinesis(caster, effect, power);
-            case "mind_sting" -> mindSting(caster, effect, power);
+            case "telekinesis" -> telekinesis(caster, effect, power, target);
+            case "mind_sting" -> mindSting(caster, effect, power, target);
             case "phi_sense" -> phiSense(caster, effect);
             case "fireball" -> fireball(caster, effect, power);
             case "wind_charge" -> windCharge(caster, effect, power);
             case "water_stream" -> waterStream(caster, effect, power);
             case "vitality" -> vitality(caster, effect, power);
             case "evoker_fangs" -> evokerFangs(caster, effect, power);
-            case "root_bind" -> rootBind(caster, effect, power);
-            case "soul_drain" -> soulDrain(caster, effect, power);
-            case "wither_touch" -> witherTouch(caster, effect, power);
-            case "shade_summon" -> shadeSummon(caster, effect, power);
+            case "root_bind" -> rootBind(caster, effect, power, target);
+            case "soul_drain" -> soulDrain(caster, effect, power, target);
+            case "wither_touch" -> witherTouch(caster, effect, power, target);
+            case "shade_summon" -> shadeSummon(caster, effect, power, target);
+            case "blink" -> blink(caster, effect, power);
+            case "rift_yank" -> riftYank(caster, effect, power, target);
+            case "phase_veil" -> phaseVeil(caster, effect, power);
+            case "corrupt_mark" -> corruptMark(caster, effect, power, target);
+            case "binding_seal" -> bindingSeal(caster, effect, power, target);
+            case "blight_pulse" -> blightPulse(caster, effect, power);
+            case "place_trap_seal" -> placeSeal(caster, effect, power, blockTarget, SealTypes.DAMAGE_TRAP);
+            case "place_fortify_seal" -> placeSeal(caster, effect, power, blockTarget, SealTypes.FORTIFY);
+            case "place_glow_seal" -> placeSeal(caster, effect, power, blockTarget, SealTypes.GLOW);
             default -> {}
         }
     }
 
-    private static void telekinesis(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        float force = effect.params().get("force").getAsFloat();
-        double range = effect.params().get("range").getAsDouble();
-        Entity target = raycastEntity(caster, range);
-        if (target == null) {
-            target = findSpellTarget(caster, range);
+    private static void placeSeal(
+            ServerPlayer caster,
+            SpellEffectEntry effect,
+            float power,
+            BlockPos blockTarget,
+            ResourceLocation typeId) {
+        if (blockTarget == null) {
+            return;
         }
+        ServerLevel level = caster.serverLevel();
+        int duration = effect.params().has("duration_ticks")
+                ? effect.params().get("duration_ticks").getAsInt()
+                : 600;
+        float strength = power;
+        SealService.place(level, blockTarget, typeId, caster.getUUID(), strength, duration, new CompoundTag());
+
+        spawnSealPlaceParticles(level, blockTarget, typeId);
+        level.playSound(null, blockTarget, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 0.8f, 1.2f);
+        caster.displayClientMessage(
+                Component.translatable(
+                        duration < 0 ? "message.effecoria.seal_placed_permanent" : "message.effecoria.seal_placed",
+                        Component.translatable("seal.effecoria." + typeId.getPath())),
+                true);
+    }
+
+    private static void spawnSealPlaceParticles(ServerLevel level, BlockPos pos, ResourceLocation typeId) {
+        var particle = typeId.equals(SealTypes.GLOW)
+                ? ParticleTypes.END_ROD
+                : typeId.equals(SealTypes.DAMAGE_TRAP)
+                        ? ParticleTypes.SCULK_SOUL
+                        : ParticleTypes.CRIT;
+        level.sendParticles(
+                particle,
+                pos.getX() + 0.5,
+                pos.getY() + 0.55,
+                pos.getZ() + 0.5,
+                20,
+                0.3,
+                0.3,
+                0.3,
+                0.02);
+    }
+
+    private static void notifyNoBlock(ServerPlayer caster) {
+        caster.displayClientMessage(Component.translatable("message.effecoria.no_block"), true);
+    }
+
+    private static void telekinesis(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         if (target == null) {
             return;
         }
+        float force = effect.params().get("force").getAsFloat();
         Vec3 look = caster.getLookAngle().normalize();
         double strength = force * (power / 50f);
         target.setDeltaMovement(target.getDeltaMovement().add(look.scale(strength)));
@@ -83,13 +232,12 @@ public final class SpellEffectExecutor {
         spawnMindParticles(caster.serverLevel(), target.position());
     }
 
-    private static void mindSting(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        float damage = effect.params().get("damage").getAsFloat();
-        int slowTicks = effect.params().get("slow_duration_ticks").getAsInt();
-        LivingEntity target = findSpellTarget(caster, 12);
+    private static void mindSting(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         if (target == null) {
             return;
         }
+        float damage = effect.params().get("damage").getAsFloat();
+        int slowTicks = effect.params().get("slow_duration_ticks").getAsInt();
         float scaledDamage = damage * (power / 50f);
         DamageSource source = caster.level().damageSources().magic();
         target.hurt(source, scaledDamage);
@@ -266,18 +414,13 @@ public final class SpellEffectExecutor {
     }
 
     /** Drain life from a target into the caster — external Ψ siphon. */
-    private static void soulDrain(ServerPlayer caster, SpellEffectEntry effect, float power) {
+    private static void soulDrain(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
         ServerLevel level = caster.serverLevel();
         float damage = effect.params().get("damage").getAsFloat();
         float healRatio = effect.params().has("heal_ratio") ? effect.params().get("heal_ratio").getAsFloat() : 0.5f;
-        double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 10;
-
-        LivingEntity target = findSpellTarget(caster, range);
-        if (target == null) {
-            notifyNoTarget(caster);
-            return;
-        }
-
         float scaledDamage = damage * (power / 50f);
         target.hurt(caster.level().damageSources().magic(), scaledDamage);
         caster.heal(scaledDamage * healRatio);
@@ -286,18 +429,13 @@ public final class SpellEffectExecutor {
     }
 
     /** Withering touch — necrotic damage over time. */
-    private static void witherTouch(ServerPlayer caster, SpellEffectEntry effect, float power) {
+    private static void witherTouch(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
         ServerLevel level = caster.serverLevel();
         float damage = effect.params().get("damage").getAsFloat();
         int witherTicks = effect.params().get("wither_ticks").getAsInt();
-        double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 10;
-
-        LivingEntity target = findSpellTarget(caster, range);
-        if (target == null) {
-            notifyNoTarget(caster);
-            return;
-        }
-
         float scaledDamage = damage * (power / 50f);
         target.hurt(caster.level().damageSources().wither(), scaledDamage);
         target.addEffect(new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
@@ -306,18 +444,13 @@ public final class SpellEffectExecutor {
     }
 
     /** Summon a short-lived shade (vex relay) that attacks the looked-at target. */
-    private static void shadeSummon(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        ServerLevel level = caster.serverLevel();
-        int lifetime = effect.params().has("lifetime_ticks") ? effect.params().get("lifetime_ticks").getAsInt() : 400;
-        double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 16;
-        lifetime = Math.round(lifetime * (0.9f + power / 150f));
-
-        LivingEntity target = findSpellTarget(caster, range);
+    private static void shadeSummon(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         if (target == null) {
-            notifyNoTarget(caster);
             return;
         }
-
+        ServerLevel level = caster.serverLevel();
+        int lifetime = effect.params().has("lifetime_ticks") ? effect.params().get("lifetime_ticks").getAsInt() : 400;
+        lifetime = Math.round(lifetime * (0.9f + power / 150f));
         Vec3 look = caster.getLookAngle().normalize();
         double spawnX = caster.getX() + look.x * 1.5;
         double spawnZ = caster.getZ() + look.z * 1.5;
@@ -339,6 +472,155 @@ public final class SpellEffectExecutor {
 
         spawnNecroParticles(level, new Vec3(spawnX, spawnY, spawnZ));
         level.playSound(null, caster.blockPosition(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 1f, 0.85f);
+    }
+
+    /** Short-range fold along look vector — lands in free space. */
+    private static void blink(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 10;
+        double minRange = effect.params().has("min_range") ? effect.params().get("min_range").getAsDouble() : 2;
+        range = Math.min(24, range * (0.85 + power / 120f));
+
+        Vec3 look = caster.getLookAngle().normalize();
+        Vec3 origin = caster.position();
+        Vec3 best = null;
+        for (double dist = range; dist >= minRange; dist -= 0.5) {
+            Vec3 candidate = origin.add(look.scale(dist));
+            BlockPos feet = BlockPos.containing(candidate.x, candidate.y, candidate.z);
+            BlockPos head = feet.above();
+            if (!level.getBlockState(feet).getCollisionShape(level, feet).isEmpty()) {
+                continue;
+            }
+            if (!level.getBlockState(head).getCollisionShape(level, head).isEmpty()) {
+                continue;
+            }
+            best = new Vec3(candidate.x, feet.getY(), candidate.z);
+            break;
+        }
+        if (best == null) {
+            return;
+        }
+
+        spawnSpatialParticles(level, origin.add(0, 1, 0));
+        caster.teleportTo(best.x, best.y, best.z);
+        caster.fallDistance = 0f;
+        spawnSpatialParticles(level, best.add(0, 1, 0));
+        level.playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.9f, 1.3f);
+    }
+
+    /** Fold space and yank the target to the caster. */
+    private static void riftYank(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        float damage = effect.params().has("damage") ? effect.params().get("damage").getAsFloat() : 3f;
+        float scaledDamage = damage * (power / 50f);
+
+        Vec3 dest = caster.position().add(caster.getLookAngle().normalize().scale(1.2));
+        spawnSpatialParticles(level, target.position().add(0, 1, 0));
+        target.teleportTo(dest.x, dest.y, dest.z);
+        target.hurt(caster.level().damageSources().magic(), scaledDamage);
+        target.hurtMarked = true;
+        spawnSpatialParticles(level, dest.add(0, 1, 0));
+        level.playSound(null, caster.blockPosition(), SoundEvents.CHORUS_FRUIT_TELEPORT, SoundSource.PLAYERS, 1f, 0.8f);
+    }
+
+    /** Thin the operator across a fold — brief veil. */
+    private static void phaseVeil(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 80;
+        duration = Math.round(duration * (0.85f + power / 100f));
+
+        caster.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0, false, false));
+        caster.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, duration, 0, false, false));
+        spawnSpatialParticles(level, caster.position().add(0, 1, 0));
+        level.playSound(null, caster.blockPosition(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.8f, 1.2f);
+    }
+
+    private static void spawnSpatialParticles(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ParticleTypes.PORTAL, pos.x, pos.y, pos.z, 24, 0.35, 0.5, 0.35, 0.4);
+        level.sendParticles(ParticleTypes.REVERSE_PORTAL, pos.x, pos.y, pos.z, 10, 0.2, 0.3, 0.2, 0.05);
+    }
+
+    /** Brand a target with Ψ-corruption — poison and weakness. */
+    private static void corruptMark(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        float damage = effect.params().get("damage").getAsFloat();
+        int poisonTicks = effect.params().get("poison_ticks").getAsInt();
+        int weaknessTicks = effect.params().get("weakness_ticks").getAsInt();
+        poisonTicks = Math.round(poisonTicks * (0.85f + power / 100f));
+        weaknessTicks = Math.round(weaknessTicks * (0.85f + power / 100f));
+
+        target.hurt(caster.level().damageSources().magic(), damage * (power / 50f));
+        target.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
+        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, weaknessTicks, 0));
+        spawnCorruptionParticles(level, target.position().add(0, 1, 0));
+        level.playSound(null, target.blockPosition(), SoundEvents.SCULK_CLICKING, SoundSource.PLAYERS, 0.9f, 0.7f);
+    }
+
+    /** Binding seal — heavy root and visible mark. */
+    private static void bindingSeal(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        int rootTicks = effect.params().get("root_ticks").getAsInt();
+        int glowTicks = effect.params().has("glow_ticks") ? effect.params().get("glow_ticks").getAsInt() : rootTicks;
+        rootTicks = Math.round(rootTicks * (0.8f + power / 100f));
+        glowTicks = Math.round(glowTicks * (0.8f + power / 100f));
+
+        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, rootTicks, 5));
+        target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, rootTicks, 2));
+        target.addEffect(new MobEffectInstance(MobEffects.GLOWING, glowTicks, 0));
+        spawnCorruptionParticles(level, target.position().add(0, 0.5, 0));
+        level.playSound(null, target.blockPosition(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.5f, 1.6f);
+    }
+
+    /** Pulse of blight around the caster — no target required. */
+    private static void blightPulse(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        double radius = effect.params().has("radius") ? effect.params().get("radius").getAsDouble() : 5;
+        float damage = effect.params().has("damage") ? effect.params().get("damage").getAsFloat() : 3f;
+        int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 60;
+        radius *= 0.9 + power / 150f;
+        float scaledDamage = damage * (power / 50f);
+        poisonTicks = Math.round(poisonTicks * (0.85f + power / 100f));
+
+        AABB box = caster.getBoundingBox().inflate(radius);
+        for (LivingEntity entity : level.getEntitiesOfClass(
+                LivingEntity.class, box, e -> e != caster && e.isAlive() && !e.isSpectator())) {
+            if (entity.distanceToSqr(caster) > radius * radius) {
+                continue;
+            }
+            entity.hurt(caster.level().damageSources().magic(), scaledDamage);
+            entity.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
+            entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, poisonTicks / 2, 0));
+            spawnCorruptionParticles(level, entity.position().add(0, 1, 0));
+        }
+
+        spawnCorruptionPulse(level, caster.position().add(0, 0.2, 0), radius);
+        level.playSound(null, caster.blockPosition(), SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.PLAYERS, 0.6f, 1.4f);
+    }
+
+    private static void spawnCorruptionParticles(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ParticleTypes.SCULK_SOUL, pos.x, pos.y, pos.z, 14, 0.25, 0.4, 0.25, 0.02);
+        level.sendParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 8, 0.2, 0.25, 0.2, 0.01);
+    }
+
+    private static void spawnCorruptionPulse(ServerLevel level, Vec3 center, double radius) {
+        int rings = Math.max(8, (int) (radius * 6));
+        for (int i = 0; i < rings; i++) {
+            double angle = (Math.PI * 2 * i) / rings;
+            double x = center.x + Math.cos(angle) * radius;
+            double z = center.z + Math.sin(angle) * radius;
+            level.sendParticles(ParticleTypes.SCULK_SOUL, x, center.y + 0.3, z, 2, 0.05, 0.1, 0.05, 0.01);
+            level.sendParticles(ParticleTypes.SQUID_INK, x, center.y + 0.2, z, 1, 0.02, 0.05, 0.02, 0.0);
+        }
     }
 
     private static void notifyNoTarget(ServerPlayer caster) {
@@ -412,14 +694,12 @@ public final class SpellEffectExecutor {
     }
 
     /** Root a target in place and optionally bloom nearby crops. */
-    private static void rootBind(ServerPlayer caster, SpellEffectEntry effect, float power) {
+    private static void rootBind(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         ServerLevel level = caster.serverLevel();
-        double range = effect.params().get("range").getAsDouble();
         int rootTicks = effect.params().get("root_ticks").getAsInt();
         boolean bloom = !effect.params().has("bloom") || effect.params().get("bloom").getAsBoolean();
         int scaledTicks = Math.round(rootTicks * (0.8f + power / 100f));
 
-        LivingEntity target = findSpellTarget(caster, range);
         if (target != null) {
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, scaledTicks, 4));
             target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, scaledTicks, 1));
@@ -463,14 +743,6 @@ public final class SpellEffectExecutor {
     private static void spawnNecroParticles(ServerLevel level, Vec3 pos) {
         level.sendParticles(ParticleTypes.SOUL, pos.x, pos.y, pos.z, 14, 0.3, 0.4, 0.3, 0.02);
         level.sendParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 8, 0.15, 0.2, 0.15, 0.01);
-    }
-
-    private static Entity raycastEntity(ServerPlayer caster, double range) {
-        HitResult hit = caster.pick(range, 0f, false);
-        if (hit instanceof EntityHitResult entityHit) {
-            return entityHit.getEntity();
-        }
-        return null;
     }
 
     private static void spawnMindParticles(ServerLevel level, Vec3 pos) {

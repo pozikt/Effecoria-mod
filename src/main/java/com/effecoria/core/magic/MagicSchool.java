@@ -14,10 +14,12 @@ public enum MagicSchool implements StringRepresentable {
     ORGANIC("organic", 5f),
     /** ~40–100 Hz — necromancy via external Ψ relay */
     NECROMANCY("necromancy", 55f),
-    /** ~100+ Hz — spatial (later) */
+    /** ~100+ Hz — spatial folds and short-range teleportation */
     SPATIAL("spatial", 120f),
-    /** complex frequency — seals / corruption (later) */
-    SEALS("seals", 0f),
+    /** complex / near-zero Hz — combat corruption (b-component heavy) */
+    CORRUPTION("corruption", 0.5f),
+    /** seal inscriptions on blocks / later items */
+    SEALS("seals", 0.45f),
     /** uninitiated */
     NONE("none", 0f);
 
@@ -35,7 +37,8 @@ public enum MagicSchool implements StringRepresentable {
 
     /** Schools available for player initiation right now. */
     public boolean isPlayable() {
-        return this == MENTAL || this == ELEMENTAL || this == ORGANIC || this == NECROMANCY;
+        return this == MENTAL || this == ELEMENTAL || this == ORGANIC
+                || this == NECROMANCY || this == SPATIAL || this == CORRUPTION || this == SEALS;
     }
 
     @Override
@@ -44,8 +47,15 @@ public enum MagicSchool implements StringRepresentable {
     }
 
     public static MagicSchool fromSerializedName(String name) {
+        if (name == null || name.isEmpty()) {
+            return NONE;
+        }
+        String key = name.toLowerCase();
+        if (key.equals("porcha")) {
+            return CORRUPTION;
+        }
         for (MagicSchool school : values()) {
-            if (school.name.equals(name)) {
+            if (school.name.equals(key)) {
                 return school;
             }
         }

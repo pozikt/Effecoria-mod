@@ -2,6 +2,7 @@ package com.effecoria.core.phi;
 
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.formula.PhiSample;
+import com.effecoria.core.psi.PsiHelper;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -21,7 +22,7 @@ public final class PhiFieldService {
     /** Samples Φ for a player — creative god mode overrides environmental limits. */
     public static PhiSample sample(Level level, Vec3 position, Player player) {
         if (CreativeGodMode.isActive(player)) {
-            return PhiSample.CREATIVE;
+            return new PhiSample(999f, false, isSolarDay(level));
         }
         float value = 1f;
         boolean zeroFlux = false;
@@ -36,9 +37,23 @@ public final class PhiFieldService {
         }
 
         if (zeroFlux) {
-            return PhiSample.ZERO_ZONE;
+            return new PhiSample(0f, true, isSolarDay(level));
         }
-        return new PhiSample(Math.max(0f, value), false);
+        if (player != null) {
+            value *= Math.max(0f, PsiHelper.get(player).phiMultiplier());
+        }
+        return new PhiSample(Math.max(0f, value), false, isSolarDay(level));
+    }
+
+    /**
+     * Solar day/night from the world clock ({@link Level#getDayTime()}).
+     * Do not use {@link Level#isDay()} — in 1.21 it follows {@code skyDarken} and lags after {@code /time set}.
+     */
+    public static boolean isSolarDay(Level level) {
+        if (level.dimensionType().hasFixedTime()) {
+            return false;
+        }
+        return level.getDayTime() % 24000L < 12000L;
     }
 
     private static float dimensionFactor(Level level) {
@@ -63,7 +78,7 @@ public final class PhiFieldService {
 
     /** Solar Φ peak by day; weak stellar flux at night. */
     private static float timeFactor(Level level) {
-        return level.isDay()
+        return isSolarDay(level)
                 ? BalanceConfig.PHI_DAY_MULTIPLIER.get().floatValue()
                 : BalanceConfig.PHI_NIGHT_MULTIPLIER.get().floatValue();
     }

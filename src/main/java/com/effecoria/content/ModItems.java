@@ -18,4 +18,9 @@ public final class ModItems {
     public static final DeferredItem<Item> RESONANCE_FOCUS = ITEMS.register(
             "resonance_focus",
             () -> new ResonanceFocusItem(new Item.Properties().stacksTo(1)));
+
+    /** Teaches breathing forms — consumed on use. */
+    public static final DeferredItem<Item> BREATHING_SCROLL = ITEMS.register(
+            "breathing_scroll",
+            () -> new BreathingScrollItem(new Item.Properties().stacksTo(16)));
 }

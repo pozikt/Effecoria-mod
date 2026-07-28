@@ -62,13 +62,21 @@ public final class BalanceConfig {
             .comment("Φ multiplier at night — less stellar flux reaches the surface")
             .defineInRange("phi_night_multiplier", 0.5, 0.0, 5.0);
 
-    public static final ModConfigSpec.IntValue BREATHING_CALM_TICKS_PER_TIER = BUILDER
-            .comment("Calm-breath counter steps per tier (progression ticks, not game ticks)")
-            .defineInRange("breathing_calm_ticks_per_tier", 200, 1, 10000);
+    public static final ModConfigSpec.DoubleValue BREATHING_MAX_MASTERY = BUILDER
+            .comment("Maximum breathing technique mastery (1.0 = fully mastered)")
+            .defineInRange("breathing_max_mastery", 1.0, 0.1, 10.0);
 
-    public static final ModConfigSpec.IntValue BREATHING_MAX_TIER = BUILDER
-            .comment("Maximum breathing technique tier")
-            .defineInRange("breathing_max_tier", 2, 0, 10);
+    public static final ModConfigSpec.DoubleValue BREATHING_MEDITATION_GAIN = BUILDER
+            .comment("Mastery gained per progression tick while meditating (standing calm)")
+            .defineInRange("breathing_meditation_gain", 0.002, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue BREATHING_SCROLL_GAIN = BUILDER
+            .comment("Mastery granted by one breathing technique scroll")
+            .defineInRange("breathing_scroll_gain", 0.08, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue BREATHING_BIOLOGY_BONUS_MAX = BUILDER
+            .comment("Max Orkanum (biologyQ) multiplier bonus at full breathing mastery — e.g. 0.3 = +30% regen")
+            .defineInRange("breathing_biology_bonus_max", 0.30, 0.0, 2.0);
 
     public static final ModConfigSpec.DoubleValue TRAINING_XP_SPRINT = BUILDER
             .comment("Training XP gained per progression tick while sprinting on ground")
@@ -97,6 +105,30 @@ public final class BalanceConfig {
     public static final ModConfigSpec.DoubleValue TRAINING_MAX_PSI_CAP = BUILDER
             .comment("Maximum Ψ capacity from training")
             .defineInRange("training_max_psi_cap", 150.0, 10.0, 10000.0);
+
+    public static final ModConfigSpec.DoubleValue WHIFF_COST_FRACTION = BUILDER
+            .comment("Ψ spent when a targeted spell finds no valid target (fraction of full cost)")
+            .defineInRange("whiff_cost_fraction", 0.25, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue MASTERY_BREATHING_MAX = BUILDER
+            .comment("Spell mastery bonus from breathing at full mastery (linear below cap)")
+            .defineInRange("mastery_breathing_max", 0.10, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue MASTERY_ESSENCE_PER_POINT = BUILDER
+            .comment("Spell mastery bonus per absorbed essence point")
+            .defineInRange("mastery_essence_per_point", 0.01, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue MASTERY_ESSENCE_CAP = BUILDER
+            .comment("Maximum mastery bonus from essence alone")
+            .defineInRange("mastery_essence_cap", 0.12, 0.0, 2.0);
+
+    public static final ModConfigSpec.DoubleValue MASTERY_COST_REDUCTION_RATIO = BUILDER
+            .comment("Fraction of (mastery - 1) applied as spell cost reduction")
+            .defineInRange("mastery_cost_reduction_ratio", 0.4, 0.0, 1.0);
+
+    public static final ModConfigSpec.IntValue ESSENCE_PER_TRAINING_MILESTONE = BUILDER
+            .comment("Essence absorbed per physical training milestone")
+            .defineInRange("essence_per_training_milestone", 1, 0, 100);
 
     public static final ModConfigSpec SPEC = BUILDER.build();
 }

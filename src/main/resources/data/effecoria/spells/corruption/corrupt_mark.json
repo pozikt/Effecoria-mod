@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:corrupt_mark",
+  "school": "corruption",
+  "frequency_hz": 0.5,
+  "base_cost": 11,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.10,
+  "min_phi": 0.15,
+  "effects": [
+    { "type": "effecoria:corrupt_mark", "damage": 4, "poison_ticks": 100, "weakness_ticks": 80, "range": 12 }
+  ]
+}

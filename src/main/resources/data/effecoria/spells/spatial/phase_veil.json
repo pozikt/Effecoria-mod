@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:phase_veil",
+  "school": "spatial",
+  "frequency_hz": 125.0,
+  "base_cost": 14,
+  "power_multiplier": 0.95,
+  "side_entropy": 0.06,
+  "min_phi": 0.2,
+  "effects": [
+    { "type": "effecoria:phase_veil", "duration_ticks": 80 }
+  ]
+}

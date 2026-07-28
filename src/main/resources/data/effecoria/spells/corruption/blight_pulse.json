@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:blight_pulse",
+  "school": "corruption",
+  "frequency_hz": 0.6,
+  "base_cost": 14,
+  "power_multiplier": 1.05,
+  "side_entropy": 0.11,
+  "min_phi": 0.2,
+  "effects": [
+    { "type": "effecoria:blight_pulse", "radius": 5, "damage": 3, "poison_ticks": 60 }
+  ]
+}
