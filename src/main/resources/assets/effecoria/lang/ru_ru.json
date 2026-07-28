@@ -40,6 +40,7 @@
   "message.effecoria.spell_selected": "Выбрано: %s",
   "message.effecoria.cast_success": "Каст: %s",
   "message.effecoria.cast_failed": "Каст невозможен — мало Ψ, низкий Φ или зона блокировки.",
+  "message.effecoria.no_target": "Нет цели в прицеле.",
   "message.effecoria.backlash": "Откат энтропии!",
   "message.effecoria.phi_sense_active": "Градиенты Φ проявлены.",
   "message.effecoria.spells_not_loaded": "Заклинания ещё не загружены — перезайди в мир.",

@@ -1,5 +1,6 @@
 package com.effecoria.effect;
 
+import com.effecoria.core.magic.ShadeService;
 import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.core.magic.SpellEffectEntry;
 import com.effecoria.core.psi.PlayerPsiData;
@@ -7,6 +8,7 @@ import com.effecoria.core.psi.PsiHelper;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -21,6 +23,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.projectile.EvokerFangs;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.entity.projectile.windcharge.WindCharge;
 import net.minecraft.world.level.block.Blocks;
@@ -68,6 +71,9 @@ public final class SpellEffectExecutor {
         double range = effect.params().get("range").getAsDouble();
         Entity target = raycastEntity(caster, range);
         if (target == null) {
+            target = findSpellTarget(caster, range);
+        }
+        if (target == null) {
             return;
         }
         Vec3 look = caster.getLookAngle().normalize();
@@ -80,7 +86,7 @@ public final class SpellEffectExecutor {
     private static void mindSting(ServerPlayer caster, SpellEffectEntry effect, float power) {
         float damage = effect.params().get("damage").getAsFloat();
         int slowTicks = effect.params().get("slow_duration_ticks").getAsInt();
-        LivingEntity target = raycastLiving(caster, 12);
+        LivingEntity target = findSpellTarget(caster, 12);
         if (target == null) {
             return;
         }
@@ -266,8 +272,9 @@ public final class SpellEffectExecutor {
         float healRatio = effect.params().has("heal_ratio") ? effect.params().get("heal_ratio").getAsFloat() : 0.5f;
         double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 10;
 
-        LivingEntity target = raycastLiving(caster, range);
+        LivingEntity target = findSpellTarget(caster, range);
         if (target == null) {
+            notifyNoTarget(caster);
             return;
         }
 
@@ -285,8 +292,9 @@ public final class SpellEffectExecutor {
         int witherTicks = effect.params().get("wither_ticks").getAsInt();
         double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 10;
 
-        LivingEntity target = raycastLiving(caster, range);
+        LivingEntity target = findSpellTarget(caster, range);
         if (target == null) {
+            notifyNoTarget(caster);
             return;
         }
 
@@ -297,11 +305,18 @@ public final class SpellEffectExecutor {
         level.playSound(null, target.blockPosition(), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.7f, 1.2f);
     }
 
-    /** Summon a short-lived shade (vex relay) bound to the caster. */
+    /** Summon a short-lived shade (vex relay) that attacks the looked-at target. */
     private static void shadeSummon(ServerPlayer caster, SpellEffectEntry effect, float power) {
         ServerLevel level = caster.serverLevel();
         int lifetime = effect.params().has("lifetime_ticks") ? effect.params().get("lifetime_ticks").getAsInt() : 400;
+        double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 16;
         lifetime = Math.round(lifetime * (0.9f + power / 150f));
+
+        LivingEntity target = findSpellTarget(caster, range);
+        if (target == null) {
+            notifyNoTarget(caster);
+            return;
+        }
 
         Vec3 look = caster.getLookAngle().normalize();
         double spawnX = caster.getX() + look.x * 1.5;
@@ -313,16 +328,75 @@ public final class SpellEffectExecutor {
             return;
         }
         shade.moveTo(spawnX, spawnY, spawnZ, caster.getYRot(), 0f);
-        shade.setBoundOrigin(BlockPos.containing(spawnX, spawnY, spawnZ));
         shade.setLimitedLife(lifetime);
-        LivingEntity target = raycastLiving(caster, 12);
-        if (target != null) {
-            shade.setTarget(target);
-        }
+        shade.setPersistenceRequired();
+        shade.setAggressive(true);
         level.addFreshEntity(shade);
+        shade.setTarget(target);
+        shade.setAggressive(true);
+        shade.getNavigation().moveTo(target, 1.2);
+        ShadeService.registerShade(shade, caster, target);
 
         spawnNecroParticles(level, new Vec3(spawnX, spawnY, spawnZ));
         level.playSound(null, caster.blockPosition(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 1f, 0.85f);
+    }
+
+    private static void notifyNoTarget(ServerPlayer caster) {
+        caster.displayClientMessage(Component.translatable("message.effecoria.no_target"), true);
+    }
+
+    /** Raycast + cone fallback — works without pixel-perfect crosshair on entity. */
+    private static LivingEntity findSpellTarget(ServerPlayer caster, double range) {
+        LivingEntity direct = raycastLivingAlongLook(caster, range);
+        if (direct != null) {
+            return direct;
+        }
+        return findLivingInLookCone(caster, range, 0.65);
+    }
+
+    private static LivingEntity raycastLivingAlongLook(ServerPlayer caster, double range) {
+        Vec3 start = caster.getEyePosition();
+        Vec3 end = start.add(caster.getLookAngle().scale(range));
+        AABB search = caster.getBoundingBox().expandTowards(caster.getLookAngle().scale(range)).inflate(1.0);
+        EntityHitResult hit = ProjectileUtil.getEntityHitResult(
+                caster.level(),
+                caster,
+                start,
+                end,
+                search,
+                entity -> entity instanceof LivingEntity living
+                        && living.isAlive()
+                        && living != caster
+                        && !living.isSpectator());
+        if (hit != null && hit.getEntity() instanceof LivingEntity living) {
+            return living;
+        }
+        return null;
+    }
+
+    private static LivingEntity findLivingInLookCone(ServerPlayer caster, double range, double minDot) {
+        Vec3 look = caster.getLookAngle().normalize();
+        Vec3 eye = caster.getEyePosition();
+        AABB box = new AABB(eye, eye).inflate(range);
+        LivingEntity best = null;
+        double bestDist = range + 1;
+        for (LivingEntity entity : caster.serverLevel().getEntitiesOfClass(
+                LivingEntity.class, box, e -> e != caster && e.isAlive() && !e.isSpectator())) {
+            Vec3 toEntity = entity.getBoundingBox().getCenter().subtract(eye);
+            double dist = toEntity.length();
+            if (dist > range || dist < 0.5) {
+                continue;
+            }
+            double dot = toEntity.normalize().dot(look);
+            if (dot < minDot) {
+                continue;
+            }
+            if (dist < bestDist) {
+                bestDist = dist;
+                best = entity;
+            }
+        }
+        return best;
     }
 
     private static double findGroundY(ServerLevel level, double x, double referenceY, double z) {
@@ -345,7 +419,7 @@ public final class SpellEffectExecutor {
         boolean bloom = !effect.params().has("bloom") || effect.params().get("bloom").getAsBoolean();
         int scaledTicks = Math.round(rootTicks * (0.8f + power / 100f));
 
-        LivingEntity target = raycastLiving(caster, range);
+        LivingEntity target = findSpellTarget(caster, range);
         if (target != null) {
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, scaledTicks, 4));
             target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, scaledTicks, 1));
@@ -397,11 +471,6 @@ public final class SpellEffectExecutor {
             return entityHit.getEntity();
         }
         return null;
-    }
-
-    private static LivingEntity raycastLiving(ServerPlayer caster, double range) {
-        Entity entity = raycastEntity(caster, range);
-        return entity instanceof LivingEntity living ? living : null;
     }
 
     private static void spawnMindParticles(ServerLevel level, Vec3 pos) {

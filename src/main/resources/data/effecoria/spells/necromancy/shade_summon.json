@@ -7,6 +7,6 @@
   "side_entropy": 0.12,
   "min_phi": 0.25,
   "effects": [
-    { "type": "effecoria:shade_summon", "lifetime_ticks": 400 }
+    { "type": "effecoria:shade_summon", "lifetime_ticks": 400, "range": 16 }
   ]
 }

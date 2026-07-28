@@ -40,6 +40,7 @@
   "message.effecoria.spell_selected": "Selected: %s",
   "message.effecoria.cast_success": "Cast %s",
   "message.effecoria.cast_failed": "Cannot cast — insufficient Psi, low Phi, or blocked zone.",
+  "message.effecoria.no_target": "No target in sight.",
   "message.effecoria.backlash": "Entropy backlash!",
   "message.effecoria.phi_sense_active": "Phi gradients revealed.",
   "message.effecoria.spells_not_loaded": "Spells not loaded yet — rejoin world.",

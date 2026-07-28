@@ -1,6 +1,7 @@
 package com.effecoria.event;
 
 import com.effecoria.core.formula.FormulaEngine;
+import com.effecoria.core.magic.ShadeService;
 import com.effecoria.core.progression.ProgressionService;
 import com.effecoria.core.phi.CreativeGodMode;
 import com.effecoria.core.phi.PhiFieldService;
@@ -51,6 +52,7 @@ public final class ModCommonEvents {
         }
 
         ProgressionService.tick(player, data);
+        ShadeService.tick(player);
 
         if (CreativeGodMode.isActive(player)) {
             data.setCurrentPsi(data.maxPsi());
