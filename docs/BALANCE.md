@@ -43,7 +43,8 @@ Spell-specific values live in JSON under `data/effecoria/spells/`.
 | Deep underground | 0.7 |
 | Nether | 1.2 |
 | End | 0.5 |
-| Night (sky visible) | 1.1 |
+| Night (overworld) | 1.0 |
+| Day (sun visible) | 1.1 |
 | Inside lead tag radius | 0.0 (ZNΦ) |
 
 ## Playtest goals

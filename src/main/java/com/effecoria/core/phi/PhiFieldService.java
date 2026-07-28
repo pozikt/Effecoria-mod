@@ -22,7 +22,7 @@ public final class PhiFieldService {
             value *= timeFactor(serverLevel);
             zeroFlux = isInsideZeroFluxZone(serverLevel, BlockPos.containing(position));
         } else {
-            value *= clientTimeFactor(level);
+            value *= timeFactor(level);
         }
 
         if (zeroFlux) {
@@ -51,20 +51,9 @@ public final class PhiFieldService {
         return 1f;
     }
 
-    private static float timeFactor(ServerLevel level) {
-        long time = level.getDayTime() % 24000L;
-        if (time >= 13000L && time <= 23000L) {
-            return 1.1f;
-        }
-        return 1f;
-    }
-
-    private static float clientTimeFactor(Level level) {
-        long time = level.getDayTime() % 24000L;
-        if (time >= 13000L && time <= 23000L) {
-            return 1.1f;
-        }
-        return 1f;
+    /** Solar Φ peak while the sun is above the horizon. */
+    private static float timeFactor(Level level) {
+        return level.isDay() ? 1.1f : 1.0f;
     }
 
     /** Phase 2 will use lead tags; for now detect heavy stone enclosure as crude ZNΦ. */
