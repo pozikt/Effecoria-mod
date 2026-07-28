@@ -14,7 +14,8 @@ NeoForge mod for **Minecraft 1.21.1**, based on the [Effecoria universe](https:/
 ```bash
 git clone https://github.com/pozikt/Effecoria-mod.git
 cd Effecoria-mod
-./gradlew runClient    # Windows: gradlew.bat runClient
+./gradlew clean build -x test   # Windows: gradlew.bat clean build -x test
+./gradlew runClient
 ```
 
 First launch downloads NeoForge and Minecraft — expect several minutes.
@@ -39,7 +40,7 @@ src/main/java/com/effecoria/
 
 src/main/resources/data/effecoria/spells/   MVP spell JSON (phase 1 loader)
 docs/                                       Design & architecture
-src/test/java/                              Unit tests (no Minecraft needed)
+src/test/java/                              Unit tests (optional, WIP)
 ```
 
 ## Documentation
@@ -55,18 +56,14 @@ src/test/java/                              Unit tests (no Minecraft needed)
 
 ## Tests
 
-```bash
-./gradlew test
-```
-
-FormulaEngine tests run **without** launching Minecraft.
+Unit tests are optional for now — use `build -x test` (see Quick start).
 
 ## Roadmap
 
 | Phase | Focus |
 |-------|-------|
-| **0** (now) | MDK, FormulaEngine, placeholders, docs |
-| **1** | Ψ/Φ resources, initiation, 6 MVP spells, cast pipeline |
+| **0** | MDK, FormulaEngine, placeholders, docs |
+| **1** (now) | Ψ/Φ resources, initiation, 6 MVP spells, cast pipeline |
 | **2** | Materials (lead, cold iron, essonite mechanics) |
 | **3** | Races & Orkanum |
 | **4** | Necromancy & liches |
