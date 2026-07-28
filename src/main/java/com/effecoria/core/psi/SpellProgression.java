@@ -19,7 +19,7 @@ public final class SpellProgression {
             case ELEMENTAL -> List.of(
                     id("fire_burst"),
                     id("wind_push"),
-                    id("stone_shield"));
+                    id("water_stream"));
             default -> List.of();
         };
     }

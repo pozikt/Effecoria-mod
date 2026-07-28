@@ -33,7 +33,7 @@ Spell-specific values live in JSON under `data/effecoria/spells/`.
 | mental_push | 12 | 0.08 |
 | wind_push | 10 | 0.05 |
 | fire_burst | 14 | 0.10 |
-| stone_shield | 18 | 0.07 |
+| water_stream | 12 | 0.06 |
 
 ## Φ-field sampling (Phase 1 plan)
 

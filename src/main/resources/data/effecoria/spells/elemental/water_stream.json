@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:water_stream",
+  "school": "elemental",
+  "frequency_hz": 18.5,
+  "base_cost": 12,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.06,
+  "min_phi": 0.2,
+  "effects": [
+    { "type": "effecoria:water_stream", "damage": 5, "range": 10, "knockback": 1.4, "slow_ticks": 50 }
+  ]
+}

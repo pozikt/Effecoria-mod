@@ -8,17 +8,23 @@ import com.effecoria.core.psi.PsiHelper;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.SmallFireball;
+import net.minecraft.world.entity.projectile.windcharge.WindCharge;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public final class SpellEffectExecutor {
     private SpellEffectExecutor() {}
@@ -34,9 +40,9 @@ public final class SpellEffectExecutor {
             case "telekinesis" -> telekinesis(caster, effect, power);
             case "mind_sting" -> mindSting(caster, effect, power);
             case "phi_sense" -> phiSense(caster, effect);
-            case "fire_burst" -> fireBurst(caster, effect, power);
-            case "knockback" -> knockback(caster, effect, power);
-            case "absorption" -> absorption(caster, effect, power);
+            case "fireball" -> fireball(caster, effect, power);
+            case "wind_charge" -> windCharge(caster, effect, power);
+            case "water_stream" -> waterStream(caster, effect, power);
             default -> {}
         }
     }
@@ -52,7 +58,7 @@ public final class SpellEffectExecutor {
         double strength = force * (power / 50f);
         target.setDeltaMovement(target.getDeltaMovement().add(look.scale(strength)));
         target.hurtMarked = true;
-        spawnCastParticles(caster.serverLevel(), target.position());
+        spawnMindParticles(caster.serverLevel(), target.position());
     }
 
     private static void mindSting(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -66,7 +72,7 @@ public final class SpellEffectExecutor {
         DamageSource source = caster.level().damageSources().magic();
         target.hurt(source, scaledDamage);
         target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
-        spawnCastParticles(caster.serverLevel(), target.position());
+        spawnMindParticles(caster.serverLevel(), target.position());
     }
 
     private static void phiSense(ServerPlayer caster, SpellEffectEntry effect) {
@@ -78,42 +84,81 @@ public final class SpellEffectExecutor {
                 net.minecraft.network.chat.Component.translatable("message.effecoria.phi_sense_active"), true);
     }
 
-    private static void fireBurst(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        float damage = effect.params().get("damage").getAsFloat();
-        int igniteTicks = effect.params().get("ignite_ticks").getAsInt();
-        double radius = effect.params().get("radius").getAsDouble();
-        Vec3 center = caster.position();
-        AABB box = AABB.ofSize(center, radius * 2, radius * 2, radius * 2);
-        List<LivingEntity> targets = caster.serverLevel().getEntitiesOfClass(LivingEntity.class, box,
-                entity -> entity != caster && entity.isAlive());
-        float scaledDamage = damage * (power / 50f);
-        DamageSource source = caster.level().damageSources().magic();
-        for (LivingEntity target : targets) {
-            if (target.position().distanceTo(center) <= radius) {
-                target.hurt(source, scaledDamage);
-                target.setRemainingFireTicks(igniteTicks);
-            }
-        }
-        spawnCastParticles(caster.serverLevel(), center);
+    /** Blaze-style small fireball — damages entities, does not break blocks. */
+    private static void fireball(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        Vec3 look = caster.getLookAngle().normalize();
+        float speed = effect.params().has("speed") ? effect.params().get("speed").getAsFloat() : 1.4f;
+        speed *= 0.85f + (power / 100f);
+
+        Vec3 velocity = look.scale(speed);
+        SmallFireball fireball = new SmallFireball(level, caster, velocity);
+        fireball.setPos(caster.getX(), caster.getEyeY() - 0.1, caster.getZ());
+        level.addFreshEntity(fireball);
+
+        level.playSound(null, caster.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1f, 1f);
+        spawnFireCastParticles(level, caster.getEyePosition());
     }
 
-    private static void knockback(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        float force = effect.params().get("force").getAsFloat();
+    /** Breeze-style wind charge — knockback burst on impact, no block damage. */
+    private static void windCharge(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        Vec3 look = caster.getLookAngle().normalize();
+        float speed = effect.params().has("speed") ? effect.params().get("speed").getAsFloat() : 1.25f;
+        speed *= 0.9f + (power / 120f);
+
+        WindCharge charge = new WindCharge(
+                caster,
+                level,
+                caster.getX(),
+                caster.getEyeY() - 0.1,
+                caster.getZ());
+        charge.shoot(look.x, look.y, look.z, speed, 0f);
+        level.addFreshEntity(charge);
+
+        level.playSound(null, caster.blockPosition(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 1f, 1f);
+        spawnWindCastParticles(level, caster.getEyePosition(), look);
+    }
+
+    /** Directed water jet — damage + push, splash particles only. */
+    private static void waterStream(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
         double range = effect.params().get("range").getAsDouble();
-        LivingEntity target = raycastLiving(caster, range);
-        if (target == null) {
-            return;
-        }
-        target.knockback(force * (power / 50f), caster.getX() - target.getX(), caster.getZ() - target.getZ());
-        spawnCastParticles(caster.serverLevel(), target.position());
-    }
+        float damage = effect.params().get("damage").getAsFloat();
+        float knockback = effect.params().has("knockback") ? effect.params().get("knockback").getAsFloat() : 1.2f;
+        int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 40;
 
-    private static void absorption(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        int hearts = effect.params().get("absorption_hearts").getAsInt();
-        int duration = effect.params().get("duration_ticks").getAsInt();
-        int amplifier = Math.max(0, Math.round(hearts * (power / 50f)) - 1);
-        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, amplifier));
-        spawnCastParticles(caster.serverLevel(), caster.position());
+        Vec3 look = caster.getLookAngle().normalize();
+        Vec3 start = caster.getEyePosition();
+        float scaledDamage = damage * (power / 50f);
+        float scaledKnock = knockback * (power / 50f);
+        DamageSource source = caster.level().damageSources().magic();
+
+        AABB sweep = caster.getBoundingBox().expandTowards(look.scale(range)).inflate(1.5);
+        Set<LivingEntity> hit = new HashSet<>();
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, sweep, e -> e != caster && e.isAlive())) {
+            Vec3 toTarget = target.getBoundingBox().getCenter().subtract(start);
+            double along = toTarget.dot(look);
+            if (along < 0 || along > range) {
+                continue;
+            }
+            Vec3 lateral = toTarget.subtract(look.scale(along));
+            if (lateral.lengthSqr() > 2.5) {
+                continue;
+            }
+            hit.add(target);
+        }
+
+        for (LivingEntity target : hit) {
+            target.hurt(source, scaledDamage);
+            target.push(look.x * scaledKnock, 0.15, look.z * scaledKnock);
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 0));
+            target.hurtMarked = true;
+            spawnWaterHitParticles(level, target.position());
+        }
+
+        spawnWaterBeamParticles(level, start, look, range);
+        level.playSound(null, caster.blockPosition(), SoundEvents.PLAYER_SPLASH_HIGH_SPEED, SoundSource.PLAYERS, 0.8f, 1.1f);
     }
 
     private static Entity raycastEntity(ServerPlayer caster, double range) {
@@ -129,7 +174,34 @@ public final class SpellEffectExecutor {
         return entity instanceof LivingEntity living ? living : null;
     }
 
-    private static void spawnCastParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ParticleTypes.WITCH, pos.x, pos.y + 1, pos.z, 12, 0.2, 0.3, 0.2, 0.01);
+    private static void spawnMindParticles(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ParticleTypes.WITCH, pos.x, pos.y + 1, pos.z, 10, 0.2, 0.3, 0.2, 0.01);
+    }
+
+    private static void spawnFireCastParticles(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ParticleTypes.FLAME, pos.x, pos.y, pos.z, 16, 0.1, 0.1, 0.1, 0.02);
+        level.sendParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 6, 0.05, 0.05, 0.05, 0.01);
+    }
+
+    private static void spawnWindCastParticles(ServerLevel level, Vec3 pos, Vec3 look) {
+        for (int i = 1; i <= 6; i++) {
+            Vec3 p = pos.add(look.scale(i * 0.35));
+            level.sendParticles(ParticleTypes.GUST, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+            level.sendParticles(ParticleTypes.CLOUD, p.x, p.y, p.z, 2, 0.05, 0.05, 0.05, 0.01);
+        }
+    }
+
+    private static void spawnWaterBeamParticles(ServerLevel level, Vec3 start, Vec3 look, double range) {
+        int steps = (int) (range * 4);
+        for (int i = 0; i <= steps; i++) {
+            Vec3 p = start.add(look.scale(i * 0.25));
+            level.sendParticles(ParticleTypes.SPLASH, p.x, p.y, p.z, 3, 0.1, 0.1, 0.1, 0.05);
+            level.sendParticles(ParticleTypes.BUBBLE, p.x, p.y, p.z, 2, 0.08, 0.08, 0.08, 0.02);
+        }
+    }
+
+    private static void spawnWaterHitParticles(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ParticleTypes.SPLASH, pos.x, pos.y + 1, pos.z, 12, 0.3, 0.4, 0.3, 0.1);
+        level.sendParticles(ParticleTypes.FALLING_WATER, pos.x, pos.y + 1.5, pos.z, 8, 0.2, 0.2, 0.2, 0.02);
     }
 }

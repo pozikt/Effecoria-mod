@@ -198,7 +198,11 @@ public final class PlayerPsiData {
         knownSpells = new ArrayList<>();
         ListTag spellList = tag.getList("knownSpells", Tag.TAG_STRING);
         for (Tag entry : spellList) {
-            knownSpells.add(ResourceLocation.parse(entry.getAsString()));
+            ResourceLocation spellId = ResourceLocation.parse(entry.getAsString());
+            if (spellId.getPath().equals("stone_shield")) {
+                spellId = ResourceLocation.fromNamespaceAndPath("effecoria", "water_stream");
+            }
+            knownSpells.add(spellId);
         }
     }
 

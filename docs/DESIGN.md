@@ -16,9 +16,9 @@ Magic is **not** a separate ruleset — it is Φ-field conversion through the Ψ
 
 | ID | Effect | Lore note |
 |----|--------|-----------|
-| `fire_burst` | AoE fire + ignite | Medium frequency band, thermal Φ dump |
-| `wind_push` | Knockback | Kinetic channel |
-| `stone_shield` | Absorption hearts | Structural field |
+| `fire_burst` | Blaze-style fireball projectile | Thermal Φ dump, no block grief |
+| `wind_push` | Wind charge projectile | Breeze-style gust burst on impact |
+| `water_stream` | Directed water jet | Damage + push + slow, splash particles only |
 
 ### Mental spells
 

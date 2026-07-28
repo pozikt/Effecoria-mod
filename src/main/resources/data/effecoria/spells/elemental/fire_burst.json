@@ -7,6 +7,6 @@
   "side_entropy": 0.1,
   "min_phi": 0.25,
   "effects": [
-    { "type": "effecoria:fire_burst", "damage": 6, "ignite_ticks": 80, "radius": 2.5 }
+    { "type": "effecoria:fireball", "speed": 1.5 }
   ]
 }

@@ -7,6 +7,6 @@
   "side_entropy": 0.05,
   "min_phi": 0.2,
   "effects": [
-    { "type": "effecoria:knockback", "force": 2.0, "range": 6 }
+    { "type": "effecoria:wind_charge", "speed": 1.3 }
   ]
 }
