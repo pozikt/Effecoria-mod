@@ -2,7 +2,7 @@
 
 NeoForge mod for **Minecraft 1.21.1**, based on the [Effecoria universe](https://github.com/pozikt/Effecoria) (ЕТЭВ / Φ-field theory).
 
-**Status:** Phase 1 — Ψ/Φ resources, initiation, spell casting (6 spells), HUD, creative god mode.
+**Status:** Phase 2 — magic UI, breathing passives, physical training foundation.
 
 ## Requirements
 
@@ -23,9 +23,9 @@ First launch downloads NeoForge and Minecraft — expect several minutes.
 ### Phase 1 gameplay
 
 1. Take **Resonance Focus** from creative tab Effecoria
-2. **Right-click** → Elemental school | **Shift+Right-click** → Mental school
+2. **Right-click** Resonance Focus → school selection menu
 3. HUD shows Ψ (purple) and Φ (blue) bars at bottom-left
-4. **R** — cast selected spell | **X** — cycle spell
+4. **R** — cast selected spell | **X** — spell book
 5. `/effecoria debug` — stats in chat
 6. **Creative mode:** Φ shows ∞, casts are free, Ψ stays full (toggle `creative_god_mode` in config)
 7. `/effecoria cast effecoria:fire_burst` — direct cast (cheat sheet)
@@ -67,8 +67,8 @@ Unit tests are optional for now — use `build -x test` (see Quick start).
 | Phase | Focus |
 |-------|-------|
 | **0** ✅ | MDK, FormulaEngine, placeholders, docs |
-| **1** (now) | Ψ/Φ, initiation, 6 spells, HUD, creative god mode |
-| **2** | **Magic core** — school UI, breathing passives, physical training, essence |
+| **1** ✅ | Ψ/Φ, initiation, 6 spells, HUD, creative god mode |
+| **2** (now) | **Magic core** — school UI, spell book, breathing, training |
 | **3** | Materials (lead ZNΦ, cold iron, essonite mechanics) |
 | **4** | Races & Orkanum |
 | **5** | Necromancy & liches |

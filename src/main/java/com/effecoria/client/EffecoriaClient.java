@@ -17,7 +17,7 @@ public final class EffecoriaClient {
     @SubscribeEvent
     public static void registerKeys(RegisterKeyMappingsEvent event) {
         event.register(KeyBindings.CAST_SPELL);
-        event.register(KeyBindings.CYCLE_SPELL);
+        event.register(KeyBindings.OPEN_SPELL_BOOK);
     }
 
     @SubscribeEvent

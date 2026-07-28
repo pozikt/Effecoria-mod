@@ -1,54 +1,115 @@
-package com.effecoria;
-
-import org.slf4j.Logger;
-
-import com.effecoria.config.BalanceConfig;
-import com.effecoria.content.ModBlocks;
-import com.effecoria.content.ModCreativeTabs;
-import com.effecoria.content.ModItems;
-import com.effecoria.core.psi.ModAttachments;
-import com.effecoria.network.ModNetworking;
-import com.mojang.logging.LogUtils;
-
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
-
-@Mod(EffecoriaMod.MOD_ID)
-public class EffecoriaMod {
-    public static final String MOD_ID = "effecoria";
-    public static final Logger LOGGER = LogUtils.getLogger();
-
-    public EffecoriaMod(IEventBus modEventBus, ModContainer modContainer) {
-        ModAttachments.register(modEventBus);
-        ModBlocks.BLOCKS.register(modEventBus);
-        ModItems.ITEMS.register(modEventBus);
-        ModCreativeTabs.CREATIVE_TABS.register(modEventBus);
-
-        modContainer.registerConfig(ModConfig.Type.COMMON, BalanceConfig.SPEC);
-        modEventBus.addListener(EffecoriaMod::registerPayloads);
-
-        LOGGER.info("Effecoria loaded — phase 1 magic systems online");
-    }
-
-    public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
-    }
-
-    private static void registerPayloads(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar registrar = event.registrar(MOD_ID);
-        registrar.playToServer(
-                ModNetworking.CastSpellPayload.TYPE,
-                ModNetworking.CastSpellPayload.STREAM_CODEC,
-                ModNetworking.CastSpellPayload::handle);
-        registrar.playToServer(
-                ModNetworking.CycleSpellPayload.TYPE,
-                ModNetworking.CycleSpellPayload.STREAM_CODEC,
-                ModNetworking.CycleSpellPayload::handle);
-    }
-}
-
+package com.effecoria;
+
+
+
+import org.slf4j.Logger;
+
+
+
+import com.effecoria.config.BalanceConfig;
+
+import com.effecoria.content.ModBlocks;
+
+import com.effecoria.content.ModCreativeTabs;
+
+import com.effecoria.content.ModItems;
+
+import com.effecoria.core.psi.ModAttachments;
+
+import com.effecoria.network.ModNetworking;
+
+import com.mojang.logging.LogUtils;
+
+
+
+import net.minecraft.resources.ResourceLocation;
+
+import net.neoforged.bus.api.IEventBus;
+
+import net.neoforged.fml.ModContainer;
+
+import net.neoforged.fml.common.Mod;
+
+import net.neoforged.fml.config.ModConfig;
+
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+
+
+
+@Mod(EffecoriaMod.MOD_ID)
+
+public class EffecoriaMod {
+
+    public static final String MOD_ID = "effecoria";
+
+    public static final Logger LOGGER = LogUtils.getLogger();
+
+
+
+    public EffecoriaMod(IEventBus modEventBus, ModContainer modContainer) {
+
+        ModAttachments.register(modEventBus);
+
+        ModBlocks.BLOCKS.register(modEventBus);
+
+        ModItems.ITEMS.register(modEventBus);
+
+        ModCreativeTabs.CREATIVE_TABS.register(modEventBus);
+
+
+
+        modContainer.registerConfig(ModConfig.Type.COMMON, BalanceConfig.SPEC);
+
+        modEventBus.addListener(EffecoriaMod::registerPayloads);
+
+
+
+        LOGGER.info("Effecoria loaded — phase 2 magic core");
+
+    }
+
+
+
+    public static ResourceLocation id(String path) {
+
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+
+    }
+
+
+
+    private static void registerPayloads(RegisterPayloadHandlersEvent event) {
+
+        PayloadRegistrar registrar = event.registrar(MOD_ID);
+
+        registrar.playToServer(
+                ModNetworking.InitiateSchoolPayload.TYPE,
+                ModNetworking.InitiateSchoolPayload.STREAM_CODEC,
+                ModNetworking.InitiateSchoolPayload::handle);
+        registrar.playToServer(
+                ModNetworking.SelectSpellPayload.TYPE,
+                ModNetworking.SelectSpellPayload.STREAM_CODEC,
+                ModNetworking.SelectSpellPayload::handle);
+        registrar.playToServer(
+
+                ModNetworking.CastSpellPayload.TYPE,
+
+                ModNetworking.CastSpellPayload.STREAM_CODEC,
+
+                ModNetworking.CastSpellPayload::handle);
+
+        registrar.playToServer(
+
+                ModNetworking.CycleSpellPayload.TYPE,
+
+                ModNetworking.CycleSpellPayload.STREAM_CODEC,
+
+                ModNetworking.CycleSpellPayload::handle);
+
+    }
+
+}
+
+

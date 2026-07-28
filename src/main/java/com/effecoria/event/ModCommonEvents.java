@@ -1,6 +1,7 @@
 package com.effecoria.event;
 
 import com.effecoria.core.formula.FormulaEngine;
+import com.effecoria.core.progression.ProgressionService;
 import com.effecoria.core.phi.CreativeGodMode;
 import com.effecoria.core.phi.PhiFieldService;
 import com.effecoria.core.psi.ModAttachments;
@@ -49,6 +50,8 @@ public final class ModCommonEvents {
             return;
         }
 
+        ProgressionService.tick(player, data);
+
         if (CreativeGodMode.isActive(player)) {
             data.setCurrentPsi(data.maxPsi());
             data.setEntropyB(0f);
@@ -56,6 +59,8 @@ public final class ModCommonEvents {
             player.syncData(ModAttachments.PSI.get());
             return;
         }
+
+        PsiHelper.set(player, data);
 
         float regen = FormulaEngine.regenPsi(
                 PsiHelper.toContext(data),

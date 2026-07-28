@@ -17,8 +17,8 @@ public final class KeyBindings {
             GLFW.GLFW_KEY_R,
             "key.categories.effecoria");
 
-    public static final KeyMapping CYCLE_SPELL = new KeyMapping(
-            "key.effecoria.cycle_spell",
+    public static final KeyMapping OPEN_SPELL_BOOK = new KeyMapping(
+            "key.effecoria.open_spell_book",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_X,

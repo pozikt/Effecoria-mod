@@ -28,6 +28,8 @@ public final class PlayerPsiData {
                 ByteBufCodecs.BOOL.encode(buf, data.initiated);
                 ByteBufCodecs.INT.encode(buf, data.selectedSpellIndex);
                 ByteBufCodecs.VAR_LONG.encode(buf, data.phiSenseUntil);
+                ByteBufCodecs.INT.encode(buf, data.breathingTier);
+                ByteBufCodecs.FLOAT.encode(buf, data.trainingXp);
                 ByteBufCodecs.INT.encode(buf, data.knownSpells.size());
                 for (ResourceLocation spell : data.knownSpells) {
                     ResourceLocation.STREAM_CODEC.encode(buf, spell);
@@ -45,6 +47,8 @@ public final class PlayerPsiData {
                 data.initiated = ByteBufCodecs.BOOL.decode(buf);
                 data.selectedSpellIndex = ByteBufCodecs.INT.decode(buf);
                 data.phiSenseUntil = ByteBufCodecs.VAR_LONG.decode(buf);
+                data.breathingTier = ByteBufCodecs.INT.decode(buf);
+                data.trainingXp = ByteBufCodecs.FLOAT.decode(buf);
                 int spellCount = ByteBufCodecs.INT.decode(buf);
                 data.knownSpells = new ArrayList<>(spellCount);
                 for (int i = 0; i < spellCount; i++) {
@@ -64,6 +68,9 @@ public final class PlayerPsiData {
     private int selectedSpellIndex;
     private List<ResourceLocation> knownSpells = new ArrayList<>();
     private long phiSenseUntil;
+    private int breathingTier;
+    private int calmBreathTicks;
+    private float trainingXp;
 
     public static PlayerPsiData createDefault() {
         PlayerPsiData data = new PlayerPsiData();
@@ -116,6 +123,24 @@ public final class PlayerPsiData {
         return phiSenseUntil;
     }
 
+    public int breathingTier() {
+        return breathingTier;
+    }
+
+    public int calmBreathTicks() {
+        return calmBreathTicks;
+    }
+
+    public float trainingXp() {
+        return trainingXp;
+    }
+
+    /** Orkanum efficiency with breathing technique bonus. */
+    public float effectiveBiologyQ() {
+        float breathingMult = 1f + breathingTier * 0.15f;
+        return biologyQ * breathingMult;
+    }
+
     public boolean isPhiSenseActive(long gameTime) {
         return phiSenseUntil > gameTime;
     }
@@ -130,6 +155,31 @@ public final class PlayerPsiData {
 
     public void setPhiSenseUntil(long gameTime) {
         this.phiSenseUntil = gameTime;
+    }
+
+    public void setSoulStrength(float value) {
+        this.soulStrength = Math.max(0.1f, value);
+    }
+
+    public void setMaxPsi(float value) {
+        this.maxPsi = Math.max(10f, value);
+        this.currentPsi = Math.min(this.currentPsi, this.maxPsi);
+    }
+
+    public void setBreathingTier(int tier) {
+        this.breathingTier = Math.clamp(tier, 0, 2);
+    }
+
+    public void addCalmBreathTicks(int ticks) {
+        this.calmBreathTicks += ticks;
+    }
+
+    public void resetCalmBreathTicks() {
+        this.calmBreathTicks = 0;
+    }
+
+    public void addTrainingXp(float amount) {
+        this.trainingXp = Math.max(0f, this.trainingXp + amount);
     }
 
     public void setSelectedSpellIndex(int index) {
@@ -174,6 +224,8 @@ public final class PlayerPsiData {
         tag.putBoolean("initiated", initiated);
         tag.putInt("selectedSpellIndex", selectedSpellIndex);
         tag.putLong("phiSenseUntil", phiSenseUntil);
+        tag.putInt("breathingTier", breathingTier);
+        tag.putFloat("trainingXp", trainingXp);
 
         ListTag spellList = new ListTag();
         for (ResourceLocation spell : knownSpells) {
@@ -194,6 +246,8 @@ public final class PlayerPsiData {
         initiated = tag.getBoolean("initiated");
         selectedSpellIndex = tag.getInt("selectedSpellIndex");
         phiSenseUntil = tag.getLong("phiSenseUntil");
+        breathingTier = tag.contains("breathingTier") ? tag.getInt("breathingTier") : 0;
+        trainingXp = tag.contains("trainingXp") ? tag.getFloat("trainingXp") : 0f;
 
         knownSpells = new ArrayList<>();
         ListTag spellList = tag.getList("knownSpells", Tag.TAG_STRING);
@@ -219,6 +273,9 @@ public final class PlayerPsiData {
         copy.selectedSpellIndex = selectedSpellIndex;
         copy.knownSpells = new ArrayList<>(knownSpells);
         copy.phiSenseUntil = phiSenseUntil;
+        copy.breathingTier = breathingTier;
+        copy.calmBreathTicks = calmBreathTicks;
+        copy.trainingXp = trainingXp;
         return copy;
     }
 }

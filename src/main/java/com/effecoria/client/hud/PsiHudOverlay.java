@@ -54,6 +54,15 @@ public final class PsiHudOverlay {
         if (data.isPhiSenseActive(minecraft.level.getGameTime())) {
             graphics.drawString(minecraft.font, Component.translatable("hud.effecoria.phi_sense"), x, y - 22, 0x55FFFF);
         }
+
+        if (data.breathingTier() > 0) {
+            graphics.drawString(
+                    minecraft.font,
+                    Component.translatable("hud.effecoria.breathing", data.breathingTier()),
+                    x,
+                    y + 52,
+                    0x88FFCC);
+        }
     }
 
     private static void drawBar(GuiGraphics graphics, int x, int y, int width, int height, float fill, int fillColor, int bgColor) {

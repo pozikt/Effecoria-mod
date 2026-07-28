@@ -1,6 +1,7 @@
 package com.effecoria.client;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.client.gui.SpellBookScreen;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.network.ModNetworking;
@@ -29,8 +30,11 @@ public final class ClientInputEvents {
             PacketDistributor.sendToServer(new ModNetworking.CastSpellPayload(index));
         }
 
-        while (KeyBindings.CYCLE_SPELL.consumeClick()) {
-            PacketDistributor.sendToServer(new ModNetworking.CycleSpellPayload(1));
+        while (KeyBindings.OPEN_SPELL_BOOK.consumeClick()) {
+            PlayerPsiData data = minecraft.player.getData(ModAttachments.PSI.get());
+            if (data.initiated()) {
+                minecraft.setScreen(new SpellBookScreen());
+            }
         }
     }
 }

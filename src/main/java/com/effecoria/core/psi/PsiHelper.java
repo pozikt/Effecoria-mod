@@ -21,7 +21,7 @@ public final class PsiHelper {
         return new PsiContext(
                 data.soulStrength(),
                 data.currentPsi(),
-                data.biologyQ(),
+                data.effectiveBiologyQ(),
                 data.frequencyHz(),
                 data.school(),
                 data.entropyB());

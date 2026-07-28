@@ -37,8 +37,8 @@ Lore reference: [Effecoria encyclopedia](https://github.com/pozikt/Effecoria).
 
 | Item | Notes |
 |------|-------|
-| School selection screen | Replace shift+click ritual with proper menu |
-| Spell book / hotbar UI | Replace blind X-cycle with selectable grid |
+| School selection screen | ✅ Menu on Resonance Focus use |
+| Spell book / hotbar UI | ✅ X key or focus when initiated |
 | Initiation ritual block (optional) | Essonite structure alternative to instant item |
 
 ### 2b — Essence & Φ harnessing
@@ -55,7 +55,12 @@ Orkanum / oxygen coupling — affects **Ψ regeneration rate**, not ambient Φ.
 
 | Stat | Field | Formula hook |
 |------|-------|--------------|
-| Breathing mastery | `biologyQ` | `regenPsi = Ψ_soul × Φ × Q_biology × …` |
+| Breathing mastery | `biologyQ` + `breathingTier` | `effectiveBiologyQ()` in regen |
+
+| Done | Item |
+|------|------|
+| ✅ | Calm standing unlocks tiers 1–2 (+15% Ψ regen per tier) |
+| ✅ | HUD indicator for breathing tier |
 
 Planned mechanics:
 - Unlock via research or trainer NPC
@@ -71,6 +76,10 @@ Soul conditioning — affects **max Ψ capacity** and spell power baseline.
 |------|-------|--------------|
 | Training rank | `soulStrength` | `regenPsi`, `spellPower` |
 | Conditioning | `maxPsi` | Hard cap on Ψ bar |
+
+| Done | Item |
+|------|------|
+| ✅ | Sprint/swim XP → soul strength + max Ψ milestones |
 
 Planned mechanics:
 - XP from sprinting, swimming, combat, block breaking
