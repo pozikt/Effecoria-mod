@@ -63,7 +63,7 @@ public final class EffecoriaCommands {
     private static int initiate(CommandSourceStack source, String schoolName) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         MagicSchool school = MagicSchool.fromSerializedName(schoolName);
-        if (school == MagicSchool.NONE || school == MagicSchool.SEALS) {
+        if (!school.isPlayable()) {
             source.sendFailure(Component.translatable("message.effecoria.invalid_school"));
             return 0;
         }

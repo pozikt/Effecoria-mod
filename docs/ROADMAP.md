@@ -15,9 +15,10 @@ Lore reference: [Effecoria encyclopedia](https://github.com/pozikt/Effecoria).
 | Done | Item |
 |------|------|
 | ✅ | Ψ/Φ resources, HUD, regen tick |
-| ✅ | Initiation via Resonance Focus (Elemental / Mental) |
-| ✅ | 6 spells + cast pipeline + JSON loader |
+| ✅ | Initiation via Resonance Focus (Elemental / Mental / Organic) |
+| ✅ | 9 spells + cast pipeline + JSON loader |
 | ✅ | Elemental rework: fireball, wind charge, water stream |
+| ✅ | Organic starter trio: vitality, thorn lash, root bind |
 | ✅ | Creative god mode (`creative_god_mode` in config) |
 | ✅ | Water stream extinguishes fire |
 

@@ -20,6 +20,10 @@ public final class SpellProgression {
                     id("fire_burst"),
                     id("wind_push"),
                     id("water_stream"));
+            case ORGANIC -> List.of(
+                    id("vitality_pulse"),
+                    id("thorn_lash"),
+                    id("root_bind"));
             default -> List.of();
         };
     }

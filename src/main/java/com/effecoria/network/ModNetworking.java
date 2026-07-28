@@ -43,7 +43,7 @@ public final class ModNetworking {
                     return;
                 }
                 MagicSchool school = MagicSchool.fromSerializedName(payload.school());
-                if (school == MagicSchool.NONE || school == MagicSchool.SEALS) {
+                if (!school.isPlayable()) {
                     player.sendSystemMessage(Component.translatable("message.effecoria.invalid_school"));
                     return;
                 }

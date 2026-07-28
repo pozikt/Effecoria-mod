@@ -23,7 +23,7 @@ First launch downloads NeoForge and Minecraft — expect several minutes.
 ### Phase 1 gameplay
 
 1. Take **Resonance Focus** from creative tab Effecoria
-2. **Right-click** Resonance Focus → school selection menu
+2. **Right-click** Resonance Focus → school selection menu (Elemental / Mental / Organic)
 3. HUD shows Ψ (purple) and Φ (blue) bars at bottom-left
 4. **R** — cast selected spell | **X** — spell book
 5. `/effecoria debug` — stats in chat

@@ -10,13 +10,13 @@ public enum MagicSchool implements StringRepresentable {
     MENTAL("mental", 7.8f),
     /** ~22.3 Hz — elemental / kinetic effects */
     ELEMENTAL("elemental", 22.3f),
-    /** ~1–10 Hz — organic (phase 3+) */
+    /** ~1–10 Hz — organic / Orkanum tissue magic */
     ORGANIC("organic", 5f),
-    /** ~40–100 Hz — necromancy (phase 4+) */
+    /** ~40–100 Hz — necromancy (external Ψ relay; later) */
     NECROMANCY("necromancy", 55f),
-    /** ~100+ Hz — spatial (phase 6+) */
+    /** ~100+ Hz — spatial (later) */
     SPATIAL("spatial", 120f),
-    /** complex frequency — seals / corruption (phase 6+) */
+    /** complex frequency — seals / corruption (later) */
     SEALS("seals", 0f),
     /** uninitiated */
     NONE("none", 0f);
@@ -31,6 +31,11 @@ public enum MagicSchool implements StringRepresentable {
 
     public float nominalFrequencyHz() {
         return nominalFrequencyHz;
+    }
+
+    /** Schools available for player initiation right now. */
+    public boolean isPlayable() {
+        return this == MENTAL || this == ELEMENTAL || this == ORGANIC;
     }
 
     @Override

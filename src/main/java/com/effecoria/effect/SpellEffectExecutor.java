@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.entity.projectile.windcharge.WindCharge;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,7 +31,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public final class SpellEffectExecutor {
@@ -49,6 +50,9 @@ public final class SpellEffectExecutor {
             case "fireball" -> fireball(caster, effect, power);
             case "wind_charge" -> windCharge(caster, effect, power);
             case "water_stream" -> waterStream(caster, effect, power);
+            case "vitality" -> vitality(caster, effect, power);
+            case "thorn_lash" -> thornLash(caster, effect, power);
+            case "root_bind" -> rootBind(caster, effect, power);
             default -> {}
         }
     }
@@ -205,6 +209,86 @@ public final class SpellEffectExecutor {
                 level.setBlock(pos, state.setValue(CandleBlock.LIT, false), 3);
             }
         }
+    }
+
+    /** Self heal + short regeneration — Orkanum tissue mend. */
+    private static void vitality(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        float heal = effect.params().get("heal").getAsFloat() * (power / 50f);
+        int regenTicks = effect.params().has("regen_ticks") ? effect.params().get("regen_ticks").getAsInt() : 60;
+
+        caster.heal(heal);
+        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, regenTicks, 0));
+        spawnOrganicParticles(level, caster.position().add(0, 1, 0));
+        level.playSound(null, caster.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.7f, 1.4f);
+    }
+
+    /** Poisoned thorn strike at a living target. */
+    private static void thornLash(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        float damage = effect.params().get("damage").getAsFloat();
+        int poisonTicks = effect.params().get("poison_ticks").getAsInt();
+        double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 10;
+
+        LivingEntity target = raycastLiving(caster, range);
+        if (target == null) {
+            return;
+        }
+
+        float scaledDamage = damage * (power / 50f);
+        target.hurt(caster.level().damageSources().magic(), scaledDamage);
+        target.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
+        spawnOrganicParticles(level, target.position().add(0, 1, 0));
+        level.playSound(null, target.blockPosition(), SoundEvents.PLAYER_HURT_SWEET_BERRY_BUSH, SoundSource.PLAYERS, 1f, 0.9f);
+    }
+
+    /** Root a target in place and optionally bloom nearby crops. */
+    private static void rootBind(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        double range = effect.params().get("range").getAsDouble();
+        int rootTicks = effect.params().get("root_ticks").getAsInt();
+        boolean bloom = !effect.params().has("bloom") || effect.params().get("bloom").getAsBoolean();
+        int scaledTicks = Math.round(rootTicks * (0.8f + power / 100f));
+
+        LivingEntity target = raycastLiving(caster, range);
+        if (target != null) {
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, scaledTicks, 4));
+            target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, scaledTicks, 1));
+            spawnOrganicParticles(level, target.position().add(0, 0.2, 0));
+            level.playSound(null, target.blockPosition(), SoundEvents.AZALEA_PLACE, SoundSource.PLAYERS, 1f, 0.7f);
+        }
+
+        if (bloom) {
+            bloomNearby(level, BlockPos.containing(caster.position()), 3);
+        }
+    }
+
+    private static void bloomNearby(ServerLevel level, BlockPos center, int radius) {
+        RandomSource random = level.getRandom();
+        for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, -1, -radius), center.offset(radius, 2, radius))) {
+            BlockState state = level.getBlockState(pos);
+            if (state.getBlock() instanceof BonemealableBlock growable
+                    && growable.isValidBonemealTarget(level, pos, state)
+                    && growable.isBonemealSuccess(level, random, pos, state)
+                    && random.nextFloat() < 0.35f) {
+                growable.performBonemeal(level, random, pos, state);
+                level.sendParticles(
+                        ParticleTypes.HAPPY_VILLAGER,
+                        pos.getX() + 0.5,
+                        pos.getY() + 0.6,
+                        pos.getZ() + 0.5,
+                        4,
+                        0.2,
+                        0.2,
+                        0.2,
+                        0.01);
+            }
+        }
+    }
+
+    private static void spawnOrganicParticles(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.x, pos.y, pos.z, 12, 0.3, 0.4, 0.3, 0.02);
+        level.sendParticles(ParticleTypes.COMPOSTER, pos.x, pos.y, pos.z, 6, 0.2, 0.3, 0.2, 0.01);
     }
 
     private static Entity raycastEntity(ServerPlayer caster, double range) {
