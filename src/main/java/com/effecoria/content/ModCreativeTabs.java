@@ -1,0 +1,29 @@
+package com.effecoria.content;
+
+import com.effecoria.EffecoriaMod;
+
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
+public final class ModCreativeTabs {
+    private ModCreativeTabs() {}
+
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS =
+            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, EffecoriaMod.MOD_ID);
+
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EFFECORIA_TAB = CREATIVE_TABS.register(
+            "main",
+            () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup.effecoria"))
+                    .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
+                    .icon(() -> ModItems.RESONANCE_FOCUS.get().getDefaultInstance())
+                    .displayItems((params, output) -> {
+                        output.accept(ModItems.ESSENITE_ORE.get());
+                        output.accept(ModItems.RESONANCE_FOCUS.get());
+                    })
+                    .build());
+}

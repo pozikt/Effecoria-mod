@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:fire_burst",
+  "school": "elemental",
+  "frequency_hz": 22.3,
+  "base_cost": 14,
+  "power_multiplier": 1.2,
+  "side_entropy": 0.1,
+  "min_phi": 0.25,
+  "effects": [
+    { "type": "effecoria:fire_burst", "damage": 6, "ignite_ticks": 80, "radius": 2.5 }
+  ]
+}

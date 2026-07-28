@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:mental_push",
+  "school": "mental",
+  "frequency_hz": 15.2,
+  "base_cost": 12,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.08,
+  "min_phi": 0.2,
+  "effects": [
+    { "type": "effecoria:telekinesis", "force": 1.5, "range": 8 }
+  ]
+}
