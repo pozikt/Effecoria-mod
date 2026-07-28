@@ -2,7 +2,7 @@
 
 NeoForge mod for **Minecraft 1.21.1**, based on the [Effecoria universe](https://github.com/pozikt/Effecoria) (ЕТЭВ / Φ-field theory).
 
-**Status:** Phase 0 — skeleton, formula engine, data templates.
+**Status:** Phase 1 — Ψ/Φ resources, initiation, spell casting (6 spells), HUD.
 
 ## Requirements
 
@@ -18,6 +18,15 @@ cd Effecoria-mod
 ```
 
 First launch downloads NeoForge and Minecraft — expect several minutes.
+
+### Phase 1 gameplay
+
+1. Take **Resonance Focus** from creative tab Effecoria
+2. **Right-click** → Elemental school | **Shift+Right-click** → Mental school
+3. HUD shows Ψ (purple) and Φ (blue) bars at bottom-left
+4. **R** — cast selected spell | **X** — cycle spell
+5. `/effecoria debug` — stats in chat
+6. `/effecoria cast effecoria:fire_burst` — direct cast (cheat sheet)
 
 ## Project layout
 

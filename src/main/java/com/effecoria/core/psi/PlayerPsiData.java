@@ -1,0 +1,212 @@
+package com.effecoria.core.psi;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.effecoria.config.BalanceConfig;
+import com.effecoria.core.magic.MagicSchool;
+
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
+
+public final class PlayerPsiData {
+    public static final StreamCodec<RegistryFriendlyByteBuf, PlayerPsiData> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.FLOAT, PlayerPsiData::currentPsi,
+            ByteBufCodecs.FLOAT, PlayerPsiData::maxPsi,
+            ByteBufCodecs.FLOAT, PlayerPsiData::soulStrength,
+            ByteBufCodecs.FLOAT, PlayerPsiData::biologyQ,
+            ByteBufCodecs.STRING_UTF8, data -> data.school.getSerializedName(),
+            ByteBufCodecs.FLOAT, PlayerPsiData::frequencyHz,
+            ByteBufCodecs.FLOAT, PlayerPsiData::entropyB,
+            ByteBufCodecs.BOOL, PlayerPsiData::initiated,
+            ByteBufCodecs.INT, PlayerPsiData::selectedSpellIndex,
+            ResourceLocation.STREAM_CODEC.apply(ByteBufCodecs.list()), PlayerPsiData::knownSpells,
+            ByteBufCodecs.VAR_LONG, PlayerPsiData::phiSenseUntil,
+            (currentPsi, maxPsi, soulStrength, biologyQ, schoolName, frequencyHz, entropyB, initiated,
+                    selectedSpellIndex, knownSpells, phiSenseUntil) -> {
+                PlayerPsiData data = new PlayerPsiData();
+                data.currentPsi = currentPsi;
+                data.maxPsi = maxPsi;
+                data.soulStrength = soulStrength;
+                data.biologyQ = biologyQ;
+                data.school = MagicSchool.fromSerializedName(schoolName);
+                data.frequencyHz = frequencyHz;
+                data.entropyB = entropyB;
+                data.initiated = initiated;
+                data.selectedSpellIndex = selectedSpellIndex;
+                data.knownSpells = new ArrayList<>(knownSpells);
+                data.phiSenseUntil = phiSenseUntil;
+                return data;
+            });
+
+    private float currentPsi;
+    private float maxPsi;
+    private float soulStrength = 1f;
+    private float biologyQ = 0.6f;
+    private MagicSchool school = MagicSchool.NONE;
+    private float frequencyHz;
+    private float entropyB;
+    private boolean initiated;
+    private int selectedSpellIndex;
+    private List<ResourceLocation> knownSpells = new ArrayList<>();
+    private long phiSenseUntil;
+
+    public static PlayerPsiData createDefault() {
+        PlayerPsiData data = new PlayerPsiData();
+        data.maxPsi = BalanceConfig.DEFAULT_MAX_PSI.get().floatValue();
+        data.currentPsi = data.maxPsi * 0.5f;
+        return data;
+    }
+
+    public float currentPsi() {
+        return currentPsi;
+    }
+
+    public float maxPsi() {
+        return maxPsi;
+    }
+
+    public float soulStrength() {
+        return soulStrength;
+    }
+
+    public float biologyQ() {
+        return biologyQ;
+    }
+
+    public MagicSchool school() {
+        return school;
+    }
+
+    public float frequencyHz() {
+        return frequencyHz;
+    }
+
+    public float entropyB() {
+        return entropyB;
+    }
+
+    public boolean initiated() {
+        return initiated;
+    }
+
+    public int selectedSpellIndex() {
+        return selectedSpellIndex;
+    }
+
+    public List<ResourceLocation> knownSpells() {
+        return knownSpells;
+    }
+
+    public long phiSenseUntil() {
+        return phiSenseUntil;
+    }
+
+    public boolean isPhiSenseActive(long gameTime) {
+        return phiSenseUntil > gameTime;
+    }
+
+    public void setCurrentPsi(float value) {
+        this.currentPsi = Math.clamp(value, 0f, maxPsi);
+    }
+
+    public void setEntropyB(float value) {
+        this.entropyB = Math.max(0f, value);
+    }
+
+    public void setPhiSenseUntil(long gameTime) {
+        this.phiSenseUntil = gameTime;
+    }
+
+    public void setSelectedSpellIndex(int index) {
+        if (knownSpells.isEmpty()) {
+            this.selectedSpellIndex = 0;
+            return;
+        }
+        this.selectedSpellIndex = Math.floorMod(index, knownSpells.size());
+    }
+
+    public ResourceLocation selectedSpell() {
+        if (knownSpells.isEmpty()) {
+            return null;
+        }
+        return knownSpells.get(Math.floorMod(selectedSpellIndex, knownSpells.size()));
+    }
+
+    public void cycleSpell(int delta) {
+        setSelectedSpellIndex(selectedSpellIndex + delta);
+    }
+
+    public void initiate(MagicSchool chosenSchool, List<ResourceLocation> spells) {
+        this.school = chosenSchool;
+        this.frequencyHz = chosenSchool.nominalFrequencyHz();
+        this.initiated = true;
+        this.knownSpells = new ArrayList<>(spells);
+        this.selectedSpellIndex = 0;
+        this.maxPsi = BalanceConfig.DEFAULT_MAX_PSI.get().floatValue();
+        this.currentPsi = BalanceConfig.DEFAULT_STARTING_PSI.get().floatValue();
+        this.entropyB = 0f;
+    }
+
+    public CompoundTag save(HolderLookup.Provider provider) {
+        CompoundTag tag = new CompoundTag();
+        tag.putFloat("currentPsi", currentPsi);
+        tag.putFloat("maxPsi", maxPsi);
+        tag.putFloat("soulStrength", soulStrength);
+        tag.putFloat("biologyQ", biologyQ);
+        tag.putString("school", school.getSerializedName());
+        tag.putFloat("frequencyHz", frequencyHz);
+        tag.putFloat("entropyB", entropyB);
+        tag.putBoolean("initiated", initiated);
+        tag.putInt("selectedSpellIndex", selectedSpellIndex);
+        tag.putLong("phiSenseUntil", phiSenseUntil);
+
+        ListTag spellList = new ListTag();
+        for (ResourceLocation spell : knownSpells) {
+            spellList.add(net.minecraft.nbt.StringTag.valueOf(spell.toString()));
+        }
+        tag.put("knownSpells", spellList);
+        return tag;
+    }
+
+    public void load(HolderLookup.Provider provider, CompoundTag tag) {
+        currentPsi = tag.getFloat("currentPsi");
+        maxPsi = tag.getFloat("maxPsi");
+        soulStrength = tag.getFloat("soulStrength");
+        biologyQ = tag.getFloat("biologyQ");
+        school = MagicSchool.fromSerializedName(tag.getString("school"));
+        frequencyHz = tag.getFloat("frequencyHz");
+        entropyB = tag.getFloat("entropyB");
+        initiated = tag.getBoolean("initiated");
+        selectedSpellIndex = tag.getInt("selectedSpellIndex");
+        phiSenseUntil = tag.getLong("phiSenseUntil");
+
+        knownSpells = new ArrayList<>();
+        ListTag spellList = tag.getList("knownSpells", Tag.TAG_STRING);
+        for (Tag entry : spellList) {
+            knownSpells.add(ResourceLocation.parse(entry.getAsString()));
+        }
+    }
+
+    public PlayerPsiData copy() {
+        PlayerPsiData copy = new PlayerPsiData();
+        copy.currentPsi = currentPsi;
+        copy.maxPsi = maxPsi;
+        copy.soulStrength = soulStrength;
+        copy.biologyQ = biologyQ;
+        copy.school = school;
+        copy.frequencyHz = frequencyHz;
+        copy.entropyB = entropyB;
+        copy.initiated = initiated;
+        copy.selectedSpellIndex = selectedSpellIndex;
+        copy.knownSpells = new ArrayList<>(knownSpells);
+        copy.phiSenseUntil = phiSenseUntil;
+        return copy;
+    }
+}

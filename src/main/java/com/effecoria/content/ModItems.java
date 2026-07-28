@@ -15,7 +15,7 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> ESSENITE_ORE = ITEMS.registerSimpleBlockItem("essonite_ore", ModBlocks.ESSENITE_ORE);
 
     /** Initiation focus — fixes magic school on first use (phase 1) */
-    public static final DeferredItem<Item> RESONANCE_FOCUS = ITEMS.registerSimpleItem(
+    public static final DeferredItem<Item> RESONANCE_FOCUS = ITEMS.register(
             "resonance_focus",
-            new Item.Properties().stacksTo(1));
+            () -> new ResonanceFocusItem(new Item.Properties().stacksTo(1)));
 }

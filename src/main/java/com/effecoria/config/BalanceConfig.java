@@ -38,5 +38,17 @@ public final class BalanceConfig {
             .comment("Hz tolerance for spectral resonance (wider = easier off-frequency casts)")
             .defineInRange("resonance_width_hz", 5.0, 0.1, 50.0);
 
+    public static final ModConfigSpec.DoubleValue DEFAULT_MAX_PSI = BUILDER
+            .comment("Default maximum Ψ energy for new players")
+            .defineInRange("default_max_psi", 100.0, 10.0, 1000.0);
+
+    public static final ModConfigSpec.DoubleValue DEFAULT_STARTING_PSI = BUILDER
+            .comment("Ψ energy granted on initiation")
+            .defineInRange("default_starting_psi", 50.0, 0.0, 1000.0);
+
+    public static final ModConfigSpec.DoubleValue BACKLASH_DAMAGE = BUILDER
+            .comment("Hearts of damage when entropy backlash triggers")
+            .defineInRange("backlash_damage", 4.0, 0.0, 20.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 }

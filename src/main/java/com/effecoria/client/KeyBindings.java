@@ -1,0 +1,26 @@
+package com.effecoria.client;
+
+import com.effecoria.EffecoriaMod;
+import com.mojang.blaze3d.platform.InputConstants;
+
+import net.minecraft.client.KeyMapping;
+import net.neoforged.neoforge.client.settings.KeyConflictContext;
+import org.lwjgl.glfw.GLFW;
+
+public final class KeyBindings {
+    private KeyBindings() {}
+
+    public static final KeyMapping CAST_SPELL = new KeyMapping(
+            "key.effecoria.cast_spell",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_R,
+            "key.categories.effecoria");
+
+    public static final KeyMapping CYCLE_SPELL = new KeyMapping(
+            "key.effecoria.cycle_spell",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_X,
+            "key.categories.effecoria");
+}
