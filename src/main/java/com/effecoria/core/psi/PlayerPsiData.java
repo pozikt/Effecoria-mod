@@ -202,14 +202,29 @@ public final class PlayerPsiData {
     }
 
     public void initiate(MagicSchool chosenSchool, List<ResourceLocation> spells) {
+        applySchool(chosenSchool, spells, true);
+    }
+
+    /** Switch magic school — keeps Ψ pool and progression stats for testing. */
+    public void reschool(MagicSchool chosenSchool, List<ResourceLocation> spells) {
+        applySchool(chosenSchool, spells, false);
+    }
+
+    private void applySchool(MagicSchool chosenSchool, List<ResourceLocation> spells, boolean resetResources) {
         this.school = chosenSchool;
         this.frequencyHz = chosenSchool.nominalFrequencyHz();
         this.initiated = true;
         this.knownSpells = new ArrayList<>(spells);
         this.selectedSpellIndex = 0;
-        this.maxPsi = BalanceConfig.DEFAULT_MAX_PSI.get().floatValue();
-        this.currentPsi = BalanceConfig.DEFAULT_STARTING_PSI.get().floatValue();
         this.entropyB = 0f;
+        this.phiSenseUntil = 0L;
+        this.calmBreathTicks = 0;
+        if (resetResources) {
+            this.maxPsi = BalanceConfig.DEFAULT_MAX_PSI.get().floatValue();
+            this.currentPsi = BalanceConfig.DEFAULT_STARTING_PSI.get().floatValue();
+        } else {
+            this.currentPsi = Math.min(this.currentPsi, this.maxPsi);
+        }
     }
 
     public CompoundTag save(HolderLookup.Provider provider) {

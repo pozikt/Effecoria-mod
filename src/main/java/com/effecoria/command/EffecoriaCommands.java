@@ -30,6 +30,9 @@ public final class EffecoriaCommands {
                 .then(Commands.literal("initiate")
                         .then(Commands.argument("school", StringArgumentType.word())
                                 .executes(ctx -> initiate(ctx.getSource(), StringArgumentType.getString(ctx, "school")))))
+                .then(Commands.literal("reschool")
+                        .then(Commands.argument("school", StringArgumentType.word())
+                                .executes(ctx -> reschool(ctx.getSource(), StringArgumentType.getString(ctx, "school")))))
                 .then(Commands.literal("cast")
                         .then(Commands.argument("spell", ResourceLocationArgument.id())
                                 .executes(ctx -> cast(ctx.getSource(), ResourceLocationArgument.getId(ctx, "spell")))))
@@ -62,14 +65,13 @@ public final class EffecoriaCommands {
 
     private static int initiate(CommandSourceStack source, String schoolName) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
-        MagicSchool school = MagicSchool.fromSerializedName(schoolName);
-        if (!school.isPlayable()) {
-            source.sendFailure(Component.translatable("message.effecoria.invalid_school"));
+        PlayerPsiData data = PsiHelper.get(player);
+        MagicSchool school = resolveSchool(source, schoolName);
+        if (school == null) {
             return 0;
         }
-        if (!SpellProgression.schoolHasLoadedSpells(school)) {
-            source.sendFailure(Component.translatable("message.effecoria.spells_not_loaded"));
-            return 0;
+        if (data.initiated()) {
+            return reschool(source, schoolName);
         }
         PsiHelper.initiate(player, school);
         player.syncData(ModAttachments.PSI.get());
@@ -77,6 +79,33 @@ public final class EffecoriaCommands {
                 "message.effecoria.initiated",
                 Component.translatable("school.effecoria." + school.getSerializedName())), false);
         return 1;
+    }
+
+    private static int reschool(CommandSourceStack source, String schoolName) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        MagicSchool school = resolveSchool(source, schoolName);
+        if (school == null) {
+            return 0;
+        }
+        PsiHelper.reschool(player, school);
+        player.syncData(ModAttachments.PSI.get());
+        source.sendSuccess(() -> Component.translatable(
+                "message.effecoria.reschool",
+                Component.translatable("school.effecoria." + school.getSerializedName())), false);
+        return 1;
+    }
+
+    private static MagicSchool resolveSchool(CommandSourceStack source, String schoolName) {
+        MagicSchool school = MagicSchool.fromSerializedName(schoolName);
+        if (!school.isPlayable()) {
+            source.sendFailure(Component.translatable("message.effecoria.invalid_school"));
+            return null;
+        }
+        if (!SpellProgression.schoolHasLoadedSpells(school)) {
+            source.sendFailure(Component.translatable("message.effecoria.spells_not_loaded"));
+            return null;
+        }
+        return school;
     }
 
     private static int cast(CommandSourceStack source, ResourceLocation spellId) throws CommandSyntaxException {

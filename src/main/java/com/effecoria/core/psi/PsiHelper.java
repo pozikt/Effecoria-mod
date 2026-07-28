@@ -32,4 +32,10 @@ public final class PsiHelper {
         data.initiate(school, SpellProgression.spellsForSchool(school));
         set(player, data);
     }
+
+    public static void reschool(Player player, MagicSchool school) {
+        PlayerPsiData data = get(player);
+        data.reschool(school, SpellProgression.spellsForSchool(school));
+        set(player, data);
+    }
 }

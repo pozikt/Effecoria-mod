@@ -36,6 +36,7 @@
   "spell.effecoria.wither_touch": "Wither Touch",
   "spell.effecoria.shade_summon": "Shade Summon",
   "message.effecoria.initiated": "Initiated as %s mage. Spectral purity locked.",
+  "message.effecoria.reschool": "Reschooled to %s. Spells updated.",
   "message.effecoria.spell_selected": "Selected: %s",
   "message.effecoria.cast_success": "Cast %s",
   "message.effecoria.cast_failed": "Cannot cast — insufficient Psi, low Phi, or blocked zone.",

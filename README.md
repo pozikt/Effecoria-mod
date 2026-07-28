@@ -27,8 +27,9 @@ First launch downloads NeoForge and Minecraft — expect several minutes.
 3. HUD shows Ψ (purple) and Φ (blue) bars at bottom-left
 4. **R** — cast selected spell | **X** — spell book
 5. `/effecoria debug` — stats in chat
-6. **Creative mode:** Φ shows ∞, casts are free, Ψ stays full (toggle `creative_god_mode` in config)
-7. `/effecoria cast effecoria:fire_burst` — direct cast (cheat sheet)
+6. `/effecoria reschool elemental` — switch school without recreating world
+7. **Creative mode:** Φ shows ∞, casts are free, Ψ stays full (toggle `creative_god_mode` in config)
+8. `/effecoria cast effecoria:fire_burst` — direct cast (cheat sheet)
 
 ## Project layout
 
