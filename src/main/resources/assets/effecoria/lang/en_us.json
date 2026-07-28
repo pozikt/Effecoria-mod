@@ -38,5 +38,9 @@
   "message.effecoria.not_initiated": "You are not initiated.",
   "message.effecoria.invalid_school": "Unknown school. Use mental or elemental.",
   "message.effecoria.cast_command_failed": "Cast failed: %s",
-  "message.effecoria.debug": "Psi: %s / %s | Phi: %s | School: %s | Entropy: %s | Initiated: %s"
+  "message.effecoria.debug": "Psi: %s / %s | Phi: %s | School: %s | Entropy: %s | Initiated: %s",
+  "message.effecoria.debug_progression": "Progression — breathing: %s | train XP: %s | soul: %s | Q_eff: %s",
+  "message.effecoria.breathing_tier_up": "Breathing technique tier %s!",
+  "message.effecoria.training_milestone": "Training up! soul: %s | max Psi: %s",
+  "message.effecoria.training_xp": "Training XP: %s"
 }

@@ -51,6 +51,12 @@ public final class EffecoriaCommands {
                 data.school().getSerializedName(),
                 String.format("%.2f", data.entropyB()),
                 data.initiated()), false);
+        source.sendSuccess(() -> Component.translatable(
+                "message.effecoria.debug_progression",
+                data.breathingTier(),
+                String.format("%.1f", data.trainingXp()),
+                String.format("%.2f", data.soulStrength()),
+                String.format("%.2f", data.effectiveBiologyQ())), false);
         return 1;
     }
 

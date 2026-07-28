@@ -38,5 +38,9 @@
   "message.effecoria.not_initiated": "Ты ещё не инициирован.",
   "message.effecoria.invalid_school": "Неизвестная школа. Используй mental или elemental.",
   "message.effecoria.cast_command_failed": "Каст не удался: %s",
-  "message.effecoria.debug": "Ψ: %s / %s | Φ: %s | Школа: %s | Энтропия: %s | Инициирован: %s"
+  "message.effecoria.debug": "Ψ: %s / %s | Φ: %s | Школа: %s | Энтропия: %s | Инициирован: %s",
+  "message.effecoria.debug_progression": "Прогрессия — дыхание: %s | XP трен.: %s | Ψ_soul: %s | Q_eff: %s",
+  "message.effecoria.breathing_tier_up": "Техника дыхания — уровень %s!",
+  "message.effecoria.training_milestone": "Тренировка! Ψ_soul: %s | макс. Ψ: %s",
+  "message.effecoria.training_xp": "Тренировка XP: %s"
 }
