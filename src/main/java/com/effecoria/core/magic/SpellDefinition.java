@@ -12,4 +12,5 @@ public record SpellDefinition(
         float powerMultiplier,
         float sideEntropyRatio,
         float minPhi,
+        RadialCategory radialCategory,
         List<SpellEffectEntry> effects) {}

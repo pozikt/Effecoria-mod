@@ -6,7 +6,12 @@
   "power_multiplier": 1.0,
   "side_entropy": 0.06,
   "min_phi": 0.2,
+  "radial_category": "seals",
   "effects": [
-    { "type": "effecoria:place_fortify_seal", "range": 8, "duration_ticks": -1 }
+    {
+      "type": "effecoria:place_fortify_seal",
+      "range": 8,
+      "duration_ticks": -1
+    }
   ]
 }

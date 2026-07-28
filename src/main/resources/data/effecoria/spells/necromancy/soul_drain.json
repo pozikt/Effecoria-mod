@@ -6,7 +6,13 @@
   "power_multiplier": 1.0,
   "side_entropy": 0.09,
   "min_phi": 0.2,
+  "radial_category": "combat",
   "effects": [
-    { "type": "effecoria:soul_drain", "damage": 6, "heal_ratio": 0.5, "range": 10 }
+    {
+      "type": "effecoria:soul_drain",
+      "damage": 6,
+      "heal_ratio": 0.5,
+      "range": 10
+    }
   ]
 }

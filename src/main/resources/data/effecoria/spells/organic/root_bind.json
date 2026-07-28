@@ -6,7 +6,13 @@
   "power_multiplier": 0.95,
   "side_entropy": 0.05,
   "min_phi": 0.2,
+  "radial_category": "utility",
   "effects": [
-    { "type": "effecoria:root_bind", "range": 8, "root_ticks": 60, "bloom": true }
+    {
+      "type": "effecoria:root_bind",
+      "range": 8,
+      "root_ticks": 60,
+      "bloom": true
+    }
   ]
 }

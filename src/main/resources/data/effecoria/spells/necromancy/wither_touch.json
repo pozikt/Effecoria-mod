@@ -6,7 +6,13 @@
   "power_multiplier": 0.95,
   "side_entropy": 0.08,
   "min_phi": 0.2,
+  "radial_category": "combat",
   "effects": [
-    { "type": "effecoria:wither_touch", "damage": 4, "wither_ticks": 100, "range": 10 }
+    {
+      "type": "effecoria:wither_touch",
+      "damage": 4,
+      "wither_ticks": 100,
+      "range": 10
+    }
   ]
 }

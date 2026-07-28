@@ -6,7 +6,12 @@
   "power_multiplier": 0.5,
   "side_entropy": 0.02,
   "min_phi": 0.05,
+  "radial_category": "utility",
   "effects": [
-    { "type": "effecoria:phi_sense", "duration_ticks": 200, "radius": 32 }
+    {
+      "type": "effecoria:phi_sense",
+      "duration_ticks": 200,
+      "radius": 32
+    }
   ]
 }

@@ -6,7 +6,13 @@
   "power_multiplier": 0.95,
   "side_entropy": 0.08,
   "min_phi": 0.2,
+  "radial_category": "utility",
   "effects": [
-    { "type": "effecoria:binding_seal", "root_ticks": 70, "glow_ticks": 100, "range": 12 }
+    {
+      "type": "effecoria:binding_seal",
+      "root_ticks": 70,
+      "glow_ticks": 100,
+      "range": 12
+    }
   ]
 }

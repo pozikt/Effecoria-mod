@@ -6,7 +6,13 @@
   "power_multiplier": 1.05,
   "side_entropy": 0.11,
   "min_phi": 0.2,
+  "radial_category": "combat",
   "effects": [
-    { "type": "effecoria:blight_pulse", "radius": 5, "damage": 3, "poison_ticks": 60 }
+    {
+      "type": "effecoria:blight_pulse",
+      "radius": 5,
+      "damage": 3,
+      "poison_ticks": 60
+    }
   ]
 }

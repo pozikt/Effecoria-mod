@@ -6,7 +6,11 @@
   "power_multiplier": 0.95,
   "side_entropy": 0.06,
   "min_phi": 0.2,
+  "radial_category": "movement",
   "effects": [
-    { "type": "effecoria:phase_veil", "duration_ticks": 80 }
+    {
+      "type": "effecoria:phase_veil",
+      "duration_ticks": 80
+    }
   ]
 }

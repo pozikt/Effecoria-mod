@@ -6,7 +6,12 @@
   "power_multiplier": 1.0,
   "side_entropy": 0.04,
   "min_phi": 0.2,
+  "radial_category": "utility",
   "effects": [
-    { "type": "effecoria:vitality", "heal": 6, "regen_ticks": 80 }
+    {
+      "type": "effecoria:vitality",
+      "heal": 6,
+      "regen_ticks": 80
+    }
   ]
 }

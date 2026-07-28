@@ -6,7 +6,12 @@
   "power_multiplier": 1.0,
   "side_entropy": 0.05,
   "min_phi": 0.2,
+  "radial_category": "movement",
   "effects": [
-    { "type": "effecoria:blink", "range": 10, "min_range": 2 }
+    {
+      "type": "effecoria:blink",
+      "range": 10,
+      "min_range": 2
+    }
   ]
 }

@@ -62,6 +62,8 @@ public final class CastPipeline {
 
         CastDelivery delivery = SpellEffectExecutor.applyAll(player, spell, power);
 
+        data.recordSpellCast(spellId, player.level().getGameTime());
+
         if (!godMode) {
             float costFraction = delivery == CastDelivery.WHIFF_NO_TARGET || delivery == CastDelivery.WHIFF_NO_BLOCK
                     ? BalanceConfig.WHIFF_COST_FRACTION.get().floatValue()

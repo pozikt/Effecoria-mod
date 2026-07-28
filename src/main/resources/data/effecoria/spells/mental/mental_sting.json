@@ -6,7 +6,12 @@
   "power_multiplier": 0.9,
   "side_entropy": 0.06,
   "min_phi": 0.15,
+  "radial_category": "combat",
   "effects": [
-    { "type": "effecoria:mind_sting", "damage": 4, "slow_duration_ticks": 60 }
+    {
+      "type": "effecoria:mind_sting",
+      "damage": 4,
+      "slow_duration_ticks": 60
+    }
   ]
 }

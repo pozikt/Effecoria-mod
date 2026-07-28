@@ -1,7 +1,9 @@
 package com.effecoria.core.psi;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.magic.MagicSchool;
@@ -36,6 +38,16 @@ public final class PlayerPsiData {
                 for (ResourceLocation spell : data.knownSpells) {
                     ResourceLocation.STREAM_CODEC.encode(buf, spell);
                 }
+                ByteBufCodecs.INT.encode(buf, data.spellCastCounts.size());
+                for (Map.Entry<ResourceLocation, Integer> entry : data.spellCastCounts.entrySet()) {
+                    ResourceLocation.STREAM_CODEC.encode(buf, entry.getKey());
+                    ByteBufCodecs.VAR_INT.encode(buf, entry.getValue());
+                }
+                ByteBufCodecs.INT.encode(buf, data.spellLastCastAt.size());
+                for (Map.Entry<ResourceLocation, Long> entry : data.spellLastCastAt.entrySet()) {
+                    ResourceLocation.STREAM_CODEC.encode(buf, entry.getKey());
+                    ByteBufCodecs.VAR_LONG.encode(buf, entry.getValue());
+                }
             },
             buf -> {
                 PlayerPsiData data = new PlayerPsiData();
@@ -58,6 +70,18 @@ public final class PlayerPsiData {
                 for (int i = 0; i < spellCount; i++) {
                     data.knownSpells.add(ResourceLocation.STREAM_CODEC.decode(buf));
                 }
+                int castCountEntries = ByteBufCodecs.INT.decode(buf);
+                data.spellCastCounts = new HashMap<>(castCountEntries);
+                for (int i = 0; i < castCountEntries; i++) {
+                    ResourceLocation id = ResourceLocation.STREAM_CODEC.decode(buf);
+                    data.spellCastCounts.put(id, ByteBufCodecs.VAR_INT.decode(buf));
+                }
+                int lastCastEntries = ByteBufCodecs.INT.decode(buf);
+                data.spellLastCastAt = new HashMap<>(lastCastEntries);
+                for (int i = 0; i < lastCastEntries; i++) {
+                    ResourceLocation id = ResourceLocation.STREAM_CODEC.decode(buf);
+                    data.spellLastCastAt.put(id, ByteBufCodecs.VAR_LONG.decode(buf));
+                }
                 return data;
             });
 
@@ -76,6 +100,8 @@ public final class PlayerPsiData {
     private float trainingXp;
     private int essence;
     private float phiMultiplier = 1f;
+    private Map<ResourceLocation, Integer> spellCastCounts = new HashMap<>();
+    private Map<ResourceLocation, Long> spellLastCastAt = new HashMap<>();
 
     public static PlayerPsiData createDefault() {
         PlayerPsiData data = new PlayerPsiData();
@@ -142,6 +168,19 @@ public final class PlayerPsiData {
 
     public float phiMultiplier() {
         return phiMultiplier;
+    }
+
+    public int spellCastCount(ResourceLocation spellId) {
+        return spellCastCounts.getOrDefault(spellId, 0);
+    }
+
+    public long spellLastCastAt(ResourceLocation spellId) {
+        return spellLastCastAt.getOrDefault(spellId, 0L);
+    }
+
+    public void recordSpellCast(ResourceLocation spellId, long gameTime) {
+        spellCastCounts.merge(spellId, 1, Integer::sum);
+        spellLastCastAt.put(spellId, gameTime);
     }
 
     public void addEssence(int amount) {
@@ -246,6 +285,8 @@ public final class PlayerPsiData {
         this.selectedSpellIndex = 0;
         this.entropyB = 0f;
         this.phiSenseUntil = 0L;
+        this.spellCastCounts.clear();
+        this.spellLastCastAt.clear();
         if (resetResources) {
             this.maxPsi = BalanceConfig.DEFAULT_MAX_PSI.get().floatValue();
             this.currentPsi = BalanceConfig.DEFAULT_STARTING_PSI.get().floatValue();
@@ -276,6 +317,18 @@ public final class PlayerPsiData {
             spellList.add(net.minecraft.nbt.StringTag.valueOf(spell.toString()));
         }
         tag.put("knownSpells", spellList);
+
+        CompoundTag castCounts = new CompoundTag();
+        for (Map.Entry<ResourceLocation, Integer> entry : spellCastCounts.entrySet()) {
+            castCounts.putInt(entry.getKey().toString(), entry.getValue());
+        }
+        tag.put("spellCastCounts", castCounts);
+
+        CompoundTag lastCast = new CompoundTag();
+        for (Map.Entry<ResourceLocation, Long> entry : spellLastCastAt.entrySet()) {
+            lastCast.putLong(entry.getKey().toString(), entry.getValue());
+        }
+        tag.put("spellLastCastAt", lastCast);
         return tag;
     }
 
@@ -312,6 +365,21 @@ public final class PlayerPsiData {
             knownSpells.add(spellId);
         }
 
+        spellCastCounts = new HashMap<>();
+        spellLastCastAt = new HashMap<>();
+        if (tag.contains("spellCastCounts", Tag.TAG_COMPOUND)) {
+            CompoundTag castCounts = tag.getCompound("spellCastCounts");
+            for (String key : castCounts.getAllKeys()) {
+                spellCastCounts.put(ResourceLocation.parse(key), castCounts.getInt(key));
+            }
+        }
+        if (tag.contains("spellLastCastAt", Tag.TAG_COMPOUND)) {
+            CompoundTag lastCast = tag.getCompound("spellLastCastAt");
+            for (String key : lastCast.getAllKeys()) {
+                spellLastCastAt.put(ResourceLocation.parse(key), lastCast.getLong(key));
+            }
+        }
+
         // Old saves used school id "seals" for combat corruption spells.
         if (school == MagicSchool.SEALS && knownSpells.stream().anyMatch(id ->
                 id.getPath().equals("corrupt_mark")
@@ -339,6 +407,8 @@ public final class PlayerPsiData {
         copy.trainingXp = trainingXp;
         copy.essence = essence;
         copy.phiMultiplier = phiMultiplier;
+        copy.spellCastCounts = new HashMap<>(spellCastCounts);
+        copy.spellLastCastAt = new HashMap<>(spellLastCastAt);
         return copy;
     }
 }

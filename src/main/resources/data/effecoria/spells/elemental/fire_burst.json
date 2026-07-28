@@ -6,7 +6,11 @@
   "power_multiplier": 1.2,
   "side_entropy": 0.1,
   "min_phi": 0.25,
+  "radial_category": "combat",
   "effects": [
-    { "type": "effecoria:fireball", "speed": 1.5 }
+    {
+      "type": "effecoria:fireball",
+      "speed": 1.5
+    }
   ]
 }

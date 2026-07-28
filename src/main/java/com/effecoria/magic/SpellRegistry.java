@@ -2,6 +2,7 @@ package com.effecoria.magic;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.core.magic.MagicSchool;
+import com.effecoria.core.magic.RadialCategory;
 import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.core.magic.SpellEffectEntry;
 import com.google.gson.Gson;
@@ -68,6 +69,10 @@ public final class SpellRegistry {
         float powerMultiplier = json.has("power_multiplier") ? json.get("power_multiplier").getAsFloat() : 1f;
         float sideEntropy = json.has("side_entropy") ? json.get("side_entropy").getAsFloat() : 0.05f;
         float minPhi = json.has("min_phi") ? json.get("min_phi").getAsFloat() : 0.1f;
+        if (!json.has("radial_category")) {
+            throw new IllegalArgumentException("Missing radial_category for " + id);
+        }
+        RadialCategory radialCategory = RadialCategory.fromSerializedName(json.get("radial_category").getAsString());
 
         List<SpellEffectEntry> effects = new ArrayList<>();
         if (json.has("effects")) {
@@ -81,6 +86,7 @@ public final class SpellRegistry {
             }
         }
 
-        return new SpellDefinition(id, school, frequency, baseCost, powerMultiplier, sideEntropy, minPhi, effects);
+        return new SpellDefinition(
+                id, school, frequency, baseCost, powerMultiplier, sideEntropy, minPhi, radialCategory, effects);
     }
 }

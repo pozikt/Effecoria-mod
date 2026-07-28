@@ -6,7 +6,12 @@
   "power_multiplier": 1.0,
   "side_entropy": 0.12,
   "min_phi": 0.25,
+  "radial_category": "utility",
   "effects": [
-    { "type": "effecoria:shade_summon", "lifetime_ticks": 400, "range": 16 }
+    {
+      "type": "effecoria:shade_summon",
+      "lifetime_ticks": 400,
+      "range": 16
+    }
   ]
 }

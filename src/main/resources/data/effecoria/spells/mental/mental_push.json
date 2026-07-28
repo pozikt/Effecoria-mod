@@ -6,7 +6,12 @@
   "power_multiplier": 1.0,
   "side_entropy": 0.08,
   "min_phi": 0.2,
+  "radial_category": "utility",
   "effects": [
-    { "type": "effecoria:telekinesis", "force": 1.5, "range": 8 }
+    {
+      "type": "effecoria:telekinesis",
+      "force": 1.5,
+      "range": 8
+    }
   ]
 }
