@@ -16,32 +16,40 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
 public final class PlayerPsiData {
-    public static final StreamCodec<RegistryFriendlyByteBuf, PlayerPsiData> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.FLOAT, PlayerPsiData::currentPsi,
-            ByteBufCodecs.FLOAT, PlayerPsiData::maxPsi,
-            ByteBufCodecs.FLOAT, PlayerPsiData::soulStrength,
-            ByteBufCodecs.FLOAT, PlayerPsiData::biologyQ,
-            ByteBufCodecs.STRING_UTF8, data -> data.school.getSerializedName(),
-            ByteBufCodecs.FLOAT, PlayerPsiData::frequencyHz,
-            ByteBufCodecs.FLOAT, PlayerPsiData::entropyB,
-            ByteBufCodecs.BOOL, PlayerPsiData::initiated,
-            ByteBufCodecs.INT, PlayerPsiData::selectedSpellIndex,
-            ResourceLocation.STREAM_CODEC.apply(ByteBufCodecs.list()), PlayerPsiData::knownSpells,
-            ByteBufCodecs.VAR_LONG, PlayerPsiData::phiSenseUntil,
-            (currentPsi, maxPsi, soulStrength, biologyQ, schoolName, frequencyHz, entropyB, initiated,
-                    selectedSpellIndex, knownSpells, phiSenseUntil) -> {
+    public static final StreamCodec<RegistryFriendlyByteBuf, PlayerPsiData> STREAM_CODEC = StreamCodec.of(
+            (buf, data) -> {
+                ByteBufCodecs.FLOAT.encode(buf, data.currentPsi);
+                ByteBufCodecs.FLOAT.encode(buf, data.maxPsi);
+                ByteBufCodecs.FLOAT.encode(buf, data.soulStrength);
+                ByteBufCodecs.FLOAT.encode(buf, data.biologyQ);
+                ByteBufCodecs.STRING_UTF8.encode(buf, data.school.getSerializedName());
+                ByteBufCodecs.FLOAT.encode(buf, data.frequencyHz);
+                ByteBufCodecs.FLOAT.encode(buf, data.entropyB);
+                ByteBufCodecs.BOOL.encode(buf, data.initiated);
+                ByteBufCodecs.INT.encode(buf, data.selectedSpellIndex);
+                ByteBufCodecs.VAR_LONG.encode(buf, data.phiSenseUntil);
+                ByteBufCodecs.INT.encode(buf, data.knownSpells.size());
+                for (ResourceLocation spell : data.knownSpells) {
+                    ResourceLocation.STREAM_CODEC.encode(buf, spell);
+                }
+            },
+            buf -> {
                 PlayerPsiData data = new PlayerPsiData();
-                data.currentPsi = currentPsi;
-                data.maxPsi = maxPsi;
-                data.soulStrength = soulStrength;
-                data.biologyQ = biologyQ;
-                data.school = MagicSchool.fromSerializedName(schoolName);
-                data.frequencyHz = frequencyHz;
-                data.entropyB = entropyB;
-                data.initiated = initiated;
-                data.selectedSpellIndex = selectedSpellIndex;
-                data.knownSpells = new ArrayList<>(knownSpells);
-                data.phiSenseUntil = phiSenseUntil;
+                data.currentPsi = ByteBufCodecs.FLOAT.decode(buf);
+                data.maxPsi = ByteBufCodecs.FLOAT.decode(buf);
+                data.soulStrength = ByteBufCodecs.FLOAT.decode(buf);
+                data.biologyQ = ByteBufCodecs.FLOAT.decode(buf);
+                data.school = MagicSchool.fromSerializedName(ByteBufCodecs.STRING_UTF8.decode(buf));
+                data.frequencyHz = ByteBufCodecs.FLOAT.decode(buf);
+                data.entropyB = ByteBufCodecs.FLOAT.decode(buf);
+                data.initiated = ByteBufCodecs.BOOL.decode(buf);
+                data.selectedSpellIndex = ByteBufCodecs.INT.decode(buf);
+                data.phiSenseUntil = ByteBufCodecs.VAR_LONG.decode(buf);
+                int spellCount = ByteBufCodecs.INT.decode(buf);
+                data.knownSpells = new ArrayList<>(spellCount);
+                for (int i = 0; i < spellCount; i++) {
+                    data.knownSpells.add(ResourceLocation.STREAM_CODEC.decode(buf));
+                }
                 return data;
             });
 

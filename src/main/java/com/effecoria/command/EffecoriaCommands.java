@@ -10,6 +10,7 @@ import com.effecoria.core.psi.SpellProgression;
 import com.effecoria.magic.CastPipeline;
 import com.effecoria.magic.SpellRegistry;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.arguments.StringArgumentType;
 
 import net.minecraft.commands.CommandSourceStack;
@@ -36,7 +37,7 @@ public final class EffecoriaCommands {
                         .executes(ctx -> listSpells(ctx.getSource()))));
     }
 
-    private static int debug(CommandSourceStack source) {
+    private static int debug(CommandSourceStack source) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         PlayerPsiData data = PsiHelper.get(player);
         PhiSample phi = PhiFieldService.sample(player.level(), player.position());
@@ -52,7 +53,7 @@ public final class EffecoriaCommands {
         return 1;
     }
 
-    private static int initiate(CommandSourceStack source, String schoolName) {
+    private static int initiate(CommandSourceStack source, String schoolName) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         MagicSchool school = MagicSchool.fromSerializedName(schoolName);
         if (school == MagicSchool.NONE || school == MagicSchool.SEALS) {
@@ -71,7 +72,7 @@ public final class EffecoriaCommands {
         return 1;
     }
 
-    private static int cast(CommandSourceStack source, ResourceLocation spellId) {
+    private static int cast(CommandSourceStack source, ResourceLocation spellId) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         CastPipeline.CastResult result = CastPipeline.tryCast(player, spellId);
         if (result == CastPipeline.CastResult.SUCCESS) {
@@ -81,7 +82,7 @@ public final class EffecoriaCommands {
         return 0;
     }
 
-    private static int listSpells(CommandSourceStack source) {
+    private static int listSpells(CommandSourceStack source) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         PlayerPsiData data = PsiHelper.get(player);
         if (!data.initiated()) {

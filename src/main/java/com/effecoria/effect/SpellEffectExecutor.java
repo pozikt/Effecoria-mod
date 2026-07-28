@@ -65,7 +65,7 @@ public final class SpellEffectExecutor {
         float scaledDamage = damage * (power / 50f);
         DamageSource source = caster.level().damageSources().magic();
         target.hurt(source, scaledDamage);
-        target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, slowTicks, 1));
+        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
         spawnCastParticles(caster.serverLevel(), target.position());
     }
 
