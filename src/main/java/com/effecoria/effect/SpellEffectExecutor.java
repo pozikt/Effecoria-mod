@@ -5,11 +5,13 @@ import com.effecoria.core.magic.SpellEffectEntry;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -17,6 +19,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.entity.projectile.windcharge.WindCharge;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.CandleBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -120,13 +126,14 @@ public final class SpellEffectExecutor {
         spawnWindCastParticles(level, caster.getEyePosition(), look);
     }
 
-    /** Directed water jet — damage + push, splash particles only. */
+    /** Directed water jet — damage, push, and fire suppression along the beam. */
     private static void waterStream(ServerPlayer caster, SpellEffectEntry effect, float power) {
         ServerLevel level = caster.serverLevel();
         double range = effect.params().get("range").getAsDouble();
         float damage = effect.params().get("damage").getAsFloat();
         float knockback = effect.params().has("knockback") ? effect.params().get("knockback").getAsFloat() : 1.2f;
         int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 40;
+        boolean extinguish = !effect.params().has("extinguish_fire") || effect.params().get("extinguish_fire").getAsBoolean();
 
         Vec3 look = caster.getLookAngle().normalize();
         Vec3 start = caster.getEyePosition();
@@ -153,12 +160,51 @@ public final class SpellEffectExecutor {
             target.hurt(source, scaledDamage);
             target.push(look.x * scaledKnock, 0.15, look.z * scaledKnock);
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 0));
+            if (extinguish) {
+                target.clearFire();
+            }
             target.hurtMarked = true;
             spawnWaterHitParticles(level, target.position());
         }
 
+        if (extinguish) {
+            extinguishFireAlongBeam(level, start, look, range);
+            for (SmallFireball fireball : level.getEntitiesOfClass(SmallFireball.class, sweep, Entity::isAlive)) {
+                fireball.discard();
+                spawnWaterHitParticles(level, fireball.position());
+            }
+        }
+
         spawnWaterBeamParticles(level, start, look, range);
         level.playSound(null, caster.blockPosition(), SoundEvents.PLAYER_SPLASH_HIGH_SPEED, SoundSource.PLAYERS, 0.8f, 1.1f);
+    }
+
+    private static void extinguishFireAlongBeam(ServerLevel level, Vec3 start, Vec3 look, double range) {
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        int steps = (int) (range * 4);
+        for (int i = 0; i <= steps; i++) {
+            Vec3 point = start.add(look.scale(i * 0.25));
+            pos.set(point.x, point.y, point.z);
+            BlockState state = level.getBlockState(pos);
+            if (state.isAir()) {
+                continue;
+            }
+            if (state.is(BlockTags.FIRE)) {
+                level.removeBlock(pos, false);
+                level.sendParticles(ParticleTypes.SMOKE, point.x, point.y, point.z, 2, 0.05, 0.05, 0.05, 0.01);
+                continue;
+            }
+            if (state.is(Blocks.CAMPFIRE) || state.is(Blocks.SOUL_CAMPFIRE)) {
+                if (state.getValue(CampfireBlock.LIT)) {
+                    level.setBlock(pos, state.setValue(CampfireBlock.LIT, false), 3);
+                    level.sendParticles(ParticleTypes.SMOKE, point.x, point.y + 0.2, point.z, 3, 0.05, 0.1, 0.05, 0.01);
+                }
+                continue;
+            }
+            if (state.hasProperty(CandleBlock.LIT) && state.getValue(CandleBlock.LIT)) {
+                level.setBlock(pos, state.setValue(CandleBlock.LIT, false), 3);
+            }
+        }
     }
 
     private static Entity raycastEntity(ServerPlayer caster, double range) {

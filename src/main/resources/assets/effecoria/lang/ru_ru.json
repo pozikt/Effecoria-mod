@@ -8,6 +8,7 @@
   "key.effecoria.cycle_spell": "Следующее заклинание",
   "hud.effecoria.psi": "Ψ: %s / %s",
   "hud.effecoria.phi": "Φ: %s",
+  "hud.effecoria.phi_infinite": "Φ: ∞",
   "hud.effecoria.phi_zero": "Φ: ЗНΦ (нулевой поток)",
   "hud.effecoria.spell": "Заклинание: %s",
   "hud.effecoria.phi_sense": "Чувство Φ активно",

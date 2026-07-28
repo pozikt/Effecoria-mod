@@ -40,13 +40,14 @@ public final class EffecoriaCommands {
     private static int debug(CommandSourceStack source) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         PlayerPsiData data = PsiHelper.get(player);
-        PhiSample phi = PhiFieldService.sample(player.level(), player.position());
+        PhiSample phi = PhiFieldService.sample(player.level(), player.position(), player);
 
+        String phiDisplay = phi.isInfinite() ? "∞" : String.format("%.2f", phi.effectiveValue());
         source.sendSuccess(() -> Component.translatable(
                 "message.effecoria.debug",
                 String.format("%.1f", data.currentPsi()),
                 String.format("%.1f", data.maxPsi()),
-                String.format("%.2f", phi.effectiveValue()),
+                phiDisplay,
                 data.school().getSerializedName(),
                 String.format("%.2f", data.entropyB()),
                 data.initiated()), false);

@@ -7,6 +7,6 @@
   "side_entropy": 0.06,
   "min_phi": 0.2,
   "effects": [
-    { "type": "effecoria:water_stream", "damage": 5, "range": 10, "knockback": 1.4, "slow_ticks": 50 }
+    { "type": "effecoria:water_stream", "damage": 5, "range": 10, "knockback": 1.4, "slow_ticks": 50, "extinguish_fire": true }
   ]
 }

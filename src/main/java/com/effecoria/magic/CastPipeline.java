@@ -5,6 +5,7 @@ import com.effecoria.core.formula.FormulaEngine;
 import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.formula.PsiContext;
 import com.effecoria.core.magic.SpellDefinition;
+import com.effecoria.core.phi.CreativeGodMode;
 import com.effecoria.core.phi.PhiFieldService;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
@@ -47,23 +48,26 @@ public final class CastPipeline {
         }
 
         PsiContext ctx = PsiHelper.toContext(data);
-        PhiSample phi = PhiFieldService.sample(player.level(), player.position());
+        boolean godMode = CreativeGodMode.isActive(player);
+        PhiSample phi = PhiFieldService.sample(player.level(), player.position(), player);
 
-        if (!FormulaEngine.canCast(ctx, phi, spell, data.currentPsi())) {
+        if (!godMode && !FormulaEngine.canCast(ctx, phi, spell, data.currentPsi())) {
             player.displayClientMessage(Component.translatable("message.effecoria.cast_failed"), true);
             return CastResult.CANNOT_CAST;
         }
 
-        float cost = FormulaEngine.spellCost(ctx, phi, spell);
+        float cost = godMode ? 0f : FormulaEngine.spellCost(ctx, phi, spell);
         float power = FormulaEngine.spellPower(ctx, phi, spell);
 
-        data.setCurrentPsi(data.currentPsi() - cost);
-        float newEntropy = FormulaEngine.accumulateEntropy(data.entropyB(), power, spell.sideEntropyRatio());
-        data.setEntropyB(newEntropy);
+        if (!godMode) {
+            data.setCurrentPsi(data.currentPsi() - cost);
+            float newEntropy = FormulaEngine.accumulateEntropy(data.entropyB(), power, spell.sideEntropyRatio());
+            data.setEntropyB(newEntropy);
 
-        if (FormulaEngine.isBacklashTriggered(newEntropy)) {
-            applyBacklash(player);
-            data.setEntropyB(0f);
+            if (FormulaEngine.isBacklashTriggered(newEntropy)) {
+                applyBacklash(player);
+                data.setEntropyB(0f);
+            }
         }
 
         SpellEffectExecutor.applyAll(player, spell, power);

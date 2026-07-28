@@ -2,7 +2,7 @@
 
 NeoForge mod for **Minecraft 1.21.1**, based on the [Effecoria universe](https://github.com/pozikt/Effecoria) (ЕТЭВ / Φ-field theory).
 
-**Status:** Phase 1 — Ψ/Φ resources, initiation, spell casting (6 spells), HUD.
+**Status:** Phase 1 — Ψ/Φ resources, initiation, spell casting (6 spells), HUD, creative god mode.
 
 ## Requirements
 
@@ -27,7 +27,8 @@ First launch downloads NeoForge and Minecraft — expect several minutes.
 3. HUD shows Ψ (purple) and Φ (blue) bars at bottom-left
 4. **R** — cast selected spell | **X** — cycle spell
 5. `/effecoria debug` — stats in chat
-6. `/effecoria cast effecoria:fire_burst` — direct cast (cheat sheet)
+6. **Creative mode:** Φ shows ∞, casts are free, Ψ stays full (toggle `creative_god_mode` in config)
+7. `/effecoria cast effecoria:fire_burst` — direct cast (cheat sheet)
 
 ## Project layout
 
@@ -47,6 +48,7 @@ src/test/java/                              Unit tests (optional, WIP)
 
 | Doc | Purpose |
 |-----|---------|
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Development phases & priorities |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Layers, packages, how to extend |
 | [docs/FORMULAS.md](docs/FORMULAS.md) | Lore equations → game math |
 | [docs/DESIGN.md](docs/DESIGN.md) | Lore → mechanics mapping |
@@ -60,15 +62,20 @@ Unit tests are optional for now — use `build -x test` (see Quick start).
 
 ## Roadmap
 
+**Priority:** complete magic & essence systems before worldgen and races.
+
 | Phase | Focus |
 |-------|-------|
-| **0** | MDK, FormulaEngine, placeholders, docs |
-| **1** (now) | Ψ/Φ resources, initiation, 6 MVP spells, cast pipeline |
-| **2** | Materials (lead, cold iron, essonite mechanics) |
-| **3** | Races & Orkanum |
-| **4** | Necromancy & liches |
-| **5** | Technomagic & multiblocks |
-| **6** | Worldgen, flora, structures |
+| **0** ✅ | MDK, FormulaEngine, placeholders, docs |
+| **1** (now) | Ψ/Φ, initiation, 6 spells, HUD, creative god mode |
+| **2** | **Magic core** — school UI, breathing passives, physical training, essence |
+| **3** | Materials (lead ZNΦ, cold iron, essonite mechanics) |
+| **4** | Races & Orkanum |
+| **5** | Necromancy & liches |
+| **6** | Technomagic & multiblocks |
+| **7** | Worldgen, flora, structures |
+
+Full breakdown: [docs/ROADMAP.md](docs/ROADMAP.md)
 
 ## License
 

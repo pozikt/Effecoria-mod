@@ -8,6 +8,7 @@
   "key.effecoria.cycle_spell": "Cycle Spell",
   "hud.effecoria.psi": "Psi: %s / %s",
   "hud.effecoria.phi": "Phi: %s",
+  "hud.effecoria.phi_infinite": "Phi: ∞",
   "hud.effecoria.phi_zero": "Phi: ZNF (zero flux)",
   "hud.effecoria.spell": "Spell: %s",
   "hud.effecoria.phi_sense": "Phi-sense active",

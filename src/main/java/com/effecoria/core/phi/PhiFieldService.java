@@ -5,6 +5,7 @@ import com.effecoria.core.formula.PhiSample;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
@@ -13,6 +14,14 @@ public final class PhiFieldService {
     private PhiFieldService() {}
 
     public static PhiSample sample(Level level, Vec3 position) {
+        return sample(level, position, null);
+    }
+
+    /** Samples Φ for a player — creative god mode overrides environmental limits. */
+    public static PhiSample sample(Level level, Vec3 position, Player player) {
+        if (CreativeGodMode.isActive(player)) {
+            return PhiSample.CREATIVE;
+        }
         float value = 1f;
         boolean zeroFlux = false;
 

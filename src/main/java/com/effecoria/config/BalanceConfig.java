@@ -50,5 +50,9 @@ public final class BalanceConfig {
             .comment("Hearts of damage when entropy backlash triggers")
             .defineInRange("backlash_damage", 4.0, 0.0, 20.0);
 
+    public static final ModConfigSpec.BooleanValue CREATIVE_GOD_MODE = BUILDER
+            .comment("In creative mode: infinite Φ, free casts, full Ψ, no backlash (for testing)")
+            .define("creative_god_mode", true);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 }

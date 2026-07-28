@@ -1,6 +1,7 @@
 package com.effecoria.event;
 
 import com.effecoria.core.formula.FormulaEngine;
+import com.effecoria.core.phi.CreativeGodMode;
 import com.effecoria.core.phi.PhiFieldService;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
@@ -48,9 +49,17 @@ public final class ModCommonEvents {
             return;
         }
 
+        if (CreativeGodMode.isActive(player)) {
+            data.setCurrentPsi(data.maxPsi());
+            data.setEntropyB(0f);
+            PsiHelper.set(player, data);
+            player.syncData(ModAttachments.PSI.get());
+            return;
+        }
+
         float regen = FormulaEngine.regenPsi(
                 PsiHelper.toContext(data),
-                PhiFieldService.sample(player.level(), player.position()),
+                PhiFieldService.sample(player.level(), player.position(), player),
                 10f);
         if (regen <= 0f) {
             return;

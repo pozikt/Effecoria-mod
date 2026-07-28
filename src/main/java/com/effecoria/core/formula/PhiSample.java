@@ -9,8 +9,14 @@ package com.effecoria.core.formula;
 public record PhiSample(float value, boolean zeroFlux) {
     public static final PhiSample ZERO_ZONE = new PhiSample(0f, true);
     public static final PhiSample DEFAULT = new PhiSample(1f, false);
+    /** Creative god mode — treated as infinite Φ for HUD and formulas. */
+    public static final PhiSample CREATIVE = new PhiSample(999f, false);
 
     public float effectiveValue() {
         return zeroFlux ? 0f : Math.max(0f, value);
+    }
+
+    public boolean isInfinite() {
+        return this == CREATIVE;
     }
 }

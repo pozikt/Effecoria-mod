@@ -25,18 +25,21 @@ public final class PsiHudOverlay {
             return;
         }
 
-        PhiSample phi = PhiFieldService.sample(minecraft.level, minecraft.player.position());
+        PhiSample phi = PhiFieldService.sample(minecraft.level, minecraft.player.position(), minecraft.player);
         int x = 10;
         int y = minecraft.getWindow().getGuiScaledHeight() - 55;
 
         drawBar(graphics, x, y, 80, 8, data.currentPsi() / data.maxPsi(), 0xFF6A0DAD, 0xFF2E0845);
         graphics.drawString(minecraft.font, Component.translatable("hud.effecoria.psi", (int) data.currentPsi(), (int) data.maxPsi()), x, y - 10, 0xE0A8FF);
 
-        drawBar(graphics, x, y + 16, 80, 6, Math.min(1f, phi.effectiveValue()), 0xFF3D85C6, 0xFF1B3A59);
-        String phiLabel = phi.zeroFlux()
-                ? Component.translatable("hud.effecoria.phi_zero").getString()
-                : Component.translatable("hud.effecoria.phi", String.format("%.2f", phi.effectiveValue())).getString();
-        graphics.drawString(minecraft.font, phiLabel, x, y + 28, phi.zeroFlux() ? 0xFF5555 : 0xAAD4FF);
+        float phiFill = phi.isInfinite() ? 1f : Math.min(1f, phi.effectiveValue());
+        drawBar(graphics, x, y + 16, 80, 6, phiFill, 0xFF3D85C6, 0xFF1B3A59);
+        String phiLabel = phi.isInfinite()
+                ? Component.translatable("hud.effecoria.phi_infinite").getString()
+                : phi.zeroFlux()
+                        ? Component.translatable("hud.effecoria.phi_zero").getString()
+                        : Component.translatable("hud.effecoria.phi", String.format("%.2f", phi.effectiveValue())).getString();
+        graphics.drawString(minecraft.font, phiLabel, x, y + 28, phi.isInfinite() ? 0xFFD4AF37 : phi.zeroFlux() ? 0xFF5555 : 0xAAD4FF);
 
         ResourceLocation selected = data.selectedSpell();
         if (selected != null) {

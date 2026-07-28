@@ -18,7 +18,7 @@ Magic is **not** a separate ruleset — it is Φ-field conversion through the Ψ
 |----|--------|-----------|
 | `fire_burst` | Blaze-style fireball projectile | Thermal Φ dump, no block grief |
 | `wind_push` | Wind charge projectile | Breeze-style gust burst on impact |
-| `water_stream` | Directed water jet | Damage + push + slow, splash particles only |
+| `water_stream` | Directed water jet | Extinguishes fire; damage + push + slow |
 
 ### Mental spells
 
@@ -32,11 +32,14 @@ Magic is **not** a separate ruleset — it is Φ-field conversion through the Ψ
 
 | Phase | Lore source | Game system |
 |-------|-------------|-------------|
-| 2 | materials-catalog | Tags, ZNΦ blocks, conductors |
-| 3 | races.md | Race selection, Q_biology modifiers |
-| 4 | liches.md, magic-system | Necromancy, phylacteries, kin curses |
-| 5 | technomagic.md, phi-reactors.md | Multiblocks, Φ cells |
-| 6 | flora.md, astrophysical-objects.md | Biomes, TSE structures |
+| 2 | magic-system, essenton | School UI, breathing passives, training, essence |
+| 3 | materials-catalog | Tags, ZNΦ blocks, conductors |
+| 4 | races.md | Race selection, Q_biology modifiers |
+| 5 | liches.md, magic-system | Necromancy, phylacteries, kin curses |
+| 6 | technomagic.md, phi-reactors.md | Multiblocks, Φ cells |
+| 7 | flora.md, astrophysical-objects.md | Biomes, TSE structures |
+
+See [ROADMAP.md](ROADMAP.md) for full plan.
 
 ## Hard rules (never break)
 
