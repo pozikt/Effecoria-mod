@@ -10,6 +10,6 @@ public final class SpellIcons {
     private SpellIcons() {}
 
     public static ResourceLocation forSpell(ResourceLocation spellId) {
-        return EffecoriaMod.id("textures/gui/spells/" + spellId.getPath() + ".png");
+        return EffecoriaMod.id("gui/spells/" + spellId.getPath());
     }
 }

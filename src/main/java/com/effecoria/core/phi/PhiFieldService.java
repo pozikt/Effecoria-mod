@@ -22,7 +22,8 @@ public final class PhiFieldService {
     /** Samples Φ for a player — creative god mode overrides environmental limits. */
     public static PhiSample sample(Level level, Vec3 position, Player player) {
         if (CreativeGodMode.isActive(player)) {
-            return new PhiSample(999f, false, isSolarDay(level));
+            float phi = BalanceConfig.CREATIVE_PHI_OVERRIDE.get().floatValue();
+            return new PhiSample(phi, false, isSolarDay(level));
         }
         float value = 1f;
         boolean zeroFlux = false;

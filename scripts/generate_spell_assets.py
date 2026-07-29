@@ -33,7 +33,9 @@ SPELL_SCHOOL = {
     "mental_push": "mental", "mental_sting": "mental", "sense_phi": "mental",
     "mind_lance": "mental", "psychic_focus": "mental",
     "fire_burst": "elemental", "wind_push": "elemental", "water_stream": "elemental",
-    "steam_jet": "elemental", "ember_volley": "elemental",
+    "steam_jet": "elemental", "steam_veil": "elemental", "ember_volley": "elemental",
+    "ice_shard": "elemental", "frost_bastion": "elemental", "plasma_bolt": "elemental",
+    "hydro_slice": "elemental",
     "vitality_pulse": "organic", "thorn_lash": "organic", "root_bind": "organic",
     "briar_surge": "organic", "verdant_mend": "organic",
     "soul_drain": "necromancy", "wither_touch": "necromancy", "shade_summon": "necromancy",
@@ -245,6 +247,30 @@ def icon_beacon(d, cx, cy, color):
     d.line([(cx, cy - 14), (cx, cy + 16)], fill=(255, 255, 200, 200), width=2)
 
 
+def icon_hydro_slice(d, cx, cy, color):
+    d.line([(cx - 14, cy + 2), (cx + 14, cy + 2)], fill=color, width=3)
+    d.polygon([(cx, cy - 10), (cx + 8, cy + 6), (cx - 8, cy + 6)], fill=(120, 200, 255, 200))
+
+
+def icon_ice(d, cx, cy, color):
+    d.polygon([(cx, cy - 14), (cx + 6, cy - 2), (cx + 10, cy + 10), (cx, cy + 6), (cx - 10, cy + 10), (cx - 6, cy - 2)], fill=color)
+
+
+def icon_frost_wall(d, cx, cy, color):
+    icon_shield(d, cx, cy, color)
+    d.line([(cx - 8, cy - 6), (cx + 8, cy + 6)], fill=(220, 240, 255, 200), width=2)
+
+
+def icon_plasma(d, cx, cy, color):
+    icon_fire(d, cx, cy, (255, 140, 255, 255))
+    draw_disc(d, cx, cy, 4, (180, 100, 255, 180))
+
+
+def icon_steam_veil(d, cx, cy, color):
+    icon_steam(d, cx, cy, color)
+    d.ellipse((cx - 14, cy - 16, cx + 14, cy + 4), outline=color, width=2)
+
+
 DRAWERS = {
     "mental_push": icon_arrow,
     "mental_sting": icon_spike,
@@ -255,7 +281,12 @@ DRAWERS = {
     "wind_push": icon_wind,
     "water_stream": icon_water,
     "steam_jet": icon_steam,
+    "steam_veil": icon_steam_veil,
     "ember_volley": icon_embers,
+    "ice_shard": icon_ice,
+    "frost_bastion": icon_frost_wall,
+    "plasma_bolt": icon_plasma,
+    "hydro_slice": icon_hydro_slice,
     "vitality_pulse": icon_heart,
     "thorn_lash": icon_thorns,
     "root_bind": icon_roots,
@@ -546,6 +577,24 @@ def particle_phi_spark() -> Image.Image:
     return img
 
 
+def particle_steam_fog() -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = PARTICLE // 2, PARTICLE // 2
+    for r, a in ((7, 40), (5, 70), (3, 110)):
+        draw_disc(d, cx, cy, r, (210, 220, 230, a))
+    return img
+
+
+def particle_ice_crystal() -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = PARTICLE // 2, PARTICLE // 2
+    d.polygon([(cx, cy - 6), (cx + 4, cy + 5), (cx - 4, cy + 5)], fill=(180, 230, 255, 230))
+    d.line([(cx, cy - 5), (cx, cy + 4)], fill=(240, 250, 255, 200), width=1)
+    return img
+
+
 def generate_school_particles():
     """Unique sprites + JSON for each magic-school particle type."""
     # Water — drops, splashes, waves (multi-frame sprite sets)
@@ -611,6 +660,9 @@ def generate_school_particles():
         glyph_paths.append(f"effecoria:{name}")
     write_particle_json("seal_glyph", glyph_paths)
     save_particle("seal_spark", particle_seal_spark())
+
+    save_particle("steam_fog", particle_steam_fog())
+    save_particle("ice_crystal", particle_ice_crystal())
 
 
 def main():

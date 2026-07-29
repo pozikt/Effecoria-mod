@@ -51,8 +51,16 @@ public final class BalanceConfig {
             .defineInRange("backlash_damage", 4.0, 0.0, 20.0);
 
     public static final ModConfigSpec.BooleanValue CREATIVE_GOD_MODE = BUILDER
-            .comment("In creative mode: infinite Φ, free casts, full Ψ, no backlash (for testing)")
+            .comment("In creative mode: free casts, full Ψ, no backlash (for testing)")
             .define("creative_god_mode", true);
+
+    public static final ModConfigSpec.DoubleValue CREATIVE_PHI_OVERRIDE = BUILDER
+            .comment("Ambient Φ while creative god mode is active (was 999 — caused one-shot spell scaling)")
+            .defineInRange("creative_phi_override", 1.0, 0.1, 10.0);
+
+    public static final ModConfigSpec.DoubleValue CREATIVE_SPELL_POWER_CAP = BUILDER
+            .comment("Maximum effective spell power in creative god mode (0 = no cap)")
+            .defineInRange("creative_spell_power_cap", 52.0, 0.0, 500.0);
 
     public static final ModConfigSpec.DoubleValue PHI_DAY_MULTIPLIER = BUILDER
             .comment("Φ multiplier while the sun is above the horizon (solar flux)")

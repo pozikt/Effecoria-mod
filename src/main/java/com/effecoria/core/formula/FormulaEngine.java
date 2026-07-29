@@ -95,7 +95,25 @@ public final class FormulaEngine {
         if (phi.effectiveValue() < spell.minPhi()) {
             return false;
         }
+        if (ctx.breathingMastery() < spell.minMastery()) {
+            return false;
+        }
+        if (spell.minPower() > 0f && spellPower(ctx, phi, spell) < spell.minPower()) {
+            return false;
+        }
         return availablePsi >= spellCost(ctx, phi, spell);
+    }
+
+    /** True when Φ and Ψ are sufficient but breathing mastery or spell power is too low. */
+    public static boolean failsConcentration(PsiContext ctx, PhiSample phi, SpellDefinition spell, float availablePsi) {
+        if (phi.zeroFlux() || phi.effectiveValue() < spell.minPhi()) {
+            return false;
+        }
+        if (availablePsi < spellCost(ctx, phi, spell)) {
+            return false;
+        }
+        return ctx.breathingMastery() < spell.minMastery()
+                || (spell.minPower() > 0f && spellPower(ctx, phi, spell) < spell.minPower());
     }
 
     /**

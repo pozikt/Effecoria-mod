@@ -12,6 +12,7 @@ import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.core.psi.SpellProgression;
+import com.effecoria.effect.elemental.ElementalBlockService;
 import com.effecoria.magic.SpellRegistry;
 
 import net.minecraft.server.level.ServerPlayer;
@@ -19,6 +20,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @EventBusSubscriber(modid = EffecoriaMod.MOD_ID)
@@ -33,6 +35,13 @@ public final class ModCommonEvents {
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         EffecoriaCommands.register(event.getDispatcher());
+    }
+
+    @SubscribeEvent
+    public static void onLevelTick(LevelTickEvent.Post event) {
+        if (event.getLevel() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            ElementalBlockService.tick(serverLevel);
+        }
     }
 
     @SubscribeEvent

@@ -2,15 +2,16 @@
   "id": "effecoria:fire_burst",
   "school": "elemental",
   "frequency_hz": 22.3,
-  "base_cost": 14,
-  "power_multiplier": 1.2,
-  "side_entropy": 0.1,
-  "min_phi": 0.25,
+  "base_cost": 10,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.06,
+  "min_phi": 0.15,
   "radial_category": "combat",
   "effects": [
     {
       "type": "effecoria:fireball",
-      "speed": 1.5
+      "speed": 1.2,
+      "damage": 1.5
     }
   ]
 }

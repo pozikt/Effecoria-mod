@@ -1,0 +1,22 @@
+{
+  "id": "effecoria:hydro_slice",
+  "school": "elemental",
+  "frequency_hz": 21.0,
+  "base_cost": 18,
+  "power_multiplier": 1.25,
+  "side_entropy": 0.1,
+  "min_phi": 0.3,
+  "min_mastery": 0.75,
+  "min_power": 38,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:hydro_slice",
+      "damage": 6,
+      "range": 12,
+      "knockback": 0.6,
+      "slow_ticks": 20,
+      "extinguish_fire": false
+    }
+  ]
+}

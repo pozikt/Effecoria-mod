@@ -53,12 +53,16 @@ public final class CastPipeline {
         PhiSample phi = PhiFieldService.sample(player.level(), player.position(), player);
 
         if (!godMode && !FormulaEngine.canCast(ctx, phi, spell, data.currentPsi())) {
-            player.displayClientMessage(Component.translatable("message.effecoria.cast_failed"), true);
+            if (FormulaEngine.failsConcentration(ctx, phi, spell, data.currentPsi())) {
+                player.displayClientMessage(Component.translatable("message.effecoria.insufficient_concentration"), true);
+            } else {
+                player.displayClientMessage(Component.translatable("message.effecoria.cast_failed"), true);
+            }
             return CastResult.CANNOT_CAST;
         }
 
         float fullCost = godMode ? 0f : FormulaEngine.spellCost(ctx, phi, spell);
-        float power = FormulaEngine.spellPower(ctx, phi, spell);
+        float power = CreativeGodMode.clampSpellPower(player, FormulaEngine.spellPower(ctx, phi, spell));
 
         CastDelivery delivery = SpellEffectExecutor.applyAll(player, spell, power);
 
