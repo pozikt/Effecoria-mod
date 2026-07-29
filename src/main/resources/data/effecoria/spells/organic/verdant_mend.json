@@ -1,0 +1,13 @@
+{
+  "id": "effecoria:verdant_mend",
+  "school": "organic",
+  "frequency_hz": 4.5,
+  "base_cost": 11,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.04,
+  "min_phi": 0.12,
+  "radial_category": "utility",
+  "effects": [
+    { "type": "effecoria:vitality", "heal": 9, "regen_ticks": 100 }
+  ]
+}

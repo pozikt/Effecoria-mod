@@ -3,6 +3,7 @@ package com.effecoria.command;
 import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.magic.MagicSchool;
 import com.effecoria.core.phi.PhiFieldService;
+import com.effecoria.core.progression.BiologyService;
 import com.effecoria.core.progression.BreathingService;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
@@ -82,7 +83,8 @@ public final class EffecoriaCommands {
                 String.format("%.2f", data.mastery()),
                 String.format("%.1f", data.trainingXp()),
                 String.format("%.2f", data.soulStrength()),
-                String.format("%.2f", data.effectiveBiologyQ())), false);
+                String.format("%.2f", data.effectiveBiologyQ() * BiologyService.bodyFactor(player)),
+                String.format("%.0f", data.exhaustion())), false);
         source.sendSuccess(() -> Component.translatable(
                 "message.effecoria.debug_mult",
                 String.format("%.2f", data.phiMultiplier())), false);
@@ -132,6 +134,10 @@ public final class EffecoriaCommands {
             case "training_xp", "train_xp" -> {
                 data.setTrainingXp(value);
                 display = String.format("training XP = %.1f", data.trainingXp());
+            }
+            case "exhaustion" -> {
+                data.setExhaustion(value);
+                display = String.format("exhaustion = %.0f", data.exhaustion());
             }
             default -> {
                 source.sendFailure(Component.translatable("message.effecoria.invalid_stat"));

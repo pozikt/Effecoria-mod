@@ -34,6 +34,7 @@ public final class PlayerPsiData {
                 ByteBufCodecs.FLOAT.encode(buf, data.trainingXp);
                 ByteBufCodecs.INT.encode(buf, data.essence);
                 ByteBufCodecs.FLOAT.encode(buf, data.phiMultiplier);
+                ByteBufCodecs.FLOAT.encode(buf, data.exhaustion);
                 ByteBufCodecs.INT.encode(buf, data.knownSpells.size());
                 for (ResourceLocation spell : data.knownSpells) {
                     ResourceLocation.STREAM_CODEC.encode(buf, spell);
@@ -65,6 +66,7 @@ public final class PlayerPsiData {
                 data.trainingXp = ByteBufCodecs.FLOAT.decode(buf);
                 data.essence = ByteBufCodecs.INT.decode(buf);
                 data.phiMultiplier = ByteBufCodecs.FLOAT.decode(buf);
+                data.exhaustion = ByteBufCodecs.FLOAT.decode(buf);
                 int spellCount = ByteBufCodecs.INT.decode(buf);
                 data.knownSpells = new ArrayList<>(spellCount);
                 for (int i = 0; i < spellCount; i++) {
@@ -100,6 +102,7 @@ public final class PlayerPsiData {
     private float trainingXp;
     private int essence;
     private float phiMultiplier = 1f;
+    private float exhaustion;
     private Map<ResourceLocation, Integer> spellCastCounts = new HashMap<>();
     private Map<ResourceLocation, Long> spellLastCastAt = new HashMap<>();
 
@@ -168,6 +171,14 @@ public final class PlayerPsiData {
 
     public float phiMultiplier() {
         return phiMultiplier;
+    }
+
+    public float exhaustion() {
+        return exhaustion;
+    }
+
+    public void setExhaustion(float value) {
+        this.exhaustion = Math.clamp(value, 0f, com.effecoria.core.progression.ExhaustionService.MAX);
     }
 
     public int spellCastCount(ResourceLocation spellId) {
@@ -277,6 +288,15 @@ public final class PlayerPsiData {
         applySchool(chosenSchool, spells, false);
     }
 
+    /** Adds newly introduced school spells without resetting progression. */
+    public void mergeMissingSpells(List<ResourceLocation> spells) {
+        for (ResourceLocation spell : spells) {
+            if (!knownSpells.contains(spell)) {
+                knownSpells.add(spell);
+            }
+        }
+    }
+
     private void applySchool(MagicSchool chosenSchool, List<ResourceLocation> spells, boolean resetResources) {
         this.school = chosenSchool;
         this.frequencyHz = chosenSchool.nominalFrequencyHz();
@@ -311,6 +331,7 @@ public final class PlayerPsiData {
         tag.putFloat("trainingXp", trainingXp);
         tag.putInt("essence", essence);
         tag.putFloat("phiMultiplier", phiMultiplier);
+        tag.putFloat("exhaustion", exhaustion);
 
         ListTag spellList = new ListTag();
         for (ResourceLocation spell : knownSpells) {
@@ -354,6 +375,7 @@ public final class PlayerPsiData {
         trainingXp = tag.contains("trainingXp") ? tag.getFloat("trainingXp") : 0f;
         essence = tag.contains("essence") ? tag.getInt("essence") : 0;
         phiMultiplier = tag.contains("phiMultiplier") ? tag.getFloat("phiMultiplier") : 1f;
+        exhaustion = tag.contains("exhaustion") ? tag.getFloat("exhaustion") : 0f;
 
         knownSpells = new ArrayList<>();
         ListTag spellList = tag.getList("knownSpells", Tag.TAG_STRING);
@@ -407,6 +429,7 @@ public final class PlayerPsiData {
         copy.trainingXp = trainingXp;
         copy.essence = essence;
         copy.phiMultiplier = phiMultiplier;
+        copy.exhaustion = exhaustion;
         copy.spellCastCounts = new HashMap<>(spellCastCounts);
         copy.spellLastCastAt = new HashMap<>(spellLastCastAt);
         return copy;

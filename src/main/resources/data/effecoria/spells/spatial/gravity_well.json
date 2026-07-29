@@ -1,0 +1,13 @@
+{
+  "id": "effecoria:gravity_well",
+  "school": "spatial",
+  "frequency_hz": 122.0,
+  "base_cost": 12,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.07,
+  "min_phi": 0.18,
+  "radial_category": "combat",
+  "effects": [
+    { "type": "effecoria:rift_yank", "damage": 4, "pull_strength": 1.4, "range": 12 }
+  ]
+}

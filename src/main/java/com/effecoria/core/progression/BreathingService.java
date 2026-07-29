@@ -15,6 +15,15 @@ public final class BreathingService {
         return BalanceConfig.BREATHING_MAX_MASTERY.get().floatValue();
     }
 
+    /** Standing calm with full breath — meditation stance for breathing gains and exhaustion recovery. */
+    public static boolean isMeditating(ServerPlayer player) {
+        return player.onGround()
+                && !player.isSprinting()
+                && !player.isInWater()
+                && !player.isPassenger()
+                && player.getAirSupply() >= player.getMaxAirSupply() - 10;
+    }
+
     /** Adds mastery up to the cap; returns the amount actually gained. */
     public static float addMastery(PlayerPsiData data, float amount) {
         if (amount <= 0f) {

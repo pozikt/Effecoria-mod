@@ -31,6 +31,8 @@ public final class PhiFieldService {
         value *= heightFactor(position.y());
         if (level instanceof ServerLevel serverLevel) {
             value *= timeFactor(serverLevel);
+            value *= exposureFactor(serverLevel, BlockPos.containing(position));
+            value *= weatherFactor(serverLevel);
             zeroFlux = isInsideZeroFluxZone(serverLevel, BlockPos.containing(position));
         } else {
             value *= timeFactor(level);
@@ -45,10 +47,6 @@ public final class PhiFieldService {
         return new PhiSample(Math.max(0f, value), false, isSolarDay(level));
     }
 
-    /**
-     * Solar day/night from the world clock ({@link Level#getDayTime()}).
-     * Do not use {@link Level#isDay()} — in 1.21 it follows {@code skyDarken} and lags after {@code /time set}.
-     */
     public static boolean isSolarDay(Level level) {
         if (level.dimensionType().hasFixedTime()) {
             return false;
@@ -76,14 +74,36 @@ public final class PhiFieldService {
         return 1f;
     }
 
-    /** Solar Φ peak by day; weak stellar flux at night. */
     private static float timeFactor(Level level) {
         return isSolarDay(level)
                 ? BalanceConfig.PHI_DAY_MULTIPLIER.get().floatValue()
                 : BalanceConfig.PHI_NIGHT_MULTIPLIER.get().floatValue();
     }
 
-    /** Phase 2 will use lead tags; for now detect heavy stone enclosure as crude ZNΦ. */
+    /** Open sky boosts surface Φ; enclosed spaces suppress it. */
+    private static float exposureFactor(ServerLevel level, BlockPos pos) {
+        if (level.dimension() != Level.OVERWORLD) {
+            return 1f;
+        }
+        if (level.canSeeSky(pos)) {
+            return BalanceConfig.PHI_OPEN_SKY_BONUS.get().floatValue();
+        }
+        return BalanceConfig.PHI_UNDERGROUND_MULTIPLIER.get().floatValue();
+    }
+
+    private static float weatherFactor(ServerLevel level) {
+        if (level.dimension() != Level.OVERWORLD) {
+            return 1f;
+        }
+        if (level.isThundering()) {
+            return BalanceConfig.PHI_THUNDER_MULTIPLIER.get().floatValue();
+        }
+        if (level.isRaining()) {
+            return BalanceConfig.PHI_RAIN_MULTIPLIER.get().floatValue();
+        }
+        return 1f;
+    }
+
     private static boolean isInsideZeroFluxZone(ServerLevel level, BlockPos center) {
         int enclosed = 0;
         for (BlockPos offset : BlockPos.betweenClosed(center.offset(-1, -1, -1), center.offset(1, 1, 1))) {

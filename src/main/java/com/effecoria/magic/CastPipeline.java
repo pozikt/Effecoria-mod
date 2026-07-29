@@ -7,11 +7,11 @@ import com.effecoria.core.formula.PsiContext;
 import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.core.phi.CreativeGodMode;
 import com.effecoria.core.phi.PhiFieldService;
+import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.effect.SpellEffectExecutor;
-import com.effecoria.magic.CastDelivery;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -48,7 +48,7 @@ public final class CastPipeline {
             return CastResult.UNKNOWN_SPELL;
         }
 
-        PsiContext ctx = PsiHelper.toContext(data);
+        PsiContext ctx = PsiHelper.toContext(player, data);
         boolean godMode = CreativeGodMode.isActive(player);
         PhiSample phi = PhiFieldService.sample(player.level(), player.position(), player);
 
@@ -71,12 +71,14 @@ public final class CastPipeline {
             float actualCost = fullCost * costFraction;
             data.setCurrentPsi(data.currentPsi() - actualCost);
 
+            ExhaustionService.onSuccessfulCast(player, data, spell, actualCost);
+
             float entropyPower = delivery == CastDelivery.FULL ? power : actualCost;
             float newEntropy = FormulaEngine.accumulateEntropy(data.entropyB(), entropyPower, spell.sideEntropyRatio());
             data.setEntropyB(newEntropy);
 
             if (FormulaEngine.isBacklashTriggered(newEntropy)) {
-                applyBacklash(player);
+                applyBacklash(player, data);
                 data.setEntropyB(0f);
             }
         }
@@ -110,10 +112,11 @@ public final class CastPipeline {
         return tryCast(player, selected);
     }
 
-    private static void applyBacklash(ServerPlayer player) {
+    private static void applyBacklash(ServerPlayer player, PlayerPsiData data) {
         float damage = BalanceConfig.BACKLASH_DAMAGE.get().floatValue();
         player.hurt(player.level().damageSources().magic(), damage);
         player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0));
+        ExhaustionService.onBacklash(player, data);
         player.displayClientMessage(Component.translatable("message.effecoria.backlash"), true);
     }
 }

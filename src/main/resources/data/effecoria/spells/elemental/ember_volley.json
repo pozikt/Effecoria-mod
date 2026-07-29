@@ -1,0 +1,14 @@
+{
+  "id": "effecoria:ember_volley",
+  "school": "elemental",
+  "frequency_hz": 26.0,
+  "base_cost": 9,
+  "power_multiplier": 0.95,
+  "side_entropy": 0.06,
+  "min_phi": 0.12,
+  "radial_category": "combat",
+  "effects": [
+    { "type": "effecoria:fireball", "speed": 1.8 },
+    { "type": "effecoria:fireball", "speed": 1.6 }
+  ]
+}

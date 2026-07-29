@@ -1,168 +1,139 @@
 # Roadmap — Effecoria Mod
 
-Prioritizes **complete magic & essence gameplay** before worldgen, races, and technomagic.
+Prioritizes **perfecting magic & energy** first, then world layers, technology, and finally cosmology (TSE → Ω).
 
 Lore reference: [Effecoria encyclopedia](https://github.com/pozikt/Effecoria).
 
 ---
 
-## Phase 0 — Foundation ✅
+## Stage order (locked)
 
-- NeoForge MDK, `FormulaEngine`, package layout, docs
+| Stage | Theme | Goal |
+|-------|--------|------|
+| **I** | Magic & energy | Complete, polished cast loop — feel “done to play” |
+| **II** | Environment | Biomes, flora, fauna, surface Φ anomalies |
+| **III** | Caves & ores | Underground, new ores, deep Φ zones |
+| **IV** | Technology | Phi Cells → reactors, towers, rune networks |
+| **V** | TSE | Topological singularities as content & risk |
+| **VI** | Ω-space | Analog of Hell — dimension + inhabitants (after TSE) |
 
-## Phase 1 — Magic MVP ✅ (polish ongoing)
-
-| Done | Item |
-|------|------|
-| ✅ | Ψ/Φ resources, HUD, regen tick |
-| ✅ | Initiation via Resonance Focus (Elemental / Mental / Organic) |
-| ✅ | 9 spells + cast pipeline + JSON loader |
-| ✅ | Elemental rework: fireball, wind charge, water stream |
-| ✅ | Organic starter trio: vitality, fang wave, root bind |
-| ✅ | Necromancy starter trio: soul drain, wither touch, shade summon |
-| ✅ | Creative god mode (`creative_god_mode` in config) |
-| ✅ | Water stream extinguishes fire |
-
-| Next in Phase 1 | Item |
-|-----------------|------|
-| ⬜ | Spell VFX/sound polish (mental school) |
-| ⬜ | `sense_phi` world highlight (client) |
-| ⬜ | Patchouli stub entries |
+Do not start II+ until Stage I is intentionally “finished enough.”
 
 ---
 
-## Phase 2 — Magic Core (next major focus)
+## Stage I — Magic & energy (current)
 
-**Goal:** Full player magic loop — from school choice to progression — before heavy world content.
+**Goal:** Full player magic loop — school → progression → cast → entropy — before heavy world content.
 
-### 2a — Initiation & UI
+### Done
 
 | Item | Notes |
 |------|-------|
-| School selection screen | ✅ Menu on Resonance Focus use |
-| Spell book / hotbar UI | ✅ X key or focus when initiated |
-| Initiation ritual block (optional) | Essonite structure alternative to instant item |
+| Ψ/Φ resources, HUD, regen | Day/night Φ via solar clock; regen + breathing % |
+| Initiation + school select | Resonance Focus; 7 schools |
+| Cast pipeline + JSON spells | 21 starter spells (3 per school) |
+| Spatial / Corruption / Seals | Block seals (trap, fortify, glow + real light) |
+| Breathing mastery | Continuous 0–1; scroll + calm meditation |
+| Training → soul / max Ψ | Sprint/swim milestones |
+| Mastery (breathing × essence) | Cost/power slight adjust |
+| Whiff economy | 25% Ψ on miss target/block |
+| Creative god mode | Config |
+| Spell book + hold-X radial | Favorites + Movement/Combat/Utility/Seals rings |
+| Admin `/effecoria set` | Playtest knobs |
 
-### 2b — Essence & Φ harnessing
+### Still in Stage I (polish → “perfect”)
 
-| Item | Lore hook |
-|------|-----------|
-| Essonite ore → dust → focus | Already placeholder ore exists |
-| Phi Cell item | Portable Φ buffer (inventory charge) |
-| Essence infusion | Crafting tie-in for spell unlocks |
+| Area | Items |
+|------|-------|
+| **Feel** | Spell VFX/SFX; `sense_phi` world highlight; Patchouli stubs |
+| **Progression** | Essence / research unlocks beyond starter trio; entropy tutorial |
+| **Φ harness** | Essonite dust → focus craft; **Phi Cell** (portable Φ buffer) — items first, not worldgen |
+| **Breathing** | Air/hunger coupling; optional trainer/modes |
+| **Training** | Broader XP sources; diminishing returns |
+| **Seals** | More types, conflicts/stacking rules |
+| **Anti-magic** | Lead (ZNΦ), cold iron — tag-based, replaces stone-box hack |
+| **School depth** | Extra spells per school; necromancy endgame hooks (lich later if needed) |
 
-### 2c — Breathing techniques (passives)
+Optional inside I (only if it serves magic feel): initiation ritual block.
 
-Orkanum / oxygen coupling — affects **Ψ regeneration rate**, not ambient Φ.
+---
 
-| Stat | Field | Formula hook |
-|------|-------|--------------|
-| Breathing mastery | `biologyQ` + `breathingTier` | `effectiveBiologyQ()` in regen |
+## Stage II — Environment
 
-| Done | Item |
-|------|------|
-| ✅ | Calm standing unlocks tiers 1–2 (+15% Ψ regen per tier) |
-| ✅ | HUD indicator for breathing tier |
-
-Planned mechanics:
-- Unlock via research or trainer NPC
-- Tiers: normal breath → resonant breath → void breath
-- Bonus scales with air supply / hunger / meditation stance
-- HUD indicator for active breathing mode
-
-### 2d — Physical training (passives)
-
-Soul conditioning — affects **max Ψ capacity** and spell power baseline.
-
-| Stat | Field | Formula hook |
-|------|-------|--------------|
-| Training rank | `soulStrength` | `regenPsi`, `spellPower` |
-| Conditioning | `maxPsi` | Hard cap on Ψ bar |
-
-| Done | Item |
-|------|------|
-| ✅ | Sprint/swim XP → soul strength + max Ψ milestones |
-
-Planned mechanics:
-- XP from sprinting, swimming, combat, block breaking
-- Training milestones unlock higher `maxPsi`
-- Diminishing returns to avoid grind wall
-
-### 2e — Spell progression
+Surface world as Φ ecology.
 
 | Item | Notes |
 |------|-------|
-| Research / essence cost per spell | Beyond starter trio |
-| Frequency tuning minigame | Optional resonance bonus |
-| Entropy management tutorial | Backlash as skill gate |
+| Biomes / biome modifiers | Φ density, day-night character |
+| Flora | Φ-sensitive plants, consumables (mandragora analogs) |
+| Fauna | Creatures tied to schools / Φ bands |
+| Surface anomalies | Mild Φ storms, ZNΦ patches (content, not just anti-cast) |
+
+Races / Orkanum baselines fit naturally here (biologyQ hooks already exist).
 
 ---
 
-## Phase 3 — Materials & Anti-Magic
-
-Deferred from old Phase 2 — **after** magic core feels complete.
-
-| Material | Effect |
-|----------|--------|
-| Lead (ZNΦ) | Zero-Φ zones, block casting |
-| Cold iron | Ψ conversion block, dampening |
-| Void obsidian | Seal structures |
-| Essonite blocks | Φ conductors, reactor parts |
-
-Replace crude stone-enclosure ZNΦ hack with tag-based detection.
-
----
-
-## Phase 4 — Races & Orkanum
+## Stage III — Caves & ores
 
 | Item | Notes |
 |------|-------|
-| Race selection at initiation | Modifies `biologyQ`, `soulStrength` baselines |
-| Race-specific passives | Tie into breathing / training trees |
-| Flora consumables | Mandragora analogs, Φ-sensitive plants |
+| Essonite & new ores | Real worldgen veins |
+| Cave biomes / deep Φ | Low light, high entropy pockets |
+| Underground structures | Small mage ruins, sealed chambers |
+
+Materials that were “craft only” in Stage I get proper sources here.
 
 ---
 
-## Phase 5 — Necromancy & Liches
+## Stage IV — Technology
 
 | Item | Notes |
 |------|-------|
-| External Ψ relay | Never self-frequency change |
-| Phylacteries | `regenPsiLich` path |
-| Kin curses, undead armies | Phase 4 lore |
+| Phi Cell → reactor tiers | Multiblocks, failure modes |
+| Mage towers | Regional Φ, beacons |
+| Rune circuits / wiring | `technomagicPower()` path |
+| Seal-automata | Automated wards |
 
 ---
 
-## Phase 6 — Technomagic
+## Stage V — TSE
 
 | Item | Notes |
 |------|-------|
-| Phi reactors, mage towers | Multiblocks |
-| Rune circuits | `technomagicPower()` |
-| Essonite wiring | Φ distribution networks |
+| TSE sites / dungeons | Catalog + d100 generator as design input |
+| Spatial magic risk | Long blink / portals ↔ TSE chance |
+| ΦR / chronal hooks | Optional ambient effects |
+
+TSE is a **gateway narrative** toward Ω (lore: TSE as Φ sink / Ω interface).
 
 ---
 
-## Phase 7 — World
+## Stage VI — Ω-space (3+1 complement)
+
+Lore: conservation forbids annihilating the imaginary Ψ component \(ib\) in ordinary **(3+1)** spacetime; it drains into **Ω-space** (metric signature (++−−)) — the dissipative “Hell” of Effecoria.
 
 | Item | Notes |
 |------|-------|
-| Essonite worldgen | Overworld ore veins |
-| Φ anomalies | Biome modifiers |
-| Structures | TSE remnants, mage ruins |
+| Ω dimension | Custom dimension; not a reskin of the Nether |
+| Gates / leaks | Via TSE exits, reactor Ω-drain failures, high-entropy backlash |
+| Inhabitants | Forms born from materialized fear/pain/exhaust (encyclopedia) |
+| Gameplay | Entropy dumps, psych-acoustic hazards, late-game expeditions |
+
+**Explicitly last** among major content pillars — needs solid magic, world, tech, and TSE first.
 
 ---
 
-## Resource model (clarification)
+## Resource model
 
 | Resource | Type | Player progression |
 |----------|------|-------------------|
-| **Φ** | Environmental flux | Read from world; boosted by location, time, materials |
-| **Ψ** | Internal operator energy | Max cap ↑ training; regen ↑ breathing × ambient Φ |
-| **Essence** | Crafting / unlock currency | Drops, infusion, research |
+| **Φ** | Environmental flux | World + items (Phi Cell); location/time/materials |
+| **Ψ** | Internal operator energy | Cap ↑ training; regen ↑ breathing × Φ |
+| **Essence** | Unlock / craft currency | Drops, infusion, research |
+| **b / entropy** | Cast side-product | Backlash; eventually Ω drain |
 
-Breathing improves how fast Ψ refills **in a given Φ field**.  
-Training raises how much Ψ you can store and channel.
+Breathing = how fast Ψ refills **in a given Φ field**.  
+Training = how much Ψ you can store and channel.
 
 ---
 
@@ -172,4 +143,4 @@ Training raises how much Ψ you can store and channel.
 |-----|---------|---------|
 | `creative_god_mode` | `true` | Infinite Φ + free casts in creative |
 
-See `docs/BALANCE.md` for full list.
+See `docs/BALANCE.md` for the full list.

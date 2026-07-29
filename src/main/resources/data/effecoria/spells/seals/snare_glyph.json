@@ -1,0 +1,13 @@
+{
+  "id": "effecoria:snare_glyph",
+  "school": "seals",
+  "frequency_hz": 0.42,
+  "base_cost": 11,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.06,
+  "min_phi": 0.15,
+  "radial_category": "seals",
+  "effects": [
+    { "type": "effecoria:place_trap_seal", "duration_ticks": 900, "range": 8 }
+  ]
+}

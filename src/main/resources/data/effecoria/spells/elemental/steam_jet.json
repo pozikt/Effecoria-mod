@@ -1,0 +1,20 @@
+{
+  "id": "effecoria:steam_jet",
+  "school": "elemental",
+  "frequency_hz": 24.0,
+  "base_cost": 12,
+  "power_multiplier": 1.05,
+  "side_entropy": 0.07,
+  "min_phi": 0.15,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:water_stream",
+      "range": 9,
+      "damage": 6,
+      "knockback": 1.4,
+      "slow_ticks": 50,
+      "extinguish_fire": true
+    }
+  ]
+}

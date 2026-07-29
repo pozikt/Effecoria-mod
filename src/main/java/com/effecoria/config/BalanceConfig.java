@@ -130,5 +130,94 @@ public final class BalanceConfig {
             .comment("Essence absorbed per physical training milestone")
             .defineInRange("essence_per_training_milestone", 1, 0, 100);
 
+    // --- Biology (hunger / air) ---
+    public static final ModConfigSpec.DoubleValue BIOLOGY_HUNGER_MIN = BUILDER
+            .comment("biologyQ multiplier at starving (food level <= 6)")
+            .defineInRange("biology_hunger_min", 0.55, 0.1, 1.0);
+
+    public static final ModConfigSpec.DoubleValue BIOLOGY_SATURATION_BONUS = BUILDER
+            .comment("biologyQ bonus when well-fed with saturation")
+            .defineInRange("biology_saturation_bonus", 0.05, 0.0, 0.5);
+
+    public static final ModConfigSpec.DoubleValue BIOLOGY_AIR_MIN = BUILDER
+            .comment("biologyQ multiplier at very low air supply")
+            .defineInRange("biology_air_min", 0.6, 0.1, 1.0);
+
+    // --- Phi environment ---
+    public static final ModConfigSpec.DoubleValue PHI_RAIN_MULTIPLIER = BUILDER
+            .comment("Φ multiplier while it is raining (overworld surface)")
+            .defineInRange("phi_rain_multiplier", 1.08, 0.5, 2.0);
+
+    public static final ModConfigSpec.DoubleValue PHI_THUNDER_MULTIPLIER = BUILDER
+            .comment("Φ multiplier during thunderstorms")
+            .defineInRange("phi_thunder_multiplier", 1.18, 0.5, 2.5);
+
+    public static final ModConfigSpec.DoubleValue PHI_UNDERGROUND_MULTIPLIER = BUILDER
+            .comment("Φ multiplier when sky is not visible (caves)")
+            .defineInRange("phi_underground_multiplier", 0.82, 0.1, 1.5);
+
+    public static final ModConfigSpec.DoubleValue PHI_OPEN_SKY_BONUS = BUILDER
+            .comment("Extra Φ multiplier when sky is visible on surface")
+            .defineInRange("phi_open_sky_bonus", 1.05, 0.5, 2.0);
+
+    // --- Exhaustion ---
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_WARM = BUILDER
+            .comment("Exhaustion level for Tired band")
+            .defineInRange("exhaustion_warm", 25.0, 0.0, 100.0);
+
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_TIRED = BUILDER
+            .comment("Exhaustion level for Strained band")
+            .defineInRange("exhaustion_tired", 50.0, 0.0, 100.0);
+
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_STRAINED = BUILDER
+            .comment("Exhaustion level for Collapsing band")
+            .defineInRange("exhaustion_strained", 75.0, 0.0, 100.0);
+
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_GAIN_PER_COST = BUILDER
+            .comment("Exhaustion gained per Ψ spent on cast")
+            .defineInRange("exhaustion_gain_per_cost", 0.35, 0.0, 5.0);
+
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_GAIN_PER_ENTROPY = BUILDER
+            .comment("Exhaustion gained per spell side_entropy ratio")
+            .defineInRange("exhaustion_gain_per_entropy", 8.0, 0.0, 50.0);
+
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_LOW_PSI_BONUS = BUILDER
+            .comment("Extra exhaustion when casting below 20% Ψ")
+            .defineInRange("exhaustion_low_psi_bonus", 6.0, 0.0, 50.0);
+
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_BACKLASH_SPIKE = BUILDER
+            .comment("Exhaustion added on entropy backlash")
+            .defineInRange("exhaustion_backlash_spike", 25.0, 0.0, 100.0);
+
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_DECAY_PER_TICK = BUILDER
+            .comment("Exhaustion recovered every 10 server ticks")
+            .defineInRange("exhaustion_decay_per_tick", 0.8, 0.0, 10.0);
+
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_MEDITATION_DECAY_BONUS = BUILDER
+            .comment("Extra exhaustion decay while meditating with full breath")
+            .defineInRange("exhaustion_meditation_decay_bonus", 0.6, 0.0, 10.0);
+
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_REGEN_TIRED = BUILDER
+            .defineInRange("exhaustion_regen_tired", 0.85, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_REGEN_STRAINED = BUILDER
+            .defineInRange("exhaustion_regen_strained", 0.6, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_REGEN_COLLAPSING = BUILDER
+            .defineInRange("exhaustion_regen_collapsing", 0.25, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_COST_TIRED = BUILDER
+            .defineInRange("exhaustion_cost_tired", 1.1, 1.0, 3.0);
+
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_COST_STRAINED = BUILDER
+            .defineInRange("exhaustion_cost_strained", 1.25, 1.0, 3.0);
+
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_COST_COLLAPSING = BUILDER
+            .defineInRange("exhaustion_cost_collapsing", 1.5, 1.0, 3.0);
+
+    public static final ModConfigSpec.DoubleValue EXHAUSTION_COLLAPSE_CAST_DAMAGE = BUILDER
+            .comment("Magic damage taken on each cast while Collapsing")
+            .defineInRange("exhaustion_collapse_cast_damage", 2.0, 0.0, 20.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 }

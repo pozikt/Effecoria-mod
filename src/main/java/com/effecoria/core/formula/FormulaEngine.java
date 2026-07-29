@@ -1,5 +1,6 @@
 package com.effecoria.core.formula;
 
+import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.magic.SpellDefinition;
 
@@ -19,7 +20,12 @@ public final class FormulaEngine {
             return 0f;
         }
         float scale = BalanceConfig.PSI_REGEN_SCALE.get().floatValue();
-        return ctx.soulStrength() * phi.effectiveValue() * ctx.biologyQ() * deltaTicks * scale;
+        return ctx.soulStrength()
+                * phi.effectiveValue()
+                * ctx.biologyQ()
+                * deltaTicks
+                * scale
+                * ExhaustionService.regenMultiplier(ctx.exhaustion());
     }
 
     /**
@@ -55,7 +61,10 @@ public final class FormulaEngine {
     public static float spellCost(PsiContext ctx, PhiSample phi, SpellDefinition spell) {
         float phiPenalty = 1f + BalanceConfig.LOW_PHI_COST_FACTOR.get().floatValue()
                 * (1f - Math.min(1f, phi.effectiveValue()));
-        return spell.baseCost() * phiPenalty * Mastery.costMultiplier(ctx.mastery());
+        return spell.baseCost()
+                * phiPenalty
+                * Mastery.costMultiplier(ctx.mastery())
+                * ExhaustionService.costMultiplier(ctx.exhaustion());
     }
 
     /**

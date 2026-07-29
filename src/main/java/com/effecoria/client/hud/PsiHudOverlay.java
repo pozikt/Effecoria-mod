@@ -1,10 +1,12 @@
 package com.effecoria.client.hud;
 
+import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.formula.FormulaEngine;
 import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.phi.CreativeGodMode;
 import com.effecoria.core.phi.PhiFieldService;
 import com.effecoria.core.progression.BreathingService;
+import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
@@ -32,12 +34,12 @@ public final class PsiHudOverlay {
         PhiSample phi = PhiFieldService.sample(minecraft.level, minecraft.player.position(), minecraft.player);
         boolean godMode = CreativeGodMode.isActive(minecraft.player);
         int x = 10;
-        int y = minecraft.getWindow().getGuiScaledHeight() - 68;
+        int y = minecraft.getWindow().getGuiScaledHeight() - 80;
 
         float psiFill = data.maxPsi() > 0f ? data.currentPsi() / data.maxPsi() : 0f;
         drawBar(graphics, x, y, 90, 8, psiFill, 0xFF6A0DAD, 0xFF2E0845);
 
-        String regenLabel = formatPsiRegen(data, phi, godMode);
+        String regenLabel = formatPsiRegen(minecraft.player, data, phi, godMode);
         graphics.drawString(
                 minecraft.font,
                 Component.translatable("hud.effecoria.psi", (int) data.currentPsi(), (int) data.maxPsi(), regenLabel),
@@ -73,17 +75,40 @@ public final class PsiHudOverlay {
                     y + 52,
                     0x88FFCC);
         }
+
+        if (data.exhaustion() >= BalanceConfig.EXHAUSTION_WARM.get().floatValue()) {
+            float exFill = data.exhaustion() / ExhaustionService.MAX;
+            drawBar(graphics, x, y + 64, 90, 5, exFill, 0xFFAA4444, 0xFF331111);
+            graphics.drawString(
+                    minecraft.font,
+                    Component.translatable(
+                            "hud.effecoria.exhaustion",
+                            formatExhaustionBand(data.exhaustion()),
+                            (int) data.exhaustion()),
+                    x,
+                    y + 72,
+                    0xFFCC8888);
+        }
     }
 
-    /** Ψ regen per second — server applies regen every 10 ticks with Δt=10. */
-    private static String formatPsiRegen(PlayerPsiData data, PhiSample phi, boolean godMode) {
+    private static Component formatExhaustionBand(float exhaustion) {
+        return switch (ExhaustionService.band(exhaustion)) {
+            case TIRED -> Component.translatable("hud.effecoria.exhaustion.tired");
+            case STRAINED -> Component.translatable("hud.effecoria.exhaustion.strained");
+            case COLLAPSING -> Component.translatable("hud.effecoria.exhaustion.collapsing");
+            default -> Component.translatable("hud.effecoria.exhaustion.warm");
+        };
+    }
+
+    private static String formatPsiRegen(
+            net.minecraft.world.entity.player.Player player, PlayerPsiData data, PhiSample phi, boolean godMode) {
         if (godMode) {
             return "∞";
         }
         if (phi.zeroFlux()) {
             return "0";
         }
-        float perSecond = FormulaEngine.regenPsi(PsiHelper.toContext(data), phi, 10f) * 2f;
+        float perSecond = FormulaEngine.regenPsi(PsiHelper.toContext(player, data), phi, 10f) * 2f;
         return String.format("%.1f", perSecond);
     }
 

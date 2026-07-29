@@ -1,0 +1,14 @@
+{
+  "id": "effecoria:grave_leech",
+  "school": "necromancy",
+  "frequency_hz": 52.0,
+  "base_cost": 13,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.1,
+  "min_phi": 0.2,
+  "radial_category": "combat",
+  "effects": [
+    { "type": "effecoria:soul_drain", "damage": 4, "heal_ratio": 0.6, "range": 10 },
+    { "type": "effecoria:wither_touch", "damage": 2, "wither_ticks": 60, "range": 10 }
+  ]
+}

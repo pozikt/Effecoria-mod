@@ -20,11 +20,7 @@ public final class ProgressionService {
             return;
         }
 
-        boolean meditating = player.onGround()
-                && !player.isSprinting()
-                && !player.isInWater()
-                && !player.isPassenger()
-                && player.getAirSupply() >= player.getMaxAirSupply() - 10;
+        boolean meditating = BreathingService.isMeditating(player);
 
         if (!meditating || data.breathingMastery() >= BreathingService.maxMastery()) {
             return;
