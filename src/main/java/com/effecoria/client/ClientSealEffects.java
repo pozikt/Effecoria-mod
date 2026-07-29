@@ -3,6 +3,7 @@ package com.effecoria.client;
 import java.util.Map;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.seal.ChunkSealData;
 import com.effecoria.core.seal.SealInstance;
@@ -10,7 +11,6 @@ import com.effecoria.core.seal.SealTypes;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.api.distmarker.Dist;
@@ -68,12 +68,13 @@ public final class ClientSealEffects {
         double y = pos.getY() + 0.55;
         double z = pos.getZ() + 0.5;
         if (seal.typeId().equals(SealTypes.GLOW)) {
-            level.addParticle(ParticleTypes.END_ROD, x, y, z, 0, 0.01, 0);
-            level.addParticle(ParticleTypes.END_ROD, x + 0.2, y + 0.2, z, 0, 0.01, 0);
+            level.addParticle(ModParticleTypes.SEAL_GLYPH.get(), x, y, z, 0, 0.008, 0);
+            level.addParticle(ModParticleTypes.SEAL_SPARK.get(), x + 0.2, y + 0.2, z, 0, 0.012, 0);
         } else if (seal.typeId().equals(SealTypes.DAMAGE_TRAP)) {
-            level.addParticle(ParticleTypes.SCULK_SOUL, x, y + 0.5, z, 0, 0.02, 0);
+            level.addParticle(ModParticleTypes.CORRUPTION_RUNE.get(), x, y + 0.5, z, 0, 0.015, 0);
+            level.addParticle(ModParticleTypes.CORRUPTION_POISON.get(), x, y + 0.3, z, 0, -0.01, 0);
         } else if (seal.typeId().equals(SealTypes.FORTIFY)) {
-            level.addParticle(ParticleTypes.CRIT, x, y, z, 0, 0.01, 0);
+            level.addParticle(ModParticleTypes.SEAL_GLYPH.get(), x, y, z, 0, 0.01, 0);
         }
     }
 }

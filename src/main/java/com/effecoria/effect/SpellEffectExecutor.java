@@ -1,5 +1,6 @@
 package com.effecoria.effect;
 
+import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.magic.ShadeService;
 import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.core.magic.SpellEffectEntry;
@@ -199,21 +200,19 @@ public final class SpellEffectExecutor {
     }
 
     private static void spawnSealPlaceParticles(ServerLevel level, BlockPos pos, ResourceLocation typeId) {
-        var particle = typeId.equals(SealTypes.GLOW)
-                ? ParticleTypes.END_ROD
-                : typeId.equals(SealTypes.DAMAGE_TRAP)
-                        ? ParticleTypes.SCULK_SOUL
-                        : ParticleTypes.CRIT;
-        level.sendParticles(
-                particle,
-                pos.getX() + 0.5,
-                pos.getY() + 0.55,
-                pos.getZ() + 0.5,
-                20,
-                0.3,
-                0.3,
-                0.3,
-                0.02);
+        double x = pos.getX() + 0.5;
+        double y = pos.getY() + 0.55;
+        double z = pos.getZ() + 0.5;
+        if (typeId.equals(SealTypes.GLOW)) {
+            level.sendParticles(ModParticleTypes.SEAL_GLYPH.get(), x, y, z, 6, 0.15, 0.15, 0.15, 0.01);
+            level.sendParticles(ModParticleTypes.SEAL_SPARK.get(), x, y + 0.1, z, 10, 0.2, 0.25, 0.2, 0.02);
+        } else if (typeId.equals(SealTypes.DAMAGE_TRAP)) {
+            level.sendParticles(ModParticleTypes.CORRUPTION_RUNE.get(), x, y, z, 8, 0.2, 0.2, 0.2, 0.01);
+            level.sendParticles(ModParticleTypes.CORRUPTION_POISON.get(), x, y + 0.2, z, 6, 0.15, 0.1, 0.15, 0.02);
+        } else {
+            level.sendParticles(ModParticleTypes.SEAL_GLYPH.get(), x, y, z, 12, 0.25, 0.25, 0.25, 0.015);
+            level.sendParticles(ModParticleTypes.PHI_SPARK.get(), x, y + 0.15, z, 4, 0.1, 0.15, 0.1, 0.01);
+        }
     }
 
     private static void notifyNoBlock(ServerPlayer caster) {
@@ -252,6 +251,16 @@ public final class SpellEffectExecutor {
         PsiHelper.set(caster, data);
         caster.displayClientMessage(
                 net.minecraft.network.chat.Component.translatable("message.effecoria.phi_sense_active"), true);
+        caster.serverLevel().sendParticles(
+                ModParticleTypes.PHI_SPARK.get(),
+                caster.getX(),
+                caster.getEyeY(),
+                caster.getZ(),
+                24,
+                0.4,
+                0.4,
+                0.4,
+                0.02);
     }
 
     /** Blaze-style small fireball — damages entities, does not break blocks. */
@@ -540,8 +549,26 @@ public final class SpellEffectExecutor {
     }
 
     private static void spawnSpatialParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ParticleTypes.PORTAL, pos.x, pos.y, pos.z, 24, 0.35, 0.5, 0.35, 0.4);
-        level.sendParticles(ParticleTypes.REVERSE_PORTAL, pos.x, pos.y, pos.z, 10, 0.2, 0.3, 0.2, 0.05);
+        level.sendParticles(ModParticleTypes.SPATIAL_RIFT.get(), pos.x, pos.y, pos.z, 16, 0.35, 0.5, 0.35, 0.03);
+        level.sendParticles(ModParticleTypes.SPATIAL_WARP.get(), pos.x, pos.y, pos.z, 10, 0.25, 0.35, 0.25, 0.02);
+    }
+
+    private static void spawnCorruptionParticles(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.CORRUPTION_POISON.get(), pos.x, pos.y, pos.z, 8, 0.2, 0.3, 0.2, 0.02);
+        level.sendParticles(ModParticleTypes.CORRUPTION_BLOOD.get(), pos.x, pos.y + 0.2, pos.z, 6, 0.15, 0.2, 0.15, 0.04);
+        level.sendParticles(ModParticleTypes.CORRUPTION_RUNE.get(), pos.x, pos.y + 0.5, pos.z, 4, 0.1, 0.15, 0.1, 0.01);
+    }
+
+    private static void spawnCorruptionPulse(ServerLevel level, Vec3 center, double radius) {
+        int rings = Math.max(8, (int) (radius * 6));
+        for (int i = 0; i < rings; i++) {
+            double angle = (Math.PI * 2 * i) / rings;
+            double x = center.x + Math.cos(angle) * radius;
+            double z = center.z + Math.sin(angle) * radius;
+            level.sendParticles(ModParticleTypes.CORRUPTION_POISON.get(), x, center.y + 0.3, z, 2, 0.05, 0.12, 0.05, 0.02);
+            level.sendParticles(ModParticleTypes.CORRUPTION_RUNE.get(), x, center.y + 0.5, z, 1, 0.02, 0.05, 0.02, 0.0);
+        }
+        level.sendParticles(ModParticleTypes.CORRUPTION_BLOOD.get(), center.x, center.y + 0.4, center.z, 6, 0.3, 0.2, 0.3, 0.05);
     }
 
     /** Brand a target with Ψ-corruption — poison and weakness. */
@@ -605,22 +632,6 @@ public final class SpellEffectExecutor {
 
         spawnCorruptionPulse(level, caster.position().add(0, 0.2, 0), radius);
         level.playSound(null, caster.blockPosition(), SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.PLAYERS, 0.6f, 1.4f);
-    }
-
-    private static void spawnCorruptionParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ParticleTypes.SCULK_SOUL, pos.x, pos.y, pos.z, 14, 0.25, 0.4, 0.25, 0.02);
-        level.sendParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 8, 0.2, 0.25, 0.2, 0.01);
-    }
-
-    private static void spawnCorruptionPulse(ServerLevel level, Vec3 center, double radius) {
-        int rings = Math.max(8, (int) (radius * 6));
-        for (int i = 0; i < rings; i++) {
-            double angle = (Math.PI * 2 * i) / rings;
-            double x = center.x + Math.cos(angle) * radius;
-            double z = center.z + Math.sin(angle) * radius;
-            level.sendParticles(ParticleTypes.SCULK_SOUL, x, center.y + 0.3, z, 2, 0.05, 0.1, 0.05, 0.01);
-            level.sendParticles(ParticleTypes.SQUID_INK, x, center.y + 0.2, z, 1, 0.02, 0.05, 0.02, 0.0);
-        }
     }
 
     private static void notifyNoTarget(ServerPlayer caster) {
@@ -703,7 +714,7 @@ public final class SpellEffectExecutor {
         if (target != null) {
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, scaledTicks, 4));
             target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, scaledTicks, 1));
-            spawnOrganicParticles(level, target.position().add(0, 0.2, 0));
+            spawnOrganicRoots(level, target.position().add(0, 0.2, 0));
             level.playSound(null, target.blockPosition(), SoundEvents.AZALEA_PLACE, SoundSource.PLAYERS, 1f, 0.7f);
         }
 
@@ -722,43 +733,59 @@ public final class SpellEffectExecutor {
                     && random.nextFloat() < 0.35f) {
                 growable.performBonemeal(level, random, pos, state);
                 level.sendParticles(
-                        ParticleTypes.HAPPY_VILLAGER,
+                        ModParticleTypes.ORGANIC_LEAF.get(),
                         pos.getX() + 0.5,
                         pos.getY() + 0.6,
                         pos.getZ() + 0.5,
-                        4,
-                        0.2,
-                        0.2,
-                        0.2,
+                        3,
+                        0.15,
+                        0.15,
+                        0.15,
                         0.01);
             }
         }
     }
 
     private static void spawnOrganicParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.x, pos.y, pos.z, 12, 0.3, 0.4, 0.3, 0.02);
-        level.sendParticles(ParticleTypes.COMPOSTER, pos.x, pos.y, pos.z, 6, 0.2, 0.3, 0.2, 0.01);
+        level.sendParticles(ModParticleTypes.ORGANIC_LEAF.get(), pos.x, pos.y + 0.5, pos.z, 8, 0.35, 0.4, 0.35, 0.02);
+        level.sendParticles(ModParticleTypes.ORGANIC_ROOT.get(), pos.x, pos.y, pos.z, 4, 0.2, 0.05, 0.2, 0.01);
+        level.sendParticles(ModParticleTypes.ORGANIC_FOG.get(), pos.x, pos.y + 0.8, pos.z, 6, 0.25, 0.3, 0.25, 0.01);
+    }
+
+    private static void spawnOrganicRoots(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ORGANIC_ROOT.get(), pos.x, pos.y, pos.z, 10, 0.25, 0.05, 0.25, 0.015);
+        level.sendParticles(ModParticleTypes.ORGANIC_LEAF.get(), pos.x, pos.y + 0.3, pos.z, 4, 0.2, 0.2, 0.2, 0.01);
     }
 
     private static void spawnNecroParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ParticleTypes.SOUL, pos.x, pos.y, pos.z, 14, 0.3, 0.4, 0.3, 0.02);
-        level.sendParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 8, 0.15, 0.2, 0.15, 0.01);
+        level.sendParticles(ModParticleTypes.NECRO_SHADOW.get(), pos.x, pos.y, pos.z, 10, 0.3, 0.35, 0.3, 0.01);
+        level.sendParticles(ModParticleTypes.NECRO_FOG.get(), pos.x, pos.y + 0.5, pos.z, 8, 0.25, 0.4, 0.25, 0.008);
     }
 
+    /** Brief psychic fog over the target's head. */
     private static void spawnMindParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ParticleTypes.WITCH, pos.x, pos.y + 1, pos.z, 10, 0.2, 0.3, 0.2, 0.01);
+        level.sendParticles(ModParticleTypes.MENTAL_FOG.get(), pos.x, pos.y + 1.6, pos.z, 8, 0.25, 0.15, 0.25, 0.005);
+        level.sendParticles(ModParticleTypes.MENTAL_FOG.get(), pos.x, pos.y + 1.2, pos.z, 4, 0.15, 0.1, 0.15, 0.003);
     }
 
     private static void spawnFireCastParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ParticleTypes.FLAME, pos.x, pos.y, pos.z, 16, 0.1, 0.1, 0.1, 0.02);
-        level.sendParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 6, 0.05, 0.05, 0.05, 0.01);
+        level.sendParticles(ModParticleTypes.PHI_FLAME.get(), pos.x, pos.y, pos.z, 14, 0.08, 0.1, 0.08, 0.015);
+        level.sendParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 4, 0.05, 0.05, 0.05, 0.01);
     }
 
     private static void spawnWindCastParticles(ServerLevel level, Vec3 pos, Vec3 look) {
         for (int i = 1; i <= 6; i++) {
             Vec3 p = pos.add(look.scale(i * 0.35));
-            level.sendParticles(ParticleTypes.GUST, p.x, p.y, p.z, 1, 0, 0, 0, 0);
-            level.sendParticles(ParticleTypes.CLOUD, p.x, p.y, p.z, 2, 0.05, 0.05, 0.05, 0.01);
+            level.sendParticles(
+                    ModParticleTypes.PHI_GUST.get(),
+                    p.x,
+                    p.y,
+                    p.z,
+                    2,
+                    look.x * 0.08,
+                    look.y * 0.08,
+                    look.z * 0.08,
+                    0.02);
         }
     }
 
@@ -766,13 +793,33 @@ public final class SpellEffectExecutor {
         int steps = (int) (range * 4);
         for (int i = 0; i <= steps; i++) {
             Vec3 p = start.add(look.scale(i * 0.25));
-            level.sendParticles(ParticleTypes.SPLASH, p.x, p.y, p.z, 3, 0.1, 0.1, 0.1, 0.05);
-            level.sendParticles(ParticleTypes.BUBBLE, p.x, p.y, p.z, 2, 0.08, 0.08, 0.08, 0.02);
+            level.sendParticles(
+                    ModParticleTypes.WATER_DROP.get(),
+                    p.x,
+                    p.y,
+                    p.z,
+                    2,
+                    look.x * 0.05,
+                    look.y * 0.05 - 0.02,
+                    look.z * 0.05,
+                    0.02);
+            if (i % 3 == 0) {
+                level.sendParticles(
+                        ModParticleTypes.WATER_WAVE.get(),
+                        p.x,
+                        p.y,
+                        p.z,
+                        1,
+                        look.x * 0.1,
+                        0,
+                        look.z * 0.1,
+                        0.01);
+            }
         }
     }
 
     private static void spawnWaterHitParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ParticleTypes.SPLASH, pos.x, pos.y + 1, pos.z, 12, 0.3, 0.4, 0.3, 0.1);
-        level.sendParticles(ParticleTypes.FALLING_WATER, pos.x, pos.y + 1.5, pos.z, 8, 0.2, 0.2, 0.2, 0.02);
+        level.sendParticles(ModParticleTypes.WATER_SPLASH.get(), pos.x, pos.y + 0.5, pos.z, 8, 0.25, 0.15, 0.25, 0.02);
+        level.sendParticles(ModParticleTypes.WATER_DROP.get(), pos.x, pos.y + 1, pos.z, 6, 0.3, 0.3, 0.3, 0.04);
     }
 }

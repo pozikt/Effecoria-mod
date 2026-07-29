@@ -28,6 +28,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class SpellRadialScreen extends Screen {
     private SpellRadialLayout.Layout layout;
     private SpellRadialLayout.Sector hovered;
+    private static final int ICON_DRAW_SIZE = 26;
 
     public SpellRadialScreen() {
         super(Component.translatable("gui.effecoria.radial"));
@@ -115,12 +116,19 @@ public class SpellRadialScreen extends Screen {
                 float r = (sector.innerRadius() + sector.outerRadius()) * 0.5f;
                 int lx = cx + Math.round((float) Math.cos(mid) * r);
                 int ly = cy + Math.round((float) Math.sin(mid) * r);
-                Component name = Component.translatable("spell.effecoria." + sector.spellId().getPath());
-                String shortName = name.getString();
-                if (shortName.length() > 10) {
-                    shortName = shortName.substring(0, 9) + "…";
-                }
-                graphics.drawCenteredString(this.font, shortName, lx, ly - 4, 0xFFFFFF);
+                ResourceLocation icon = SpellIcons.forSpell(sector.spellId());
+                int iconX = lx - ICON_DRAW_SIZE / 2;
+                int iconY = ly - ICON_DRAW_SIZE / 2;
+                graphics.blit(
+                        icon,
+                        iconX,
+                        iconY,
+                        0,
+                        0,
+                        ICON_DRAW_SIZE,
+                        ICON_DRAW_SIZE,
+                        SpellIcons.TEXTURE_SIZE,
+                        SpellIcons.TEXTURE_SIZE);
             }
         }
 
