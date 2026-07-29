@@ -1,8 +1,10 @@
 package com.effecoria.core.formula;
 
-import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.config.BalanceConfig;
+import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.magic.SpellDefinition;
+
+import net.minecraft.util.Mth;
 
 /**
  * Single source of truth for Effecoria physics approximations.
@@ -56,15 +58,32 @@ public final class FormulaEngine {
     }
 
     /**
-     * cost = base_cost × low_Φ_penalty × mastery_cost_reduction
+     * cost = base_cost × proficiency_discount × low_Φ_penalty × exhaustion
+     * Proficiency drops from ~100% at unlock to ~33% at full breathing mastery.
      */
     public static float spellCost(PsiContext ctx, PhiSample phi, SpellDefinition spell) {
         float phiPenalty = 1f + BalanceConfig.LOW_PHI_COST_FACTOR.get().floatValue()
                 * (1f - Math.min(1f, phi.effectiveValue()));
         return spell.baseCost()
+                * proficiencyCostFactor(ctx.breathingMastery(), spell.minMastery())
                 * phiPenalty
-                * Mastery.costMultiplier(ctx.mastery())
                 * ExhaustionService.costMultiplier(ctx.exhaustion());
+    }
+
+    /**
+     * 1.0 when the spell is freshly unlocked; falls toward {@link BalanceConfig#SPELL_COST_FLOOR_RATIO}
+     * as breathing mastery grows past {@code unlockMastery}.
+     */
+    public static float proficiencyCostFactor(float breathingMastery, float unlockMastery) {
+        float anchor = Math.max(0f, unlockMastery);
+        float progress;
+        if (breathingMastery <= anchor) {
+            progress = 0f;
+        } else {
+            progress = Mth.clamp((breathingMastery - anchor) / Math.max(0.01f, 1f - anchor), 0f, 1f);
+        }
+        float floor = BalanceConfig.SPELL_COST_FLOOR_RATIO.get().floatValue();
+        return Mth.lerp(progress, 1f, floor);
     }
 
     /**

@@ -2,7 +2,7 @@
   "id": "effecoria:vitality_pulse",
   "school": "organic",
   "frequency_hz": 4.5,
-  "base_cost": 12,
+  "base_cost": 15,
   "power_multiplier": 1.0,
   "side_entropy": 0.04,
   "min_phi": 0.2,

@@ -2,7 +2,7 @@
   "id": "effecoria:root_bind",
   "school": "organic",
   "frequency_hz": 5.0,
-  "base_cost": 11,
+  "base_cost": 15,
   "power_multiplier": 0.95,
   "side_entropy": 0.05,
   "min_phi": 0.2,

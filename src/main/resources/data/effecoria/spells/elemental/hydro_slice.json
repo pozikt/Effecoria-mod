@@ -2,7 +2,7 @@
   "id": "effecoria:hydro_slice",
   "school": "elemental",
   "frequency_hz": 21.0,
-  "base_cost": 18,
+  "base_cost": 17,
   "power_multiplier": 1.25,
   "side_entropy": 0.1,
   "min_phi": 0.3,

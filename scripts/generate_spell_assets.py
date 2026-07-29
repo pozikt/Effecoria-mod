@@ -10,7 +10,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT_GUI = ROOT / "src/main/resources/assets/effecoria/textures/gui/spells"
+OUT_GUI = ROOT / "src/main/resources/assets/effecoria/textures/gui/sprites/spells"
 OUT_PARTICLE = ROOT / "src/main/resources/assets/effecoria/textures/particle"
 OUT_ENTITY = ROOT / "src/main/resources/assets/effecoria/textures/entity"
 OUT_PARTICLES_JSON = ROOT / "src/main/resources/assets/effecoria/particles"
@@ -20,13 +20,13 @@ ICON = 64
 PARTICLE = 16
 
 SCHOOLS = {
-    "mental": ((90, 210, 255), (170, 120, 255), (130, 70, 200)),
-    "elemental": ((255, 150, 50), (255, 90, 30), (190, 70, 210)),
-    "organic": ((90, 210, 100), (50, 160, 70), (120, 90, 210)),
-    "necromancy": ((70, 200, 120), (35, 90, 60), (110, 60, 170)),
-    "spatial": ((110, 190, 255), (70, 130, 255), (170, 110, 255)),
-    "corruption": ((170, 90, 190), (110, 50, 90), (90, 210, 80)),
-    "seals": ((230, 190, 90), (190, 150, 60), (160, 120, 240)),
+    "mental": ((120, 220, 255), (80, 160, 255), (40, 80, 160)),
+    "elemental": ((255, 180, 60), (255, 110, 40), (180, 60, 20)),
+    "organic": ((120, 255, 100), (60, 200, 70), (30, 120, 40)),
+    "necromancy": ((100, 255, 140), (40, 160, 80), (20, 80, 50)),
+    "spatial": ((140, 210, 255), (80, 140, 255), (50, 80, 180)),
+    "corruption": ((220, 120, 255), (140, 60, 160), (80, 30, 90)),
+    "seals": ((255, 220, 100), (220, 170, 60), (140, 100, 30)),
 }
 
 SPELL_SCHOOL = {
@@ -61,22 +61,27 @@ def draw_disc(draw: ImageDraw.ImageDraw, cx: int, cy: int, r: int, fill, outline
     draw.ellipse((cx - r, cy - r, cx + r, cy + r), fill=fill, outline=outline, width=width)
 
 
+def apply_circle_mask(img: Image.Image) -> Image.Image:
+    """Clip icon to a circle for hub constellation nodes."""
+    mask = Image.new("L", (ICON, ICON), 0)
+    md = ImageDraw.Draw(mask)
+    md.ellipse((1, 1, ICON - 2, ICON - 2), fill=255)
+    out = Image.new("RGBA", (ICON, ICON), (0, 0, 0, 0))
+    out.paste(img, (0, 0), mask)
+    return out
+
+
 def base_icon(school: str) -> Image.Image:
-    bg, mid, rim = SCHOOLS[school]
+    """High-contrast tile: dark fill, bright school rim, bold glyph on top."""
+    accent, _, rim = SCHOOLS[school]
+    bg = (14, 14, 22, 255)
     img = Image.new("RGBA", (ICON, ICON), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     cx, cy = ICON // 2, ICON // 2
-    for i in range(28, 0, -1):
-        t = i / 28
-        col = (
-            lerp(rim[0], mid[0], t),
-            lerp(rim[1], mid[1], t),
-            lerp(rim[2], mid[2], t),
-            255,
-        )
-        draw_disc(d, cx, cy, i, col)
-    draw_disc(d, cx, cy, 22, bg + (255,))
-    draw_disc(d, cx, cy, 28, None, outline=rim + (220,), width=2)
+    draw_disc(d, cx, cy, 30, accent + (255,))
+    draw_disc(d, cx, cy, 26, bg)
+    draw_disc(d, cx, cy, 26, None, outline=rim + (255,), width=3)
+    draw_disc(d, cx, cy, 22, (22, 22, 32, 255))
     return img, d, cx, cy
 
 
@@ -317,11 +322,10 @@ DRAWERS = {
 
 def make_icon(spell: str) -> Image.Image:
     school = SPELL_SCHOOL[spell]
-    _, mid, _ = SCHOOLS[school]
-    sym = tuple(min(255, c + 40) for c in mid) + (255,)
+    sym = (255, 255, 255, 255)
     img, d, cx, cy = base_icon(school)
     DRAWERS[spell](d, cx, cy, sym)
-    return img
+    return apply_circle_mask(img)
 
 
 def make_particle(name: str, inner, outer) -> Image.Image:

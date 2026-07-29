@@ -2,7 +2,7 @@
   "id": "effecoria:steam_jet",
   "school": "elemental",
   "frequency_hz": 24.0,
-  "base_cost": 12,
+  "base_cost": 15,
   "power_multiplier": 1.05,
   "side_entropy": 0.07,
   "min_phi": 0.15,

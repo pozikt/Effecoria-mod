@@ -2,13 +2,21 @@
   "id": "effecoria:mind_lance",
   "school": "mental",
   "frequency_hz": 11.0,
-  "base_cost": 12,
+  "base_cost": 15,
   "power_multiplier": 1.0,
   "side_entropy": 0.08,
   "min_phi": 0.15,
   "radial_category": "combat",
   "effects": [
-    { "type": "effecoria:mind_sting", "damage": 3, "slow_duration_ticks": 40 },
-    { "type": "effecoria:telekinesis", "force": 2.0, "range": 10 }
+    {
+      "type": "effecoria:mind_sting",
+      "damage": 3,
+      "slow_duration_ticks": 40
+    },
+    {
+      "type": "effecoria:telekinesis",
+      "force": 2.0,
+      "range": 10
+    }
   ]
 }

@@ -8,6 +8,11 @@
   "min_phi": 0.22,
   "radial_category": "combat",
   "effects": [
-    { "type": "effecoria:blight_pulse", "radius": 6.5, "damage": 3.5, "poison_ticks": 80 }
+    {
+      "type": "effecoria:blight_pulse",
+      "radius": 6.5,
+      "damage": 3.5,
+      "poison_ticks": 80
+    }
   ]
 }

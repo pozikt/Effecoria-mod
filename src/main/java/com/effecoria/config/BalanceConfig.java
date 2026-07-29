@@ -50,6 +50,10 @@ public final class BalanceConfig {
             .comment("Hearts of damage when entropy backlash triggers")
             .defineInRange("backlash_damage", 4.0, 0.0, 20.0);
 
+    public static final ModConfigSpec.DoubleValue SPELL_COST_FLOOR_RATIO = BUILDER
+            .comment("Minimum spell cost as fraction of base_cost once breathing mastery is fully past unlock")
+            .defineInRange("spell_cost_floor_ratio", 0.33, 0.1, 1.0);
+
     public static final ModConfigSpec.BooleanValue CREATIVE_GOD_MODE = BUILDER
             .comment("In creative mode: free casts, full Ψ, no backlash (for testing)")
             .define("creative_god_mode", true);

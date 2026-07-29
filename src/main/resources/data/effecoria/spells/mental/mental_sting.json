@@ -2,7 +2,7 @@
   "id": "effecoria:mental_sting",
   "school": "mental",
   "frequency_hz": 12.0,
-  "base_cost": 8,
+  "base_cost": 15,
   "power_multiplier": 0.9,
   "side_entropy": 0.06,
   "min_phi": 0.15,

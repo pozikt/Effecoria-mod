@@ -9,7 +9,8 @@ public final class SpellIcons {
 
     private SpellIcons() {}
 
+    /** Sprite id under {@code textures/gui/sprites/spells/}. */
     public static ResourceLocation forSpell(ResourceLocation spellId) {
-        return EffecoriaMod.id("gui/spells/" + spellId.getPath());
+        return EffecoriaMod.id("spells/" + spellId.getPath());
     }
 }

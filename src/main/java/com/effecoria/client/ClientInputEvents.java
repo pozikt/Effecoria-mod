@@ -1,8 +1,7 @@
 package com.effecoria.client;
 
 import com.effecoria.EffecoriaMod;
-import com.effecoria.client.gui.SpellBookScreen;
-import com.effecoria.client.gui.SpellRadialScreen;
+import com.effecoria.client.gui.SpellHubScreen;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.network.ModNetworking;
@@ -37,9 +36,9 @@ public final class ClientInputEvents {
         // which would immediately close the radial. Poll the raw bound key instead.
         boolean down = isSpellBookKeyPhysicallyDown(minecraft);
 
-        if (minecraft.screen instanceof SpellRadialScreen radial) {
+        if (minecraft.screen instanceof SpellHubScreen hub) {
             if (!down) {
-                radial.completeSelection();
+                hub.completeSelection();
                 resetHoldState();
             } else {
                 spellBookKeyWasDown = true;
@@ -70,15 +69,11 @@ public final class ClientInputEvents {
 
         if (down && data.initiated() && !radialOpenedThisHold) {
             if (System.currentTimeMillis() - spellBookHoldStartMs >= HOLD_MS) {
-                minecraft.setScreen(new SpellRadialScreen());
+                minecraft.setScreen(new SpellHubScreen());
                 radialOpenedThisHold = true;
                 spellBookKeyWasDown = true;
                 return;
             }
-        }
-
-        if (!down && spellBookKeyWasDown && data.initiated() && !radialOpenedThisHold) {
-            minecraft.setScreen(new SpellBookScreen());
         }
 
         if (!down) {

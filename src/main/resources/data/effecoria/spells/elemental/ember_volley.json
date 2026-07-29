@@ -2,7 +2,7 @@
   "id": "effecoria:ember_volley",
   "school": "elemental",
   "frequency_hz": 26.0,
-  "base_cost": 8,
+  "base_cost": 15,
   "power_multiplier": 0.9,
   "side_entropy": 0.05,
   "min_phi": 0.12,

@@ -2,7 +2,7 @@
   "id": "effecoria:binding_seal",
   "school": "corruption",
   "frequency_hz": 0.4,
-  "base_cost": 13,
+  "base_cost": 15,
   "power_multiplier": 0.95,
   "side_entropy": 0.08,
   "min_phi": 0.2,

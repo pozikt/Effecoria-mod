@@ -1,7 +1,7 @@
 package com.effecoria.client;
 
 import com.effecoria.client.gui.SchoolSelectScreen;
-import com.effecoria.client.gui.SpellBookScreen;
+import com.effecoria.client.gui.SpellHubScreen;
 import com.effecoria.core.psi.PsiHelper;
 
 import net.minecraft.client.Minecraft;
@@ -17,7 +17,7 @@ public final class ClientGuiHooks {
         if (!PsiHelper.get(player).initiated()) {
             Minecraft.getInstance().setScreen(new SchoolSelectScreen());
         } else {
-            Minecraft.getInstance().setScreen(new SpellBookScreen());
+            Minecraft.getInstance().setScreen(new SpellHubScreen());
         }
     }
 }

@@ -2,13 +2,24 @@
   "id": "effecoria:blight_brand",
   "school": "corruption",
   "frequency_hz": 0.55,
-  "base_cost": 13,
+  "base_cost": 15,
   "power_multiplier": 1.0,
   "side_entropy": 0.1,
   "min_phi": 0.18,
   "radial_category": "combat",
   "effects": [
-    { "type": "effecoria:corrupt_mark", "damage": 3, "poison_ticks": 80, "weakness_ticks": 60, "range": 10 },
-    { "type": "effecoria:binding_seal", "root_ticks": 50, "glow_ticks": 80, "range": 10 }
+    {
+      "type": "effecoria:corrupt_mark",
+      "damage": 3,
+      "poison_ticks": 80,
+      "weakness_ticks": 60,
+      "range": 10
+    },
+    {
+      "type": "effecoria:binding_seal",
+      "root_ticks": 50,
+      "glow_ticks": 80,
+      "range": 10
+    }
   ]
 }
