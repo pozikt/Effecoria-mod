@@ -10,10 +10,12 @@ import com.effecoria.network.ModNetworking;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -73,6 +75,10 @@ public final class SteamCloudService {
             }
         }
 
+        if (now % 5 == 0) {
+            clearObscuredTargets(level);
+        }
+
         if (changed) {
             syncToTracking(level);
         }
@@ -98,6 +104,96 @@ public final class SteamCloudService {
 
     public static void syncToPlayer(ServerPlayer player, ServerLevel level) {
         PacketDistributor.sendToPlayer(player, new ModNetworking.SteamCloudsPayload(snapshotsFor(level)));
+    }
+
+    /** True if this mob cannot see the target because steam fog conceals or blocks the view. */
+    public static boolean obscuresVision(LivingEntity viewer, LivingEntity target) {
+        if (viewer == null || target == null || viewer.level().isClientSide()) {
+            return false;
+        }
+        if (!(viewer.level() instanceof ServerLevel level)) {
+            return false;
+        }
+        if (!hasClouds(level)) {
+            return false;
+        }
+        Vec3 eyeTarget = target.getEyePosition();
+        if (isInsideCloud(level, eyeTarget) || isInsideCloud(level, target.position().add(0, target.getBbHeight() * 0.5, 0))) {
+            return true;
+        }
+        return blocksLineOfSight(level, viewer.getEyePosition(), eyeTarget);
+    }
+
+    public static boolean hasClouds(ServerLevel level) {
+        long now = level.getGameTime();
+        for (SteamCloud cloud : CLOUDS) {
+            if (cloud.level() == level && now < cloud.expireAt()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isInsideCloud(ServerLevel level, Vec3 pos) {
+        long now = level.getGameTime();
+        for (SteamCloud cloud : CLOUDS) {
+            if (cloud.level() != level || now >= cloud.expireAt()) {
+                continue;
+            }
+            if (cloud.contains(pos)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Steam acts as a visual wall: any active cloud intersecting the eye-line blocks sight. */
+    public static boolean blocksLineOfSight(ServerLevel level, Vec3 from, Vec3 to) {
+        long now = level.getGameTime();
+        for (SteamCloud cloud : CLOUDS) {
+            if (cloud.level() != level || now >= cloud.expireAt()) {
+                continue;
+            }
+            if (segmentIntersectsSphere(from, to, cloud.center(), cloud.radius())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean segmentIntersectsSphere(Vec3 a, Vec3 b, Vec3 center, float radius) {
+        double r2 = (double) radius * radius;
+        if (a.distanceToSqr(center) <= r2 || b.distanceToSqr(center) <= r2) {
+            return true;
+        }
+        Vec3 ab = b.subtract(a);
+        double abLenSq = ab.lengthSqr();
+        if (abLenSq < 1.0E-8) {
+            return false;
+        }
+        double t = Mth.clamp(center.subtract(a).dot(ab) / abLenSq, 0.0, 1.0);
+        Vec3 closest = a.add(ab.scale(t));
+        return closest.distanceToSqr(center) <= r2;
+    }
+
+    /** Drop mob aggression when their current target is hidden by steam. */
+    public static void clearObscuredTargets(ServerLevel level) {
+        if (!hasClouds(level)) {
+            return;
+        }
+        double pad = 24.0;
+        for (SteamCloud cloud : CLOUDS) {
+            if (cloud.level() != level || level.getGameTime() >= cloud.expireAt()) {
+                continue;
+            }
+            AABB search = cloud.bounds().inflate(pad);
+            for (Mob mob : level.getEntitiesOfClass(Mob.class, search, LivingEntity::isAlive)) {
+                LivingEntity target = mob.getTarget();
+                if (target != null && obscuresVision(mob, target)) {
+                    mob.setTarget(null);
+                }
+            }
+        }
     }
 
     private static void applyZoneEffects(ServerLevel level, SteamCloud cloud, long now) {
