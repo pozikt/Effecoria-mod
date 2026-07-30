@@ -83,7 +83,17 @@ public final class SpellEffectExecutor {
             "death_coil",
             "symbiotic_graft",
             "genetic_lock",
-            "biological_cleaving");
+            "biological_cleaving",
+            "necrotic_bolt",
+            "grave_bind",
+            "curse_of_frailty",
+            "haunting_visage",
+            "corpse_burst",
+            "raise_zombie",
+            "bone_volley",
+            "soul_anchor",
+            "soul_reaper",
+            "army_of_dead");
 
     private static final Set<String> BLOCK_SEAL_EFFECTS = Set.of(
             "place_trap_seal",
@@ -301,6 +311,20 @@ public final class SpellEffectExecutor {
             case "death_coil" -> NecromancyEffects.deathCoil(caster, effect, power, target);
             case "soul_cataclysm" -> NecromancyEffects.soulCataclysm(caster, effect, power);
             case "death_apotheosis" -> NecromancyEffects.deathApotheosis(caster, effect, power);
+            case "necrotic_bolt" -> NecromancyEffects.necroticBolt(caster, effect, power, target);
+            case "grave_bind" -> NecromancyEffects.graveBind(caster, effect, power, target);
+            case "curse_of_frailty" -> NecromancyEffects.curseOfFrailty(caster, effect, power, target);
+            case "haunting_visage" -> NecromancyEffects.hauntingVisage(caster, effect, power, target);
+            case "corpse_burst" -> NecromancyEffects.corpseBurst(caster, effect, power, target);
+            case "raise_zombie" -> NecromancyEffects.raiseZombie(caster, effect, power, target);
+            case "bone_volley" -> NecromancyEffects.boneVolley(caster, effect, power, target);
+            case "necrotic_aura" -> NecromancyEffects.necroticAura(caster, effect, power);
+            case "soul_anchor" -> NecromancyEffects.soulAnchor(caster, effect, power, target);
+            case "army_of_dead" -> NecromancyEffects.armyOfDead(caster, effect, power, target);
+            case "death_gate" -> NecromancyEffects.deathGate(caster, effect, power);
+            case "soul_reaper" -> NecromancyEffects.soulReaper(caster, effect, power, target);
+            case "phylactery_surge" -> NecromancyEffects.phylacterySurge(caster, effect, power);
+            case "lich_ascension" -> NecromancyEffects.lichAscension(caster, effect, power);
             case "blink" -> blink(caster, effect, power);
             case "rift_yank" -> riftYank(caster, effect, power, target);
             case "phase_veil" -> phaseVeil(caster, effect, power);

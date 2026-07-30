@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:necrotic_bolt",
+  "school": "necromancy",
+  "frequency_hz": 50.0,
+  "base_cost": 6,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.05,
+  "min_phi": 0.14,
+  "min_mastery": 0.12,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:necrotic_bolt",
+      "damage_dice": "1d8",
+      "wither_ticks": 40
+    }
+  ]
+}

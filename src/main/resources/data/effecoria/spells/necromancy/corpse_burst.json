@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:corpse_burst",
+  "school": "necromancy",
+  "frequency_hz": 68.0,
+  "base_cost": 14,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.08,
+  "min_phi": 0.3,
+  "min_mastery": 0.35,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:corpse_burst",
+      "damage_dice": "2d8",
+      "radius": 4
+    }
+  ]
+}

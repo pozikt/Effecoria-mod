@@ -1,0 +1,17 @@
+{
+  "id": "effecoria:grave_bind",
+  "school": "necromancy",
+  "frequency_hz": 54.0,
+  "base_cost": 8,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.06,
+  "min_phi": 0.18,
+  "min_mastery": 0.18,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:grave_bind",
+      "root_ticks": 120
+    }
+  ]
+}

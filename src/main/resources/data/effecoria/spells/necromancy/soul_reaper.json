@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:soul_reaper",
+  "school": "necromancy",
+  "frequency_hz": 90.0,
+  "base_cost": 28,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.11,
+  "min_phi": 0.5,
+  "min_mastery": 0.68,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:soul_reaper",
+      "damage_dice": "3d10",
+      "execute_threshold": 0.35,
+      "heal_ratio": 0.5
+    }
+  ]
+}

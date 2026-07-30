@@ -14,7 +14,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.monster.Skeleton;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -178,24 +180,9 @@ public final class NecromancyEffects {
         if (target == null) {
             return;
         }
-        ServerLevel level = caster.serverLevel();
         int lifetime = effect.params().has("lifetime_ticks") ? effect.params().get("lifetime_ticks").getAsInt() : 300;
         lifetime = Math.round(lifetime * (0.85f + power / 150f));
-        Vec3 look = caster.getLookAngle().normalize();
-        double x = caster.getX() + look.x * 2;
-        double z = caster.getZ() + look.z * 2;
-        double y = caster.getY();
-        Skeleton skeleton = EntityType.SKELETON.create(level);
-        if (skeleton == null) {
-            return;
-        }
-        skeleton.moveTo(x, y, z, caster.getYRot(), 0f);
-        skeleton.setPersistenceRequired();
-        level.addFreshEntity(skeleton);
-        skeleton.setTarget(target);
-        NecroSummonService.register(skeleton, caster, target, level.getGameTime() + lifetime);
-        spawnNecroParticles(level, new Vec3(x, y + 1, z));
-        level.playSound(null, caster.blockPosition(), SoundEvents.SKELETON_AMBIENT, SoundSource.PLAYERS, 0.7f, 0.8f);
+        spawnSkeletonThrall(caster, target, lifetime, 0);
     }
 
     public static void shadeBrood(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -281,6 +268,276 @@ public final class NecromancyEffects {
         caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
         spawnNecroParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
         caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.35f, 1.4f);
+    }
+
+    public static void necroticBolt(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        float damage = DiceDamage.fromParams(effect.params(), power, 5f);
+        int witherTicks = effect.params().has("wither_ticks") ? effect.params().get("wither_ticks").getAsInt() : 40;
+        target.hurt(level.damageSources().wither(), damage);
+        target.addEffect(new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
+        target.hurtMarked = true;
+        finishHit(level, target);
+    }
+
+    public static void graveBind(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        int rootTicks = effect.params().has("root_ticks") ? effect.params().get("root_ticks").getAsInt() : 120;
+        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, rootTicks, 5));
+        target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, rootTicks, 2));
+        finishHit(caster.serverLevel(), target);
+    }
+
+    public static void curseOfFrailty(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 140;
+        int weakAmp = effect.params().has("weakness_amplifier") ? effect.params().get("weakness_amplifier").getAsInt() : 1;
+        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, weakAmp));
+        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 0));
+        finishHit(caster.serverLevel(), target);
+    }
+
+    public static void hauntingVisage(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
+        target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, duration / 2, 0));
+        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, duration, 0));
+        target.addEffect(new MobEffectInstance(MobEffects.DARKNESS, duration / 2, 0));
+        finishHit(caster.serverLevel(), target);
+    }
+
+    public static void corpseBurst(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 4f;
+        float damage = DiceDamage.fromParams(effect.params(), power, 6f);
+        Vec3 center = target.position();
+        AABB box = new AABB(center, center).inflate(radius);
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (entity == caster) {
+                continue;
+            }
+            if (entity.position().distanceToSqr(center) > radius * radius) {
+                continue;
+            }
+            entity.hurt(level.damageSources().wither(), damage);
+            entity.hurtMarked = true;
+            spawnNecroParticles(level, entity.position().add(0, 1, 0));
+        }
+        level.playSound(null, target.blockPosition(), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.5f, 0.7f);
+    }
+
+    public static void raiseZombie(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        int lifetime = effect.params().has("lifetime_ticks") ? effect.params().get("lifetime_ticks").getAsInt() : 320;
+        lifetime = Math.round(lifetime * (0.85f + power / 150f));
+        spawnZombieThrall(caster, target, lifetime, 0);
+    }
+
+    public static void boneVolley(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        int hits = effect.params().has("hits") ? effect.params().get("hits").getAsInt() : 3;
+        float perHit = DiceDamage.fromParams(effect.params(), power, 4f) / Math.max(1, hits);
+        for (int i = 0; i < hits; i++) {
+            target.hurt(level.damageSources().wither(), perHit);
+        }
+        target.hurtMarked = true;
+        finishHit(level, target);
+    }
+
+    public static void necroticAura(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 160;
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 4f;
+        float pulse = DiceDamage.fromParams(effect.params(), power, 3f);
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
+        AABB box = caster.getBoundingBox().inflate(radius);
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (entity == caster) {
+                continue;
+            }
+            if (entity.distanceToSqr(caster) > radius * radius) {
+                continue;
+            }
+            entity.hurt(level.damageSources().wither(), pulse);
+            entity.addEffect(new MobEffectInstance(MobEffects.WITHER, 40, 0));
+            entity.hurtMarked = true;
+            spawnNecroParticles(level, entity.position().add(0, 1, 0));
+        }
+        spawnNecroParticles(level, caster.position().add(0, 1, 0));
+    }
+
+    public static void soulAnchor(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 80;
+        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 6));
+        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, 1));
+        target.setDeltaMovement(0, target.getDeltaMovement().y, 0);
+        target.hurtMarked = true;
+        finishHit(caster.serverLevel(), target);
+    }
+
+    public static void armyOfDead(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        int count = effect.params().has("count") ? effect.params().get("count").getAsInt() : 3;
+        int lifetime = effect.params().has("lifetime_ticks") ? effect.params().get("lifetime_ticks").getAsInt() : 260;
+        lifetime = Math.round(lifetime * (0.85f + power / 150f));
+        count = Math.min(4, Math.max(2, count));
+        for (int i = 0; i < count; i++) {
+            spawnSkeletonThrall(caster, target, lifetime, i);
+        }
+        caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.SKELETON_AMBIENT, SoundSource.PLAYERS, 0.9f, 0.6f);
+    }
+
+    public static void deathGate(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 8;
+        double minRange = effect.params().has("min_range") ? effect.params().get("min_range").getAsDouble() : 2;
+        range = Math.min(18, range * (0.85 + power / 120f));
+        float trailDamage = DiceDamage.fromParams(effect.params(), power, 4f);
+        float trailRadius = effect.params().has("trail_radius") ? effect.params().get("trail_radius").getAsFloat() : 2.5f;
+
+        Vec3 origin = caster.position();
+        Vec3 look = caster.getLookAngle().normalize();
+        Vec3 best = null;
+        for (double dist = range; dist >= minRange; dist -= 0.5) {
+            Vec3 candidate = origin.add(look.scale(dist));
+            BlockPos feet = BlockPos.containing(candidate.x, candidate.y, candidate.z);
+            BlockPos head = feet.above();
+            if (!level.getBlockState(feet).getCollisionShape(level, feet).isEmpty()) {
+                continue;
+            }
+            if (!level.getBlockState(head).getCollisionShape(level, head).isEmpty()) {
+                continue;
+            }
+            best = new Vec3(candidate.x, feet.getY(), candidate.z);
+            break;
+        }
+        if (best == null) {
+            return;
+        }
+        hurtInRadius(level, origin, trailRadius, trailDamage, caster);
+        spawnNecroParticles(level, origin.add(0, 1, 0));
+        caster.teleportTo(best.x, best.y, best.z);
+        caster.fallDistance = 0f;
+        spawnNecroParticles(level, best.add(0, 1, 0));
+        level.playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7f, 0.6f);
+    }
+
+    public static void soulReaper(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        float damage = DiceDamage.fromParams(effect.params(), power, 9f);
+        float threshold = effect.params().has("execute_threshold") ? effect.params().get("execute_threshold").getAsFloat() : 0.35f;
+        float healRatio = effect.params().has("heal_ratio") ? effect.params().get("heal_ratio").getAsFloat() : 0.5f;
+        if (target.getHealth() / target.getMaxHealth() <= threshold) {
+            damage *= 1.75f;
+        }
+        target.hurt(level.damageSources().wither(), damage);
+        caster.heal(damage * healRatio);
+        target.addEffect(new MobEffectInstance(MobEffects.WITHER, 100, 1));
+        target.hurtMarked = true;
+        finishHit(level, target);
+    }
+
+    public static void phylacterySurge(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        float heal = DiceDamage.healFromParams(effect.params(), power, 8f);
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 5f;
+        float damage = DiceDamage.fromParams(effect.params(), power, 5f);
+        caster.heal(heal);
+        hurtInRadius(level, caster.position(), radius, damage, caster);
+        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 80, 1, false, true, true));
+        spawnNecroParticles(level, caster.position().add(0, 1, 0));
+        level.playSound(null, caster.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.6f, 0.7f);
+    }
+
+    public static void lichAscension(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 240;
+        int aftermath = effect.params().has("aftermath_ticks") ? effect.params().get("aftermath_ticks").getAsInt() : 160;
+        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, 3, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 2, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 2, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 2, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, aftermath, 1, false, false, true));
+        spawnNecroParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.45f, 1.1f);
+    }
+
+    private static void hurtInRadius(ServerLevel level, Vec3 center, float radius, float damage, ServerPlayer skip) {
+        AABB box = new AABB(center, center).inflate(radius);
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (entity == skip) {
+                continue;
+            }
+            if (entity.position().distanceToSqr(center) > radius * radius) {
+                continue;
+            }
+            entity.hurt(level.damageSources().wither(), damage);
+            entity.hurtMarked = true;
+            spawnNecroParticles(level, entity.position().add(0, 1, 0));
+        }
+    }
+
+    private static void spawnSkeletonThrall(ServerPlayer caster, LivingEntity target, int lifetime, int index) {
+        ServerLevel level = caster.serverLevel();
+        Vec3 look = caster.getLookAngle().normalize();
+        double angle = index * 1.2;
+        double x = caster.getX() + look.x * 2 + Math.cos(angle);
+        double z = caster.getZ() + look.z * 2 + Math.sin(angle);
+        double y = caster.getY();
+        Skeleton skeleton = EntityType.SKELETON.create(level);
+        if (skeleton == null) {
+            return;
+        }
+        skeleton.moveTo(x, y, z, caster.getYRot(), 0f);
+        skeleton.setPersistenceRequired();
+        level.addFreshEntity(skeleton);
+        skeleton.setTarget(target);
+        NecroSummonService.register(skeleton, caster, target, level.getGameTime() + lifetime);
+        spawnNecroParticles(level, new Vec3(x, y + 1, z));
+    }
+
+    private static void spawnZombieThrall(ServerPlayer caster, LivingEntity target, int lifetime, int index) {
+        ServerLevel level = caster.serverLevel();
+        Vec3 look = caster.getLookAngle().normalize();
+        double x = caster.getX() + look.x * (2 + index * 0.5);
+        double z = caster.getZ() + look.z * (2 + index * 0.5);
+        double y = caster.getY();
+        Zombie zombie = EntityType.ZOMBIE.create(level);
+        if (zombie == null) {
+            return;
+        }
+        zombie.moveTo(x, y, z, caster.getYRot(), 0f);
+        zombie.setPersistenceRequired();
+        level.addFreshEntity(zombie);
+        zombie.setTarget(target);
+        NecroSummonService.register(zombie, caster, target, level.getGameTime() + lifetime);
+        spawnNecroParticles(level, new Vec3(x, y + 1, z));
+        level.playSound(null, caster.blockPosition(), SoundEvents.ZOMBIE_AMBIENT, SoundSource.PLAYERS, 0.6f, 0.9f);
     }
 
     private static void applyCoilHit(ServerLevel level, LivingEntity entity, float damage, int witherTicks) {

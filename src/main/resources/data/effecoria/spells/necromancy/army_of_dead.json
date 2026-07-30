@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:army_of_dead",
+  "school": "necromancy",
+  "frequency_hz": 78.0,
+  "base_cost": 20,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.09,
+  "min_phi": 0.38,
+  "min_mastery": 0.5,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:army_of_dead",
+      "count": 3,
+      "lifetime_ticks": 260
+    }
+  ]
+}
