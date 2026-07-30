@@ -9,6 +9,7 @@ import com.effecoria.core.phi.CreativeGodMode;
 import com.effecoria.core.phi.PhiFieldService;
 import com.effecoria.core.progression.EntropyService;
 import com.effecoria.core.progression.ExhaustionService;
+import com.effecoria.core.progression.ProgressionService;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
@@ -73,6 +74,7 @@ public final class CastPipeline {
         CastPresentation.playResolve(player, spell, power, delivery);
 
         data.recordSpellCast(spellId, player.level().getGameTime());
+        ProgressionService.onCastResolved(player, data, delivery);
 
         if (!godMode) {
             float costFraction = delivery == CastDelivery.WHIFF_NO_TARGET || delivery == CastDelivery.WHIFF_NO_BLOCK

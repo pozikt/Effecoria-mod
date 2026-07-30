@@ -56,6 +56,7 @@ public final class ExhaustionService {
     public static void clearOnDeath(PlayerPsiData data) {
         data.setExhaustion(0f);
         data.setEntropyB(0f);
+        data.setCastSuccessStreak(0);
         data.setSteamFlightActive(false);
         data.setSteamFlightDrainPerTick(0f);
     }

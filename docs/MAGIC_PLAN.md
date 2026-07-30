@@ -38,7 +38,7 @@ Goal: mastery and essence matter; radial isn’t overcrowded at start.
 
 1. **Essence & research unlocks** — spells beyond starter band require essence + optional `unlock_essence_cost` in JSON (see `SpellUnlockService`, config `spell_starter_count`). ✅ *baseline shipped*
 2. **Entropy tutorial** — first backlash event, HUD hint, decay over time. ✅ *`EntropyService` + HUD bar*
-3. **Training XP** — broaden sources (meditation block optional, spell success streaks).
+3. **Training XP** — meditation, spell success streaks, breathing drill (+ sprint/swim). ✅ *`ProgressionService`*
 4. **Radial UX** — show next locked spells as ghost nodes + unlock hint on hover. ✅ *`SpellHubLayout` / `SpellUnlockService.hintFor`* (favorites optional later)
 
 **Exit:** progression list is a *goal tree*, not an instant full wheel.
@@ -135,7 +135,8 @@ If choosing a single slice for the next implementation session:
 7. Test helper: `/effecoria max [school]` (op) — max stats + unlock all school spells — ✅ done.
 8. Phase **B2** entropy tutorial — ✅ done.
 9. Phase **A1/A2** VFX/SFX polish — ✅ done.
-10. Next: Phase **A5** balance sweep, or **B3** training XP sources.
+10. Phase **B3** training XP sources — ✅ done.
+11. Next: Phase **A5** balance sweep (tiers 0–3), or Phase **C** Φ harness items.
 
 ---
 

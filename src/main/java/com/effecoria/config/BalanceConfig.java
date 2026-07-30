@@ -130,6 +130,26 @@ public final class BalanceConfig {
             .comment("Training XP gained per progression tick while swimming")
             .defineInRange("training_xp_swim", 0.05, 0.0, 1000.0);
 
+    public static final ModConfigSpec.DoubleValue TRAINING_XP_MEDITATE = BUILDER
+            .comment("Training XP per progression tick while meditating (standing calm, full breath)")
+            .defineInRange("training_xp_meditate", 0.14, 0.0, 1000.0);
+
+    public static final ModConfigSpec.DoubleValue TRAINING_XP_CAST = BUILDER
+            .comment("Training XP for a full successful spell cast")
+            .defineInRange("training_xp_cast", 1.2, 0.0, 1000.0);
+
+    public static final ModConfigSpec.DoubleValue TRAINING_XP_CAST_STREAK = BUILDER
+            .comment("Bonus training XP per consecutive full cast (after the first)")
+            .defineInRange("training_xp_cast_streak", 0.35, 0.0, 1000.0);
+
+    public static final ModConfigSpec.IntValue TRAINING_XP_CAST_STREAK_CAP = BUILDER
+            .comment("Max cast streak steps that grant bonus XP")
+            .defineInRange("training_xp_cast_streak_cap", 8, 1, 50);
+
+    public static final ModConfigSpec.DoubleValue TRAINING_XP_BREATH_TRAIN = BUILDER
+            .comment("Training XP granted on a successful breathing-train hit")
+            .defineInRange("training_xp_breath_train", 3.5, 0.0, 1000.0);
+
     public static final ModConfigSpec.DoubleValue TRAINING_XP_THRESHOLD = BUILDER
             .comment("Training XP required for one soul/psi milestone")
             .defineInRange("training_xp_threshold", 100.0, 1.0, 10000.0);

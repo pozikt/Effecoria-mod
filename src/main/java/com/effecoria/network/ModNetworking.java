@@ -217,6 +217,7 @@ public final class ModNetworking {
                 }
                 float before = data.breathingMastery();
                 data.recordSuccessfulBreathTrain();
+                com.effecoria.core.progression.ProgressionService.onBreathTrainHit(player, data);
                 PsiHelper.set(player, data);
                 player.syncData(ModAttachments.PSI.get());
                 float bonusPct = data.breathTrainRegenBonus() * 100f;
