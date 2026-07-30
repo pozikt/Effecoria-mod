@@ -525,20 +525,23 @@ public final class ElementalEffects {
                 0.08);
     }
 
-    /** Ice sheet — slick packed ice on the ground (D&D level 3). */
+    /** Ice sheet — slick packed ice spreads outward from the aim point (D&D level 3). */
     public static void iceSheet(ServerPlayer caster, SpellEffectEntry effect, float power) {
         ServerLevel level = caster.serverLevel();
         JsonObject params = effect.params();
         int half = params.has("half_size") ? params.get("half_size").getAsInt() : 3;
         int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 160;
         duration = Math.round(duration * (0.85f + power / 120f));
+        int riseDelay = params.has("rise_delay_ticks") ? params.get("rise_delay_ticks").getAsInt() : 1;
+
         BlockPos center = caster.blockPosition();
         HitResult hit = caster.pick(8, 0f, false);
         if (hit.getType() == HitResult.Type.BLOCK) {
             center = ((BlockHitResult) hit).getBlockPos();
         }
+
         BlockState ice = Blocks.PACKED_ICE.defaultBlockState();
-        int placed = 0;
+        List<BlockPos> targets = new ArrayList<>();
         for (int dx = -half; dx <= half; dx++) {
             for (int dz = -half; dz <= half; dz++) {
                 BlockPos ground = findGround(level, center.offset(dx, 0, dz));
@@ -546,17 +549,35 @@ public final class ElementalEffects {
                     continue;
                 }
                 BlockPos above = ground.above();
-                if (level.getBlockState(above).canBeReplaced() || level.getBlockState(above).isAir()) {
-                    if (ElementalBlockService.placeTemporary(level, above, ice, duration)) {
-                        placed++;
-                    }
+                BlockState current = level.getBlockState(above);
+                if (current.canBeReplaced() || current.isAir()) {
+                    targets.add(above.immutable());
                 }
             }
         }
-        if (placed > 0) {
-            level.playSound(null, center, SoundEvents.GLASS_PLACE, SoundSource.PLAYERS, 0.8f, 1.2f);
-            spawnIceParticles(level, Vec3.atCenterOf(center));
+        if (targets.isEmpty()) {
+            return;
         }
+
+        // Same staged placement as frost bastion: center-out over successive ticks.
+        BlockPos orderCenter = targets.get(0);
+        double best = Double.MAX_VALUE;
+        for (BlockPos pos : targets) {
+            double d = pos.distSqr(center);
+            if (d < best) {
+                best = d;
+                orderCenter = pos;
+            }
+        }
+        List<BlockPos> ordered = ElementalBlockService.risingOrder(targets, orderCenter);
+        long startTick = level.getGameTime();
+        for (int i = 0; i < ordered.size(); i++) {
+            long placeAt = startTick + (long) i * riseDelay;
+            ElementalBlockService.scheduleTemporary(level, ordered.get(i), ice, duration, placeAt);
+        }
+
+        level.playSound(null, center, SoundEvents.GLASS_PLACE, SoundSource.PLAYERS, 0.8f, 1.2f);
+        spawnIceParticles(level, Vec3.atCenterOf(center));
     }
 
     private static BlockPos findGround(ServerLevel level, BlockPos start) {

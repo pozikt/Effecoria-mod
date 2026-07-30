@@ -12,7 +12,8 @@
     {
       "type": "effecoria:ice_sheet",
       "half_size": 3,
-      "duration_ticks": 160
+      "duration_ticks": 160,
+      "rise_delay_ticks": 1
     }
   ]
 }
