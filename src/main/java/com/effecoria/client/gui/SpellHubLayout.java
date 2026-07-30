@@ -20,9 +20,13 @@ public final class SpellHubLayout {
     public static final float BASE_CORE_RADIUS = 34f;
     public static final float BASE_MIN_ORBIT = 78f;
     public static final float BASE_ORBIT_STEP = 30f;
+    /** Fixed orbit for the breathing-train node (left of core). */
+    public static final float BASE_TRAIN_ORBIT = 92f;
     private static final float NODE_GAP = 8f;
     private static final float MAX_CATEGORY_SPAN = (float) (Math.PI * 0.46);
     private static final int SEPARATION_ITERATIONS = 14;
+    /** Screen angle: left (−X) so the train node stays clear of spell fans. */
+    private static final float TRAIN_ANGLE = (float) Math.PI;
 
     public record SpellNode(
             ResourceLocation spellId,
@@ -31,7 +35,16 @@ public final class SpellHubLayout {
             float offsetX,
             float offsetY) {}
 
-    public record Layout(float scale, float coreRadius, float nodeRadius, List<SpellNode> nodes) {}
+    public record TrainNode(float offsetX, float offsetY, float radius) {
+        public boolean contains(float dx, float dy) {
+            float ndx = dx - offsetX;
+            float ndy = dy - offsetY;
+            float hit = radius + 6f;
+            return ndx * ndx + ndy * ndy <= hit * hit;
+        }
+    }
+
+    public record Layout(float scale, float coreRadius, float nodeRadius, List<SpellNode> nodes, TrainNode trainNode) {}
 
     private SpellHubLayout() {}
 
@@ -48,6 +61,13 @@ public final class SpellHubLayout {
         float orbitStep = BASE_ORBIT_STEP * scale;
         float maxOrbit = Math.min(screenWidth, screenHeight) * 0.40f * scale;
         orbitStep = Math.max(orbitStep, minCenterDistance(nodeRadius) * 0.95f);
+        float trainOrbit = Math.min(BASE_TRAIN_ORBIT * scale, maxOrbit);
+        float trainRadius = nodeRadius * 1.15f;
+
+        TrainNode trainNode = new TrainNode(
+                (float) Math.cos(TRAIN_ANGLE) * trainOrbit,
+                (float) Math.sin(TRAIN_ANGLE) * trainOrbit,
+                trainRadius);
 
         List<ResourceLocation> known = data.knownSpells();
         EnumMap<RadialCategory, List<IndexedSpell>> byCategory = new EnumMap<>(RadialCategory.class);
@@ -88,10 +108,15 @@ public final class SpellHubLayout {
         }
 
         nodes = separateNodes(nodes, nodeRadius, coreRadius + 4f, maxOrbit);
-        return new Layout(scale, coreRadius, nodeRadius, List.copyOf(nodes));
+        // Keep spell nodes out of the fixed train node.
+        nodes = pushAwayFromTrain(nodes, trainNode, nodeRadius);
+        return new Layout(scale, coreRadius, nodeRadius, List.copyOf(nodes), trainNode);
     }
 
     public static Optional<SpellNode> pick(Layout layout, float dx, float dy) {
+        if (layout.trainNode() != null && layout.trainNode().contains(dx, dy)) {
+            return Optional.empty();
+        }
         float hit = layout.nodeRadius() + 6f;
         SpellNode best = null;
         float bestDist = hit * hit;
@@ -105,6 +130,37 @@ public final class SpellHubLayout {
             }
         }
         return Optional.ofNullable(best);
+    }
+
+    public static Optional<TrainNode> pickTrain(Layout layout, float dx, float dy) {
+        if (layout.trainNode() != null && layout.trainNode().contains(dx, dy)) {
+            return Optional.of(layout.trainNode());
+        }
+        return Optional.empty();
+    }
+
+    private static List<SpellNode> pushAwayFromTrain(List<SpellNode> nodes, TrainNode train, float nodeRadius) {
+        float minDist = train.radius() + nodeRadius + NODE_GAP;
+        float minDistSq = minDist * minDist;
+        List<SpellNode> out = new ArrayList<>(nodes.size());
+        for (SpellNode node : nodes) {
+            float dx = node.offsetX() - train.offsetX();
+            float dy = node.offsetY() - train.offsetY();
+            float distSq = dx * dx + dy * dy;
+            if (distSq >= minDistSq || distSq < 1.0E-4f) {
+                out.add(node);
+                continue;
+            }
+            float dist = (float) Math.sqrt(distSq);
+            float scale = minDist / dist;
+            out.add(new SpellNode(
+                    node.spellId(),
+                    node.knownIndex(),
+                    node.category(),
+                    train.offsetX() + dx * scale,
+                    train.offsetY() + dy * scale));
+        }
+        return out;
     }
 
     private static float categorySpanFor(int activeCategories) {

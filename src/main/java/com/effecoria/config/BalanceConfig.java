@@ -79,8 +79,28 @@ public final class BalanceConfig {
             .defineInRange("breathing_max_mastery", 1.0, 0.1, 10.0);
 
     public static final ModConfigSpec.DoubleValue BREATHING_MEDITATION_GAIN = BUILDER
-            .comment("Mastery gained per progression tick while meditating (standing calm)")
+            .comment("Deprecated — meditation breathing gains removed; kept for config compatibility")
             .defineInRange("breathing_meditation_gain", 0.002, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue BREATHING_TRAIN_REGEN_BONUS = BUILDER
+            .comment("Permanent Ψ regen bonus per successful breathing mini-game hit (0.001 = +0.1%)")
+            .defineInRange("breathing_train_regen_bonus", 0.001, 0.0, 0.1);
+
+    public static final ModConfigSpec.DoubleValue BREATHING_TRAIN_MASTERY_GAIN = BUILDER
+            .comment("Breathing mastery gained per successful mini-game hit")
+            .defineInRange("breathing_train_mastery_gain", 0.01, 0.0, 1.0);
+
+    public static final ModConfigSpec.IntValue BREATHING_TRAIN_MISS_LIMIT = BUILDER
+            .comment("Failed timing clicks before breathing-train fatigue applies")
+            .defineInRange("breathing_train_miss_limit", 3, 1, 20);
+
+    public static final ModConfigSpec.IntValue BREATHING_TRAIN_FATIGUE_MS = BUILDER
+            .comment("Real-time fatigue after miss limit (ms) — blocks retraining and cuts regen")
+            .defineInRange("breathing_train_fatigue_ms", 300_000, 0, 3_600_000);
+
+    public static final ModConfigSpec.DoubleValue BREATHING_TRAIN_FATIGUE_REGEN_MULT = BUILDER
+            .comment("Ψ regen multiplier while breathing-train fatigue is active")
+            .defineInRange("breathing_train_fatigue_regen_mult", 0.5, 0.0, 1.0);
 
     public static final ModConfigSpec.DoubleValue BREATHING_SCROLL_GAIN = BUILDER
             .comment("Mastery granted by one breathing technique scroll")

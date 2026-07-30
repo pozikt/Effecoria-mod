@@ -27,7 +27,11 @@ public final class FormulaEngine {
                 * ctx.biologyQ()
                 * deltaTicks
                 * scale
-                * ExhaustionService.regenMultiplier(ctx.exhaustion());
+                * ExhaustionService.regenMultiplier(ctx.exhaustion())
+                * (1f + Math.max(0f, ctx.breathTrainRegenBonus()))
+                * (ctx.breathTrainFatigue()
+                        ? BalanceConfig.BREATHING_TRAIN_FATIGUE_REGEN_MULT.get().floatValue()
+                        : 1f);
     }
 
     /**

@@ -26,10 +26,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-/** Hold-X spell constellation — core hub with threaded spell nodes. */
+/** Hold-X spell constellation — core hub with threaded spell nodes + breathing train. */
 public class SpellHubScreen extends Screen {
     private SpellHubLayout.Layout layout;
     private SpellHubLayout.SpellNode hovered;
+    private boolean trainHovered;
 
     public SpellHubScreen() {
         super(Component.translatable("gui.effecoria.hub"));
@@ -42,7 +43,8 @@ public class SpellHubScreen extends Screen {
 
     private void rebuildLayout() {
         if (minecraft == null || minecraft.player == null) {
-            layout = new SpellHubLayout.Layout(0.7f, 24f, 14f, java.util.List.of());
+            layout = new SpellHubLayout.Layout(
+                    0.7f, 24f, 14f, java.util.List.of(), new SpellHubLayout.TrainNode(-64f, 0f, 16f));
             return;
         }
         PlayerPsiData data = minecraft.player.getData(ModAttachments.PSI.get());
@@ -58,24 +60,37 @@ public class SpellHubScreen extends Screen {
     private void updateHover() {
         if (minecraft == null) {
             hovered = null;
+            trainHovered = false;
             return;
         }
-        hovered = pickAtMouse().orElse(null);
+        float dx = mouseDx();
+        float dy = mouseDy();
+        trainHovered = SpellHubLayout.pickTrain(layout, dx, dy).isPresent();
+        hovered = trainHovered ? null : SpellHubLayout.pick(layout, dx, dy).orElse(null);
     }
 
-    private Optional<SpellHubLayout.SpellNode> pickAtMouse() {
+    private float mouseDx() {
         double mouseX = minecraft.mouseHandler.xpos()
                 * (double) minecraft.getWindow().getGuiScaledWidth()
                 / (double) minecraft.getWindow().getScreenWidth();
+        return (float) (mouseX - this.width / 2.0);
+    }
+
+    private float mouseDy() {
         double mouseY = minecraft.mouseHandler.ypos()
                 * (double) minecraft.getWindow().getGuiScaledHeight()
                 / (double) minecraft.getWindow().getScreenHeight();
-        float dx = (float) (mouseX - this.width / 2.0);
-        float dy = (float) (mouseY - this.height / 2.0);
-        return SpellHubLayout.pick(layout, dx, dy);
+        return (float) (mouseY - this.height / 2.0);
     }
 
     public void completeSelection() {
+        if (trainHovered) {
+            onClose();
+            if (minecraft != null) {
+                minecraft.setScreen(new BreathingTrainScreen());
+            }
+            return;
+        }
         if (hovered != null) {
             PacketDistributor.sendToServer(new ModNetworking.SelectSpellPayload(hovered.knownIndex()));
         }
@@ -84,7 +99,10 @@ public class SpellHubScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        hovered = pickAtMouse().orElse(null);
+        float dx = mouseX - this.width / 2f;
+        float dy = mouseY - this.height / 2f;
+        trainHovered = SpellHubLayout.pickTrain(layout, dx, dy).isPresent();
+        hovered = trainHovered ? null : SpellHubLayout.pick(layout, dx, dy).orElse(null);
 
         int cx = this.width / 2;
         int cy = this.height / 2;
@@ -95,6 +113,7 @@ public class SpellHubScreen extends Screen {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
+        drawTrainThread(graphics, cx, cy, trainHovered);
         for (SpellHubLayout.SpellNode node : layout.nodes()) {
             drawThread(graphics, cx, cy, node, isHovered(node));
         }
@@ -102,6 +121,7 @@ public class SpellHubScreen extends Screen {
         drawCore(graphics, cx, cy, layout.coreRadius(), scale);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
+        drawTrainNode(graphics, cx, cy, trainHovered);
         for (SpellHubLayout.SpellNode node : layout.nodes()) {
             drawSpellNode(graphics, cx, cy, node, layout.nodeRadius(), isHovered(node));
         }
@@ -112,36 +132,57 @@ public class SpellHubScreen extends Screen {
 
     private void drawCore(GuiGraphics graphics, int cx, int cy, float radius, float scale) {
         int r = Math.round(radius);
-        int outer = 0xFF3A4868;
-        int fill = 0xF0141828;
-        int glow = 0x5533AAFF;
+        drawFilledCircle(graphics, cx, cy, r + 4, 0x5533AAFF);
+        drawFilledCircle(graphics, cx, cy, r + 1, 0xFF3A4868);
+        drawFilledCircle(graphics, cx, cy, r, 0xF0141828);
+        graphics.drawCenteredString(this.font, "Ψ", cx, cy - 5, 0xE8F0FF);
+        graphics.drawCenteredString(
+                this.font, Component.translatable("gui.effecoria.hub.core"), cx, cy + 6, 0x99AABBCC);
+    }
 
-        drawFilledCircle(graphics, cx, cy, r + 4, glow);
-        drawFilledCircle(graphics, cx, cy, r + 1, outer);
-        drawFilledCircle(graphics, cx, cy, r, fill);
+    private void drawTrainThread(GuiGraphics graphics, int cx, int cy, boolean highlight) {
+        SpellHubLayout.TrainNode train = layout.trainNode();
+        if (train == null) {
+            return;
+        }
+        float dist = (float) Math.hypot(train.offsetX(), train.offsetY());
+        if (dist < 1f) {
+            return;
+        }
+        float ux = train.offsetX() / dist;
+        float uy = train.offsetY() / dist;
+        float x1 = cx + ux * (layout.coreRadius() + 2f);
+        float y1 = cy + uy * (layout.coreRadius() + 2f);
+        float x2 = cx + train.offsetX() - ux * (train.radius() + 1f);
+        float y2 = cy + train.offsetY() - uy * (train.radius() + 1f);
+        int color = highlight ? 0xEEFFE08A : 0xCCD4A84A;
+        drawDashedLine(graphics, x1, y1, x2, y2, 2.2f, color);
+    }
 
-        String coreMark = "Ψ";
-        graphics.drawCenteredString(this.font, coreMark, cx, cy - 5, 0xE8F0FF);
-        Component coreLabel = Component.translatable("gui.effecoria.hub.core");
-        graphics.drawCenteredString(this.font, coreLabel, cx, cy + 6, 0x99AABBCC);
+    private void drawTrainNode(GuiGraphics graphics, int cx, int cy, boolean highlight) {
+        SpellHubLayout.TrainNode train = layout.trainNode();
+        if (train == null) {
+            return;
+        }
+        int px = cx + Math.round(train.offsetX());
+        int py = cy + Math.round(train.offsetY());
+        int r = Math.round(train.radius());
+        drawFilledCircle(graphics, px, py, r + 3, highlight ? 0xFFFFE080 : 0xFFC9A227);
+        drawFilledCircle(graphics, px, py, r, highlight ? 0xFF3A3420 : 0xFF221E12);
+        graphics.drawCenteredString(this.font, "◎", px, py - 4, highlight ? 0xFFFFF0A0 : 0xFFE8C860);
     }
 
     private void drawThread(GuiGraphics graphics, int cx, int cy, SpellHubLayout.SpellNode node, boolean highlight) {
-        float nx = cx + node.offsetX();
-        float ny = cy + node.offsetY();
         float dist = (float) Math.hypot(node.offsetX(), node.offsetY());
         if (dist < 1f) {
             return;
         }
         float ux = node.offsetX() / dist;
         float uy = node.offsetY() / dist;
-        float coreEdge = layout.coreRadius() + 2f;
-        float nodeEdge = layout.nodeRadius() + 1f;
-        float x1 = cx + ux * coreEdge;
-        float y1 = cy + uy * coreEdge;
-        float x2 = cx + node.offsetX() - ux * nodeEdge;
-        float y2 = cy + node.offsetY() - uy * nodeEdge;
-
+        float x1 = cx + ux * (layout.coreRadius() + 2f);
+        float y1 = cy + uy * (layout.coreRadius() + 2f);
+        float x2 = cx + node.offsetX() - ux * (layout.nodeRadius() + 1f);
+        float y2 = cy + node.offsetY() - uy * (layout.nodeRadius() + 1f);
         int color = highlight ? 0xCCFFE890 : categoryThreadColor(node.category());
         drawLine(graphics, x1, y1, x2, y2, 1.5f + (highlight ? 0.5f : 0f), color);
     }
@@ -161,17 +202,24 @@ public class SpellHubScreen extends Screen {
         int py = cy + Math.round(node.offsetY());
         int r = Math.round(nodeRadius);
         int iconSize = Math.round(nodeRadius * 1.55f);
-
-        int border = highlight ? 0xFFFFE080 : 0xFF9090A8;
-        int fill = highlight ? 0xFF282838 : 0xFF141420;
-        drawFilledCircle(graphics, px, py, r + 2, border);
-        drawFilledCircle(graphics, px, py, r, fill);
-
+        drawFilledCircle(graphics, px, py, r + 2, highlight ? 0xFFFFE080 : 0xFF9090A8);
+        drawFilledCircle(graphics, px, py, r, highlight ? 0xFF282838 : 0xFF141420);
         drawSpellIcon(graphics, node.spellId(), px, py, iconSize);
     }
 
     private void renderHoverPanel(GuiGraphics graphics, int cx, int cy, float scale) {
         int panelY = cy + Math.round(118 * scale);
+        if (trainHovered) {
+            Component title = Component.translatable("gui.effecoria.breath_train.node");
+            Component sub = Component.translatable("gui.effecoria.breath_train.node_hint");
+            int panelW = Math.max(this.font.width(title), this.font.width(sub)) + 24;
+            int left = cx - panelW / 2;
+            graphics.fill(left - 1, panelY - 5, left + panelW + 1, panelY + 28, 0xFFC9A227);
+            graphics.fill(left, panelY - 4, left + panelW, panelY + 27, 0xF01E1A10);
+            graphics.drawCenteredString(this.font, title, cx, panelY, 0xFFFFE8A0);
+            graphics.drawCenteredString(this.font, sub, cx, panelY + 12, 0xCCD8C878);
+            return;
+        }
         if (hovered != null && minecraft != null && minecraft.player != null) {
             ResourceLocation spellId = hovered.spellId();
             Component spellName = Component.translatable("spell.effecoria." + spellId.getPath());
@@ -179,7 +227,6 @@ public class SpellHubScreen extends Screen {
             Component category = Component.translatable(SpellHubLayout.categoryLabelKey(hovered.category()));
             float cost = SpellRadialCosts.previewCost(minecraft.player, spellId);
             Component costLine = formatCost(cost);
-
             int padX = 12;
             int lineH = 10;
             int panelH = lineH * 3 + 16;
@@ -188,12 +235,9 @@ public class SpellHubScreen extends Screen {
                     Math.max(this.font.width(school), this.font.width(category.copy().append(" · ").append(costLine))));
             int panelW = maxW + padX * 2;
             int left = cx - panelW / 2;
-            int top = panelY - 4;
-
-            graphics.fill(left - 1, top - 1, left + panelW + 1, top + panelH + 1, 0xFF505068);
-            graphics.fill(left, top, left + panelW, top + panelH, 0xF0181828);
-
-            int y = top + 6;
+            graphics.fill(left - 1, panelY - 5, left + panelW + 1, panelY + panelH - 3, 0xFF505068);
+            graphics.fill(left, panelY - 4, left + panelW, panelY + panelH - 4, 0xF0181828);
+            int y = panelY;
             graphics.drawCenteredString(this.font, spellName, cx, y, 0xFFFFFF);
             y += lineH + 2;
             graphics.drawCenteredString(this.font, school, cx, y, 0xCCE8E8FF);
@@ -206,11 +250,7 @@ public class SpellHubScreen extends Screen {
                     canAffordCost(cost) ? 0x99CCFF : 0xFF8888);
         } else {
             graphics.drawCenteredString(
-                    this.font,
-                    Component.translatable("gui.effecoria.hub.hint"),
-                    cx,
-                    panelY,
-                    0xAAAAAA);
+                    this.font, Component.translatable("gui.effecoria.hub.hint"), cx, panelY, 0xAAAAAA);
         }
     }
 
@@ -222,8 +262,7 @@ public class SpellHubScreen extends Screen {
         if (CreativeGodMode.isActive(minecraft != null ? minecraft.player : null)) {
             return Component.translatable("gui.effecoria.radial.cost_free");
         }
-        int rounded = Math.max(1, Math.round(cost));
-        return Component.translatable("gui.effecoria.radial.cost", rounded);
+        return Component.translatable("gui.effecoria.radial.cost", Math.max(1, Math.round(cost)));
     }
 
     private boolean canAffordCost(float cost) {
@@ -234,9 +273,7 @@ public class SpellHubScreen extends Screen {
 
     private static void drawSpellIcon(GuiGraphics graphics, ResourceLocation spellId, int cx, int cy, int size) {
         ResourceLocation icon = SpellIcons.forSpell(spellId);
-        int x = cx - size / 2;
-        int y = cy - size / 2;
-        graphics.blitSprite(icon, x, y, size, size);
+        graphics.blitSprite(icon, cx - size / 2, cy - size / 2, size, size);
     }
 
     private static Component schoolLabel(ResourceLocation spellId) {
@@ -256,7 +293,6 @@ public class SpellHubScreen extends Screen {
         float r = ((argb >>> 16) & 0xFF) / 255f;
         float g = ((argb >>> 8) & 0xFF) / 255f;
         float b = (argb & 0xFF) / 255f;
-
         Matrix4f matrix = graphics.pose().last().pose();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
@@ -279,12 +315,10 @@ public class SpellHubScreen extends Screen {
         }
         float nx = -dy / len * width * 0.5f;
         float ny = dx / len * width * 0.5f;
-
         float a = ((argb >>> 24) & 0xFF) / 255f;
         float r = ((argb >>> 16) & 0xFF) / 255f;
         float g = ((argb >>> 8) & 0xFF) / 255f;
         float b = (argb & 0xFF) / 255f;
-
         Matrix4f matrix = graphics.pose().last().pose();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
@@ -293,6 +327,25 @@ public class SpellHubScreen extends Screen {
         buffer.addVertex(matrix, x2 + nx, y2 + ny, 0).setColor(r, g, b, a);
         buffer.addVertex(matrix, x2 - nx, y2 - ny, 0).setColor(r, g, b, a);
         BufferUploader.drawWithShader(buffer.buildOrThrow());
+    }
+
+    private void drawDashedLine(GuiGraphics graphics, float x1, float y1, float x2, float y2, float width, int argb) {
+        float dx = x2 - x1;
+        float dy = y2 - y1;
+        float len = (float) Math.hypot(dx, dy);
+        if (len < 1f) {
+            return;
+        }
+        float ux = dx / len;
+        float uy = dy / len;
+        float dash = 6f;
+        float gap = 4f;
+        float t = 0f;
+        while (t < len) {
+            float t2 = Math.min(len, t + dash);
+            drawLine(graphics, x1 + ux * t, y1 + uy * t, x1 + ux * t2, y1 + uy * t2, width, argb);
+            t += dash + gap;
+        }
     }
 
     @Override

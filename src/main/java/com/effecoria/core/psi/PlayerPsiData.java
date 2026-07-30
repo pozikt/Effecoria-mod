@@ -35,6 +35,9 @@ public final class PlayerPsiData {
                 ByteBufCodecs.INT.encode(buf, data.essence);
                 ByteBufCodecs.FLOAT.encode(buf, data.phiMultiplier);
                 ByteBufCodecs.FLOAT.encode(buf, data.exhaustion);
+                ByteBufCodecs.VAR_INT.encode(buf, data.breathTrainHits);
+                ByteBufCodecs.VAR_INT.encode(buf, data.breathTrainSessionMisses);
+                ByteBufCodecs.VAR_LONG.encode(buf, data.breathTrainFatigueUntilMs);
                 ByteBufCodecs.INT.encode(buf, data.knownSpells.size());
                 for (ResourceLocation spell : data.knownSpells) {
                     ResourceLocation.STREAM_CODEC.encode(buf, spell);
@@ -67,6 +70,9 @@ public final class PlayerPsiData {
                 data.essence = ByteBufCodecs.INT.decode(buf);
                 data.phiMultiplier = ByteBufCodecs.FLOAT.decode(buf);
                 data.exhaustion = ByteBufCodecs.FLOAT.decode(buf);
+                data.breathTrainHits = ByteBufCodecs.VAR_INT.decode(buf);
+                data.breathTrainSessionMisses = ByteBufCodecs.VAR_INT.decode(buf);
+                data.breathTrainFatigueUntilMs = ByteBufCodecs.VAR_LONG.decode(buf);
                 int spellCount = ByteBufCodecs.INT.decode(buf);
                 data.knownSpells = new ArrayList<>(spellCount);
                 for (int i = 0; i < spellCount; i++) {
@@ -103,6 +109,9 @@ public final class PlayerPsiData {
     private int essence;
     private float phiMultiplier = 1f;
     private float exhaustion;
+    private int breathTrainHits;
+    private int breathTrainSessionMisses;
+    private long breathTrainFatigueUntilMs;
     private Map<ResourceLocation, Integer> spellCastCounts = new HashMap<>();
     private Map<ResourceLocation, Long> spellLastCastAt = new HashMap<>();
 
@@ -175,6 +184,52 @@ public final class PlayerPsiData {
 
     public float exhaustion() {
         return exhaustion;
+    }
+
+    public int breathTrainHits() {
+        return breathTrainHits;
+    }
+
+    public int breathTrainSessionMisses() {
+        return breathTrainSessionMisses;
+    }
+
+    public float breathTrainRegenBonus() {
+        return breathTrainHits * BalanceConfig.BREATHING_TRAIN_REGEN_BONUS.get().floatValue();
+    }
+
+    public boolean isBreathTrainFatigued() {
+        return System.currentTimeMillis() < breathTrainFatigueUntilMs;
+    }
+
+    public long breathTrainFatigueRemainingMs() {
+        return Math.max(0L, breathTrainFatigueUntilMs - System.currentTimeMillis());
+    }
+
+    /** Successful timing hit: permanent regen bonus + mastery. No fatigue. */
+    public void recordSuccessfulBreathTrain() {
+        breathTrainHits++;
+        float masteryGain = BalanceConfig.BREATHING_TRAIN_MASTERY_GAIN.get().floatValue();
+        if (masteryGain > 0f) {
+            setBreathingMastery(breathingMastery + masteryGain);
+        }
+    }
+
+    /**
+     * Failed timing click: shrinks the green zone (via miss count) and may apply fatigue.
+     *
+     * @return true if fatigue was applied this miss
+     */
+    public boolean recordBreathTrainMiss() {
+        breathTrainSessionMisses++;
+        int limit = Math.max(1, BalanceConfig.BREATHING_TRAIN_MISS_LIMIT.get());
+        if (breathTrainSessionMisses < limit) {
+            return false;
+        }
+        breathTrainSessionMisses = 0;
+        long fatigueMs = BalanceConfig.BREATHING_TRAIN_FATIGUE_MS.get();
+        breathTrainFatigueUntilMs = System.currentTimeMillis() + Math.max(0L, fatigueMs);
+        return true;
     }
 
     public void setExhaustion(float value) {
@@ -332,6 +387,9 @@ public final class PlayerPsiData {
         tag.putInt("essence", essence);
         tag.putFloat("phiMultiplier", phiMultiplier);
         tag.putFloat("exhaustion", exhaustion);
+        tag.putInt("breathTrainHits", breathTrainHits);
+        tag.putInt("breathTrainSessionMisses", breathTrainSessionMisses);
+        tag.putLong("breathTrainFatigueUntilMs", breathTrainFatigueUntilMs);
 
         ListTag spellList = new ListTag();
         for (ResourceLocation spell : knownSpells) {
@@ -376,6 +434,9 @@ public final class PlayerPsiData {
         essence = tag.contains("essence") ? tag.getInt("essence") : 0;
         phiMultiplier = tag.contains("phiMultiplier") ? tag.getFloat("phiMultiplier") : 1f;
         exhaustion = tag.contains("exhaustion") ? tag.getFloat("exhaustion") : 0f;
+        breathTrainHits = tag.contains("breathTrainHits") ? tag.getInt("breathTrainHits") : 0;
+        breathTrainSessionMisses = tag.contains("breathTrainSessionMisses") ? tag.getInt("breathTrainSessionMisses") : 0;
+        breathTrainFatigueUntilMs = tag.contains("breathTrainFatigueUntilMs") ? tag.getLong("breathTrainFatigueUntilMs") : 0L;
 
         knownSpells = new ArrayList<>();
         ListTag spellList = tag.getList("knownSpells", Tag.TAG_STRING);
@@ -430,6 +491,9 @@ public final class PlayerPsiData {
         copy.essence = essence;
         copy.phiMultiplier = phiMultiplier;
         copy.exhaustion = exhaustion;
+        copy.breathTrainHits = breathTrainHits;
+        copy.breathTrainSessionMisses = breathTrainSessionMisses;
+        copy.breathTrainFatigueUntilMs = breathTrainFatigueUntilMs;
         copy.spellCastCounts = new HashMap<>(spellCastCounts);
         copy.spellLastCastAt = new HashMap<>(spellLastCastAt);
         return copy;

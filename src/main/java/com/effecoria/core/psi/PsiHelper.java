@@ -29,7 +29,9 @@ public final class PsiHelper {
                 data.entropyB(),
                 data.breathingMastery(),
                 data.essence(),
-                data.exhaustion());
+                data.exhaustion(),
+                data.breathTrainRegenBonus(),
+                data.isBreathTrainFatigued());
     }
 
     public static void initiate(Player player, MagicSchool school) {

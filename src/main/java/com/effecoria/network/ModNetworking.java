@@ -186,4 +186,83 @@ public final class ModNetworking {
             context.enqueueWork(() -> ClientSteamCloudEffects.setClouds(payload.clouds()));
         }
     }
+
+    /** Client reports a successful timing hit; server validates fatigue and grants rewards. */
+    public record BreathTrainHitPayload() implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<BreathTrainHitPayload> TYPE =
+                new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "breath_train_hit"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, BreathTrainHitPayload> STREAM_CODEC =
+                StreamCodec.unit(new BreathTrainHitPayload());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(BreathTrainHitPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                PlayerPsiData data = PsiHelper.get(player);
+                if (!data.initiated()) {
+                    return;
+                }
+                if (data.isBreathTrainFatigued()) {
+                    int sec = (int) Math.ceil(data.breathTrainFatigueRemainingMs() / 1000.0);
+                    player.displayClientMessage(
+                            Component.translatable("message.effecoria.breath_train_fatigued", sec), true);
+                    return;
+                }
+                float before = data.breathingMastery();
+                data.recordSuccessfulBreathTrain();
+                PsiHelper.set(player, data);
+                player.syncData(ModAttachments.PSI.get());
+                float bonusPct = data.breathTrainRegenBonus() * 100f;
+                player.displayClientMessage(
+                        Component.translatable(
+                                "message.effecoria.breath_train_success",
+                                String.format("%.1f", bonusPct),
+                                com.effecoria.core.progression.BreathingService.formatTotalPercent(data.breathingMastery())),
+                        true);
+                com.effecoria.core.progression.BreathingService.notifyMilestones(
+                        player, before, data.breathingMastery());
+            });
+        }
+    }
+
+    /** Client reports a missed timing click; after the miss limit, fatigue applies. */
+    public record BreathTrainMissPayload() implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<BreathTrainMissPayload> TYPE =
+                new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "breath_train_miss"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, BreathTrainMissPayload> STREAM_CODEC =
+                StreamCodec.unit(new BreathTrainMissPayload());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(BreathTrainMissPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                PlayerPsiData data = PsiHelper.get(player);
+                if (!data.initiated() || data.isBreathTrainFatigued()) {
+                    return;
+                }
+                boolean fatigued = data.recordBreathTrainMiss();
+                PsiHelper.set(player, data);
+                player.syncData(ModAttachments.PSI.get());
+                if (fatigued) {
+                    int sec = (int) Math.ceil(data.breathTrainFatigueRemainingMs() / 1000.0);
+                    player.displayClientMessage(
+                            Component.translatable("message.effecoria.breath_train_miss_fatigue", sec), true);
+                }
+            });
+        }
+    }
 }

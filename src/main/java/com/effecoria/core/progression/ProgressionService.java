@@ -5,34 +5,12 @@ import com.effecoria.core.psi.PlayerPsiData;
 
 import net.minecraft.server.level.ServerPlayer;
 
-/** Passive progression: breathing meditation and physical training. */
+/** Passive progression: physical training (breathing is trained via the hub mini-game). */
 public final class ProgressionService {
     private ProgressionService() {}
 
     public static void tick(ServerPlayer player, PlayerPsiData data) {
-        tickBreathingMeditation(player, data);
         tickTraining(player, data);
-    }
-
-    /** Standing calm — gradual breathing mastery (meditation). */
-    private static void tickBreathingMeditation(ServerPlayer player, PlayerPsiData data) {
-        if (!data.initiated()) {
-            return;
-        }
-
-        boolean meditating = BreathingService.isMeditating(player);
-
-        if (!meditating || data.breathingMastery() >= BreathingService.maxMastery()) {
-            return;
-        }
-
-        float before = data.breathingMastery();
-        float gained = BreathingService.addMastery(
-                data,
-                BalanceConfig.BREATHING_MEDITATION_GAIN.get().floatValue());
-        if (gained > 0f) {
-            BreathingService.notifyMilestones(player, before, data.breathingMastery());
-        }
     }
 
     private static void tickTraining(ServerPlayer player, PlayerPsiData data) {

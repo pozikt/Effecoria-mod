@@ -112,6 +112,14 @@ public class EffecoriaMod {
                 ModNetworking.SteamCloudsPayload.TYPE,
                 ModNetworking.SteamCloudsPayload.STREAM_CODEC,
                 ModNetworking.SteamCloudsPayload::handle);
+        registrar.playToServer(
+                ModNetworking.BreathTrainHitPayload.TYPE,
+                ModNetworking.BreathTrainHitPayload.STREAM_CODEC,
+                ModNetworking.BreathTrainHitPayload::handle);
+        registrar.playToServer(
+                ModNetworking.BreathTrainMissPayload.TYPE,
+                ModNetworking.BreathTrainMissPayload.STREAM_CODEC,
+                ModNetworking.BreathTrainMissPayload::handle);
     }
 
 }
