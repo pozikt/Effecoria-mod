@@ -4,6 +4,8 @@ import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
 import com.effecoria.core.magic.ShadeService;
 import com.effecoria.core.magic.SpellEffectEntry;
+import com.effecoria.core.psi.PlayerPsiData;
+import com.effecoria.core.psi.PsiHelper;
 import com.google.gson.JsonObject;
 
 import net.minecraft.server.level.ServerLevel;
@@ -464,19 +466,34 @@ public final class NecromancyEffects {
 
     public static void phylacterySurge(ServerPlayer caster, SpellEffectEntry effect, float power) {
         ServerLevel level = caster.serverLevel();
+        long gameTime = level.getGameTime();
+        PlayerPsiData data = PsiHelper.get(caster);
         float heal = DiceDamage.healFromParams(effect.params(), power, 8f);
         float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 5f;
         float damage = DiceDamage.fromParams(effect.params(), power, 5f);
         caster.heal(heal);
         hurtInRadius(level, caster.position(), radius, damage, caster);
         caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 80, 1, false, true, true));
+        if (data.isLichAscensionActive(gameTime)) {
+            float bonus = effect.params().has("phyl_boost") ? effect.params().get("phyl_boost").getAsFloat() : 0.12f;
+            data.boostPhylacteryEfficiency(gameTime, bonus);
+            PsiHelper.set(caster, data);
+        }
         spawnNecroParticles(level, caster.position().add(0, 1, 0));
         level.playSound(null, caster.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.6f, 0.7f);
     }
 
     public static void lichAscension(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 240;
         int aftermath = effect.params().has("aftermath_ticks") ? effect.params().get("aftermath_ticks").getAsInt() : 160;
+        float phylBase = effect.params().has("phyl_efficiency") ? effect.params().get("phyl_efficiency").getAsFloat() : 0.85f;
+        float phylEff = phylBase * (0.9f + power / 150f);
+        PlayerPsiData data = PsiHelper.get(caster);
+        data.beginLichAscension(level.getGameTime() + duration, data.biologyQ(), phylEff);
+        PsiHelper.set(caster, data);
+        caster.displayClientMessage(
+                net.minecraft.network.chat.Component.translatable("message.effecoria.necro.lich_ascension"), true);
         caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, 3, false, true, true));
         caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 2, false, false, true));
         caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 2, false, false, true));

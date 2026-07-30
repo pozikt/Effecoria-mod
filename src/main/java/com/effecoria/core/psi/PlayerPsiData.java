@@ -42,6 +42,9 @@ public final class PlayerPsiData {
                 ByteBufCodecs.FLOAT.encode(buf, data.steamFlightDrainPerTick);
                 ByteBufCodecs.VAR_INT.encode(buf, data.ionChargeTicksRemaining);
                 ByteBufCodecs.FLOAT.encode(buf, data.ionChargeBonusDamage);
+                ByteBufCodecs.VAR_LONG.encode(buf, data.lichAscensionUntil);
+                ByteBufCodecs.FLOAT.encode(buf, data.phylacteryEfficiency);
+                ByteBufCodecs.FLOAT.encode(buf, data.biologyQBeforeLich);
                 ByteBufCodecs.INT.encode(buf, data.knownSpells.size());
                 for (ResourceLocation spell : data.knownSpells) {
                     ResourceLocation.STREAM_CODEC.encode(buf, spell);
@@ -81,6 +84,9 @@ public final class PlayerPsiData {
                 data.steamFlightDrainPerTick = ByteBufCodecs.FLOAT.decode(buf);
                 data.ionChargeTicksRemaining = ByteBufCodecs.VAR_INT.decode(buf);
                 data.ionChargeBonusDamage = ByteBufCodecs.FLOAT.decode(buf);
+                data.lichAscensionUntil = ByteBufCodecs.VAR_LONG.decode(buf);
+                data.phylacteryEfficiency = ByteBufCodecs.FLOAT.decode(buf);
+                data.biologyQBeforeLich = ByteBufCodecs.FLOAT.decode(buf);
                 int spellCount = ByteBufCodecs.INT.decode(buf);
                 data.knownSpells = new ArrayList<>(spellCount);
                 for (int i = 0; i < spellCount; i++) {
@@ -124,6 +130,9 @@ public final class PlayerPsiData {
     private float steamFlightDrainPerTick;
     private int ionChargeTicksRemaining;
     private float ionChargeBonusDamage;
+    private long lichAscensionUntil;
+    private float phylacteryEfficiency;
+    private float biologyQBeforeLich;
     private Map<ResourceLocation, Integer> spellCastCounts = new HashMap<>();
     private Map<ResourceLocation, Long> spellLastCastAt = new HashMap<>();
 
@@ -340,6 +349,55 @@ public final class PlayerPsiData {
         return phiSenseUntil > gameTime;
     }
 
+    public boolean isLichAscensionActive(long gameTime) {
+        return lichAscensionUntil > gameTime;
+    }
+
+    public float phylacteryEfficiency() {
+        return phylacteryEfficiency;
+    }
+
+    /** Enter lich ascension: Q_biology → 0, Ψ regen uses phylactery efficiency until {@code until}. */
+    public void beginLichAscension(long until, float storedBiologyQ, float phylEfficiency) {
+        this.biologyQBeforeLich = Math.max(0.05f, storedBiologyQ);
+        this.biologyQ = 0f;
+        this.lichAscensionUntil = until;
+        this.phylacteryEfficiency = Math.clamp(phylEfficiency, 0.2f, 1.5f);
+    }
+
+    public void boostPhylacteryEfficiency(long gameTime, float bonus) {
+        if (!isLichAscensionActive(gameTime)) {
+            return;
+        }
+        this.phylacteryEfficiency = Math.clamp(phylacteryEfficiency + bonus, 0.2f, 1.5f);
+    }
+
+    /** Restores biology when ascension ends; returns true if state just cleared. */
+    public boolean tickLichAscension(long gameTime) {
+        if (lichAscensionUntil <= 0) {
+            return false;
+        }
+        if (gameTime < lichAscensionUntil) {
+            return false;
+        }
+        if (biologyQ <= 0f && biologyQBeforeLich > 0f) {
+            setBiologyQ(biologyQBeforeLich);
+        }
+        biologyQBeforeLich = 0f;
+        lichAscensionUntil = 0L;
+        phylacteryEfficiency = 0f;
+        return true;
+    }
+
+    public void clearLichAscension() {
+        if (biologyQ <= 0f && biologyQBeforeLich > 0f) {
+            setBiologyQ(biologyQBeforeLich);
+        }
+        biologyQBeforeLich = 0f;
+        lichAscensionUntil = 0L;
+        phylacteryEfficiency = 0f;
+    }
+
     public void setCurrentPsi(float value) {
         this.currentPsi = Math.clamp(value, 0f, maxPsi);
     }
@@ -453,6 +511,9 @@ public final class PlayerPsiData {
         tag.putFloat("steamFlightDrainPerTick", steamFlightDrainPerTick);
         tag.putInt("ionChargeTicksRemaining", ionChargeTicksRemaining);
         tag.putFloat("ionChargeBonusDamage", ionChargeBonusDamage);
+        tag.putLong("lichAscensionUntil", lichAscensionUntil);
+        tag.putFloat("phylacteryEfficiency", phylacteryEfficiency);
+        tag.putFloat("biologyQBeforeLich", biologyQBeforeLich);
 
         ListTag spellList = new ListTag();
         for (ResourceLocation spell : knownSpells) {
@@ -505,6 +566,9 @@ public final class PlayerPsiData {
         ionChargeTicksRemaining =
                 tag.contains("ionChargeTicksRemaining") ? tag.getInt("ionChargeTicksRemaining") : 0;
         ionChargeBonusDamage = tag.contains("ionChargeBonusDamage") ? tag.getFloat("ionChargeBonusDamage") : 0f;
+        lichAscensionUntil = tag.contains("lichAscensionUntil") ? tag.getLong("lichAscensionUntil") : 0L;
+        phylacteryEfficiency = tag.contains("phylacteryEfficiency") ? tag.getFloat("phylacteryEfficiency") : 0f;
+        biologyQBeforeLich = tag.contains("biologyQBeforeLich") ? tag.getFloat("biologyQBeforeLich") : 0f;
 
         knownSpells = new ArrayList<>();
         ListTag spellList = tag.getList("knownSpells", Tag.TAG_STRING);
@@ -566,6 +630,9 @@ public final class PlayerPsiData {
         copy.steamFlightDrainPerTick = steamFlightDrainPerTick;
         copy.ionChargeTicksRemaining = ionChargeTicksRemaining;
         copy.ionChargeBonusDamage = ionChargeBonusDamage;
+        copy.lichAscensionUntil = lichAscensionUntil;
+        copy.phylacteryEfficiency = phylacteryEfficiency;
+        copy.biologyQBeforeLich = biologyQBeforeLich;
         copy.spellCastCounts = new HashMap<>(spellCastCounts);
         copy.spellLastCastAt = new HashMap<>(spellLastCastAt);
         return copy;

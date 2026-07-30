@@ -64,6 +64,14 @@ public final class PsiHudOverlay {
         if (data.isPhiSenseActive(minecraft.level.getGameTime())) {
             graphics.drawString(minecraft.font, Component.translatable("hud.effecoria.phi_sense"), x, y - 22, 0x55FFFF);
         }
+        if (data.isLichAscensionActive(minecraft.level.getGameTime())) {
+            graphics.drawString(
+                    minecraft.font,
+                    Component.translatable("hud.effecoria.lich_ascension", (int) (data.phylacteryEfficiency() * 100)),
+                    x,
+                    y - 34,
+                    0xAA88FF);
+        }
 
         if (data.breathingMastery() > 0f) {
             graphics.drawString(
@@ -108,7 +116,15 @@ public final class PsiHudOverlay {
         if (phi.zeroFlux()) {
             return "0";
         }
-        float perSecond = FormulaEngine.regenPsi(PsiHelper.toContext(player, data), phi, 10f) * 2f;
+        long gameTime = player.level().getGameTime();
+        float perSecond;
+        if (data.isLichAscensionActive(gameTime)) {
+            perSecond = FormulaEngine.regenPsiLich(
+                            PsiHelper.toContext(player, data), phi, data.phylacteryEfficiency(), 10f)
+                    * 2f;
+        } else {
+            perSecond = FormulaEngine.regenPsi(PsiHelper.toContext(player, data), phi, 10f) * 2f;
+        }
         return String.format("%.1f", perSecond);
     }
 

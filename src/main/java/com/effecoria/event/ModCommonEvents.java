@@ -3,6 +3,7 @@ package com.effecoria.event;
 import com.effecoria.EffecoriaMod;
 import com.effecoria.command.EffecoriaCommands;
 import com.effecoria.core.formula.FormulaEngine;
+import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.magic.ShadeService;
 import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.progression.ProgressionService;
@@ -135,10 +136,20 @@ public final class ModCommonEvents {
 
         ExhaustionService.tick(player, data);
 
-        float regen = FormulaEngine.regenPsi(
-                PsiHelper.toContext(player, data),
-                PhiFieldService.sample(player.level(), player.position(), player),
-                10f);
+        long gameTime = player.serverLevel().getGameTime();
+        if (data.tickLichAscension(gameTime)) {
+            player.displayClientMessage(
+                    net.minecraft.network.chat.Component.translatable("message.effecoria.necro.lich_ended"), true);
+        }
+
+        PhiSample phi = PhiFieldService.sample(player.level(), player.position(), player);
+        float regen;
+        if (data.isLichAscensionActive(gameTime)) {
+            regen = FormulaEngine.regenPsiLich(
+                    PsiHelper.toContext(player, data), phi, data.phylacteryEfficiency(), 10f);
+        } else {
+            regen = FormulaEngine.regenPsi(PsiHelper.toContext(player, data), phi, 10f);
+        }
         if (regen > 0f) {
             data.setCurrentPsi(data.currentPsi() + regen);
         }
@@ -174,6 +185,7 @@ public final class ModCommonEvents {
         PlayerPsiData data = PsiHelper.get(player);
         ExhaustionService.clearOnDeath(data);
         data.clearIonCharge();
+        data.clearLichAscension();
         ElementalFieldService.clearFor(player.getUUID());
         OrganicFieldService.clearFor(player.getUUID());
         NecroFieldService.clearFor(player.getUUID());
