@@ -34,6 +34,18 @@ public final class BalanceConfig {
             .comment("Entropy level that triggers backlash event")
             .defineInRange("entropy_threshold", 1.0, 0.1, 100.0);
 
+    public static final ModConfigSpec.DoubleValue ENTROPY_DECAY_PER_TICK = BUILDER
+            .comment("Entropy recovered every 10 server ticks while not casting")
+            .defineInRange("entropy_decay_per_tick", 0.005, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue ENTROPY_MEDITATION_DECAY_BONUS = BUILDER
+            .comment("Extra entropy decay while meditating with full breath")
+            .defineInRange("entropy_meditation_decay_bonus", 0.008, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue ENTROPY_WARN_RATIO = BUILDER
+            .comment("Fraction of entropy threshold that shows HUD warn / first tip")
+            .defineInRange("entropy_warn_ratio", 0.55, 0.1, 1.0);
+
     public static final ModConfigSpec.DoubleValue RESONANCE_WIDTH_HZ = BUILDER
             .comment("Hz tolerance for spectral resonance (wider = easier off-frequency casts)")
             .defineInRange("resonance_width_hz", 5.0, 0.1, 50.0);

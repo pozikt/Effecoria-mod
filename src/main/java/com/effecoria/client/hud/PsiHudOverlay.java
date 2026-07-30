@@ -6,6 +6,7 @@ import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.phi.CreativeGodMode;
 import com.effecoria.core.phi.PhiFieldService;
 import com.effecoria.core.progression.BreathingService;
+import com.effecoria.core.progression.EntropyService;
 import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
@@ -96,6 +97,22 @@ public final class PsiHudOverlay {
                     x,
                     y + 72,
                     0xFFCC8888);
+        }
+
+        float entropyFill = EntropyService.fillRatio(data.entropyB());
+        if (entropyFill > 0.02f) {
+            boolean critical = EntropyService.isCritical(data.entropyB());
+            int barColor = critical ? 0xFFE07030 : 0xFF8866AA;
+            int textColor = critical ? 0xFFFFAA66 : 0xCCBBAADD;
+            drawBar(graphics, x, y + 84, 90, 5, entropyFill, barColor, 0xFF221828);
+            graphics.drawString(
+                    minecraft.font,
+                    Component.translatable(
+                            critical ? "hud.effecoria.entropy_warn" : "hud.effecoria.entropy",
+                            (int) (entropyFill * 100)),
+                    x,
+                    y + 92,
+                    textColor);
         }
     }
 

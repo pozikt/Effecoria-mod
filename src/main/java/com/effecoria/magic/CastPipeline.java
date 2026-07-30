@@ -7,6 +7,7 @@ import com.effecoria.core.formula.PsiContext;
 import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.core.phi.CreativeGodMode;
 import com.effecoria.core.phi.PhiFieldService;
+import com.effecoria.core.progression.EntropyService;
 import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
@@ -82,6 +83,7 @@ public final class CastPipeline {
             float entropyPower = delivery == CastDelivery.FULL ? power : actualCost;
             float newEntropy = FormulaEngine.accumulateEntropy(data.entropyB(), entropyPower, spell.sideEntropyRatio());
             data.setEntropyB(newEntropy);
+            EntropyService.maybeWarnRising(player, data);
 
             if (FormulaEngine.isBacklashTriggered(newEntropy)) {
                 applyBacklash(player, data);
@@ -127,5 +129,6 @@ public final class CastPipeline {
         player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0));
         ExhaustionService.onBacklash(player, data);
         player.displayClientMessage(Component.translatable("message.effecoria.backlash"), true);
+        EntropyService.onBacklash(player, data);
     }
 }

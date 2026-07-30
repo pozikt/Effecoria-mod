@@ -5,6 +5,7 @@ import com.effecoria.command.EffecoriaCommands;
 import com.effecoria.core.formula.FormulaEngine;
 import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.magic.ShadeService;
+import com.effecoria.core.progression.EntropyService;
 import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.progression.ProgressionService;
 import com.effecoria.core.progression.SpellUnlockService;
@@ -136,6 +137,7 @@ public final class ModCommonEvents {
         }
 
         ExhaustionService.tick(player, data);
+        EntropyService.tick(player, data);
 
         long gameTime = player.serverLevel().getGameTime();
         if (data.tickLichAscension(gameTime)) {

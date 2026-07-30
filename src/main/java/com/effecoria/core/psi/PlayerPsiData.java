@@ -45,6 +45,8 @@ public final class PlayerPsiData {
                 ByteBufCodecs.VAR_LONG.encode(buf, data.lichAscensionUntil);
                 ByteBufCodecs.FLOAT.encode(buf, data.phylacteryEfficiency);
                 ByteBufCodecs.FLOAT.encode(buf, data.biologyQBeforeLich);
+                ByteBufCodecs.BOOL.encode(buf, data.seenEntropyWarn);
+                ByteBufCodecs.BOOL.encode(buf, data.seenEntropyTutorial);
                 ByteBufCodecs.INT.encode(buf, data.knownSpells.size());
                 for (ResourceLocation spell : data.knownSpells) {
                     ResourceLocation.STREAM_CODEC.encode(buf, spell);
@@ -87,6 +89,8 @@ public final class PlayerPsiData {
                 data.lichAscensionUntil = ByteBufCodecs.VAR_LONG.decode(buf);
                 data.phylacteryEfficiency = ByteBufCodecs.FLOAT.decode(buf);
                 data.biologyQBeforeLich = ByteBufCodecs.FLOAT.decode(buf);
+                data.seenEntropyWarn = ByteBufCodecs.BOOL.decode(buf);
+                data.seenEntropyTutorial = ByteBufCodecs.BOOL.decode(buf);
                 int spellCount = ByteBufCodecs.INT.decode(buf);
                 data.knownSpells = new ArrayList<>(spellCount);
                 for (int i = 0; i < spellCount; i++) {
@@ -133,6 +137,8 @@ public final class PlayerPsiData {
     private long lichAscensionUntil;
     private float phylacteryEfficiency;
     private float biologyQBeforeLich;
+    private boolean seenEntropyWarn;
+    private boolean seenEntropyTutorial;
     private Map<ResourceLocation, Integer> spellCastCounts = new HashMap<>();
     private Map<ResourceLocation, Long> spellLastCastAt = new HashMap<>();
 
@@ -406,6 +412,22 @@ public final class PlayerPsiData {
         this.entropyB = Math.max(0f, value);
     }
 
+    public boolean seenEntropyWarn() {
+        return seenEntropyWarn;
+    }
+
+    public void setSeenEntropyWarn(boolean value) {
+        this.seenEntropyWarn = value;
+    }
+
+    public boolean seenEntropyTutorial() {
+        return seenEntropyTutorial;
+    }
+
+    public void setSeenEntropyTutorial(boolean value) {
+        this.seenEntropyTutorial = value;
+    }
+
     public void setPhiSenseUntil(long gameTime) {
         this.phiSenseUntil = gameTime;
     }
@@ -521,6 +543,8 @@ public final class PlayerPsiData {
         tag.putLong("lichAscensionUntil", lichAscensionUntil);
         tag.putFloat("phylacteryEfficiency", phylacteryEfficiency);
         tag.putFloat("biologyQBeforeLich", biologyQBeforeLich);
+        tag.putBoolean("seenEntropyWarn", seenEntropyWarn);
+        tag.putBoolean("seenEntropyTutorial", seenEntropyTutorial);
 
         ListTag spellList = new ListTag();
         for (ResourceLocation spell : knownSpells) {
@@ -576,6 +600,8 @@ public final class PlayerPsiData {
         lichAscensionUntil = tag.contains("lichAscensionUntil") ? tag.getLong("lichAscensionUntil") : 0L;
         phylacteryEfficiency = tag.contains("phylacteryEfficiency") ? tag.getFloat("phylacteryEfficiency") : 0f;
         biologyQBeforeLich = tag.contains("biologyQBeforeLich") ? tag.getFloat("biologyQBeforeLich") : 0f;
+        seenEntropyWarn = tag.contains("seenEntropyWarn") && tag.getBoolean("seenEntropyWarn");
+        seenEntropyTutorial = tag.contains("seenEntropyTutorial") && tag.getBoolean("seenEntropyTutorial");
 
         knownSpells = new ArrayList<>();
         ListTag spellList = tag.getList("knownSpells", Tag.TAG_STRING);
@@ -640,6 +666,8 @@ public final class PlayerPsiData {
         copy.lichAscensionUntil = lichAscensionUntil;
         copy.phylacteryEfficiency = phylacteryEfficiency;
         copy.biologyQBeforeLich = biologyQBeforeLich;
+        copy.seenEntropyWarn = seenEntropyWarn;
+        copy.seenEntropyTutorial = seenEntropyTutorial;
         copy.spellCastCounts = new HashMap<>(spellCastCounts);
         copy.spellLastCastAt = new HashMap<>(spellLastCastAt);
         return copy;
