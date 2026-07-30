@@ -206,6 +206,10 @@ public final class SealService {
     }
 
     public static float trapDamage(SealInstance seal) {
-        return Math.max(0.5f, seal.strength() / 25f);
+        float mult = 1f;
+        if (seal.params() != null && seal.params().contains("trap_damage_mult")) {
+            mult = seal.params().getFloat("trap_damage_mult");
+        }
+        return Math.max(0.5f, seal.strength() / 25f) * mult;
     }
 }

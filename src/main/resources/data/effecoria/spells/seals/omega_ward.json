@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:omega_ward",
+  "school": "seals",
+  "frequency_hz": 0.65,
+  "base_cost": 18,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.07,
+  "min_phi": 0.22,
+  "min_mastery": 0.2,
+  "radial_category": "seals",
+  "effects": [
+    {
+      "type": "effecoria:place_fortify_seal",
+      "duration_ticks": 4800,
+      "range": 9
+    }
+  ]
+}

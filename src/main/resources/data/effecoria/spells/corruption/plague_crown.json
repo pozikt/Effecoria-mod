@@ -1,0 +1,20 @@
+{
+  "id": "effecoria:plague_crown",
+  "school": "corruption",
+  "frequency_hz": 0.88,
+  "base_cost": 18,
+  "power_multiplier": 1.05,
+  "side_entropy": 0.09,
+  "min_phi": 0.28,
+  "min_mastery": 0.26,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:plague_crown",
+      "duration_ticks": 140,
+      "damage_dice": "3d6",
+      "radius": 7,
+      "poison_ticks": 100
+    }
+  ]
+}

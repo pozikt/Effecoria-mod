@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:miasma_cloak",
+  "school": "corruption",
+  "frequency_hz": 0.58,
+  "base_cost": 10,
+  "power_multiplier": 1.05,
+  "side_entropy": 0.06,
+  "min_phi": 0.14,
+  "min_mastery": 0.12,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:miasma_cloak",
+      "duration_ticks": 160,
+      "radius": 4,
+      "damage_per_second": 1.5
+    }
+  ]
+}

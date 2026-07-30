@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:entropy_lash",
+  "school": "corruption",
+  "frequency_hz": 0.55,
+  "base_cost": 9,
+  "power_multiplier": 1.05,
+  "side_entropy": 0.06,
+  "min_phi": 0.12,
+  "min_mastery": 0.1,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:entropy_lash",
+      "damage_dice": "1d8",
+      "poison_ticks": 60,
+      "range": 11
+    }
+  ]
+}

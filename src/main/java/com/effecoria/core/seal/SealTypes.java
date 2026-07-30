@@ -11,4 +11,6 @@ public final class SealTypes {
     public static final ResourceLocation DAMAGE_TRAP = EffecoriaMod.id("damage_trap");
     public static final ResourceLocation FORTIFY = EffecoriaMod.id("fortify");
     public static final ResourceLocation GLOW = EffecoriaMod.id("glow");
+    public static final ResourceLocation SNARE = EffecoriaMod.id("snare");
+    public static final ResourceLocation REPULSE = EffecoriaMod.id("repulse");
 }

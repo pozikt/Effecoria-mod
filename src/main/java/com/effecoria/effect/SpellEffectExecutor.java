@@ -3,6 +3,7 @@ package com.effecoria.effect;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.effect.elemental.AirHandService;
 import com.effecoria.effect.elemental.ElementalEffects;
+import com.effecoria.effect.corruption.CorruptionEffects;
 import com.effecoria.effect.mental.MentalEffects;
 import com.effecoria.effect.necromancy.NecromancyEffects;
 import com.effecoria.effect.spatial.SpatialEffects;
@@ -111,12 +112,20 @@ public final class SpellEffectExecutor {
             "mind_probe",
             "synaptic_overload",
             "psychic_drain",
-            "thought_bomb");
+            "thought_bomb",
+            "rot_touch",
+            "entropy_lash",
+            "plague_bolt",
+            "festering_wound",
+            "decay_bind",
+            "tainted_leech");
 
     private static final Set<String> BLOCK_SEAL_EFFECTS = Set.of(
             "place_trap_seal",
             "place_fortify_seal",
-            "place_glow_seal");
+            "place_glow_seal",
+            "place_snare_seal",
+            "place_repulse_seal");
 
     private SpellEffectExecutor() {}
 
@@ -375,12 +384,27 @@ public final class SpellEffectExecutor {
             case "blink" -> blink(caster, effect, power);
             case "rift_yank" -> riftYank(caster, effect, power, target);
             case "phase_veil" -> phaseVeil(caster, effect, power);
-            case "corrupt_mark" -> corruptMark(caster, effect, power, target);
-            case "binding_seal" -> bindingSeal(caster, effect, power, target);
-            case "blight_pulse" -> blightPulse(caster, effect, power);
+            case "corrupt_mark" -> CorruptionEffects.corruptMark(caster, effect, power, target);
+            case "binding_seal" -> CorruptionEffects.bindingSeal(caster, effect, power, target);
+            case "blight_pulse" -> CorruptionEffects.blightPulse(caster, effect, power);
+            case "rot_touch" -> CorruptionEffects.rotTouch(caster, effect, power, target);
+            case "entropy_lash" -> CorruptionEffects.entropyLash(caster, effect, power, target);
+            case "plague_bolt" -> CorruptionEffects.plagueBolt(caster, effect, power, target);
+            case "festering_wound" -> CorruptionEffects.festeringWound(caster, effect, power, target);
+            case "miasma_cloak" -> CorruptionEffects.miasmaCloak(caster, effect, power);
+            case "blight_surge" -> CorruptionEffects.blightSurge(caster, effect, power);
+            case "decay_bind" -> CorruptionEffects.decayBind(caster, effect, power, target);
+            case "blight_field" -> CorruptionEffects.blightField(caster, effect, power);
+            case "entropy_aegis" -> CorruptionEffects.entropyAegis(caster, effect, power);
+            case "tainted_leech" -> CorruptionEffects.taintedLeech(caster, effect, power, target);
+            case "virulent_wave" -> CorruptionEffects.virulentWave(caster, effect, power);
+            case "plague_crown" -> CorruptionEffects.plagueCrown(caster, effect, power);
+            case "omega_blight" -> CorruptionEffects.omegaBlight(caster, effect, power);
             case "place_trap_seal" -> placeSeal(caster, effect, power, blockTarget, SealTypes.DAMAGE_TRAP);
             case "place_fortify_seal" -> placeSeal(caster, effect, power, blockTarget, SealTypes.FORTIFY);
             case "place_glow_seal" -> placeSeal(caster, effect, power, blockTarget, SealTypes.GLOW);
+            case "place_snare_seal" -> placeSeal(caster, effect, power, blockTarget, SealTypes.SNARE);
+            case "place_repulse_seal" -> placeSeal(caster, effect, power, blockTarget, SealTypes.REPULSE);
             default -> {}
         }
     }
@@ -399,7 +423,8 @@ public final class SpellEffectExecutor {
                 ? effect.params().get("duration_ticks").getAsInt()
                 : 600;
         float strength = power;
-        SealService.place(level, blockTarget, typeId, caster.getUUID(), strength, duration, new CompoundTag());
+        CompoundTag sealParams = sealParamsFromEffect(effect);
+        SealService.place(level, blockTarget, typeId, caster.getUUID(), strength, duration, sealParams);
 
         spawnSealPlaceParticles(level, blockTarget, typeId);
         level.playSound(null, blockTarget, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 0.8f, 1.2f);
@@ -417,13 +442,27 @@ public final class SpellEffectExecutor {
         if (typeId.equals(SealTypes.GLOW)) {
             level.sendParticles(ModParticleTypes.SEAL_GLYPH.get(), x, y, z, 6, 0.15, 0.15, 0.15, 0.01);
             level.sendParticles(ModParticleTypes.SEAL_SPARK.get(), x, y + 0.1, z, 10, 0.2, 0.25, 0.2, 0.02);
-        } else if (typeId.equals(SealTypes.DAMAGE_TRAP)) {
+        } else if (typeId.equals(SealTypes.DAMAGE_TRAP) || typeId.equals(SealTypes.SNARE) || typeId.equals(SealTypes.REPULSE)) {
             level.sendParticles(ModParticleTypes.CORRUPTION_RUNE.get(), x, y, z, 8, 0.2, 0.2, 0.2, 0.01);
             level.sendParticles(ModParticleTypes.CORRUPTION_POISON.get(), x, y + 0.2, z, 6, 0.15, 0.1, 0.15, 0.02);
         } else {
             level.sendParticles(ModParticleTypes.SEAL_GLYPH.get(), x, y, z, 12, 0.25, 0.25, 0.25, 0.015);
             level.sendParticles(ModParticleTypes.PHI_SPARK.get(), x, y + 0.15, z, 4, 0.1, 0.15, 0.1, 0.01);
         }
+    }
+
+    private static CompoundTag sealParamsFromEffect(SpellEffectEntry effect) {
+        CompoundTag tag = new CompoundTag();
+        if (effect.params().has("trap_damage_mult")) {
+            tag.putFloat("trap_damage_mult", effect.params().get("trap_damage_mult").getAsFloat());
+        }
+        if (effect.params().has("slow_amplifier")) {
+            tag.putInt("slow_amplifier", effect.params().get("slow_amplifier").getAsInt());
+        }
+        if (effect.params().has("repulse_force")) {
+            tag.putFloat("repulse_force", effect.params().get("repulse_force").getAsFloat());
+        }
+        return tag;
     }
 
     private static void notifyNoBlock(ServerPlayer caster) {
@@ -634,87 +673,6 @@ public final class SpellEffectExecutor {
     private static void spawnSpatialParticles(ServerLevel level, Vec3 pos) {
         level.sendParticles(ModParticleTypes.SPATIAL_RIFT.get(), pos.x, pos.y, pos.z, 16, 0.35, 0.5, 0.35, 0.03);
         level.sendParticles(ModParticleTypes.SPATIAL_WARP.get(), pos.x, pos.y, pos.z, 10, 0.25, 0.35, 0.25, 0.02);
-    }
-
-    private static void spawnCorruptionParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ModParticleTypes.CORRUPTION_POISON.get(), pos.x, pos.y, pos.z, 8, 0.2, 0.3, 0.2, 0.02);
-        level.sendParticles(ModParticleTypes.CORRUPTION_BLOOD.get(), pos.x, pos.y + 0.2, pos.z, 6, 0.15, 0.2, 0.15, 0.04);
-        level.sendParticles(ModParticleTypes.CORRUPTION_RUNE.get(), pos.x, pos.y + 0.5, pos.z, 4, 0.1, 0.15, 0.1, 0.01);
-    }
-
-    private static void spawnCorruptionPulse(ServerLevel level, Vec3 center, double radius) {
-        int rings = Math.max(8, (int) (radius * 6));
-        for (int i = 0; i < rings; i++) {
-            double angle = (Math.PI * 2 * i) / rings;
-            double x = center.x + Math.cos(angle) * radius;
-            double z = center.z + Math.sin(angle) * radius;
-            level.sendParticles(ModParticleTypes.CORRUPTION_POISON.get(), x, center.y + 0.3, z, 2, 0.05, 0.12, 0.05, 0.02);
-            level.sendParticles(ModParticleTypes.CORRUPTION_RUNE.get(), x, center.y + 0.5, z, 1, 0.02, 0.05, 0.02, 0.0);
-        }
-        level.sendParticles(ModParticleTypes.CORRUPTION_BLOOD.get(), center.x, center.y + 0.4, center.z, 6, 0.3, 0.2, 0.3, 0.05);
-    }
-
-    /** Brand a target with Ψ-corruption — poison and weakness. */
-    private static void corruptMark(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
-        ServerLevel level = caster.serverLevel();
-        float damage = effect.params().get("damage").getAsFloat();
-        int poisonTicks = effect.params().get("poison_ticks").getAsInt();
-        int weaknessTicks = effect.params().get("weakness_ticks").getAsInt();
-        poisonTicks = Math.round(poisonTicks * (0.85f + power / 100f));
-        weaknessTicks = Math.round(weaknessTicks * (0.85f + power / 100f));
-
-        target.hurt(caster.level().damageSources().magic(), damage * (power / 50f));
-        target.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, weaknessTicks, 0));
-        spawnCorruptionParticles(level, target.position().add(0, 1, 0));
-        level.playSound(null, target.blockPosition(), SoundEvents.SCULK_CLICKING, SoundSource.PLAYERS, 0.9f, 0.7f);
-    }
-
-    /** Binding seal — heavy root and visible mark. */
-    private static void bindingSeal(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
-        ServerLevel level = caster.serverLevel();
-        int rootTicks = effect.params().get("root_ticks").getAsInt();
-        int glowTicks = effect.params().has("glow_ticks") ? effect.params().get("glow_ticks").getAsInt() : rootTicks;
-        rootTicks = Math.round(rootTicks * (0.8f + power / 100f));
-        glowTicks = Math.round(glowTicks * (0.8f + power / 100f));
-
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, rootTicks, 5));
-        target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, rootTicks, 2));
-        target.addEffect(new MobEffectInstance(MobEffects.GLOWING, glowTicks, 0));
-        spawnCorruptionParticles(level, target.position().add(0, 0.5, 0));
-        level.playSound(null, target.blockPosition(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.5f, 1.6f);
-    }
-
-    /** Pulse of blight around the caster — no target required. */
-    private static void blightPulse(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        ServerLevel level = caster.serverLevel();
-        double radius = effect.params().has("radius") ? effect.params().get("radius").getAsDouble() : 5;
-        float damage = effect.params().has("damage") ? effect.params().get("damage").getAsFloat() : 3f;
-        int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 60;
-        radius *= 0.9 + power / 150f;
-        float scaledDamage = damage * (power / 50f);
-        poisonTicks = Math.round(poisonTicks * (0.85f + power / 100f));
-
-        AABB box = caster.getBoundingBox().inflate(radius);
-        for (LivingEntity entity : level.getEntitiesOfClass(
-                LivingEntity.class, box, e -> e != caster && e.isAlive() && !e.isSpectator())) {
-            if (entity.distanceToSqr(caster) > radius * radius) {
-                continue;
-            }
-            entity.hurt(caster.level().damageSources().magic(), scaledDamage);
-            entity.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
-            entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, poisonTicks / 2, 0));
-            spawnCorruptionParticles(level, entity.position().add(0, 1, 0));
-        }
-
-        spawnCorruptionPulse(level, caster.position().add(0, 0.2, 0), radius);
-        level.playSound(null, caster.blockPosition(), SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.PLAYERS, 0.6f, 1.4f);
     }
 
     private static void notifyNoTarget(ServerPlayer caster) {

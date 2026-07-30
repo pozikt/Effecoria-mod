@@ -9,7 +9,7 @@
   "radial_category": "seals",
   "effects": [
     {
-      "type": "effecoria:place_trap_seal",
+      "type": "effecoria:place_snare_seal",
       "duration_ticks": 900,
       "range": 8
     }

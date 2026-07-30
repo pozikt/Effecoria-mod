@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:repulsion_seal",
+  "school": "seals",
+  "frequency_hz": 0.5,
+  "base_cost": 12,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.05,
+  "min_phi": 0.13,
+  "min_mastery": 0.11,
+  "radial_category": "seals",
+  "effects": [
+    {
+      "type": "effecoria:place_repulse_seal",
+      "duration_ticks": 900,
+      "range": 8,
+      "repulse_force": 0.9
+    }
+  ]
+}

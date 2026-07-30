@@ -23,6 +23,7 @@ import com.effecoria.effect.necromancy.NecroFieldService;
 import com.effecoria.effect.necromancy.NecroSummonService;
 import com.effecoria.effect.organic.OrganicDiagnosticService;
 import com.effecoria.effect.organic.OrganicFieldService;
+import com.effecoria.effect.corruption.CorruptionFieldService;
 import com.effecoria.effect.spatial.SpatialFieldService;
 import com.effecoria.magic.SpellRegistry;
 
@@ -68,6 +69,7 @@ public final class ModCommonEvents {
             OrganicFieldService.tick(serverLevel);
             NecroFieldService.tick(serverLevel);
             SpatialFieldService.tick(serverLevel);
+            CorruptionFieldService.tick(serverLevel);
             ElementalCageService.tick(serverLevel);
         }
     }
@@ -176,6 +178,7 @@ public final class ModCommonEvents {
         OrganicFieldService.clearFor(player.getUUID());
         NecroFieldService.clearFor(player.getUUID());
         SpatialFieldService.clearFor(player.getUUID());
+        CorruptionFieldService.clearFor(player.getUUID());
         ElementalShroudService.clearFor(player.getUUID());
         AirHandService.clearFor(player);
         PsiHelper.set(player, data);

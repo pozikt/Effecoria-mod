@@ -199,28 +199,39 @@ public final class SpellProgression {
                     id("absolute_fold"));
 
             case CORRUPTION -> List.of(
-
                     id("corrupt_mark"),
-
-                    id("binding_seal"),
-
                     id("blight_pulse"),
-
+                    id("rot_touch"),
+                    id("entropy_lash"),
+                    id("binding_seal"),
+                    id("plague_bolt"),
+                    id("festering_wound"),
+                    id("miasma_cloak"),
                     id("blight_brand"),
-
-                    id("pestilence_wave"));
+                    id("blight_surge"),
+                    id("decay_bind"),
+                    id("pestilence_wave"),
+                    id("blight_field"),
+                    id("entropy_aegis"),
+                    id("tainted_leech"),
+                    id("virulent_wave"),
+                    id("plague_crown"),
+                    id("omega_blight"));
 
             case SEALS -> List.of(
-
                     id("trap_seal"),
-
-                    id("fortify_seal"),
-
                     id("glow_seal"),
-
                     id("snare_glyph"),
-
-                    id("beacon_seal"));
+                    id("fortify_seal"),
+                    id("beacon_seal"),
+                    id("shock_glyph"),
+                    id("ward_glyph"),
+                    id("repulsion_seal"),
+                    id("anchor_fortify"),
+                    id("permanent_glow"),
+                    id("snare_matrix"),
+                    id("shock_trap"),
+                    id("omega_ward"));
 
             default -> List.of();
 

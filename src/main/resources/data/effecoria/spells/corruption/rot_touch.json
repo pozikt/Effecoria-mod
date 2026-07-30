@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:rot_touch",
+  "school": "corruption",
+  "frequency_hz": 0.5,
+  "base_cost": 8,
+  "power_multiplier": 1.05,
+  "side_entropy": 0.05,
+  "min_phi": 0.1,
+  "min_mastery": 0.08,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:rot_touch",
+      "damage_dice": "1d6",
+      "hunger_ticks": 100,
+      "range": 10
+    }
+  ]
+}

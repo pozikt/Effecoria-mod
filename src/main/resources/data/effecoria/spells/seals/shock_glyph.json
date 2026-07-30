@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:shock_glyph",
+  "school": "seals",
+  "frequency_hz": 0.45,
+  "base_cost": 11,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.05,
+  "min_phi": 0.12,
+  "min_mastery": 0.1,
+  "radial_category": "seals",
+  "effects": [
+    {
+      "type": "effecoria:place_trap_seal",
+      "duration_ticks": 1200,
+      "range": 8,
+      "trap_damage_mult": 1.8
+    }
+  ]
+}

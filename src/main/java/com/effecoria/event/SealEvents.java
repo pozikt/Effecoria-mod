@@ -91,12 +91,59 @@ public final class SealEvents {
                     }
                     if (seal.typeId().equals(SealTypes.DAMAGE_TRAP)) {
                         applyTrap(level, pos, seal);
+                    } else if (seal.typeId().equals(SealTypes.SNARE)) {
+                        applySnare(level, pos, seal);
+                    } else if (seal.typeId().equals(SealTypes.REPULSE)) {
+                        applyRepulse(level, pos, seal);
                     } else if (seal.typeId().equals(SealTypes.GLOW)) {
                         SealService.ensureGlowLight(level, chunk, pos, seal);
                         spawnGlowParticles(level, pos);
                     }
                 }
             }
+        }
+    }
+
+    private static void applySnare(ServerLevel level, BlockPos pos, SealInstance seal) {
+        int slowAmp = seal.params() != null && seal.params().contains("slow_amplifier")
+                ? seal.params().getInt("slow_amplifier")
+                : 3;
+        AABB box = new AABB(pos).move(0, 1, 0).inflate(0.35, 0.15, 0.35);
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            BlockPos standingOn = BlockPos.containing(entity.getX(), entity.getY() - 0.05, entity.getZ());
+            if (!standingOn.equals(pos)) {
+                continue;
+            }
+            entity.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                    net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 25, slowAmp));
+            entity.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                    net.minecraft.world.effect.MobEffects.DIG_SLOWDOWN, 25, 1));
+        }
+    }
+
+    private static void applyRepulse(ServerLevel level, BlockPos pos, SealInstance seal) {
+        float force = seal.params() != null && seal.params().contains("repulse_force")
+                ? seal.params().getFloat("repulse_force")
+                : 0.85f;
+        force *= Math.max(0.5f, seal.strength() / 40f);
+        AABB box = new AABB(pos).move(0, 1, 0).inflate(0.2, 0.1, 0.2);
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            BlockPos standingOn = BlockPos.containing(entity.getX(), entity.getY() - 0.05, entity.getZ());
+            if (!standingOn.equals(pos)) {
+                continue;
+            }
+            entity.setDeltaMovement(entity.getDeltaMovement().add(0, force, 0));
+            entity.hurtMarked = true;
+            level.sendParticles(
+                    ParticleTypes.CLOUD,
+                    pos.getX() + 0.5,
+                    pos.getY() + 1.0,
+                    pos.getZ() + 0.5,
+                    6,
+                    0.2,
+                    0.1,
+                    0.2,
+                    0.02);
         }
     }
 
