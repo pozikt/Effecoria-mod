@@ -1,7 +1,11 @@
 package com.effecoria.effect.elemental;
 
 import com.effecoria.content.ModParticleTypes;
+import com.effecoria.core.formula.DiceDamage;
 import com.effecoria.core.magic.SpellEffectEntry;
+import com.effecoria.core.psi.ModAttachments;
+import com.effecoria.core.psi.PlayerPsiData;
+import com.effecoria.core.psi.PsiHelper;
 import com.google.gson.JsonObject;
 
 import net.minecraft.core.BlockPos;
@@ -41,8 +45,7 @@ public final class ElementalEffects {
         float speed = effect.params().has("speed") ? effect.params().get("speed").getAsFloat() : 1.2f;
         speed *= 0.8f + (power / 120f);
 
-        float baseDamage = effect.params().has("damage") ? effect.params().get("damage").getAsFloat() : 1.5f;
-        float scaledDamage = baseDamage * (power / 50f);
+        float scaledDamage = DiceDamage.fromParams(effect.params(), power, 1.5f);
 
         if (power >= 55f && effect.params().has("plasma_threshold")
                 && power >= effect.params().get("plasma_threshold").getAsFloat()) {
@@ -74,20 +77,20 @@ public final class ElementalEffects {
     public static void steamJet(ServerPlayer caster, SpellEffectEntry effect, float power) {
         ServerLevel level = caster.serverLevel();
         double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 8;
-        float damage = effect.params().has("damage") ? effect.params().get("damage").getAsFloat() : 4f;
         float knockback = effect.params().has("knockback") ? effect.params().get("knockback").getAsFloat() : 1.6f;
         float cloudRadius = effect.params().has("cloud_radius") ? effect.params().get("cloud_radius").getAsFloat() : 2.5f;
         int cloudDuration = effect.params().has("cloud_duration_ticks")
                 ? effect.params().get("cloud_duration_ticks").getAsInt()
                 : 60;
+        int blindTicks = effect.params().has("blind_ticks") ? effect.params().get("blind_ticks").getAsInt() : 20;
 
         Vec3 look = caster.getLookAngle().normalize();
         Vec3 start = caster.getEyePosition();
-        float scaledDamage = damage * (power / 50f);
-        float scaledKnock = knockback * (power / 50f);
+        float scaledDamage = DiceDamage.fromParams(effect.params(), power, 4f);
+        float scaledKnock = knockback * (0.75f + power / 100f);
         float scaledCloudRadius = cloudRadius * (0.85f + power / 120f);
         int scaledCloudDuration = Math.round(cloudDuration * (0.85f + power / 100f));
-        DamageSource source = caster.level().damageSources().magic();
+        DamageSource source = caster.level().damageSources().onFire();
 
         LivingEntity nearestHit = null;
         double nearestDist = Double.MAX_VALUE;
@@ -102,6 +105,9 @@ public final class ElementalEffects {
             target.hurt(source, scaledDamage);
             target.push(look.x * scaledKnock, 0.2, look.z * scaledKnock);
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0));
+            if (blindTicks > 0) {
+                target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, blindTicks, 0));
+            }
             target.hurtMarked = true;
             spawnSteamBurst(level, target.position());
             if (along < nearestDist) {
@@ -147,8 +153,7 @@ public final class ElementalEffects {
         ServerLevel level = caster.serverLevel();
         Vec3 look = caster.getLookAngle().normalize();
         float speed = effect.params().has("speed") ? effect.params().get("speed").getAsFloat() : 1.5f;
-        float baseDamage = effect.params().has("damage") ? effect.params().get("damage").getAsFloat() : 4f;
-        float scaledDamage = baseDamage * (power / 50f);
+        float scaledDamage = DiceDamage.fromParams(effect.params(), power, 4f);
 
         Snowball shard = new Snowball(level, caster);
         shard.setPos(caster.getX(), caster.getEyeY() - 0.1, caster.getZ());
@@ -227,8 +232,7 @@ public final class ElementalEffects {
         Vec3 look = caster.getLookAngle().normalize();
         float speed = effect.params().has("speed") ? effect.params().get("speed").getAsFloat() : 2f;
         speed *= 0.9f + (power / 80f);
-        float baseDamage = effect.params().has("damage") ? effect.params().get("damage").getAsFloat() : 10f;
-        float scaledDamage = baseDamage * (power / 50f);
+        float scaledDamage = DiceDamage.fromParams(effect.params(), power, 10f);
 
         Snowball plasma = new Snowball(level, caster);
         plasma.setPos(caster.getX(), caster.getEyeY() - 0.1, caster.getZ());
@@ -268,19 +272,18 @@ public final class ElementalEffects {
     private static void waterStream(ServerPlayer caster, SpellEffectEntry effect, float power, boolean cutter) {
         ServerLevel level = caster.serverLevel();
         JsonObject params = effect.params();
-        double range = params.get("range").getAsDouble();
-        float damage = params.get("damage").getAsFloat();
+        double range = params.has("range") ? params.get("range").getAsDouble() : 8;
         float knockback = params.has("knockback") ? params.get("knockback").getAsFloat() : 1.2f;
         int slowTicks = params.has("slow_ticks") ? params.get("slow_ticks").getAsInt() : 40;
         boolean extinguish = !params.has("extinguish_fire") || params.get("extinguish_fire").getAsBoolean();
 
         Vec3 look = caster.getLookAngle().normalize();
         Vec3 start = caster.getEyePosition();
-        // Hydro-slice matches diamond-axe strike damage; soft water lash still scales with power.
+        // Hydro-slice: 3d8 slash ≈ diamond-axe class; soft lash uses dice/legacy params.
         float scaledDamage = cutter
-                ? diamondAxeDamage() * Mth.clamp(0.85f + power / 200f, 0.85f, 1.25f)
-                : damage * (power / 50f);
-        float scaledKnock = knockback * (power / 50f);
+                ? DiceDamage.fromParams(params, power, diamondAxeDamage())
+                : DiceDamage.fromParams(params, power, 2f);
+        float scaledKnock = knockback * (0.75f + power / 100f);
         DamageSource source = cutter
                 ? caster.level().damageSources().playerAttack(caster)
                 : caster.level().damageSources().magic();
@@ -385,8 +388,7 @@ public final class ElementalEffects {
         Vec3 look = caster.getLookAngle().normalize();
         float speed = params.has("speed") ? params.get("speed").getAsFloat() : 1.05f;
         speed *= 0.85f + power / 140f;
-        float baseDamage = params.has("damage") ? params.get("damage").getAsFloat() : 10f;
-        float scaledDamage = baseDamage * (power / 50f);
+        float scaledDamage = DiceDamage.fromParams(params, power, 10f);
         int mass = params.has("fire_mass") ? params.get("fire_mass").getAsInt() : 4;
         int igniteRadius = params.has("ignite_radius") ? params.get("ignite_radius").getAsInt() : 2;
         int groundIgnite = params.has("ground_ignite_count") ? params.get("ground_ignite_count").getAsInt() : 9;
@@ -458,26 +460,186 @@ public final class ElementalEffects {
         radius *= 0.9f + power / 160f;
         int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 100;
         duration = Math.round(duration * (0.85f + power / 120f));
-        float dps = params.has("damage_per_second") ? params.get("damage_per_second").getAsFloat() : 2f;
-        dps *= power / 50f;
+        float dps = DiceDamage.perSecondFromParams(params, power, 2f);
         ElementalCageService.imprisonWater(
                 caster.serverLevel(), target, caster.getUUID(), radius, duration, dps);
     }
 
-    /** Collapse air around a target into a vacuum pocket that asphyxiates and pins them. */
+    /** Absolute vacuum sphere around the looked-at target (or aim point). */
     public static void vacuumCage(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 3f;
+        radius *= 0.9f + power / 160f;
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 100;
+        duration = Math.round(duration * (0.85f + power / 120f));
+        float dps = DiceDamage.perSecondFromParams(params, power, 2.5f);
+        Vec3 center = target != null
+                ? target.position().add(0, target.getBbHeight() * 0.5, 0)
+                : caster.getEyePosition().add(caster.getLookAngle().normalize().scale(4));
+        ElementalCageService.imprisonVacuumAoE(
+                caster.serverLevel(), center, caster.getUUID(), radius, duration, dps);
+    }
+
+    /** Ice cocoon prison — packed-ice shell + cold DoT (D&D level 6). */
+    public static void icePrison(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         if (target == null) {
             return;
         }
         JsonObject params = effect.params();
         float radius = params.has("radius") ? params.get("radius").getAsFloat() : 2f;
-        radius *= 0.9f + power / 160f;
-        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 100;
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 120;
         duration = Math.round(duration * (0.85f + power / 120f));
-        float dps = params.has("damage_per_second") ? params.get("damage_per_second").getAsFloat() : 2.5f;
-        dps *= power / 50f;
-        ElementalCageService.imprisonVacuum(
+        float dps = DiceDamage.perSecondFromParams(params, power, 2f);
+        ElementalCageService.imprisonIce(
                 caster.serverLevel(), target, caster.getUUID(), radius, duration, dps);
+    }
+
+    /** Shockwave — compressed air burst around the caster (D&D level 3). */
+    public static void shockwave(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 3f;
+        float knock = params.has("knockback") ? params.get("knockback").getAsFloat() : 1.4f;
+        int stunTicks = params.has("stun_ticks") ? params.get("stun_ticks").getAsInt() : 20;
+        float damage = DiceDamage.fromParams(params, power, 7f);
+        AABB box = caster.getBoundingBox().inflate(radius);
+        DamageSource source = level.damageSources().magic();
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
+            target.hurt(source, damage);
+            Vec3 away = target.position().subtract(caster.position()).normalize();
+            target.push(away.x * knock, 0.35, away.z * knock);
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, stunTicks, 2));
+            target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, stunTicks, 0));
+            target.hurtMarked = true;
+        }
+        level.playSound(null, caster.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7f, 1.4f);
+        level.sendParticles(
+                ModParticleTypes.PHI_GUST.get(),
+                caster.getX(),
+                caster.getY() + 1,
+                caster.getZ(),
+                28,
+                radius * 0.4,
+                0.4,
+                radius * 0.4,
+                0.08);
+    }
+
+    /** Ice sheet — slick packed ice on the ground (D&D level 3). */
+    public static void iceSheet(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        int half = params.has("half_size") ? params.get("half_size").getAsInt() : 3;
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 160;
+        duration = Math.round(duration * (0.85f + power / 120f));
+        BlockPos center = caster.blockPosition();
+        HitResult hit = caster.pick(8, 0f, false);
+        if (hit.getType() == HitResult.Type.BLOCK) {
+            center = ((BlockHitResult) hit).getBlockPos();
+        }
+        BlockState ice = Blocks.PACKED_ICE.defaultBlockState();
+        int placed = 0;
+        for (int dx = -half; dx <= half; dx++) {
+            for (int dz = -half; dz <= half; dz++) {
+                BlockPos ground = findGround(level, center.offset(dx, 0, dz));
+                if (ground == null) {
+                    continue;
+                }
+                BlockPos above = ground.above();
+                if (level.getBlockState(above).canBeReplaced() || level.getBlockState(above).isAir()) {
+                    if (ElementalBlockService.placeTemporary(level, above, ice, duration)) {
+                        placed++;
+                    }
+                }
+            }
+        }
+        if (placed > 0) {
+            level.playSound(null, center, SoundEvents.GLASS_PLACE, SoundSource.PLAYERS, 0.8f, 1.2f);
+            spawnIceParticles(level, Vec3.atCenterOf(center));
+        }
+    }
+
+    private static BlockPos findGround(ServerLevel level, BlockPos start) {
+        BlockPos.MutableBlockPos cursor = start.mutable();
+        for (int i = 0; i < 6; i++) {
+            BlockState state = level.getBlockState(cursor);
+            if (!state.isAir() && state.getFluidState().isEmpty() && !state.canBeReplaced()) {
+                return cursor.immutable();
+            }
+            cursor.move(0, -1, 0);
+        }
+        return null;
+    }
+
+    /** Breath bubble — water breathing for the target (D&D level 3). */
+    public static void breathBubble(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        LivingEntity subject = target != null ? target : caster;
+        JsonObject params = effect.params();
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 12000;
+        duration = Math.round(duration * (0.85f + power / 120f));
+        subject.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, duration, 0, false, true, true));
+        subject.clearFire();
+        ServerLevel level = caster.serverLevel();
+        level.playSound(null, subject.blockPosition(), SoundEvents.BUBBLE_COLUMN_UPWARDS_INSIDE, SoundSource.PLAYERS, 0.9f, 1.2f);
+        level.sendParticles(
+                ParticleTypes.BUBBLE,
+                subject.getX(),
+                subject.getY() + subject.getBbHeight(),
+                subject.getZ(),
+                16,
+                0.3,
+                0.3,
+                0.3,
+                0.02);
+    }
+
+    /** Water shield — brief absorption/resistance (D&D level 1, simplified concentration). */
+    public static void waterShield(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        JsonObject params = effect.params();
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 200;
+        duration = Math.round(duration * (0.85f + power / 120f));
+        int amp = power >= 50f ? 1 : 0;
+        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, amp, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
+        float maintain = params.has("maintain_drain") ? params.get("maintain_drain").getAsFloat() : 0.05f;
+        if (maintain > 0f) {
+            PlayerPsiData data = PsiHelper.get(caster);
+            data.setCurrentPsi(Math.max(0f, data.currentPsi() - maintain * 20f));
+            PsiHelper.set(caster, data);
+            caster.syncData(ModAttachments.PSI.get());
+        }
+        ServerLevel level = caster.serverLevel();
+        level.playSound(null, caster.blockPosition(), SoundEvents.PLAYER_SPLASH, SoundSource.PLAYERS, 0.7f, 1.3f);
+        spawnWaterHit(level, caster.position().add(0, 1, 0));
+    }
+
+    /** Sonic lance — focused compressed-air beam (D&D level 4). */
+    public static void sonicLance(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        double range = params.has("range") ? params.get("range").getAsDouble() : 48;
+        float damage = DiceDamage.fromParams(params, power, 7f);
+        float knock = params.has("knockback") ? params.get("knockback").getAsFloat() : 0.8f;
+        Vec3 look = caster.getLookAngle().normalize();
+        Vec3 start = caster.getEyePosition();
+        DamageSource source = level.damageSources().magic();
+        AABB sweep = caster.getBoundingBox().expandTowards(look.scale(range)).inflate(1.2);
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, sweep, e -> e != caster && e.isAlive())) {
+            Vec3 toTarget = target.getBoundingBox().getCenter().subtract(start);
+            double along = toTarget.dot(look);
+            if (along < 0 || along > range || toTarget.subtract(look.scale(along)).lengthSqr() > 2.0) {
+                continue;
+            }
+            target.hurt(source, damage);
+            target.push(look.x * knock, 0.12, look.z * knock);
+            target.hurtMarked = true;
+        }
+        int steps = (int) (range * 2);
+        for (int i = 0; i <= steps; i++) {
+            Vec3 p = start.add(look.scale(i * 0.5));
+            level.sendParticles(ModParticleTypes.PHI_GUST.get(), p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.01);
+        }
+        level.playSound(null, caster.blockPosition(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 1f, 0.7f);
     }
 
     public static void ignitePatch(ServerLevel level, BlockPos center, int radius, int maxFires) {

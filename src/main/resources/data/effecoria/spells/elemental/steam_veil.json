@@ -2,17 +2,17 @@
   "id": "effecoria:steam_veil",
   "school": "elemental",
   "frequency_hz": 20.0,
-  "base_cost": 15,
+  "base_cost": 5,
   "power_multiplier": 1.0,
-  "side_entropy": 0.05,
-  "min_phi": 0.2,
-  "min_mastery": 0.35,
+  "side_entropy": 0.04,
+  "min_phi": 0.15,
+  "min_mastery": 0.2,
   "radial_category": "movement",
   "effects": [
     {
       "type": "effecoria:steam_veil",
       "duration_ticks": 120,
-      "radius": 4.0
+      "radius": 3.0
     }
   ]
 }

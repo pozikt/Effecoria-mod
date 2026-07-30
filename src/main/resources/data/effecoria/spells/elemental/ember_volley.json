@@ -1,22 +1,23 @@
 {
   "id": "effecoria:ember_volley",
   "school": "elemental",
-  "frequency_hz": 26.0,
-  "base_cost": 15,
-  "power_multiplier": 0.9,
-  "side_entropy": 0.05,
-  "min_phi": 0.12,
+  "frequency_hz": 22.5,
+  "base_cost": 4,
+  "power_multiplier": 0.85,
+  "side_entropy": 0.04,
+  "min_phi": 0.1,
+  "min_mastery": 0.1,
   "radial_category": "combat",
   "effects": [
     {
       "type": "effecoria:fireball",
-      "speed": 1.4,
-      "damage": 1.2
+      "speed": 1.1,
+      "damage_dice": "1d4"
     },
     {
       "type": "effecoria:fireball",
-      "speed": 1.2,
-      "damage": 1.0
+      "speed": 1.0,
+      "damage_dice": "1d4"
     }
   ]
 }

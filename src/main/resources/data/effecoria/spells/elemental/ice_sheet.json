@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:ice_sheet",
+  "school": "elemental",
+  "frequency_hz": 18.2,
+  "base_cost": 10,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.05,
+  "min_phi": 0.2,
+  "min_mastery": 0.3,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:ice_sheet",
+      "half_size": 3,
+      "duration_ticks": 160
+    }
+  ]
+}

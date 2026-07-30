@@ -1,19 +1,19 @@
 {
   "id": "effecoria:ice_shard",
   "school": "elemental",
-  "frequency_hz": 19.0,
-  "base_cost": 15,
-  "power_multiplier": 1.1,
-  "side_entropy": 0.08,
-  "min_phi": 0.25,
-  "min_mastery": 0.55,
-  "min_power": 22,
+  "frequency_hz": 19.5,
+  "base_cost": 3,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.04,
+  "min_phi": 0.15,
+  "min_mastery": 0.1,
   "radial_category": "combat",
   "effects": [
     {
       "type": "effecoria:ice_shard",
       "speed": 1.5,
-      "damage": 5
+      "damage_dice": "1d4",
+      "damage_dice_alt": "1d4"
     }
   ]
 }

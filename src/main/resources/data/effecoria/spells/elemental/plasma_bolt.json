@@ -6,14 +6,14 @@
   "power_multiplier": 1.35,
   "side_entropy": 0.12,
   "min_phi": 0.35,
-  "min_mastery": 0.8,
-  "min_power": 42,
+  "min_mastery": 0.7,
+  "min_power": 40,
   "radial_category": "combat",
   "effects": [
     {
       "type": "effecoria:plasma_bolt",
       "speed": 2.0,
-      "damage": 12
+      "damage_dice": "4d8"
     }
   ]
 }

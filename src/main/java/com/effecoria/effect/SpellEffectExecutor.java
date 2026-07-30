@@ -60,8 +60,8 @@ public final class SpellEffectExecutor {
             "corrupt_mark",
             "binding_seal",
             "water_prison",
-            "vacuum_cage",
-            "air_hand");
+            "air_hand",
+            "ice_prison");
 
     private static final Set<String> BLOCK_SEAL_EFFECTS = Set.of(
             "place_trap_seal",
@@ -185,7 +185,15 @@ public final class SpellEffectExecutor {
             case "steam_flight" -> ElementalEffects.steamFlight(caster, effect, power);
             case "air_hand" -> ElementalEffects.airHand(caster, effect, power, target);
             case "water_prison" -> ElementalEffects.waterPrison(caster, effect, power, target);
-            case "vacuum_cage" -> ElementalEffects.vacuumCage(caster, effect, power, target);
+            case "vacuum_cage" -> ElementalEffects.vacuumCage(
+                    caster, effect, power, findSpellTarget(caster, 10));
+            case "ice_prison" -> ElementalEffects.icePrison(caster, effect, power, target);
+            case "shockwave" -> ElementalEffects.shockwave(caster, effect, power);
+            case "ice_sheet" -> ElementalEffects.iceSheet(caster, effect, power);
+            case "breath_bubble" -> ElementalEffects.breathBubble(
+                    caster, effect, power, findSpellTarget(caster, 8));
+            case "water_shield" -> ElementalEffects.waterShield(caster, effect, power);
+            case "sonic_lance" -> ElementalEffects.sonicLance(caster, effect, power);
             case "vitality" -> vitality(caster, effect, power);
             case "evoker_fangs" -> evokerFangs(caster, effect, power);
             case "root_bind" -> rootBind(caster, effect, power, target);

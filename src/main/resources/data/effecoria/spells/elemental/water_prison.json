@@ -6,7 +6,7 @@
   "power_multiplier": 1.15,
   "side_entropy": 0.08,
   "min_phi": 0.25,
-  "min_mastery": 0.55,
+  "min_mastery": 0.45,
   "min_power": 28,
   "radial_category": "combat",
   "effects": [
@@ -15,7 +15,7 @@
       "range": 10,
       "radius": 2,
       "duration_ticks": 100,
-      "damage_per_second": 2.0
+      "damage_dice_per_round": "2d6"
     }
   ]
 }

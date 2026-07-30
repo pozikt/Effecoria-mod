@@ -1,16 +1,17 @@
 {
   "id": "effecoria:wind_push",
   "school": "elemental",
-  "frequency_hz": 24.0,
-  "base_cost": 15,
+  "frequency_hz": 18.0,
+  "base_cost": 6,
   "power_multiplier": 1.0,
-  "side_entropy": 0.05,
-  "min_phi": 0.2,
-  "radial_category": "utility",
+  "side_entropy": 0.04,
+  "min_phi": 0.15,
+  "min_mastery": 0.2,
+  "radial_category": "movement",
   "effects": [
     {
       "type": "effecoria:wind_charge",
-      "speed": 1.3
+      "speed": 1.4
     }
   ]
 }

@@ -37,6 +37,8 @@ SPELL_SCHOOL = {
     "ice_shard": "elemental", "frost_bastion": "elemental", "plasma_bolt": "elemental",
     "hydro_slice": "elemental", "great_fireball": "elemental", "steam_flight": "elemental",
     "air_hand": "elemental", "water_prison": "elemental", "vacuum_cage": "elemental",
+    "water_shield": "elemental", "shockwave": "elemental", "ice_sheet": "elemental",
+    "breath_bubble": "elemental", "sonic_lance": "elemental", "ice_prison": "elemental",
     "vitality_pulse": "organic", "thorn_lash": "organic", "root_bind": "organic",
     "briar_surge": "organic", "verdant_mend": "organic",
     "soul_drain": "necromancy", "wither_touch": "necromancy", "shade_summon": "necromancy",
@@ -300,6 +302,37 @@ def icon_vacuum_cage(d, cx, cy, color):
     draw_disc(d, cx, cy, 3, (20, 20, 30, 220))
 
 
+def icon_water_shield(d, cx, cy, color):
+    icon_water(d, cx, cy, color)
+    icon_shield(d, cx, cy, (120, 200, 255, 220))
+
+
+def icon_shockwave(d, cx, cy, color):
+    icon_wind(d, cx, cy, color)
+    d.ellipse((cx - 12, cy - 12, cx + 12, cy + 12), outline=(220, 230, 255, 200), width=2)
+    d.ellipse((cx - 7, cy - 7, cx + 7, cy + 7), outline=(180, 200, 255, 180), width=1)
+
+
+def icon_ice_sheet(d, cx, cy, color):
+    icon_ice(d, cx, cy, color)
+    d.rectangle((cx - 10, cy + 4, cx + 10, cy + 10), fill=(180, 220, 255, 200))
+
+
+def icon_breath_bubble(d, cx, cy, color):
+    icon_wind(d, cx, cy, (200, 240, 255, 255))
+    d.ellipse((cx - 8, cy - 10, cx + 8, cy + 2), outline=(180, 230, 255, 230), width=2)
+
+
+def icon_sonic_lance(d, cx, cy, color):
+    icon_arrow(d, cx, cy, (230, 240, 255, 255))
+    d.line([(cx - 10, cy), (cx + 10, cy)], fill=(200, 220, 255, 220), width=3)
+
+
+def icon_ice_prison(d, cx, cy, color):
+    icon_ice(d, cx, cy, color)
+    d.ellipse((cx - 11, cy - 11, cx + 11, cy + 11), outline=(140, 200, 255, 230), width=2)
+
+
 def icon_steam_veil(d, cx, cy, color):
     icon_steam(d, cx, cy, color)
     d.ellipse((cx - 14, cy - 16, cx + 14, cy + 4), outline=color, width=2)
@@ -326,6 +359,12 @@ DRAWERS = {
     "air_hand": icon_air_hand,
     "water_prison": icon_water_prison,
     "vacuum_cage": icon_vacuum_cage,
+    "water_shield": icon_water_shield,
+    "shockwave": icon_shockwave,
+    "ice_sheet": icon_ice_sheet,
+    "breath_bubble": icon_breath_bubble,
+    "sonic_lance": icon_sonic_lance,
+    "ice_prison": icon_ice_prison,
     "vitality_pulse": icon_heart,
     "thorn_lash": icon_thorns,
     "root_bind": icon_roots,

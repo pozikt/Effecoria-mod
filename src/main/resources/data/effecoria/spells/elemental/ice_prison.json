@@ -1,0 +1,21 @@
+{
+  "id": "effecoria:ice_prison",
+  "school": "elemental",
+  "frequency_hz": 17.5,
+  "base_cost": 25,
+  "power_multiplier": 1.25,
+  "side_entropy": 0.11,
+  "min_phi": 0.3,
+  "min_mastery": 0.6,
+  "min_power": 36,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:ice_prison",
+      "range": 10,
+      "radius": 2,
+      "duration_ticks": 120,
+      "damage_dice_per_round": "2d6"
+    }
+  ]
+}

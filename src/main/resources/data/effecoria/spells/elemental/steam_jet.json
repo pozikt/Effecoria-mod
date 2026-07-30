@@ -1,21 +1,22 @@
 {
   "id": "effecoria:steam_jet",
   "school": "elemental",
-  "frequency_hz": 24.0,
-  "base_cost": 15,
-  "power_multiplier": 1.05,
-  "side_entropy": 0.07,
+  "frequency_hz": 21.0,
+  "base_cost": 3,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.05,
   "min_phi": 0.15,
-  "min_mastery": 0.25,
+  "min_mastery": 0.1,
   "radial_category": "combat",
   "effects": [
     {
       "type": "effecoria:steam_jet",
-      "range": 8,
-      "damage": 4,
-      "knockback": 1.5,
-      "cloud_radius": 2.5,
-      "cloud_duration_ticks": 60
+      "damage_dice": "1d6",
+      "range": 5,
+      "knockback": 1.2,
+      "blind_ticks": 20,
+      "cloud_radius": 2.0,
+      "cloud_duration_ticks": 50
     }
   ]
 }
