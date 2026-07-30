@@ -1,0 +1,22 @@
+{
+  "id": "effecoria:plasma_barrage",
+  "school": "elemental",
+  "frequency_hz": 34.0,
+  "base_cost": 65,
+  "power_multiplier": 1.6,
+  "side_entropy": 0.2,
+  "min_phi": 0.6,
+  "min_mastery": 0.9,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:plasma_barrage",
+      "count": 10,
+      "speed": 2.2,
+      "spread": 4.5,
+      "damage_dice": "4d12",
+      "damage_dice_alt": "3d8",
+      "damage_bonus": 8
+    }
+  ]
+}

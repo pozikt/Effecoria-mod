@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:thermonuclear_pulse",
+  "school": "elemental",
+  "frequency_hz": 30.0,
+  "base_cost": 40,
+  "power_multiplier": 1.45,
+  "side_entropy": 0.15,
+  "min_phi": 0.5,
+  "min_mastery": 0.8,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:thermonuclear_pulse",
+      "radius": 9,
+      "blind_ticks": 40,
+      "damage_dice": "7d10"
+    }
+  ]
+}

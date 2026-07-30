@@ -40,6 +40,12 @@ SPELL_SCHOOL = {
     "water_shield": "elemental", "shockwave": "elemental", "ice_sheet": "elemental",
     "breath_bubble": "elemental", "sonic_lance": "elemental", "ice_prison": "elemental",
     "air_ionization": "elemental", "mirage": "elemental", "tornado": "elemental", "ion_storm": "elemental",
+    "weak_breeze": "elemental", "hyper_cooling": "elemental",
+    "lightning_spear": "elemental", "water_shroud": "elemental", "air_shroud": "elemental",
+    "atmospheric_pressure": "elemental", "cryo_wave": "elemental", "air_form": "elemental",
+    "hurricane_storm": "elemental", "elemental_supremacy": "elemental", "thermonuclear_pulse": "elemental",
+    "absolute_zero": "elemental", "meteorological_cataclysm": "elemental", "quasar": "elemental",
+    "plasma_barrage": "elemental",
     "vitality_pulse": "organic", "thorn_lash": "organic", "root_bind": "organic",
     "briar_surge": "organic", "verdant_mend": "organic",
     "soul_drain": "necromancy", "wither_touch": "necromancy", "shade_summon": "necromancy",
@@ -354,6 +360,85 @@ def icon_ion_storm(d, cx, cy, color):
     d.ellipse((cx - 13, cy - 13, cx + 13, cy + 13), outline=(180, 220, 255, 200), width=2)
 
 
+def icon_weak_breeze(d, cx, cy, color):
+    icon_wind(d, cx, cy, (200, 210, 230, 220))
+    d.arc((cx - 10, cy - 6, cx + 4, cy + 8), 200, 340, fill=(180, 200, 230, 200))
+
+
+def icon_hyper_cooling(d, cx, cy, color):
+    icon_ice(d, cx, cy, color)
+    d.ellipse((cx - 12, cy - 12, cx + 12, cy + 12), outline=(160, 210, 255, 220), width=2)
+    draw_disc(d, cx, cy, 3, (220, 240, 255, 230))
+
+
+def icon_lightning_spear(d, cx, cy, color):
+    icon_plasma(d, cx, cy, color)
+    icon_lance(d, cx, cy, (240, 250, 255, 230))
+
+
+def icon_water_shroud(d, cx, cy, color):
+    icon_water(d, cx, cy, color)
+    d.ellipse((cx - 12, cy - 14, cx + 12, cy + 10), outline=(120, 200, 255, 200), width=2)
+
+
+def icon_air_shroud(d, cx, cy, color):
+    icon_wind(d, cx, cy, color)
+    d.ellipse((cx - 12, cy - 14, cx + 12, cy + 10), outline=(200, 220, 255, 200), width=2)
+
+
+def icon_atmospheric_pressure(d, cx, cy, color):
+    icon_shockwave(d, cx, cy, color)
+    d.ellipse((cx - 5, cy - 5, cx + 5, cy + 5), fill=(80, 90, 110, 220))
+
+
+def icon_cryo_wave(d, cx, cy, color):
+    icon_ice(d, cx, cy, color)
+    d.polygon([(cx - 12, cy + 8), (cx, cy - 10), (cx + 12, cy + 8)], outline=(180, 230, 255, 230))
+
+
+def icon_air_form(d, cx, cy, color):
+    icon_steam_flight(d, cx, cy, (210, 230, 255, 230))
+    d.ellipse((cx - 8, cy - 8, cx + 8, cy + 8), outline=(255, 255, 255, 160), width=1)
+
+
+def icon_hurricane_storm(d, cx, cy, color):
+    icon_tornado(d, cx, cy, color)
+    d.ellipse((cx - 14, cy - 14, cx + 14, cy + 14), outline=(180, 200, 230, 180), width=2)
+
+
+def icon_elemental_supremacy(d, cx, cy, color):
+    icon_fire(d, cx - 5, cy - 2, (255, 140, 60, 230))
+    icon_ice(d, cx + 5, cy + 2, (160, 220, 255, 230))
+    icon_wind(d, cx, cy - 6, (200, 220, 255, 180))
+
+
+def icon_thermonuclear_pulse(d, cx, cy, color):
+    icon_great_fire(d, cx, cy, color)
+    d.ellipse((cx - 14, cy - 14, cx + 14, cy + 14), outline=(255, 220, 120, 220), width=2)
+
+
+def icon_absolute_zero(d, cx, cy, color):
+    icon_ice_prison(d, cx, cy, color)
+    draw_disc(d, cx, cy, 4, (230, 245, 255, 240))
+
+
+def icon_meteorological_cataclysm(d, cx, cy, color):
+    icon_hurricane_storm(d, cx, cy, color)
+    icon_plasma(d, cx, cy - 4, (220, 240, 255, 200))
+
+
+def icon_quasar(d, cx, cy, color):
+    draw_disc(d, cx, cy, 5, (255, 240, 200, 255))
+    d.ellipse((cx - 11, cy - 11, cx + 11, cy + 11), outline=(255, 220, 140, 230), width=2)
+    d.ellipse((cx - 15, cy - 15, cx + 15, cy + 15), outline=(180, 200, 255, 160), width=1)
+
+
+def icon_plasma_barrage(d, cx, cy, color):
+    for ox, oy in ((-7, -4), (0, 0), (7, 4), (-3, 6), (4, -7)):
+        draw_disc(d, cx + ox, cy + oy, 2, (255, 180, 80, 240))
+    icon_plasma(d, cx, cy, color)
+
+
 def icon_steam_veil(d, cx, cy, color):
     icon_steam(d, cx, cy, color)
     d.ellipse((cx - 14, cy - 16, cx + 14, cy + 4), outline=color, width=2)
@@ -390,6 +475,21 @@ DRAWERS = {
     "mirage": icon_mirage,
     "tornado": icon_tornado,
     "ion_storm": icon_ion_storm,
+    "weak_breeze": icon_weak_breeze,
+    "hyper_cooling": icon_hyper_cooling,
+    "lightning_spear": icon_lightning_spear,
+    "water_shroud": icon_water_shroud,
+    "air_shroud": icon_air_shroud,
+    "atmospheric_pressure": icon_atmospheric_pressure,
+    "cryo_wave": icon_cryo_wave,
+    "air_form": icon_air_form,
+    "hurricane_storm": icon_hurricane_storm,
+    "elemental_supremacy": icon_elemental_supremacy,
+    "thermonuclear_pulse": icon_thermonuclear_pulse,
+    "absolute_zero": icon_absolute_zero,
+    "meteorological_cataclysm": icon_meteorological_cataclysm,
+    "quasar": icon_quasar,
+    "plasma_barrage": icon_plasma_barrage,
     "vitality_pulse": icon_heart,
     "thorn_lash": icon_thorns,
     "root_bind": icon_roots,

@@ -16,6 +16,7 @@ import com.effecoria.effect.elemental.AirHandService;
 import com.effecoria.effect.elemental.ElementalBlockService;
 import com.effecoria.effect.elemental.ElementalCageService;
 import com.effecoria.effect.elemental.ElementalFieldService;
+import com.effecoria.effect.elemental.ElementalShroudService;
 import com.effecoria.effect.elemental.SteamCloudService;
 import com.effecoria.effect.elemental.SteamFlightService;
 import com.effecoria.magic.SpellRegistry;
@@ -87,6 +88,7 @@ public final class ModCommonEvents {
                 SteamFlightService.tick(player);
             }
             AirHandService.tick(player);
+            ElementalShroudService.tick(player);
             PsiHelper.set(player, flightData);
         }
 
@@ -154,6 +156,7 @@ public final class ModCommonEvents {
         ExhaustionService.clearOnDeath(data);
         data.clearIonCharge();
         ElementalFieldService.clearFor(player.getUUID());
+        ElementalShroudService.clearFor(player.getUUID());
         AirHandService.clearFor(player);
         PsiHelper.set(player, data);
         ExhaustionService.stripExhaustionEffects(player);

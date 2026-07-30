@@ -15,18 +15,20 @@ import net.minecraft.util.Mth;
 
 /**
  * Constellation layout: player core at center, spells on orbits grouped by category.
+ * Dense categories get wider wedges; rings never collapse onto the same radius.
  */
 public final class SpellHubLayout {
     public static final float BASE_CORE_RADIUS = 34f;
     public static final float BASE_MIN_ORBIT = 78f;
-    public static final float BASE_ORBIT_STEP = 30f;
+    public static final float BASE_ORBIT_STEP = 34f;
     /** Fixed orbit for the breathing-train node (left of core). */
     public static final float BASE_TRAIN_ORBIT = 92f;
-    private static final float NODE_GAP = 8f;
-    private static final float MAX_CATEGORY_SPAN = (float) (Math.PI * 0.46);
-    private static final int SEPARATION_ITERATIONS = 14;
-    /** Screen angle: left (−X) so the train node stays clear of spell fans. */
+    private static final float NODE_GAP = 10f;
+    /** Keep a clear pie slice around the train node (screen left). */
+    private static final float TRAIN_GAP = (float) (Math.PI * 0.42);
     private static final float TRAIN_ANGLE = (float) Math.PI;
+    private static final int SEPARATION_ITERATIONS = 28;
+    private static final float MIN_CATEGORY_SHARE = 0.12f;
 
     public record SpellNode(
             ResourceLocation spellId,
@@ -56,12 +58,11 @@ public final class SpellHubLayout {
     public static Layout build(PlayerPsiData data, int screenWidth, int screenHeight) {
         float scale = menuScale(screenWidth, screenHeight);
         float coreRadius = BASE_CORE_RADIUS * scale;
-        float nodeRadius = Math.max(13f, 17f * scale);
+        float nodeRadius = Math.max(12f, 16f * scale);
         float minOrbit = BASE_MIN_ORBIT * scale;
-        float orbitStep = BASE_ORBIT_STEP * scale;
-        float maxOrbit = Math.min(screenWidth, screenHeight) * 0.40f * scale;
-        orbitStep = Math.max(orbitStep, minCenterDistance(nodeRadius) * 0.95f);
-        float trainOrbit = Math.min(BASE_TRAIN_ORBIT * scale, maxOrbit);
+        float orbitStep = Math.max(BASE_ORBIT_STEP * scale, minCenterDistance(nodeRadius));
+        float screenCap = Math.min(screenWidth, screenHeight) * 0.46f;
+        float trainOrbit = Math.min(BASE_TRAIN_ORBIT * scale, screenCap);
         float trainRadius = nodeRadius * 1.15f;
 
         TrainNode trainNode = new TrainNode(
@@ -83,32 +84,52 @@ public final class SpellHubLayout {
             byCategory.get(def.get().radialCategory()).add(new IndexedSpell(id, i));
         }
 
-        int activeCategories = (int) byCategory.values().stream().filter(list -> !list.isEmpty()).count();
-        float categorySpan = categorySpanFor(activeCategories);
+        List<RadialCategory> active = new ArrayList<>();
+        int totalSpells = 0;
+        for (RadialCategory category : RadialCategory.outerRingOrder()) {
+            List<IndexedSpell> spells = byCategory.get(category);
+            if (!spells.isEmpty()) {
+                active.add(category);
+                totalSpells += spells.size();
+            }
+        }
+
+        float[] shares = proportionalShares(active, byCategory, totalSpells);
+        float usable = (float) (Math.PI * 2.0) - TRAIN_GAP;
+        float cursor = normalizeAngle(TRAIN_ANGLE + TRAIN_GAP * 0.5f);
+
+        // Grow outer radius so the densest category can spread without stacking rings.
+        float maxOrbit = minOrbit;
+        for (int i = 0; i < active.size(); i++) {
+            float span = usable * shares[i];
+            int count = byCategory.get(active.get(i)).size();
+            maxOrbit = Math.max(maxOrbit, requiredOuterOrbit(count, span, minOrbit, orbitStep, nodeRadius));
+        }
+        maxOrbit = Math.min(maxOrbit, screenCap);
 
         List<SpellNode> nodes = new ArrayList<>();
-        float[] categoryAngle = categoryBaseAngles();
-        RadialCategory[] order = RadialCategory.outerRingOrder();
-        for (int c = 0; c < order.length; c++) {
-            RadialCategory category = order[c];
-            List<IndexedSpell> spells = byCategory.get(category);
-            if (spells.isEmpty()) {
-                continue;
-            }
+        for (int i = 0; i < active.size(); i++) {
+            RadialCategory category = active.get(i);
+            float span = usable * shares[i];
+            float baseAngle = normalizeAngle(cursor + span * 0.5f);
             placeCategoryFan(
                     nodes,
-                    spells,
+                    byCategory.get(category),
                     category,
-                    categoryAngle[c],
-                    categorySpan,
+                    baseAngle,
+                    span,
                     minOrbit,
                     orbitStep,
                     maxOrbit,
                     nodeRadius);
+            cursor = normalizeAngle(cursor + span);
         }
 
-        nodes = separateNodes(nodes, nodeRadius, coreRadius + 4f, maxOrbit);
-        // Keep spell nodes out of the fixed train node.
+        float annulusMin = coreRadius + nodeRadius + 6f;
+        nodes = separateNodes(nodes, nodeRadius, annulusMin, maxOrbit);
+        nodes = pushAwayFromTrain(nodes, trainNode, nodeRadius);
+        // Train push can reintroduce overlaps — resolve again within a slightly wider cap.
+        nodes = separateNodes(nodes, nodeRadius, annulusMin, Math.min(screenCap, maxOrbit + orbitStep * 0.5f));
         nodes = pushAwayFromTrain(nodes, trainNode, nodeRadius);
         return new Layout(scale, coreRadius, nodeRadius, List.copyOf(nodes), trainNode);
     }
@@ -139,6 +160,46 @@ public final class SpellHubLayout {
         return Optional.empty();
     }
 
+    private static float[] proportionalShares(
+            List<RadialCategory> active,
+            EnumMap<RadialCategory, List<IndexedSpell>> byCategory,
+            int totalSpells) {
+        float[] shares = new float[active.size()];
+        if (active.isEmpty()) {
+            return shares;
+        }
+        if (active.size() == 1) {
+            shares[0] = 1f;
+            return shares;
+        }
+        float rawSum = 0f;
+        for (int i = 0; i < active.size(); i++) {
+            float share = Math.max(MIN_CATEGORY_SHARE, byCategory.get(active.get(i)).size() / (float) Math.max(1, totalSpells));
+            shares[i] = share;
+            rawSum += share;
+        }
+        for (int i = 0; i < shares.length; i++) {
+            shares[i] /= rawSum;
+        }
+        return shares;
+    }
+
+    /** Outer orbit needed so every spell fits without stacking rings at the same radius. */
+    private static float requiredOuterOrbit(
+            int count, float span, float minOrbit, float orbitStep, float nodeRadius) {
+        float minDist = minCenterDistance(nodeRadius);
+        int remaining = count;
+        int ring = 0;
+        float orbit = minOrbit;
+        while (remaining > 0 && ring < 12) {
+            orbit = minOrbit + ring * orbitStep;
+            int capacity = Math.max(1, maxNodesOnRing(orbit, span, minDist));
+            remaining -= capacity;
+            ring++;
+        }
+        return orbit;
+    }
+
     private static List<SpellNode> pushAwayFromTrain(List<SpellNode> nodes, TrainNode train, float nodeRadius) {
         float minDist = train.radius() + nodeRadius + NODE_GAP;
         float minDistSq = minDist * minDist;
@@ -147,8 +208,19 @@ public final class SpellHubLayout {
             float dx = node.offsetX() - train.offsetX();
             float dy = node.offsetY() - train.offsetY();
             float distSq = dx * dx + dy * dy;
-            if (distSq >= minDistSq || distSq < 1.0E-4f) {
+            if (distSq >= minDistSq) {
                 out.add(node);
+                continue;
+            }
+            if (distSq < 1.0E-4f) {
+                // Nudge along the train gap edge rather than stacking on the train.
+                float edge = TRAIN_ANGLE + TRAIN_GAP * 0.55f;
+                out.add(new SpellNode(
+                        node.spellId(),
+                        node.knownIndex(),
+                        node.category(),
+                        train.offsetX() + (float) Math.cos(edge) * minDist,
+                        train.offsetY() + (float) Math.sin(edge) * minDist));
                 continue;
             }
             float dist = (float) Math.sqrt(distSq);
@@ -163,25 +235,17 @@ public final class SpellHubLayout {
         return out;
     }
 
-    private static float categorySpanFor(int activeCategories) {
-        if (activeCategories <= 1) {
-            return (float) (Math.PI * 0.9);
-        }
-        float evenSpan = (float) (Math.PI * 2.0 / activeCategories) * 0.82f;
-        return Math.min(MAX_CATEGORY_SPAN, evenSpan);
-    }
-
     private static float minCenterDistance(float nodeRadius) {
         return nodeRadius * 2f + NODE_GAP;
     }
 
-    private static float[] categoryBaseAngles() {
-        return new float[] {
-            (float) (-Math.PI / 2.0),
-            0f,
-            (float) (Math.PI / 2.0),
-            (float) Math.PI
-        };
+    private static float normalizeAngle(float angle) {
+        float twoPi = (float) (Math.PI * 2.0);
+        float a = angle % twoPi;
+        if (a < 0f) {
+            a += twoPi;
+        }
+        return a;
     }
 
     private static void placeCategoryFan(
@@ -199,48 +263,58 @@ public final class SpellHubLayout {
         int index = 0;
         int ring = 0;
 
-        while (index < count) {
-            float orbit = minOrbit + ring * orbitStep;
-            if (orbit > maxOrbit) {
-                orbit = maxOrbit;
+        while (index < count && ring < 12) {
+            float orbit = Math.min(minOrbit + ring * orbitStep, maxOrbit);
+            // If we have already hit the outer cap, keep walking outward in tiny steps
+            // so remaining spells are not forced onto the exact same circle.
+            if (ring > 0 && orbit >= maxOrbit - 0.5f) {
+                orbit = Math.min(maxOrbit + (ring - estimatedRingsToCap(minOrbit, orbitStep, maxOrbit)) * (orbitStep * 0.55f),
+                        maxOrbit + orbitStep);
             }
 
             int capacity = maxNodesOnRing(orbit, span, minDist);
+            // Never place more than capacity; if capacity is 1 forever, still advance radius.
             int remaining = count - index;
-            int onRing = Math.min(capacity, remaining);
+            int onRing = Math.min(Math.max(1, capacity), remaining);
 
             for (int j = 0; j < onRing; j++) {
                 IndexedSpell spell = spells.get(index++);
                 float t = onRing == 1 ? 0.5f : j / (float) (onRing - 1);
-                float angle = baseAngle - span * 0.5f + t * span;
+                // Inset slightly from wedge edges so neighboring categories do not kiss.
+                float edgePad = onRing == 1 ? 0f : 0.08f;
+                float localSpan = span * (1f - edgePad);
+                float angle = baseAngle - localSpan * 0.5f + t * localSpan;
                 float nx = (float) Math.cos(angle) * orbit;
                 float ny = (float) Math.sin(angle) * orbit;
                 nodes.add(new SpellNode(spell.id(), spell.knownIndex(), category, nx, ny));
             }
             ring++;
-            if (ring > 8) {
-                break;
-            }
         }
     }
 
-    /** How many nodes fit on one ring without overlapping (chord spacing). */
+    private static int estimatedRingsToCap(float minOrbit, float orbitStep, float maxOrbit) {
+        if (orbitStep < 1f) {
+            return 0;
+        }
+        return Math.max(0, (int) Math.floor((maxOrbit - minOrbit) / orbitStep));
+    }
+
+    /** How many nodes fit on one ring without overlapping (adjacent chord spacing). */
     private static int maxNodesOnRing(float orbit, float span, float minDist) {
         if (orbit < 1f || span < 0.01f) {
             return 1;
         }
-        float arcLength = span * orbit;
-        int byArc = Math.max(1, (int) Math.floor(arcLength / minDist));
-        if (byArc <= 1) {
-            return 1;
+        // For n>=2 equally spaced on an arc: chord = 2 r sin(Δθ/2), Δθ = span/(n-1).
+        int best = 1;
+        for (int n = 2; n <= 24; n++) {
+            float delta = span / (n - 1);
+            float chord = 2f * orbit * (float) Math.sin(delta * 0.5);
+            if (chord + 0.01f < minDist) {
+                break;
+            }
+            best = n;
         }
-        float halfAngle = span * 0.5f;
-        float sinHalf = (float) Math.sin(Math.min(Math.PI * 0.49, halfAngle));
-        if (sinHalf < 0.01f) {
-            return 1;
-        }
-        int byChord = Math.max(1, (int) Math.floor((2f * orbit * sinHalf) / minDist) + 1);
-        return Math.max(1, Math.min(byArc, byChord));
+        return best;
     }
 
     private static List<SpellNode> separateNodes(
@@ -267,16 +341,17 @@ public final class SpellHubLayout {
                     float dx = xs[j] - xs[i];
                     float dy = ys[j] - ys[i];
                     float distSq = dx * dx + dy * dy;
-                    if (distSq >= minDistSq || distSq < 1.0e-4f) {
-                        if (distSq < 1.0e-4f) {
-                            float jitter = 0.5f + i * 0.1f;
-                            xs[j] += jitter;
-                            ys[j] += jitter * 0.7f;
-                        }
+                    if (distSq >= minDistSq) {
+                        continue;
+                    }
+                    if (distSq < 1.0e-4f) {
+                        float jitter = 0.8f + i * 0.15f;
+                        xs[j] += jitter;
+                        ys[j] += jitter * 0.6f;
                         continue;
                     }
                     float dist = (float) Math.sqrt(distSq);
-                    float push = (minDist - dist) * 0.55f;
+                    float push = (minDist - dist) * 0.62f;
                     float ux = dx / dist;
                     float uy = dy / dist;
                     xs[i] -= ux * push;

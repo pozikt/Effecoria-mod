@@ -1,0 +1,21 @@
+{
+  "id": "effecoria:hurricane_storm",
+  "school": "elemental",
+  "frequency_hz": 26.0,
+  "base_cost": 32,
+  "power_multiplier": 1.3,
+  "side_entropy": 0.12,
+  "min_phi": 0.42,
+  "min_mastery": 0.7,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:hurricane_storm",
+      "radius": 7.5,
+      "duration_ticks": 160,
+      "knockback": 1.8,
+      "maintain_drain_per_second": 4.0,
+      "damage_dice_per_round": "3d8"
+    }
+  ]
+}

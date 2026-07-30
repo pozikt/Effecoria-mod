@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:quasar",
+  "school": "elemental",
+  "frequency_hz": 33.0,
+  "base_cost": 55,
+  "power_multiplier": 1.5,
+  "side_entropy": 0.18,
+  "min_phi": 0.58,
+  "min_mastery": 0.9,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:quasar",
+      "radius": 7.5,
+      "duration_ticks": 1200,
+      "damage_dice_per_round": "6d12"
+    }
+  ]
+}

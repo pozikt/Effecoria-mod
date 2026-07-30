@@ -30,7 +30,10 @@ public final class ElementalFieldService {
     public enum Kind {
         MIRAGE,
         ION_STORM,
-        TORNADO
+        TORNADO,
+        HURRICANE,
+        QUASAR,
+        SUPREMACY
     }
 
     private static final class ActiveField {
@@ -145,6 +148,76 @@ public final class ElementalFieldService {
         level.playSound(null, start.x, start.y, start.z, SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 0.9f, 0.6f);
     }
 
+    public static void spawnHurricane(
+            ServerLevel level,
+            Vec3 center,
+            UUID owner,
+            float radius,
+            int durationTicks,
+            float maintainDrainPerSecond,
+            float damagePerSecond,
+            float knock) {
+        addField(
+                level,
+                Kind.HURRICANE,
+                center,
+                Vec3.ZERO,
+                radius,
+                durationTicks,
+                owner,
+                maintainDrainPerSecond / 20f,
+                damagePerSecond,
+                knock,
+                0f,
+                0f);
+        level.playSound(null, center.x, center.y, center.z, SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.1f, 0.4f);
+    }
+
+    public static void spawnQuasar(
+            ServerLevel level,
+            Vec3 center,
+            UUID owner,
+            float radius,
+            int durationTicks,
+            float damagePerSecond) {
+        addField(level, Kind.QUASAR, center, Vec3.ZERO, radius, durationTicks, owner, 0f, damagePerSecond, 0f, 0f, 0f);
+        level.playSound(null, center.x, center.y, center.z, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.9f, 0.5f);
+        level.sendParticles(
+                ParticleTypes.END_ROD,
+                center.x,
+                center.y + 1,
+                center.z,
+                40,
+                radius * 0.2,
+                1.0,
+                radius * 0.2,
+                0.05);
+    }
+
+    public static void spawnSupremacy(
+            ServerLevel level,
+            Vec3 center,
+            UUID owner,
+            float radius,
+            int durationTicks,
+            float maintainDrainPerSecond,
+            float damagePerSecond) {
+        addField(
+                level,
+                Kind.SUPREMACY,
+                center,
+                Vec3.ZERO,
+                radius,
+                durationTicks,
+                owner,
+                maintainDrainPerSecond / 20f,
+                damagePerSecond,
+                0f,
+                0f,
+                0f);
+        level.playSound(null, center.x, center.y, center.z, SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.PLAYERS, 0.6f, 1.4f);
+    }
+
     public static void clearFor(UUID owner) {
         FIELDS.removeIf(f -> owner.equals(f.owner));
     }
@@ -170,6 +243,9 @@ public final class ElementalFieldService {
                 case MIRAGE -> tickMirage(level, field, now);
                 case ION_STORM -> tickIonStorm(level, field, now);
                 case TORNADO -> tickTornado(level, field, now);
+                case HURRICANE -> tickHurricane(level, field, now);
+                case QUASAR -> tickQuasar(level, field, now);
+                case SUPREMACY -> tickSupremacy(level, field, now);
             }
         }
 
@@ -334,6 +410,137 @@ public final class ElementalFieldService {
                     field.radius * 0.5,
                     field.radius * 0.25,
                     0.06);
+        }
+    }
+
+    private static void tickHurricane(ServerLevel level, ActiveField field, long now) {
+        AABB box = field.bounds();
+        DamageSource source = level.damageSources().magic();
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (entity.getUUID().equals(field.owner)) {
+                continue;
+            }
+            if (!field.contains(entity.position().add(0, entity.getBbHeight() * 0.5, 0))) {
+                continue;
+            }
+            Vec3 away = entity.position().subtract(field.center);
+            if (away.lengthSqr() > 1.0e-4) {
+                away = away.normalize();
+                float knock = Math.max(0.2f, field.tornadoKnock);
+                entity.push(away.x * knock * 0.12, 0.12, away.z * knock * 0.12);
+            }
+            if (now % 20 == 0 && field.damagePerSecond > 0f) {
+                entity.hurt(source, field.damagePerSecond);
+                entity.hurtMarked = true;
+            }
+        }
+        if (now % 2 == 0) {
+            level.sendParticles(
+                    ModParticleTypes.PHI_GUST.get(),
+                    field.center.x,
+                    field.center.y + 1,
+                    field.center.z,
+                    Math.max(12, Math.round(field.radius)),
+                    field.radius * 0.45,
+                    0.8,
+                    field.radius * 0.45,
+                    0.08);
+        }
+    }
+
+    private static void tickQuasar(ServerLevel level, ActiveField field, long now) {
+        if (now % 20 == 0 && field.damagePerSecond > 0f) {
+            DamageSource source = level.damageSources().magic();
+            AABB box = field.bounds();
+            for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+                if (entity.getUUID().equals(field.owner)) {
+                    continue;
+                }
+                if (!field.contains(entity.position().add(0, entity.getBbHeight() * 0.5, 0))) {
+                    continue;
+                }
+                entity.hurt(source, field.damagePerSecond);
+                entity.hurt(level.damageSources().onFire(), field.damagePerSecond * 0.25f);
+                entity.hurtMarked = true;
+            }
+        }
+        if (now % 2 == 0) {
+            level.sendParticles(
+                    ParticleTypes.END_ROD,
+                    field.center.x,
+                    field.center.y + 1.2,
+                    field.center.z,
+                    10,
+                    field.radius * 0.35,
+                    0.7,
+                    field.radius * 0.35,
+                    0.04);
+            level.sendParticles(
+                    ModParticleTypes.PHI_FLAME.get(),
+                    field.center.x,
+                    field.center.y + 0.8,
+                    field.center.z,
+                    4,
+                    0.2,
+                    0.4,
+                    0.2,
+                    0.02);
+        }
+    }
+
+    private static void tickSupremacy(ServerLevel level, ActiveField field, long now) {
+        ServerPlayer owner = level.getServer().getPlayerList().getPlayer(field.owner);
+        if (owner != null) {
+            field.center = owner.position().add(0, 0.5, 0);
+        }
+        AABB box = field.bounds();
+        DamageSource source = level.damageSources().magic();
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (entity.getUUID().equals(field.owner)) {
+                continue;
+            }
+            if (!field.contains(entity.position().add(0, entity.getBbHeight() * 0.5, 0))) {
+                continue;
+            }
+            entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 1, false, false, true));
+            if (now % 20 == 0 && field.damagePerSecond > 0f) {
+                // Mixed elemental pressure: alternate cold / fire / magic slices.
+                float hit = field.damagePerSecond;
+                long phase = (now / 20) % 3;
+                if (phase == 0) {
+                    entity.hurt(source, hit);
+                    entity.setTicksFrozen(Math.min(200, entity.getTicksFrozen() + 40));
+                } else if (phase == 1) {
+                    entity.hurt(level.damageSources().onFire(), hit);
+                    entity.igniteForSeconds(2);
+                } else {
+                    entity.hurt(source, hit * 0.85f);
+                    entity.push(0, 0.25, 0);
+                }
+                entity.hurtMarked = true;
+            }
+        }
+        if (now % 5 == 0) {
+            level.sendParticles(
+                    ModParticleTypes.STEAM_FOG.get(),
+                    field.center.x,
+                    field.center.y + 1,
+                    field.center.z,
+                    8,
+                    field.radius * 0.3,
+                    0.5,
+                    field.radius * 0.3,
+                    0.02);
+            level.sendParticles(
+                    ModParticleTypes.ICE_CRYSTAL.get(),
+                    field.center.x,
+                    field.center.y + 0.5,
+                    field.center.z,
+                    4,
+                    field.radius * 0.25,
+                    0.3,
+                    field.radius * 0.25,
+                    0.02);
         }
     }
 }

@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:weak_breeze",
+  "school": "elemental",
+  "frequency_hz": 16.0,
+  "base_cost": 1,
+  "power_multiplier": 0.85,
+  "side_entropy": 0.01,
+  "min_phi": 0.05,
+  "min_mastery": 0.0,
+  "radial_category": "movement",
+  "effects": [
+    {
+      "type": "effecoria:weak_breeze",
+      "range": 5,
+      "knockback": 0.55
+    }
+  ]
+}

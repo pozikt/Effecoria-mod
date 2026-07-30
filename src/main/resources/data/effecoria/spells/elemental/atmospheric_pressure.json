@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:atmospheric_pressure",
+  "school": "elemental",
+  "frequency_hz": 23.0,
+  "base_cost": 24,
+  "power_multiplier": 1.2,
+  "side_entropy": 0.1,
+  "min_phi": 0.38,
+  "min_mastery": 0.6,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:atmospheric_pressure",
+      "radius": 6,
+      "stun_ticks": 30,
+      "damage_dice": "4d6"
+    }
+  ]
+}

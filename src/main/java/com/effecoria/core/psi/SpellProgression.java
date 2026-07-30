@@ -40,6 +40,7 @@ public final class SpellProgression {
 
             case ELEMENTAL -> List.of(
                     id("fire_burst"),
+                    id("weak_breeze"),
                     id("water_stream"),
                     id("water_shield"),
                     id("steam_jet"),
@@ -56,14 +57,28 @@ public final class SpellProgression {
                     id("sonic_lance"),
                     id("tornado"),
                     id("ion_storm"),
+                    id("hyper_cooling"),
                     id("frost_bastion"),
                     id("hydro_slice"),
                     id("water_prison"),
                     id("great_fireball"),
                     id("vacuum_cage"),
+                    id("lightning_spear"),
+                    id("water_shroud"),
+                    id("air_shroud"),
                     id("ice_prison"),
+                    id("atmospheric_pressure"),
+                    id("cryo_wave"),
+                    id("air_form"),
+                    id("hurricane_storm"),
                     id("plasma_bolt"),
-                    id("steam_flight"));
+                    id("steam_flight"),
+                    id("elemental_supremacy"),
+                    id("thermonuclear_pulse"),
+                    id("absolute_zero"),
+                    id("meteorological_cataclysm"),
+                    id("quasar"),
+                    id("plasma_barrage"));
 
             case ORGANIC -> List.of(
 

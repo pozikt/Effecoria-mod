@@ -174,6 +174,8 @@ public final class SpellEffectExecutor {
             case "phi_sense" -> phiSense(caster, effect);
             case "fireball" -> ElementalEffects.weakFireball(caster, effect, power);
             case "wind_charge" -> ElementalEffects.windCharge(caster, effect, power);
+            case "weak_breeze" -> ElementalEffects.weakBreeze(caster, effect, power);
+            case "hyper_cooling" -> ElementalEffects.hyperCooling(caster, effect, power);
             case "water_stream" -> ElementalEffects.waterLash(caster, effect, power);
             case "steam_jet" -> ElementalEffects.steamJet(caster, effect, power);
             case "steam_veil" -> ElementalEffects.steamVeil(caster, effect, power);
@@ -198,6 +200,19 @@ public final class SpellEffectExecutor {
             case "mirage" -> ElementalEffects.mirage(caster, effect, power);
             case "tornado" -> ElementalEffects.tornado(caster, effect, power);
             case "ion_storm" -> ElementalEffects.ionStorm(caster, effect, power);
+            case "lightning_spear" -> ElementalEffects.lightningSpear(caster, effect, power);
+            case "water_shroud" -> ElementalEffects.waterShroud(caster, effect, power);
+            case "air_shroud" -> ElementalEffects.airShroud(caster, effect, power);
+            case "atmospheric_pressure" -> ElementalEffects.atmosphericPressure(caster, effect, power);
+            case "cryo_wave" -> ElementalEffects.cryoWave(caster, effect, power);
+            case "air_form" -> ElementalEffects.airForm(caster, effect, power);
+            case "hurricane_storm" -> ElementalEffects.hurricaneStorm(caster, effect, power);
+            case "elemental_supremacy" -> ElementalEffects.elementalSupremacy(caster, effect, power);
+            case "thermonuclear_pulse" -> ElementalEffects.thermonuclearPulse(caster, effect, power);
+            case "absolute_zero" -> ElementalEffects.absoluteZero(caster, effect, power);
+            case "meteorological_cataclysm" -> ElementalEffects.meteorologicalCataclysm(caster, effect, power);
+            case "quasar" -> ElementalEffects.quasar(caster, effect, power);
+            case "plasma_barrage" -> ElementalEffects.plasmaBarrage(caster, effect, power);
             case "vitality" -> vitality(caster, effect, power);
             case "evoker_fangs" -> evokerFangs(caster, effect, power);
             case "root_bind" -> rootBind(caster, effect, power, target);

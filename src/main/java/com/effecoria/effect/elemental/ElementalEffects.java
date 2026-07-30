@@ -248,6 +248,118 @@ public final class ElementalEffects {
         level.sendParticles(ModParticleTypes.PHI_FLAME.get(), caster.getX(), caster.getEyeY(), caster.getZ(), 8, 0.1, 0.1, 0.1, 0.03);
     }
 
+    /** Soft breeze cantrip — light push along the look direction, no real damage. */
+    public static void weakBreeze(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        double range = params.has("range") ? params.get("range").getAsDouble() : 5;
+        float knock = params.has("knockback") ? params.get("knockback").getAsFloat() : 0.55f;
+        knock *= 0.85f + power / 140f;
+
+        Vec3 look = caster.getLookAngle().normalize();
+        Vec3 start = caster.getEyePosition();
+        AABB sweep = caster.getBoundingBox().expandTowards(look.scale(range)).inflate(1.1);
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, sweep, e -> e != caster && e.isAlive())) {
+            Vec3 toTarget = target.getBoundingBox().getCenter().subtract(start);
+            double along = toTarget.dot(look);
+            if (along < 0 || along > range || toTarget.subtract(look.scale(along)).lengthSqr() > 1.8) {
+                continue;
+            }
+            target.push(look.x * knock, 0.08, look.z * knock);
+            target.hurtMarked = true;
+        }
+
+        for (int i = 1; i <= 5; i++) {
+            Vec3 p = start.add(look.scale(i * 0.4));
+            level.sendParticles(
+                    ModParticleTypes.PHI_GUST.get(),
+                    p.x,
+                    p.y,
+                    p.z,
+                    1,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.01);
+        }
+        level.playSound(null, caster.blockPosition(), SoundEvents.BREEZE_IDLE_GROUND, SoundSource.PLAYERS, 0.45f, 1.4f);
+    }
+
+    /** Hyper-cooling — cold burst that slows foes and seeds a temporary ice patch. */
+    public static void hyperCooling(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 4f;
+        int slowTicks = params.has("slow_ticks") ? params.get("slow_ticks").getAsInt() : 80;
+        int iceHalf = params.has("ice_half_size") ? params.get("ice_half_size").getAsInt() : 2;
+        int iceDuration = params.has("ice_duration_ticks") ? params.get("ice_duration_ticks").getAsInt() : 100;
+        iceDuration = Math.round(iceDuration * (0.85f + power / 120f));
+        radius *= 0.9f + power / 160f;
+
+        float damage = DiceDamage.fromParams(params, power, 5f);
+        Vec3 center = caster.position().add(0, 0.2, 0);
+        HitResult hit = caster.pick(10, 0f, false);
+        if (hit.getType() == HitResult.Type.BLOCK) {
+            center = hit.getLocation();
+        } else if (hit.getType() == HitResult.Type.ENTITY) {
+            center = hit.getLocation();
+        }
+
+        AABB box = new AABB(center, center).inflate(radius);
+        DamageSource source = level.damageSources().magic();
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
+            if (target.position().distanceToSqr(center) > (double) radius * radius) {
+                continue;
+            }
+            target.hurt(source, damage);
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
+            target.setTicksFrozen(Math.min(140, target.getTicksFrozen() + 80));
+            target.hurtMarked = true;
+            spawnIceParticles(level, target.position().add(0, 1, 0));
+        }
+
+        BlockPos groundCenter = BlockPos.containing(center);
+        BlockState ice = Blocks.PACKED_ICE.defaultBlockState();
+        List<BlockPos> iceTargets = new ArrayList<>();
+        for (int dx = -iceHalf; dx <= iceHalf; dx++) {
+            for (int dz = -iceHalf; dz <= iceHalf; dz++) {
+                if (dx * dx + dz * dz > iceHalf * iceHalf + 1) {
+                    continue;
+                }
+                BlockPos ground = findGround(level, groundCenter.offset(dx, 0, dz));
+                if (ground == null) {
+                    continue;
+                }
+                BlockPos above = ground.above();
+                BlockState current = level.getBlockState(above);
+                if (current.canBeReplaced() || current.isAir()) {
+                    iceTargets.add(above.immutable());
+                }
+            }
+        }
+        if (!iceTargets.isEmpty()) {
+            List<BlockPos> ordered = ElementalBlockService.risingOrder(iceTargets, groundCenter);
+            long startTick = level.getGameTime();
+            for (int i = 0; i < ordered.size(); i++) {
+                ElementalBlockService.scheduleTemporary(level, ordered.get(i), ice, iceDuration, startTick + i);
+            }
+        }
+
+        level.playSound(null, BlockPos.containing(center), SoundEvents.PLAYER_HURT_FREEZE, SoundSource.PLAYERS, 0.9f, 0.7f);
+        level.sendParticles(
+                ParticleTypes.SNOWFLAKE,
+                center.x,
+                center.y + 0.5,
+                center.z,
+                28,
+                radius * 0.35,
+                0.4,
+                radius * 0.35,
+                0.02);
+        spawnIceParticles(level, center);
+    }
+
+    /** Squall — fires a wind charge projectile (D&D level 2). */
     public static void windCharge(ServerPlayer caster, SpellEffectEntry effect, float power) {
         ServerLevel level = caster.serverLevel();
         Vec3 look = caster.getLookAngle().normalize();
@@ -773,6 +885,356 @@ public final class ElementalEffects {
             level.sendParticles(ModParticleTypes.PHI_GUST.get(), p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.01);
         }
         level.playSound(null, caster.blockPosition(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 1f, 0.7f);
+    }
+
+    /** Lightning spear — strike an aim point; nearby foes take fire/stun (D&D level 5). */
+    public static void lightningSpear(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        double range = params.has("range") ? params.get("range").getAsDouble() : 40;
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 7.5f;
+        int stunTicks = params.has("stun_ticks") ? params.get("stun_ticks").getAsInt() : 40;
+        float executeBelow = params.has("execute_below_health") ? params.get("execute_below_health").getAsFloat() : 8f;
+        float damage = DiceDamage.fromParams(params, power, 12f);
+
+        Vec3 look = caster.getLookAngle().normalize();
+        Vec3 center = caster.getEyePosition().add(look.scale(Math.min(range, 12)));
+        HitResult hit = caster.pick(range, 0f, false);
+        if (hit.getType() != HitResult.Type.MISS) {
+            center = hit.getLocation();
+        }
+
+        DamageSource source = level.damageSources().magic();
+        AABB box = new AABB(center, center).inflate(radius);
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
+            if (target.position().distanceToSqr(center) > (double) radius * radius) {
+                continue;
+            }
+            target.hurt(source, damage);
+            target.hurt(level.damageSources().onFire(), damage * 0.35f);
+            target.igniteForSeconds(3);
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, stunTicks, 3));
+            target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, stunTicks, 1));
+            // Soft execute: fragile non-boss leftovers drop from residual voltage.
+            if (target.getHealth() > 0f
+                    && target.getHealth() <= executeBelow
+                    && target.getMaxHealth() <= 80f) {
+                target.hurt(source, target.getHealth() + 1f);
+            }
+            target.hurtMarked = true;
+        }
+
+        level.playSound(
+                null,
+                BlockPos.containing(center),
+                SoundEvents.LIGHTNING_BOLT_THUNDER,
+                SoundSource.PLAYERS,
+                0.8f,
+                1.2f);
+        level.sendParticles(
+                ParticleTypes.ELECTRIC_SPARK,
+                center.x,
+                center.y + 0.5,
+                center.z,
+                48,
+                radius * 0.3,
+                0.8,
+                radius * 0.3,
+                0.2);
+        level.sendParticles(ParticleTypes.FLASH, center.x, center.y + 0.5, center.z, 1, 0, 0, 0, 0);
+    }
+
+    public static void waterShroud(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        JsonObject params = effect.params();
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 200;
+        float drain = params.has("maintain_drain_per_second")
+                ? params.get("maintain_drain_per_second").getAsFloat()
+                : 5f;
+        duration = Math.round(duration * (0.85f + power / 120f));
+        ElementalShroudService.activate(caster, ElementalShroudService.Kind.WATER, duration, drain);
+    }
+
+    public static void airShroud(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        JsonObject params = effect.params();
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 200;
+        float drain = params.has("maintain_drain_per_second")
+                ? params.get("maintain_drain_per_second").getAsFloat()
+                : 5f;
+        duration = Math.round(duration * (0.85f + power / 120f));
+        ElementalShroudService.activate(caster, ElementalShroudService.Kind.AIR, duration, drain);
+    }
+
+    public static void atmosphericPressure(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 6f;
+        int stunTicks = params.has("stun_ticks") ? params.get("stun_ticks").getAsInt() : 30;
+        float damage = DiceDamage.fromParams(params, power, 10f);
+        radius *= 0.9f + power / 160f;
+
+        Vec3 center = aimPoint(caster, 12);
+        DamageSource source = level.damageSources().magic();
+        AABB box = new AABB(center, center).inflate(radius);
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
+            if (target.position().distanceToSqr(center) > (double) radius * radius) {
+                continue;
+            }
+            target.hurt(source, damage);
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, stunTicks, 4));
+            target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, stunTicks, 2));
+            target.push(0, -0.35, 0);
+            target.hurtMarked = true;
+        }
+        level.playSound(null, BlockPos.containing(center), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7f, 0.5f);
+        level.sendParticles(
+                ParticleTypes.CLOUD,
+                center.x,
+                center.y + 0.5,
+                center.z,
+                30,
+                radius * 0.35,
+                0.3,
+                radius * 0.35,
+                0.04);
+    }
+
+    public static void cryoWave(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        double range = params.has("range") ? params.get("range").getAsDouble() : 9;
+        float coneHalf = params.has("cone_half_width") ? params.get("cone_half_width").getAsFloat() : 2.8f;
+        int slowTicks = params.has("slow_ticks") ? params.get("slow_ticks").getAsInt() : 40;
+        float damage = DiceDamage.fromParams(params, power, 14f);
+
+        Vec3 look = caster.getLookAngle().normalize();
+        Vec3 start = caster.getEyePosition();
+        DamageSource source = level.damageSources().magic();
+        AABB sweep = caster.getBoundingBox().expandTowards(look.scale(range)).inflate(coneHalf);
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, sweep, e -> e != caster && e.isAlive())) {
+            Vec3 toTarget = target.getBoundingBox().getCenter().subtract(start);
+            double along = toTarget.dot(look);
+            if (along < 0 || along > range) {
+                continue;
+            }
+            double radial = toTarget.subtract(look.scale(along)).length();
+            if (radial > coneHalf * (0.35 + along / range)) {
+                continue;
+            }
+            target.hurt(source, damage);
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 2));
+            target.setTicksFrozen(Math.min(200, target.getTicksFrozen() + 100));
+            target.hurtMarked = true;
+            spawnIceParticles(level, target.position().add(0, 1, 0));
+        }
+
+        // Freeze moisture along the cone into short-lived ice.
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        for (int i = 1; i <= (int) range; i++) {
+            Vec3 p = start.add(look.scale(i));
+            cursor.set(p.x, p.y - 1, p.z);
+            BlockPos ground = findGround(level, cursor);
+            if (ground == null) {
+                continue;
+            }
+            BlockPos above = ground.above();
+            if (level.getBlockState(above).canBeReplaced() || level.getBlockState(above).isAir()) {
+                ElementalBlockService.scheduleTemporary(
+                        level, above, Blocks.PACKED_ICE.defaultBlockState(), 80, level.getGameTime() + i);
+            }
+        }
+
+        for (int i = 0; i <= (int) (range * 2); i++) {
+            Vec3 p = start.add(look.scale(i * 0.5));
+            level.sendParticles(ParticleTypes.SNOWFLAKE, p.x, p.y, p.z, 2, 0.15, 0.1, 0.15, 0.01);
+        }
+        level.playSound(null, caster.blockPosition(), SoundEvents.PLAYER_HURT_FREEZE, SoundSource.PLAYERS, 1f, 0.6f);
+    }
+
+    public static void airForm(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        JsonObject params = effect.params();
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 12000;
+        duration = Math.round(duration * (0.85f + power / 140f));
+        ElementalShroudService.activate(caster, ElementalShroudService.Kind.AIR_FORM, duration, 0f);
+    }
+
+    public static void hurricaneStorm(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 7.5f;
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 160;
+        float drain = params.has("maintain_drain_per_second")
+                ? params.get("maintain_drain_per_second").getAsFloat()
+                : 4f;
+        float knock = params.has("knockback") ? params.get("knockback").getAsFloat() : 1.8f;
+        duration = Math.round(duration * (0.85f + power / 120f));
+        float dps = DiceDamage.perSecondFromParams(params, power, 5f);
+        Vec3 center = aimPoint(caster, 14);
+        ElementalFieldService.spawnHurricane(
+                level, center, caster.getUUID(), radius, duration, drain, dps, knock);
+    }
+
+    public static void elementalSupremacy(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 15f;
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 200;
+        float drain = params.has("maintain_drain_per_second")
+                ? params.get("maintain_drain_per_second").getAsFloat()
+                : 6f;
+        duration = Math.round(duration * (0.85f + power / 120f));
+        float dps = DiceDamage.perSecondFromParams(params, power, 4f);
+        ElementalFieldService.spawnSupremacy(
+                level, caster.position().add(0, 0.5, 0), caster.getUUID(), radius, duration, drain, dps);
+    }
+
+    public static void thermonuclearPulse(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 9f;
+        int blindTicks = params.has("blind_ticks") ? params.get("blind_ticks").getAsInt() : 40;
+        float damage = DiceDamage.fromParams(params, power, 22f);
+        Vec3 center = aimPoint(caster, 16);
+        DamageSource source = level.damageSources().magic();
+        AABB box = new AABB(center, center).inflate(radius);
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
+            if (target.position().distanceToSqr(center) > (double) radius * radius) {
+                continue;
+            }
+            target.hurt(source, damage);
+            target.hurt(level.damageSources().onFire(), damage * 0.5f);
+            target.igniteForSeconds(8);
+            target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, blindTicks, 0));
+            target.hurtMarked = true;
+        }
+        ignitePatch(level, BlockPos.containing(center), Math.max(2, Math.round(radius * 0.4f)), 18);
+        level.playSound(null, BlockPos.containing(center), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.2f, 0.55f);
+        level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, center.x, center.y + 0.5, center.z, 1, 0, 0, 0, 0);
+        level.sendParticles(ParticleTypes.FLAME, center.x, center.y + 0.5, center.z, 60, radius * 0.35, 0.5, radius * 0.35, 0.08);
+    }
+
+    public static void absoluteZero(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 6f;
+        int freezeTicks = params.has("freeze_ticks") ? params.get("freeze_ticks").getAsInt() : 30;
+        float damage = DiceDamage.fromParams(params, power, 20f);
+        Vec3 center = aimPoint(caster, 12);
+        DamageSource source = level.damageSources().magic();
+        AABB box = new AABB(center, center).inflate(radius);
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
+            if (target.position().distanceToSqr(center) > (double) radius * radius) {
+                continue;
+            }
+            target.hurt(source, damage);
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, freezeTicks, 6));
+            target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, freezeTicks, 4));
+            target.setTicksFrozen(Math.min(300, target.getTicksFrozen() + 200));
+            target.setDeltaMovement(Vec3.ZERO);
+            target.hurtMarked = true;
+            spawnIceParticles(level, target.position().add(0, 1, 0));
+        }
+        BlockPos ground = BlockPos.containing(center);
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                BlockPos g = findGround(level, ground.offset(dx, 0, dz));
+                if (g == null) {
+                    continue;
+                }
+                BlockPos above = g.above();
+                if (level.getBlockState(above).canBeReplaced() || level.getBlockState(above).isAir()) {
+                    ElementalBlockService.scheduleTemporary(
+                            level, above, Blocks.BLUE_ICE.defaultBlockState(), 120, level.getGameTime());
+                }
+            }
+        }
+        level.playSound(null, ground, SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 1f, 0.4f);
+        level.sendParticles(ParticleTypes.SNOWFLAKE, center.x, center.y + 0.5, center.z, 50, radius * 0.3, 0.5, radius * 0.3, 0.02);
+    }
+
+    public static void meteorologicalCataclysm(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 28f;
+        float damage = DiceDamage.fromParams(params, power, 28f);
+        Vec3 center = caster.position();
+        DamageSource source = level.damageSources().magic();
+        AABB box = caster.getBoundingBox().inflate(radius);
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
+            if (target.position().distanceToSqr(center) > (double) radius * radius) {
+                continue;
+            }
+            target.hurt(source, damage * 0.45f);
+            target.hurt(level.damageSources().onFire(), damage * 0.3f);
+            target.setTicksFrozen(Math.min(200, target.getTicksFrozen() + 60));
+            Vec3 away = target.position().subtract(center);
+            if (away.lengthSqr() > 1.0e-4) {
+                away = away.normalize();
+                target.push(away.x * 1.2, 0.45, away.z * 1.2);
+            }
+            target.hurtMarked = true;
+        }
+        ElementalFieldService.spawnTornado(
+                level,
+                center.add(3, 0.5, 0),
+                new Vec3(1, 0, 0.2),
+                caster.getUUID(),
+                3.5f,
+                60,
+                0f,
+                damage / 8f,
+                1.5f,
+                40f,
+                0.2f);
+        level.playSound(null, caster.blockPosition(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.2f, 0.6f);
+        level.sendParticles(ParticleTypes.CLOUD, center.x, center.y + 3, center.z, 80, radius * 0.25, 2.0, radius * 0.25, 0.05);
+        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, center.x, center.y + 2, center.z, 40, radius * 0.2, 1.5, radius * 0.2, 0.1);
+    }
+
+    public static void quasar(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 7.5f;
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 1200;
+        float dps = DiceDamage.perSecondFromParams(params, power, 12f);
+        Vec3 center = aimPoint(caster, 16);
+        ElementalFieldService.spawnQuasar(level, center, caster.getUUID(), radius, duration, dps);
+    }
+
+    public static void plasmaBarrage(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        int count = params.has("count") ? params.get("count").getAsInt() : 10;
+        float speed = params.has("speed") ? params.get("speed").getAsFloat() : 2.2f;
+        float spread = params.has("spread") ? params.get("spread").getAsFloat() : 4.5f;
+        float damage = DiceDamage.fromParams(params, power, 18f);
+        Vec3 look = caster.getLookAngle().normalize();
+        for (int i = 0; i < count; i++) {
+            Snowball plasma = new Snowball(level, caster);
+            plasma.setPos(caster.getX(), caster.getEyeY() - 0.1, caster.getZ());
+            float inaccuracy = spread * (0.35f + (i % 5) * 0.15f);
+            plasma.shoot(look.x, look.y, look.z, speed, inaccuracy);
+            tagProjectile(plasma, ElementalTags.KIND_PLASMA, damage);
+            level.addFreshEntity(plasma);
+        }
+        level.playSound(null, caster.blockPosition(), SoundEvents.WITHER_SHOOT, SoundSource.PLAYERS, 1f, 1.4f);
+        level.sendParticles(
+                ModParticleTypes.PHI_FLAME.get(),
+                caster.getX(),
+                caster.getEyeY(),
+                caster.getZ(),
+                20,
+                0.3,
+                0.3,
+                0.3,
+                0.05);
+    }
+
+    private static Vec3 aimPoint(ServerPlayer caster, double range) {
+        HitResult hit = caster.pick(range, 0f, false);
+        if (hit.getType() != HitResult.Type.MISS) {
+            return hit.getLocation();
+        }
+        return caster.getEyePosition().add(caster.getLookAngle().normalize().scale(range * 0.5));
     }
 
     public static void ignitePatch(ServerLevel level, BlockPos center, int radius, int maxFires) {

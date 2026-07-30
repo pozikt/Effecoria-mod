@@ -1,0 +1,20 @@
+{
+  "id": "effecoria:elemental_supremacy",
+  "school": "elemental",
+  "frequency_hz": 28.0,
+  "base_cost": 40,
+  "power_multiplier": 1.4,
+  "side_entropy": 0.14,
+  "min_phi": 0.5,
+  "min_mastery": 0.8,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:elemental_supremacy",
+      "radius": 15,
+      "duration_ticks": 200,
+      "maintain_drain_per_second": 6.0,
+      "damage_dice_per_round": "3d6"
+    }
+  ]
+}

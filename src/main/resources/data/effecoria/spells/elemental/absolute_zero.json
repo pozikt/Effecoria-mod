@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:absolute_zero",
+  "school": "elemental",
+  "frequency_hz": 29.0,
+  "base_cost": 45,
+  "power_multiplier": 1.45,
+  "side_entropy": 0.15,
+  "min_phi": 0.52,
+  "min_mastery": 0.8,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:absolute_zero",
+      "radius": 6,
+      "freeze_ticks": 30,
+      "damage_dice": "6d10"
+    }
+  ]
+}

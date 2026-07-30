@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:meteorological_cataclysm",
+  "school": "elemental",
+  "frequency_hz": 32.0,
+  "base_cost": 70,
+  "power_multiplier": 1.55,
+  "side_entropy": 0.2,
+  "min_phi": 0.6,
+  "min_mastery": 0.9,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:meteorological_cataclysm",
+      "radius": 28,
+      "damage_dice": "8d10"
+    }
+  ]
+}
