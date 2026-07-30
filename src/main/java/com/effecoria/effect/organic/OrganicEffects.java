@@ -229,7 +229,7 @@ public final class OrganicEffects {
             healParams.addProperty("damage_dice_per_round", "1d6");
         }
         float hps = DiceDamage.perSecondFromParams(healParams, power, 1.5f);
-        OrganicFieldService.spawn(
+        OrganicFieldService.spawnHeal(
                 caster.serverLevel(),
                 caster.position().add(0, 0.5, 0),
                 caster.getUUID(),
@@ -237,6 +237,270 @@ public final class OrganicEffects {
                 duration,
                 drain,
                 hps);
+    }
+
+    public static void boneSpur(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
+        int amp = effect.params().has("strength_amplifier") ? effect.params().get("strength_amplifier").getAsInt() : 0;
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, amp, false, true, true));
+        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+    }
+
+    public static void senseSharpening(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 200;
+        caster.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, duration, 0, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0, false, false, true));
+        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+    }
+
+    public static void painInhibitor(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 160;
+        int absorb = effect.params().has("absorption_amplifier") ? effect.params().get("absorption_amplifier").getAsInt() : 1;
+        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
+        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+    }
+
+    public static void poisonThorns(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 3.5f;
+        int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 80;
+        int selfTicks = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 200;
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, selfTicks, 0, false, true, true));
+        AABB box = caster.getBoundingBox().inflate(radius);
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (entity == caster) {
+                continue;
+            }
+            entity.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
+            spawnOrganicParticles(level, entity.position().add(0, 1, 0));
+        }
+        spawnOrganicParticles(level, caster.position().add(0, 1, 0));
+    }
+
+    public static void bioMimicry(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 120;
+        caster.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0, false, false, true));
+        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+    }
+
+    public static void organismAdaptation(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 300;
+        caster.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
+        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+    }
+
+    public static void immuneSuppression(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 160;
+        int weakAmp = effect.params().has("weakness_amplifier") ? effect.params().get("weakness_amplifier").getAsInt() : 1;
+        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, weakAmp));
+        target.addEffect(new MobEffectInstance(MobEffects.POISON, duration / 2, 0));
+        spawnOrganicParticles(level, target.position().add(0, 1, 0));
+    }
+
+    public static void metabolicBoost(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 200;
+        int exhaustTicks = effect.params().has("exhaustion_ticks") ? effect.params().get("exhaustion_ticks").getAsInt() : 120;
+        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 1, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, duration, 0, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, exhaustTicks, 0, false, false, true));
+        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+    }
+
+    public static void organicNecrosis(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        float damage = DiceDamage.fromParams(effect.params(), power, 8f);
+        int witherTicks = effect.params().has("wither_ticks") ? effect.params().get("wither_ticks").getAsInt() : 100;
+        int weakTicks = effect.params().has("weakness_ticks") ? effect.params().get("weakness_ticks").getAsInt() : 80;
+        target.hurt(level.damageSources().wither(), damage);
+        target.addEffect(new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
+        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, weakTicks, 1));
+        target.hurtMarked = true;
+        spawnOrganicParticles(level, target.position().add(0, 1, 0));
+    }
+
+    public static void fullRestructuring(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 400;
+        caster.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, duration, 0, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, duration, 0, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.JUMP, duration, 1, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
+        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+    }
+
+    public static void scorchedEarth(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 4f;
+        int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 100;
+        Vec3 center = target.position();
+        AABB box = new AABB(center, center).inflate(radius);
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (entity == caster) {
+                continue;
+            }
+            entity.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
+            entity.hurt(level.damageSources().magic(), DiceDamage.fromParams(effect.params(), power, 4f) * 0.5f);
+            entity.hurtMarked = true;
+        }
+        spawnOrganicParticles(level, center.add(0, 0.5, 0));
+        level.playSound(null, target.blockPosition(), SoundEvents.WOLF_GROWL, SoundSource.PLAYERS, 0.7f, 0.6f);
+    }
+
+    public static void bioFission(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 6f;
+        BlockPos center = caster.blockPosition();
+        int r = (int) Math.ceil(radius);
+        int broken = 0;
+        for (BlockPos pos : BlockPos.betweenClosed(center.offset(-r, -r, -r), center.offset(r, r, r))) {
+            if (center.distSqr(pos) > radius * radius) {
+                continue;
+            }
+            var state = level.getBlockState(pos);
+            if (state.is(net.minecraft.tags.BlockTags.LEAVES)
+                    || state.is(net.minecraft.tags.BlockTags.LOGS)
+                    || state.is(net.minecraft.tags.BlockTags.WOOL)
+                    || state.is(net.minecraft.tags.BlockTags.CROPS)) {
+                if (level.destroyBlock(pos, true)) {
+                    broken++;
+                }
+            }
+        }
+        caster.displayClientMessage(Component.translatable("message.effecoria.organic.bio_fission", broken), true);
+        spawnOrganicParticles(level, caster.position().add(0, 1, 0));
+    }
+
+    public static void superRegeneration(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        float heal = DiceDamage.healFromParams(effect.params(), power, 12f);
+        int regenTicks = effect.params().has("regen_ticks") ? effect.params().get("regen_ticks").getAsInt() : 120;
+        int regenAmp = effect.params().has("regen_amplifier") ? effect.params().get("regen_amplifier").getAsInt() : 1;
+        caster.heal(heal);
+        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, regenTicks, regenAmp, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0, false, false, true));
+        spawnOrganicParticles(level, caster.position().add(0, 1, 0));
+    }
+
+    public static void populationControl(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 8f;
+        int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 120;
+        int witherTicks = effect.params().has("wither_ticks") ? effect.params().get("wither_ticks").getAsInt() : 60;
+        AABB box = caster.getBoundingBox().inflate(radius);
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (entity == caster) {
+                continue;
+            }
+            if (entity.distanceToSqr(caster) > radius * radius) {
+                continue;
+            }
+            entity.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
+            entity.addEffect(new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
+            spawnOrganicParticles(level, entity.position().add(0, 1, 0));
+        }
+        spawnOrganicParticles(level, caster.position().add(0, 1, 0));
+    }
+
+    public static void biologicalPlague(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        float burst = DiceDamage.fromParams(effect.params(), power, 10f);
+        float spread = effect.params().has("spread_radius") ? effect.params().get("spread_radius").getAsFloat() : 5f;
+        int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 160;
+        applyPlagueHit(level, target, burst, poisonTicks);
+        AABB box = target.getBoundingBox().inflate(spread);
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (entity == target || entity == caster) {
+                continue;
+            }
+            if (entity.distanceToSqr(target) > spread * spread) {
+                continue;
+            }
+            applyPlagueHit(level, entity, burst * 0.45f, poisonTicks / 2);
+        }
+        spawnOrganicParticles(level, target.position().add(0, 1, 0));
+    }
+
+    private static void applyPlagueHit(ServerLevel level, LivingEntity entity, float damage, int poisonTicks) {
+        entity.hurt(level.damageSources().wither(), damage);
+        entity.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
+        entity.hurtMarked = true;
+    }
+
+    public static void livingArmor(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 600;
+        int resist = effect.params().has("resistance_amplifier") ? effect.params().get("resistance_amplifier").getAsInt() : 1;
+        int absorb = effect.params().has("absorption_amplifier") ? effect.params().get("absorption_amplifier").getAsInt() : 2;
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, resist, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 1, false, false, true));
+        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+    }
+
+    public static void beastForm(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 300;
+        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 1, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.JUMP, duration, 1, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
+        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+    }
+
+    public static void bioCataclysm(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 12f;
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 200;
+        float dps = OrganicFieldService.cataclysmDpsFromParams(params, power);
+        OrganicFieldService.spawnCataclysm(
+                caster.serverLevel(),
+                caster.position().add(0, 0.5, 0),
+                caster.getUUID(),
+                radius,
+                duration,
+                dps);
+    }
+
+    public static void absoluteRegeneration(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        caster.removeAllEffects();
+        caster.heal(caster.getMaxHealth());
+        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 60, 1, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 160, 1, false, false, true));
+        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+    }
+
+    public static void cellularDominion(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 1200;
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 0, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, false, true));
+        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+    }
+
+    public static void evolutionaryLeap(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 200;
+        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, 3, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 2, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 2, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 2, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 1, false, false, true));
+        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.6f, 1.2f);
     }
 
     private static void tagProjectile(Snowball projectile, float damage) {

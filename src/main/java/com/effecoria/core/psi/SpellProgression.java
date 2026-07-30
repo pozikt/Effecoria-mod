@@ -93,11 +93,32 @@ public final class SpellProgression {
                     id("root_bind"),
                     id("chitin_plates"),
                     id("acid_gland"),
+                    id("bone_spur"),
+                    id("sense_sharpening"),
+                    id("pain_inhibitor"),
+                    id("poison_thorns"),
+                    id("bio_mimicry"),
+                    id("organism_adaptation"),
                     id("metabolic_shock"),
                     id("parasitic_infection"),
+                    id("immune_suppression"),
+                    id("metabolic_boost"),
+                    id("organic_necrosis"),
                     id("briar_surge"),
                     id("verdant_mend"),
-                    id("biological_field"));
+                    id("full_restructuring"),
+                    id("biological_field"),
+                    id("scorched_earth"),
+                    id("bio_fission"),
+                    id("super_regeneration"),
+                    id("population_control"),
+                    id("biological_plague"),
+                    id("living_armor"),
+                    id("beast_form"),
+                    id("bio_cataclysm"),
+                    id("absolute_regeneration"),
+                    id("cellular_dominion"),
+                    id("evolutionary_leap"));
 
             case NECROMANCY -> List.of(
 

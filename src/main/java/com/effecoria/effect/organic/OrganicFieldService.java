@@ -22,23 +22,30 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-/** Regeneration aura — biological field (D&D level 5). */
+/** Regeneration aura and biological cataclysm zones. */
 public final class OrganicFieldService {
-    private static final List<HealField> FIELDS = new CopyOnWriteArrayList<>();
+    private static final List<OrganicField> FIELDS = new CopyOnWriteArrayList<>();
 
-    private static final class HealField {
+    public enum Kind {
+        HEAL,
+        CATACLYSM
+    }
+
+    private static final class OrganicField {
         ServerLevel level;
+        Kind kind;
         Vec3 center;
         float radius;
         long expireAt;
         UUID owner;
         float maintainDrainPerTick;
         float healPerSecond;
+        float damagePerSecond;
     }
 
     private OrganicFieldService() {}
 
-    public static void spawn(
+    public static void spawnHeal(
             ServerLevel level,
             Vec3 center,
             UUID owner,
@@ -46,16 +53,42 @@ public final class OrganicFieldService {
             int durationTicks,
             float maintainDrainPerSecond,
             float healPerSecond) {
-        HealField field = new HealField();
+        OrganicField field = baseField(level, Kind.HEAL, center, owner, radius, durationTicks, maintainDrainPerSecond);
+        field.healPerSecond = Math.max(0f, healPerSecond);
+        FIELDS.add(field);
+        level.playSound(null, center.x, center.y, center.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8f, 1.1f);
+    }
+
+    public static void spawnCataclysm(
+            ServerLevel level,
+            Vec3 center,
+            UUID owner,
+            float radius,
+            int durationTicks,
+            float damagePerSecond) {
+        OrganicField field = baseField(level, Kind.CATACLYSM, center, owner, radius, durationTicks, 0f);
+        field.damagePerSecond = Math.max(0.05f, damagePerSecond);
+        FIELDS.add(field);
+        level.playSound(null, center.x, center.y, center.z, SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.5f, 0.7f);
+    }
+
+    private static OrganicField baseField(
+            ServerLevel level,
+            Kind kind,
+            Vec3 center,
+            UUID owner,
+            float radius,
+            int durationTicks,
+            float maintainDrainPerSecond) {
+        OrganicField field = new OrganicField();
         field.level = level;
+        field.kind = kind;
         field.center = center;
         field.radius = Math.max(1f, radius);
         field.expireAt = level.getGameTime() + Math.max(1, durationTicks);
         field.owner = owner;
         field.maintainDrainPerTick = Math.max(0f, maintainDrainPerSecond / 20f);
-        field.healPerSecond = Math.max(0f, healPerSecond);
-        FIELDS.add(field);
-        level.playSound(null, center.x, center.y, center.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8f, 1.1f);
+        return field;
     }
 
     public static void clearFor(UUID owner) {
@@ -64,8 +97,8 @@ public final class OrganicFieldService {
 
     public static void tick(ServerLevel level) {
         long now = level.getGameTime();
-        List<HealField> toRemove = new ArrayList<>();
-        for (HealField field : FIELDS) {
+        List<OrganicField> toRemove = new ArrayList<>();
+        for (OrganicField field : FIELDS) {
             if (field.level != level) {
                 continue;
             }
@@ -77,37 +110,78 @@ public final class OrganicFieldService {
                 toRemove.add(field);
                 continue;
             }
-            ServerPlayer owner = level.getServer().getPlayerList().getPlayer(field.owner);
-            if (owner != null) {
-                field.center = owner.position().add(0, 0.5, 0);
-            }
-            if (now % 20 == 0 && field.healPerSecond > 0f) {
-                AABB box = new AABB(field.center, field.center).inflate(field.radius);
-                for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, box, LivingEntity::isAlive)) {
-                    if (ally.position().distanceToSqr(field.center) > (double) field.radius * field.radius) {
-                        continue;
-                    }
-                    ally.heal(field.healPerSecond);
-                    OrganicEffects.spawnOrganicParticles(level, ally.position().add(0, 1, 0));
+            if (field.kind == Kind.HEAL) {
+                ServerPlayer owner = level.getServer().getPlayerList().getPlayer(field.owner);
+                if (owner != null) {
+                    field.center = owner.position().add(0, 0.5, 0);
                 }
             }
+            if (now % 20 == 0) {
+                tickOncePerSecond(level, field, now);
+            }
             if (now % 6 == 0) {
-                level.sendParticles(
-                        ModParticleTypes.ORGANIC_FOG.get(),
-                        field.center.x,
-                        field.center.y + 0.5,
-                        field.center.z,
-                        6,
-                        field.radius * 0.35,
-                        0.4,
-                        field.radius * 0.35,
-                        0.01);
+                spawnFieldParticles(level, field);
             }
         }
         FIELDS.removeAll(toRemove);
     }
 
-    private static boolean drainOwner(HealField field) {
+    private static void tickOncePerSecond(ServerLevel level, OrganicField field, long now) {
+        AABB box = new AABB(field.center, field.center).inflate(field.radius);
+        if (field.kind == Kind.HEAL && field.healPerSecond > 0f) {
+            for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, box, LivingEntity::isAlive)) {
+                if (ally.position().distanceToSqr(field.center) > (double) field.radius * field.radius) {
+                    continue;
+                }
+                ally.heal(field.healPerSecond);
+                OrganicEffects.spawnOrganicParticles(level, ally.position().add(0, 1, 0));
+            }
+            return;
+        }
+        if (field.kind == Kind.CATACLYSM && field.damagePerSecond > 0f) {
+            for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+                if (entity instanceof ServerPlayer player && player.getUUID().equals(field.owner)) {
+                    continue;
+                }
+                if (entity.position().distanceToSqr(field.center) > (double) field.radius * field.radius) {
+                    continue;
+                }
+                entity.hurt(level.damageSources().wither(), field.damagePerSecond);
+                entity.hurtMarked = true;
+                if (now % 40 == 0) {
+                    entity.addEffect(new MobEffectInstance(MobEffects.POISON, 40, 0));
+                }
+            }
+        }
+    }
+
+    private static void spawnFieldParticles(ServerLevel level, OrganicField field) {
+        if (field.kind == Kind.CATACLYSM) {
+            level.sendParticles(
+                    ModParticleTypes.ORGANIC_FOG.get(),
+                    field.center.x,
+                    field.center.y + 0.5,
+                    field.center.z,
+                    10,
+                    field.radius * 0.4,
+                    0.5,
+                    field.radius * 0.4,
+                    0.02);
+            return;
+        }
+        level.sendParticles(
+                ModParticleTypes.ORGANIC_FOG.get(),
+                field.center.x,
+                field.center.y + 0.5,
+                field.center.z,
+                6,
+                field.radius * 0.35,
+                0.4,
+                field.radius * 0.35,
+                0.01);
+    }
+
+    private static boolean drainOwner(OrganicField field) {
         ServerPlayer owner = field.level.getServer().getPlayerList().getPlayer(field.owner);
         if (owner == null) {
             return false;
@@ -123,5 +197,10 @@ public final class OrganicFieldService {
         PsiHelper.set(owner, data);
         owner.syncData(ModAttachments.PSI.get());
         return true;
+    }
+
+    /** Build DPS for cataclysm from dice-per-round notation. */
+    public static float cataclysmDpsFromParams(com.google.gson.JsonObject params, float power) {
+        return DiceDamage.perSecondFromParams(params, power, 2f);
     }
 }

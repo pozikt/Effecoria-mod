@@ -68,7 +68,11 @@ public final class SpellEffectExecutor {
             "foreign_agent",
             "muscle_spasm",
             "parasitic_infection",
-            "metabolic_shock");
+            "metabolic_shock",
+            "immune_suppression",
+            "organic_necrosis",
+            "scorched_earth",
+            "biological_plague");
 
     private static final Set<String> BLOCK_SEAL_EFFECTS = Set.of(
             "place_trap_seal",
@@ -233,6 +237,27 @@ public final class SpellEffectExecutor {
             case "parasitic_infection" -> OrganicEffects.parasiticInfection(caster, effect, power, target);
             case "metabolic_shock" -> OrganicEffects.metabolicShock(caster, effect, power, target);
             case "biological_field" -> OrganicEffects.biologicalField(caster, effect, power);
+            case "bone_spur" -> OrganicEffects.boneSpur(caster, effect, power);
+            case "sense_sharpening" -> OrganicEffects.senseSharpening(caster, effect, power);
+            case "pain_inhibitor" -> OrganicEffects.painInhibitor(caster, effect, power);
+            case "poison_thorns" -> OrganicEffects.poisonThorns(caster, effect, power);
+            case "bio_mimicry" -> OrganicEffects.bioMimicry(caster, effect, power);
+            case "organism_adaptation" -> OrganicEffects.organismAdaptation(caster, effect, power);
+            case "immune_suppression" -> OrganicEffects.immuneSuppression(caster, effect, power, target);
+            case "metabolic_boost" -> OrganicEffects.metabolicBoost(caster, effect, power);
+            case "organic_necrosis" -> OrganicEffects.organicNecrosis(caster, effect, power, target);
+            case "full_restructuring" -> OrganicEffects.fullRestructuring(caster, effect, power);
+            case "scorched_earth" -> OrganicEffects.scorchedEarth(caster, effect, power, target);
+            case "bio_fission" -> OrganicEffects.bioFission(caster, effect, power);
+            case "super_regeneration" -> OrganicEffects.superRegeneration(caster, effect, power);
+            case "population_control" -> OrganicEffects.populationControl(caster, effect, power);
+            case "biological_plague" -> OrganicEffects.biologicalPlague(caster, effect, power, target);
+            case "living_armor" -> OrganicEffects.livingArmor(caster, effect, power);
+            case "beast_form" -> OrganicEffects.beastForm(caster, effect, power);
+            case "bio_cataclysm" -> OrganicEffects.bioCataclysm(caster, effect, power);
+            case "absolute_regeneration" -> OrganicEffects.absoluteRegeneration(caster, effect, power);
+            case "cellular_dominion" -> OrganicEffects.cellularDominion(caster, effect, power);
+            case "evolutionary_leap" -> OrganicEffects.evolutionaryLeap(caster, effect, power);
             case "evoker_fangs" -> evokerFangs(caster, effect, power);
             case "root_bind" -> rootBind(caster, effect, power, target);
             case "soul_drain" -> soulDrain(caster, effect, power, target);
