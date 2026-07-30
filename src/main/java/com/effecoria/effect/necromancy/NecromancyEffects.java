@@ -484,24 +484,9 @@ public final class NecromancyEffects {
     }
 
     public static void lichAscension(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        ServerLevel level = caster.serverLevel();
-        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 240;
-        int aftermath = effect.params().has("aftermath_ticks") ? effect.params().get("aftermath_ticks").getAsInt() : 160;
-        float phylBase = effect.params().has("phyl_efficiency") ? effect.params().get("phyl_efficiency").getAsFloat() : 0.85f;
-        float phylEff = phylBase * (0.9f + power / 150f);
-        PlayerPsiData data = PsiHelper.get(caster);
-        data.beginLichAscension(level.getGameTime() + duration, data.biologyQ(), phylEff);
-        PsiHelper.set(caster, data);
+        // Gated until mage-tower / phylactery content (Stage IV). See docs/MAGIC_PLAN.md.
         caster.displayClientMessage(
-                net.minecraft.network.chat.Component.translatable("message.effecoria.necro.lich_ascension"), true);
-        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, 3, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 2, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 2, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 2, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, aftermath, 1, false, false, true));
-        spawnNecroParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
-        caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.45f, 1.1f);
+                net.minecraft.network.chat.Component.translatable("message.effecoria.necro.lich_locked"), true);
     }
 
     private static void hurtInRadius(ServerLevel level, Vec3 center, float radius, float damage, ServerPlayer skip) {

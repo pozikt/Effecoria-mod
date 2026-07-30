@@ -175,8 +175,7 @@ public final class SpellProgression {
                     id("death_coil"),
                     id("phylactery_surge"),
                     id("soul_cataclysm"),
-                    id("death_apotheosis"),
-                    id("lich_ascension"));
+                    id("death_apotheosis"));
 
             case SPATIAL -> List.of(
                     id("blink"),

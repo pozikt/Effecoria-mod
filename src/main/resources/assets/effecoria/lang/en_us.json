@@ -227,6 +227,7 @@
   "message.effecoria.necro.death_sense": "Wounded life nearby: %s",
   "message.effecoria.necro.lich_ascension": "Biology suspended — phylactery feeds your Psi.",
   "message.effecoria.necro.lich_ended": "Lich ascension ended; biology restored.",
+  "message.effecoria.necro.lich_locked": "Lich ascension requires a phylactery and mage infrastructure (not yet in the world).",
   "spell.effecoria.void_step": "Void Step",
   "spell.effecoria.gravity_well": "Gravity Well",
   "spell.effecoria.warp_bolt": "Warp Bolt",
