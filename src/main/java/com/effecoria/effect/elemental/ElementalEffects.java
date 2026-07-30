@@ -434,6 +434,52 @@ public final class ElementalEffects {
         level.playSound(null, caster.blockPosition(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 0.9f, 1.15f);
     }
 
+    /**
+     * Grab a living target with a wind-formed hand and drag it with the caster's look.
+     * Cast again to release. Returns false if no target and not already holding.
+     */
+    public static boolean airHand(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        JsonObject params = effect.params();
+        float holdDistance = params.has("hold_distance") ? params.get("hold_distance").getAsFloat() : 3.5f;
+        holdDistance *= 0.9f + power / 200f;
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 160;
+        duration = Math.round(duration * (0.85f + power / 120f));
+        float drainPerSecond = params.has("drain_per_second") ? params.get("drain_per_second").getAsFloat() : 2.5f;
+        return AirHandService.toggleOrGrab(caster, target, holdDistance, duration, drainPerSecond);
+    }
+
+    /** Submerge and root a target in a temporary water shell. */
+    public static void waterPrison(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 2f;
+        radius *= 0.9f + power / 160f;
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 100;
+        duration = Math.round(duration * (0.85f + power / 120f));
+        float dps = params.has("damage_per_second") ? params.get("damage_per_second").getAsFloat() : 2f;
+        dps *= power / 50f;
+        ElementalCageService.imprisonWater(
+                caster.serverLevel(), target, caster.getUUID(), radius, duration, dps);
+    }
+
+    /** Collapse air around a target into a vacuum pocket that asphyxiates and pins them. */
+    public static void vacuumCage(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 2f;
+        radius *= 0.9f + power / 160f;
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 100;
+        duration = Math.round(duration * (0.85f + power / 120f));
+        float dps = params.has("damage_per_second") ? params.get("damage_per_second").getAsFloat() : 2.5f;
+        dps *= power / 50f;
+        ElementalCageService.imprisonVacuum(
+                caster.serverLevel(), target, caster.getUUID(), radius, duration, dps);
+    }
+
     public static void ignitePatch(ServerLevel level, BlockPos center, int radius, int maxFires) {
         int placed = 0;
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();

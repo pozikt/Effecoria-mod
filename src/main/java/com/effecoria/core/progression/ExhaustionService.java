@@ -60,6 +60,13 @@ public final class ExhaustionService {
         data.setSteamFlightDrainPerTick(0f);
     }
 
+    /** Strip exhaustion-driven status effects from a living player. */
+    public static void stripExhaustionEffects(ServerPlayer player) {
+        player.removeEffect(MobEffects.WEAKNESS);
+        player.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+        player.removeEffect(MobEffects.CONFUSION);
+    }
+
     public static void tick(ServerPlayer player, PlayerPsiData data) {
         float decay = BalanceConfig.EXHAUSTION_DECAY_PER_TICK.get().floatValue();
         if (BreathingService.isMeditating(player) && player.getAirSupply() >= player.getMaxAirSupply() - 10) {

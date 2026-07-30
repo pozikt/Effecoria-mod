@@ -36,6 +36,7 @@ SPELL_SCHOOL = {
     "steam_jet": "elemental", "steam_veil": "elemental", "ember_volley": "elemental",
     "ice_shard": "elemental", "frost_bastion": "elemental", "plasma_bolt": "elemental",
     "hydro_slice": "elemental", "great_fireball": "elemental", "steam_flight": "elemental",
+    "air_hand": "elemental", "water_prison": "elemental", "vacuum_cage": "elemental",
     "vitality_pulse": "organic", "thorn_lash": "organic", "root_bind": "organic",
     "briar_surge": "organic", "verdant_mend": "organic",
     "soul_drain": "necromancy", "wither_touch": "necromancy", "shade_summon": "necromancy",
@@ -282,6 +283,23 @@ def icon_steam_flight(d, cx, cy, color):
     icon_arrow(d, cx, cy - 2, (220, 240, 255, 230))
 
 
+def icon_air_hand(d, cx, cy, color):
+    icon_wind(d, cx, cy, color)
+    d.ellipse((cx + 2, cy - 2, cx + 10, cy + 8), outline=(230, 245, 255, 230), width=2)
+    d.line([(cx - 2, cy + 2), (cx + 4, cy + 2)], fill=(230, 245, 255, 230), width=2)
+
+
+def icon_water_prison(d, cx, cy, color):
+    icon_water(d, cx, cy, color)
+    d.ellipse((cx - 11, cy - 11, cx + 11, cy + 11), outline=(80, 160, 255, 220), width=2)
+
+
+def icon_vacuum_cage(d, cx, cy, color):
+    icon_wind(d, cx, cy, (180, 180, 200, 255))
+    d.ellipse((cx - 11, cy - 11, cx + 11, cy + 11), outline=(60, 60, 80, 230), width=2)
+    draw_disc(d, cx, cy, 3, (20, 20, 30, 220))
+
+
 def icon_steam_veil(d, cx, cy, color):
     icon_steam(d, cx, cy, color)
     d.ellipse((cx - 14, cy - 16, cx + 14, cy + 4), outline=color, width=2)
@@ -305,6 +323,9 @@ DRAWERS = {
     "hydro_slice": icon_hydro_slice,
     "great_fireball": icon_great_fire,
     "steam_flight": icon_steam_flight,
+    "air_hand": icon_air_hand,
+    "water_prison": icon_water_prison,
+    "vacuum_cage": icon_vacuum_cage,
     "vitality_pulse": icon_heart,
     "thorn_lash": icon_thorns,
     "root_bind": icon_roots,

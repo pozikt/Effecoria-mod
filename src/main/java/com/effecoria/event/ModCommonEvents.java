@@ -12,12 +12,15 @@ import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.core.psi.SpellProgression;
+import com.effecoria.effect.elemental.AirHandService;
 import com.effecoria.effect.elemental.ElementalBlockService;
+import com.effecoria.effect.elemental.ElementalCageService;
 import com.effecoria.effect.elemental.SteamCloudService;
 import com.effecoria.effect.elemental.SteamFlightService;
 import com.effecoria.magic.SpellRegistry;
 
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
@@ -46,6 +49,7 @@ public final class ModCommonEvents {
         if (event.getLevel() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
             ElementalBlockService.tick(serverLevel);
             SteamCloudService.tick(serverLevel);
+            ElementalCageService.tick(serverLevel);
         }
     }
 
@@ -75,8 +79,11 @@ public final class ModCommonEvents {
         }
 
         PlayerPsiData flightData = PsiHelper.get(player);
-        if (flightData.initiated() && flightData.steamFlightActive()) {
-            SteamFlightService.tick(player);
+        if (flightData.initiated()) {
+            if (flightData.steamFlightActive()) {
+                SteamFlightService.tick(player);
+            }
+            AirHandService.tick(player);
         }
 
         if (player.tickCount % 10 != 0) {
@@ -115,7 +122,11 @@ public final class ModCommonEvents {
         player.syncData(ModAttachments.PSI.get());
     }
 
-    @SubscribeEvent
+    /**
+     * Must run after NeoForge copies {@code copyOnDeath} attachments, otherwise exhaustion
+     * from the dead player is written back over a premature clear.
+     */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPlayerClone(PlayerEvent.Clone event) {
         if (!event.isWasDeath()) {
             return;
@@ -123,9 +134,23 @@ public final class ModCommonEvents {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
+        clearOvercastPenalties(player);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+        clearOvercastPenalties(player);
+    }
+
+    private static void clearOvercastPenalties(ServerPlayer player) {
         PlayerPsiData data = PsiHelper.get(player);
         ExhaustionService.clearOnDeath(data);
+        AirHandService.clearFor(player);
         PsiHelper.set(player, data);
+        ExhaustionService.stripExhaustionEffects(player);
         player.syncData(ModAttachments.PSI.get());
     }
 
