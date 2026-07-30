@@ -1,11 +1,16 @@
 package com.effecoria.network;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.effecoria.EffecoriaMod;
+import com.effecoria.client.ClientSteamCloudEffects;
 import com.effecoria.core.magic.MagicSchool;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.core.psi.SpellProgression;
+import com.effecoria.effect.elemental.SteamCloudService;
 import com.effecoria.magic.CastPipeline;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -149,6 +154,36 @@ public final class ModNetworking {
                 PsiHelper.set(player, data);
                 player.syncData(ModAttachments.PSI.get());
             });
+        }
+    }
+
+    /** Server → client: active steam fog volumes for density fog + local particles. */
+    public record SteamCloudsPayload(List<SteamCloudService.CloudSnapshot> clouds) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<SteamCloudsPayload> TYPE =
+                new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "steam_clouds"));
+
+        private static final StreamCodec<RegistryFriendlyByteBuf, SteamCloudService.CloudSnapshot> SNAPSHOT_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.DOUBLE, SteamCloudService.CloudSnapshot::x,
+                        ByteBufCodecs.DOUBLE, SteamCloudService.CloudSnapshot::y,
+                        ByteBufCodecs.DOUBLE, SteamCloudService.CloudSnapshot::z,
+                        ByteBufCodecs.FLOAT, SteamCloudService.CloudSnapshot::radius,
+                        ByteBufCodecs.VAR_LONG, SteamCloudService.CloudSnapshot::expireAt,
+                        SteamCloudService.CloudSnapshot::new);
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, SteamCloudsPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.collection(ArrayList::new, SNAPSHOT_CODEC),
+                        SteamCloudsPayload::clouds,
+                        SteamCloudsPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(SteamCloudsPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> ClientSteamCloudEffects.setClouds(payload.clouds()));
         }
     }
 }

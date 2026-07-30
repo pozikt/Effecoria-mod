@@ -105,13 +105,13 @@ public class EffecoriaMod {
                 ModNetworking.CastSpellPayload::handle);
 
         registrar.playToServer(
-
                 ModNetworking.CycleSpellPayload.TYPE,
-
                 ModNetworking.CycleSpellPayload.STREAM_CODEC,
-
                 ModNetworking.CycleSpellPayload::handle);
-
+        registrar.playToClient(
+                ModNetworking.SteamCloudsPayload.TYPE,
+                ModNetworking.SteamCloudsPayload.STREAM_CODEC,
+                ModNetworking.SteamCloudsPayload::handle);
     }
 
 }

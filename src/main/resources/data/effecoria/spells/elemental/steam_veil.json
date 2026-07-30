@@ -11,7 +11,8 @@
   "effects": [
     {
       "type": "effecoria:steam_veil",
-      "duration_ticks": 120
+      "duration_ticks": 120,
+      "radius": 4.0
     }
   ]
 }

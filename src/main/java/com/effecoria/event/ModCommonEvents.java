@@ -13,6 +13,7 @@ import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.core.psi.SpellProgression;
 import com.effecoria.effect.elemental.ElementalBlockService;
+import com.effecoria.effect.elemental.SteamCloudService;
 import com.effecoria.magic.SpellRegistry;
 
 import net.minecraft.server.level.ServerPlayer;
@@ -20,6 +21,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
@@ -41,6 +43,23 @@ public final class ModCommonEvents {
     public static void onLevelTick(LevelTickEvent.Post event) {
         if (event.getLevel() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
             ElementalBlockService.tick(serverLevel);
+            SteamCloudService.tick(serverLevel);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player
+                && player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            SteamCloudService.syncToPlayer(player, serverLevel);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player
+                && player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            SteamCloudService.syncToPlayer(player, serverLevel);
         }
     }
 

@@ -28,13 +28,31 @@ public final class SchoolParticles {
                 SpriteSet sprites,
                 float baseSize,
                 float growRate) {
+            this(level, x, y, z, xd, yd, zd, sprites, baseSize, growRate, 18, 16, 0.3F, 0.25F);
+        }
+
+        protected FogParticle(
+                ClientLevel level,
+                double x,
+                double y,
+                double z,
+                double xd,
+                double yd,
+                double zd,
+                SpriteSet sprites,
+                float baseSize,
+                float growRate,
+                int lifeBase,
+                int lifeVariance,
+                float alphaBase,
+                float alphaVariance) {
             super(level, x, y, z, xd, yd, zd);
             this.friction = 0.96F;
             this.hasPhysics = false;
             this.quadSize = baseSize;
             this.growRate = growRate;
-            this.lifetime = 18 + this.random.nextInt(16);
-            this.alpha = 0.3F + this.random.nextFloat() * 0.25F;
+            this.lifetime = lifeBase + this.random.nextInt(Math.max(1, lifeVariance));
+            this.alpha = alphaBase + this.random.nextFloat() * alphaVariance;
             this.sprite = sprites.get(this.random);
         }
 
@@ -54,11 +72,30 @@ public final class SchoolParticles {
             private final SpriteSet sprites;
             private final float baseSize;
             private final float growRate;
+            private final int lifeBase;
+            private final int lifeVariance;
+            private final float alphaBase;
+            private final float alphaVariance;
 
             public Provider(SpriteSet sprites, float baseSize, float growRate) {
+                this(sprites, baseSize, growRate, 18, 16, 0.3F, 0.25F);
+            }
+
+            public Provider(
+                    SpriteSet sprites,
+                    float baseSize,
+                    float growRate,
+                    int lifeBase,
+                    int lifeVariance,
+                    float alphaBase,
+                    float alphaVariance) {
                 this.sprites = sprites;
                 this.baseSize = baseSize;
                 this.growRate = growRate;
+                this.lifeBase = lifeBase;
+                this.lifeVariance = lifeVariance;
+                this.alphaBase = alphaBase;
+                this.alphaVariance = alphaVariance;
             }
 
             @Override
@@ -71,7 +108,21 @@ public final class SchoolParticles {
                     double xd,
                     double yd,
                     double zd) {
-                return new FogParticle(level, x, y, z, xd, yd, zd, this.sprites, this.baseSize, this.growRate);
+                return new FogParticle(
+                        level,
+                        x,
+                        y,
+                        z,
+                        xd,
+                        yd,
+                        zd,
+                        this.sprites,
+                        this.baseSize,
+                        this.growRate,
+                        this.lifeBase,
+                        this.lifeVariance,
+                        this.alphaBase,
+                        this.alphaVariance);
             }
         }
     }

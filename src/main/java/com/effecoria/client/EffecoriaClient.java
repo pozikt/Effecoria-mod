@@ -37,7 +37,7 @@ public final class EffecoriaClient {
                 ModParticleTypes.WATER_WAVE.get(), sprites -> new SchoolParticles.StreakParticle.Provider(sprites, 0.12F));
         event.registerSpriteSet(
                 ModParticleTypes.STEAM_FOG.get(),
-                sprites -> new SchoolParticles.FogParticle.Provider(sprites, 0.7F, 0.016F));
+                sprites -> new SchoolParticles.FogParticle.Provider(sprites, 1.4F, 0.03F, 32, 28, 0.5F, 0.3F));
         event.registerSpriteSet(ModParticleTypes.ICE_CRYSTAL.get(), SchoolParticles.SparkParticle.Provider::new);
         event.registerSpriteSet(ModParticleTypes.PHI_FLAME.get(), SchoolParticles.FlameParticle.Provider::new);
         event.registerSpriteSet(

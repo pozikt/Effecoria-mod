@@ -30,7 +30,6 @@ public final class PlayerPsiData {
                 ByteBufCodecs.BOOL.encode(buf, data.initiated);
                 ByteBufCodecs.INT.encode(buf, data.selectedSpellIndex);
                 ByteBufCodecs.VAR_LONG.encode(buf, data.phiSenseUntil);
-                ByteBufCodecs.VAR_LONG.encode(buf, data.steamVeilUntil);
                 ByteBufCodecs.FLOAT.encode(buf, data.breathingMastery);
                 ByteBufCodecs.FLOAT.encode(buf, data.trainingXp);
                 ByteBufCodecs.INT.encode(buf, data.essence);
@@ -63,7 +62,6 @@ public final class PlayerPsiData {
                 data.initiated = ByteBufCodecs.BOOL.decode(buf);
                 data.selectedSpellIndex = ByteBufCodecs.INT.decode(buf);
                 data.phiSenseUntil = ByteBufCodecs.VAR_LONG.decode(buf);
-                data.steamVeilUntil = ByteBufCodecs.VAR_LONG.decode(buf);
                 data.breathingMastery = ByteBufCodecs.FLOAT.decode(buf);
                 data.trainingXp = ByteBufCodecs.FLOAT.decode(buf);
                 data.essence = ByteBufCodecs.INT.decode(buf);
@@ -100,7 +98,6 @@ public final class PlayerPsiData {
     private int selectedSpellIndex;
     private List<ResourceLocation> knownSpells = new ArrayList<>();
     private long phiSenseUntil;
-    private long steamVeilUntil;
     private float breathingMastery;
     private float trainingXp;
     private int essence;
@@ -229,10 +226,6 @@ public final class PlayerPsiData {
         return phiSenseUntil > gameTime;
     }
 
-    public boolean isSteamVeilActive(long gameTime) {
-        return steamVeilUntil > gameTime;
-    }
-
     public void setCurrentPsi(float value) {
         this.currentPsi = Math.clamp(value, 0f, maxPsi);
     }
@@ -243,10 +236,6 @@ public final class PlayerPsiData {
 
     public void setPhiSenseUntil(long gameTime) {
         this.phiSenseUntil = gameTime;
-    }
-
-    public void setSteamVeilUntil(long gameTime) {
-        this.steamVeilUntil = gameTime;
     }
 
     public void setSoulStrength(float value) {
@@ -316,7 +305,6 @@ public final class PlayerPsiData {
         this.selectedSpellIndex = 0;
         this.entropyB = 0f;
         this.phiSenseUntil = 0L;
-        this.steamVeilUntil = 0L;
         this.spellCastCounts.clear();
         this.spellLastCastAt.clear();
         if (resetResources) {
@@ -339,7 +327,6 @@ public final class PlayerPsiData {
         tag.putBoolean("initiated", initiated);
         tag.putInt("selectedSpellIndex", selectedSpellIndex);
         tag.putLong("phiSenseUntil", phiSenseUntil);
-        tag.putLong("steamVeilUntil", steamVeilUntil);
         tag.putFloat("breathingMastery", breathingMastery);
         tag.putFloat("trainingXp", trainingXp);
         tag.putInt("essence", essence);
@@ -377,7 +364,6 @@ public final class PlayerPsiData {
         initiated = tag.getBoolean("initiated");
         selectedSpellIndex = tag.getInt("selectedSpellIndex");
         phiSenseUntil = tag.getLong("phiSenseUntil");
-        steamVeilUntil = tag.contains("steamVeilUntil") ? tag.getLong("steamVeilUntil") : 0L;
         if (tag.contains("breathingMastery")) {
             breathingMastery = tag.getFloat("breathingMastery");
         } else if (tag.contains("breathingTier")) {
@@ -439,7 +425,6 @@ public final class PlayerPsiData {
         copy.selectedSpellIndex = selectedSpellIndex;
         copy.knownSpells = new ArrayList<>(knownSpells);
         copy.phiSenseUntil = phiSenseUntil;
-        copy.steamVeilUntil = steamVeilUntil;
         copy.breathingMastery = breathingMastery;
         copy.trainingXp = trainingXp;
         copy.essence = essence;

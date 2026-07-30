@@ -2,8 +2,6 @@ package com.effecoria.effect.elemental;
 
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.magic.SpellEffectEntry;
-import com.effecoria.core.psi.PlayerPsiData;
-import com.effecoria.core.psi.PsiHelper;
 import com.google.gson.JsonObject;
 
 import net.minecraft.core.BlockPos;
@@ -72,19 +70,27 @@ public final class ElementalEffects {
         waterStream(caster, effect, power, true);
     }
 
-    /** Gaseous steam jet — scalding mist with strong push. */
+    /** Gaseous steam jet — scalding cone that leaves lingering fog. */
     public static void steamJet(ServerPlayer caster, SpellEffectEntry effect, float power) {
         ServerLevel level = caster.serverLevel();
         double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 8;
         float damage = effect.params().has("damage") ? effect.params().get("damage").getAsFloat() : 4f;
         float knockback = effect.params().has("knockback") ? effect.params().get("knockback").getAsFloat() : 1.6f;
-        int blindTicks = effect.params().has("blind_ticks") ? effect.params().get("blind_ticks").getAsInt() : 30;
+        float cloudRadius = effect.params().has("cloud_radius") ? effect.params().get("cloud_radius").getAsFloat() : 2.5f;
+        int cloudDuration = effect.params().has("cloud_duration_ticks")
+                ? effect.params().get("cloud_duration_ticks").getAsInt()
+                : 60;
 
         Vec3 look = caster.getLookAngle().normalize();
         Vec3 start = caster.getEyePosition();
         float scaledDamage = damage * (power / 50f);
         float scaledKnock = knockback * (power / 50f);
+        float scaledCloudRadius = cloudRadius * (0.85f + power / 120f);
+        int scaledCloudDuration = Math.round(cloudDuration * (0.85f + power / 100f));
         DamageSource source = caster.level().damageSources().magic();
+
+        LivingEntity nearestHit = null;
+        double nearestDist = Double.MAX_VALUE;
 
         AABB sweep = caster.getBoundingBox().expandTowards(look.scale(range)).inflate(1.5);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, sweep, e -> e != caster && e.isAlive())) {
@@ -96,30 +102,43 @@ public final class ElementalEffects {
             target.hurt(source, scaledDamage);
             target.push(look.x * scaledKnock, 0.2, look.z * scaledKnock);
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0));
-            if (power >= 30f) {
-                target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, blindTicks, 0));
-            }
             target.hurtMarked = true;
             spawnSteamBurst(level, target.position());
+            if (along < nearestDist) {
+                nearestDist = along;
+                nearestHit = target;
+            }
         }
 
         spawnSteamBeam(level, start, look, range);
+
+        Vec3 trailCenter = start.add(look.scale(range * 0.55));
+        SteamCloudService.spawn(
+                level, trailCenter, scaledCloudRadius, scaledCloudDuration, caster.getUUID(), true);
+        if (nearestHit != null) {
+            SteamCloudService.spawn(
+                    level,
+                    nearestHit.position().add(0, 0.8, 0),
+                    scaledCloudRadius * 0.85f,
+                    Math.round(scaledCloudDuration * 0.75f),
+                    caster.getUUID(),
+                    true);
+        }
+
         level.playSound(null, caster.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.9f, 0.7f);
     }
 
-    /** Hide inside a personal steam cloud. */
+    /** Stationary steam fog volume around the cast point — does not follow the caster. */
     public static void steamVeil(ServerPlayer caster, SpellEffectEntry effect, float power) {
         ServerLevel level = caster.serverLevel();
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 4f;
         duration = Math.round(duration * (0.75f + power / 100f));
+        radius *= 0.85f + power / 120f;
 
-        PlayerPsiData data = PsiHelper.get(caster);
-        data.setSteamVeilUntil(level.getGameTime() + duration);
-        PsiHelper.set(caster, data);
+        Vec3 center = caster.position().add(0, 1.0, 0);
+        SteamCloudService.spawn(level, center, radius, duration, caster.getUUID(), false);
 
-        caster.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, false));
-        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0, false, false));
-        spawnSteamBurst(level, caster.position().add(0, 1, 0));
         level.playSound(null, caster.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.7f, 1.1f);
     }
 
