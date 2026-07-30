@@ -1,0 +1,17 @@
+{
+  "id": "effecoria:genetic_lock",
+  "school": "organic",
+  "frequency_hz": 24.0,
+  "base_cost": 26,
+  "power_multiplier": 1.15,
+  "side_entropy": 0.11,
+  "min_phi": 0.5,
+  "min_mastery": 0.7,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:genetic_lock",
+      "duration_ticks": 160
+    }
+  ]
+}

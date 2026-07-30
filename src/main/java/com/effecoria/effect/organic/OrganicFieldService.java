@@ -28,7 +28,8 @@ public final class OrganicFieldService {
 
     public enum Kind {
         HEAL,
-        CATACLYSM
+        CATACLYSM,
+        SINGULARITY
     }
 
     private static final class OrganicField {
@@ -70,6 +71,21 @@ public final class OrganicFieldService {
         field.damagePerSecond = Math.max(0.05f, damagePerSecond);
         FIELDS.add(field);
         level.playSound(null, center.x, center.y, center.z, SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.5f, 0.7f);
+    }
+
+    public static void spawnSingularity(
+            ServerLevel level,
+            Vec3 center,
+            UUID owner,
+            float radius,
+            int durationTicks,
+            float healPerSecond,
+            float damagePerSecond) {
+        OrganicField field = baseField(level, Kind.SINGULARITY, center, owner, radius, durationTicks, 0f);
+        field.healPerSecond = Math.max(0f, healPerSecond);
+        field.damagePerSecond = Math.max(0.05f, damagePerSecond);
+        FIELDS.add(field);
+        level.playSound(null, center.x, center.y, center.z, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.7f, 0.5f);
     }
 
     private static OrganicField baseField(
@@ -116,6 +132,12 @@ public final class OrganicFieldService {
                     field.center = owner.position().add(0, 0.5, 0);
                 }
             }
+            if (field.kind == Kind.SINGULARITY) {
+                ServerPlayer owner = level.getServer().getPlayerList().getPlayer(field.owner);
+                if (owner != null) {
+                    field.center = owner.position().add(0, 0.5, 0);
+                }
+            }
             if (now % 20 == 0) {
                 tickOncePerSecond(level, field, now);
             }
@@ -138,6 +160,28 @@ public final class OrganicFieldService {
             }
             return;
         }
+        if (field.kind == Kind.SINGULARITY) {
+            for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, box, LivingEntity::isAlive)) {
+                if (ally.position().distanceToSqr(field.center) > (double) field.radius * field.radius) {
+                    continue;
+                }
+                if (field.healPerSecond > 0f) {
+                    ally.heal(field.healPerSecond);
+                    OrganicEffects.spawnOrganicParticles(level, ally.position().add(0, 1, 0));
+                }
+            }
+            for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+                if (entity instanceof ServerPlayer) {
+                    continue;
+                }
+                if (entity.position().distanceToSqr(field.center) > (double) field.radius * field.radius) {
+                    continue;
+                }
+                entity.hurt(level.damageSources().magic(), field.damagePerSecond);
+                entity.hurtMarked = true;
+            }
+            return;
+        }
         if (field.kind == Kind.CATACLYSM && field.damagePerSecond > 0f) {
             for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
                 if (entity instanceof ServerPlayer player && player.getUUID().equals(field.owner)) {
@@ -156,17 +200,29 @@ public final class OrganicFieldService {
     }
 
     private static void spawnFieldParticles(ServerLevel level, OrganicField field) {
-        if (field.kind == Kind.CATACLYSM) {
+        if (field.kind == Kind.CATACLYSM || field.kind == Kind.SINGULARITY) {
             level.sendParticles(
                     ModParticleTypes.ORGANIC_FOG.get(),
                     field.center.x,
                     field.center.y + 0.5,
                     field.center.z,
-                    10,
+                    field.kind == Kind.SINGULARITY ? 14 : 10,
                     field.radius * 0.4,
                     0.5,
                     field.radius * 0.4,
                     0.02);
+            if (field.kind == Kind.SINGULARITY) {
+                level.sendParticles(
+                        ModParticleTypes.ORGANIC_LEAF.get(),
+                        field.center.x,
+                        field.center.y + 0.8,
+                        field.center.z,
+                        8,
+                        field.radius * 0.3,
+                        0.4,
+                        field.radius * 0.3,
+                        0.01);
+            }
             return;
         }
         level.sendParticles(

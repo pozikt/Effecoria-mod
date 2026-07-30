@@ -503,6 +503,204 @@ public final class OrganicEffects {
         caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.6f, 1.2f);
     }
 
+    public static void symbioticGraft(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        LivingEntity subject = target != null ? target : caster;
+        ServerLevel level = caster.serverLevel();
+        float heal = DiceDamage.healFromParams(effect.params(), power, 10f);
+        int regenTicks = effect.params().has("regen_ticks") ? effect.params().get("regen_ticks").getAsInt() : 120;
+        int regenAmp = effect.params().has("regen_amplifier") ? effect.params().get("regen_amplifier").getAsInt() : 1;
+        subject.heal(heal);
+        subject.addEffect(new MobEffectInstance(MobEffects.REGENERATION, regenTicks, regenAmp, false, true, true));
+        spawnOrganicParticles(level, subject.position().add(0, 1, 0));
+        level.playSound(null, subject.blockPosition(), SoundEvents.HONEY_DRINK, SoundSource.PLAYERS, 0.7f, 1.2f);
+    }
+
+    public static void limbRegeneration(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        float heal = DiceDamage.healFromParams(effect.params(), power, 14f);
+        int regenTicks = effect.params().has("regen_ticks") ? effect.params().get("regen_ticks").getAsInt() : 400;
+        int regenAmp = effect.params().has("regen_amplifier") ? effect.params().get("regen_amplifier").getAsInt() : 2;
+        caster.heal(heal);
+        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, regenTicks, regenAmp, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.SATURATION, 40, 0, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 140, 0, false, false, true));
+        spawnOrganicParticles(level, caster.position().add(0, 1, 0));
+        level.playSound(null, caster.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.5f, 1.3f);
+    }
+
+    public static void verdantBloom(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 6f;
+        float heal = DiceDamage.healFromParams(effect.params(), power, 4f);
+        int bloomRadius = effect.params().has("bloom_radius") ? effect.params().get("bloom_radius").getAsInt() : 4;
+        caster.heal(heal);
+        AABB box = caster.getBoundingBox().inflate(radius);
+        for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, box, LivingEntity::isAlive)) {
+            if (ally.distanceToSqr(caster) > radius * radius) {
+                continue;
+            }
+            ally.heal(heal * 0.5f);
+            spawnOrganicParticles(level, ally.position().add(0, 1, 0));
+        }
+        bloomNearby(level, caster.blockPosition(), bloomRadius);
+        spawnOrganicParticles(level, caster.position().add(0, 1, 0));
+    }
+
+    public static void geneticLock(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 160;
+        target.removeEffect(MobEffects.REGENERATION);
+        target.addEffect(new MobEffectInstance(MobEffects.POISON, duration, 1));
+        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, 1));
+        target.addEffect(new MobEffectInstance(MobEffects.HUNGER, duration, 2));
+        spawnOrganicParticles(level, target.position().add(0, 1, 0));
+    }
+
+    public static void biologicalCleaving(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        float damage = DiceDamage.fromParams(effect.params(), power, 7f);
+        int armorDamage = effect.params().has("armor_damage") ? effect.params().get("armor_damage").getAsInt() : 80;
+        target.hurt(level.damageSources().magic(), damage);
+        target.hurtMarked = true;
+        shredOrganicArmor(target, armorDamage);
+        spawnOrganicParticles(level, target.position().add(0, 1, 0));
+        level.playSound(null, target.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8f, 0.5f);
+    }
+
+    public static void fullTransformation(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 400;
+        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 2, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 2, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.JUMP, duration, 2, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, duration, 0, false, false, true));
+        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+    }
+
+    public static void sporeStorm(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 7f;
+        int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 140;
+        float damage = DiceDamage.fromParams(effect.params(), power, 5f);
+        AABB box = caster.getBoundingBox().inflate(radius);
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (entity == caster) {
+                continue;
+            }
+            if (entity.distanceToSqr(caster) > radius * radius) {
+                continue;
+            }
+            entity.hurt(level.damageSources().magic(), damage);
+            entity.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
+            entity.hurtMarked = true;
+            spawnOrganicParticles(level, entity.position().add(0, 1, 0));
+        }
+        spawnOrganicParticles(level, caster.position().add(0, 1, 0));
+    }
+
+    public static void biologicalSingularity(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 10f;
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 240;
+        float healPerSecond;
+        if (params.has("heal_dice_per_round")) {
+            JsonObject healParams = new JsonObject();
+            healParams.addProperty("damage_dice_per_round", params.get("heal_dice_per_round").getAsString());
+            healPerSecond = DiceDamage.perSecondFromParams(healParams, power, 1.5f);
+        } else if (params.has("heal_per_second")) {
+            healPerSecond = params.get("heal_per_second").getAsFloat() * (0.75f + power / 100f);
+        } else {
+            healPerSecond = 1.5f * (0.75f + power / 100f);
+        }
+        float damagePerSecond = params.has("damage_dice_per_round")
+                ? OrganicFieldService.cataclysmDpsFromParams(params, power)
+                : OrganicFieldService.cataclysmDpsFromParams(params, power);
+        OrganicFieldService.spawnSingularity(
+                caster.serverLevel(),
+                caster.position().add(0, 0.5, 0),
+                caster.getUUID(),
+                radius,
+                duration,
+                healPerSecond,
+                damagePerSecond);
+    }
+
+    public static void lifeCreation(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        int bloomRadius = effect.params().has("bloom_radius") ? effect.params().get("bloom_radius").getAsInt() : 5;
+        Vec3 look = caster.getLookAngle().normalize();
+        double x = caster.getX() + look.x * 2.5;
+        double z = caster.getZ() + look.z * 2.5;
+        double y = caster.getY();
+        var chicken = net.minecraft.world.entity.EntityType.CHICKEN.create(level);
+        if (chicken != null) {
+            chicken.moveTo(x, y, z, caster.getYRot(), 0f);
+            chicken.setPersistenceRequired();
+            level.addFreshEntity(chicken);
+        }
+        bloomNearby(level, BlockPos.containing(x, y, z), bloomRadius);
+        caster.heal(DiceDamage.healFromParams(effect.params(), power, 3f));
+        spawnOrganicParticles(level, new Vec3(x, y + 1, z));
+        level.playSound(null, caster.blockPosition(), SoundEvents.CHICKEN_EGG, SoundSource.PLAYERS, 0.8f, 1.1f);
+    }
+
+    public static void biologicalImmortality(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 600;
+        int aftermath = effect.params().has("aftermath_ticks") ? effect.params().get("aftermath_ticks").getAsInt() : 200;
+        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 3, false, true, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, 3, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, false, true));
+        caster.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, aftermath, 2, false, false, true));
+        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.5f, 0.9f);
+    }
+
+    private static void shredOrganicArmor(LivingEntity target, int amount) {
+        for (net.minecraft.world.entity.EquipmentSlot slot :
+                new net.minecraft.world.entity.EquipmentSlot[] {
+                    net.minecraft.world.entity.EquipmentSlot.HEAD,
+                    net.minecraft.world.entity.EquipmentSlot.CHEST,
+                    net.minecraft.world.entity.EquipmentSlot.LEGS,
+                    net.minecraft.world.entity.EquipmentSlot.FEET
+                }) {
+            net.minecraft.world.item.ItemStack stack = target.getItemBySlot(slot);
+            if (stack.isEmpty() || !isOrganicArmor(stack)) {
+                continue;
+            }
+            stack.hurtAndBreak(amount, target, slot);
+        }
+    }
+
+    private static boolean isOrganicArmor(net.minecraft.world.item.ItemStack stack) {
+        if (stack.is(net.minecraft.tags.ItemTags.WOOL)) {
+            return true;
+        }
+        String path = net.minecraft.core.registries.BuiltInRegistries.ITEM
+                .getKey(stack.getItem())
+                .getPath();
+        return path.contains("leather");
+    }
+
+    private static void bloomNearby(ServerLevel level, BlockPos center, int radius) {
+        net.minecraft.util.RandomSource random = level.getRandom();
+        for (BlockPos pos :
+                BlockPos.betweenClosed(center.offset(-radius, -1, -radius), center.offset(radius, 2, radius))) {
+            net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
+            if (state.getBlock() instanceof net.minecraft.world.level.block.BonemealableBlock growable
+                    && growable.isValidBonemealTarget(level, pos, state)
+                    && growable.isBonemealSuccess(level, random, pos, state)
+                    && random.nextFloat() < 0.45f) {
+                growable.performBonemeal(level, random, pos, state);
+            }
+        }
+    }
+
     private static void tagProjectile(Snowball projectile, float damage) {
         projectile.getPersistentData().putBoolean(OrganicTags.PROJECTILE, true);
         projectile.getPersistentData().putString(OrganicTags.KIND, OrganicTags.KIND_BONE_NEEDLE);

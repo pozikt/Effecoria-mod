@@ -19,6 +19,8 @@ import com.effecoria.effect.elemental.ElementalFieldService;
 import com.effecoria.effect.elemental.ElementalShroudService;
 import com.effecoria.effect.elemental.SteamCloudService;
 import com.effecoria.effect.elemental.SteamFlightService;
+import com.effecoria.effect.necromancy.NecroFieldService;
+import com.effecoria.effect.necromancy.NecroSummonService;
 import com.effecoria.effect.organic.OrganicDiagnosticService;
 import com.effecoria.effect.organic.OrganicFieldService;
 import com.effecoria.magic.SpellRegistry;
@@ -63,6 +65,7 @@ public final class ModCommonEvents {
             SteamCloudService.tick(serverLevel);
             ElementalFieldService.tick(serverLevel);
             OrganicFieldService.tick(serverLevel);
+            NecroFieldService.tick(serverLevel);
             ElementalCageService.tick(serverLevel);
         }
     }
@@ -114,6 +117,7 @@ public final class ModCommonEvents {
 
         ProgressionService.tick(player, data);
         ShadeService.tick(player);
+        NecroSummonService.tick(player);
         data.mergeMissingSpells(SpellProgression.spellsForSchool(data.school()));
 
         if (CreativeGodMode.isActive(player)) {
@@ -168,6 +172,7 @@ public final class ModCommonEvents {
         data.clearIonCharge();
         ElementalFieldService.clearFor(player.getUUID());
         OrganicFieldService.clearFor(player.getUUID());
+        NecroFieldService.clearFor(player.getUUID());
         ElementalShroudService.clearFor(player.getUUID());
         AirHandService.clearFor(player);
         PsiHelper.set(player, data);

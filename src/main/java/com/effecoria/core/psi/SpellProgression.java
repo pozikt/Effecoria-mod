@@ -106,31 +106,53 @@ public final class SpellProgression {
                     id("organic_necrosis"),
                     id("briar_surge"),
                     id("verdant_mend"),
+                    id("symbiotic_graft"),
                     id("full_restructuring"),
                     id("biological_field"),
+                    id("verdant_bloom"),
                     id("scorched_earth"),
                     id("bio_fission"),
                     id("super_regeneration"),
+                    id("limb_regeneration"),
                     id("population_control"),
+                    id("genetic_lock"),
                     id("biological_plague"),
+                    id("biological_cleaving"),
                     id("living_armor"),
                     id("beast_form"),
+                    id("full_transformation"),
+                    id("spore_storm"),
                     id("bio_cataclysm"),
                     id("absolute_regeneration"),
                     id("cellular_dominion"),
+                    id("biological_singularity"),
+                    id("life_creation"),
+                    id("biological_immortality"),
                     id("evolutionary_leap"));
 
             case NECROMANCY -> List.of(
-
+                    id("death_sense"),
+                    id("bone_chill"),
                     id("soul_drain"),
-
                     id("wither_touch"),
-
+                    id("grave_whisper"),
+                    id("siphon_pulse"),
+                    id("bone_armor"),
+                    id("phantom_step"),
                     id("shade_summon"),
-
+                    id("life_tap"),
+                    id("soul_shackle"),
+                    id("wither_wave"),
+                    id("dark_pact"),
                     id("grave_leech"),
-
-                    id("shade_swarm"));
+                    id("grave_field"),
+                    id("raise_skeleton"),
+                    id("shade_swarm"),
+                    id("shade_brood"),
+                    id("lich_ward"),
+                    id("death_coil"),
+                    id("soul_cataclysm"),
+                    id("death_apotheosis"));
 
             case SPATIAL -> List.of(
 

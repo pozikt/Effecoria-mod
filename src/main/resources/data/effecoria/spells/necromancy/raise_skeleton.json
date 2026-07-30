@@ -1,0 +1,17 @@
+{
+  "id": "effecoria:raise_skeleton",
+  "school": "necromancy",
+  "frequency_hz": 74.0,
+  "base_cost": 17,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.09,
+  "min_phi": 0.34,
+  "min_mastery": 0.45,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:raise_skeleton",
+      "lifetime_ticks": 300
+    }
+  ]
+}

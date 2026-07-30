@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:bone_chill",
+  "school": "necromancy",
+  "frequency_hz": 48.0,
+  "base_cost": 6,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.05,
+  "min_phi": 0.14,
+  "min_mastery": 0.1,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:bone_chill",
+      "damage_dice": "1d6",
+      "slow_ticks": 80
+    }
+  ]
+}

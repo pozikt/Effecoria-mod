@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:shade_brood",
+  "school": "necromancy",
+  "frequency_hz": 76.0,
+  "base_cost": 18,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.1,
+  "min_phi": 0.36,
+  "min_mastery": 0.5,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:shade_brood",
+      "count": 2,
+      "lifetime_ticks": 200
+    }
+  ]
+}

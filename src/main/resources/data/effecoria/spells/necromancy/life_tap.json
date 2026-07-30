@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:life_tap",
+  "school": "necromancy",
+  "frequency_hz": 58.0,
+  "base_cost": 11,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.07,
+  "min_phi": 0.22,
+  "min_mastery": 0.25,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:life_tap",
+      "damage_dice": "2d6",
+      "heal_ratio": 0.75
+    }
+  ]
+}

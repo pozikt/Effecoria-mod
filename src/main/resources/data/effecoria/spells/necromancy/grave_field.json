@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:grave_field",
+  "school": "necromancy",
+  "frequency_hz": 72.0,
+  "base_cost": 16,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.09,
+  "min_phi": 0.32,
+  "min_mastery": 0.4,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:grave_field",
+      "radius": 8,
+      "duration_ticks": 160,
+      "damage_dice_per_round": "2d8"
+    }
+  ]
+}

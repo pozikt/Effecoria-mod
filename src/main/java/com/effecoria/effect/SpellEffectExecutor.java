@@ -3,6 +3,7 @@ package com.effecoria.effect;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.effect.elemental.AirHandService;
 import com.effecoria.effect.elemental.ElementalEffects;
+import com.effecoria.effect.necromancy.NecromancyEffects;
 import com.effecoria.effect.organic.OrganicEffects;
 import com.effecoria.core.magic.ShadeService;
 import com.effecoria.core.magic.SpellDefinition;
@@ -72,7 +73,17 @@ public final class SpellEffectExecutor {
             "immune_suppression",
             "organic_necrosis",
             "scorched_earth",
-            "biological_plague");
+            "biological_plague",
+            "bone_chill",
+            "grave_whisper",
+            "life_tap",
+            "soul_shackle",
+            "raise_skeleton",
+            "shade_brood",
+            "death_coil",
+            "symbiotic_graft",
+            "genetic_lock",
+            "biological_cleaving");
 
     private static final Set<String> BLOCK_SEAL_EFFECTS = Set.of(
             "place_trap_seal",
@@ -258,11 +269,38 @@ public final class SpellEffectExecutor {
             case "absolute_regeneration" -> OrganicEffects.absoluteRegeneration(caster, effect, power);
             case "cellular_dominion" -> OrganicEffects.cellularDominion(caster, effect, power);
             case "evolutionary_leap" -> OrganicEffects.evolutionaryLeap(caster, effect, power);
+            case "symbiotic_graft" -> OrganicEffects.symbioticGraft(caster, effect, power, target);
+            case "limb_regeneration" -> OrganicEffects.limbRegeneration(caster, effect, power);
+            case "verdant_bloom" -> OrganicEffects.verdantBloom(caster, effect, power);
+            case "genetic_lock" -> OrganicEffects.geneticLock(caster, effect, power, target);
+            case "biological_cleaving" -> OrganicEffects.biologicalCleaving(caster, effect, power, target);
+            case "full_transformation" -> OrganicEffects.fullTransformation(caster, effect, power);
+            case "spore_storm" -> OrganicEffects.sporeStorm(caster, effect, power);
+            case "biological_singularity" -> OrganicEffects.biologicalSingularity(caster, effect, power);
+            case "life_creation" -> OrganicEffects.lifeCreation(caster, effect, power);
+            case "biological_immortality" -> OrganicEffects.biologicalImmortality(caster, effect, power);
             case "evoker_fangs" -> evokerFangs(caster, effect, power);
             case "root_bind" -> rootBind(caster, effect, power, target);
             case "soul_drain" -> soulDrain(caster, effect, power, target);
             case "wither_touch" -> witherTouch(caster, effect, power, target);
             case "shade_summon" -> shadeSummon(caster, effect, power, target);
+            case "bone_chill" -> NecromancyEffects.boneChill(caster, effect, power, target);
+            case "death_sense" -> NecromancyEffects.deathSense(caster, effect, power);
+            case "grave_whisper" -> NecromancyEffects.graveWhisper(caster, effect, power, target);
+            case "siphon_pulse" -> NecromancyEffects.siphonPulse(caster, effect, power);
+            case "bone_armor" -> NecromancyEffects.boneArmor(caster, effect, power);
+            case "life_tap" -> NecromancyEffects.lifeTap(caster, effect, power, target);
+            case "wither_wave" -> NecromancyEffects.witherWave(caster, effect, power);
+            case "dark_pact" -> NecromancyEffects.darkPact(caster, effect, power);
+            case "soul_shackle" -> NecromancyEffects.soulShackle(caster, effect, power, target);
+            case "phantom_step" -> NecromancyEffects.phantomStep(caster, effect, power);
+            case "grave_field" -> NecromancyEffects.graveField(caster, effect, power);
+            case "raise_skeleton" -> NecromancyEffects.raiseSkeleton(caster, effect, power, target);
+            case "shade_brood" -> NecromancyEffects.shadeBrood(caster, effect, power, target);
+            case "lich_ward" -> NecromancyEffects.lichWard(caster, effect, power);
+            case "death_coil" -> NecromancyEffects.deathCoil(caster, effect, power, target);
+            case "soul_cataclysm" -> NecromancyEffects.soulCataclysm(caster, effect, power);
+            case "death_apotheosis" -> NecromancyEffects.deathApotheosis(caster, effect, power);
             case "blink" -> blink(caster, effect, power);
             case "rift_yank" -> riftYank(caster, effect, power, target);
             case "phase_veil" -> phaseVeil(caster, effect, power);

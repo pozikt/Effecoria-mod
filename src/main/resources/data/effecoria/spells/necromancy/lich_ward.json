@@ -1,0 +1,17 @@
+{
+  "id": "effecoria:lich_ward",
+  "school": "necromancy",
+  "frequency_hz": 82.0,
+  "base_cost": 22,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.1,
+  "min_phi": 0.42,
+  "min_mastery": 0.55,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:lich_ward",
+      "duration_ticks": 500
+    }
+  ]
+}
