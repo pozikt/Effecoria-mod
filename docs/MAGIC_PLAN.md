@@ -24,7 +24,7 @@ Goal: casting feels intentional and readable in survival.
 
 1. **Per-school VFX pass** — consistent cast wind-up, impact, and AoE rings (spatial, mental storms, corruption fields, necro summons).
 2. **SFX pass** — map schools to a small set of NeoForge sounds (no new assets required at first).
-3. **`sense_phi` v2** — optional outline or icon above high/low-Φ entities (client-only); keep motes as fallback.
+3. **`sense_phi` v2** — entity outline (high/low Φ / ZNΦ) + motes. ✅ *outline shipped in `ClientPhiSenseOutline`*
 4. **Cast feedback** — clearer action bar messages for whiff reasons (no target / no block / ZNΦ / concentration).
 5. **Balance sweep** — `rebalance_spell_costs.py` + playtest tiers 0–3 per school (not endgame numbers).
 
@@ -101,13 +101,31 @@ Code for lich state remains in `PlayerPsiData` / `FormulaEngine.regenPsiLich` fo
 
 ---
 
+## Backlog / UX (noted)
+
+### First join — school selection (TODO)
+
+When a player **first appears in the world** and is not initiated (`PlayerPsiData.initiated == false`), automatically open **`SchoolSelectScreen`** and block normal play until a magic school is chosen.
+
+Today school pick only happens when the player opens the Resonance Focus flow (`ClientGuiHooks.openResonanceFocusScreen`); there is **no** prompt on spawn/login.
+
+**Implementation sketch (later):**
+
+- Client: one-shot after level load (`ClientTickEvent` or `ClientPlayerNetworkEvent.LoggingIn`) — if `!initiated`, `setScreen(new SchoolSelectScreen())` and optionally suppress movement.
+- Server: keep existing initiate packet in `ModNetworking`; no duplicate initiation.
+- Do **not** re-open on death, dimension travel, or reconnect after initiation.
+- Optional: server flag `hasSeenWorld` in player NBT if attachment loads late on first tick.
+
+---
+
 ## Suggested next sprint (concrete)
 
 If choosing a single slice for the next implementation session:
 
-1. Phase **B1**: essence-gated spell unlocks (server + sync + JSON `unlock_essence_cost`).
-2. Phase **A3**: phi-sense entity outline (client).
-3. Phase **D3**: seal stacking on one block.
+1. Phase **B1**: essence-gated spell unlocks — ✅ done.
+2. Phase **A3**: phi-sense entity outline — ✅ done.
+3. Phase **D3**: seal stacking on one block — **next**.
+4. **First-join school menu** — see backlog above.
 
 ---
 
