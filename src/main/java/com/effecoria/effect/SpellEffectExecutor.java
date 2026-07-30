@@ -381,7 +381,7 @@ public final class SpellEffectExecutor {
             case "psychic_storm" -> MentalEffects.psychicStorm(caster, effect, power);
             case "psychic_amplify" -> MentalEffects.psychicAmplify(caster, effect, power);
             case "omega_mind" -> MentalEffects.omegaMind(caster, effect, power);
-            case "blink" -> blink(caster, effect, power);
+            case "blink" -> SpatialEffects.standardBlink(caster, effect, power);
             case "rift_yank" -> riftYank(caster, effect, power, target);
             case "phase_veil" -> phaseVeil(caster, effect, power);
             case "corrupt_mark" -> CorruptionEffects.corruptMark(caster, effect, power, target);
@@ -603,40 +603,6 @@ public final class SpellEffectExecutor {
 
         spawnNecroParticles(level, new Vec3(spawnX, spawnY, spawnZ));
         level.playSound(null, caster.blockPosition(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 1f, 0.85f);
-    }
-
-    /** Short-range fold along look vector — lands in free space. */
-    private static void blink(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        ServerLevel level = caster.serverLevel();
-        double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 10;
-        double minRange = effect.params().has("min_range") ? effect.params().get("min_range").getAsDouble() : 2;
-        range = Math.min(24, range * (0.85 + power / 120f));
-
-        Vec3 look = caster.getLookAngle().normalize();
-        Vec3 origin = caster.position();
-        Vec3 best = null;
-        for (double dist = range; dist >= minRange; dist -= 0.5) {
-            Vec3 candidate = origin.add(look.scale(dist));
-            BlockPos feet = BlockPos.containing(candidate.x, candidate.y, candidate.z);
-            BlockPos head = feet.above();
-            if (!level.getBlockState(feet).getCollisionShape(level, feet).isEmpty()) {
-                continue;
-            }
-            if (!level.getBlockState(head).getCollisionShape(level, head).isEmpty()) {
-                continue;
-            }
-            best = new Vec3(candidate.x, feet.getY(), candidate.z);
-            break;
-        }
-        if (best == null) {
-            return;
-        }
-
-        spawnSpatialParticles(level, origin.add(0, 1, 0));
-        caster.teleportTo(best.x, best.y, best.z);
-        caster.fallDistance = 0f;
-        spawnSpatialParticles(level, best.add(0, 1, 0));
-        level.playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.9f, 1.3f);
     }
 
     /** Fold space and yank the target to the caster. */

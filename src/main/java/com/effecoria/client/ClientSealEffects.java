@@ -70,7 +70,9 @@ public final class ClientSealEffects {
         if (seal.typeId().equals(SealTypes.GLOW)) {
             level.addParticle(ModParticleTypes.SEAL_GLYPH.get(), x, y, z, 0, 0.008, 0);
             level.addParticle(ModParticleTypes.SEAL_SPARK.get(), x + 0.2, y + 0.2, z, 0, 0.012, 0);
-        } else if (seal.typeId().equals(SealTypes.DAMAGE_TRAP)) {
+        } else if (seal.typeId().equals(SealTypes.DAMAGE_TRAP)
+                || seal.typeId().equals(SealTypes.SNARE)
+                || seal.typeId().equals(SealTypes.REPULSE)) {
             level.addParticle(ModParticleTypes.CORRUPTION_RUNE.get(), x, y + 0.5, z, 0, 0.015, 0);
             level.addParticle(ModParticleTypes.CORRUPTION_POISON.get(), x, y + 0.3, z, 0, -0.01, 0);
         } else if (seal.typeId().equals(SealTypes.FORTIFY)) {

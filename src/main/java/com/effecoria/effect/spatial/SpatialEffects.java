@@ -168,7 +168,11 @@ public final class SpatialEffects {
     }
 
     public static void farBlink(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        blinkAlongLook(caster, effect, power, 1.35);
+        blinkAlongLook(caster, effect, power, 1.0, defaultMaxRange(effect, 200));
+    }
+
+    public static void standardBlink(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        blinkAlongLook(caster, effect, power, 1.0, defaultMaxRange(effect, 24));
     }
 
     public static void riftBurst(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -212,17 +216,22 @@ public final class SpatialEffects {
 
     public static void absoluteFold(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int veilTicks = effect.params().has("veil_ticks") ? effect.params().get("veil_ticks").getAsInt() : 100;
-        blinkAlongLook(caster, effect, power, 1.5);
+        blinkAlongLook(caster, effect, power, 1.05, defaultMaxRange(effect, 220));
         caster.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, veilTicks, 0, false, true, true));
         caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, veilTicks, 1, false, false, true));
         caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, veilTicks, 1, false, false, true));
     }
 
-    private static void blinkAlongLook(ServerPlayer caster, SpellEffectEntry effect, float power, double rangeScale) {
+    private static double defaultMaxRange(SpellEffectEntry effect, double fallback) {
+        return effect.params().has("max_range") ? effect.params().get("max_range").getAsDouble() : fallback;
+    }
+
+    private static void blinkAlongLook(
+            ServerPlayer caster, SpellEffectEntry effect, float power, double rangeScale, double maxCap) {
         ServerLevel level = caster.serverLevel();
         double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 10;
         double minRange = effect.params().has("min_range") ? effect.params().get("min_range").getAsDouble() : 2;
-        range = Math.min(28, range * rangeScale * (0.85 + power / 120f));
+        range = Math.min(maxCap, range * rangeScale * (0.85 + power / 120f));
 
         Vec3 look = caster.getLookAngle().normalize();
         Vec3 origin = caster.position();
@@ -243,11 +252,30 @@ public final class SpatialEffects {
         if (best == null) {
             return;
         }
-        spawnSpatialParticles(level, origin.add(0, 1, 0));
+        Vec3 from = origin.add(0, 1, 0);
+        Vec3 to = best.add(0, 1, 0);
+        spawnBlinkTrail(level, from, to);
+        spawnSpatialParticles(level, from);
         caster.teleportTo(best.x, best.y, best.z);
         caster.fallDistance = 0f;
-        spawnSpatialParticles(level, best.add(0, 1, 0));
+        spawnSpatialParticles(level, to);
         level.playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.9f, 1.1f);
+    }
+
+    private static void spawnBlinkTrail(ServerLevel level, Vec3 from, Vec3 to) {
+        double dist = from.distanceTo(to);
+        if (dist < 1.5) {
+            return;
+        }
+        int steps = Math.min(48, Math.max(4, (int) (dist / 2.5)));
+        for (int i = 0; i <= steps; i++) {
+            double t = i / (double) steps;
+            Vec3 p = from.lerp(to, t);
+            level.sendParticles(ModParticleTypes.SPATIAL_WARP.get(), p.x, p.y, p.z, 2, 0.08, 0.12, 0.08, 0.01);
+            if (i % 2 == 0) {
+                level.sendParticles(ModParticleTypes.SPATIAL_RIFT.get(), p.x, p.y, p.z, 1, 0.05, 0.08, 0.05, 0.02);
+            }
+        }
     }
 
     private static void hurtRadius(ServerLevel level, Vec3 center, float radius, float damage, ServerPlayer skip) {

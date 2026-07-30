@@ -11,8 +11,9 @@
   "effects": [
     {
       "type": "effecoria:absolute_fold",
-      "range": 16,
-      "min_range": 3,
+      "range": 220,
+      "max_range": 220,
+      "min_range": 5,
       "veil_ticks": 100
     }
   ]

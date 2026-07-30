@@ -11,8 +11,9 @@
   "effects": [
     {
       "type": "effecoria:far_blink",
-      "range": 14,
-      "min_range": 3
+      "range": 200,
+      "max_range": 200,
+      "min_range": 8
     }
   ]
 }
