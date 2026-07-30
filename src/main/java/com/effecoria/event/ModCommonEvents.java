@@ -15,6 +15,7 @@ import com.effecoria.core.psi.SpellProgression;
 import com.effecoria.effect.elemental.AirHandService;
 import com.effecoria.effect.elemental.ElementalBlockService;
 import com.effecoria.effect.elemental.ElementalCageService;
+import com.effecoria.effect.elemental.ElementalFieldService;
 import com.effecoria.effect.elemental.SteamCloudService;
 import com.effecoria.effect.elemental.SteamFlightService;
 import com.effecoria.magic.SpellRegistry;
@@ -49,6 +50,7 @@ public final class ModCommonEvents {
         if (event.getLevel() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
             ElementalBlockService.tick(serverLevel);
             SteamCloudService.tick(serverLevel);
+            ElementalFieldService.tick(serverLevel);
             ElementalCageService.tick(serverLevel);
         }
     }
@@ -80,10 +82,12 @@ public final class ModCommonEvents {
 
         PlayerPsiData flightData = PsiHelper.get(player);
         if (flightData.initiated()) {
+            flightData.tickIonCharge();
             if (flightData.steamFlightActive()) {
                 SteamFlightService.tick(player);
             }
             AirHandService.tick(player);
+            PsiHelper.set(player, flightData);
         }
 
         if (player.tickCount % 10 != 0) {
@@ -148,6 +152,8 @@ public final class ModCommonEvents {
     private static void clearOvercastPenalties(ServerPlayer player) {
         PlayerPsiData data = PsiHelper.get(player);
         ExhaustionService.clearOnDeath(data);
+        data.clearIonCharge();
+        ElementalFieldService.clearFor(player.getUUID());
         AirHandService.clearFor(player);
         PsiHelper.set(player, data);
         ExhaustionService.stripExhaustionEffects(player);

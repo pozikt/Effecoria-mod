@@ -233,6 +233,10 @@ public final class ElementalEffects {
         float speed = effect.params().has("speed") ? effect.params().get("speed").getAsFloat() : 2f;
         speed *= 0.9f + (power / 80f);
         float scaledDamage = DiceDamage.fromParams(effect.params(), power, 10f);
+        PlayerPsiData psi = PsiHelper.get(caster);
+        scaledDamage += psi.takeIonChargeBonus();
+        PsiHelper.set(caster, psi);
+        caster.syncData(ModAttachments.PSI.get());
 
         Snowball plasma = new Snowball(level, caster);
         plasma.setPos(caster.getX(), caster.getEyeY() - 0.1, caster.getZ());
@@ -523,6 +527,114 @@ public final class ElementalEffects {
                 0.4,
                 radius * 0.4,
                 0.08);
+    }
+
+    /** Ionize air — primes the next plasma (electric) strike with bonus damage. */
+    public static void airIonization(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        JsonObject params = effect.params();
+        int chargeTicks = params.has("charge_ticks") ? params.get("charge_ticks").getAsInt() : 600;
+        chargeTicks = Math.round(chargeTicks * (0.85f + power / 120f));
+        JsonObject bonusParams = new JsonObject();
+        if (params.has("bonus_dice")) {
+            bonusParams.addProperty("damage_dice", params.get("bonus_dice").getAsString());
+        } else {
+            bonusParams.addProperty("damage_dice", "2d6");
+        }
+        float bonus = DiceDamage.fromParams(bonusParams, power, 3f);
+
+        PlayerPsiData data = PsiHelper.get(caster);
+        data.activateIonCharge(chargeTicks, bonus);
+        PsiHelper.set(caster, data);
+        caster.syncData(ModAttachments.PSI.get());
+
+        ServerLevel level = caster.serverLevel();
+        caster.addEffect(new MobEffectInstance(MobEffects.GLOWING, Math.min(chargeTicks, 200), 0, false, false, true));
+        level.playSound(null, caster.blockPosition(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.5f, 1.7f);
+        level.sendParticles(
+                ParticleTypes.ELECTRIC_SPARK,
+                caster.getX(),
+                caster.getEyeY(),
+                caster.getZ(),
+                16,
+                0.35,
+                0.35,
+                0.35,
+                0.12);
+    }
+
+    /** Mirage — caster shimmers; nearby foes struggle to aim (blindness + glow). */
+    public static void mirage(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        JsonObject params = effect.params();
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 200;
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 4f;
+        float drainPerSecond = params.has("maintain_drain_per_second")
+                ? params.get("maintain_drain_per_second").getAsFloat()
+                : 2f;
+        duration = Math.round(duration * (0.8f + power / 100f));
+        radius *= 0.85f + power / 120f;
+
+        ElementalFieldService.spawnMirage(caster.serverLevel(), caster, radius, duration, drainPerSecond);
+    }
+
+    /** Tornado — moving wind column that lifts small foes and shreds them. */
+    public static void tornado(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 2.5f;
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 80;
+        float drainPerSecond = params.has("maintain_drain_per_second")
+                ? params.get("maintain_drain_per_second").getAsFloat()
+                : 2f;
+        float knock = params.has("knockback") ? params.get("knockback").getAsFloat() : 1.2f;
+        float liftMaxHealth = params.has("lift_max_health") ? params.get("lift_max_health").getAsFloat() : 30f;
+        float moveSpeed = params.has("move_speed") ? params.get("move_speed").getAsFloat() : 0.15f;
+        moveSpeed *= 0.9f + power / 160f;
+
+        float dps = DiceDamage.perSecondFromParams(params, power, 3f);
+
+        Vec3 look = caster.getLookAngle().normalize();
+        Vec3 start = caster.position().add(look.scale(3)).add(0, 0.5, 0);
+        HitResult hit = caster.pick(12, 0f, false);
+        if (hit.getType() == HitResult.Type.BLOCK) {
+            start = hit.getLocation();
+        }
+
+        ElementalFieldService.spawnTornado(
+                level,
+                start,
+                look,
+                caster.getUUID(),
+                radius,
+                duration,
+                drainPerSecond,
+                dps,
+                knock,
+                liftMaxHealth,
+                moveSpeed);
+    }
+
+    /** Ion storm — stationary electric zone (DoT + concentration drain). */
+    public static void ionStorm(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 4.5f;
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 160;
+        float drainPerSecond = params.has("maintain_drain_per_second")
+                ? params.get("maintain_drain_per_second").getAsFloat()
+                : 3f;
+        duration = Math.round(duration * (0.85f + power / 120f));
+        radius *= 0.85f + power / 120f;
+
+        float dps = DiceDamage.perSecondFromParams(params, power, 4f);
+
+        Vec3 center = caster.position().add(0, 0.5, 0);
+        HitResult hit = caster.pick(10, 0f, false);
+        if (hit.getType() == HitResult.Type.BLOCK) {
+            center = hit.getLocation();
+        }
+
+        ElementalFieldService.spawnIonStorm(
+                level, center, caster.getUUID(), radius, duration, drainPerSecond, dps);
     }
 
     /** Ice sheet — slick packed ice spreads outward from the aim point (D&D level 3). */

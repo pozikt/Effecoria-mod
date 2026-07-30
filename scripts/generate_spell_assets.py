@@ -39,6 +39,7 @@ SPELL_SCHOOL = {
     "air_hand": "elemental", "water_prison": "elemental", "vacuum_cage": "elemental",
     "water_shield": "elemental", "shockwave": "elemental", "ice_sheet": "elemental",
     "breath_bubble": "elemental", "sonic_lance": "elemental", "ice_prison": "elemental",
+    "air_ionization": "elemental", "mirage": "elemental", "tornado": "elemental", "ion_storm": "elemental",
     "vitality_pulse": "organic", "thorn_lash": "organic", "root_bind": "organic",
     "briar_surge": "organic", "verdant_mend": "organic",
     "soul_drain": "necromancy", "wither_touch": "necromancy", "shade_summon": "necromancy",
@@ -333,6 +334,26 @@ def icon_ice_prison(d, cx, cy, color):
     d.ellipse((cx - 11, cy - 11, cx + 11, cy + 11), outline=(140, 200, 255, 230), width=2)
 
 
+def icon_air_ionization(d, cx, cy, color):
+    icon_plasma(d, cx, cy, color)
+    d.line([(cx - 8, cy + 6), (cx, cy - 8), (cx + 8, cy + 6)], fill=(220, 240, 255, 230), width=2)
+
+
+def icon_mirage(d, cx, cy, color):
+    icon_steam_veil(d, cx, cy, (200, 220, 255, 200))
+    d.ellipse((cx - 6, cy - 4, cx + 6, cy + 8), outline=(180, 200, 255, 180), width=1)
+
+
+def icon_tornado(d, cx, cy, color):
+    icon_wind(d, cx, cy, color)
+    d.polygon([(cx, cy - 12), (cx - 10, cy + 10), (cx + 10, cy + 10)], outline=(200, 220, 255, 220))
+
+
+def icon_ion_storm(d, cx, cy, color):
+    icon_plasma(d, cx, cy, color)
+    d.ellipse((cx - 13, cy - 13, cx + 13, cy + 13), outline=(180, 220, 255, 200), width=2)
+
+
 def icon_steam_veil(d, cx, cy, color):
     icon_steam(d, cx, cy, color)
     d.ellipse((cx - 14, cy - 16, cx + 14, cy + 4), outline=color, width=2)
@@ -365,6 +386,10 @@ DRAWERS = {
     "breath_bubble": icon_breath_bubble,
     "sonic_lance": icon_sonic_lance,
     "ice_prison": icon_ice_prison,
+    "air_ionization": icon_air_ionization,
+    "mirage": icon_mirage,
+    "tornado": icon_tornado,
+    "ion_storm": icon_ion_storm,
     "vitality_pulse": icon_heart,
     "thorn_lash": icon_thorns,
     "root_bind": icon_roots,

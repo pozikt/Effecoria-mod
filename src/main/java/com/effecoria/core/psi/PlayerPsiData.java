@@ -40,6 +40,8 @@ public final class PlayerPsiData {
                 ByteBufCodecs.VAR_LONG.encode(buf, data.breathTrainFatigueUntilMs);
                 ByteBufCodecs.BOOL.encode(buf, data.steamFlightActive);
                 ByteBufCodecs.FLOAT.encode(buf, data.steamFlightDrainPerTick);
+                ByteBufCodecs.VAR_INT.encode(buf, data.ionChargeTicksRemaining);
+                ByteBufCodecs.FLOAT.encode(buf, data.ionChargeBonusDamage);
                 ByteBufCodecs.INT.encode(buf, data.knownSpells.size());
                 for (ResourceLocation spell : data.knownSpells) {
                     ResourceLocation.STREAM_CODEC.encode(buf, spell);
@@ -77,6 +79,8 @@ public final class PlayerPsiData {
                 data.breathTrainFatigueUntilMs = ByteBufCodecs.VAR_LONG.decode(buf);
                 data.steamFlightActive = ByteBufCodecs.BOOL.decode(buf);
                 data.steamFlightDrainPerTick = ByteBufCodecs.FLOAT.decode(buf);
+                data.ionChargeTicksRemaining = ByteBufCodecs.VAR_INT.decode(buf);
+                data.ionChargeBonusDamage = ByteBufCodecs.FLOAT.decode(buf);
                 int spellCount = ByteBufCodecs.INT.decode(buf);
                 data.knownSpells = new ArrayList<>(spellCount);
                 for (int i = 0; i < spellCount; i++) {
@@ -118,6 +122,8 @@ public final class PlayerPsiData {
     private long breathTrainFatigueUntilMs;
     private boolean steamFlightActive;
     private float steamFlightDrainPerTick;
+    private int ionChargeTicksRemaining;
+    private float ionChargeBonusDamage;
     private Map<ResourceLocation, Integer> spellCastCounts = new HashMap<>();
     private Map<ResourceLocation, Long> spellLastCastAt = new HashMap<>();
 
@@ -226,6 +232,37 @@ public final class PlayerPsiData {
 
     public void setSteamFlightDrainPerTick(float drainPerTick) {
         this.steamFlightDrainPerTick = Math.max(0f, drainPerTick);
+    }
+
+    public int ionChargeTicksRemaining() {
+        return ionChargeTicksRemaining;
+    }
+
+    public void activateIonCharge(int ticks, float bonusDamage) {
+        this.ionChargeTicksRemaining = Math.max(this.ionChargeTicksRemaining, Math.max(0, ticks));
+        this.ionChargeBonusDamage = Math.max(this.ionChargeBonusDamage, Math.max(0f, bonusDamage));
+    }
+
+    /** Consumes stored ion bonus for the next electric strike (e.g. plasma). */
+    public float takeIonChargeBonus() {
+        if (ionChargeTicksRemaining <= 0 || ionChargeBonusDamage <= 0f) {
+            return 0f;
+        }
+        float bonus = ionChargeBonusDamage;
+        ionChargeTicksRemaining = 0;
+        ionChargeBonusDamage = 0f;
+        return bonus;
+    }
+
+    public void tickIonCharge() {
+        if (ionChargeTicksRemaining > 0) {
+            ionChargeTicksRemaining--;
+        }
+    }
+
+    public void clearIonCharge() {
+        ionChargeTicksRemaining = 0;
+        ionChargeBonusDamage = 0f;
     }
 
     /** Successful timing hit: permanent regen bonus + mastery. No fatigue. */
@@ -414,6 +451,8 @@ public final class PlayerPsiData {
         tag.putLong("breathTrainFatigueUntilMs", breathTrainFatigueUntilMs);
         tag.putBoolean("steamFlightActive", steamFlightActive);
         tag.putFloat("steamFlightDrainPerTick", steamFlightDrainPerTick);
+        tag.putInt("ionChargeTicksRemaining", ionChargeTicksRemaining);
+        tag.putFloat("ionChargeBonusDamage", ionChargeBonusDamage);
 
         ListTag spellList = new ListTag();
         for (ResourceLocation spell : knownSpells) {
@@ -463,6 +502,9 @@ public final class PlayerPsiData {
         breathTrainFatigueUntilMs = tag.contains("breathTrainFatigueUntilMs") ? tag.getLong("breathTrainFatigueUntilMs") : 0L;
         steamFlightActive = tag.contains("steamFlightActive") && tag.getBoolean("steamFlightActive");
         steamFlightDrainPerTick = tag.contains("steamFlightDrainPerTick") ? tag.getFloat("steamFlightDrainPerTick") : 0f;
+        ionChargeTicksRemaining =
+                tag.contains("ionChargeTicksRemaining") ? tag.getInt("ionChargeTicksRemaining") : 0;
+        ionChargeBonusDamage = tag.contains("ionChargeBonusDamage") ? tag.getFloat("ionChargeBonusDamage") : 0f;
 
         knownSpells = new ArrayList<>();
         ListTag spellList = tag.getList("knownSpells", Tag.TAG_STRING);
@@ -522,6 +564,8 @@ public final class PlayerPsiData {
         copy.breathTrainFatigueUntilMs = breathTrainFatigueUntilMs;
         copy.steamFlightActive = steamFlightActive;
         copy.steamFlightDrainPerTick = steamFlightDrainPerTick;
+        copy.ionChargeTicksRemaining = ionChargeTicksRemaining;
+        copy.ionChargeBonusDamage = ionChargeBonusDamage;
         copy.spellCastCounts = new HashMap<>(spellCastCounts);
         copy.spellLastCastAt = new HashMap<>(spellLastCastAt);
         return copy;

@@ -194,6 +194,10 @@ public final class SpellEffectExecutor {
                     caster, effect, power, findSpellTarget(caster, 8));
             case "water_shield" -> ElementalEffects.waterShield(caster, effect, power);
             case "sonic_lance" -> ElementalEffects.sonicLance(caster, effect, power);
+            case "air_ionization" -> ElementalEffects.airIonization(caster, effect, power);
+            case "mirage" -> ElementalEffects.mirage(caster, effect, power);
+            case "tornado" -> ElementalEffects.tornado(caster, effect, power);
+            case "ion_storm" -> ElementalEffects.ionStorm(caster, effect, power);
             case "vitality" -> vitality(caster, effect, power);
             case "evoker_fangs" -> evokerFangs(caster, effect, power);
             case "root_bind" -> rootBind(caster, effect, power, target);

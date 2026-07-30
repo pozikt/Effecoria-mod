@@ -1,0 +1,23 @@
+{
+  "id": "effecoria:tornado",
+  "school": "elemental",
+  "frequency_hz": 22.0,
+  "base_cost": 16,
+  "power_multiplier": 1.2,
+  "side_entropy": 0.08,
+  "min_phi": 0.28,
+  "min_mastery": 0.4,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:tornado",
+      "duration_ticks": 80,
+      "radius": 2.5,
+      "move_speed": 0.15,
+      "knockback": 1.2,
+      "lift_max_health": 30,
+      "maintain_drain_per_second": 2.0,
+      "damage_dice_per_round": "3d6"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:air_ionization",
+  "school": "elemental",
+  "frequency_hz": 16.0,
+  "base_cost": 3,
+  "power_multiplier": 0.9,
+  "side_entropy": 0.03,
+  "min_phi": 0.1,
+  "min_mastery": 0.1,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:air_ionization",
+      "charge_ticks": 600,
+      "bonus_dice": "2d6"
+    }
+  ]
+}
