@@ -280,6 +280,8 @@
   "message.effecoria.initiated": "Initiated as %s mage. Spectral purity locked.",
   "message.effecoria.reschool": "Reschooled to %s. Spells updated.",
   "message.effecoria.spell_selected": "Selected: %s",
+  "message.effecoria.spell_unlocked": "New spell: %s",
+  "message.effecoria.spell_unlocked_essence": "Researched %s (−%s essence)",
   "message.effecoria.cast_whiff": "Whiff: %s (%s%% Psi spent)",
   "message.effecoria.cast_success": "Cast %s",
   "message.effecoria.cast_failed": "Cannot cast — insufficient Psi, low Phi, or blocked zone.",

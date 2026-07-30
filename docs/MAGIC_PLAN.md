@@ -36,7 +36,7 @@ Goal: casting feels intentional and readable in survival.
 
 Goal: mastery and essence matter; radial isn’t overcrowded at start.
 
-1. **Essence & research unlocks** — spells beyond starter band require essence + optional “research” flag per spell id (data-driven).
+1. **Essence & research unlocks** — spells beyond starter band require essence + optional `unlock_essence_cost` in JSON (see `SpellUnlockService`, config `spell_starter_count`). ✅ *baseline shipped*
 2. **Entropy tutorial** — first backlash event, HUD hint, decay over time (if not already obvious).
 3. **Training XP** — broaden sources (meditation block optional, spell success streaks).
 4. **Radial UX** — favorites, hide locked spells, show unlock hint on hover.

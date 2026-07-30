@@ -162,6 +162,14 @@ public final class BalanceConfig {
             .comment("Essence absorbed per physical training milestone")
             .defineInRange("essence_per_training_milestone", 1, 0, 100);
 
+    public static final ModConfigSpec.IntValue SPELL_STARTER_COUNT = BUILDER
+            .comment("First N spells in each school progression unlock without essence (mastery gates still apply)")
+            .defineInRange("spell_starter_count", 5, 1, 20);
+
+    public static final ModConfigSpec.IntValue SPELL_UNLOCK_ESSENCE_STEP = BUILDER
+            .comment("Default essence cost grows by this amount per progression tier after starters (when JSON omits unlock_essence_cost)")
+            .defineInRange("spell_unlock_essence_step", 2, 0, 50);
+
     // --- Biology (hunger / air) ---
     public static final ModConfigSpec.DoubleValue BIOLOGY_HUNGER_MIN = BUILDER
             .comment("biologyQ multiplier at starving (food level <= 6)")

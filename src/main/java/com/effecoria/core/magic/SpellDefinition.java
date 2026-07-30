@@ -14,5 +14,6 @@ public record SpellDefinition(
         float minPhi,
         float minMastery,
         float minPower,
+        int unlockEssenceCost,
         RadialCategory radialCategory,
         List<SpellEffectEntry> effects) {}

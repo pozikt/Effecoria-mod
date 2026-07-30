@@ -280,6 +280,8 @@
   "message.effecoria.initiated": "Инициация: %s магия. Спектральная чистота зафиксирована.",
   "message.effecoria.reschool": "Школа сменена на: %s. Заклинания обновлены.",
   "message.effecoria.spell_selected": "Выбрано: %s",
+  "message.effecoria.spell_unlocked": "Новое заклинание: %s",
+  "message.effecoria.spell_unlocked_essence": "Изучено: %s (−%s эссенции)",
   "message.effecoria.cast_whiff": "Промах: %s (потрачено %s%% Ψ)",
   "message.effecoria.cast_success": "Каст: %s",
   "message.effecoria.cast_failed": "Каст невозможен — мало Ψ, низкий Φ или зона блокировки.",

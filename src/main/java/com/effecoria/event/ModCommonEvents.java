@@ -7,6 +7,7 @@ import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.magic.ShadeService;
 import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.progression.ProgressionService;
+import com.effecoria.core.progression.SpellUnlockService;
 import com.effecoria.core.phi.CreativeGodMode;
 import com.effecoria.core.phi.PhiFieldService;
 import com.effecoria.core.psi.ModAttachments;
@@ -123,7 +124,7 @@ public final class ModCommonEvents {
         ProgressionService.tick(player, data);
         ShadeService.tick(player);
         NecroSummonService.tick(player);
-        data.mergeMissingSpells(SpellProgression.spellsForSchool(data.school()));
+        SpellUnlockService.tick(player, data);
 
         if (CreativeGodMode.isActive(player)) {
             data.setCurrentPsi(data.maxPsi());

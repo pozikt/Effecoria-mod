@@ -469,6 +469,13 @@ public final class PlayerPsiData {
         }
     }
 
+    public void unlockSpell(ResourceLocation spellId) {
+        if (knownSpells.contains(spellId)) {
+            return;
+        }
+        knownSpells.add(spellId);
+    }
+
     private void applySchool(MagicSchool chosenSchool, List<ResourceLocation> spells, boolean resetResources) {
         this.school = chosenSchool;
         this.frequencyHz = chosenSchool.nominalFrequencyHz();

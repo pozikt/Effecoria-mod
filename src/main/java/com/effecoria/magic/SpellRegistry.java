@@ -71,6 +71,7 @@ public final class SpellRegistry {
         float minPhi = json.has("min_phi") ? json.get("min_phi").getAsFloat() : 0.1f;
         float minMastery = json.has("min_mastery") ? json.get("min_mastery").getAsFloat() : 0f;
         float minPower = json.has("min_power") ? json.get("min_power").getAsFloat() : 0f;
+        int unlockEssenceCost = json.has("unlock_essence_cost") ? json.get("unlock_essence_cost").getAsInt() : -1;
         if (!json.has("radial_category")) {
             throw new IllegalArgumentException("Missing radial_category for " + id);
         }
@@ -89,6 +90,6 @@ public final class SpellRegistry {
         }
 
         return new SpellDefinition(
-                id, school, frequency, baseCost, powerMultiplier, sideEntropy, minPhi, minMastery, minPower, radialCategory, effects);
+                id, school, frequency, baseCost, powerMultiplier, sideEntropy, minPhi, minMastery, minPower, unlockEssenceCost, radialCategory, effects);
     }
 }

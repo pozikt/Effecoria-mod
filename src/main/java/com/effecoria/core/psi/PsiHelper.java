@@ -36,13 +36,20 @@ public final class PsiHelper {
 
     public static void initiate(Player player, MagicSchool school) {
         PlayerPsiData data = get(player);
-        data.initiate(school, SpellProgression.spellsForSchool(school));
+        data.initiate(school, SpellProgression.starterSpells(school));
         set(player, data);
     }
 
     public static void reschool(Player player, MagicSchool school) {
         PlayerPsiData data = get(player);
-        data.reschool(school, SpellProgression.spellsForSchool(school));
+        java.util.List<ResourceLocation> progression = SpellProgression.spellsForSchool(school);
+        java.util.ArrayList<ResourceLocation> kept = new java.util.ArrayList<>(SpellProgression.starterSpells(school));
+        for (ResourceLocation id : data.knownSpells()) {
+            if (progression.contains(id) && !kept.contains(id)) {
+                kept.add(id);
+            }
+        }
+        data.reschool(school, kept);
         set(player, data);
     }
 }

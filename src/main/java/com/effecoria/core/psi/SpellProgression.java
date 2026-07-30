@@ -2,6 +2,7 @@ package com.effecoria.core.psi;
 
 
 
+import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.magic.MagicSchool;
 
 import com.effecoria.magic.SpellRegistry;
@@ -244,6 +245,22 @@ public final class SpellProgression {
 
         return spellsForSchool(school).stream().allMatch(SpellRegistry::contains);
 
+    }
+
+    public static List<ResourceLocation> starterSpells(MagicSchool school) {
+        List<ResourceLocation> all = spellsForSchool(school);
+        int count = Math.min(BalanceConfig.SPELL_STARTER_COUNT.get(), all.size());
+        return List.copyOf(all.subList(0, count));
+    }
+
+    public static int progressionIndex(MagicSchool school, ResourceLocation spellId) {
+        List<ResourceLocation> all = spellsForSchool(school);
+        for (int i = 0; i < all.size(); i++) {
+            if (all.get(i).equals(spellId)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
 
