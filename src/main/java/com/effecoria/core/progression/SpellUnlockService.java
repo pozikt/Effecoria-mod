@@ -1,6 +1,8 @@
 package com.effecoria.core.progression;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.magic.MagicSchool;
@@ -53,6 +55,78 @@ public final class SpellUnlockService {
                             cost),
                     true);
             return;
+        }
+    }
+
+    /** Next spells in school progression that are not yet known (for hub ghost nodes). */
+    public static List<ResourceLocation> upcomingLocked(PlayerPsiData data, int limit) {
+        if (!data.initiated() || data.school() == MagicSchool.NONE || limit <= 0) {
+            return List.of();
+        }
+        List<ResourceLocation> out = new ArrayList<>();
+        for (ResourceLocation spellId : SpellProgression.spellsForSchool(data.school())) {
+            if (data.knownSpells().contains(spellId)) {
+                continue;
+            }
+            if (!SpellRegistry.contains(spellId)) {
+                continue;
+            }
+            out.add(spellId);
+            if (out.size() >= limit) {
+                break;
+            }
+        }
+        return out;
+    }
+
+    /** First unknown spell in progression — the only one research can unlock next. */
+    public static Optional<ResourceLocation> nextUnlockCandidate(PlayerPsiData data) {
+        List<ResourceLocation> upcoming = upcomingLocked(data, 1);
+        return upcoming.isEmpty() ? Optional.empty() : Optional.of(upcoming.getFirst());
+    }
+
+    public static UnlockHint hintFor(PlayerPsiData data, ResourceLocation spellId) {
+        if (data.knownSpells().contains(spellId)) {
+            return UnlockHint.alreadyKnown();
+        }
+        Optional<SpellDefinition> defOpt = SpellRegistry.get(spellId);
+        if (defOpt.isEmpty()) {
+            return UnlockHint.missing();
+        }
+        SpellDefinition def = defOpt.get();
+        Optional<ResourceLocation> next = nextUnlockCandidate(data);
+        boolean nextInLine = next.isPresent() && next.get().equals(spellId);
+        int needEssence = resolveUnlockCost(spellId, data.school(), def);
+        return new UnlockHint(
+                false,
+                nextInLine,
+                def.minMastery(),
+                data.breathingMastery(),
+                needEssence,
+                data.essence());
+    }
+
+    public record UnlockHint(
+            boolean known,
+            boolean nextInLine,
+            float needMastery,
+            float haveMastery,
+            int needEssence,
+            int haveEssence) {
+        public static UnlockHint alreadyKnown() {
+            return new UnlockHint(true, false, 0f, 0f, 0, 0);
+        }
+
+        public static UnlockHint missing() {
+            return new UnlockHint(false, false, 0f, 0f, 0, 0);
+        }
+
+        public boolean masteryMet() {
+            return haveMastery >= needMastery;
+        }
+
+        public boolean essenceMet() {
+            return needEssence <= 0 || haveEssence >= needEssence;
         }
     }
 

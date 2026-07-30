@@ -6,6 +6,8 @@ import org.joml.Matrix4f;
 
 import com.effecoria.core.magic.MagicSchool;
 import com.effecoria.core.magic.SpellDefinition;
+import com.effecoria.core.progression.BreathingService;
+import com.effecoria.core.progression.SpellUnlockService;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.phi.CreativeGodMode;
@@ -91,7 +93,7 @@ public class SpellHubScreen extends Screen {
             }
             return;
         }
-        if (hovered != null) {
+        if (hovered != null && !hovered.locked()) {
             PacketDistributor.sendToServer(new ModNetworking.SelectSpellPayload(hovered.knownIndex()));
         }
         onClose();
@@ -183,8 +185,14 @@ public class SpellHubScreen extends Screen {
         float y1 = cy + uy * (layout.coreRadius() + 2f);
         float x2 = cx + node.offsetX() - ux * (layout.nodeRadius() + 1f);
         float y2 = cy + node.offsetY() - uy * (layout.nodeRadius() + 1f);
-        int color = highlight ? 0xCCFFE890 : categoryThreadColor(node.category());
-        drawLine(graphics, x1, y1, x2, y2, 1.5f + (highlight ? 0.5f : 0f), color);
+        int color = highlight
+                ? (node.locked() ? 0xAA886644 : 0xCCFFE890)
+                : (node.locked() ? 0x55444455 : categoryThreadColor(node.category()));
+        if (node.locked()) {
+            drawDashedLine(graphics, x1, y1, x2, y2, 1.4f + (highlight ? 0.4f : 0f), color);
+        } else {
+            drawLine(graphics, x1, y1, x2, y2, 1.5f + (highlight ? 0.5f : 0f), color);
+        }
     }
 
     private static int categoryThreadColor(com.effecoria.core.magic.RadialCategory category) {
@@ -202,9 +210,18 @@ public class SpellHubScreen extends Screen {
         int py = cy + Math.round(node.offsetY());
         int r = Math.round(nodeRadius);
         int iconSize = Math.round(nodeRadius * 1.55f);
-        drawFilledCircle(graphics, px, py, r + 2, highlight ? 0xFFFFE080 : 0xFF9090A8);
-        drawFilledCircle(graphics, px, py, r, highlight ? 0xFF282838 : 0xFF141420);
-        drawSpellIcon(graphics, node.spellId(), px, py, iconSize);
+        if (node.locked()) {
+            drawFilledCircle(graphics, px, py, r + 2, highlight ? 0xFF886644 : 0xFF4A4458);
+            drawFilledCircle(graphics, px, py, r, highlight ? 0xFF1A1520 : 0xFF0C0C14);
+            RenderSystem.setShaderColor(0.45f, 0.42f, 0.5f, 0.85f);
+            drawSpellIcon(graphics, node.spellId(), px, py, iconSize);
+            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+            graphics.drawCenteredString(this.font, "?", px, py - 4, highlight ? 0xFFE8C080 : 0xAA9988AA);
+        } else {
+            drawFilledCircle(graphics, px, py, r + 2, highlight ? 0xFFFFE080 : 0xFF9090A8);
+            drawFilledCircle(graphics, px, py, r, highlight ? 0xFF282838 : 0xFF141420);
+            drawSpellIcon(graphics, node.spellId(), px, py, iconSize);
+        }
     }
 
     private void renderHoverPanel(GuiGraphics graphics, int cx, int cy, float scale) {
@@ -223,6 +240,10 @@ public class SpellHubScreen extends Screen {
         if (hovered != null && minecraft != null && minecraft.player != null) {
             ResourceLocation spellId = hovered.spellId();
             Component spellName = Component.translatable("spell.effecoria." + spellId.getPath());
+            if (hovered.locked()) {
+                renderLockedHoverPanel(graphics, cx, panelY, scale, spellId, spellName);
+                return;
+            }
             Component school = schoolLabel(spellId);
             Component category = Component.translatable(SpellHubLayout.categoryLabelKey(hovered.category()));
             float cost = SpellRadialCosts.previewCost(minecraft.player, spellId);
@@ -252,6 +273,50 @@ public class SpellHubScreen extends Screen {
             graphics.drawCenteredString(
                     this.font, Component.translatable("gui.effecoria.hub.hint"), cx, panelY, 0xAAAAAA);
         }
+    }
+
+    private void renderLockedHoverPanel(
+            GuiGraphics graphics, int cx, int panelY, float scale, ResourceLocation spellId, Component spellName) {
+        PlayerPsiData data = minecraft.player.getData(ModAttachments.PSI.get());
+        SpellUnlockService.UnlockHint hint = SpellUnlockService.hintFor(data, spellId);
+        Component locked = Component.translatable("gui.effecoria.hub.locked");
+        Component line2;
+        Component line3;
+        if (!hint.nextInLine()) {
+            line2 = Component.translatable("gui.effecoria.hub.locked_queue");
+            line3 = Component.translatable("gui.effecoria.hub.locked_queue_hint");
+        } else {
+            String needBreath = BreathingService.formatTotalPercent(hint.needMastery());
+            String haveBreath = BreathingService.formatTotalPercent(hint.haveMastery());
+            line2 = Component.translatable(
+                    "gui.effecoria.hub.locked_mastery", needBreath, haveBreath);
+            if (hint.needEssence() > 0) {
+                line3 = Component.translatable(
+                        "gui.effecoria.hub.locked_essence", hint.needEssence(), hint.haveEssence());
+            } else {
+                line3 = Component.translatable("gui.effecoria.hub.locked_essence_free");
+            }
+        }
+        int padX = 12;
+        int lineH = 10;
+        int panelH = lineH * 4 + 18;
+        int maxW = Math.max(
+                this.font.width(spellName),
+                Math.max(this.font.width(locked), Math.max(this.font.width(line2), this.font.width(line3))));
+        int panelW = maxW + padX * 2;
+        int left = cx - panelW / 2;
+        graphics.fill(left - 1, panelY - 5, left + panelW + 1, panelY + panelH - 3, 0xFF6A5538);
+        graphics.fill(left, panelY - 4, left + panelW, panelY + panelH - 4, 0xF01A1410);
+        int y = panelY;
+        graphics.drawCenteredString(this.font, spellName, cx, y, 0xCCBBAA);
+        y += lineH + 2;
+        graphics.drawCenteredString(this.font, locked, cx, y, 0xFFE0A060);
+        y += lineH + 2;
+        graphics.drawCenteredString(
+                this.font, line2, cx, y, hint.nextInLine() && hint.masteryMet() ? 0x88FFAA : 0xFFAA8888);
+        y += lineH + 2;
+        graphics.drawCenteredString(
+                this.font, line3, cx, y, hint.nextInLine() && hint.essenceMet() ? 0x88FFAA : 0xFFAA8888);
     }
 
     private boolean isHovered(SpellHubLayout.SpellNode node) {

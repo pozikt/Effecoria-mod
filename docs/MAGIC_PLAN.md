@@ -39,7 +39,7 @@ Goal: mastery and essence matter; radial isn’t overcrowded at start.
 1. **Essence & research unlocks** — spells beyond starter band require essence + optional `unlock_essence_cost` in JSON (see `SpellUnlockService`, config `spell_starter_count`). ✅ *baseline shipped*
 2. **Entropy tutorial** — first backlash event, HUD hint, decay over time (if not already obvious).
 3. **Training XP** — broaden sources (meditation block optional, spell success streaks).
-4. **Radial UX** — favorites, hide locked spells, show unlock hint on hover.
+4. **Radial UX** — show next locked spells as ghost nodes + unlock hint on hover. ✅ *`SpellHubLayout` / `SpellUnlockService.hintFor`* (favorites optional later)
 
 **Exit:** progression list is a *goal tree*, not an instant full wheel.
 
@@ -131,8 +131,9 @@ If choosing a single slice for the next implementation session:
 3. Phase **D3**: seal stacking on one block — ✅ done.
 4. Phase **A4**: cast feedback — ✅ done.
 5. **First-join school menu** — ✅ done.
-6. Phase **A1/A2** VFX/SFX polish, **B2** entropy tutorial, or **B4** radial locked hints.
-7. Test helper: `/effecoria max [school]` (op) — max stats + unlock all school spells.
+6. Phase **B4** radial locked hints — ✅ done.
+7. Test helper: `/effecoria max [school]` (op) — max stats + unlock all school spells — ✅ done.
+8. Next: Phase **B2** entropy tutorial, or **A1/A2** VFX/SFX polish.
 
 ---
 

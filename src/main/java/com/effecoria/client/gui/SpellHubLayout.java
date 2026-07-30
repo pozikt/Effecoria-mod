@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import com.effecoria.core.magic.RadialCategory;
 import com.effecoria.core.magic.SpellDefinition;
+import com.effecoria.core.progression.SpellUnlockService;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.magic.SpellRegistry;
 
@@ -35,7 +36,8 @@ public final class SpellHubLayout {
             int knownIndex,
             RadialCategory category,
             float offsetX,
-            float offsetY) {}
+            float offsetY,
+            boolean locked) {}
 
     public record TrainNode(float offsetX, float offsetY, float radius) {
         public boolean contains(float dx, float dy) {
@@ -81,7 +83,15 @@ public final class SpellHubLayout {
             if (def.isEmpty()) {
                 continue;
             }
-            byCategory.get(def.get().radialCategory()).add(new IndexedSpell(id, i));
+            byCategory.get(def.get().radialCategory()).add(new IndexedSpell(id, i, false));
+        }
+
+        for (ResourceLocation id : SpellUnlockService.upcomingLocked(data, 4)) {
+            Optional<SpellDefinition> def = SpellRegistry.get(id);
+            if (def.isEmpty()) {
+                continue;
+            }
+            byCategory.get(def.get().radialCategory()).add(new IndexedSpell(id, -1, true));
         }
 
         List<RadialCategory> active = new ArrayList<>();
@@ -220,7 +230,8 @@ public final class SpellHubLayout {
                         node.knownIndex(),
                         node.category(),
                         train.offsetX() + (float) Math.cos(edge) * minDist,
-                        train.offsetY() + (float) Math.sin(edge) * minDist));
+                        train.offsetY() + (float) Math.sin(edge) * minDist,
+                        node.locked()));
                 continue;
             }
             float dist = (float) Math.sqrt(distSq);
@@ -230,7 +241,8 @@ public final class SpellHubLayout {
                     node.knownIndex(),
                     node.category(),
                     train.offsetX() + dx * scale,
-                    train.offsetY() + dy * scale));
+                    train.offsetY() + dy * scale,
+                    node.locked()));
         }
         return out;
     }
@@ -286,7 +298,7 @@ public final class SpellHubLayout {
                 float angle = baseAngle - localSpan * 0.5f + t * localSpan;
                 float nx = (float) Math.cos(angle) * orbit;
                 float ny = (float) Math.sin(angle) * orbit;
-                nodes.add(new SpellNode(spell.id(), spell.knownIndex(), category, nx, ny));
+                nodes.add(new SpellNode(spell.id(), spell.knownIndex(), category, nx, ny, spell.locked()));
             }
             ring++;
         }
@@ -368,7 +380,7 @@ public final class SpellHubLayout {
         List<SpellNode> resolved = new ArrayList<>(n);
         for (int i = 0; i < n; i++) {
             SpellNode old = nodes.get(i);
-            resolved.add(new SpellNode(old.spellId(), old.knownIndex(), old.category(), xs[i], ys[i]));
+            resolved.add(new SpellNode(old.spellId(), old.knownIndex(), old.category(), xs[i], ys[i], old.locked()));
         }
         return resolved;
     }
@@ -392,5 +404,5 @@ public final class SpellHubLayout {
         return category.langKey();
     }
 
-    private record IndexedSpell(ResourceLocation id, int knownIndex) {}
+    private record IndexedSpell(ResourceLocation id, int knownIndex, boolean locked) {}
 }
