@@ -14,6 +14,7 @@ import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.core.psi.SpellProgression;
 import com.effecoria.effect.elemental.ElementalBlockService;
 import com.effecoria.effect.elemental.SteamCloudService;
+import com.effecoria.effect.elemental.SteamFlightService;
 import com.effecoria.magic.SpellRegistry;
 
 import net.minecraft.server.level.ServerPlayer;
@@ -21,6 +22,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -71,6 +73,12 @@ public final class ModCommonEvents {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
+
+        PlayerPsiData flightData = PsiHelper.get(player);
+        if (flightData.initiated() && flightData.steamFlightActive()) {
+            SteamFlightService.tick(player);
+        }
+
         if (player.tickCount % 10 != 0) {
             return;
         }
@@ -105,5 +113,24 @@ public final class ModCommonEvents {
 
         PsiHelper.set(player, data);
         player.syncData(ModAttachments.PSI.get());
+    }
+
+    @SubscribeEvent
+    public static void onPlayerClone(PlayerEvent.Clone event) {
+        if (!event.isWasDeath()) {
+            return;
+        }
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+        PlayerPsiData data = PsiHelper.get(player);
+        ExhaustionService.clearOnDeath(data);
+        PsiHelper.set(player, data);
+        player.syncData(ModAttachments.PSI.get());
+    }
+
+    @SubscribeEvent
+    public static void onLivingFall(LivingFallEvent event) {
+        SteamFlightService.onFall(event);
     }
 }

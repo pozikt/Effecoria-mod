@@ -52,6 +52,14 @@ public final class ExhaustionService {
         addExhaustion(data, BalanceConfig.EXHAUSTION_BACKLASH_SPIKE.get().floatValue());
     }
 
+    /** Clears overcast penalties that should not survive death. */
+    public static void clearOnDeath(PlayerPsiData data) {
+        data.setExhaustion(0f);
+        data.setEntropyB(0f);
+        data.setSteamFlightActive(false);
+        data.setSteamFlightDrainPerTick(0f);
+    }
+
     public static void tick(ServerPlayer player, PlayerPsiData data) {
         float decay = BalanceConfig.EXHAUSTION_DECAY_PER_TICK.get().floatValue();
         if (BreathingService.isMeditating(player) && player.getAirSupply() >= player.getMaxAirSupply() - 10) {

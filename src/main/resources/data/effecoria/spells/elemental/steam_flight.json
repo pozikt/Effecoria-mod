@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:steam_flight",
+  "school": "elemental",
+  "frequency_hz": 19.5,
+  "base_cost": 18,
+  "power_multiplier": 1.15,
+  "side_entropy": 0.08,
+  "min_phi": 0.25,
+  "min_mastery": 0.85,
+  "min_power": 40,
+  "radial_category": "movement",
+  "effects": [
+    {
+      "type": "effecoria:steam_flight",
+      "boost": 1.55,
+      "drain_per_second": 5.0
+    }
+  ]
+}

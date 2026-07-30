@@ -35,7 +35,7 @@ SPELL_SCHOOL = {
     "fire_burst": "elemental", "wind_push": "elemental", "water_stream": "elemental",
     "steam_jet": "elemental", "steam_veil": "elemental", "ember_volley": "elemental",
     "ice_shard": "elemental", "frost_bastion": "elemental", "plasma_bolt": "elemental",
-    "hydro_slice": "elemental",
+    "hydro_slice": "elemental", "great_fireball": "elemental", "steam_flight": "elemental",
     "vitality_pulse": "organic", "thorn_lash": "organic", "root_bind": "organic",
     "briar_surge": "organic", "verdant_mend": "organic",
     "soul_drain": "necromancy", "wither_touch": "necromancy", "shade_summon": "necromancy",
@@ -271,6 +271,17 @@ def icon_plasma(d, cx, cy, color):
     draw_disc(d, cx, cy, 4, (180, 100, 255, 180))
 
 
+def icon_great_fire(d, cx, cy, color):
+    icon_fire(d, cx, cy, (255, 90, 20, 255))
+    d.ellipse((cx - 10, cy - 8, cx + 10, cy + 10), outline=(255, 200, 80, 230), width=2)
+    draw_disc(d, cx, cy, 5, (255, 240, 160, 200))
+
+
+def icon_steam_flight(d, cx, cy, color):
+    icon_steam(d, cx, cy, color)
+    icon_arrow(d, cx, cy - 2, (220, 240, 255, 230))
+
+
 def icon_steam_veil(d, cx, cy, color):
     icon_steam(d, cx, cy, color)
     d.ellipse((cx - 14, cy - 16, cx + 14, cy + 4), outline=color, width=2)
@@ -292,6 +303,8 @@ DRAWERS = {
     "frost_bastion": icon_frost_wall,
     "plasma_bolt": icon_plasma,
     "hydro_slice": icon_hydro_slice,
+    "great_fireball": icon_great_fire,
+    "steam_flight": icon_steam_flight,
     "vitality_pulse": icon_heart,
     "thorn_lash": icon_thorns,
     "root_bind": icon_roots,

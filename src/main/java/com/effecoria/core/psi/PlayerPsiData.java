@@ -38,6 +38,8 @@ public final class PlayerPsiData {
                 ByteBufCodecs.VAR_INT.encode(buf, data.breathTrainHits);
                 ByteBufCodecs.VAR_INT.encode(buf, data.breathTrainSessionMisses);
                 ByteBufCodecs.VAR_LONG.encode(buf, data.breathTrainFatigueUntilMs);
+                ByteBufCodecs.BOOL.encode(buf, data.steamFlightActive);
+                ByteBufCodecs.FLOAT.encode(buf, data.steamFlightDrainPerTick);
                 ByteBufCodecs.INT.encode(buf, data.knownSpells.size());
                 for (ResourceLocation spell : data.knownSpells) {
                     ResourceLocation.STREAM_CODEC.encode(buf, spell);
@@ -73,6 +75,8 @@ public final class PlayerPsiData {
                 data.breathTrainHits = ByteBufCodecs.VAR_INT.decode(buf);
                 data.breathTrainSessionMisses = ByteBufCodecs.VAR_INT.decode(buf);
                 data.breathTrainFatigueUntilMs = ByteBufCodecs.VAR_LONG.decode(buf);
+                data.steamFlightActive = ByteBufCodecs.BOOL.decode(buf);
+                data.steamFlightDrainPerTick = ByteBufCodecs.FLOAT.decode(buf);
                 int spellCount = ByteBufCodecs.INT.decode(buf);
                 data.knownSpells = new ArrayList<>(spellCount);
                 for (int i = 0; i < spellCount; i++) {
@@ -112,6 +116,8 @@ public final class PlayerPsiData {
     private int breathTrainHits;
     private int breathTrainSessionMisses;
     private long breathTrainFatigueUntilMs;
+    private boolean steamFlightActive;
+    private float steamFlightDrainPerTick;
     private Map<ResourceLocation, Integer> spellCastCounts = new HashMap<>();
     private Map<ResourceLocation, Long> spellLastCastAt = new HashMap<>();
 
@@ -204,6 +210,22 @@ public final class PlayerPsiData {
 
     public long breathTrainFatigueRemainingMs() {
         return Math.max(0L, breathTrainFatigueUntilMs - System.currentTimeMillis());
+    }
+
+    public boolean steamFlightActive() {
+        return steamFlightActive;
+    }
+
+    public float steamFlightDrainPerTick() {
+        return steamFlightDrainPerTick;
+    }
+
+    public void setSteamFlightActive(boolean active) {
+        this.steamFlightActive = active;
+    }
+
+    public void setSteamFlightDrainPerTick(float drainPerTick) {
+        this.steamFlightDrainPerTick = Math.max(0f, drainPerTick);
     }
 
     /** Successful timing hit: permanent regen bonus + mastery. No fatigue. */
@@ -390,6 +412,8 @@ public final class PlayerPsiData {
         tag.putInt("breathTrainHits", breathTrainHits);
         tag.putInt("breathTrainSessionMisses", breathTrainSessionMisses);
         tag.putLong("breathTrainFatigueUntilMs", breathTrainFatigueUntilMs);
+        tag.putBoolean("steamFlightActive", steamFlightActive);
+        tag.putFloat("steamFlightDrainPerTick", steamFlightDrainPerTick);
 
         ListTag spellList = new ListTag();
         for (ResourceLocation spell : knownSpells) {
@@ -437,6 +461,8 @@ public final class PlayerPsiData {
         breathTrainHits = tag.contains("breathTrainHits") ? tag.getInt("breathTrainHits") : 0;
         breathTrainSessionMisses = tag.contains("breathTrainSessionMisses") ? tag.getInt("breathTrainSessionMisses") : 0;
         breathTrainFatigueUntilMs = tag.contains("breathTrainFatigueUntilMs") ? tag.getLong("breathTrainFatigueUntilMs") : 0L;
+        steamFlightActive = tag.contains("steamFlightActive") && tag.getBoolean("steamFlightActive");
+        steamFlightDrainPerTick = tag.contains("steamFlightDrainPerTick") ? tag.getFloat("steamFlightDrainPerTick") : 0f;
 
         knownSpells = new ArrayList<>();
         ListTag spellList = tag.getList("knownSpells", Tag.TAG_STRING);
@@ -494,6 +520,8 @@ public final class PlayerPsiData {
         copy.breathTrainHits = breathTrainHits;
         copy.breathTrainSessionMisses = breathTrainSessionMisses;
         copy.breathTrainFatigueUntilMs = breathTrainFatigueUntilMs;
+        copy.steamFlightActive = steamFlightActive;
+        copy.steamFlightDrainPerTick = steamFlightDrainPerTick;
         copy.spellCastCounts = new HashMap<>(spellCastCounts);
         copy.spellLastCastAt = new HashMap<>(spellLastCastAt);
         return copy;

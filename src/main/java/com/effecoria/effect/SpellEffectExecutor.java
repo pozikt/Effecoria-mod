@@ -162,6 +162,8 @@ public final class SpellEffectExecutor {
             case "frost_bastion" -> ElementalEffects.frostBastion(caster, effect, power);
             case "plasma_bolt" -> ElementalEffects.plasmaBolt(caster, effect, power);
             case "hydro_slice" -> ElementalEffects.hydroSlice(caster, effect, power);
+            case "great_fireball" -> ElementalEffects.greatFireball(caster, effect, power);
+            case "steam_flight" -> ElementalEffects.steamFlight(caster, effect, power);
             case "vitality" -> vitality(caster, effect, power);
             case "evoker_fangs" -> evokerFangs(caster, effect, power);
             case "root_bind" -> rootBind(caster, effect, power, target);

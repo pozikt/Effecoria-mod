@@ -1,0 +1,22 @@
+{
+  "id": "effecoria:great_fireball",
+  "school": "elemental",
+  "frequency_hz": 23.5,
+  "base_cost": 22,
+  "power_multiplier": 1.3,
+  "side_entropy": 0.14,
+  "min_phi": 0.3,
+  "min_mastery": 0.7,
+  "min_power": 36,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:great_fireball",
+      "speed": 1.05,
+      "damage": 10,
+      "fire_mass": 4,
+      "ignite_radius": 2,
+      "ground_ignite_count": 9
+    }
+  ]
+}

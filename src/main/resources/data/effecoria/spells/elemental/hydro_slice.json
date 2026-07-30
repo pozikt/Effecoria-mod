@@ -12,7 +12,7 @@
   "effects": [
     {
       "type": "effecoria:hydro_slice",
-      "damage": 6,
+      "damage": 9,
       "range": 12,
       "knockback": 0.6,
       "slow_ticks": 20,

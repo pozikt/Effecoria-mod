@@ -39,26 +39,18 @@ public final class SpellProgression {
                     id("psychic_focus"));
 
             case ELEMENTAL -> List.of(
-
                     id("fire_burst"),
-
                     id("water_stream"),
-
                     id("wind_push"),
-
                     id("ember_volley"),
-
                     id("steam_jet"),
-
                     id("steam_veil"),
-
                     id("ice_shard"),
-
                     id("frost_bastion"),
-
                     id("hydro_slice"),
-
-                    id("plasma_bolt"));
+                    id("great_fireball"),
+                    id("plasma_bolt"),
+                    id("steam_flight"));
 
             case ORGANIC -> List.of(
 

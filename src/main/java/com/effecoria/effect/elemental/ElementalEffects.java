@@ -276,9 +276,14 @@ public final class ElementalEffects {
 
         Vec3 look = caster.getLookAngle().normalize();
         Vec3 start = caster.getEyePosition();
-        float scaledDamage = damage * (power / 50f);
+        // Hydro-slice matches diamond-axe strike damage; soft water lash still scales with power.
+        float scaledDamage = cutter
+                ? diamondAxeDamage() * Mth.clamp(0.85f + power / 200f, 0.85f, 1.25f)
+                : damage * (power / 50f);
         float scaledKnock = knockback * (power / 50f);
-        DamageSource source = caster.level().damageSources().magic();
+        DamageSource source = cutter
+                ? caster.level().damageSources().playerAttack(caster)
+                : caster.level().damageSources().magic();
 
         AABB sweep = caster.getBoundingBox().expandTowards(look.scale(range)).inflate(1.5);
         Set<LivingEntity> hit = new HashSet<>();
@@ -364,6 +369,123 @@ public final class ElementalEffects {
         projectile.getPersistentData().putBoolean(ElementalTags.PROJECTILE, true);
         projectile.getPersistentData().putString(ElementalTags.KIND, kind);
         projectile.getPersistentData().putFloat(ElementalTags.POWER, damage);
+    }
+
+    /** Vanilla diamond axe attack damage (1.21). */
+    public static float diamondAxeDamage() {
+        return 9f;
+    }
+
+    /**
+     * Large fire orb that sheds mass (and fire) on each block scrape; floor impact ignites a wide patch.
+     */
+    public static void greatFireball(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        Vec3 look = caster.getLookAngle().normalize();
+        float speed = params.has("speed") ? params.get("speed").getAsFloat() : 1.05f;
+        speed *= 0.85f + power / 140f;
+        float baseDamage = params.has("damage") ? params.get("damage").getAsFloat() : 10f;
+        float scaledDamage = baseDamage * (power / 50f);
+        int mass = params.has("fire_mass") ? params.get("fire_mass").getAsInt() : 4;
+        int igniteRadius = params.has("ignite_radius") ? params.get("ignite_radius").getAsInt() : 2;
+        int groundIgnite = params.has("ground_ignite_count") ? params.get("ground_ignite_count").getAsInt() : 9;
+
+        Snowball orb = new Snowball(level, caster);
+        orb.setPos(caster.getX(), caster.getEyeY() - 0.1, caster.getZ());
+        orb.shoot(look.x, look.y, look.z, speed, 0.6f);
+        tagProjectile(orb, ElementalTags.KIND_GREAT_FIRE, scaledDamage);
+        orb.getPersistentData().putInt(ElementalTags.FIRE_MASS, Math.max(1, mass));
+        orb.getPersistentData().putInt(ElementalTags.IGNITE_RADIUS, Math.max(1, igniteRadius));
+        orb.getPersistentData().putInt(ElementalTags.GROUND_IGNITE_COUNT, Math.max(1, groundIgnite));
+        level.addFreshEntity(orb);
+
+        level.playSound(null, caster.blockPosition(), SoundEvents.GHAST_SHOOT, SoundSource.PLAYERS, 0.85f, 0.7f);
+        spawnFireParticles(level, caster.getEyePosition());
+        level.sendParticles(
+                ParticleTypes.FLAME,
+                caster.getX() + look.x,
+                caster.getEyeY() + look.y,
+                caster.getZ() + look.z,
+                18,
+                0.25,
+                0.25,
+                0.25,
+                0.04);
+    }
+
+    /** Start / boost steam-powered elytra-style flight; continuous drain is handled by {@link SteamFlightService}. */
+    public static void steamFlight(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        JsonObject params = effect.params();
+        float drainPerSecond = params.has("drain_per_second")
+                ? params.get("drain_per_second").getAsFloat()
+                : 4f;
+        float drainPerTick = drainPerSecond / 20f * (0.9f + 10f / Math.max(20f, power));
+        float boost = params.has("boost") ? params.get("boost").getAsFloat() : 1.5f;
+        boost *= 0.9f + power / 160f;
+
+        SteamFlightService.activate(caster, drainPerTick, boost);
+
+        ServerLevel level = caster.serverLevel();
+        Vec3 look = caster.getLookAngle().normalize();
+        Vec3 trail = caster.position().add(look.scale(-0.6));
+        SteamCloudService.spawn(level, trail, 1.6f * (0.85f + power / 120f), 40, caster.getUUID(), false);
+        spawnSteamBurst(level, caster.position());
+        level.playSound(null, caster.blockPosition(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 0.9f, 1.15f);
+    }
+
+    public static void ignitePatch(ServerLevel level, BlockPos center, int radius, int maxFires) {
+        int placed = 0;
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        for (int dy = -1; dy <= 1 && placed < maxFires; dy++) {
+            for (int dx = -radius; dx <= radius && placed < maxFires; dx++) {
+                for (int dz = -radius; dz <= radius && placed < maxFires; dz++) {
+                    if (dx * dx + dz * dz > radius * radius + 1) {
+                        continue;
+                    }
+                    cursor.set(center.getX() + dx, center.getY() + dy, center.getZ() + dz);
+                    if (tryPlaceFire(level, cursor)) {
+                        placed++;
+                    }
+                }
+            }
+        }
+    }
+
+    public static boolean tryPlaceFire(ServerLevel level, BlockPos pos) {
+        if (!level.getBlockState(pos).isAir()) {
+            return false;
+        }
+        BlockPos below = pos.below();
+        BlockState belowState = level.getBlockState(below);
+        if (belowState.isAir()) {
+            return false;
+        }
+        BlockState fire = Blocks.FIRE.defaultBlockState();
+        if (!fire.canSurvive(level, pos)) {
+            return false;
+        }
+        level.setBlock(pos, fire, 3);
+        level.sendParticles(
+                ParticleTypes.FLAME,
+                pos.getX() + 0.5,
+                pos.getY() + 0.2,
+                pos.getZ() + 0.5,
+                6,
+                0.15,
+                0.15,
+                0.15,
+                0.01);
+        return true;
+    }
+
+    public static void shedFireAt(ServerLevel level, BlockPos hitPos, Vec3 hitLocation, net.minecraft.core.Direction face) {
+        BlockPos firePos = hitPos.relative(face);
+        if (!tryPlaceFire(level, firePos)) {
+            tryPlaceFire(level, hitPos.above());
+        }
+        spawnFireParticles(level, hitLocation);
+        level.sendParticles(ParticleTypes.LAVA, hitLocation.x, hitLocation.y, hitLocation.z, 4, 0.1, 0.1, 0.1, 0.02);
     }
 
     public static void spawnFireParticles(ServerLevel level, Vec3 pos) {

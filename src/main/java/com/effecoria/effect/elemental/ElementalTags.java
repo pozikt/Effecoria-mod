@@ -9,6 +9,12 @@ public final class ElementalTags {
     public static final String KIND_WEAK_FIRE = "weak_fire";
     public static final String KIND_ICE_SHARD = "ice_shard";
     public static final String KIND_PLASMA = "plasma";
+    public static final String KIND_GREAT_FIRE = "great_fire";
+
+    /** Remaining fire mass units for shedding fireballs. */
+    public static final String FIRE_MASS = "effecoria_fire_mass";
+    public static final String IGNITE_RADIUS = "effecoria_ignite_radius";
+    public static final String GROUND_IGNITE_COUNT = "effecoria_ground_ignite";
 
     private ElementalTags() {}
 }
