@@ -1,0 +1,17 @@
+{
+  "id": "effecoria:psychic_amplify",
+  "school": "mental",
+  "frequency_hz": 8.5,
+  "base_cost": 10,
+  "power_multiplier": 1.05,
+  "side_entropy": 0.04,
+  "min_phi": 0.14,
+  "min_mastery": 0.12,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:psychic_amplify",
+      "duration_ticks": 400
+    }
+  ]
+}

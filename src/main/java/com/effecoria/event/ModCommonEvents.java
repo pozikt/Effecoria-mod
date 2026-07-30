@@ -23,6 +23,7 @@ import com.effecoria.effect.necromancy.NecroFieldService;
 import com.effecoria.effect.necromancy.NecroSummonService;
 import com.effecoria.effect.organic.OrganicDiagnosticService;
 import com.effecoria.effect.organic.OrganicFieldService;
+import com.effecoria.effect.spatial.SpatialFieldService;
 import com.effecoria.magic.SpellRegistry;
 
 import net.minecraft.server.MinecraftServer;
@@ -66,6 +67,7 @@ public final class ModCommonEvents {
             ElementalFieldService.tick(serverLevel);
             OrganicFieldService.tick(serverLevel);
             NecroFieldService.tick(serverLevel);
+            SpatialFieldService.tick(serverLevel);
             ElementalCageService.tick(serverLevel);
         }
     }
@@ -173,6 +175,7 @@ public final class ModCommonEvents {
         ElementalFieldService.clearFor(player.getUUID());
         OrganicFieldService.clearFor(player.getUUID());
         NecroFieldService.clearFor(player.getUUID());
+        SpatialFieldService.clearFor(player.getUUID());
         ElementalShroudService.clearFor(player.getUUID());
         AirHandService.clearFor(player);
         PsiHelper.set(player, data);

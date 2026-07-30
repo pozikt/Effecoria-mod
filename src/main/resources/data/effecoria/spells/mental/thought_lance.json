@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:thought_lance",
+  "school": "mental",
+  "frequency_hz": 11.0,
+  "base_cost": 12,
+  "power_multiplier": 1.05,
+  "side_entropy": 0.07,
+  "min_phi": 0.18,
+  "min_mastery": 0.2,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:thought_lance",
+      "damage_dice": "2d8",
+      "slow_ticks": 60
+    }
+  ]
+}

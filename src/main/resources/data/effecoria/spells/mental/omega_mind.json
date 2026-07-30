@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:omega_mind",
+  "school": "mental",
+  "frequency_hz": 22.0,
+  "base_cost": 28,
+  "power_multiplier": 1.05,
+  "side_entropy": 0.11,
+  "min_phi": 0.42,
+  "min_mastery": 0.55,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:omega_mind",
+      "duration_ticks": 200,
+      "phi_sense_ticks": 320
+    }
+  ]
+}

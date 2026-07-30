@@ -2,17 +2,19 @@
   "id": "effecoria:gravity_well",
   "school": "spatial",
   "frequency_hz": 122.0,
-  "base_cost": 15,
+  "base_cost": 18,
   "power_multiplier": 1.1,
   "side_entropy": 0.07,
-  "min_phi": 0.18,
+  "min_phi": 0.22,
+  "min_mastery": 0.35,
   "radial_category": "combat",
   "effects": [
     {
-      "type": "effecoria:rift_yank",
-      "damage": 4,
-      "pull_strength": 1.4,
-      "range": 12
+      "type": "effecoria:gravity_field",
+      "radius": 8,
+      "duration_ticks": 180,
+      "pull_strength": 0.28,
+      "damage_dice_per_round": "1d6"
     }
   ]
 }

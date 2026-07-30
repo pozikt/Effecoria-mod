@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:rift_burst",
+  "school": "spatial",
+  "frequency_hz": 135.0,
+  "base_cost": 18,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.08,
+  "min_phi": 0.32,
+  "min_mastery": 0.4,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:rift_burst",
+      "damage_dice": "2d10",
+      "radius": 4
+    }
+  ]
+}

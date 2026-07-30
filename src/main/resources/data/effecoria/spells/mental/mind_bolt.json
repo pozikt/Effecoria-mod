@@ -1,0 +1,17 @@
+{
+  "id": "effecoria:mind_bolt",
+  "school": "mental",
+  "frequency_hz": 8.0,
+  "base_cost": 6,
+  "power_multiplier": 1.05,
+  "side_entropy": 0.05,
+  "min_phi": 0.12,
+  "min_mastery": 0.1,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:mind_bolt",
+      "damage_dice": "1d8"
+    }
+  ]
+}

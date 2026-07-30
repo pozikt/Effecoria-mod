@@ -27,16 +27,26 @@ public final class SpellProgression {
         return switch (school) {
 
             case MENTAL -> List.of(
-
                     id("mental_push"),
-
+                    id("mind_bolt"),
                     id("mental_sting"),
-
                     id("sense_phi"),
-
+                    id("psychic_barrier"),
+                    id("psychic_amplify"),
+                    id("neural_lock"),
                     id("mind_lance"),
-
-                    id("psychic_focus"));
+                    id("thought_lance"),
+                    id("telekinetic_crush"),
+                    id("psychic_scream"),
+                    id("mind_probe"),
+                    id("mass_confusion"),
+                    id("synaptic_overload"),
+                    id("psychic_drain"),
+                    id("psychic_focus"),
+                    id("psychic_storm"),
+                    id("mental_fortress"),
+                    id("thought_bomb"),
+                    id("omega_mind"));
 
             case ELEMENTAL -> List.of(
                     id("fire_burst"),
@@ -169,16 +179,24 @@ public final class SpellProgression {
                     id("lich_ascension"));
 
             case SPATIAL -> List.of(
-
                     id("blink"),
-
-                    id("rift_yank"),
-
+                    id("warp_bolt"),
                     id("phase_veil"),
-
+                    id("spatial_ward"),
+                    id("rift_yank"),
+                    id("fold_repulse"),
+                    id("rift_slash"),
+                    id("gravity_snare"),
                     id("void_step"),
-
-                    id("gravity_well"));
+                    id("dimensional_anchor"),
+                    id("far_blink"),
+                    id("gravity_well"),
+                    id("warp_exchange"),
+                    id("spatial_surge"),
+                    id("void_lance"),
+                    id("rift_burst"),
+                    id("spatial_singularity"),
+                    id("absolute_fold"));
 
             case CORRUPTION -> List.of(
 

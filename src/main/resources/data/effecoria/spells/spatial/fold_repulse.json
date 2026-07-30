@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:fold_repulse",
+  "school": "spatial",
+  "frequency_hz": 120.0,
+  "base_cost": 9,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.06,
+  "min_phi": 0.16,
+  "min_mastery": 0.16,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:fold_repulse",
+      "force": 2.2,
+      "damage_dice": "1d4"
+    }
+  ]
+}

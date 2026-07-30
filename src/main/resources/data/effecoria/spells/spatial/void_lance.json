@@ -1,0 +1,17 @@
+{
+  "id": "effecoria:void_lance",
+  "school": "spatial",
+  "frequency_hz": 132.0,
+  "base_cost": 16,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.08,
+  "min_phi": 0.28,
+  "min_mastery": 0.35,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:void_lance",
+      "damage_dice": "3d8"
+    }
+  ]
+}

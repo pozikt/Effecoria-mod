@@ -1,0 +1,17 @@
+{
+  "id": "effecoria:mind_probe",
+  "school": "mental",
+  "frequency_hz": 10.5,
+  "base_cost": 8,
+  "power_multiplier": 1.05,
+  "side_entropy": 0.05,
+  "min_phi": 0.16,
+  "min_mastery": 0.16,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:mind_probe",
+      "duration_ticks": 160
+    }
+  ]
+}

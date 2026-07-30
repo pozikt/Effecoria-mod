@@ -3,7 +3,9 @@ package com.effecoria.effect;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.effect.elemental.AirHandService;
 import com.effecoria.effect.elemental.ElementalEffects;
+import com.effecoria.effect.mental.MentalEffects;
 import com.effecoria.effect.necromancy.NecromancyEffects;
+import com.effecoria.effect.spatial.SpatialEffects;
 import com.effecoria.effect.organic.OrganicEffects;
 import com.effecoria.core.magic.ShadeService;
 import com.effecoria.core.magic.SpellDefinition;
@@ -93,7 +95,23 @@ public final class SpellEffectExecutor {
             "bone_volley",
             "soul_anchor",
             "soul_reaper",
-            "army_of_dead");
+            "army_of_dead",
+            "warp_bolt",
+            "fold_repulse",
+            "rift_slash",
+            "dimensional_anchor",
+            "void_lance",
+            "warp_exchange",
+            "rift_burst",
+            "spatial_singularity",
+            "mind_bolt",
+            "thought_lance",
+            "neural_lock",
+            "telekinetic_crush",
+            "mind_probe",
+            "synaptic_overload",
+            "psychic_drain",
+            "thought_bomb");
 
     private static final Set<String> BLOCK_SEAL_EFFECTS = Set.of(
             "place_trap_seal",
@@ -325,6 +343,35 @@ public final class SpellEffectExecutor {
             case "soul_reaper" -> NecromancyEffects.soulReaper(caster, effect, power, target);
             case "phylactery_surge" -> NecromancyEffects.phylacterySurge(caster, effect, power);
             case "lich_ascension" -> NecromancyEffects.lichAscension(caster, effect, power);
+            case "warp_bolt" -> SpatialEffects.warpBolt(caster, effect, power, target);
+            case "spatial_ward" -> SpatialEffects.spatialWard(caster, effect, power);
+            case "fold_repulse" -> SpatialEffects.foldRepulse(caster, effect, power, target);
+            case "rift_slash" -> SpatialEffects.riftSlash(caster, effect, power, target);
+            case "gravity_snare" -> SpatialEffects.gravitySnare(caster, effect, power);
+            case "gravity_field" -> SpatialEffects.gravityField(caster, effect, power);
+            case "dimensional_anchor" -> SpatialEffects.dimensionalAnchor(caster, effect, power, target);
+            case "void_lance" -> SpatialEffects.voidLance(caster, effect, power, target);
+            case "warp_exchange" -> SpatialEffects.warpExchange(caster, effect, power, target);
+            case "spatial_surge" -> SpatialEffects.spatialSurge(caster, effect, power);
+            case "far_blink" -> SpatialEffects.farBlink(caster, effect, power);
+            case "rift_burst" -> SpatialEffects.riftBurst(caster, effect, power, target);
+            case "spatial_singularity" -> SpatialEffects.spatialSingularity(caster, effect, power, target);
+            case "absolute_fold" -> SpatialEffects.absoluteFold(caster, effect, power);
+            case "mind_bolt" -> MentalEffects.mindBolt(caster, effect, power, target);
+            case "psychic_scream" -> MentalEffects.psychicScream(caster, effect, power);
+            case "thought_lance" -> MentalEffects.thoughtLance(caster, effect, power, target);
+            case "neural_lock" -> MentalEffects.neuralLock(caster, effect, power, target);
+            case "telekinetic_crush" -> MentalEffects.telekineticCrush(caster, effect, power, target);
+            case "mass_confusion" -> MentalEffects.massConfusion(caster, effect, power);
+            case "psychic_barrier" -> MentalEffects.psychicBarrier(caster, effect, power);
+            case "mind_probe" -> MentalEffects.mindProbe(caster, effect, power, target);
+            case "synaptic_overload" -> MentalEffects.synapticOverload(caster, effect, power, target);
+            case "psychic_drain" -> MentalEffects.psychicDrain(caster, effect, power, target);
+            case "mental_fortress" -> MentalEffects.mentalFortress(caster, effect, power);
+            case "thought_bomb" -> MentalEffects.thoughtBomb(caster, effect, power, target);
+            case "psychic_storm" -> MentalEffects.psychicStorm(caster, effect, power);
+            case "psychic_amplify" -> MentalEffects.psychicAmplify(caster, effect, power);
+            case "omega_mind" -> MentalEffects.omegaMind(caster, effect, power);
             case "blink" -> blink(caster, effect, power);
             case "rift_yank" -> riftYank(caster, effect, power, target);
             case "phase_veil" -> phaseVeil(caster, effect, power);

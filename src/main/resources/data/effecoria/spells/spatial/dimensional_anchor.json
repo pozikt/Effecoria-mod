@@ -1,0 +1,17 @@
+{
+  "id": "effecoria:dimensional_anchor",
+  "school": "spatial",
+  "frequency_hz": 124.0,
+  "base_cost": 12,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.07,
+  "min_phi": 0.22,
+  "min_mastery": 0.22,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:dimensional_anchor",
+      "duration_ticks": 100
+    }
+  ]
+}

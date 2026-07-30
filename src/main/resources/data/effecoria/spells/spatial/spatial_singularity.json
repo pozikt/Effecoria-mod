@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:spatial_singularity",
+  "school": "spatial",
+  "frequency_hz": 140.0,
+  "base_cost": 22,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.09,
+  "min_phi": 0.38,
+  "min_mastery": 0.5,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:spatial_singularity",
+      "damage_dice": "3d8",
+      "radius": 7,
+      "pull_strength": 0.9
+    }
+  ]
+}
