@@ -2,7 +2,7 @@
   "id": "effecoria:ice_shard",
   "school": "elemental",
   "frequency_hz": 19.5,
-  "base_cost": 3,
+  "base_cost": 12,
   "power_multiplier": 1.0,
   "side_entropy": 0.04,
   "min_phi": 0.15,

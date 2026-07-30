@@ -2,7 +2,7 @@
   "id": "effecoria:pestilence_wave",
   "school": "corruption",
   "frequency_hz": 0.65,
-  "base_cost": 15,
+  "base_cost": 18,
   "power_multiplier": 1.08,
   "side_entropy": 0.12,
   "min_phi": 0.22,

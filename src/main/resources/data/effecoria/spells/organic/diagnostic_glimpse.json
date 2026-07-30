@@ -2,7 +2,7 @@
   "id": "effecoria:diagnostic_glimpse",
   "school": "organic",
   "frequency_hz": 4.5,
-  "base_cost": 0,
+  "base_cost": 5,
   "power_multiplier": 0.8,
   "side_entropy": 0.01,
   "min_phi": 0.05,

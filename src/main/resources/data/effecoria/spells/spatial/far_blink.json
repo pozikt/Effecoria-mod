@@ -2,7 +2,7 @@
   "id": "effecoria:far_blink",
   "school": "spatial",
   "frequency_hz": 125.0,
-  "base_cost": 10,
+  "base_cost": 17,
   "power_multiplier": 1.1,
   "side_entropy": 0.06,
   "min_phi": 0.2,

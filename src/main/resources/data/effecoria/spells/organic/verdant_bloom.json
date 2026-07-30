@@ -2,7 +2,7 @@
   "id": "effecoria:verdant_bloom",
   "school": "organic",
   "frequency_hz": 16.0,
-  "base_cost": 18,
+  "base_cost": 36,
   "power_multiplier": 1.15,
   "side_entropy": 0.09,
   "min_phi": 0.4,

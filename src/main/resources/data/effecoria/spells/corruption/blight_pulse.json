@@ -2,7 +2,7 @@
   "id": "effecoria:blight_pulse",
   "school": "corruption",
   "frequency_hz": 0.6,
-  "base_cost": 15,
+  "base_cost": 7,
   "power_multiplier": 1.05,
   "side_entropy": 0.11,
   "min_phi": 0.2,

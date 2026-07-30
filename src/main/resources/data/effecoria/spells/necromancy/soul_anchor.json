@@ -2,7 +2,7 @@
   "id": "effecoria:soul_anchor",
   "school": "necromancy",
   "frequency_hz": 72.0,
-  "base_cost": 14,
+  "base_cost": 36,
   "power_multiplier": 1.1,
   "side_entropy": 0.08,
   "min_phi": 0.34,

@@ -2,7 +2,7 @@
   "id": "effecoria:dimensional_anchor",
   "school": "spatial",
   "frequency_hz": 124.0,
-  "base_cost": 12,
+  "base_cost": 16,
   "power_multiplier": 1.1,
   "side_entropy": 0.07,
   "min_phi": 0.22,

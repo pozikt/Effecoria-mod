@@ -2,6 +2,7 @@ package com.effecoria.core.psi;
 
 import com.effecoria.core.formula.PsiContext;
 import com.effecoria.core.magic.MagicSchool;
+import com.effecoria.core.phi.PhiHarness;
 import com.effecoria.core.progression.BiologyService;
 
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +21,7 @@ public final class PsiHelper {
 
     public static PsiContext toContext(Player player, PlayerPsiData data) {
         float biology = data.effectiveBiologyQ() * BiologyService.bodyFactor(player);
+        PhiHarness.FocusBonuses focus = PhiHarness.focusBonuses(player);
         return new PsiContext(
                 data.soulStrength(),
                 data.currentPsi(),
@@ -31,7 +33,9 @@ public final class PsiHelper {
                 data.essence(),
                 data.exhaustion(),
                 data.breathTrainRegenBonus(),
-                data.isBreathTrainFatigued());
+                data.isBreathTrainFatigued(),
+                focus.costFloorRatio(),
+                focus.resonanceWidthBonus());
     }
 
     public static void initiate(Player player, MagicSchool school) {

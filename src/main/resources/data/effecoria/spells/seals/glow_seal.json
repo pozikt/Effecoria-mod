@@ -2,7 +2,7 @@
   "id": "effecoria:glow_seal",
   "school": "seals",
   "frequency_hz": 0.5,
-  "base_cost": 12,
+  "base_cost": 5,
   "power_multiplier": 0.9,
   "side_entropy": 0.04,
   "min_phi": 0.1,

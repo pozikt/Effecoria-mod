@@ -2,7 +2,7 @@
   "id": "effecoria:plague_bolt",
   "school": "corruption",
   "frequency_hz": 0.6,
-  "base_cost": 10,
+  "base_cost": 12,
   "power_multiplier": 1.05,
   "side_entropy": 0.06,
   "min_phi": 0.14,

@@ -2,7 +2,7 @@
   "id": "effecoria:absolute_zero",
   "school": "elemental",
   "frequency_hz": 29.0,
-  "base_cost": 45,
+  "base_cost": 36,
   "power_multiplier": 1.45,
   "side_entropy": 0.15,
   "min_phi": 0.52,

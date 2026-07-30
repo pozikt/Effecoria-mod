@@ -2,7 +2,7 @@
   "id": "effecoria:shade_summon",
   "school": "necromancy",
   "frequency_hz": 48.0,
-  "base_cost": 15,
+  "base_cost": 18,
   "power_multiplier": 1.0,
   "side_entropy": 0.12,
   "min_phi": 0.25,

@@ -2,7 +2,7 @@
   "id": "effecoria:water_stream",
   "school": "elemental",
   "frequency_hz": 20.0,
-  "base_cost": 1,
+  "base_cost": 8,
   "power_multiplier": 0.7,
   "side_entropy": 0.02,
   "min_phi": 0.05,

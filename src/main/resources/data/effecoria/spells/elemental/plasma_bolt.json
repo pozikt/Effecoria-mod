@@ -2,7 +2,7 @@
   "id": "effecoria:plasma_bolt",
   "school": "elemental",
   "frequency_hz": 26.0,
-  "base_cost": 20,
+  "base_cost": 36,
   "power_multiplier": 1.35,
   "side_entropy": 0.12,
   "min_phi": 0.35,

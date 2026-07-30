@@ -2,7 +2,7 @@
   "id": "effecoria:ward_glyph",
   "school": "seals",
   "frequency_hz": 0.48,
-  "base_cost": 10,
+  "base_cost": 13,
   "power_multiplier": 1.0,
   "side_entropy": 0.04,
   "min_phi": 0.11,

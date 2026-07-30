@@ -2,7 +2,7 @@
   "id": "effecoria:muscle_spasm",
   "school": "organic",
   "frequency_hz": 5.5,
-  "base_cost": 4,
+  "base_cost": 14,
   "power_multiplier": 1.0,
   "side_entropy": 0.06,
   "min_phi": 0.15,

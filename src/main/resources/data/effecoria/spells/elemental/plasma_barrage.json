@@ -2,7 +2,7 @@
   "id": "effecoria:plasma_barrage",
   "school": "elemental",
   "frequency_hz": 34.0,
-  "base_cost": 65,
+  "base_cost": 36,
   "power_multiplier": 1.6,
   "side_entropy": 0.2,
   "min_phi": 0.6,

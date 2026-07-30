@@ -2,7 +2,7 @@
   "id": "effecoria:wind_push",
   "school": "elemental",
   "frequency_hz": 18.0,
-  "base_cost": 6,
+  "base_cost": 14,
   "power_multiplier": 1.0,
   "side_entropy": 0.04,
   "min_phi": 0.15,

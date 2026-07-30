@@ -2,7 +2,7 @@
   "id": "effecoria:life_tap",
   "school": "necromancy",
   "frequency_hz": 58.0,
-  "base_cost": 11,
+  "base_cost": 20,
   "power_multiplier": 1.1,
   "side_entropy": 0.07,
   "min_phi": 0.22,

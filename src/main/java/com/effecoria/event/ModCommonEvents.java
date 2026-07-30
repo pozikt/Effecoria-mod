@@ -11,6 +11,7 @@ import com.effecoria.core.progression.ProgressionService;
 import com.effecoria.core.progression.SpellUnlockService;
 import com.effecoria.core.phi.CreativeGodMode;
 import com.effecoria.core.phi.PhiFieldService;
+import com.effecoria.core.phi.PhiHarness;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
@@ -146,6 +147,7 @@ public final class ModCommonEvents {
         }
 
         PhiSample phi = PhiFieldService.sample(player.level(), player.position(), player);
+        PhiHarness.tickRecharge(player, phi);
         float regen;
         if (data.isLichAscensionActive(gameTime)) {
             regen = FormulaEngine.regenPsiLich(

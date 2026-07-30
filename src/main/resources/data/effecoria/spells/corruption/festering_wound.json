@@ -2,7 +2,7 @@
   "id": "effecoria:festering_wound",
   "school": "corruption",
   "frequency_hz": 0.65,
-  "base_cost": 11,
+  "base_cost": 13,
   "power_multiplier": 1.05,
   "side_entropy": 0.07,
   "min_phi": 0.16,

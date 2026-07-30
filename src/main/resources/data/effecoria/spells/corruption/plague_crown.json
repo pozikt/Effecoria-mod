@@ -2,7 +2,7 @@
   "id": "effecoria:plague_crown",
   "school": "corruption",
   "frequency_hz": 0.88,
-  "base_cost": 18,
+  "base_cost": 23,
   "power_multiplier": 1.05,
   "side_entropy": 0.09,
   "min_phi": 0.28,

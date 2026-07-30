@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": { "item": "minecraft:amethyst_shard" },
+    "D": { "item": "effecoria:essonite_dust" },
+    "G": { "item": "minecraft:glass" },
+    "R": { "item": "minecraft:redstone" }
+  },
+  "pattern": [
+    "DRD",
+    "GAG",
+    "DRD"
+  ],
+  "result": {
+    "count": 1,
+    "id": "effecoria:phi_cell"
+  }
+}

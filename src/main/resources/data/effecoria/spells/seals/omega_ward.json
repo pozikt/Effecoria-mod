@@ -2,7 +2,7 @@
   "id": "effecoria:omega_ward",
   "school": "seals",
   "frequency_hz": 0.65,
-  "base_cost": 18,
+  "base_cost": 20,
   "power_multiplier": 1.0,
   "side_entropy": 0.07,
   "min_phi": 0.22,

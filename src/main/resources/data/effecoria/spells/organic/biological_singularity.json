@@ -2,7 +2,7 @@
   "id": "effecoria:biological_singularity",
   "school": "organic",
   "frequency_hz": 42.0,
-  "base_cost": 44,
+  "base_cost": 36,
   "power_multiplier": 1.15,
   "side_entropy": 0.14,
   "min_phi": 0.68,

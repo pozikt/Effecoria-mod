@@ -2,7 +2,7 @@
   "id": "effecoria:sense_sharpening",
   "school": "organic",
   "frequency_hz": 4.5,
-  "base_cost": 4,
+  "base_cost": 21,
   "power_multiplier": 1.15,
   "side_entropy": 0.04,
   "min_phi": 0.12,

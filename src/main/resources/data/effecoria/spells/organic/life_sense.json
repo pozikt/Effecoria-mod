@@ -2,7 +2,7 @@
   "id": "effecoria:life_sense",
   "school": "organic",
   "frequency_hz": 4.5,
-  "base_cost": 1,
+  "base_cost": 5,
   "power_multiplier": 0.85,
   "side_entropy": 0.02,
   "min_phi": 0.05,

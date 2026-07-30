@@ -2,7 +2,7 @@
   "id": "effecoria:synaptic_overload",
   "school": "mental",
   "frequency_hz": 13.0,
-  "base_cost": 14,
+  "base_cost": 21,
   "power_multiplier": 1.05,
   "side_entropy": 0.08,
   "min_phi": 0.24,

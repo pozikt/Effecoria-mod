@@ -2,7 +2,7 @@
   "id": "effecoria:wither_touch",
   "school": "necromancy",
   "frequency_hz": 58.0,
-  "base_cost": 15,
+  "base_cost": 11,
   "power_multiplier": 0.95,
   "side_entropy": 0.08,
   "min_phi": 0.2,

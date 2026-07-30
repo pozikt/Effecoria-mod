@@ -2,7 +2,7 @@
   "id": "effecoria:psychic_focus",
   "school": "mental",
   "frequency_hz": 7.5,
-  "base_cost": 12,
+  "base_cost": 5,
   "power_multiplier": 0.85,
   "side_entropy": 0.03,
   "min_phi": 0.1,

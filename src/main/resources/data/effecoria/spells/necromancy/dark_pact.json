@@ -2,7 +2,7 @@
   "id": "effecoria:dark_pact",
   "school": "necromancy",
   "frequency_hz": 64.0,
-  "base_cost": 14,
+  "base_cost": 28,
   "power_multiplier": 1.1,
   "side_entropy": 0.08,
   "min_phi": 0.28,

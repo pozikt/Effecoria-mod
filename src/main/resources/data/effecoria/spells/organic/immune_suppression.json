@@ -2,7 +2,7 @@
   "id": "effecoria:immune_suppression",
   "school": "organic",
   "frequency_hz": 8.0,
-  "base_cost": 10,
+  "base_cost": 32,
   "power_multiplier": 1.15,
   "side_entropy": 0.07,
   "min_phi": 0.28,

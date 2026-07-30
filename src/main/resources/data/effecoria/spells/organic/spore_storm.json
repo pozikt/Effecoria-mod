@@ -2,7 +2,7 @@
   "id": "effecoria:spore_storm",
   "school": "organic",
   "frequency_hz": 32.0,
-  "base_cost": 34,
+  "base_cost": 36,
   "power_multiplier": 1.15,
   "side_entropy": 0.12,
   "min_phi": 0.58,

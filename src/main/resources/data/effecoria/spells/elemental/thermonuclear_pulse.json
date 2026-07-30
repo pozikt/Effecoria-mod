@@ -2,7 +2,7 @@
   "id": "effecoria:thermonuclear_pulse",
   "school": "elemental",
   "frequency_hz": 30.0,
-  "base_cost": 40,
+  "base_cost": 36,
   "power_multiplier": 1.45,
   "side_entropy": 0.15,
   "min_phi": 0.5,

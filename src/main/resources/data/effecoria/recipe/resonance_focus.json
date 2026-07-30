@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": { "item": "minecraft:amethyst_shard" },
+    "D": { "item": "effecoria:essonite_dust" },
+    "G": { "item": "minecraft:gold_ingot" }
+  },
+  "pattern": [
+    " D ",
+    "DAD",
+    " G "
+  ],
+  "result": {
+    "count": 1,
+    "id": "effecoria:resonance_focus"
+  }
+}

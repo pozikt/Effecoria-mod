@@ -2,7 +2,7 @@
   "id": "effecoria:psychic_storm",
   "school": "mental",
   "frequency_hz": 20.0,
-  "base_cost": 24,
+  "base_cost": 23,
   "power_multiplier": 1.05,
   "side_entropy": 0.1,
   "min_phi": 0.38,

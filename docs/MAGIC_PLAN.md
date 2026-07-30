@@ -26,7 +26,7 @@ Goal: casting feels intentional and readable in survival.
 2. **SFX pass** — map schools to a small set of vanilla sounds (no new assets). ✅ *school themes in `CastPresentation`*
 3. **`sense_phi` v2** — entity outline (high/low Φ / ZNΦ) + motes. ✅ *outline shipped in `ClientPhiSenseOutline`*
 4. **Cast feedback** — specific blocked/whiff reasons on action bar. ✅ *`CastBlockReason` / `CastPipeline`*
-5. **Balance sweep** — `rebalance_spell_costs.py` + playtest tiers 0–3 per school (not endgame numbers).
+5. **Balance sweep** — `rebalance_spell_costs.py` + playtest tiers 0–3 per school (not endgame numbers). ✅ *progression-index tiers*
 
 **Exit:** a new player can learn one school to ~tier 3 without wiki.
 
@@ -49,9 +49,9 @@ Goal: mastery and essence matter; radial isn’t overcrowded at start.
 
 Goal: bridge lore formulas to items players can craft.
 
-1. **Essonite dust → Resonance Focus** craft (or upgrade path).
-2. **Phi Cell** — portable Φ buffer; drains on cast in low-Φ zones; craft-only recipe.
-3. **Focus tiers** — small bonuses to resonance or cost floor (data in item NBT).
+1. **Essonite dust → Resonance Focus** craft (or upgrade path). ✅ *smelt ore → dust → focus; sneak-upgrade tiers*
+2. **Phi Cell** — portable Φ buffer; drains on cast in low-Φ zones; craft-only recipe. ✅ *`PhiHarness` / `PhiCellItem`*
+3. **Focus tiers** — small bonuses to resonance or cost floor (data in item NBT). ✅ *tiers 0–3 via CustomData*
 
 **Exit:** low-Φ caves are playable without creative Φ.
 
@@ -136,7 +136,9 @@ If choosing a single slice for the next implementation session:
 8. Phase **B2** entropy tutorial — ✅ done.
 9. Phase **A1/A2** VFX/SFX polish — ✅ done.
 10. Phase **B3** training XP sources — ✅ done.
-11. Next: Phase **A5** balance sweep (tiers 0–3), or Phase **C** Φ harness items.
+11. Phase **A5** balance sweep — ✅ done.
+12. Phase **C** Φ harness (dust / focus / Phi Cell / tiers) — ✅ done.
+13. Next: Phase **E** breathing/body polish, or **D4** seal conflicts, or Patchouli.
 
 ---
 

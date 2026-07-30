@@ -2,7 +2,7 @@
   "id": "effecoria:thorn_lash",
   "school": "organic",
   "frequency_hz": 6.0,
-  "base_cost": 5,
+  "base_cost": 15,
   "power_multiplier": 1.0,
   "side_entropy": 0.07,
   "min_phi": 0.15,

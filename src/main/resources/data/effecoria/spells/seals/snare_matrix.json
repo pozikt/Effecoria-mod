@@ -2,7 +2,7 @@
   "id": "effecoria:snare_matrix",
   "school": "seals",
   "frequency_hz": 0.54,
-  "base_cost": 13,
+  "base_cost": 17,
   "power_multiplier": 1.0,
   "side_entropy": 0.06,
   "min_phi": 0.16,

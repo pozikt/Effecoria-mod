@@ -66,6 +66,26 @@ public final class BalanceConfig {
             .comment("Minimum spell cost as fraction of base_cost once breathing mastery is fully past unlock")
             .defineInRange("spell_cost_floor_ratio", 0.33, 0.1, 1.0);
 
+    public static final ModConfigSpec.DoubleValue FOCUS_COST_FLOOR_PER_TIER = BUILDER
+            .comment("How much each Resonance Focus tier lowers the spell cost floor ratio")
+            .defineInRange("focus_cost_floor_per_tier", 0.04, 0.0, 0.2);
+
+    public static final ModConfigSpec.DoubleValue FOCUS_RESONANCE_WIDTH_PER_TIER = BUILDER
+            .comment("Extra resonance Hz width per Resonance Focus tier")
+            .defineInRange("focus_resonance_width_per_tier", 1.5, 0.0, 20.0);
+
+    public static final ModConfigSpec.DoubleValue PHI_CELL_ASSIST_THRESHOLD = BUILDER
+            .comment("Ambient Φ below this triggers Phi Cell assist on cast")
+            .defineInRange("phi_cell_assist_threshold", 0.75, 0.1, 5.0);
+
+    public static final ModConfigSpec.DoubleValue PHI_CELL_PHI_PER_CHARGE = BUILDER
+            .comment("Φ gained per 1.0 of Phi Cell charge spent")
+            .defineInRange("phi_cell_phi_per_charge", 0.9, 0.1, 5.0);
+
+    public static final ModConfigSpec.DoubleValue PHI_CELL_RECHARGE_PER_TICK = BUILDER
+            .comment("Phi Cell recharge while held in high ambient Φ (per progression tick)")
+            .defineInRange("phi_cell_recharge_per_tick", 0.01, 0.0, 1.0);
+
     public static final ModConfigSpec.BooleanValue CREATIVE_GOD_MODE = BUILDER
             .comment("In creative mode: free casts, full Ψ, no backlash (for testing)")
             .define("creative_god_mode", true);

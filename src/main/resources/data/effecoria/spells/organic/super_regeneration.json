@@ -2,7 +2,7 @@
   "id": "effecoria:super_regeneration",
   "school": "organic",
   "frequency_hz": 20.0,
-  "base_cost": 22,
+  "base_cost": 36,
   "power_multiplier": 1.15,
   "side_entropy": 0.1,
   "min_phi": 0.45,

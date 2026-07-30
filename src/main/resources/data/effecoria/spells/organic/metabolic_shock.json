@@ -2,7 +2,7 @@
   "id": "effecoria:metabolic_shock",
   "school": "organic",
   "frequency_hz": 6.0,
-  "base_cost": 9,
+  "base_cost": 28,
   "power_multiplier": 1.0,
   "side_entropy": 0.06,
   "min_phi": 0.2,

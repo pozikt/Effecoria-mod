@@ -2,7 +2,7 @@
   "id": "effecoria:necrotic_aura",
   "school": "necromancy",
   "frequency_hz": 66.0,
-  "base_cost": 12,
+  "base_cost": 23,
   "power_multiplier": 1.1,
   "side_entropy": 0.07,
   "min_phi": 0.26,

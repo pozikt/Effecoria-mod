@@ -2,7 +2,7 @@
   "id": "effecoria:spatial_ward",
   "school": "spatial",
   "frequency_hz": 119.0,
-  "base_cost": 8,
+  "base_cost": 10,
   "power_multiplier": 1.1,
   "side_entropy": 0.05,
   "min_phi": 0.15,

@@ -2,7 +2,7 @@
   "id": "effecoria:spatial_singularity",
   "school": "spatial",
   "frequency_hz": 140.0,
-  "base_cost": 22,
+  "base_cost": 23,
   "power_multiplier": 1.1,
   "side_entropy": 0.09,
   "min_phi": 0.38,

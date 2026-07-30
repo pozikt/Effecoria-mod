@@ -2,7 +2,7 @@
   "id": "effecoria:tornado",
   "school": "elemental",
   "frequency_hz": 22.0,
-  "base_cost": 16,
+  "base_cost": 23,
   "power_multiplier": 1.2,
   "side_entropy": 0.08,
   "min_phi": 0.28,

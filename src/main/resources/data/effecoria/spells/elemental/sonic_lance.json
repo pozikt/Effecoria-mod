@@ -2,7 +2,7 @@
   "id": "effecoria:sonic_lance",
   "school": "elemental",
   "frequency_hz": 19.8,
-  "base_cost": 15,
+  "base_cost": 23,
   "power_multiplier": 1.2,
   "side_entropy": 0.08,
   "min_phi": 0.25,

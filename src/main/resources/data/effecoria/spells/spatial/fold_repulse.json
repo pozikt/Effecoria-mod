@@ -2,7 +2,7 @@
   "id": "effecoria:fold_repulse",
   "school": "spatial",
   "frequency_hz": 120.0,
-  "base_cost": 9,
+  "base_cost": 12,
   "power_multiplier": 1.1,
   "side_entropy": 0.06,
   "min_phi": 0.16,

@@ -2,7 +2,7 @@
   "id": "effecoria:pain_inhibitor",
   "school": "organic",
   "frequency_hz": 5.0,
-  "base_cost": 5,
+  "base_cost": 22,
   "power_multiplier": 1.15,
   "side_entropy": 0.05,
   "min_phi": 0.14,

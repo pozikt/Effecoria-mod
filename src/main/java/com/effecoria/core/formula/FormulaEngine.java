@@ -54,7 +54,7 @@ public final class FormulaEngine {
         if (phi.zeroFlux()) {
             return 0f;
         }
-        float resonance = resonance(ctx.frequencyHz(), spell.frequencyHz());
+        float resonance = resonance(ctx.frequencyHz(), spell.frequencyHz(), ctx.focusResonanceWidthBonus());
         return ctx.currentPsi()
                 * phi.effectiveValue()
                 * resonance
@@ -71,16 +71,20 @@ public final class FormulaEngine {
         float phiPenalty = 1f + BalanceConfig.LOW_PHI_COST_FACTOR.get().floatValue()
                 * (1f - Math.min(1f, phi.effectiveValue()));
         return spell.baseCost()
-                * proficiencyCostFactor(ctx.breathingMastery(), spell.minMastery())
+                * proficiencyCostFactor(ctx.breathingMastery(), spell.minMastery(), ctx.focusCostFloor())
                 * phiPenalty
                 * ExhaustionService.costMultiplier(ctx.exhaustion());
     }
 
     /**
      * 1.0 when the spell is freshly unlocked; falls toward {@link BalanceConfig#SPELL_COST_FLOOR_RATIO}
-     * as breathing mastery grows past {@code unlockMastery}.
+     * (or a focus-lowered floor) as breathing mastery grows past {@code unlockMastery}.
      */
     public static float proficiencyCostFactor(float breathingMastery, float unlockMastery) {
+        return proficiencyCostFactor(breathingMastery, unlockMastery, 0f);
+    }
+
+    public static float proficiencyCostFactor(float breathingMastery, float unlockMastery, float focusCostFloor) {
         float anchor = Math.max(0f, unlockMastery);
         float progress;
         if (breathingMastery <= anchor) {
@@ -88,7 +92,9 @@ public final class FormulaEngine {
         } else {
             progress = Mth.clamp((breathingMastery - anchor) / Math.max(0.01f, 1f - anchor), 0f, 1f);
         }
-        float floor = BalanceConfig.SPELL_COST_FLOOR_RATIO.get().floatValue();
+        float floor = focusCostFloor > 0f
+                ? focusCostFloor
+                : BalanceConfig.SPELL_COST_FLOOR_RATIO.get().floatValue();
         return Mth.lerp(progress, 1f, floor);
     }
 
@@ -152,8 +158,12 @@ public final class FormulaEngine {
      * Replaces literal Hz comparison for gameplay feel.
      */
     public static float resonance(float operatorHz, float spellHz) {
+        return resonance(operatorHz, spellHz, 0f);
+    }
+
+    public static float resonance(float operatorHz, float spellHz, float widthBonus) {
         float delta = Math.abs(operatorHz - spellHz);
-        float width = BalanceConfig.RESONANCE_WIDTH_HZ.get().floatValue();
+        float width = BalanceConfig.RESONANCE_WIDTH_HZ.get().floatValue() + Math.max(0f, widthBonus);
         if (width <= 0f) {
             return operatorHz == spellHz ? 1f : 0f;
         }

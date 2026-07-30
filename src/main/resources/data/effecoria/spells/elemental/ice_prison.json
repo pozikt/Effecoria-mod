@@ -2,7 +2,7 @@
   "id": "effecoria:ice_prison",
   "school": "elemental",
   "frequency_hz": 17.5,
-  "base_cost": 25,
+  "base_cost": 36,
   "power_multiplier": 1.25,
   "side_entropy": 0.11,
   "min_phi": 0.3,

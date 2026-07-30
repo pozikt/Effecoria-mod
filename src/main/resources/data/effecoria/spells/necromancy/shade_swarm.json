@@ -2,7 +2,7 @@
   "id": "effecoria:shade_swarm",
   "school": "necromancy",
   "frequency_hz": 46.0,
-  "base_cost": 15,
+  "base_cost": 36,
   "power_multiplier": 0.9,
   "side_entropy": 0.09,
   "min_phi": 0.18,

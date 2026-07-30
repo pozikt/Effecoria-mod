@@ -2,7 +2,7 @@
   "id": "effecoria:ice_sheet",
   "school": "elemental",
   "frequency_hz": 18.2,
-  "base_cost": 10,
+  "base_cost": 21,
   "power_multiplier": 1.0,
   "side_entropy": 0.05,
   "min_phi": 0.2,

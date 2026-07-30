@@ -2,7 +2,7 @@
   "id": "effecoria:shock_trap",
   "school": "seals",
   "frequency_hz": 0.58,
-  "base_cost": 15,
+  "base_cost": 18,
   "power_multiplier": 1.0,
   "side_entropy": 0.06,
   "min_phi": 0.18,

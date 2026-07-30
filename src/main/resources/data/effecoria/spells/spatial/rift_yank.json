@@ -2,7 +2,7 @@
   "id": "effecoria:rift_yank",
   "school": "spatial",
   "frequency_hz": 122.0,
-  "base_cost": 15,
+  "base_cost": 11,
   "power_multiplier": 1.0,
   "side_entropy": 0.07,
   "min_phi": 0.25,

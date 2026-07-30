@@ -2,7 +2,7 @@
   "id": "effecoria:meteorological_cataclysm",
   "school": "elemental",
   "frequency_hz": 32.0,
-  "base_cost": 70,
+  "base_cost": 36,
   "power_multiplier": 1.55,
   "side_entropy": 0.2,
   "min_phi": 0.6,

@@ -2,7 +2,7 @@
   "id": "effecoria:grave_field",
   "school": "necromancy",
   "frequency_hz": 72.0,
-  "base_cost": 16,
+  "base_cost": 34,
   "power_multiplier": 1.1,
   "side_entropy": 0.09,
   "min_phi": 0.32,

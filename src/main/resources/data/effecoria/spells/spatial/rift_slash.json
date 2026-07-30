@@ -2,7 +2,7 @@
   "id": "effecoria:rift_slash",
   "school": "spatial",
   "frequency_hz": 121.0,
-  "base_cost": 10,
+  "base_cost": 13,
   "power_multiplier": 1.1,
   "side_entropy": 0.06,
   "min_phi": 0.18,

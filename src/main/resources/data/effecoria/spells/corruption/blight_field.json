@@ -2,7 +2,7 @@
   "id": "effecoria:blight_field",
   "school": "corruption",
   "frequency_hz": 0.75,
-  "base_cost": 14,
+  "base_cost": 20,
   "power_multiplier": 1.05,
   "side_entropy": 0.08,
   "min_phi": 0.2,

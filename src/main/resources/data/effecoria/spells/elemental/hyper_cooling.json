@@ -2,7 +2,7 @@
   "id": "effecoria:hyper_cooling",
   "school": "elemental",
   "frequency_hz": 20.5,
-  "base_cost": 14,
+  "base_cost": 28,
   "power_multiplier": 1.15,
   "side_entropy": 0.08,
   "min_phi": 0.28,

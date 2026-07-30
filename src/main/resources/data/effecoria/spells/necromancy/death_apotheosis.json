@@ -2,7 +2,7 @@
   "id": "effecoria:death_apotheosis",
   "school": "necromancy",
   "frequency_hz": 100.0,
-  "base_cost": 38,
+  "base_cost": 36,
   "power_multiplier": 1.1,
   "side_entropy": 0.14,
   "min_phi": 0.62,

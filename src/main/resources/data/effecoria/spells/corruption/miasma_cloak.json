@@ -2,7 +2,7 @@
   "id": "effecoria:miasma_cloak",
   "school": "corruption",
   "frequency_hz": 0.58,
-  "base_cost": 10,
+  "base_cost": 14,
   "power_multiplier": 1.05,
   "side_entropy": 0.06,
   "min_phi": 0.14,

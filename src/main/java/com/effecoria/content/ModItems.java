@@ -14,10 +14,18 @@ public final class ModItems {
 
     public static final DeferredItem<BlockItem> ESSENITE_ORE = ITEMS.registerSimpleBlockItem("essonite_ore", ModBlocks.ESSENITE_ORE);
 
-    /** Initiation focus — fixes magic school on first use (phase 1) */
+    /** Refined Φ-conductive dust — smelted from essonite ore. */
+    public static final DeferredItem<Item> ESSENITE_DUST = ITEMS.registerSimpleItem("essonite_dust");
+
+    /** Initiation focus — school select + tiered resonance bonuses. */
     public static final DeferredItem<Item> RESONANCE_FOCUS = ITEMS.register(
             "resonance_focus",
             () -> new ResonanceFocusItem(new Item.Properties().stacksTo(1)));
+
+    /** Portable Φ buffer for low-Φ caves. */
+    public static final DeferredItem<Item> PHI_CELL = ITEMS.register(
+            "phi_cell",
+            () -> new PhiCellItem(new Item.Properties().stacksTo(1)));
 
     /** Teaches breathing forms — consumed on use. */
     public static final DeferredItem<Item> BREATHING_SCROLL = ITEMS.register(

@@ -2,7 +2,7 @@
   "id": "effecoria:ion_storm",
   "school": "elemental",
   "frequency_hz": 24.0,
-  "base_cost": 20,
+  "base_cost": 23,
   "power_multiplier": 1.25,
   "side_entropy": 0.1,
   "min_phi": 0.3,

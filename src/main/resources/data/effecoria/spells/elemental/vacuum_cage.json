@@ -2,7 +2,7 @@
   "id": "effecoria:vacuum_cage",
   "school": "elemental",
   "frequency_hz": 19.0,
-  "base_cost": 22,
+  "base_cost": 36,
   "power_multiplier": 1.2,
   "side_entropy": 0.1,
   "min_phi": 0.3,

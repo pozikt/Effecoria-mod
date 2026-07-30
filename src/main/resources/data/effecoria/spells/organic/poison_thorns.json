@@ -2,7 +2,7 @@
   "id": "effecoria:poison_thorns",
   "school": "organic",
   "frequency_hz": 6.0,
-  "base_cost": 6,
+  "base_cost": 23,
   "power_multiplier": 1.15,
   "side_entropy": 0.06,
   "min_phi": 0.16,

@@ -2,7 +2,7 @@
   "id": "effecoria:limb_regeneration",
   "school": "organic",
   "frequency_hz": 22.0,
-  "base_cost": 24,
+  "base_cost": 36,
   "power_multiplier": 1.15,
   "side_entropy": 0.1,
   "min_phi": 0.48,

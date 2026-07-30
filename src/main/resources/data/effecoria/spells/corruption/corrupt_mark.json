@@ -2,7 +2,7 @@
   "id": "effecoria:corrupt_mark",
   "school": "corruption",
   "frequency_hz": 0.5,
-  "base_cost": 15,
+  "base_cost": 6,
   "power_multiplier": 1.0,
   "side_entropy": 0.1,
   "min_phi": 0.15,

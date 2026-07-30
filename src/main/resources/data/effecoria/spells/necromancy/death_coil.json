@@ -2,7 +2,7 @@
   "id": "effecoria:death_coil",
   "school": "necromancy",
   "frequency_hz": 88.0,
-  "base_cost": 26,
+  "base_cost": 36,
   "power_multiplier": 1.1,
   "side_entropy": 0.11,
   "min_phi": 0.48,

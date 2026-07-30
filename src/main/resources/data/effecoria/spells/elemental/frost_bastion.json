@@ -2,7 +2,7 @@
   "id": "effecoria:frost_bastion",
   "school": "elemental",
   "frequency_hz": 18.0,
-  "base_cost": 14,
+  "base_cost": 30,
   "power_multiplier": 1.15,
   "side_entropy": 0.08,
   "min_phi": 0.25,

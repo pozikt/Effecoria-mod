@@ -2,7 +2,7 @@
   "id": "effecoria:water_prison",
   "school": "elemental",
   "frequency_hz": 20.5,
-  "base_cost": 16,
+  "base_cost": 34,
   "power_multiplier": 1.15,
   "side_entropy": 0.08,
   "min_phi": 0.25,

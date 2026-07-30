@@ -2,7 +2,7 @@
   "id": "effecoria:entropy_lash",
   "school": "corruption",
   "frequency_hz": 0.55,
-  "base_cost": 9,
+  "base_cost": 10,
   "power_multiplier": 1.05,
   "side_entropy": 0.06,
   "min_phi": 0.12,

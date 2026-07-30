@@ -2,7 +2,7 @@
   "id": "effecoria:psychic_scream",
   "school": "mental",
   "frequency_hz": 9.0,
-  "base_cost": 8,
+  "base_cost": 17,
   "power_multiplier": 1.05,
   "side_entropy": 0.06,
   "min_phi": 0.14,

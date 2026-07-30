@@ -2,7 +2,7 @@
   "id": "effecoria:psychic_barrier",
   "school": "mental",
   "frequency_hz": 9.5,
-  "base_cost": 9,
+  "base_cost": 11,
   "power_multiplier": 1.05,
   "side_entropy": 0.05,
   "min_phi": 0.15,

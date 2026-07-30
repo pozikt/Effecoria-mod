@@ -14,10 +14,12 @@ public record PsiContext(
         int essence,
         float exhaustion,
         float breathTrainRegenBonus,
-        boolean breathTrainFatigue) {
+        boolean breathTrainFatigue,
+        float focusCostFloor,
+        float focusResonanceWidthBonus) {
 
     public static PsiContext defaultHuman(MagicSchool school) {
-        return new PsiContext(1f, 50f, 0.6f, school.nominalFrequencyHz(), school, 0f, 0f, 0, 0f, 0f, false);
+        return new PsiContext(1f, 50f, 0.6f, school.nominalFrequencyHz(), school, 0f, 0f, 0, 0f, 0f, false, 0f, 0f);
     }
 
     public float mastery() {

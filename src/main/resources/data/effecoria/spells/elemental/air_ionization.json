@@ -2,7 +2,7 @@
   "id": "effecoria:air_ionization",
   "school": "elemental",
   "frequency_hz": 16.0,
-  "base_cost": 3,
+  "base_cost": 15,
   "power_multiplier": 0.9,
   "side_entropy": 0.03,
   "min_phi": 0.1,

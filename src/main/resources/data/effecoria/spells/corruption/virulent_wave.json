@@ -2,7 +2,7 @@
   "id": "effecoria:virulent_wave",
   "school": "corruption",
   "frequency_hz": 0.82,
-  "base_cost": 16,
+  "base_cost": 23,
   "power_multiplier": 1.05,
   "side_entropy": 0.09,
   "min_phi": 0.24,

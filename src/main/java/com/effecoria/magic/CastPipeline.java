@@ -7,6 +7,7 @@ import com.effecoria.core.formula.PsiContext;
 import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.core.phi.CreativeGodMode;
 import com.effecoria.core.phi.PhiFieldService;
+import com.effecoria.core.phi.PhiHarness;
 import com.effecoria.core.progression.EntropyService;
 import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.progression.ProgressionService;
@@ -57,6 +58,9 @@ public final class CastPipeline {
         PsiContext ctx = PsiHelper.toContext(player, data);
         boolean godMode = CreativeGodMode.isActive(player);
         PhiSample phi = PhiFieldService.sample(player.level(), player.position(), player);
+        if (!godMode) {
+            phi = PhiHarness.assistCast(player, phi);
+        }
 
         if (!godMode) {
             var block = FormulaEngine.diagnoseCannotCast(ctx, phi, spell, data.currentPsi());

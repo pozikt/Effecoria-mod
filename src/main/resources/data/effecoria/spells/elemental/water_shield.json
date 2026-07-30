@@ -2,7 +2,7 @@
   "id": "effecoria:water_shield",
   "school": "elemental",
   "frequency_hz": 20.2,
-  "base_cost": 2,
+  "base_cost": 10,
   "power_multiplier": 0.9,
   "side_entropy": 0.03,
   "min_phi": 0.1,

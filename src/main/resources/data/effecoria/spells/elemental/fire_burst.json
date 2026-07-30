@@ -2,7 +2,7 @@
   "id": "effecoria:fire_burst",
   "school": "elemental",
   "frequency_hz": 22.3,
-  "base_cost": 1,
+  "base_cost": 6,
   "power_multiplier": 0.6,
   "side_entropy": 0.02,
   "min_phi": 0.05,

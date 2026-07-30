@@ -2,7 +2,7 @@
   "id": "effecoria:lightning_spear",
   "school": "elemental",
   "frequency_hz": 25.0,
-  "base_cost": 30,
+  "base_cost": 36,
   "power_multiplier": 1.35,
   "side_entropy": 0.12,
   "min_phi": 0.35,

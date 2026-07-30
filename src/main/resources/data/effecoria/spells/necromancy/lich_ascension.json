@@ -2,7 +2,7 @@
   "id": "effecoria:lich_ascension",
   "school": "necromancy",
   "frequency_hz": 105.0,
-  "base_cost": 42,
+  "base_cost": 28,
   "power_multiplier": 1.1,
   "side_entropy": 0.14,
   "min_phi": 0.68,

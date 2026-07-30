@@ -2,7 +2,7 @@
   "id": "effecoria:tainted_leech",
   "school": "corruption",
   "frequency_hz": 0.78,
-  "base_cost": 15,
+  "base_cost": 22,
   "power_multiplier": 1.05,
   "side_entropy": 0.08,
   "min_phi": 0.22,

@@ -2,7 +2,7 @@
   "id": "effecoria:lich_ward",
   "school": "necromancy",
   "frequency_hz": 82.0,
-  "base_cost": 22,
+  "base_cost": 36,
   "power_multiplier": 1.1,
   "side_entropy": 0.1,
   "min_phi": 0.42,

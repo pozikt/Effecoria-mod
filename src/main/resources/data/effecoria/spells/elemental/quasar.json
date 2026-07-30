@@ -2,7 +2,7 @@
   "id": "effecoria:quasar",
   "school": "elemental",
   "frequency_hz": 33.0,
-  "base_cost": 55,
+  "base_cost": 36,
   "power_multiplier": 1.5,
   "side_entropy": 0.18,
   "min_phi": 0.58,

@@ -23,7 +23,9 @@ public final class ModCreativeTabs {
                     .icon(() -> ModItems.RESONANCE_FOCUS.get().getDefaultInstance())
                     .displayItems((params, output) -> {
                         output.accept(ModItems.ESSENITE_ORE.get());
+                        output.accept(ModItems.ESSENITE_DUST.get());
                         output.accept(ModItems.RESONANCE_FOCUS.get());
+                        output.accept(ModItems.PHI_CELL.get());
                         output.accept(ModItems.BREATHING_SCROLL.get());
                     })
                     .build());

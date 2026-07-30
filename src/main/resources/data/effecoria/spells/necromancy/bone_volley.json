@@ -2,7 +2,7 @@
   "id": "effecoria:bone_volley",
   "school": "necromancy",
   "frequency_hz": 62.0,
-  "base_cost": 11,
+  "base_cost": 23,
   "power_multiplier": 1.1,
   "side_entropy": 0.07,
   "min_phi": 0.24,

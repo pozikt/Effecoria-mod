@@ -2,7 +2,7 @@
   "id": "effecoria:siphon_pulse",
   "school": "necromancy",
   "frequency_hz": 54.0,
-  "base_cost": 9,
+  "base_cost": 14,
   "power_multiplier": 1.1,
   "side_entropy": 0.06,
   "min_phi": 0.18,
