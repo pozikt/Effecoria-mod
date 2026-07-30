@@ -3,6 +3,7 @@ package com.effecoria.effect;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.effect.elemental.AirHandService;
 import com.effecoria.effect.elemental.ElementalEffects;
+import com.effecoria.effect.organic.OrganicEffects;
 import com.effecoria.core.magic.ShadeService;
 import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.core.magic.SpellEffectEntry;
@@ -61,7 +62,13 @@ public final class SpellEffectExecutor {
             "binding_seal",
             "water_prison",
             "air_hand",
-            "ice_prison");
+            "ice_prison",
+            "diagnostic_glimpse",
+            "bio_strike",
+            "foreign_agent",
+            "muscle_spasm",
+            "parasitic_infection",
+            "metabolic_shock");
 
     private static final Set<String> BLOCK_SEAL_EFFECTS = Set.of(
             "place_trap_seal",
@@ -213,7 +220,19 @@ public final class SpellEffectExecutor {
             case "meteorological_cataclysm" -> ElementalEffects.meteorologicalCataclysm(caster, effect, power);
             case "quasar" -> ElementalEffects.quasar(caster, effect, power);
             case "plasma_barrage" -> ElementalEffects.plasmaBarrage(caster, effect, power);
-            case "vitality" -> vitality(caster, effect, power);
+            case "vitality" -> OrganicEffects.applyVitality(caster, effect, power, target);
+            case "diagnostic_glimpse" -> OrganicEffects.diagnosticGlimpse(caster, effect, power, target);
+            case "blood_stasis" -> OrganicEffects.bloodStasis(caster, effect, power);
+            case "life_sense" -> OrganicEffects.lifeSense(caster, effect, power);
+            case "bio_strike" -> OrganicEffects.bioStrike(caster, effect, power, target);
+            case "bone_needle" -> OrganicEffects.boneNeedle(caster, effect, power);
+            case "foreign_agent" -> OrganicEffects.foreignAgent(caster, effect, power, target);
+            case "muscle_spasm" -> OrganicEffects.muscleSpasm(caster, effect, power, target);
+            case "chitin_plates" -> OrganicEffects.chitinPlates(caster, effect, power);
+            case "acid_gland" -> OrganicEffects.acidGland(caster, effect, power);
+            case "parasitic_infection" -> OrganicEffects.parasiticInfection(caster, effect, power, target);
+            case "metabolic_shock" -> OrganicEffects.metabolicShock(caster, effect, power, target);
+            case "biological_field" -> OrganicEffects.biologicalField(caster, effect, power);
             case "evoker_fangs" -> evokerFangs(caster, effect, power);
             case "root_bind" -> rootBind(caster, effect, power, target);
             case "soul_drain" -> soulDrain(caster, effect, power, target);
@@ -321,17 +340,6 @@ public final class SpellEffectExecutor {
                 0.02);
     }
 
-    /** Self heal + short regeneration — Orkanum tissue mend. */
-    private static void vitality(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        ServerLevel level = caster.serverLevel();
-        float heal = effect.params().get("heal").getAsFloat() * (power / 50f);
-        int regenTicks = effect.params().has("regen_ticks") ? effect.params().get("regen_ticks").getAsInt() : 60;
-
-        caster.heal(heal);
-        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, regenTicks, 0));
-        spawnOrganicParticles(level, caster.position().add(0, 1, 0));
-        level.playSound(null, caster.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.7f, 1.4f);
-    }
 
     /** Evoker-style fang line along the caster's look vector. */
     private static void evokerFangs(ServerPlayer caster, SpellEffectEntry effect, float power) {

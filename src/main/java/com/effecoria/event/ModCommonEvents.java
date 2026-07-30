@@ -19,7 +19,11 @@ import com.effecoria.effect.elemental.ElementalFieldService;
 import com.effecoria.effect.elemental.ElementalShroudService;
 import com.effecoria.effect.elemental.SteamCloudService;
 import com.effecoria.effect.elemental.SteamFlightService;
+import com.effecoria.effect.organic.OrganicDiagnosticService;
+import com.effecoria.effect.organic.OrganicFieldService;
 import com.effecoria.magic.SpellRegistry;
+
+import net.minecraft.server.MinecraftServer;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.EventPriority;
@@ -47,11 +51,18 @@ public final class ModCommonEvents {
     }
 
     @SubscribeEvent
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        MinecraftServer server = event.getServer();
+        OrganicDiagnosticService.tick(server);
+    }
+
+    @SubscribeEvent
     public static void onLevelTick(LevelTickEvent.Post event) {
         if (event.getLevel() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
             ElementalBlockService.tick(serverLevel);
             SteamCloudService.tick(serverLevel);
             ElementalFieldService.tick(serverLevel);
+            OrganicFieldService.tick(serverLevel);
             ElementalCageService.tick(serverLevel);
         }
     }
@@ -156,6 +167,7 @@ public final class ModCommonEvents {
         ExhaustionService.clearOnDeath(data);
         data.clearIonCharge();
         ElementalFieldService.clearFor(player.getUUID());
+        OrganicFieldService.clearFor(player.getUUID());
         ElementalShroudService.clearFor(player.getUUID());
         AirHandService.clearFor(player);
         PsiHelper.set(player, data);

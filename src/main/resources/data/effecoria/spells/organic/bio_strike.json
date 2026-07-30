@@ -1,0 +1,17 @@
+{
+  "id": "effecoria:bio_strike",
+  "school": "organic",
+  "frequency_hz": 5.0,
+  "base_cost": 2,
+  "power_multiplier": 0.95,
+  "side_entropy": 0.05,
+  "min_phi": 0.1,
+  "min_mastery": 0.1,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:bio_strike",
+      "damage_dice": "1d6"
+    }
+  ]
+}

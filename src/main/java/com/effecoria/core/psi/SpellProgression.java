@@ -81,16 +81,23 @@ public final class SpellProgression {
                     id("plasma_barrage"));
 
             case ORGANIC -> List.of(
-
+                    id("diagnostic_glimpse"),
+                    id("blood_stasis"),
+                    id("life_sense"),
                     id("vitality_pulse"),
-
+                    id("bio_strike"),
+                    id("bone_needle"),
+                    id("foreign_agent"),
+                    id("muscle_spasm"),
                     id("thorn_lash"),
-
                     id("root_bind"),
-
+                    id("chitin_plates"),
+                    id("acid_gland"),
+                    id("metabolic_shock"),
+                    id("parasitic_infection"),
                     id("briar_surge"),
-
-                    id("verdant_mend"));
+                    id("verdant_mend"),
+                    id("biological_field"));
 
             case NECROMANCY -> List.of(
 

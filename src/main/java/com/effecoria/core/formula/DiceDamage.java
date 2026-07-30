@@ -90,4 +90,23 @@ public final class DiceDamage {
     public static float clampDamage(float damage) {
         return Mth.clamp(damage, 0.25f, 80f);
     }
+
+    /** Healing from {@code heal_dice} / legacy {@code heal} (same dice curve as damage). */
+    public static float healFromParams(JsonObject params, float power, float legacyDefault) {
+        float diceExpected = 0f;
+        if (params.has("heal_dice")) {
+            diceExpected += expected(params.get("heal_dice").getAsString());
+        }
+        if (params.has("heal_dice_alt")) {
+            diceExpected += expected(params.get("heal_dice_alt").getAsString());
+        }
+        if (params.has("heal_bonus")) {
+            diceExpected += params.get("heal_bonus").getAsFloat();
+        }
+        if (diceExpected > 0f) {
+            return Mth.clamp(scaleWithPower(toMinecraftBase(diceExpected), power), 0.5f, 40f);
+        }
+        float flat = params.has("heal") ? params.get("heal").getAsFloat() : legacyDefault;
+        return Mth.clamp(flat * (power / 50f), 0.5f, 40f);
+    }
 }

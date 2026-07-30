@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:life_sense",
+  "school": "organic",
+  "frequency_hz": 4.5,
+  "base_cost": 1,
+  "power_multiplier": 0.85,
+  "side_entropy": 0.02,
+  "min_phi": 0.05,
+  "min_mastery": 0.0,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:life_sense",
+      "radius": 4,
+      "duration_ticks": 40
+    }
+  ]
+}
