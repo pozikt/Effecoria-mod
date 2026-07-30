@@ -1,5 +1,6 @@
 package com.effecoria.event;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -32,12 +33,12 @@ public final class SealEvents {
             return;
         }
         BlockPos pos = event.getPosition().get();
-        Optional<SealInstance> sealOpt = SealService.get(event.getEntity().level(), pos);
-        if (sealOpt.isEmpty()) {
+        Optional<SealInstance> fortify = SealService.find(event.getEntity().level(), pos, SealTypes.FORTIFY);
+        if (fortify.isEmpty()) {
             return;
         }
-        SealInstance seal = sealOpt.get();
-        if (!seal.typeId().equals(SealTypes.FORTIFY) || seal.isExpired(event.getEntity().level().getGameTime())) {
+        SealInstance seal = fortify.get();
+        if (seal.isExpired(event.getEntity().level().getGameTime())) {
             return;
         }
         event.setNewSpeed(event.getNewSpeed() * SealService.fortifyBreakFactor(seal));
@@ -83,21 +84,22 @@ public final class SealEvents {
                 if (data.isEmpty()) {
                     continue;
                 }
-                for (Map.Entry<BlockPos, SealInstance> entry : Map.copyOf(data.seals()).entrySet()) {
+                for (Map.Entry<BlockPos, List<SealInstance>> entry : Map.copyOf(data.seals()).entrySet()) {
                     BlockPos pos = entry.getKey();
-                    SealInstance seal = entry.getValue();
-                    if (seal.isExpired(gameTime)) {
-                        continue;
-                    }
-                    if (seal.typeId().equals(SealTypes.DAMAGE_TRAP)) {
-                        applyTrap(level, pos, seal);
-                    } else if (seal.typeId().equals(SealTypes.SNARE)) {
-                        applySnare(level, pos, seal);
-                    } else if (seal.typeId().equals(SealTypes.REPULSE)) {
-                        applyRepulse(level, pos, seal);
-                    } else if (seal.typeId().equals(SealTypes.GLOW)) {
-                        SealService.ensureGlowLight(level, chunk, pos, seal);
-                        spawnGlowParticles(level, pos);
+                    for (SealInstance seal : entry.getValue()) {
+                        if (seal.isExpired(gameTime)) {
+                            continue;
+                        }
+                        if (seal.typeId().equals(SealTypes.DAMAGE_TRAP)) {
+                            applyTrap(level, pos, seal);
+                        } else if (seal.typeId().equals(SealTypes.SNARE)) {
+                            applySnare(level, pos, seal);
+                        } else if (seal.typeId().equals(SealTypes.REPULSE)) {
+                            applyRepulse(level, pos, seal);
+                        } else if (seal.typeId().equals(SealTypes.GLOW)) {
+                            SealService.ensureGlowLight(level, chunk, pos, seal);
+                            spawnGlowParticles(level, pos);
+                        }
                     }
                 }
             }

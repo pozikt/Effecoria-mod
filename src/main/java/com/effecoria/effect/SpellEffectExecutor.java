@@ -13,6 +13,7 @@ import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.core.magic.SpellEffectEntry;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
+import com.effecoria.core.seal.SealPlaceResult;
 import com.effecoria.core.seal.SealService;
 import com.effecoria.core.seal.SealTypes;
 import com.effecoria.magic.CastDelivery;
@@ -424,15 +425,23 @@ public final class SpellEffectExecutor {
                 : 600;
         float strength = power;
         CompoundTag sealParams = sealParamsFromEffect(effect);
-        SealService.place(level, blockTarget, typeId, caster.getUUID(), strength, duration, sealParams);
+        SealPlaceResult result =
+                SealService.place(level, blockTarget, typeId, caster.getUUID(), strength, duration, sealParams);
 
         spawnSealPlaceParticles(level, blockTarget, typeId);
         level.playSound(null, blockTarget, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 0.8f, 1.2f);
-        caster.displayClientMessage(
-                Component.translatable(
-                        duration < 0 ? "message.effecoria.seal_placed_permanent" : "message.effecoria.seal_placed",
-                        Component.translatable("seal.effecoria." + typeId.getPath())),
-                true);
+        Component sealName = Component.translatable("seal.effecoria." + typeId.getPath());
+        Component message = switch (result) {
+            case STACKED -> Component.translatable("message.effecoria.seal_stacked", sealName);
+            case REPLACED_OFFENSIVE -> Component.translatable("message.effecoria.seal_replaced_offensive", sealName);
+            case REPLACED_SAME -> Component.translatable(
+                    duration < 0 ? "message.effecoria.seal_placed_permanent" : "message.effecoria.seal_refreshed",
+                    sealName);
+            case PLACED -> Component.translatable(
+                    duration < 0 ? "message.effecoria.seal_placed_permanent" : "message.effecoria.seal_placed",
+                    sealName);
+        };
+        caster.displayClientMessage(message, true);
     }
 
     private static void spawnSealPlaceParticles(ServerLevel level, BlockPos pos, ResourceLocation typeId) {

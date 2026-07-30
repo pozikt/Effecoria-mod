@@ -1,6 +1,8 @@
 package com.effecoria.core.seal;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,10 +37,23 @@ public final class SealService {
         return getChunkData(chunk).get(pos);
     }
 
+    public static List<SealInstance> getAll(Level level, BlockPos pos) {
+        LevelChunk chunk = level.getChunkAt(pos);
+        return getChunkData(chunk).getAll(pos);
+    }
+
+    public static Optional<SealInstance> find(Level level, BlockPos pos, ResourceLocation typeId) {
+        LevelChunk chunk = level.getChunkAt(pos);
+        return getChunkData(chunk).find(pos, typeId);
+    }
+
     /**
+     * Places or stacks a seal. Offensive seals replace any existing offensive layer;
+     * fortify and glow may coexist; same type refreshes in place.
+     *
      * @param durationTicks {@code -1} for permanent, otherwise lifetime in ticks
      */
-    public static SealInstance place(
+    public static SealPlaceResult place(
             ServerLevel level,
             BlockPos pos,
             ResourceLocation typeId,
@@ -48,8 +63,32 @@ public final class SealService {
             CompoundTag params) {
         LevelChunk chunk = level.getChunkAt(pos);
         ChunkSealData data = getChunkData(chunk);
+        List<SealInstance> layers = new ArrayList<>(data.getAll(pos));
+        SealLayer layer = SealLayer.of(typeId);
 
-        data.get(pos).ifPresent(old -> clearGlowLight(level, old));
+        SealPlaceResult result = SealPlaceResult.PLACED;
+        if (layer == SealLayer.OFFENSIVE) {
+            Optional<SealInstance> existing = layers.stream()
+                    .filter(s -> SealLayer.of(s.typeId()) == SealLayer.OFFENSIVE)
+                    .findFirst();
+            if (existing.isPresent()) {
+                result = existing.get().typeId().equals(typeId)
+                        ? SealPlaceResult.REPLACED_SAME
+                        : SealPlaceResult.REPLACED_OFFENSIVE;
+                layers.removeIf(s -> SealLayer.of(s.typeId()) == SealLayer.OFFENSIVE);
+            }
+        } else {
+            Optional<SealInstance> same = layers.stream()
+                    .filter(s -> s.typeId().equals(typeId))
+                    .findFirst();
+            if (same.isPresent()) {
+                result = SealPlaceResult.REPLACED_SAME;
+                layers.removeIf(s -> s.typeId().equals(typeId));
+                clearGlowLight(level, same.get());
+            } else if (layers.stream().anyMatch(s -> SealLayer.of(s.typeId()) == SealLayer.UTILITY)) {
+                result = SealPlaceResult.STACKED;
+            }
+        }
 
         CompoundTag sealParams = params == null ? new CompoundTag() : params.copy();
         if (typeId.equals(SealTypes.GLOW)) {
@@ -58,30 +97,26 @@ public final class SealService {
 
         long now = level.getGameTime();
         long expireAt = durationTicks < 0 ? SealInstance.PERMANENT : now + durationTicks;
-        SealInstance seal = new SealInstance(
-                typeId,
-                casterId,
-                now,
-                expireAt,
-                strength,
-                sealParams);
+        layers.add(new SealInstance(typeId, casterId, now, expireAt, strength, sealParams));
 
-        data.put(pos, seal);
+        data.putLayers(pos, layers);
         chunk.setData(ModAttachments.CHUNK_SEALS.get(), data);
         chunk.setUnsaved(true);
         syncChunk(chunk);
-        return seal;
+        return result;
     }
 
     public static boolean remove(ServerLevel level, BlockPos pos) {
         LevelChunk chunk = level.getChunkAt(pos);
         ChunkSealData data = getChunkData(chunk);
-        Optional<SealInstance> existing = data.get(pos);
+        List<SealInstance> existing = data.getAll(pos);
         if (existing.isEmpty()) {
             return false;
         }
-        clearGlowLight(level, existing.get());
-        data.remove(pos);
+        for (SealInstance seal : existing) {
+            clearGlowLight(level, seal);
+        }
+        data.removeAll(pos);
         chunk.setData(ModAttachments.CHUNK_SEALS.get(), data);
         chunk.setUnsaved(true);
         syncChunk(chunk);
@@ -92,11 +127,20 @@ public final class SealService {
     public static boolean purgeExpired(ServerLevel level, LevelChunk chunk, long gameTime) {
         ChunkSealData data = getChunkData(chunk);
         boolean changed = false;
-        Iterator<Map.Entry<BlockPos, SealInstance>> it = data.seals().entrySet().iterator();
+        Iterator<Map.Entry<BlockPos, List<SealInstance>>> it = data.seals().entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<BlockPos, SealInstance> entry = it.next();
-            if (entry.getValue().isExpired(gameTime)) {
-                clearGlowLight(level, entry.getValue());
+            Map.Entry<BlockPos, List<SealInstance>> entry = it.next();
+            List<SealInstance> layers = entry.getValue();
+            Iterator<SealInstance> layerIt = layers.iterator();
+            while (layerIt.hasNext()) {
+                SealInstance seal = layerIt.next();
+                if (seal.isExpired(gameTime)) {
+                    clearGlowLight(level, seal);
+                    layerIt.remove();
+                    changed = true;
+                }
+            }
+            if (layers.isEmpty()) {
                 it.remove();
                 changed = true;
             }
@@ -142,7 +186,7 @@ public final class SealService {
     }
 
     /**
-     * Re-places glow light if the recorded light block is missing (e.g. after world edit / block replace).
+     * Re-places glow light if the recorded light block is missing.
      * Persists updated coords onto the chunk seal when needed.
      */
     public static void ensureGlowLight(ServerLevel level, LevelChunk chunk, BlockPos sealedPos, SealInstance seal) {
@@ -165,15 +209,23 @@ public final class SealService {
             return;
         }
         ChunkSealData data = getChunkData(chunk);
-        data.put(
-                sealedPos,
-                new SealInstance(
-                        seal.typeId(),
-                        seal.casterId(),
-                        seal.placedAt(),
-                        seal.expireAt(),
-                        seal.strength(),
-                        updated));
+        List<SealInstance> layers = new ArrayList<>(data.getAll(sealedPos));
+        for (int i = 0; i < layers.size(); i++) {
+            if (layers.get(i).typeId().equals(SealTypes.GLOW)) {
+                SealInstance old = layers.get(i);
+                layers.set(
+                        i,
+                        new SealInstance(
+                                old.typeId(),
+                                old.casterId(),
+                                old.placedAt(),
+                                old.expireAt(),
+                                old.strength(),
+                                updated));
+                break;
+            }
+        }
+        data.putLayers(sealedPos, layers);
         chunk.setData(ModAttachments.CHUNK_SEALS.get(), data);
         chunk.setUnsaved(true);
         syncChunk(chunk);

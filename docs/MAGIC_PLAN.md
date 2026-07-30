@@ -63,7 +63,7 @@ Goal: ZNΦ and wards are gameplay, not lore text.
 
 1. **Lead (ZNΦ) tag** — blocks or items reduce Φ_sample in radius; blocks cast in chambers.
 2. **Cold iron** tag — optional school-specific debuff (necro/corruption first).
-3. **Seal stacking rules** — document and enforce: one “offensive” + one “utility” per block, or merge types (glow + fortify).
+3. **Seal stacking rules** — one offensive + fortify and/or glow per block. ✅ *see `SealLayer` / `SealPlaceResult`*
 4. **Seal conflicts** — repulse vs trap priority; chunk sync messages.
 
 **Exit:** builders can make a safe ritual room and a trapped corridor.
@@ -124,8 +124,9 @@ If choosing a single slice for the next implementation session:
 
 1. Phase **B1**: essence-gated spell unlocks — ✅ done.
 2. Phase **A3**: phi-sense entity outline — ✅ done.
-3. Phase **D3**: seal stacking on one block — **next**.
+3. Phase **D3**: seal stacking on one block — ✅ done.
 4. **First-join school menu** — see backlog above.
+5. Phase **D1** or **A4**: lead ZNΦ tags, or clearer cast feedback — pick next.
 
 ---
 

@@ -48,16 +48,17 @@ public final class ClientSealEffects {
                 if (data.isEmpty()) {
                     continue;
                 }
-                for (Map.Entry<BlockPos, SealInstance> entry : data.seals().entrySet()) {
-                    SealInstance seal = entry.getValue();
-                    if (seal.isExpired(gameTime)) {
-                        continue;
-                    }
+                for (Map.Entry<BlockPos, java.util.List<SealInstance>> entry : data.seals().entrySet()) {
                     BlockPos pos = entry.getKey();
                     if (pos.distSqr(origin) > 48 * 48) {
                         continue;
                     }
-                    spawnClientParticles(level, pos, seal);
+                    for (SealInstance seal : entry.getValue()) {
+                        if (seal.isExpired(gameTime)) {
+                            continue;
+                        }
+                        spawnClientParticles(level, pos, seal);
+                    }
                 }
             }
         }
