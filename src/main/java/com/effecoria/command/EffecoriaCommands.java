@@ -1,5 +1,6 @@
 package com.effecoria.command;
 
+import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.magic.MagicSchool;
 import com.effecoria.core.phi.PhiFieldService;
@@ -59,7 +60,13 @@ public final class EffecoriaCommands {
                                         .executes(ctx -> setStat(
                                                 ctx.getSource(),
                                                 StringArgumentType.getString(ctx, "stat"),
-                                                FloatArgumentType.getFloat(ctx, "value")))))));
+                                                FloatArgumentType.getFloat(ctx, "value"))))))
+                .then(Commands.literal("max")
+                        .requires(source -> source.hasPermission(2))
+                        .executes(ctx -> maxMagic(ctx.getSource(), null))
+                        .then(Commands.argument("school", StringArgumentType.word())
+                                .executes(ctx -> maxMagic(
+                                        ctx.getSource(), StringArgumentType.getString(ctx, "school"))))));
     }
 
     private static int debug(CommandSourceStack source) throws CommandSyntaxException {
@@ -149,6 +156,70 @@ public final class EffecoriaCommands {
         player.syncData(ModAttachments.PSI.get());
         String finalDisplay = display;
         source.sendSuccess(() -> Component.translatable("message.effecoria.stat_set", finalDisplay), true);
+        return 1;
+    }
+
+    /**
+     * Test helper: push magic stats to progression caps and unlock the full school spell list.
+     * Optional {@code school} initiates/reschools first. Requires permission level 2.
+     */
+    private static int maxMagic(CommandSourceStack source, String schoolName) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        PlayerPsiData data = PsiHelper.get(player);
+
+        if (schoolName != null) {
+            MagicSchool school = resolveSchool(source, schoolName);
+            if (school == null) {
+                return 0;
+            }
+            if (data.initiated()) {
+                PsiHelper.reschool(player, school);
+            } else {
+                PsiHelper.initiate(player, school);
+            }
+            data = PsiHelper.get(player);
+        } else if (!data.initiated()) {
+            source.sendFailure(Component.translatable("message.effecoria.max_need_school"));
+            return 0;
+        }
+
+        float maxBreath = BalanceConfig.BREATHING_MAX_MASTERY.get().floatValue();
+        float maxSoul = BalanceConfig.TRAINING_MAX_SOUL.get().floatValue();
+        float maxPsi = BalanceConfig.TRAINING_MAX_PSI_CAP.get().floatValue();
+
+        data.setBreathingMastery(maxBreath);
+        data.setSoulStrength(maxSoul);
+        data.setMaxPsi(maxPsi);
+        data.setCurrentPsi(maxPsi);
+        data.setEssence(999);
+        data.setBiologyQ(1f);
+        data.setPhiMultiplier(1f);
+        data.setEntropyB(0f);
+        data.setExhaustion(0f);
+        data.setTrainingXp(0f);
+
+        for (ResourceLocation spellId : SpellProgression.spellsForSchool(data.school())) {
+            if (SpellRegistry.contains(spellId)) {
+                data.unlockSpell(spellId);
+            }
+        }
+
+        PsiHelper.set(player, data);
+        player.syncData(ModAttachments.PSI.get());
+        String schoolKey = data.school().getSerializedName();
+        int spellCount = data.knownSpells().size();
+        String breathPct = BreathingService.formatTotalPercent(data.breathingMastery());
+        int psiCap = (int) data.maxPsi();
+        int essence = data.essence();
+        source.sendSuccess(
+                () -> Component.translatable(
+                        "message.effecoria.max_magic",
+                        Component.translatable("school.effecoria." + schoolKey),
+                        spellCount,
+                        breathPct,
+                        psiCap,
+                        essence),
+                true);
         return 1;
     }
 

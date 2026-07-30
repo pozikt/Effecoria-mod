@@ -105,18 +105,9 @@ Code for lich state remains in `PlayerPsiData` / `FormulaEngine.regenPsiLich` fo
 
 ## Backlog / UX (noted)
 
-### First join — school selection (TODO)
+### First join — school selection (TODO) → ✅ shipped
 
-When a player **first appears in the world** and is not initiated (`PlayerPsiData.initiated == false`), automatically open **`SchoolSelectScreen`** and block normal play until a magic school is chosen.
-
-Today school pick only happens when the player opens the Resonance Focus flow (`ClientGuiHooks.openResonanceFocusScreen`); there is **no** prompt on spawn/login.
-
-**Implementation sketch (later):**
-
-- Client: one-shot after level load (`ClientTickEvent` or `ClientPlayerNetworkEvent.LoggingIn`) — if `!initiated`, `setScreen(new SchoolSelectScreen())` and optionally suppress movement.
-- Server: keep existing initiate packet in `ModNetworking`; no duplicate initiation.
-- Do **not** re-open on death, dimension travel, or reconnect after initiation.
-- Optional: server flag `hasSeenWorld` in player NBT if attachment loads late on first tick.
+When a player **first appears in the world** and is not initiated, client opens **`SchoolSelectScreen(mandatory)`** (`ClientFirstJoinSchoolPrompt`). ESC cannot dismiss until a school is chosen.
 
 ---
 
@@ -126,7 +117,7 @@ Today school pick only happens when the player opens the Resonance Focus flow (`
 |------|----------------|
 | **D1 Lead / ZNΦ world tags** | Needs environment, ores, structures — Stage II–III |
 | **D2 Cold iron** | Same — material tags / world content |
-| First-join school menu | UX backlog (still Stage I, but separate from formula feel) |
+| First-join school menu | ✅ shipped (`ClientFirstJoinSchoolPrompt`) |
 | Lich re-enable | Stage IV tower / phylactery |
 
 ---
@@ -139,8 +130,9 @@ If choosing a single slice for the next implementation session:
 2. Phase **A3**: phi-sense entity outline — ✅ done.
 3. Phase **D3**: seal stacking on one block — ✅ done.
 4. Phase **A4**: cast feedback — ✅ done.
-5. **First-join school menu** — see backlog above.
+5. **First-join school menu** — ✅ done.
 6. Phase **A1/A2** VFX/SFX polish, **B2** entropy tutorial, or **B4** radial locked hints.
+7. Test helper: `/effecoria max [school]` (op) — max stats + unlock all school spells.
 
 ---
 

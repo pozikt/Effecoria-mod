@@ -17,8 +17,15 @@ public class SchoolSelectScreen extends Screen {
             .filter(MagicSchool::isPlayable)
             .toArray(MagicSchool[]::new);
 
+    private final boolean mandatory;
+
     public SchoolSelectScreen() {
+        this(false);
+    }
+
+    public SchoolSelectScreen(boolean mandatory) {
         super(Component.translatable("gui.effecoria.school_select"));
+        this.mandatory = mandatory;
     }
 
     @Override
@@ -62,5 +69,10 @@ public class SchoolSelectScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    @Override
+    public boolean shouldCloseOnEsc() {
+        return !mandatory;
     }
 }
