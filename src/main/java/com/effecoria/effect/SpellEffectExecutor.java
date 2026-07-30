@@ -155,7 +155,6 @@ public final class SpellEffectExecutor {
             if (!airHandRelease) {
                 target = resolveTarget(caster, spell);
                 if (target == null) {
-                    notifyNoTarget(caster);
                     return CastDelivery.WHIFF_NO_TARGET;
                 }
             }
@@ -165,7 +164,6 @@ public final class SpellEffectExecutor {
         if (requiresBlockTarget(spell)) {
             blockTarget = resolveBlockTarget(caster, spell);
             if (blockTarget == null) {
-                notifyNoBlock(caster);
                 return CastDelivery.WHIFF_NO_BLOCK;
             }
         }
@@ -474,10 +472,6 @@ public final class SpellEffectExecutor {
         return tag;
     }
 
-    private static void notifyNoBlock(ServerPlayer caster) {
-        caster.displayClientMessage(Component.translatable("message.effecoria.no_block"), true);
-    }
-
     private static void telekinesis(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         if (target == null) {
             return;
@@ -648,10 +642,6 @@ public final class SpellEffectExecutor {
     private static void spawnSpatialParticles(ServerLevel level, Vec3 pos) {
         level.sendParticles(ModParticleTypes.SPATIAL_RIFT.get(), pos.x, pos.y, pos.z, 16, 0.35, 0.5, 0.35, 0.03);
         level.sendParticles(ModParticleTypes.SPATIAL_WARP.get(), pos.x, pos.y, pos.z, 10, 0.25, 0.35, 0.25, 0.02);
-    }
-
-    private static void notifyNoTarget(ServerPlayer caster) {
-        caster.displayClientMessage(Component.translatable("message.effecoria.no_target"), true);
     }
 
     /** Raycast + cone fallback — works without pixel-perfect crosshair on entity. */

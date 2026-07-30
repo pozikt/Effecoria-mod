@@ -25,7 +25,7 @@ Goal: casting feels intentional and readable in survival.
 1. **Per-school VFX pass** — consistent cast wind-up, impact, and AoE rings (spatial, mental storms, corruption fields, necro summons).
 2. **SFX pass** — map schools to a small set of NeoForge sounds (no new assets required at first).
 3. **`sense_phi` v2** — entity outline (high/low Φ / ZNΦ) + motes. ✅ *outline shipped in `ClientPhiSenseOutline`*
-4. **Cast feedback** — clearer action bar messages for whiff reasons (no target / no block / ZNΦ / concentration).
+4. **Cast feedback** — specific blocked/whiff reasons on action bar. ✅ *`CastBlockReason` / `CastPipeline`*
 5. **Balance sweep** — `rebalance_spell_costs.py` + playtest tiers 0–3 per school (not endgame numbers).
 
 **Exit:** a new player can learn one school to ~tier 3 without wiki.
@@ -62,7 +62,9 @@ Goal: bridge lore formulas to items players can craft.
 Goal: ZNΦ and wards are gameplay, not lore text.
 
 1. **Lead (ZNΦ) tag** — blocks or items reduce Φ_sample in radius; blocks cast in chambers.
+   - **Deferred (box):** Stage II+ environment / materials — not while Stage I is pure magic loop.
 2. **Cold iron** tag — optional school-specific debuff (necro/corruption first).
+   - **Deferred** with D1 (world tags / materials).
 3. **Seal stacking rules** — one offensive + fortify and/or glow per block. ✅ *see `SealLayer` / `SealPlaceResult`*
 4. **Seal conflicts** — repulse vs trap priority; chunk sync messages.
 
@@ -118,6 +120,17 @@ Today school pick only happens when the player opens the Resonance Focus flow (`
 
 ---
 
+## Deferred to later roadmap stages (do not start in Stage I magic pass)
+
+| Item | Why deferred |
+|------|----------------|
+| **D1 Lead / ZNΦ world tags** | Needs environment, ores, structures — Stage II–III |
+| **D2 Cold iron** | Same — material tags / world content |
+| First-join school menu | UX backlog (still Stage I, but separate from formula feel) |
+| Lich re-enable | Stage IV tower / phylactery |
+
+---
+
 ## Suggested next sprint (concrete)
 
 If choosing a single slice for the next implementation session:
@@ -125,8 +138,9 @@ If choosing a single slice for the next implementation session:
 1. Phase **B1**: essence-gated spell unlocks — ✅ done.
 2. Phase **A3**: phi-sense entity outline — ✅ done.
 3. Phase **D3**: seal stacking on one block — ✅ done.
-4. **First-join school menu** — see backlog above.
-5. Phase **D1** or **A4**: lead ZNΦ tags, or clearer cast feedback — pick next.
+4. Phase **A4**: cast feedback — ✅ done.
+5. **First-join school menu** — see backlog above.
+6. Phase **A1/A2** VFX/SFX polish, **B2** entropy tutorial, or **B4** radial locked hints.
 
 ---
 

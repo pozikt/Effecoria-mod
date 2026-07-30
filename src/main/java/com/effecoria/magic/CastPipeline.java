@@ -35,16 +35,19 @@ public final class CastPipeline {
     public static CastResult tryCast(ServerPlayer player, ResourceLocation spellId) {
         PlayerPsiData data = PsiHelper.get(player);
         if (!data.initiated()) {
+            player.displayClientMessage(Component.translatable("message.effecoria.not_initiated"), true);
             return CastResult.NOT_INITIATED;
         }
 
         Optional<SpellDefinition> spellOpt = SpellRegistry.get(spellId);
         if (spellOpt.isEmpty()) {
+            player.displayClientMessage(Component.translatable("message.effecoria.unknown_spell"), true);
             return CastResult.UNKNOWN_SPELL;
         }
 
         SpellDefinition spell = spellOpt.get();
         if (!data.knownSpells().contains(spellId)) {
+            player.displayClientMessage(Component.translatable("message.effecoria.spell_not_known"), true);
             return CastResult.UNKNOWN_SPELL;
         }
 
@@ -52,13 +55,12 @@ public final class CastPipeline {
         boolean godMode = CreativeGodMode.isActive(player);
         PhiSample phi = PhiFieldService.sample(player.level(), player.position(), player);
 
-        if (!godMode && !FormulaEngine.canCast(ctx, phi, spell, data.currentPsi())) {
-            if (FormulaEngine.failsConcentration(ctx, phi, spell, data.currentPsi())) {
-                player.displayClientMessage(Component.translatable("message.effecoria.insufficient_concentration"), true);
-            } else {
-                player.displayClientMessage(Component.translatable("message.effecoria.cast_failed"), true);
+        if (!godMode) {
+            var block = FormulaEngine.diagnoseCannotCast(ctx, phi, spell, data.currentPsi());
+            if (block.isPresent()) {
+                player.displayClientMessage(Component.translatable(block.get().messageKey()), true);
+                return CastResult.CANNOT_CAST;
             }
-            return CastResult.CANNOT_CAST;
         }
 
         float fullCost = godMode ? 0f : FormulaEngine.spellCost(ctx, phi, spell);
@@ -91,13 +93,15 @@ public final class CastPipeline {
         player.syncData(ModAttachments.PSI.get());
 
         Component spellName = Component.translatable("spell.effecoria." + spellId.getPath());
-        if (delivery == CastDelivery.WHIFF_NO_TARGET || delivery == CastDelivery.WHIFF_NO_BLOCK) {
+        if (delivery == CastDelivery.WHIFF_NO_TARGET) {
             int whiffPercent = Math.round(BalanceConfig.WHIFF_COST_FRACTION.get().floatValue() * 100f);
-            String key = delivery == CastDelivery.WHIFF_NO_BLOCK
-                    ? "message.effecoria.cast_whiff_block"
-                    : "message.effecoria.cast_whiff";
             player.displayClientMessage(
-                    Component.translatable(key, spellName, whiffPercent),
+                    Component.translatable("message.effecoria.cast_whiff_no_target", spellName, whiffPercent),
+                    true);
+        } else if (delivery == CastDelivery.WHIFF_NO_BLOCK) {
+            int whiffPercent = Math.round(BalanceConfig.WHIFF_COST_FRACTION.get().floatValue() * 100f);
+            player.displayClientMessage(
+                    Component.translatable("message.effecoria.cast_whiff_no_block", spellName, whiffPercent),
                     true);
         } else {
             player.displayClientMessage(
@@ -111,6 +115,7 @@ public final class CastPipeline {
         PlayerPsiData data = PsiHelper.get(player);
         ResourceLocation selected = data.selectedSpell();
         if (selected == null) {
+            player.displayClientMessage(Component.translatable("message.effecoria.no_spell_selected"), true);
             return CastResult.NO_SPELL_SELECTED;
         }
         return tryCast(player, selected);

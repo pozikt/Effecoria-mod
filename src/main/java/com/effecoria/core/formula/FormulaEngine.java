@@ -6,6 +6,8 @@ import com.effecoria.core.magic.SpellDefinition;
 
 import net.minecraft.util.Mth;
 
+import java.util.Optional;
+
 /**
  * Single source of truth for Effecoria physics approximations.
  * Lore integrals are discretized per game tick; coefficients live in {@link BalanceConfig}.
@@ -109,34 +111,40 @@ public final class FormulaEngine {
     }
 
     public static boolean canCast(PsiContext ctx, PhiSample phi, SpellDefinition spell, float availablePsi) {
+        return diagnoseCannotCast(ctx, phi, spell, availablePsi).isEmpty();
+    }
+
+    /**
+     * Why {@link #canCast} fails — first matching reason for player-facing feedback.
+     */
+    public static Optional<CastBlockReason> diagnoseCannotCast(
+            PsiContext ctx, PhiSample phi, SpellDefinition spell, float availablePsi) {
         if (phi.zeroFlux()) {
-            return false;
+            return Optional.of(CastBlockReason.ZERO_FLUX);
         }
         if (spell.requiredSchool() != null && !ctx.hasAffinity(spell.requiredSchool())) {
-            return false;
+            return Optional.of(CastBlockReason.WRONG_SCHOOL);
         }
         if (phi.effectiveValue() < spell.minPhi()) {
-            return false;
+            return Optional.of(CastBlockReason.LOW_PHI);
+        }
+        if (availablePsi < spellCost(ctx, phi, spell)) {
+            return Optional.of(CastBlockReason.LOW_PSI);
         }
         if (ctx.breathingMastery() < spell.minMastery()) {
-            return false;
+            return Optional.of(CastBlockReason.LOW_MASTERY);
         }
         if (spell.minPower() > 0f && spellPower(ctx, phi, spell) < spell.minPower()) {
-            return false;
+            return Optional.of(CastBlockReason.LOW_POWER);
         }
-        return availablePsi >= spellCost(ctx, phi, spell);
+        return Optional.empty();
     }
 
     /** True when Φ and Ψ are sufficient but breathing mastery or spell power is too low. */
     public static boolean failsConcentration(PsiContext ctx, PhiSample phi, SpellDefinition spell, float availablePsi) {
-        if (phi.zeroFlux() || phi.effectiveValue() < spell.minPhi()) {
-            return false;
-        }
-        if (availablePsi < spellCost(ctx, phi, spell)) {
-            return false;
-        }
-        return ctx.breathingMastery() < spell.minMastery()
-                || (spell.minPower() > 0f && spellPower(ctx, phi, spell) < spell.minPower());
+        return diagnoseCannotCast(ctx, phi, spell, availablePsi)
+                .filter(r -> r == CastBlockReason.LOW_MASTERY || r == CastBlockReason.LOW_POWER)
+                .isPresent();
     }
 
     /**
