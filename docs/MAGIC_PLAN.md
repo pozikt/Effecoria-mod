@@ -22,8 +22,8 @@ Spell count is no longer the bottleneck. Next work is **systems, feel, and gates
 
 Goal: casting feels intentional and readable in survival.
 
-1. **Per-school VFX pass** — consistent cast wind-up, impact, and AoE rings (spatial, mental storms, corruption fields, necro summons).
-2. **SFX pass** — map schools to a small set of NeoForge sounds (no new assets required at first).
+1. **Per-school VFX pass** — consistent cast wind-up, impact, and AoE rings. ✅ *`CastPresentation`*
+2. **SFX pass** — map schools to a small set of vanilla sounds (no new assets). ✅ *school themes in `CastPresentation`*
 3. **`sense_phi` v2** — entity outline (high/low Φ / ZNΦ) + motes. ✅ *outline shipped in `ClientPhiSenseOutline`*
 4. **Cast feedback** — specific blocked/whiff reasons on action bar. ✅ *`CastBlockReason` / `CastPipeline`*
 5. **Balance sweep** — `rebalance_spell_costs.py` + playtest tiers 0–3 per school (not endgame numbers).
@@ -134,7 +134,8 @@ If choosing a single slice for the next implementation session:
 6. Phase **B4** radial locked hints — ✅ done.
 7. Test helper: `/effecoria max [school]` (op) — max stats + unlock all school spells — ✅ done.
 8. Phase **B2** entropy tutorial — ✅ done.
-9. Next: Phase **A1/A2** VFX/SFX polish, or **B3** training XP sources.
+9. Phase **A1/A2** VFX/SFX polish — ✅ done.
+10. Next: Phase **A5** balance sweep, or **B3** training XP sources.
 
 ---
 

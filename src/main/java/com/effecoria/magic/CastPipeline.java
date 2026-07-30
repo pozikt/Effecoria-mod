@@ -12,6 +12,7 @@ import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
+import com.effecoria.effect.CastPresentation;
 import com.effecoria.effect.SpellEffectExecutor;
 
 import net.minecraft.network.chat.Component;
@@ -67,7 +68,9 @@ public final class CastPipeline {
         float fullCost = godMode ? 0f : FormulaEngine.spellCost(ctx, phi, spell);
         float power = CreativeGodMode.clampSpellPower(player, FormulaEngine.spellPower(ctx, phi, spell));
 
+        CastPresentation.playWindUp(player, spell);
         CastDelivery delivery = SpellEffectExecutor.applyAll(player, spell, power);
+        CastPresentation.playResolve(player, spell, power, delivery);
 
         data.recordSpellCast(spellId, player.level().getGameTime());
 
