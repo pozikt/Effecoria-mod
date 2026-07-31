@@ -122,16 +122,9 @@ Ship only after Stage I magic **presentation** and thrall budget feel solid.
 
 When a player **first appears in the world** and is not initiated, client opens **`SchoolSelectScreen(mandatory)`** (`ClientFirstJoinSchoolPrompt`). ESC cannot dismiss until a school is chosen.
 
-### Magic presentation (current Stage I focus)
+### Magic presentation (after schools feel solid)
 
-Goal: players learn Ψ/Φ, breathing, entropy, unlocks, and school identity **in-game**, without a Discord wiki.
-
-Candidates (pick in order of leverage):
-
-1. **Patchouli (or lightweight book)** — cast loop, day/night Φ (additive), exhaustion, Death Mark army limits.
-2. **Hub / HUD copy** — clearer locked hints, control-budget readout for necro, Φ night not “everything halved.”
-3. **First-hour tutorial beats** — short action-bar / toast chain after school select (entropy, breathing train, first unlock).
-4. **Spell `.desc` + radial costs** — keep accurate; add “why blocked” already partly shipped via `CastBlockReason`.
+Guides / Patchouli / first-hour teaching wait until **each school has a satisfying combat identity**. Until then, prioritize making schools actually good (mental compulsion wave started: terror / cliff / frenzy).
 
 ---
 

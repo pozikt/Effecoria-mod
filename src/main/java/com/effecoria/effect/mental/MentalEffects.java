@@ -238,6 +238,42 @@ public final class MentalEffects {
         caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.5f, 1.6f);
     }
 
+    public static void mindTerror(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        applyCompulsion(caster, effect, power, target, MentalCompulsionService.Type.TERROR, 140);
+    }
+
+    public static void cliffUrge(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        applyCompulsion(caster, effect, power, target, MentalCompulsionService.Type.CLIFF, 160);
+    }
+
+    public static void psychicFrenzy(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        applyCompulsion(caster, effect, power, target, MentalCompulsionService.Type.FRENZY, 120);
+    }
+
+    private static void applyCompulsion(
+            ServerPlayer caster,
+            SpellEffectEntry effect,
+            float power,
+            LivingEntity target,
+            MentalCompulsionService.Type type,
+            int defaultTicks) {
+        if (target == null) {
+            return;
+        }
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : defaultTicks;
+        duration = Math.round(duration * (0.85f + power / 120f));
+        if (!MentalCompulsionService.apply(caster, target, type, duration)) {
+            caster.displayClientMessage(
+                    net.minecraft.network.chat.Component.translatable("message.effecoria.mental.compel_invalid"),
+                    true);
+            return;
+        }
+        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, Math.min(duration, 100), 0));
+        finishHit(caster.serverLevel(), target.position());
+        caster.serverLevel().playSound(
+                null, target.blockPosition(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.55f, 1.5f);
+    }
+
     public static void telekineticSurge(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         if (target == null) {
             return;

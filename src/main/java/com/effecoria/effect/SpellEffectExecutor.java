@@ -107,6 +107,9 @@ public final class SpellEffectExecutor {
             "synaptic_overload",
             "psychic_drain",
             "thought_bomb",
+            "mind_terror",
+            "cliff_urge",
+            "psychic_frenzy",
             "rot_touch",
             "entropy_lash",
             "plague_bolt",
@@ -369,6 +372,9 @@ public final class SpellEffectExecutor {
             case "psychic_storm" -> MentalEffects.psychicStorm(caster, effect, power);
             case "psychic_amplify" -> MentalEffects.psychicAmplify(caster, effect, power);
             case "omega_mind" -> MentalEffects.omegaMind(caster, effect, power);
+            case "mind_terror" -> MentalEffects.mindTerror(caster, effect, power, target);
+            case "cliff_urge" -> MentalEffects.cliffUrge(caster, effect, power, target);
+            case "psychic_frenzy" -> MentalEffects.psychicFrenzy(caster, effect, power, target);
             case "blink" -> SpatialEffects.standardBlink(caster, effect, power);
             case "rift_yank" -> riftYank(caster, effect, power, target);
             case "phase_veil" -> phaseVeil(caster, effect, power);
