@@ -180,9 +180,9 @@ public final class DeathMarkService {
         float reserve = tag.getFloat(MARK_HP_TAG);
         ResourceLocation typeId = ResourceLocation.parse(tag.getString(MARK_TYPE_TAG));
         if (!NecroSummonService.canAfford(player, reserve)) {
-            player.displayClientMessage(
-                    Component.translatable("message.effecoria.necro.summon_psi_reserve", (int) Math.ceil(reserve)),
-                    true);
+            NecroSummonService.diagnoseControl(player, reserve).ifPresent(block ->
+                    player.displayClientMessage(
+                            NecroSummonService.controlMessage(block, player, reserve), true));
             return true;
         }
 

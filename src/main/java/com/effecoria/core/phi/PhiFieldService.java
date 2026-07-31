@@ -12,6 +12,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
+/**
+ * Local Φ sampling. Environmental modifiers stack as signed bonuses/penalties on a
+ * base of 1.0 — night no longer multiplies (and thus halves) every other buff.
+ */
 public final class PhiFieldService {
     private PhiFieldService() {}
 
@@ -28,22 +32,23 @@ public final class PhiFieldService {
         float value = 1f;
         boolean zeroFlux = false;
 
-        value *= dimensionFactor(level);
-        value *= heightFactor(position.y());
+        value += dimensionBonus(level);
+        value += heightBonus(position.y());
         if (level instanceof ServerLevel serverLevel) {
-            value *= timeFactor(serverLevel);
-            value *= exposureFactor(serverLevel, BlockPos.containing(position));
-            value *= weatherFactor(serverLevel);
+            value += timeBonus(serverLevel);
+            value += exposureBonus(serverLevel, BlockPos.containing(position));
+            value += weatherBonus(serverLevel);
             zeroFlux = isInsideZeroFluxZone(serverLevel, BlockPos.containing(position));
         } else {
-            value *= timeFactor(level);
+            value += timeBonus(level);
         }
 
         if (zeroFlux) {
             return new PhiSample(0f, true, isSolarDay(level));
         }
         if (player != null) {
-            value *= Math.max(0f, PsiHelper.get(player).phiMultiplier());
+            // phiMultiplier is stored as a factor around 1.0 → convert to signed bonus.
+            value += Math.max(0f, PsiHelper.get(player).phiMultiplier()) - 1f;
         }
         return new PhiSample(Math.max(0f, value), false, isSolarDay(level));
     }
@@ -55,54 +60,59 @@ public final class PhiFieldService {
         return level.getDayTime() % 24000L < 12000L;
     }
 
-    private static float dimensionFactor(Level level) {
+    /** Config multipliers are interpreted as {@code bonus = multiplier - 1}. */
+    private static float fromMultiplier(float multiplier) {
+        return multiplier - 1f;
+    }
+
+    private static float dimensionBonus(Level level) {
         if (level.dimension() == Level.NETHER) {
-            return 1.2f;
+            return 0.2f;
         }
         if (level.dimension() == Level.END) {
-            return 0.5f;
+            return -0.5f;
         }
-        return 1f;
+        return 0f;
     }
 
-    private static float heightFactor(double y) {
+    private static float heightBonus(double y) {
         if (y < 0) {
-            return 0.7f;
+            return -0.3f;
         }
         if (y > 120) {
-            return 1.1f;
+            return 0.1f;
         }
-        return 1f;
+        return 0f;
     }
 
-    private static float timeFactor(Level level) {
-        return isSolarDay(level)
+    private static float timeBonus(Level level) {
+        float mult = isSolarDay(level)
                 ? BalanceConfig.PHI_DAY_MULTIPLIER.get().floatValue()
                 : BalanceConfig.PHI_NIGHT_MULTIPLIER.get().floatValue();
+        return fromMultiplier(mult);
     }
 
-    /** Open sky boosts surface Φ; enclosed spaces suppress it. */
-    private static float exposureFactor(ServerLevel level, BlockPos pos) {
+    private static float exposureBonus(ServerLevel level, BlockPos pos) {
         if (level.dimension() != Level.OVERWORLD) {
-            return 1f;
+            return 0f;
         }
         if (level.canSeeSky(pos)) {
-            return BalanceConfig.PHI_OPEN_SKY_BONUS.get().floatValue();
+            return fromMultiplier(BalanceConfig.PHI_OPEN_SKY_BONUS.get().floatValue());
         }
-        return BalanceConfig.PHI_UNDERGROUND_MULTIPLIER.get().floatValue();
+        return fromMultiplier(BalanceConfig.PHI_UNDERGROUND_MULTIPLIER.get().floatValue());
     }
 
-    private static float weatherFactor(ServerLevel level) {
+    private static float weatherBonus(ServerLevel level) {
         if (level.dimension() != Level.OVERWORLD) {
-            return 1f;
+            return 0f;
         }
         if (level.isThundering()) {
-            return BalanceConfig.PHI_THUNDER_MULTIPLIER.get().floatValue();
+            return fromMultiplier(BalanceConfig.PHI_THUNDER_MULTIPLIER.get().floatValue());
         }
         if (level.isRaining()) {
-            return BalanceConfig.PHI_RAIN_MULTIPLIER.get().floatValue();
+            return fromMultiplier(BalanceConfig.PHI_RAIN_MULTIPLIER.get().floatValue());
         }
-        return 1f;
+        return 0f;
     }
 
     private static boolean isInsideZeroFluxZone(ServerLevel level, BlockPos center) {

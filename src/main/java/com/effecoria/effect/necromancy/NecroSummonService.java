@@ -1,8 +1,10 @@
 package com.effecoria.effect.necromancy;
 
+import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,11 +20,13 @@ import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Permanent thralls bound to a necromancer. Stay near the owner and only engage
  * enemies the owner can see (no cave-pushing through walls).
+ * Army size/strength is gated by breathing mastery (control budget).
  */
 public final class NecroSummonService {
     public static final String OWNER_TAG = "effecoria:necro_owner";
@@ -36,17 +40,22 @@ public final class NecroSummonService {
     /** Only engage threats within this of the owner, with line of sight. */
     private static final double ENGAGE_RANGE = 14.0;
 
+    public enum ControlBlock {
+        TOO_STRONG,
+        TOO_MANY,
+        BUDGET,
+        PSI
+    }
+
     private NecroSummonService() {}
 
-    /** @return false if the caster cannot afford the given Ψ reserve */
+    /** @return false if the caster cannot afford the given Ψ reserve / control budget */
     public static boolean register(Mob mob, ServerPlayer owner, LivingEntity preferredTarget, float reservePsi) {
         float reserve = Math.max(1f, reservePsi);
-        if (!canAfford(owner, reserve)) {
+        Optional<ControlBlock> block = diagnoseControl(owner, reserve);
+        if (block.isPresent()) {
             mob.discard();
-            owner.displayClientMessage(
-                    net.minecraft.network.chat.Component.translatable(
-                            "message.effecoria.necro.summon_psi_reserve", (int) Math.ceil(reserve)),
-                    true);
+            owner.displayClientMessage(controlMessage(block.get(), owner, reserve), true);
             return false;
         }
         mob.getPersistentData().putUUID(OWNER_TAG, owner.getUUID());
@@ -67,9 +76,64 @@ public final class NecroSummonService {
     }
 
     public static boolean canAfford(ServerPlayer owner, float reserveCost) {
+        return diagnoseControl(owner, reserveCost).isEmpty();
+    }
+
+    public static Optional<ControlBlock> diagnoseControl(ServerPlayer owner, float reserveCost) {
         PlayerPsiData data = PsiHelper.get(owner);
-        float nextReserve = reservedPsi(owner) + Math.max(0f, reserveCost);
-        return nextReserve <= data.maxPsi() - 1f;
+        float cost = Math.max(0f, reserveCost);
+        if (cost > maxSingleHp(data) + 0.05f) {
+            return Optional.of(ControlBlock.TOO_STRONG);
+        }
+        if (countOwned(owner) >= maxThralls(data)) {
+            return Optional.of(ControlBlock.TOO_MANY);
+        }
+        float next = reservedPsi(owner) + cost;
+        if (next > controlBudget(data) + 0.05f) {
+            return Optional.of(ControlBlock.BUDGET);
+        }
+        if (next > data.maxPsi() - 1f) {
+            return Optional.of(ControlBlock.PSI);
+        }
+        return Optional.empty();
+    }
+
+    public static Component controlMessage(ControlBlock block, ServerPlayer owner, float reserveCost) {
+        PlayerPsiData data = PsiHelper.get(owner);
+        return switch (block) {
+            case TOO_STRONG -> Component.translatable(
+                    "message.effecoria.necro.control_too_strong",
+                    (int) Math.ceil(reserveCost),
+                    (int) Math.floor(maxSingleHp(data)));
+            case TOO_MANY -> Component.translatable(
+                    "message.effecoria.necro.control_too_many", maxThralls(data));
+            case BUDGET -> Component.translatable(
+                    "message.effecoria.necro.control_budget",
+                    (int) Math.ceil(reservedPsi(owner)),
+                    (int) Math.floor(controlBudget(data)),
+                    (int) Math.ceil(reserveCost));
+            case PSI -> Component.translatable(
+                    "message.effecoria.necro.summon_psi_reserve", (int) Math.ceil(reserveCost));
+        };
+    }
+
+    public static float controlBudget(PlayerPsiData data) {
+        float mastery = Math.max(0f, data.breathingMastery());
+        return BalanceConfig.NECRO_CONTROL_BUDGET_BASE.get().floatValue()
+                + mastery * BalanceConfig.NECRO_CONTROL_BUDGET_PER_MASTERY.get().floatValue();
+    }
+
+    public static float maxSingleHp(PlayerPsiData data) {
+        float mastery = Math.max(0f, data.breathingMastery());
+        return BalanceConfig.NECRO_MAX_SINGLE_HP_BASE.get().floatValue()
+                + mastery * BalanceConfig.NECRO_MAX_SINGLE_HP_PER_MASTERY.get().floatValue();
+    }
+
+    public static int maxThralls(PlayerPsiData data) {
+        float mastery = Math.max(0f, data.breathingMastery());
+        int base = BalanceConfig.NECRO_MAX_THRALLS_BASE.get();
+        int extra = (int) Math.floor(mastery * BalanceConfig.NECRO_MAX_THRALLS_PER_MASTERY.get().floatValue());
+        return Math.max(1, base + extra);
     }
 
     public static float reservedPsi(net.minecraft.world.entity.player.Player owner) {

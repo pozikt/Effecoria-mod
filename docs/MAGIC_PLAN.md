@@ -82,22 +82,35 @@ Goal: ZNΦ and wards are gameplay, not lore text.
 
 ### Phase F — Deferred “epic” magic (do **not** rush)
 
-Tie to **Stage IV** technology / structures:
+Tie to **Stage IV** technology / structures / late End progression:
 
 | Feature | Depends on |
 |---------|------------|
 | **True lich** (`lich_ascension`, `regenPsiLich`, phylactery efficiency) | Phylactery item/block, soul anchor, tower Φ |
 | **TSE risk on long blink** | TSE sites (Stage V) |
-| **Army of dead cap / thrall AI** | Necro field + chunk limits |
+| **Ender Dragon thrall** | Endgame mastery + special AI (see below) |
 | **Ω backlash** | Ω dimension (Stage VI) |
 
 Code for lich state remains in `PlayerPsiData` / `FormulaEngine.regenPsiLich` for later wiring.
+
+#### Ender Dragon thrall (design only — do not code in Stage I sprint)
+
+**Fantasy gate:** very late game — End already explored for elytra, dragon defeated multiple times, players in netherite; necro control budget / mastery at endgame tier (far above normal thrall caps).
+
+**Behavior when captured:**
+
+1. **Autonomy** — unlike normal Death Mark thralls, the dragon is **not** leashed beside the caster. It keeps End-dragon-like free movement / “lives its own life.”
+2. **Call** — on summoner signal (spell, key, or item TBD), it pathfinds / flies to the necromancer.
+3. **Mount** — owner can mount and steer (ridable); dismount returns it toward autonomous End behavior (or linger nearby — TBD in implementation).
+4. **Limits** — single dragon; no loot farm; does not use standard thrall LOS/leash combat AI.
+
+Ship only after Stage I magic **presentation** and thrall budget feel solid.
 
 ---
 
 ## Optional parallel tracks (pick one when A–B stable)
 
-- **Patchouli** — one page per school + cast loop + entropy.
+- **Patchouli** — one page per school + cast loop + entropy + Death Mark / control budget.
 - **Initiation ritual** — multiblock or block sequence instead of instant school select.
 - **Spell variants** — overcast / hold-to-charge using existing power pipeline.
 
@@ -109,6 +122,17 @@ Code for lich state remains in `PlayerPsiData` / `FormulaEngine.regenPsiLich` fo
 
 When a player **first appears in the world** and is not initiated, client opens **`SchoolSelectScreen(mandatory)`** (`ClientFirstJoinSchoolPrompt`). ESC cannot dismiss until a school is chosen.
 
+### Magic presentation (current Stage I focus)
+
+Goal: players learn Ψ/Φ, breathing, entropy, unlocks, and school identity **in-game**, without a Discord wiki.
+
+Candidates (pick in order of leverage):
+
+1. **Patchouli (or lightweight book)** — cast loop, day/night Φ (additive), exhaustion, Death Mark army limits.
+2. **Hub / HUD copy** — clearer locked hints, control-budget readout for necro, Φ night not “everything halved.”
+3. **First-hour tutorial beats** — short action-bar / toast chain after school select (entropy, breathing train, first unlock).
+4. **Spell `.desc` + radial costs** — keep accurate; add “why blocked” already partly shipped via `CastBlockReason`.
+
 ---
 
 ## Deferred to later roadmap stages (do not start in Stage I magic pass)
@@ -119,6 +143,7 @@ When a player **first appears in the world** and is not initiated, client opens 
 | **D2 Cold iron** | Same — material tags / world content |
 | First-join school menu | ✅ shipped (`ClientFirstJoinSchoolPrompt`) |
 | Lich re-enable | Stage IV tower / phylactery |
+| **Ender Dragon thrall AI / mount** | Endgame fantasy; after magic presentation pass |
 
 ---
 
@@ -138,7 +163,8 @@ If choosing a single slice for the next implementation session:
 10. Phase **B3** training XP sources — ✅ done.
 11. Phase **A5** balance sweep — ✅ done.
 12. Phase **C** Φ harness (dust / focus / Phi Cell / tiers) — ✅ done.
-13. Next: Phase **E** breathing/body polish, or **D4** seal conflicts, or Patchouli.
+13. Death Mark thralls + mastery control budget + additive Φ stacking — ✅ baseline shipped.
+14. **Next:** magic **presentation** — Patchouli / first-hour tips / hub+HUD clarity (see backlog above). Then Phase **E** or **D4**.
 
 ---
 
@@ -147,5 +173,6 @@ If choosing a single slice for the next implementation session:
 - New spell waves purely for count (schools are wide enough).
 - Worldgen ores / biomes (Stage II–III).
 - Mage tower multiblock (Stage IV) — **including re-enabling lich ascension**.
+- Ender Dragon thrall / rideable dragon AI.
 
 Update this file when a phase ships or priorities change.

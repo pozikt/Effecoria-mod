@@ -99,12 +99,12 @@ public final class BalanceConfig {
             .defineInRange("creative_spell_power_cap", 52.0, 0.0, 500.0);
 
     public static final ModConfigSpec.DoubleValue PHI_DAY_MULTIPLIER = BUILDER
-            .comment("Φ multiplier while the sun is above the horizon (solar flux)")
+            .comment("Day Φ as factor around 1.0; stacked additively as (value - 1). Default 1.1 → +0.1")
             .defineInRange("phi_day_multiplier", 1.1, 0.0, 5.0);
 
     public static final ModConfigSpec.DoubleValue PHI_NIGHT_MULTIPLIER = BUILDER
-            .comment("Φ multiplier at night — less stellar flux reaches the surface")
-            .defineInRange("phi_night_multiplier", 0.5, 0.0, 5.0);
+            .comment("Night Φ as factor around 1.0; stacked additively as (value - 1). Default 0.75 → -0.25")
+            .defineInRange("phi_night_multiplier", 0.75, 0.0, 5.0);
 
     public static final ModConfigSpec.DoubleValue BREATHING_MAX_MASTERY = BUILDER
             .comment("Maximum breathing technique mastery (1.0 = fully mastered)")
@@ -239,22 +239,47 @@ public final class BalanceConfig {
             .comment("biologyQ multiplier at very low air supply")
             .defineInRange("biology_air_min", 0.6, 0.1, 1.0);
 
-    // --- Phi environment ---
+    // --- Phi environment (factors around 1.0; PhiFieldService adds (factor - 1)) ---
     public static final ModConfigSpec.DoubleValue PHI_RAIN_MULTIPLIER = BUILDER
-            .comment("Φ multiplier while it is raining (overworld surface)")
+            .comment("Rain Φ factor around 1.0 (additive as value-1)")
             .defineInRange("phi_rain_multiplier", 1.08, 0.5, 2.0);
 
     public static final ModConfigSpec.DoubleValue PHI_THUNDER_MULTIPLIER = BUILDER
-            .comment("Φ multiplier during thunderstorms")
+            .comment("Thunder Φ factor around 1.0 (additive as value-1)")
             .defineInRange("phi_thunder_multiplier", 1.18, 0.5, 2.5);
 
     public static final ModConfigSpec.DoubleValue PHI_UNDERGROUND_MULTIPLIER = BUILDER
-            .comment("Φ multiplier when sky is not visible (caves)")
+            .comment("Underground / no-sky Φ factor around 1.0 (additive as value-1)")
             .defineInRange("phi_underground_multiplier", 0.82, 0.1, 1.5);
 
     public static final ModConfigSpec.DoubleValue PHI_OPEN_SKY_BONUS = BUILDER
-            .comment("Extra Φ multiplier when sky is visible on surface")
+            .comment("Open-sky Φ factor around 1.0 (additive as value-1)")
             .defineInRange("phi_open_sky_bonus", 1.05, 0.5, 2.0);
+
+    // --- Necro thrall control (Death Mark army limits by breathing mastery) ---
+    public static final ModConfigSpec.DoubleValue NECRO_CONTROL_BUDGET_BASE = BUILDER
+            .comment("Total thrall HP budget at breathing mastery 0")
+            .defineInRange("necro_control_budget_base", 24.0, 5.0, 500.0);
+
+    public static final ModConfigSpec.DoubleValue NECRO_CONTROL_BUDGET_PER_MASTERY = BUILDER
+            .comment("Extra thrall HP budget at breathing mastery 1.0")
+            .defineInRange("necro_control_budget_per_mastery", 300.0, 0.0, 1000.0);
+
+    public static final ModConfigSpec.DoubleValue NECRO_MAX_SINGLE_HP_BASE = BUILDER
+            .comment("Strongest single thrall HP at mastery 0")
+            .defineInRange("necro_max_single_hp_base", 22.0, 5.0, 300.0);
+
+    public static final ModConfigSpec.DoubleValue NECRO_MAX_SINGLE_HP_PER_MASTERY = BUILDER
+            .comment("Extra max single thrall HP at mastery 1.0 (base+this ≈ 300)")
+            .defineInRange("necro_max_single_hp_per_mastery", 278.0, 0.0, 1000.0);
+
+    public static final ModConfigSpec.IntValue NECRO_MAX_THRALLS_BASE = BUILDER
+            .comment("Max thrall count at mastery 0")
+            .defineInRange("necro_max_thralls_base", 1, 1, 10);
+
+    public static final ModConfigSpec.DoubleValue NECRO_MAX_THRALLS_PER_MASTERY = BUILDER
+            .comment("Extra thrall slots gained by mastery 1.0 (floored)")
+            .defineInRange("necro_max_thralls_per_mastery", 4.0, 0.0, 20.0);
 
     // --- Exhaustion ---
     public static final ModConfigSpec.DoubleValue EXHAUSTION_WARM = BUILDER

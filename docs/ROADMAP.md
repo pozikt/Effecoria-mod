@@ -53,8 +53,25 @@ Do not start II+ until Stage I is intentionally “finished enough.”
 | **Seals** | More types, conflicts/stacking rules |
 | **Anti-magic** | Lead (ZNΦ), cold iron — tag-based, replaces stone-box hack |
 | **School depth** | Extra spells per school; necromancy endgame hooks (lich later if needed) |
+| **Player-facing magic** | Teach the loop without wiki: Patchouli / in-game tips / hub clarity |
 
 Optional inside I (only if it serves magic feel): initiation ritual block.
+
+### Necromancy — Death Mark (shipped baseline)
+
+Raise via Death Mark (not free summons). Thralls leash + LOS-only combat; gear preserved; no thrall loot farm. **Control budget** scales with breathing mastery (count + max single HP + total HP).
+
+### Endgame hook (deferred) — Ender Dragon thrall
+
+**Not Stage I implementation.** Design note for late necro / post–End exploration:
+
+| Gate (fantasy) | Players already in netherite, End mapped for elytra, dragon beaten several times; mastery/control budget at true endgame |
+| Behavior | While unbound to the rider: dragon **lives its own life** in the End (free roam AI — not leash thrall rules) |
+| Call | On summoner signal: flies to the necromancer |
+| Mount | Allows the summoner to **sit and steer** as a rideable mount |
+| Balance | Unique exception to normal thrall leash/LOS; one dragon max; heavy mastery + story gates |
+
+Track under Stage I polish only as **docs**; code when magic presentation + control budget feel final.
 
 ---
 
