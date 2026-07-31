@@ -16,6 +16,7 @@ import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.effect.CastPresentation;
 import com.effecoria.effect.SpellEffectExecutor;
+import com.effecoria.effect.necromancy.NecroSummonService;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -63,7 +64,8 @@ public final class CastPipeline {
         }
 
         if (!godMode) {
-            var block = FormulaEngine.diagnoseCannotCast(ctx, phi, spell, data.currentPsi());
+            float usablePsi = NecroSummonService.usablePsi(player, data);
+            var block = FormulaEngine.diagnoseCannotCast(ctx, phi, spell, usablePsi);
             if (block.isPresent()) {
                 player.displayClientMessage(Component.translatable(block.get().messageKey()), true);
                 return CastResult.CANNOT_CAST;

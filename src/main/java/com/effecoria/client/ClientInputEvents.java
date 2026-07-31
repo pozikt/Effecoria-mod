@@ -12,6 +12,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 @EventBusSubscriber(modid = EffecoriaMod.MOD_ID, value = Dist.CLIENT)
@@ -25,6 +26,25 @@ public final class ClientInputEvents {
     private ClientInputEvents() {}
 
     @SubscribeEvent
+    public static void onMouseScroll(InputEvent.MouseScrollingEvent event) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null || minecraft.screen != null) {
+            return;
+        }
+        if (!isCycleModifierPhysicallyDown(minecraft)) {
+            return;
+        }
+        PlayerPsiData data = minecraft.player.getData(ModAttachments.PSI.get());
+        if (!data.initiated() || data.knownSpells().isEmpty()) {
+            return;
+        }
+        event.setCanceled(true);
+        int delta = event.getScrollDeltaY() > 0 ? -1 : 1;
+        data.cycleSpell(delta);
+        PacketDistributor.sendToServer(new ModNetworking.CycleSpellPayload(delta));
+    }
+
+    @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null) {
@@ -32,8 +52,6 @@ public final class ClientInputEvents {
             return;
         }
 
-        // KeyConflictContext.IN_GAME makes KeyMapping.isDown() false while any Screen is open,
-        // which would immediately close the radial. Poll the raw bound key instead.
         boolean down = isSpellBookKeyPhysicallyDown(minecraft);
 
         if (minecraft.screen instanceof SpellHubScreen hub) {
@@ -83,9 +101,15 @@ public final class ClientInputEvents {
         spellBookKeyWasDown = down;
     }
 
-    /** Raw GLFW state of the bound key — works even while a Screen is open. */
     private static boolean isSpellBookKeyPhysicallyDown(Minecraft minecraft) {
-        InputConstants.Key key = KeyBindings.OPEN_SPELL_BOOK.getKey();
+        return isKeyPhysicallyDown(minecraft, KeyBindings.OPEN_SPELL_BOOK.getKey());
+    }
+
+    private static boolean isCycleModifierPhysicallyDown(Minecraft minecraft) {
+        return isKeyPhysicallyDown(minecraft, KeyBindings.CYCLE_SPELL_MODIFIER.getKey());
+    }
+
+    private static boolean isKeyPhysicallyDown(Minecraft minecraft, InputConstants.Key key) {
         long window = minecraft.getWindow().getWindow();
         if (key.getType() == InputConstants.Type.MOUSE) {
             return org.lwjgl.glfw.GLFW.glfwGetMouseButton(window, key.getValue())

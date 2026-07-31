@@ -2,7 +2,6 @@ package com.effecoria.effect.necromancy;
 
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
-import com.effecoria.core.magic.ShadeService;
 import com.effecoria.core.magic.SpellEffectEntry;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
@@ -182,9 +181,7 @@ public final class NecromancyEffects {
         if (target == null) {
             return;
         }
-        int lifetime = effect.params().has("lifetime_ticks") ? effect.params().get("lifetime_ticks").getAsInt() : 300;
-        lifetime = Math.round(lifetime * (0.85f + power / 150f));
-        spawnSkeletonThrall(caster, target, lifetime, 0);
+        spawnSkeletonThrall(caster, target, 0);
     }
 
     public static void shadeBrood(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -193,11 +190,13 @@ public final class NecromancyEffects {
         }
         ServerLevel level = caster.serverLevel();
         int count = effect.params().has("count") ? effect.params().get("count").getAsInt() : 2;
-        int lifetime = effect.params().has("lifetime_ticks") ? effect.params().get("lifetime_ticks").getAsInt() : 200;
-        lifetime = Math.round(lifetime * (0.9f + power / 150f));
         count = Math.min(4, Math.max(1, count));
         Vec3 look = caster.getLookAngle().normalize();
+        int spawned = 0;
         for (int i = 0; i < count; i++) {
+            if (!NecroSummonService.canAffordAnother(caster)) {
+                break;
+            }
             double angle = (Math.PI * 2 * i) / count;
             double ox = Math.cos(angle) * 1.2;
             double oz = Math.sin(angle) * 1.2;
@@ -209,14 +208,21 @@ public final class NecromancyEffects {
                 continue;
             }
             shade.moveTo(spawnX, spawnY, spawnZ, caster.getYRot(), 0f);
-            shade.setLimitedLife(lifetime);
-            shade.setPersistenceRequired();
             shade.setAggressive(true);
             level.addFreshEntity(shade);
-            shade.setTarget(target);
-            ShadeService.registerShade(shade, caster, target);
+            if (NecroSummonService.register(shade, caster, target)) {
+                spawned++;
+            }
         }
-        level.playSound(null, caster.blockPosition(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 0.9f, 0.7f);
+        if (spawned > 0) {
+            level.playSound(null, caster.blockPosition(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 0.9f, 0.7f);
+        } else {
+            caster.displayClientMessage(
+                    net.minecraft.network.chat.Component.translatable(
+                            "message.effecoria.necro.summon_psi_reserve",
+                            (int) com.effecoria.config.BalanceConfig.NECRO_SUMMON_PSI_RESERVE.get().floatValue()),
+                    true);
+        }
     }
 
     public static void lichWard(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -344,9 +350,7 @@ public final class NecromancyEffects {
         if (target == null) {
             return;
         }
-        int lifetime = effect.params().has("lifetime_ticks") ? effect.params().get("lifetime_ticks").getAsInt() : 320;
-        lifetime = Math.round(lifetime * (0.85f + power / 150f));
-        spawnZombieThrall(caster, target, lifetime, 0);
+        spawnZombieThrall(caster, target, 0);
     }
 
     public static void boneVolley(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -402,13 +406,21 @@ public final class NecromancyEffects {
             return;
         }
         int count = effect.params().has("count") ? effect.params().get("count").getAsInt() : 3;
-        int lifetime = effect.params().has("lifetime_ticks") ? effect.params().get("lifetime_ticks").getAsInt() : 260;
-        lifetime = Math.round(lifetime * (0.85f + power / 150f));
         count = Math.min(4, Math.max(2, count));
+        int spawned = 0;
         for (int i = 0; i < count; i++) {
-            spawnSkeletonThrall(caster, target, lifetime, i);
+            int before = NecroSummonService.countOwned(caster);
+            spawnSkeletonThrall(caster, target, i);
+            if (NecroSummonService.countOwned(caster) > before) {
+                spawned++;
+            } else {
+                break;
+            }
         }
-        caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.SKELETON_AMBIENT, SoundSource.PLAYERS, 0.9f, 0.6f);
+        if (spawned > 0) {
+            caster.serverLevel().playSound(
+                    null, caster.blockPosition(), SoundEvents.SKELETON_AMBIENT, SoundSource.PLAYERS, 0.9f, 0.6f);
+        }
     }
 
     public static void deathGate(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -504,8 +516,16 @@ public final class NecromancyEffects {
         }
     }
 
-    private static void spawnSkeletonThrall(ServerPlayer caster, LivingEntity target, int lifetime, int index) {
+    private static void spawnSkeletonThrall(ServerPlayer caster, LivingEntity target, int index) {
         ServerLevel level = caster.serverLevel();
+        if (!NecroSummonService.canAffordAnother(caster)) {
+            caster.displayClientMessage(
+                    net.minecraft.network.chat.Component.translatable(
+                            "message.effecoria.necro.summon_psi_reserve",
+                            (int) com.effecoria.config.BalanceConfig.NECRO_SUMMON_PSI_RESERVE.get().floatValue()),
+                    true);
+            return;
+        }
         Vec3 look = caster.getLookAngle().normalize();
         double angle = index * 1.2;
         double x = caster.getX() + look.x * 2 + Math.cos(angle);
@@ -516,15 +536,22 @@ public final class NecromancyEffects {
             return;
         }
         skeleton.moveTo(x, y, z, caster.getYRot(), 0f);
-        skeleton.setPersistenceRequired();
         level.addFreshEntity(skeleton);
-        skeleton.setTarget(target);
-        NecroSummonService.register(skeleton, caster, target, level.getGameTime() + lifetime);
-        spawnNecroParticles(level, new Vec3(x, y + 1, z));
+        if (NecroSummonService.register(skeleton, caster, target)) {
+            spawnNecroParticles(level, new Vec3(x, y + 1, z));
+        }
     }
 
-    private static void spawnZombieThrall(ServerPlayer caster, LivingEntity target, int lifetime, int index) {
+    private static void spawnZombieThrall(ServerPlayer caster, LivingEntity target, int index) {
         ServerLevel level = caster.serverLevel();
+        if (!NecroSummonService.canAffordAnother(caster)) {
+            caster.displayClientMessage(
+                    net.minecraft.network.chat.Component.translatable(
+                            "message.effecoria.necro.summon_psi_reserve",
+                            (int) com.effecoria.config.BalanceConfig.NECRO_SUMMON_PSI_RESERVE.get().floatValue()),
+                    true);
+            return;
+        }
         Vec3 look = caster.getLookAngle().normalize();
         double x = caster.getX() + look.x * (2 + index * 0.5);
         double z = caster.getZ() + look.z * (2 + index * 0.5);
@@ -534,12 +561,11 @@ public final class NecromancyEffects {
             return;
         }
         zombie.moveTo(x, y, z, caster.getYRot(), 0f);
-        zombie.setPersistenceRequired();
         level.addFreshEntity(zombie);
-        zombie.setTarget(target);
-        NecroSummonService.register(zombie, caster, target, level.getGameTime() + lifetime);
-        spawnNecroParticles(level, new Vec3(x, y + 1, z));
-        level.playSound(null, caster.blockPosition(), SoundEvents.ZOMBIE_AMBIENT, SoundSource.PLAYERS, 0.6f, 0.9f);
+        if (NecroSummonService.register(zombie, caster, target)) {
+            spawnNecroParticles(level, new Vec3(x, y + 1, z));
+            level.playSound(null, caster.blockPosition(), SoundEvents.ZOMBIE_AMBIENT, SoundSource.PLAYERS, 0.6f, 0.9f);
+        }
     }
 
     private static void applyCoilHit(ServerLevel level, LivingEntity entity, float damage, int witherTicks) {

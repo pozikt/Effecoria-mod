@@ -20,6 +20,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.entity.projectile.windcharge.WindCharge;
 import net.minecraft.world.level.block.Blocks;
@@ -53,9 +54,8 @@ public final class ElementalEffects {
             return;
         }
 
-        Snowball bolt = new Snowball(level, caster);
+        SmallFireball bolt = new SmallFireball(level, caster, look.scale(speed));
         bolt.setPos(caster.getX(), caster.getEyeY() - 0.1, caster.getZ());
-        bolt.shoot(look.x, look.y, look.z, speed, 1f);
         tagProjectile(bolt, ElementalTags.KIND_WEAK_FIRE, scaledDamage);
         level.addFreshEntity(bolt);
 
@@ -509,9 +509,8 @@ public final class ElementalEffects {
         int igniteRadius = params.has("ignite_radius") ? params.get("ignite_radius").getAsInt() : 2;
         int groundIgnite = params.has("ground_ignite_count") ? params.get("ground_ignite_count").getAsInt() : 9;
 
-        Snowball orb = new Snowball(level, caster);
+        SmallFireball orb = new SmallFireball(level, caster, look.scale(speed));
         orb.setPos(caster.getX(), caster.getEyeY() - 0.1, caster.getZ());
-        orb.shoot(look.x, look.y, look.z, speed, 0.6f);
         tagProjectile(orb, ElementalTags.KIND_GREAT_FIRE, scaledDamage);
         orb.getPersistentData().putInt(ElementalTags.FIRE_MASS, Math.max(1, mass));
         orb.getPersistentData().putInt(ElementalTags.IGNITE_RADIUS, Math.max(1, igniteRadius));

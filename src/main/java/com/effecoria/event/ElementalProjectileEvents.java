@@ -13,6 +13,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -55,10 +56,9 @@ public final class ElementalProjectileEvents {
                 switch (kind) {
                     case ElementalTags.KIND_WEAK_FIRE -> {
                         target.hurt(source, Math.max(0.5f, damage));
-                        if (damage >= 3f) {
-                            target.igniteForSeconds(2);
-                        }
+                        target.igniteForSeconds(Math.max(2, Math.round(2f + damage)));
                         ElementalEffects.spawnFireParticles(level, target.position());
+                        ElementalEffects.ignitePatch(level, target.blockPosition(), 0, 1);
                     }
                     case ElementalTags.KIND_ICE_SHARD -> {
                         target.hurt(source, damage);
@@ -87,7 +87,13 @@ public final class ElementalProjectileEvents {
             }
         }
 
-        if (projectile instanceof Snowball) {
+        if (hit.getType() == HitResult.Type.BLOCK
+                && ElementalTags.KIND_WEAK_FIRE.equals(kind)
+                && hit instanceof BlockHitResult blockHit) {
+            ElementalEffects.ignitePatch(level, blockHit.getBlockPos().relative(blockHit.getDirection()), 0, 1);
+        }
+
+        if (projectile instanceof Snowball || projectile instanceof SmallFireball) {
             event.setCanceled(true);
             projectile.discard();
         }
@@ -133,7 +139,6 @@ public final class ElementalProjectileEvents {
             return;
         }
 
-        // Scrape a block: shed one fire mass unit and keep flying.
         int mass = projectile.getPersistentData().getInt(ElementalTags.FIRE_MASS);
         ElementalEffects.shedFireAt(level, blockHit.getBlockPos(), loc, face);
         mass--;
@@ -148,52 +153,71 @@ public final class ElementalProjectileEvents {
             projectile.discard();
             return;
         }
-        // Nudge past the scraped face so the same block is not hit every tick.
         projectile.setPos(projectile.position().add(vel.normalize().scale(0.45)));
-        // Slight slowdown as mass is lost.
         projectile.setDeltaMovement(vel.scale(0.92));
     }
 
     @SubscribeEvent
     public static void onProjectileTick(EntityTickEvent.Post event) {
-        if (!(event.getEntity() instanceof Snowball snowball)) {
+        if (!(event.getEntity() instanceof Projectile projectile)) {
             return;
         }
-        if (!snowball.getPersistentData().getBoolean(ElementalTags.PROJECTILE)) {
+        if (!projectile.getPersistentData().getBoolean(ElementalTags.PROJECTILE)) {
             return;
         }
-        if (snowball.level().isClientSide()) {
+        if (projectile.level().isClientSide() || !(projectile.level() instanceof ServerLevel level)) {
             return;
         }
-        String kind = snowball.getPersistentData().getString(ElementalTags.KIND);
-        if (!ElementalTags.KIND_GREAT_FIRE.equals(kind)) {
-            return;
-        }
-        if (!(snowball.level() instanceof ServerLevel level)) {
-            return;
-        }
-        int mass = Math.max(1, snowball.getPersistentData().getInt(ElementalTags.FIRE_MASS));
-        level.sendParticles(
-                ParticleTypes.FLAME,
-                snowball.getX(),
-                snowball.getY(),
-                snowball.getZ(),
-                2 + mass,
-                0.2 + mass * 0.05,
-                0.2 + mass * 0.05,
-                0.2 + mass * 0.05,
-                0.01);
-        if (snowball.tickCount % 3 == 0) {
+        String kind = projectile.getPersistentData().getString(ElementalTags.KIND);
+        if (ElementalTags.KIND_GREAT_FIRE.equals(kind)) {
+            int mass = Math.max(1, projectile.getPersistentData().getInt(ElementalTags.FIRE_MASS));
             level.sendParticles(
-                    ModParticleTypes.PHI_FLAME.get(),
-                    snowball.getX(),
-                    snowball.getY(),
-                    snowball.getZ(),
+                    ParticleTypes.FLAME,
+                    projectile.getX(),
+                    projectile.getY(),
+                    projectile.getZ(),
+                    2 + mass,
+                    0.2 + mass * 0.05,
+                    0.2 + mass * 0.05,
+                    0.2 + mass * 0.05,
+                    0.01);
+            if (projectile.tickCount % 3 == 0) {
+                level.sendParticles(
+                        ModParticleTypes.PHI_FLAME.get(),
+                        projectile.getX(),
+                        projectile.getY(),
+                        projectile.getZ(),
+                        2,
+                        0.12,
+                        0.12,
+                        0.12,
+                        0.02);
+            }
+            return;
+        }
+        if (ElementalTags.KIND_WEAK_FIRE.equals(kind) || ElementalTags.KIND_PLASMA.equals(kind)) {
+            level.sendParticles(
+                    ParticleTypes.FLAME,
+                    projectile.getX(),
+                    projectile.getY(),
+                    projectile.getZ(),
                     2,
-                    0.12,
-                    0.12,
-                    0.12,
-                    0.02);
+                    0.08,
+                    0.08,
+                    0.08,
+                    0.01);
+            if (projectile.tickCount % 2 == 0) {
+                level.sendParticles(
+                        ModParticleTypes.PHI_FLAME.get(),
+                        projectile.getX(),
+                        projectile.getY(),
+                        projectile.getZ(),
+                        1,
+                        0.05,
+                        0.05,
+                        0.05,
+                        0.015);
+            }
         }
     }
 }

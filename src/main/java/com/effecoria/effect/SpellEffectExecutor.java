@@ -8,7 +8,6 @@ import com.effecoria.effect.mental.MentalEffects;
 import com.effecoria.effect.necromancy.NecromancyEffects;
 import com.effecoria.effect.spatial.SpatialEffects;
 import com.effecoria.effect.organic.OrganicEffects;
-import com.effecoria.core.magic.ShadeService;
 import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.core.magic.SpellEffectEntry;
 import com.effecoria.core.psi.PlayerPsiData;
@@ -16,6 +15,7 @@ import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.core.seal.SealPlaceResult;
 import com.effecoria.core.seal.SealService;
 import com.effecoria.core.seal.SealTypes;
+import com.effecoria.effect.necromancy.NecroSummonService;
 import com.effecoria.magic.CastDelivery;
 
 import net.minecraft.core.BlockPos;
@@ -577,14 +577,20 @@ public final class SpellEffectExecutor {
         level.playSound(null, target.blockPosition(), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.7f, 1.2f);
     }
 
-    /** Summon a short-lived shade (vex relay) that attacks the looked-at target. */
+    /** Summon a permanent shade (vex relay) bound to the necromancer — reserves Ψ. */
     private static void shadeSummon(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         if (target == null) {
             return;
         }
         ServerLevel level = caster.serverLevel();
-        int lifetime = effect.params().has("lifetime_ticks") ? effect.params().get("lifetime_ticks").getAsInt() : 400;
-        lifetime = Math.round(lifetime * (0.9f + power / 150f));
+        if (!NecroSummonService.canAffordAnother(caster)) {
+            caster.displayClientMessage(
+                    Component.translatable(
+                            "message.effecoria.necro.summon_psi_reserve",
+                            (int) com.effecoria.config.BalanceConfig.NECRO_SUMMON_PSI_RESERVE.get().floatValue()),
+                    true);
+            return;
+        }
         Vec3 look = caster.getLookAngle().normalize();
         double spawnX = caster.getX() + look.x * 1.5;
         double spawnZ = caster.getZ() + look.z * 1.5;
@@ -595,14 +601,11 @@ public final class SpellEffectExecutor {
             return;
         }
         shade.moveTo(spawnX, spawnY, spawnZ, caster.getYRot(), 0f);
-        shade.setLimitedLife(lifetime);
-        shade.setPersistenceRequired();
         shade.setAggressive(true);
         level.addFreshEntity(shade);
-        shade.setTarget(target);
-        shade.setAggressive(true);
-        shade.getNavigation().moveTo(target, 1.2);
-        ShadeService.registerShade(shade, caster, target);
+        if (!NecroSummonService.register(shade, caster, target)) {
+            return;
+        }
 
         spawnNecroParticles(level, new Vec3(spawnX, spawnY, spawnZ));
         level.playSound(null, caster.blockPosition(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 1f, 0.85f);

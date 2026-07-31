@@ -11,8 +11,8 @@
   "effects": [
     {
       "type": "effecoria:fireball",
-      "speed": 0.9,
-      "damage_dice": "1d2"
+      "speed": 0.95,
+      "damage_dice": "1d4"
     }
   ]
 }

@@ -11,6 +11,7 @@ import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
+import com.effecoria.effect.necromancy.NecroSummonService;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -47,6 +48,17 @@ public final class PsiHudOverlay {
                 x,
                 y - 10,
                 0xE0A8FF);
+
+        float reserved = NecroSummonService.reservedPsi(minecraft.player);
+        if (reserved > 0.5f) {
+            float usable = NecroSummonService.usablePsi(minecraft.player, data);
+            graphics.drawString(
+                    minecraft.font,
+                    Component.translatable("hud.effecoria.psi_reserved", (int) reserved, (int) usable),
+                    x,
+                    y - 20,
+                    0xCC8866AA);
+        }
 
         float phiFill = phi.isInfinite() ? 1f : Math.min(1f, phi.effectiveValue() / 1.2f);
         drawBar(graphics, x, y + 16, 90, 6, phiFill, phiBarColor(phi), 0xFF1B3A59);

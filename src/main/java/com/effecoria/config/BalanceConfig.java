@@ -222,6 +222,10 @@ public final class BalanceConfig {
             .comment("Default essence cost grows by this amount per progression tier after starters (when JSON omits unlock_essence_cost)")
             .defineInRange("spell_unlock_essence_step", 2, 0, 50);
 
+    public static final ModConfigSpec.DoubleValue NECRO_SUMMON_PSI_RESERVE = BUILDER
+            .comment("Ψ permanently reserved per living necro thrall (shades / skeletons / zombies)")
+            .defineInRange("necro_summon_psi_reserve", 18.0, 1.0, 100.0);
+
     // --- Biology (hunger / air) ---
     public static final ModConfigSpec.DoubleValue BIOLOGY_HUNGER_MIN = BUILDER
             .comment("biologyQ multiplier at starving (food level <= 6)")

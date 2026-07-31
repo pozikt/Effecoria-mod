@@ -1,47 +1,186 @@
 package com.effecoria.effect.necromancy;
 
+import com.effecoria.config.BalanceConfig;
+import com.effecoria.core.psi.PlayerPsiData;
+import com.effecoria.core.psi.PsiHelper;
+
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.phys.AABB;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-/** Short-lived skeleton thralls bound to a necromancer's target. */
+/**
+ * Permanent thralls bound to a necromancer. Each alive thrall reserves Ψ from the caster.
+ */
 public final class NecroSummonService {
     public static final String OWNER_TAG = "effecoria:necro_owner";
     public static final String TARGET_TAG = "effecoria:necro_target";
-    public static final String EXPIRE_TAG = "effecoria:necro_expire";
 
     private NecroSummonService() {}
 
-    public static void register(Mob mob, ServerPlayer owner, LivingEntity target, long expireAtGameTime) {
+    /** @return false if the caster cannot afford another permanent thrall */
+    public static boolean register(Mob mob, ServerPlayer owner, LivingEntity preferredTarget) {
+        if (!canAffordAnother(owner)) {
+            mob.discard();
+            owner.displayClientMessage(
+                    net.minecraft.network.chat.Component.translatable(
+                            "message.effecoria.necro.summon_psi_reserve",
+                            (int) BalanceConfig.NECRO_SUMMON_PSI_RESERVE.get().floatValue()),
+                    true);
+            return false;
+        }
         mob.getPersistentData().putUUID(OWNER_TAG, owner.getUUID());
-        mob.getPersistentData().putUUID(TARGET_TAG, target.getUUID());
-        mob.getPersistentData().putLong(EXPIRE_TAG, expireAtGameTime);
+        if (preferredTarget != null) {
+            mob.getPersistentData().putUUID(TARGET_TAG, preferredTarget.getUUID());
+        }
+        mob.setPersistenceRequired();
+        strengthen(mob);
+        if (preferredTarget != null && preferredTarget.isAlive() && preferredTarget != owner) {
+            mob.setTarget(preferredTarget);
+        }
+        return true;
+    }
+
+    public static boolean canAffordAnother(ServerPlayer owner) {
+        PlayerPsiData data = PsiHelper.get(owner);
+        float nextReserve = reservedPsi(owner) + BalanceConfig.NECRO_SUMMON_PSI_RESERVE.get().floatValue();
+        return nextReserve <= data.maxPsi() - 1f;
+    }
+
+    public static float reservedPsi(net.minecraft.world.entity.player.Player owner) {
+        return countOwned(owner) * BalanceConfig.NECRO_SUMMON_PSI_RESERVE.get().floatValue();
+    }
+
+    public static float usablePsi(net.minecraft.world.entity.player.Player owner, PlayerPsiData data) {
+        return Math.max(0f, data.currentPsi() - reservedPsi(owner));
+    }
+
+    public static int countOwned(net.minecraft.world.entity.player.Player owner) {
+        return listOwned(owner).size();
+    }
+
+    public static List<Mob> listOwned(net.minecraft.world.entity.player.Player owner) {
+        AABB box = owner.getBoundingBox().inflate(96);
+        List<Mob> owned = new ArrayList<>();
+        for (Mob mob : owner.level().getEntitiesOfClass(Mob.class, box, Mob::isAlive)) {
+            if (isOwnedBy(mob, owner.getUUID())) {
+                owned.add(mob);
+            }
+        }
+        return owned;
+    }
+
+    public static boolean isOwnedBy(Mob mob, UUID ownerId) {
+        return mob.getPersistentData().hasUUID(OWNER_TAG)
+                && ownerId.equals(mob.getPersistentData().getUUID(OWNER_TAG));
+    }
+
+    public static boolean isNecroThrall(LivingEntity entity) {
+        return entity instanceof Mob mob && mob.getPersistentData().hasUUID(OWNER_TAG);
+    }
+
+    public static boolean sameNecromancer(LivingEntity a, LivingEntity b) {
+        if (!(a instanceof Mob ma) || !(b instanceof Mob mb)) {
+            return false;
+        }
+        if (!ma.getPersistentData().hasUUID(OWNER_TAG) || !mb.getPersistentData().hasUUID(OWNER_TAG)) {
+            return false;
+        }
+        return ma.getPersistentData().getUUID(OWNER_TAG).equals(mb.getPersistentData().getUUID(OWNER_TAG));
     }
 
     public static void tick(ServerPlayer owner) {
         ServerLevel level = owner.serverLevel();
-        long now = level.getGameTime();
-        AABB box = owner.getBoundingBox().inflate(64);
-        for (Mob mob : level.getEntitiesOfClass(Mob.class, box, Mob::isAlive)) {
-            if (!mob.getPersistentData().hasUUID(OWNER_TAG)) {
+        for (Mob mob : listOwned(owner)) {
+            LivingEntity current = mob.getTarget();
+            if (current == owner || (current instanceof Mob other && isOwnedBy(other, owner.getUUID()))) {
+                mob.setTarget(null);
+                current = null;
+            }
+
+            LivingEntity preferred = null;
+            if (mob.getPersistentData().hasUUID(TARGET_TAG)) {
+                UUID targetId = mob.getPersistentData().getUUID(TARGET_TAG);
+                if (level.getEntity(targetId) instanceof LivingEntity living
+                        && living.isAlive()
+                        && living != owner
+                        && !(living instanceof Mob other && isOwnedBy(other, owner.getUUID()))) {
+                    preferred = living;
+                }
+            }
+
+            LivingEntity next = preferred != null ? preferred : findHostile(owner, mob);
+            if (next != null) {
+                mob.setTarget(next);
+                if (mob instanceof Vex vex) {
+                    vex.setAggressive(true);
+                }
+            } else {
+                mob.setTarget(null);
+                followOwner(mob, owner);
+            }
+        }
+    }
+
+    private static LivingEntity findHostile(ServerPlayer owner, Mob thrall) {
+        AABB box = thrall.getBoundingBox().inflate(24);
+        LivingEntity best = null;
+        double bestDist = Double.MAX_VALUE;
+        for (Monster monster : thrall.level().getEntitiesOfClass(Monster.class, box, LivingEntity::isAlive)) {
+            if (monster == thrall) {
                 continue;
             }
-            if (!owner.getUUID().equals(mob.getPersistentData().getUUID(OWNER_TAG))) {
+            if (isOwnedBy(monster, owner.getUUID())) {
                 continue;
             }
-            long expire = mob.getPersistentData().getLong(EXPIRE_TAG);
-            if (now >= expire) {
-                mob.discard();
-                continue;
+            // Prefer what is already aggroed on the necromancer.
+            LivingEntity theirTarget = monster.getTarget();
+            boolean prioritizesOwner = theirTarget == owner;
+            double dist = monster.distanceToSqr(thrall);
+            if (prioritizesOwner) {
+                dist *= 0.35;
             }
-            UUID targetId = mob.getPersistentData().getUUID(TARGET_TAG);
-            if (level.getEntity(targetId) instanceof LivingEntity living && living.isAlive()) {
-                mob.setTarget(living);
+            if (dist < bestDist) {
+                bestDist = dist;
+                best = monster;
             }
+        }
+        return best;
+    }
+
+    private static void followOwner(Mob mob, ServerPlayer owner) {
+        double dist = mob.distanceToSqr(owner);
+        if (dist > 12 * 12) {
+            mob.teleportTo(owner.getX() + 0.5, owner.getY(), owner.getZ() + 0.5);
+        } else if (dist > 4 * 4) {
+            mob.getNavigation().moveTo(owner, 1.15);
+        }
+    }
+
+    private static void strengthen(Mob mob) {
+        if (mob.getAttribute(Attributes.MAX_HEALTH) != null) {
+            double health = mob instanceof Vex ? 18.0 : 28.0;
+            mob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(health);
+            mob.setHealth((float) health);
+        }
+        if (mob.getAttribute(Attributes.ATTACK_DAMAGE) != null) {
+            double damage = mob instanceof Vex ? 5.0 : 6.5;
+            mob.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(damage);
+        }
+        if (mob.getAttribute(Attributes.MOVEMENT_SPEED) != null) {
+            double speed = mob.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue();
+            mob.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(speed * 1.15);
+        }
+        if (mob.getAttribute(Attributes.FOLLOW_RANGE) != null) {
+            mob.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(28.0);
         }
     }
 }
