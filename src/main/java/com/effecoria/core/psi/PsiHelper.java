@@ -20,7 +20,10 @@ public final class PsiHelper {
     }
 
     public static PsiContext toContext(Player player, PlayerPsiData data) {
-        float biology = data.effectiveBiologyQ() * BiologyService.bodyFactor(player);
+        long now = player.level().getGameTime();
+        float breathFactor = data.overcastBreathFactor(now);
+        float biology = data.effectiveBiologyQ() * BiologyService.bodyFactor(player) * breathFactor;
+        float breath = data.breathingMastery() * breathFactor;
         PhiHarness.FocusBonuses focus = PhiHarness.focusBonuses(player);
         return new PsiContext(
                 data.soulStrength(),
@@ -29,13 +32,14 @@ public final class PsiHelper {
                 data.frequencyHz(),
                 data.school(),
                 data.entropyB(),
-                data.breathingMastery(),
+                breath,
                 data.essence(),
                 data.exhaustion(),
                 data.breathTrainRegenBonus(),
                 data.isBreathTrainFatigued(),
                 focus.costFloorRatio(),
-                focus.resonanceWidthBonus());
+                focus.resonanceWidthBonus(),
+                data.overcastRegenMultiplier(now));
     }
 
     public static void initiate(Player player, MagicSchool school) {

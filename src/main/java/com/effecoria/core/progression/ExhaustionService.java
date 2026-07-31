@@ -1,7 +1,6 @@
 package com.effecoria.core.progression;
 
 import com.effecoria.config.BalanceConfig;
-import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.core.psi.PlayerPsiData;
 
 import net.minecraft.server.level.ServerPlayer;
@@ -9,7 +8,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 
 /**
- * Magical exhaustion from overcasting — soft penalty layer below entropy backlash.
+ * Magical exhaustion — filled by overcast trauma and entropy backlash, not by healthy casts.
  */
 public final class ExhaustionService {
     public static final float MAX = 100f;
@@ -36,16 +35,12 @@ public final class ExhaustionService {
         return Band.NONE;
     }
 
-    public static void onSuccessfulCast(
-            ServerPlayer player, PlayerPsiData data, SpellDefinition spell, float actualCost) {
-        float gain = actualCost * BalanceConfig.EXHAUSTION_GAIN_PER_COST.get().floatValue()
-                + spell.sideEntropyRatio() * BalanceConfig.EXHAUSTION_GAIN_PER_ENTROPY.get().floatValue();
-        float psiRatio = data.maxPsi() > 0f ? data.currentPsi() / data.maxPsi() : 1f;
-        if (psiRatio < 0.2f) {
-            gain += BalanceConfig.EXHAUSTION_LOW_PSI_BONUS.get().floatValue();
-        }
-        addExhaustion(data, gain);
-        applyCollapseCastDamage(player, data);
+    /**
+     * Healthy casts (cost fits in usable Ψ) apply no exhaustion.
+     * Overcasts are handled by {@link OvercastService} before this is called.
+     */
+    public static void onHealthyCast(ServerPlayer player, PlayerPsiData data) {
+        // No cast tax while the operator still has the energy to pay.
     }
 
     public static void onBacklash(ServerPlayer player, PlayerPsiData data) {
@@ -56,6 +51,7 @@ public final class ExhaustionService {
     public static void clearOnDeath(PlayerPsiData data) {
         data.setExhaustion(0f);
         data.setEntropyB(0f);
+        data.clearOvercastTrauma();
         data.setCastSuccessStreak(0);
         data.setSteamFlightActive(false);
         data.setSteamFlightDrainPerTick(0f);
@@ -66,17 +62,28 @@ public final class ExhaustionService {
         player.removeEffect(MobEffects.WEAKNESS);
         player.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
         player.removeEffect(MobEffects.CONFUSION);
+        player.removeEffect(MobEffects.DARKNESS);
+        player.removeEffect(MobEffects.HUNGER);
     }
 
     public static void tick(ServerPlayer player, PlayerPsiData data) {
+        long now = player.level().getGameTime();
+        if (!data.hasOvercastTrauma(now) && data.exhaustion() <= 0f) {
+            return;
+        }
+
         float decay = BalanceConfig.EXHAUSTION_DECAY_PER_TICK.get().floatValue();
         if (BreathingService.isMeditating(player) && player.getAirSupply() >= player.getMaxAirSupply() - 10) {
             decay += BalanceConfig.EXHAUSTION_MEDITATION_DECAY_BONUS.get().floatValue();
         }
+        // Trauma decays slower while active.
+        if (data.hasOvercastTrauma(now)) {
+            decay *= 0.45f;
+        }
         if (decay > 0f && data.exhaustion() > 0f) {
             data.setExhaustion(Math.max(0f, data.exhaustion() - decay));
         }
-        applyMobEffects(player, data);
+        applyMobEffects(player, data, now);
     }
 
     public static float regenMultiplier(float exhaustion) {
@@ -97,11 +104,14 @@ public final class ExhaustionService {
         };
     }
 
-    private static void addExhaustion(PlayerPsiData data, float amount) {
+    public static void addExhaustion(PlayerPsiData data, float amount) {
+        if (amount <= 0f) {
+            return;
+        }
         data.setExhaustion(Math.min(MAX, data.exhaustion() + amount));
     }
 
-    private static void applyCollapseCastDamage(ServerPlayer player, PlayerPsiData data) {
+    public static void applyCollapseCastDamage(ServerPlayer player, PlayerPsiData data) {
         if (band(data.exhaustion()) != Band.COLLAPSING) {
             return;
         }
@@ -111,17 +121,37 @@ public final class ExhaustionService {
         }
     }
 
-    private static void applyMobEffects(ServerPlayer player, PlayerPsiData data) {
-        switch (band(data.exhaustion())) {
+    private static void applyMobEffects(ServerPlayer player, PlayerPsiData data, long gameTime) {
+        boolean trauma = data.hasOvercastTrauma(gameTime);
+        Band b = band(data.exhaustion());
+        if (!trauma && b == Band.NONE) {
+            return;
+        }
+        // Overcast trauma forces at least Strained visuals.
+        if (trauma && b == Band.NONE) {
+            b = Band.STRAINED;
+        } else if (trauma && b == Band.TIRED) {
+            b = Band.STRAINED;
+        }
+
+        switch (b) {
             case TIRED -> player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 25, 0, false, false, true));
             case STRAINED -> {
-                player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 25, 0, false, false, true));
+                player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 25, 1, false, false, true));
                 player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 25, 0, false, false, true));
+                if (trauma) {
+                    player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 25, 0, false, false, true));
+                }
             }
             case COLLAPSING -> {
-                player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 25, 1, false, false, true));
-                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 25, 1, false, false, true));
+                int amp = trauma ? 2 : 1;
+                player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 25, amp, false, false, true));
+                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 25, amp, false, false, true));
                 player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 25, 0, false, false, true));
+                if (trauma) {
+                    player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 25, 0, false, false, true));
+                    player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 25, 1, false, false, true));
+                }
             }
             default -> {}
         }

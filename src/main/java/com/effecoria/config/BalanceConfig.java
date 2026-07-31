@@ -357,8 +357,49 @@ public final class BalanceConfig {
             .defineInRange("exhaustion_cost_collapsing", 1.5, 1.0, 3.0);
 
     public static final ModConfigSpec.DoubleValue EXHAUSTION_COLLAPSE_CAST_DAMAGE = BUILDER
-            .comment("Magic damage taken on each cast while Collapsing")
-            .defineInRange("exhaustion_collapse_cast_damage", 2.0, 0.0, 20.0);
+            .comment("Deprecated — casts no longer deal HP damage while collapsing. Kept for config compatibility.")
+            .defineInRange("exhaustion_collapse_cast_damage", 0.0, 0.0, 20.0);
+
+    // --- Overcast (casting when cost > usable Ψ) ---
+    public static final ModConfigSpec.IntValue OVERCAST_DURATION_BASE = BUILDER
+            .comment("Base overcast trauma duration in ticks")
+            .defineInRange("overcast_duration_base", 200, 40, 6000);
+
+    public static final ModConfigSpec.DoubleValue OVERCAST_DURATION_PER_SEVERITY = BUILDER
+            .comment("Extra trauma ticks at full overcast severity (deficit/cost = 1)")
+            .defineInRange("overcast_duration_per_severity", 500.0, 0.0, 6000.0);
+
+    public static final ModConfigSpec.DoubleValue OVERCAST_EXHAUSTION_BASE = BUILDER
+            .comment("Exhaustion spiked on any overcast")
+            .defineInRange("overcast_exhaustion_base", 45.0, 0.0, 100.0);
+
+    public static final ModConfigSpec.DoubleValue OVERCAST_EXHAUSTION_PER_SEVERITY = BUILDER
+            .comment("Extra exhaustion at full overcast severity")
+            .defineInRange("overcast_exhaustion_per_severity", 50.0, 0.0, 100.0);
+
+    public static final ModConfigSpec.DoubleValue OVERCAST_DAMAGE = BUILDER
+            .comment("Deprecated — overcast no longer deals HP damage (channel trauma only). Kept for config compatibility.")
+            .defineInRange("overcast_damage", 0.0, 0.0, 20.0);
+
+    public static final ModConfigSpec.DoubleValue OVERCAST_ENTROPY_BUMP = BUILDER
+            .comment("Entropy added at full overcast severity")
+            .defineInRange("overcast_entropy_bump", 0.35, 0.0, 5.0);
+
+    public static final ModConfigSpec.DoubleValue OVERCAST_REGEN_MIN = BUILDER
+            .comment("Ψ regen multiplier at full overcast severity")
+            .defineInRange("overcast_regen_min", 0.02, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue OVERCAST_REGEN_MAX = BUILDER
+            .comment("Ψ regen multiplier at mild overcast severity")
+            .defineInRange("overcast_regen_max", 0.35, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue OVERCAST_BREATH_MIN = BUILDER
+            .comment("Effective breathing mastery factor at full overcast severity")
+            .defineInRange("overcast_breath_min", 0.1, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue OVERCAST_BREATH_MAX = BUILDER
+            .comment("Effective breathing mastery factor at mild overcast severity")
+            .defineInRange("overcast_breath_max", 0.55, 0.0, 1.0);
 
     public static final ModConfigSpec SPEC = BUILDER.build();
 }

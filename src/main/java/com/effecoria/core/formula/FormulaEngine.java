@@ -30,6 +30,7 @@ public final class FormulaEngine {
                 * deltaTicks
                 * scale
                 * ExhaustionService.regenMultiplier(ctx.exhaustion())
+                * Math.max(0f, ctx.overcastRegenMult())
                 * (1f + Math.max(0f, ctx.breathTrainRegenBonus()))
                 * (ctx.breathTrainFatigue()
                         ? BalanceConfig.BREATHING_TRAIN_FATIGUE_REGEN_MULT.get().floatValue()
@@ -147,13 +148,14 @@ public final class FormulaEngine {
         if (phi.effectiveValue() < spell.minPhi()) {
             return Optional.of(CastBlockReason.LOW_PHI);
         }
-        if (availablePsi < spellCost(ctx, phi, spell)) {
-            return Optional.of(CastBlockReason.LOW_PSI);
-        }
+        // Insufficient Ψ no longer blocks — CastPipeline allows overcast with trauma.
         if (ctx.breathingMastery() < spell.minMastery()) {
             return Optional.of(CastBlockReason.LOW_MASTERY);
         }
-        if (spell.minPower() > 0f && spellPower(ctx, phi, spell) < spell.minPower()) {
+        float cost = spellCost(ctx, phi, spell);
+        float powerPsi = Math.max(availablePsi, cost);
+        PsiContext powerCtx = ctx.withCurrentPsi(powerPsi);
+        if (spell.minPower() > 0f && spellPower(powerCtx, phi, spell) < spell.minPower()) {
             return Optional.of(CastBlockReason.LOW_POWER);
         }
         return Optional.empty();

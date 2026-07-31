@@ -49,6 +49,8 @@ public final class PlayerPsiData {
                 ByteBufCodecs.BOOL.encode(buf, data.seenEntropyTutorial);
                 ByteBufCodecs.VAR_INT.encode(buf, data.castSuccessStreak);
                 ByteBufCodecs.FLOAT.encode(buf, data.necroReservedPsi);
+                ByteBufCodecs.VAR_LONG.encode(buf, data.overcastUntil);
+                ByteBufCodecs.FLOAT.encode(buf, data.overcastSeverity);
                 ByteBufCodecs.INT.encode(buf, data.knownSpells.size());
                 for (ResourceLocation spell : data.knownSpells) {
                     ResourceLocation.STREAM_CODEC.encode(buf, spell);
@@ -95,6 +97,8 @@ public final class PlayerPsiData {
                 data.seenEntropyTutorial = ByteBufCodecs.BOOL.decode(buf);
                 data.castSuccessStreak = ByteBufCodecs.VAR_INT.decode(buf);
                 data.necroReservedPsi = ByteBufCodecs.FLOAT.decode(buf);
+                data.overcastUntil = ByteBufCodecs.VAR_LONG.decode(buf);
+                data.overcastSeverity = ByteBufCodecs.FLOAT.decode(buf);
                 int spellCount = ByteBufCodecs.INT.decode(buf);
                 data.knownSpells = new ArrayList<>(spellCount);
                 for (int i = 0; i < spellCount; i++) {
@@ -146,6 +150,8 @@ public final class PlayerPsiData {
     private int castSuccessStreak;
     /** Synced thrall Ψ reserve for client HUD (server recalculates each tick). */
     private float necroReservedPsi;
+    private long overcastUntil;
+    private float overcastSeverity;
     private Map<ResourceLocation, Integer> spellCastCounts = new HashMap<>();
     private Map<ResourceLocation, Long> spellLastCastAt = new HashMap<>();
 
@@ -450,6 +456,50 @@ public final class PlayerPsiData {
         this.necroReservedPsi = Math.max(0f, value);
     }
 
+    public boolean hasOvercastTrauma(long gameTime) {
+        return overcastSeverity > 0f && gameTime < overcastUntil;
+    }
+
+    public float overcastSeverity() {
+        return overcastSeverity;
+    }
+
+    public long overcastUntil() {
+        return overcastUntil;
+    }
+
+    public void clearOvercastTrauma() {
+        overcastUntil = 0L;
+        overcastSeverity = 0f;
+    }
+
+    public void applyOvercastTrauma(long gameTime, float severity, int durationTicks) {
+        float s = Math.clamp(severity, 0f, 1f);
+        this.overcastSeverity = Math.max(this.overcastSeverity, s);
+        long until = gameTime + Math.max(1, durationTicks);
+        this.overcastUntil = Math.max(this.overcastUntil, until);
+    }
+
+    /** Ψ regen crush while overcast trauma is active. */
+    public float overcastRegenMultiplier(long gameTime) {
+        if (!hasOvercastTrauma(gameTime)) {
+            return 1f;
+        }
+        float min = BalanceConfig.OVERCAST_REGEN_MIN.get().floatValue();
+        float max = BalanceConfig.OVERCAST_REGEN_MAX.get().floatValue();
+        return max + (min - max) * overcastSeverity;
+    }
+
+    /** Effective breathing collapse while overcast trauma is active. */
+    public float overcastBreathFactor(long gameTime) {
+        if (!hasOvercastTrauma(gameTime)) {
+            return 1f;
+        }
+        float min = BalanceConfig.OVERCAST_BREATH_MIN.get().floatValue();
+        float max = BalanceConfig.OVERCAST_BREATH_MAX.get().floatValue();
+        return max + (min - max) * overcastSeverity;
+    }
+
     public void setPhiSenseUntil(long gameTime) {
         this.phiSenseUntil = gameTime;
     }
@@ -572,6 +622,8 @@ public final class PlayerPsiData {
         tag.putBoolean("seenEntropyWarn", seenEntropyWarn);
         tag.putBoolean("seenEntropyTutorial", seenEntropyTutorial);
         tag.putInt("castSuccessStreak", castSuccessStreak);
+        tag.putLong("overcastUntil", overcastUntil);
+        tag.putFloat("overcastSeverity", overcastSeverity);
 
         ListTag spellList = new ListTag();
         for (ResourceLocation spell : knownSpells) {
@@ -630,6 +682,8 @@ public final class PlayerPsiData {
         seenEntropyWarn = tag.contains("seenEntropyWarn") && tag.getBoolean("seenEntropyWarn");
         seenEntropyTutorial = tag.contains("seenEntropyTutorial") && tag.getBoolean("seenEntropyTutorial");
         castSuccessStreak = tag.contains("castSuccessStreak") ? tag.getInt("castSuccessStreak") : 0;
+        overcastUntil = tag.contains("overcastUntil") ? tag.getLong("overcastUntil") : 0L;
+        overcastSeverity = tag.contains("overcastSeverity") ? tag.getFloat("overcastSeverity") : 0f;
 
         knownSpells = new ArrayList<>();
         ListTag spellList = tag.getList("knownSpells", Tag.TAG_STRING);
@@ -698,6 +752,8 @@ public final class PlayerPsiData {
         copy.seenEntropyTutorial = seenEntropyTutorial;
         copy.castSuccessStreak = castSuccessStreak;
         copy.necroReservedPsi = necroReservedPsi;
+        copy.overcastUntil = overcastUntil;
+        copy.overcastSeverity = overcastSeverity;
         copy.spellCastCounts = new HashMap<>(spellCastCounts);
         copy.spellLastCastAt = new HashMap<>(spellLastCastAt);
         return copy;

@@ -16,10 +16,29 @@ public record PsiContext(
         float breathTrainRegenBonus,
         boolean breathTrainFatigue,
         float focusCostFloor,
-        float focusResonanceWidthBonus) {
+        float focusResonanceWidthBonus,
+        float overcastRegenMult) {
 
     public static PsiContext defaultHuman(MagicSchool school) {
-        return new PsiContext(1f, 50f, 0.6f, school.nominalFrequencyHz(), school, 0f, 0f, 0, 0f, 0f, false, 0f, 0f);
+        return new PsiContext(1f, 50f, 0.6f, school.nominalFrequencyHz(), school, 0f, 0f, 0, 0f, 0f, false, 0f, 0f, 1f);
+    }
+
+    public PsiContext withCurrentPsi(float psi) {
+        return new PsiContext(
+                soulStrength,
+                psi,
+                biologyQ,
+                frequencyHz,
+                school,
+                entropyB,
+                breathingMastery,
+                essence,
+                exhaustion,
+                breathTrainRegenBonus,
+                breathTrainFatigue,
+                focusCostFloor,
+                focusResonanceWidthBonus,
+                overcastRegenMult);
     }
 
     public float mastery() {

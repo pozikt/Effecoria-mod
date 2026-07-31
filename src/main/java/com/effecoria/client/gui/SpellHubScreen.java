@@ -280,7 +280,7 @@ public class SpellHubScreen extends Screen {
                     Component.literal("").append(category).append(" · ").append(costLine),
                     cx,
                     y,
-                    canAffordCost(cost) ? 0x99CCFF : 0xFF8888);
+                    canAffordCost(cost) ? 0x99CCFF : 0xFFAA55);
             y += lineH + 2;
             graphics.drawCenteredString(this.font, desc, cx, y, 0xAABBBBCC);
             if (reserveHint != null) {

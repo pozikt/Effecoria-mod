@@ -58,7 +58,7 @@ public final class ElementalEffects {
         }
 
         SmallFireball bolt = new SmallFireball(level, caster, look.scale(speed));
-        bolt.setPos(caster.getX(), caster.getEyeY() - 0.1, caster.getZ());
+        placeProjectileAhead(bolt, caster, look);
         tagProjectile(bolt, ElementalTags.KIND_WEAK_FIRE, scaledDamage);
         level.addFreshEntity(bolt);
 
@@ -159,7 +159,7 @@ public final class ElementalEffects {
         float scaledDamage = DiceDamage.fromParams(effect.params(), power, 4f);
 
         Snowball shard = new Snowball(level, caster);
-        shard.setPos(caster.getX(), caster.getEyeY() - 0.1, caster.getZ());
+        placeProjectileAhead(shard, caster, look);
         shard.shoot(look.x, look.y, look.z, speed, 0.5f);
         tagProjectile(shard, ElementalTags.KIND_ICE_SHARD, scaledDamage);
         level.addFreshEntity(shard);
@@ -242,7 +242,7 @@ public final class ElementalEffects {
         caster.syncData(ModAttachments.PSI.get());
 
         Snowball plasma = new Snowball(level, caster);
-        plasma.setPos(caster.getX(), caster.getEyeY() - 0.1, caster.getZ());
+        placeProjectileAhead(plasma, caster, look);
         plasma.shoot(look.x, look.y, look.z, speed, 0.5f);
         tagProjectile(plasma, ElementalTags.KIND_PLASMA, scaledDamage);
         level.addFreshEntity(plasma);
@@ -403,16 +403,14 @@ public final class ElementalEffects {
                 ? DiceDamage.fromParams(params, power, diamondAxeDamage())
                 : DiceDamage.fromParams(params, power, 2f);
         float scaledKnock = knockback * (0.75f + power / 100f);
-        DamageSource source = cutter
-                ? caster.level().damageSources().playerAttack(caster)
-                : SpellCombat.magic(caster);
+        DamageSource source = SpellCombat.magic(caster);
 
         AABB sweep = caster.getBoundingBox().expandTowards(look.scale(range)).inflate(1.5);
         Set<LivingEntity> hit = new HashSet<>();
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, sweep, e -> e != caster && e.isAlive())) {
             Vec3 toTarget = target.getBoundingBox().getCenter().subtract(start);
             double along = toTarget.dot(look);
-            if (along < 0 || along > range || toTarget.subtract(look.scale(along)).lengthSqr() > 2.5) {
+            if (along < 0.35 || along > range || toTarget.subtract(look.scale(along)).lengthSqr() > 2.5) {
                 continue;
             }
             hit.add(target);
@@ -439,16 +437,17 @@ public final class ElementalEffects {
         level.playSound(
                 null,
                 caster.blockPosition(),
-                cutter ? SoundEvents.GENERIC_EXPLODE.value() : SoundEvents.PLAYER_SPLASH_HIGH_SPEED,
+                cutter ? SoundEvents.PLAYER_ATTACK_SWEEP : SoundEvents.PLAYER_SPLASH_HIGH_SPEED,
                 SoundSource.PLAYERS,
-                cutter ? 0.4f : 0.8f,
-                cutter ? 1.6f : 1.1f);
+                cutter ? 0.7f : 0.8f,
+                cutter ? 1.25f : 1.1f);
     }
 
     private static void cutBlocksAlongBeam(ServerLevel level, Vec3 start, Vec3 look, double range, float power) {
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         int steps = (int) (range * 4);
-        for (int i = 0; i <= steps; i++) {
+        // Skip the first ~1 block so the operator never shears the block under their feet/face.
+        for (int i = 4; i <= steps; i++) {
             Vec3 point = start.add(look.scale(i * 0.25));
             pos.set(point.x, point.y, point.z);
             BlockState state = level.getBlockState(pos);
@@ -487,6 +486,27 @@ public final class ElementalEffects {
         }
     }
 
+    private static final double PROJECTILE_SPAWN_CLEARANCE = 1.0;
+
+    private static void placeProjectileAhead(
+            net.minecraft.world.entity.projectile.Projectile projectile, ServerPlayer caster, Vec3 look) {
+        placeProjectileAhead(projectile, caster, look, PROJECTILE_SPAWN_CLEARANCE);
+    }
+
+    /** Spawn clear of the operator hitbox so projectiles never self-hit on cast. */
+    private static void placeProjectileAhead(
+            net.minecraft.world.entity.projectile.Projectile projectile,
+            ServerPlayer caster,
+            Vec3 look,
+            double clearance) {
+        Vec3 eye = caster.getEyePosition();
+        projectile.setPos(
+                eye.x + look.x * clearance,
+                eye.y - 0.1 + look.y * clearance,
+                eye.z + look.z * clearance);
+        projectile.setOwner(caster);
+    }
+
     private static void tagProjectile(net.minecraft.world.entity.projectile.Projectile projectile, String kind, float damage) {
         projectile.getPersistentData().putBoolean(ElementalTags.PROJECTILE, true);
         projectile.getPersistentData().putString(ElementalTags.KIND, kind);
@@ -513,7 +533,8 @@ public final class ElementalEffects {
         int groundIgnite = params.has("ground_ignite_count") ? params.get("ground_ignite_count").getAsInt() : 9;
 
         SmallFireball orb = new SmallFireball(level, caster, look.scale(speed));
-        orb.setPos(caster.getX(), caster.getEyeY() - 0.1, caster.getZ());
+        // Spawn clear of the caster so the orb never scrapes the operator on cast.
+        placeProjectileAhead(orb, caster, look, 1.15);
         tagProjectile(orb, ElementalTags.KIND_GREAT_FIRE, scaledDamage);
         orb.getPersistentData().putInt(ElementalTags.FIRE_MASS, Math.max(1, mass));
         orb.getPersistentData().putInt(ElementalTags.IGNITE_RADIUS, Math.max(1, igniteRadius));
@@ -1212,7 +1233,7 @@ public final class ElementalEffects {
         Vec3 look = caster.getLookAngle().normalize();
         for (int i = 0; i < count; i++) {
             Snowball plasma = new Snowball(level, caster);
-            plasma.setPos(caster.getX(), caster.getEyeY() - 0.1, caster.getZ());
+            placeProjectileAhead(plasma, caster, look);
             float inaccuracy = spread * (0.35f + (i % 5) * 0.15f);
             plasma.shoot(look.x, look.y, look.z, speed, inaccuracy);
             tagProjectile(plasma, ElementalTags.KIND_PLASMA, damage);

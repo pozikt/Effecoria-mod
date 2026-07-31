@@ -54,7 +54,9 @@ public final class ElementalProjectileEvents {
         }
 
         if (hit.getType() == HitResult.Type.ENTITY && hit instanceof EntityHitResult entityHit) {
-            if (entityHit.getEntity() instanceof LivingEntity target && target.isAlive()) {
+            if (entityHit.getEntity() instanceof LivingEntity target
+                    && target.isAlive()
+                    && target != projectile.getOwner()) {
                 DamageSource source = level.damageSources().indirectMagic(projectile, projectile.getOwner());
                 switch (kind) {
                     case ElementalTags.KIND_WEAK_FIRE -> {
@@ -116,14 +118,20 @@ public final class ElementalProjectileEvents {
         event.setCanceled(true);
 
         if (hit.getType() == HitResult.Type.ENTITY && hit instanceof EntityHitResult entityHit) {
-            if (entityHit.getEntity() instanceof LivingEntity target && target.isAlive()) {
+            if (entityHit.getEntity() instanceof LivingEntity target
+                    && target.isAlive()
+                    && target != projectile.getOwner()) {
                 DamageSource source = level.damageSources().indirectMagic(projectile, projectile.getOwner());
                 target.hurt(source, Math.max(4f, damage));
                 target.igniteForSeconds(6);
                 target.hurtMarked = true;
+                if (projectile.getOwner() instanceof LivingEntity owner) {
+                    SpellCombat.alert(target, owner);
+                }
                 ElementalEffects.spawnFireParticles(level, target.position());
                 ElementalEffects.ignitePatch(level, target.blockPosition(), 1, 4);
             }
+            // Owner graze / self-hit — discard without harming the operator.
             projectile.discard();
             return;
         }

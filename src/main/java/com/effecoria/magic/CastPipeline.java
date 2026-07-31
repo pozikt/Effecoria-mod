@@ -10,6 +10,7 @@ import com.effecoria.core.phi.PhiFieldService;
 import com.effecoria.core.phi.PhiHarness;
 import com.effecoria.core.progression.EntropyService;
 import com.effecoria.core.progression.ExhaustionService;
+import com.effecoria.core.progression.OvercastService;
 import com.effecoria.core.progression.ProgressionService;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
@@ -63,8 +64,8 @@ public final class CastPipeline {
             phi = PhiHarness.assistCast(player, phi);
         }
 
+        float usablePsi = NecroSummonService.usablePsi(player, data);
         if (!godMode) {
-            float usablePsi = NecroSummonService.usablePsi(player, data);
             var block = FormulaEngine.diagnoseCannotCast(ctx, phi, spell, usablePsi);
             if (block.isPresent()) {
                 player.displayClientMessage(Component.translatable(block.get().messageKey()), true);
@@ -73,7 +74,10 @@ public final class CastPipeline {
         }
 
         float fullCost = godMode ? 0f : FormulaEngine.spellCost(ctx, phi, spell);
-        float power = CreativeGodMode.clampSpellPower(player, FormulaEngine.spellPower(ctx, phi, spell));
+        boolean overcasting = !godMode && usablePsi + 0.001f < fullCost;
+        // Overcast still delivers borrowed power as if the cost were paid in full.
+        PsiContext powerCtx = overcasting ? ctx.withCurrentPsi(Math.max(usablePsi, fullCost)) : ctx;
+        float power = CreativeGodMode.clampSpellPower(player, FormulaEngine.spellPower(powerCtx, phi, spell));
 
         CastPresentation.playWindUp(player, spell);
         CastDelivery delivery = SpellEffectExecutor.applyAll(player, spell, power);
@@ -87,9 +91,18 @@ public final class CastPipeline {
                     ? BalanceConfig.WHIFF_COST_FRACTION.get().floatValue()
                     : 1f;
             float actualCost = fullCost * costFraction;
-            data.setCurrentPsi(data.currentPsi() - actualCost);
+            float paid = Math.min(usablePsi, actualCost);
+            float deficit = Math.max(0f, actualCost - usablePsi);
+            data.setCurrentPsi(Math.max(0f, data.currentPsi() - paid));
 
-            ExhaustionService.onSuccessfulCast(player, data, spell, actualCost);
+            if (deficit > 0.05f && delivery == CastDelivery.FULL) {
+                OvercastService.apply(player, data, deficit, actualCost);
+            } else if (deficit > 0.05f) {
+                // Whiff overcast — lighter trauma (half deficit).
+                OvercastService.apply(player, data, deficit * 0.5f, Math.max(actualCost, 0.01f));
+            } else {
+                ExhaustionService.onHealthyCast(player, data);
+            }
 
             float entropyPower = delivery == CastDelivery.FULL ? power : actualCost;
             float newEntropy = FormulaEngine.accumulateEntropy(data.entropyB(), entropyPower, spell.sideEntropyRatio());
@@ -115,6 +128,10 @@ public final class CastPipeline {
             int whiffPercent = Math.round(BalanceConfig.WHIFF_COST_FRACTION.get().floatValue() * 100f);
             player.displayClientMessage(
                     Component.translatable("message.effecoria.cast_whiff_no_block", spellName, whiffPercent),
+                    true);
+        } else if (overcasting) {
+            player.displayClientMessage(
+                    Component.translatable("message.effecoria.cast_overcast_success", spellName),
                     true);
         } else {
             player.displayClientMessage(
