@@ -11,6 +11,7 @@ Aligns with [ROADMAP.md](ROADMAP.md) Stage I (“magic feels finished”) before
 | School VFX (particles) | Baseline; spatial trails, phi-sense motes added |
 | Block seals | trap / fortify / glow / snare / repulse |
 | Corruption curses | Contagion by EntityType + cure tags/AI — see [CORRUPTION.md](CORRUPTION.md) |
+| Spatial singularity | Veil black-hole lens at cast focus — see [SPATIAL_FX.md](SPATIAL_FX.md) |
 | **Lich ascension** | **Disabled** — out of progression; needs phylactery + mage tower (Stage IV) |
 
 Spell count is no longer the bottleneck. Next work is **systems, feel, and gates**.

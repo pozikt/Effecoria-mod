@@ -187,6 +187,43 @@ public final class ModNetworking {
         }
     }
 
+    /** Server → nearby clients: world-anchored spatial singularity pulse. */
+    public record SingularityFxPayload(double x, double y, double z, float intensity, int durationTicks)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<SingularityFxPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "singularity_fx"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, SingularityFxPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.DOUBLE,
+                        SingularityFxPayload::x,
+                        ByteBufCodecs.DOUBLE,
+                        SingularityFxPayload::y,
+                        ByteBufCodecs.DOUBLE,
+                        SingularityFxPayload::z,
+                        ByteBufCodecs.FLOAT,
+                        SingularityFxPayload::intensity,
+                        ByteBufCodecs.VAR_INT,
+                        SingularityFxPayload::durationTicks,
+                        SingularityFxPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(SingularityFxPayload payload, IPayloadContext context) {
+            context.enqueueWork(
+                    () -> com.effecoria.client.SpatialSingularityClient.trigger(
+                            payload.x(),
+                            payload.y(),
+                            payload.z(),
+                            payload.intensity(),
+                            payload.durationTicks()));
+        }
+    }
+
     /** Client reports a successful timing hit; server validates fatigue and grants rewards. */
     public record BreathTrainHitPayload() implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<BreathTrainHitPayload> TYPE =

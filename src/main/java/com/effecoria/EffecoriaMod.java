@@ -116,6 +116,10 @@ public class EffecoriaMod {
                 ModNetworking.SteamCloudsPayload.TYPE,
                 ModNetworking.SteamCloudsPayload.STREAM_CODEC,
                 ModNetworking.SteamCloudsPayload::handle);
+        registrar.playToClient(
+                ModNetworking.SingularityFxPayload.TYPE,
+                ModNetworking.SingularityFxPayload.STREAM_CODEC,
+                ModNetworking.SingularityFxPayload::handle);
         registrar.playToServer(
                 ModNetworking.BreathTrainHitPayload.TYPE,
                 ModNetworking.BreathTrainHitPayload.STREAM_CODEC,

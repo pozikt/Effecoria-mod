@@ -1,0 +1,10 @@
+{
+  "stages": [
+    {
+      "type": "veil:blit",
+      "shader": "effecoria:singularity",
+      "in": "minecraft:main",
+      "out": "veil:post"
+    }
+  ]
+}

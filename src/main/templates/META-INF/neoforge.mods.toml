@@ -87,8 +87,10 @@ Phase 0: project skeleton, FormulaEngine, data-driven spell templates.
     ordering="NONE"
     side="BOTH"
 
-# Features are specific properties of the game environment, that you may want to declare you require. This example declares
-# that your mod requires GL version 3.2 or higher. Other features will be added. They are side aware so declaring this won't
-# stop your mod loading on the server for example.
-#[features.${mod_id}]
-#openGLVersion="[3.2,)"
+[[dependencies.${mod_id}]]
+    modId="veil"
+    type="required"
+    versionRange="${veil_version_range}"
+    ordering="NONE"
+    side="CLIENT"
+    reason="Spatial singularity post-processing (black-hole cast FX)"

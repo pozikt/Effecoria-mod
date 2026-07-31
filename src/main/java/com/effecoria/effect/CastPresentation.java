@@ -5,6 +5,7 @@ import com.effecoria.core.magic.MagicSchool;
 import com.effecoria.core.magic.RadialCategory;
 import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.magic.CastDelivery;
+import com.effecoria.network.ModNetworking;
 
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
@@ -15,6 +16,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Shared cast readability: school wind-up at the caster, impact burst, and a horizontal AoE ring.
@@ -47,6 +49,18 @@ public final class CastPresentation {
         playImpact(caster.serverLevel(), focus, theme, power);
         playRing(caster.serverLevel(), focus, theme, ringRadius(spell, power));
         playImpactSound(caster.serverLevel(), focus, theme);
+        if (school == MagicSchool.SPATIAL) {
+            float intensity = Mth.clamp(power / 70f, 0.55f, 1.35f);
+            int duration = 24 + Math.round(intensity * 22f);
+            PacketDistributor.sendToPlayersNear(
+                    caster.serverLevel(),
+                    null,
+                    focus.x,
+                    focus.y,
+                    focus.z,
+                    48.0,
+                    new ModNetworking.SingularityFxPayload(focus.x, focus.y, focus.z, intensity, duration));
+        }
     }
 
     private static void playWindUp(ServerPlayer caster, SchoolTheme theme) {
