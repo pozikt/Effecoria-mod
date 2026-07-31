@@ -82,6 +82,10 @@ public final class SpellEffectExecutor {
             "soul_shackle",
             "death_coil",
             "symbiotic_graft",
+            "vital_infusion",
+            "soothing_sap",
+            "vital_ward",
+            "adrenal_gift",
             "genetic_lock",
             "biological_cleaving",
             "necrotic_bolt",
@@ -310,6 +314,10 @@ public final class SpellEffectExecutor {
             case "cellular_dominion" -> OrganicEffects.cellularDominion(caster, effect, power);
             case "evolutionary_leap" -> OrganicEffects.evolutionaryLeap(caster, effect, power);
             case "symbiotic_graft" -> OrganicEffects.symbioticGraft(caster, effect, power, target);
+            case "vital_infusion" -> OrganicEffects.vitalInfusion(caster, effect, power, target);
+            case "soothing_sap" -> OrganicEffects.soothingSap(caster, effect, power, target);
+            case "vital_ward" -> OrganicEffects.vitalWard(caster, effect, power, target);
+            case "adrenal_gift" -> OrganicEffects.adrenalGift(caster, effect, power, target);
             case "limb_regeneration" -> OrganicEffects.limbRegeneration(caster, effect, power);
             case "verdant_bloom" -> OrganicEffects.verdantBloom(caster, effect, power);
             case "genetic_lock" -> OrganicEffects.geneticLock(caster, effect, power, target);

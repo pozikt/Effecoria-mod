@@ -1,0 +1,21 @@
+{
+  "id": "effecoria:vital_infusion",
+  "school": "organic",
+  "frequency_hz": 5.5,
+  "base_cost": 22,
+  "power_multiplier": 1.05,
+  "side_entropy": 0.04,
+  "min_phi": 0.12,
+  "min_mastery": 0.2,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:vital_infusion",
+      "range": 12,
+      "heal_dice": "2d6",
+      "heal_bonus": 2,
+      "regen_ticks": 360,
+      "regen_amplifier": 0
+    }
+  ]
+}

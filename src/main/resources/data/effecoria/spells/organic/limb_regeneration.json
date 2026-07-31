@@ -1,20 +1,20 @@
 {
-  "id": "effecoria:limb_regeneration",
-  "school": "organic",
-  "frequency_hz": 22.0,
-  "base_cost": 36,
-  "power_multiplier": 1.15,
-  "side_entropy": 0.1,
-  "min_phi": 0.48,
-  "min_mastery": 0.65,
-  "radial_category": "utility",
-  "effects": [
-    {
-      "type": "effecoria:limb_regeneration",
-      "heal_dice": "4d8",
-      "heal_bonus": 6,
-      "regen_ticks": 400,
-      "regen_amplifier": 2
-    }
-  ]
+    "id":  "effecoria:limb_regeneration",
+    "school":  "organic",
+    "frequency_hz":  22.0,
+    "base_cost":  36,
+    "power_multiplier":  1.15,
+    "side_entropy":  0.1,
+    "min_phi":  0.48,
+    "min_mastery":  0.65,
+    "radial_category":  "utility",
+    "effects":  [
+                    {
+                        "type":  "effecoria:limb_regeneration",
+                        "heal_dice":  "4d8",
+                        "heal_bonus":  6,
+                        "regen_ticks":  1200,
+                        "regen_amplifier":  2
+                    }
+                ]
 }

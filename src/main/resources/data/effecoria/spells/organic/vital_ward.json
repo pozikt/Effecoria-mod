@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:vital_ward",
+  "school": "organic",
+  "frequency_hz": 6.0,
+  "base_cost": 26,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.05,
+  "min_phi": 0.16,
+  "min_mastery": 0.25,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:vital_ward",
+      "range": 12,
+      "duration_ticks": 600,
+      "absorption_amplifier": 1
+    }
+  ]
+}

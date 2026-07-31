@@ -1,18 +1,18 @@
 {
-  "id": "effecoria:metabolic_boost",
-  "school": "organic",
-  "frequency_hz": 9.0,
-  "base_cost": 34,
-  "power_multiplier": 1.15,
-  "side_entropy": 0.08,
-  "min_phi": 0.3,
-  "min_mastery": 0.4,
-  "radial_category": "utility",
-  "effects": [
-    {
-      "type": "effecoria:metabolic_boost",
-      "duration_ticks": 200,
-      "exhaustion_ticks": 120
-    }
-  ]
+    "id":  "effecoria:metabolic_boost",
+    "school":  "organic",
+    "frequency_hz":  9.0,
+    "base_cost":  34,
+    "power_multiplier":  1.15,
+    "side_entropy":  0.08,
+    "min_phi":  0.3,
+    "min_mastery":  0.4,
+    "radial_category":  "utility",
+    "effects":  [
+                    {
+                        "type":  "effecoria:metabolic_boost",
+                        "duration_ticks":  600,
+                        "exhaustion_ticks":  360
+                    }
+                ]
 }
