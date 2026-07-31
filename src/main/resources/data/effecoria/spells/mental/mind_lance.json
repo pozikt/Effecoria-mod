@@ -10,8 +10,8 @@
   "effects": [
     {
       "type": "effecoria:mind_sting",
-      "damage": 3,
-      "slow_duration_ticks": 40
+      "slow_duration_ticks": 40,
+      "confusion_ticks": 70
     },
     {
       "type": "effecoria:telekinesis",

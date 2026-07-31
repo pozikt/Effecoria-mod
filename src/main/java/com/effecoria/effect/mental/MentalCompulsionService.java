@@ -7,6 +7,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
@@ -17,22 +19,25 @@ import net.minecraft.world.phys.Vec3;
 import java.util.UUID;
 
 /**
- * Timed mental compulsions: flee the caster, seek a lethal drop, or frenzy on everyone nearby.
+ * Timed mental compulsions: flee a fear source, seek a lethal drop, frenzy, or freeze in despair.
  */
 public final class MentalCompulsionService {
     public static final String TYPE_TAG = "effecoria:mental_compel_type";
     public static final String UNTIL_TAG = "effecoria:mental_compel_until";
     public static final String OWNER_TAG = "effecoria:mental_compel_owner";
+    public static final String FEAR_SOURCE_TAG = "effecoria:mental_fear_source";
 
     public enum Type {
         TERROR,
         CLIFF,
-        FRENZY;
+        FRENZY,
+        DEPRESS;
 
         static Type fromId(String id) {
             return switch (id) {
                 case "cliff" -> CLIFF;
                 case "frenzy" -> FRENZY;
+                case "depress" -> DEPRESS;
                 default -> TERROR;
             };
         }
@@ -41,6 +46,7 @@ public final class MentalCompulsionService {
             return switch (this) {
                 case CLIFF -> "cliff";
                 case FRENZY -> "frenzy";
+                case DEPRESS -> "depress";
                 case TERROR -> "terror";
             };
         }
@@ -49,6 +55,11 @@ public final class MentalCompulsionService {
     private MentalCompulsionService() {}
 
     public static boolean apply(ServerPlayer caster, LivingEntity target, Type type, int durationTicks) {
+        return apply(caster, target, type, durationTicks, null);
+    }
+
+    public static boolean apply(
+            ServerPlayer caster, LivingEntity target, Type type, int durationTicks, LivingEntity fearSource) {
         if (!(target instanceof Mob mob) || target instanceof Player) {
             return false;
         }
@@ -59,8 +70,19 @@ public final class MentalCompulsionService {
         data.putString(TYPE_TAG, type.id());
         data.putLong(UNTIL_TAG, caster.level().getGameTime() + durationTicks);
         data.putUUID(OWNER_TAG, caster.getUUID());
+        if (type == Type.TERROR && fearSource != null && fearSource.isAlive()) {
+            data.putUUID(FEAR_SOURCE_TAG, fearSource.getUUID());
+        } else {
+            data.remove(FEAR_SOURCE_TAG);
+        }
         mob.setTarget(null);
         mob.getNavigation().stop();
+        if (type == Type.DEPRESS) {
+            mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, durationTicks, 4));
+            mob.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, durationTicks, 2));
+            mob.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, durationTicks, 2));
+            mob.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, Math.min(60, durationTicks), 0));
+        }
         return true;
     }
 
@@ -81,6 +103,7 @@ public final class MentalCompulsionService {
         data.remove(TYPE_TAG);
         data.remove(UNTIL_TAG);
         data.remove(OWNER_TAG);
+        data.remove(FEAR_SOURCE_TAG);
     }
 
     public static void tick(ServerLevel level) {
@@ -120,29 +143,48 @@ public final class MentalCompulsionService {
                 0.002);
 
         switch (type) {
-            case TERROR -> tickTerror(mob, owner);
+            case TERROR -> tickTerror(level, mob, data, owner);
             case CLIFF -> tickCliff(level, mob);
             case FRENZY -> tickFrenzy(level, mob);
+            case DEPRESS -> tickDepress(mob);
         }
     }
 
-    private static void tickTerror(Mob mob, LivingEntity owner) {
-        if (owner == null || !owner.isAlive()) {
+    private static void tickTerror(ServerLevel level, Mob mob, CompoundTag data, LivingEntity owner) {
+        LivingEntity fear = resolveFearSource(level, data, owner);
+        if (fear == null || !fear.isAlive()) {
             return;
         }
-        double distSq = mob.distanceToSqr(owner);
+        double distSq = mob.distanceToSqr(fear);
         if (distSq < 2.5 * 2.5) {
-            Vec3 push = mob.position().subtract(owner.position()).normalize().scale(0.55);
+            Vec3 push = mob.position().subtract(fear.position()).normalize().scale(0.55);
             mob.setDeltaMovement(mob.getDeltaMovement().add(push.x, 0.05, push.z));
             mob.hurtMarked = true;
         }
-        Vec3 away = mob.position().subtract(owner.position());
+        Vec3 away = mob.position().subtract(fear.position());
         if (away.lengthSqr() < 0.01) {
             away = new Vec3(1, 0, 0);
         }
         Vec3 dest = mob.position().add(away.normalize().scale(10));
         mob.getNavigation().moveTo(dest.x, dest.y, dest.z, 1.4);
         mob.setTarget(null);
+    }
+
+    private static LivingEntity resolveFearSource(ServerLevel level, CompoundTag data, LivingEntity owner) {
+        if (data.hasUUID(FEAR_SOURCE_TAG)) {
+            var entity = level.getEntity(data.getUUID(FEAR_SOURCE_TAG));
+            if (entity instanceof LivingEntity living && living.isAlive()) {
+                return living;
+            }
+        }
+        return owner;
+    }
+
+    private static void tickDepress(Mob mob) {
+        mob.setTarget(null);
+        mob.getNavigation().stop();
+        mob.setDeltaMovement(mob.getDeltaMovement().multiply(0.2, 1.0, 0.2));
+        mob.hurtMarked = true;
     }
 
     private static void tickCliff(ServerLevel level, Mob mob) {

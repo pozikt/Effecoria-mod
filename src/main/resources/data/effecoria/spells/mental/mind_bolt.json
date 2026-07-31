@@ -11,7 +11,7 @@
   "effects": [
     {
       "type": "effecoria:mind_bolt",
-      "damage_dice": "1d8"
+      "confusion_ticks": 80
     }
   ]
 }

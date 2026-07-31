@@ -11,8 +11,8 @@
   "effects": [
     {
       "type": "effecoria:telekinetic_crush",
-      "damage_dice": "2d6",
-      "lift_force": 0.65
+      "lift_force": 0.65,
+      "confusion_ticks": 90
     }
   ]
 }

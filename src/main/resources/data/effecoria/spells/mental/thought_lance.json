@@ -11,8 +11,8 @@
   "effects": [
     {
       "type": "effecoria:thought_lance",
-      "damage_dice": "2d8",
-      "slow_ticks": 60
+      "slow_ticks": 60,
+      "confusion_ticks": 100
     }
   ]
 }

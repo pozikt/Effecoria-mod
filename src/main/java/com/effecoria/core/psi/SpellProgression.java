@@ -50,6 +50,7 @@ public final class SpellProgression {
                     id("psychic_storm"),
                     id("mental_fortress"),
                     id("thought_bomb"),
+                    id("mass_hysteria"),
                     id("omega_mind"));
 
             case ELEMENTAL -> List.of(

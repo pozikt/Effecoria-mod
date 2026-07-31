@@ -1,7 +1,6 @@
 package com.effecoria.effect.mental;
 
 import com.effecoria.content.ModParticleTypes;
-import com.effecoria.core.formula.DiceDamage;
 import com.effecoria.core.magic.SpellEffectEntry;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
@@ -13,8 +12,12 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class MentalEffects {
     private MentalEffects() {}
@@ -23,18 +26,16 @@ public final class MentalEffects {
         if (target == null) {
             return;
         }
-        ServerLevel level = caster.serverLevel();
-        float damage = DiceDamage.fromParams(effect.params(), power, 4f);
-        target.hurt(level.damageSources().magic(), damage);
-        target.hurtMarked = true;
-        finishHit(level, target.position());
+        int ticks = scaledTicks(effect, power, "confusion_ticks", 80);
+        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, ticks, 0));
+        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ticks, 0));
+        finishHit(caster.serverLevel(), target.position());
     }
 
     public static void psychicScream(ServerPlayer caster, SpellEffectEntry effect, float power) {
         ServerLevel level = caster.serverLevel();
         float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 6f;
-        int confuseTicks = effect.params().has("confusion_ticks") ? effect.params().get("confusion_ticks").getAsInt() : 80;
-        float damage = DiceDamage.fromParams(effect.params(), power, 3f);
+        int confuseTicks = scaledTicks(effect, power, "confusion_ticks", 80);
         AABB box = caster.getBoundingBox().inflate(radius);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == caster) {
@@ -43,9 +44,8 @@ public final class MentalEffects {
             if (entity.distanceToSqr(caster) > radius * radius) {
                 continue;
             }
-            entity.hurt(level.damageSources().magic(), damage);
-            entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 0));
-            entity.hurtMarked = true;
+            entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 1));
+            entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, confuseTicks / 2, 0));
             spawnMindParticles(level, entity.position());
         }
         spawnMindParticles(level, caster.position().add(0, 1, 0));
@@ -57,11 +57,11 @@ public final class MentalEffects {
             return;
         }
         ServerLevel level = caster.serverLevel();
-        float damage = DiceDamage.fromParams(effect.params(), power, 8f);
-        int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 60;
-        target.hurt(level.damageSources().magic(), damage);
+        int slowTicks = scaledTicks(effect, power, "slow_ticks", 60);
+        int confuseTicks = Math.max(slowTicks, scaledTicks(effect, power, "confusion_ticks", 100));
+        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 1));
         target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 2));
-        target.hurtMarked = true;
+        target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, Math.min(40, slowTicks / 2), 0));
         finishHit(level, target.position());
         level.playSound(null, target.blockPosition(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.7f, 0.5f);
     }
@@ -70,7 +70,7 @@ public final class MentalEffects {
         if (target == null) {
             return;
         }
-        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
+        int duration = scaledTicks(effect, power, "duration_ticks", 100);
         target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 3));
         target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, 1));
         finishHit(caster.serverLevel(), target.position());
@@ -81,11 +81,12 @@ public final class MentalEffects {
             return;
         }
         ServerLevel level = caster.serverLevel();
-        float damage = DiceDamage.fromParams(effect.params(), power, 7f);
         float lift = effect.params().has("lift_force") ? effect.params().get("lift_force").getAsFloat() : 0.65f;
-        target.hurt(level.damageSources().magic(), damage);
+        int fogTicks = scaledTicks(effect, power, "confusion_ticks", 90);
         target.setDeltaMovement(target.getDeltaMovement().add(0, lift * (power / 50f), 0));
         target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 30, 0));
+        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, fogTicks, 1));
+        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, fogTicks, 1));
         target.hurtMarked = true;
         finishHit(level, target.position());
     }
@@ -93,7 +94,7 @@ public final class MentalEffects {
     public static void massConfusion(ServerPlayer caster, SpellEffectEntry effect, float power) {
         ServerLevel level = caster.serverLevel();
         float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 8f;
-        int ticks = effect.params().has("confusion_ticks") ? effect.params().get("confusion_ticks").getAsInt() : 120;
+        int ticks = scaledTicks(effect, power, "confusion_ticks", 120);
         AABB box = caster.getBoundingBox().inflate(radius);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == caster) {
@@ -136,30 +137,29 @@ public final class MentalEffects {
         if (target == null) {
             return;
         }
-        ServerLevel level = caster.serverLevel();
-        float damage = DiceDamage.fromParams(effect.params(), power, 6f);
-        int confuseTicks = effect.params().has("confusion_ticks") ? effect.params().get("confusion_ticks").getAsInt() : 100;
-        target.hurt(level.damageSources().magic(), damage);
-        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 1));
+        int confuseTicks = scaledTicks(effect, power, "confusion_ticks", 100);
+        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 2));
         target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, confuseTicks / 2, 1));
-        target.hurtMarked = true;
-        finishHit(level, target.position());
+        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, confuseTicks, 1));
+        finishHit(caster.serverLevel(), target.position());
     }
 
     public static void psychicDrain(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         if (target == null) {
             return;
         }
-        ServerLevel level = caster.serverLevel();
-        float damage = DiceDamage.fromParams(effect.params(), power, 5f);
-        float ratio = effect.params().has("psi_ratio") ? effect.params().get("psi_ratio").getAsFloat() : 0.15f;
-        target.hurt(level.damageSources().magic(), damage);
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 1));
+        int fogTicks = scaledTicks(effect, power, "fatigue_ticks", 120);
+        float psiGain = effect.params().has("psi_gain")
+                ? effect.params().get("psi_gain").getAsFloat()
+                : 4f;
+        psiGain *= power / 50f;
+        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, fogTicks, 1));
+        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, fogTicks / 2, 1));
+        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, fogTicks / 2, 0));
         PlayerPsiData data = PsiHelper.get(caster);
-        data.setCurrentPsi(Math.min(data.maxPsi(), data.currentPsi() + damage * ratio));
+        data.setCurrentPsi(Math.min(data.maxPsi(), data.currentPsi() + psiGain));
         PsiHelper.set(caster, data);
-        target.hurtMarked = true;
-        finishHit(level, target.position());
+        finishHit(caster.serverLevel(), target.position());
     }
 
     public static void mentalFortress(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -175,7 +175,7 @@ public final class MentalEffects {
         }
         ServerLevel level = caster.serverLevel();
         float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 5f;
-        float damage = DiceDamage.fromParams(effect.params(), power, 10f);
+        int ticks = scaledTicks(effect, power, "confusion_ticks", 140);
         Vec3 center = target.position();
         AABB box = new AABB(center, center).inflate(radius);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
@@ -185,8 +185,8 @@ public final class MentalEffects {
             if (entity.position().distanceToSqr(center) > radius * radius) {
                 continue;
             }
-            entity.hurt(level.damageSources().magic(), damage);
-            entity.hurtMarked = true;
+            entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, ticks, 2));
+            entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ticks / 2, 1));
             spawnMindParticles(level, entity.position().add(0, 1, 0));
         }
         level.playSound(null, target.blockPosition(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 0.5f, 1.2f);
@@ -196,9 +196,11 @@ public final class MentalEffects {
         ServerLevel level = caster.serverLevel();
         float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 7f;
         int pulses = effect.params().has("pulses") ? effect.params().get("pulses").getAsInt() : 3;
-        float perPulse = DiceDamage.fromParams(effect.params(), power, 4f) / pulses;
+        int baseTicks = scaledTicks(effect, power, "confusion_ticks", 60);
         AABB box = caster.getBoundingBox().inflate(radius);
         for (int p = 0; p < pulses; p++) {
+            int amp = Math.min(2, p);
+            int ticks = baseTicks + p * 20;
             for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
                 if (entity == caster) {
                     continue;
@@ -206,11 +208,12 @@ public final class MentalEffects {
                 if (entity.distanceToSqr(caster) > radius * radius) {
                     continue;
                 }
-                entity.hurt(level.damageSources().magic(), perPulse);
-                entity.hurtMarked = true;
+                entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, ticks, amp));
+                entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ticks / 2, 0));
             }
         }
         spawnMindParticles(level, caster.position().add(0, 1, 0));
+        level.playSound(null, caster.blockPosition(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.7f, 0.8f);
     }
 
     public static void psychicAmplify(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -250,6 +253,58 @@ public final class MentalEffects {
         applyCompulsion(caster, effect, power, target, MentalCompulsionService.Type.FRENZY, 120);
     }
 
+    public static void massHysteria(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 10f;
+        int duration = scaledTicks(effect, power, "duration_ticks", 160);
+        MentalCompulsionService.Type[] pool = {
+            MentalCompulsionService.Type.TERROR,
+            MentalCompulsionService.Type.CLIFF,
+            MentalCompulsionService.Type.FRENZY,
+            MentalCompulsionService.Type.DEPRESS
+        };
+        AABB box = caster.getBoundingBox().inflate(radius);
+        int hit = 0;
+        for (Mob mob : level.getEntitiesOfClass(Mob.class, box, LivingEntity::isAlive)) {
+            if (mob.distanceToSqr(caster) > radius * radius) {
+                continue;
+            }
+            MentalCompulsionService.Type type = pool[mob.getRandom().nextInt(pool.length)];
+            LivingEntity fearSource = null;
+            if (type == MentalCompulsionService.Type.TERROR) {
+                fearSource = pickRandomFearSource(level, mob, radius * 1.5f, caster);
+            }
+            if (!MentalCompulsionService.apply(caster, mob, type, duration, fearSource)) {
+                continue;
+            }
+            mob.addEffect(new MobEffectInstance(MobEffects.CONFUSION, Math.min(duration, 120), 1));
+            spawnMindParticles(level, mob.position().add(0, 1, 0));
+            hit++;
+        }
+        spawnMindParticles(level, caster.position().add(0, 1, 0));
+        level.playSound(null, caster.blockPosition(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 0.45f, 1.35f);
+        if (hit == 0) {
+            caster.displayClientMessage(
+                    net.minecraft.network.chat.Component.translatable("message.effecoria.mental.compel_invalid"),
+                    true);
+        }
+    }
+
+    private static LivingEntity pickRandomFearSource(
+            ServerLevel level, Mob victim, float searchRadius, LivingEntity fallback) {
+        List<LivingEntity> candidates = new ArrayList<>();
+        AABB box = victim.getBoundingBox().inflate(searchRadius);
+        for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (other != victim) {
+                candidates.add(other);
+            }
+        }
+        if (candidates.isEmpty()) {
+            return fallback;
+        }
+        return candidates.get(victim.getRandom().nextInt(candidates.size()));
+    }
+
     private static void applyCompulsion(
             ServerPlayer caster,
             SpellEffectEntry effect,
@@ -260,8 +315,7 @@ public final class MentalEffects {
         if (target == null) {
             return;
         }
-        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : defaultTicks;
-        duration = Math.round(duration * (0.85f + power / 120f));
+        int duration = scaledTicks(effect, power, "duration_ticks", defaultTicks);
         if (!MentalCompulsionService.apply(caster, target, type, duration)) {
             caster.displayClientMessage(
                     net.minecraft.network.chat.Component.translatable("message.effecoria.mental.compel_invalid"),
@@ -281,11 +335,15 @@ public final class MentalEffects {
         float force = effect.params().has("force") ? effect.params().get("force").getAsFloat() : 3.5f;
         Vec3 look = caster.getLookAngle().normalize();
         double strength = force * (power / 50f);
-        float damage = DiceDamage.fromParams(effect.params(), power, 3f);
         target.setDeltaMovement(target.getDeltaMovement().add(look.scale(strength)));
-        target.hurt(caster.serverLevel().damageSources().magic(), damage);
+        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 40, 0));
         target.hurtMarked = true;
         finishHit(caster.serverLevel(), target.position());
+    }
+
+    private static int scaledTicks(SpellEffectEntry effect, float power, String key, int fallback) {
+        int base = effect.params().has(key) ? effect.params().get(key).getAsInt() : fallback;
+        return Math.round(base * (0.85f + power / 120f));
     }
 
     private static void finishHit(ServerLevel level, Vec3 pos) {

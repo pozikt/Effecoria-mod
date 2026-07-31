@@ -28,7 +28,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -375,6 +374,7 @@ public final class SpellEffectExecutor {
             case "mind_terror" -> MentalEffects.mindTerror(caster, effect, power, target);
             case "cliff_urge" -> MentalEffects.cliffUrge(caster, effect, power, target);
             case "psychic_frenzy" -> MentalEffects.psychicFrenzy(caster, effect, power, target);
+            case "mass_hysteria" -> MentalEffects.massHysteria(caster, effect, power);
             case "blink" -> SpatialEffects.standardBlink(caster, effect, power);
             case "rift_yank" -> riftYank(caster, effect, power, target);
             case "phase_veil" -> phaseVeil(caster, effect, power);
@@ -483,12 +483,17 @@ public final class SpellEffectExecutor {
         if (target == null) {
             return;
         }
-        float damage = effect.params().get("damage").getAsFloat();
-        int slowTicks = effect.params().get("slow_duration_ticks").getAsInt();
-        float scaledDamage = damage * (power / 50f);
-        DamageSource source = caster.level().damageSources().magic();
-        target.hurt(source, scaledDamage);
+        int slowTicks = effect.params().has("slow_duration_ticks")
+                ? effect.params().get("slow_duration_ticks").getAsInt()
+                : 60;
+        int fogTicks = effect.params().has("confusion_ticks")
+                ? effect.params().get("confusion_ticks").getAsInt()
+                : Math.max(slowTicks, 80);
+        slowTicks = Math.round(slowTicks * (0.85f + power / 120f));
+        fogTicks = Math.round(fogTicks * (0.85f + power / 120f));
+        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, fogTicks, 0));
         target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
+        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, fogTicks / 2, 0));
         spawnMindParticles(caster.serverLevel(), target.position());
     }
 

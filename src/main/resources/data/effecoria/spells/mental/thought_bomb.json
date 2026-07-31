@@ -11,8 +11,8 @@
   "effects": [
     {
       "type": "effecoria:thought_bomb",
-      "damage_dice": "3d10",
-      "radius": 5
+      "radius": 5,
+      "confusion_ticks": 140
     }
   ]
 }

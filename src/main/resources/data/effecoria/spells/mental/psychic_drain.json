@@ -11,8 +11,8 @@
   "effects": [
     {
       "type": "effecoria:psychic_drain",
-      "damage_dice": "2d6",
-      "psi_ratio": 0.2
+      "fatigue_ticks": 120,
+      "psi_gain": 5
     }
   ]
 }

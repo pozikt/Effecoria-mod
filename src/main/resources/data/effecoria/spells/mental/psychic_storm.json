@@ -11,9 +11,9 @@
   "effects": [
     {
       "type": "effecoria:psychic_storm",
-      "damage_dice": "3d6",
       "radius": 7,
-      "pulses": 3
+      "pulses": 3,
+      "confusion_ticks": 60
     }
   ]
 }
