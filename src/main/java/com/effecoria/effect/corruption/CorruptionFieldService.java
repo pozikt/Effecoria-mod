@@ -1,5 +1,6 @@
 package com.effecoria.effect.corruption;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -86,8 +87,8 @@ public final class CorruptionFieldService {
                 continue;
             }
             entity.hurt(level.damageSources().magic(), field.damagePerSecond);
-            entity.addEffect(new MobEffectInstance(MobEffects.POISON, 40, field.poisonAmplifier));
-            entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 0));
+            BreathDebuffs.apply(level, field.owner, entity, new MobEffectInstance(MobEffects.POISON, 40, field.poisonAmplifier));
+            BreathDebuffs.apply(level, field.owner, entity, new MobEffectInstance(MobEffects.WEAKNESS, 40, 0));
             entity.hurtMarked = true;
         }
     }

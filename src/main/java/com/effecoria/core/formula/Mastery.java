@@ -7,12 +7,11 @@ public final class Mastery {
     private Mastery() {}
 
     /**
-     * @return multiplier in ~[1.0, 1.3] — higher power, slightly lower cost via {@link #costMultiplier(float)}.
+     * @return multiplier starting at 1.0 — breathing bonus scales past 100% (ascension).
      */
     public static float factor(float breathingMastery, int essence) {
-        float cap = BalanceConfig.BREATHING_MAX_MASTERY.get().floatValue();
-        float normalized = cap > 0f ? Math.min(1f, breathingMastery / cap) : 0f;
-        float fromBreathing = normalized * BalanceConfig.MASTERY_BREATHING_MAX.get().floatValue();
+        float ratio = com.effecoria.core.progression.BreathingService.referenceRatio(breathingMastery);
+        float fromBreathing = ratio * BalanceConfig.MASTERY_BREATHING_MAX.get().floatValue();
         float fromEssence = Math.min(
                 essence * BalanceConfig.MASTERY_ESSENCE_PER_POINT.get().floatValue(),
                 BalanceConfig.MASTERY_ESSENCE_CAP.get().floatValue());

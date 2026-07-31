@@ -1,5 +1,6 @@
 package com.effecoria.effect.necromancy;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -78,7 +79,7 @@ public final class NecroFieldService {
                     entity.hurt(level.damageSources().wither(), field.damagePerSecond);
                     entity.hurtMarked = true;
                     if (now % 40 == 0) {
-                        entity.addEffect(new MobEffectInstance(MobEffects.WITHER, 40, 0));
+                        BreathDebuffs.apply(level, field.owner, entity, new MobEffectInstance(MobEffects.WITHER, 40, 0));
                     }
                 }
             }

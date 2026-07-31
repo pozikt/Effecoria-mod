@@ -1,5 +1,6 @@
 package com.effecoria.effect.corruption;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
 import com.effecoria.core.magic.SpellEffectEntry;
@@ -34,8 +35,8 @@ public final class CorruptionEffects {
         weaknessTicks = Math.round(weaknessTicks * (0.85f + power / 100f));
 
         target.hurt(level.damageSources().magic(), damage);
-        target.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, weaknessTicks, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, weaknessTicks, 0));
         spawnCorruptionParticles(level, target.position().add(0, 1, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.SCULK_CLICKING, SoundSource.PLAYERS, 0.9f, 0.7f);
     }
@@ -50,9 +51,9 @@ public final class CorruptionEffects {
         rootTicks = Math.round(rootTicks * (0.8f + power / 100f));
         glowTicks = Math.round(glowTicks * (0.8f + power / 100f));
 
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, rootTicks, 5));
-        target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, rootTicks, 2));
-        target.addEffect(new MobEffectInstance(MobEffects.GLOWING, glowTicks, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, rootTicks, 5));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.DIG_SLOWDOWN, rootTicks, 2));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.GLOWING, glowTicks, 0));
         spawnCorruptionParticles(level, target.position().add(0, 0.5, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.5f, 1.6f);
     }
@@ -79,7 +80,7 @@ public final class CorruptionEffects {
         float damage = DiceDamage.fromParams(effect.params(), power, 2.5f);
         int hungerTicks = effect.params().has("hunger_ticks") ? effect.params().get("hunger_ticks").getAsInt() : 100;
         target.hurt(level.damageSources().wither(), damage);
-        target.addEffect(new MobEffectInstance(MobEffects.HUNGER, hungerTicks, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.HUNGER, hungerTicks, 1));
         finishHit(level, target);
     }
 
@@ -91,7 +92,7 @@ public final class CorruptionEffects {
         float damage = DiceDamage.fromParams(effect.params(), power, 4f);
         int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 60;
         target.hurt(level.damageSources().magic(), damage);
-        target.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
         finishHit(level, target);
     }
 
@@ -104,8 +105,8 @@ public final class CorruptionEffects {
         int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 80;
         int weaknessTicks = effect.params().has("weakness_ticks") ? effect.params().get("weakness_ticks").getAsInt() : 60;
         target.hurt(level.damageSources().magic(), damage);
-        target.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, weaknessTicks, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, weaknessTicks, 0));
         finishHit(level, target);
     }
 
@@ -118,7 +119,7 @@ public final class CorruptionEffects {
         int witherTicks = effect.params().has("wither_ticks") ? effect.params().get("wither_ticks").getAsInt() : 80;
         int amp = effect.params().has("wither_amplifier") ? effect.params().get("wither_amplifier").getAsInt() : 1;
         target.hurt(level.damageSources().wither(), damage);
-        target.addEffect(new MobEffectInstance(MobEffects.WITHER, witherTicks, amp));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, amp));
         finishHit(level, target);
     }
 
@@ -128,7 +129,7 @@ public final class CorruptionEffects {
         float dps = effect.params().has("damage_per_second") ? effect.params().get("damage_per_second").getAsFloat() : 1.5f;
         radius *= 0.9f + power / 120f;
         dps *= 0.85f + power / 100f;
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
         CorruptionFieldService.spawnMiasma(
                 caster.serverLevel(),
                 caster.position().add(0, 0.5, 0),
@@ -155,7 +156,7 @@ public final class CorruptionEffects {
         }
         bindingSeal(caster, effect, power, target);
         int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 80;
-        target.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
     }
 
     public static void blightField(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -172,8 +173,8 @@ public final class CorruptionEffects {
     public static void entropyAegis(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 240;
         int resist = effect.params().has("resistance_amplifier") ? effect.params().get("resistance_amplifier").getAsInt() : 1;
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, resist, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.HUNGER, duration / 2, 0, false, false, false));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, resist, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.HUNGER, duration / 2, 0, false, false, false));
         spawnCorruptionParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -204,8 +205,8 @@ public final class CorruptionEffects {
             if (entity.distanceToSqr(caster) > radius * radius) {
                 continue;
             }
-            entity.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, amp));
-            entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, poisonTicks / 2, 0));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.POISON, poisonTicks, amp));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.CONFUSION, poisonTicks / 2, 0));
             spawnCorruptionParticles(level, entity.position().add(0, 1, 0));
         }
         spawnCorruptionPulse(level, caster.position().add(0, 0.2, 0), radius);
@@ -213,7 +214,7 @@ public final class CorruptionEffects {
 
     public static void plagueCrown(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 120;
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, true, true));
         blightSurge(caster, effect, power);
     }
 
@@ -249,9 +250,9 @@ public final class CorruptionEffects {
                 continue;
             }
             entity.hurt(level.damageSources().magic(), damage);
-            entity.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
             if (weakness) {
-                entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, poisonTicks / 2, 0));
+                BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WEAKNESS, poisonTicks / 2, 0));
             }
             spawnCorruptionParticles(level, entity.position().add(0, 1, 0));
         }

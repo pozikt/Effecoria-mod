@@ -1,5 +1,6 @@
 package com.effecoria.effect.mental;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 
 import net.minecraft.core.BlockPos;
@@ -66,6 +67,7 @@ public final class MentalCompulsionService {
         if (durationTicks <= 0) {
             return false;
         }
+        durationTicks = BreathDebuffs.scaleDuration(caster, durationTicks);
         CompoundTag data = mob.getPersistentData();
         data.putString(TYPE_TAG, type.id());
         data.putLong(UNTIL_TAG, caster.level().getGameTime() + durationTicks);
@@ -78,10 +80,30 @@ public final class MentalCompulsionService {
         mob.setTarget(null);
         mob.getNavigation().stop();
         if (type == Type.DEPRESS) {
-            mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, durationTicks, 4));
-            mob.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, durationTicks, 2));
-            mob.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, durationTicks, 2));
-            mob.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, Math.min(60, durationTicks), 0));
+            BreathDebuffs.applyExact(
+                    mob,
+                    new MobEffectInstance(
+                            MobEffects.MOVEMENT_SLOWDOWN,
+                            durationTicks,
+                            BreathDebuffs.scaleAmplifier(caster, 4)));
+            BreathDebuffs.applyExact(
+                    mob,
+                    new MobEffectInstance(
+                            MobEffects.WEAKNESS,
+                            durationTicks,
+                            BreathDebuffs.scaleAmplifier(caster, 2)));
+            BreathDebuffs.applyExact(
+                    mob,
+                    new MobEffectInstance(
+                            MobEffects.DIG_SLOWDOWN,
+                            durationTicks,
+                            BreathDebuffs.scaleAmplifier(caster, 2)));
+            BreathDebuffs.applyExact(
+                    mob,
+                    new MobEffectInstance(
+                            MobEffects.BLINDNESS,
+                            Math.min(60, durationTicks),
+                            BreathDebuffs.scaleAmplifier(caster, 0)));
         }
         return true;
     }

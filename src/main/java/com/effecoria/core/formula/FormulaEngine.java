@@ -78,7 +78,7 @@ public final class FormulaEngine {
 
     /**
      * 1.0 when the spell is freshly unlocked; falls toward {@link BalanceConfig#SPELL_COST_FLOOR_RATIO}
-     * (or a focus-lowered floor) as breathing mastery grows past {@code unlockMastery}.
+     * by reference mastery (100%), then toward {@link BalanceConfig#SPELL_COST_ASCENSION_FLOOR} past that.
      */
     public static float proficiencyCostFactor(float breathingMastery, float unlockMastery) {
         return proficiencyCostFactor(breathingMastery, unlockMastery, 0f);
@@ -86,16 +86,29 @@ public final class FormulaEngine {
 
     public static float proficiencyCostFactor(float breathingMastery, float unlockMastery, float focusCostFloor) {
         float anchor = Math.max(0f, unlockMastery);
-        float progress;
-        if (breathingMastery <= anchor) {
-            progress = 0f;
-        } else {
-            progress = Mth.clamp((breathingMastery - anchor) / Math.max(0.01f, 1f - anchor), 0f, 1f);
-        }
-        float floor = focusCostFloor > 0f
+        float ref = BalanceConfig.BREATHING_MAX_MASTERY.get().floatValue();
+        float mortalFloor = focusCostFloor > 0f
                 ? focusCostFloor
                 : BalanceConfig.SPELL_COST_FLOOR_RATIO.get().floatValue();
-        return Mth.lerp(progress, 1f, floor);
+        float ascensionFloor = Math.min(
+                mortalFloor,
+                BalanceConfig.SPELL_COST_ASCENSION_FLOOR.get().floatValue());
+
+        if (breathingMastery <= anchor) {
+            return 1f;
+        }
+
+        // Mortal band: unlock → 100% reference
+        float mortalEnd = Math.max(anchor + 0.01f, ref);
+        if (breathingMastery <= mortalEnd) {
+            float progress = Mth.clamp((breathingMastery - anchor) / (mortalEnd - anchor), 0f, 1f);
+            return Mth.lerp(progress, 1f, mortalFloor);
+        }
+
+        // Ascension: 100% → ~500% reaches ascension floor
+        float past = (breathingMastery - mortalEnd) / Math.max(0.01f, ref);
+        float t = Mth.clamp(past / 4f, 0f, 1f);
+        return Mth.lerp(t, mortalFloor, ascensionFloor);
     }
 
     /**

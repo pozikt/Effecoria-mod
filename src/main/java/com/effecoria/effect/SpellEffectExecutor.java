@@ -1,6 +1,7 @@
 package com.effecoria.effect;
 
 import com.effecoria.content.ModParticleTypes;
+import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.effect.elemental.AirHandService;
 import com.effecoria.effect.elemental.ElementalEffects;
 import com.effecoria.effect.corruption.CorruptionEffects;
@@ -144,29 +145,34 @@ public final class SpellEffectExecutor {
     }
 
     public static CastDelivery applyAll(ServerPlayer caster, SpellDefinition spell, float power) {
-        LivingEntity target = null;
-        if (requiresTarget(spell)) {
-            boolean airHandRelease = isAirHandRelease(caster, spell);
-            if (!airHandRelease) {
-                target = resolveTarget(caster, spell);
-                if (target == null) {
-                    return CastDelivery.WHIFF_NO_TARGET;
+        BreathDebuffs.beginCast(caster);
+        try {
+            LivingEntity target = null;
+            if (requiresTarget(spell)) {
+                boolean airHandRelease = isAirHandRelease(caster, spell);
+                if (!airHandRelease) {
+                    target = resolveTarget(caster, spell);
+                    if (target == null) {
+                        return CastDelivery.WHIFF_NO_TARGET;
+                    }
                 }
             }
-        }
 
-        BlockPos blockTarget = null;
-        if (requiresBlockTarget(spell)) {
-            blockTarget = resolveBlockTarget(caster, spell);
-            if (blockTarget == null) {
-                return CastDelivery.WHIFF_NO_BLOCK;
+            BlockPos blockTarget = null;
+            if (requiresBlockTarget(spell)) {
+                blockTarget = resolveBlockTarget(caster, spell);
+                if (blockTarget == null) {
+                    return CastDelivery.WHIFF_NO_BLOCK;
+                }
             }
-        }
 
-        for (SpellEffectEntry effect : spell.effects()) {
-            apply(caster, effect, power, target, blockTarget);
+            for (SpellEffectEntry effect : spell.effects()) {
+                apply(caster, effect, power, target, blockTarget);
+            }
+            return CastDelivery.FULL;
+        } finally {
+            BreathDebuffs.endCast();
         }
-        return CastDelivery.FULL;
     }
 
     private static boolean isAirHandRelease(ServerPlayer caster, SpellDefinition spell) {
@@ -491,9 +497,9 @@ public final class SpellEffectExecutor {
                 : Math.max(slowTicks, 80);
         slowTicks = Math.round(slowTicks * (0.85f + power / 120f));
         fogTicks = Math.round(fogTicks * (0.85f + power / 120f));
-        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, fogTicks, 0));
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, fogTicks / 2, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, fogTicks, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, fogTicks / 2, 0));
         spawnMindParticles(caster.serverLevel(), target.position());
     }
 
@@ -572,7 +578,7 @@ public final class SpellEffectExecutor {
         int witherTicks = effect.params().get("wither_ticks").getAsInt();
         float scaledDamage = damage * (power / 50f);
         target.hurt(caster.level().damageSources().wither(), scaledDamage);
-        target.addEffect(new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
         spawnNecroParticles(level, target.position().add(0, 1, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.7f, 1.2f);
     }
@@ -601,9 +607,9 @@ public final class SpellEffectExecutor {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 80;
         duration = Math.round(duration * (0.85f + power / 100f));
 
-        caster.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0, false, false));
-        caster.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, duration, 0, false, false));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0, false, false));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.SLOW_FALLING, duration, 0, false, false));
         spawnSpatialParticles(level, caster.position().add(0, 1, 0));
         level.playSound(null, caster.blockPosition(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.8f, 1.2f);
     }
@@ -687,8 +693,8 @@ public final class SpellEffectExecutor {
         int scaledTicks = Math.round(rootTicks * (0.8f + power / 100f));
 
         if (target != null) {
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, scaledTicks, 4));
-            target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, scaledTicks, 1));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, scaledTicks, 4));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.DIG_SLOWDOWN, scaledTicks, 1));
             spawnOrganicRoots(level, target.position().add(0, 0.2, 0));
             level.playSound(null, target.blockPosition(), SoundEvents.AZALEA_PLACE, SoundSource.PLAYERS, 1f, 0.7f);
         }

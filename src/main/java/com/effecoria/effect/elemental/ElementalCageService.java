@@ -1,5 +1,6 @@
 package com.effecoria.effect.elemental;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -10,6 +11,7 @@ import com.effecoria.content.ModParticleTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -52,9 +54,10 @@ public final class ElementalCageService {
     public static void imprisonWater(
             ServerLevel level, LivingEntity target, UUID casterId, float radius, int durationTicks, float damagePerSecond) {
         Vec3 center = target.position().add(0, target.getBbHeight() * 0.5, 0);
-        int duration = Math.max(40, durationTicks);
+        ServerPlayer caster = resolveCaster(level, casterId);
+        int duration = Math.max(40, BreathDebuffs.scaleDuration(caster, durationTicks));
         placeWaterShell(level, BlockPos.containing(center), Math.max(1, Math.round(radius)), duration);
-        pinTarget(target, duration);
+        pinTarget(caster, target, duration);
         CAGES.add(new Cage(
                 Kind.WATER,
                 target.getUUID(),
@@ -80,11 +83,20 @@ public final class ElementalCageService {
     public static void imprisonIce(
             ServerLevel level, LivingEntity target, UUID casterId, float radius, int durationTicks, float damagePerSecond) {
         Vec3 center = target.position().add(0, target.getBbHeight() * 0.5, 0);
-        int duration = Math.max(40, durationTicks);
+        ServerPlayer caster = resolveCaster(level, casterId);
+        int duration = Math.max(40, BreathDebuffs.scaleDuration(caster, durationTicks));
         int r = Math.max(1, Math.round(radius));
         placeIceShell(level, BlockPos.containing(center), r, duration);
-        pinTarget(target, duration);
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 6, false, true, true));
+        pinTarget(caster, target, duration);
+        BreathDebuffs.applyExact(
+                target,
+                new MobEffectInstance(
+                        MobEffects.MOVEMENT_SLOWDOWN,
+                        duration,
+                        BreathDebuffs.scaleAmplifier(caster, 6),
+                        false,
+                        true,
+                        true));
         CAGES.add(new Cage(
                 Kind.ICE,
                 target.getUUID(),
@@ -101,11 +113,31 @@ public final class ElementalCageService {
     /** Absolute vacuum sphere — damages and pins everyone inside the radius. */
     public static void imprisonVacuumAoE(
             ServerLevel level, Vec3 center, UUID casterId, float radius, int durationTicks, float damagePerSecond) {
-        int duration = Math.max(40, durationTicks);
+        ServerPlayer caster = resolveCaster(level, casterId);
+        int duration = Math.max(40, BreathDebuffs.scaleDuration(caster, durationTicks));
         AABB box = new AABB(center, center).inflate(radius);
         for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, box, Entity::isAlive)) {
-            living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 4, false, true, true));
-            living.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, duration, 1, false, true, true));
+            if (casterId.equals(living.getUUID())) {
+                continue;
+            }
+            BreathDebuffs.applyExact(
+                    living,
+                    new MobEffectInstance(
+                            MobEffects.MOVEMENT_SLOWDOWN,
+                            duration,
+                            BreathDebuffs.scaleAmplifier(caster, 4),
+                            false,
+                            true,
+                            true));
+            BreathDebuffs.applyExact(
+                    living,
+                    new MobEffectInstance(
+                            MobEffects.DIG_SLOWDOWN,
+                            duration,
+                            BreathDebuffs.scaleAmplifier(caster, 1),
+                            false,
+                            true,
+                            true));
         }
         CAGES.add(new Cage(
                 Kind.VACUUM,
@@ -216,9 +248,30 @@ public final class ElementalCageService {
         target.fallDistance = 0f;
     }
 
-    private static void pinTarget(LivingEntity target, int duration) {
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 5, false, true, true));
-        target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, duration, 2, false, true, true));
+    private static ServerPlayer resolveCaster(ServerLevel level, UUID casterId) {
+        ServerPlayer caster = level.getServer().getPlayerList().getPlayer(casterId);
+        return caster != null ? caster : BreathDebuffs.currentCaster();
+    }
+
+    private static void pinTarget(ServerPlayer caster, LivingEntity target, int duration) {
+        BreathDebuffs.applyExact(
+                target,
+                new MobEffectInstance(
+                        MobEffects.MOVEMENT_SLOWDOWN,
+                        duration,
+                        BreathDebuffs.scaleAmplifier(caster, 5),
+                        false,
+                        true,
+                        true));
+        BreathDebuffs.applyExact(
+                target,
+                new MobEffectInstance(
+                        MobEffects.DIG_SLOWDOWN,
+                        duration,
+                        BreathDebuffs.scaleAmplifier(caster, 2),
+                        false,
+                        true,
+                        true));
     }
 
     private static void placeWaterShell(ServerLevel level, BlockPos center, int radius, int durationTicks) {

@@ -1,5 +1,6 @@
 package com.effecoria.effect.necromancy;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
 import com.effecoria.core.magic.SpellEffectEntry;
@@ -29,7 +30,7 @@ public final class NecromancyEffects {
         float damage = DiceDamage.fromParams(effect.params(), power, 3f);
         int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 80;
         target.hurt(level.damageSources().wither(), damage);
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
         target.hurtMarked = true;
         finishHit(level, target);
     }
@@ -48,7 +49,7 @@ public final class NecromancyEffects {
             if (entity.getHealth() / entity.getMaxHealth() > threshold) {
                 continue;
             }
-            entity.addEffect(new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false, true));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false, true));
             count++;
         }
         caster.displayClientMessage(
@@ -61,8 +62,8 @@ public final class NecromancyEffects {
             return;
         }
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
-        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, duration, 0));
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, duration, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, 0));
         finishHit(caster.serverLevel(), target);
     }
 
@@ -94,8 +95,8 @@ public final class NecromancyEffects {
     public static void boneArmor(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 240;
         int resist = effect.params().has("resistance_amplifier") ? effect.params().get("resistance_amplifier").getAsInt() : 0;
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, resist, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, resist, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, 1, false, false, true));
         spawnNecroParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -126,7 +127,7 @@ public final class NecromancyEffects {
                 continue;
             }
             entity.hurt(level.damageSources().wither(), damage);
-            entity.addEffect(new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
             entity.hurtMarked = true;
             spawnNecroParticles(level, entity.position().add(0, 1, 0));
         }
@@ -136,9 +137,9 @@ public final class NecromancyEffects {
     public static void darkPact(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 200;
         int exhaust = effect.params().has("exhaustion_ticks") ? effect.params().get("exhaustion_ticks").getAsInt() : 120;
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, exhaust, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, exhaust, 1, false, false, true));
         spawnNecroParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -147,15 +148,15 @@ public final class NecromancyEffects {
             return;
         }
         int rootTicks = effect.params().has("root_ticks") ? effect.params().get("root_ticks").getAsInt() : 100;
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, rootTicks, 4));
-        target.addEffect(new MobEffectInstance(MobEffects.GLOWING, rootTicks, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, rootTicks, 4));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.GLOWING, rootTicks, 0));
         finishHit(caster.serverLevel(), target);
     }
 
     public static void phantomStep(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
-        caster.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.SLOW_FALLING, duration, 0, false, false, true));
         spawnNecroParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -182,9 +183,9 @@ public final class NecromancyEffects {
 
     public static void lichWard(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 500;
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, duration, 0, false, false, true));
         spawnNecroParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -225,10 +226,10 @@ public final class NecromancyEffects {
 
     public static void deathApotheosis(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 180;
-        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, 2, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 2, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 1, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, 2, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 2, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
         spawnNecroParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
         caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.35f, 1.4f);
     }
@@ -241,7 +242,7 @@ public final class NecromancyEffects {
         float damage = DiceDamage.fromParams(effect.params(), power, 5f);
         int witherTicks = effect.params().has("wither_ticks") ? effect.params().get("wither_ticks").getAsInt() : 40;
         target.hurt(level.damageSources().wither(), damage);
-        target.addEffect(new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
         target.hurtMarked = true;
         finishHit(level, target);
     }
@@ -251,8 +252,8 @@ public final class NecromancyEffects {
             return;
         }
         int rootTicks = effect.params().has("root_ticks") ? effect.params().get("root_ticks").getAsInt() : 120;
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, rootTicks, 5));
-        target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, rootTicks, 2));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, rootTicks, 5));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.DIG_SLOWDOWN, rootTicks, 2));
         finishHit(caster.serverLevel(), target);
     }
 
@@ -262,8 +263,8 @@ public final class NecromancyEffects {
         }
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 140;
         int weakAmp = effect.params().has("weakness_amplifier") ? effect.params().get("weakness_amplifier").getAsInt() : 1;
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, weakAmp));
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, weakAmp));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 0));
         finishHit(caster.serverLevel(), target);
     }
 
@@ -272,9 +273,9 @@ public final class NecromancyEffects {
             return;
         }
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
-        target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, duration / 2, 0));
-        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, duration, 0));
-        target.addEffect(new MobEffectInstance(MobEffects.DARKNESS, duration / 2, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.BLINDNESS, duration / 2, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, duration, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.DARKNESS, duration / 2, 0));
         finishHit(caster.serverLevel(), target);
     }
 
@@ -320,7 +321,7 @@ public final class NecromancyEffects {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 160;
         float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 4f;
         float pulse = DiceDamage.fromParams(effect.params(), power, 3f);
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
         AABB box = caster.getBoundingBox().inflate(radius);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == caster) {
@@ -330,7 +331,7 @@ public final class NecromancyEffects {
                 continue;
             }
             entity.hurt(level.damageSources().wither(), pulse);
-            entity.addEffect(new MobEffectInstance(MobEffects.WITHER, 40, 0));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WITHER, 40, 0));
             entity.hurtMarked = true;
             spawnNecroParticles(level, entity.position().add(0, 1, 0));
         }
@@ -342,8 +343,8 @@ public final class NecromancyEffects {
             return;
         }
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 80;
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 6));
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 6));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, 1));
         target.setDeltaMovement(0, target.getDeltaMovement().y, 0);
         target.hurtMarked = true;
         finishHit(caster.serverLevel(), target);
@@ -397,7 +398,7 @@ public final class NecromancyEffects {
         }
         target.hurt(level.damageSources().wither(), damage);
         caster.heal(damage * healRatio);
-        target.addEffect(new MobEffectInstance(MobEffects.WITHER, 100, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, 100, 1));
         target.hurtMarked = true;
         finishHit(level, target);
     }
@@ -411,7 +412,7 @@ public final class NecromancyEffects {
         float damage = DiceDamage.fromParams(effect.params(), power, 5f);
         caster.heal(heal);
         hurtInRadius(level, caster.position(), radius, damage, caster);
-        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 80, 1, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, 80, 1, false, true, true));
         if (data.isLichAscensionActive(gameTime)) {
             float bonus = effect.params().has("phyl_boost") ? effect.params().get("phyl_boost").getAsFloat() : 0.12f;
             data.boostPhylacteryEfficiency(gameTime, bonus);
@@ -444,7 +445,7 @@ public final class NecromancyEffects {
 
     private static void applyCoilHit(ServerLevel level, LivingEntity entity, float damage, int witherTicks) {
         entity.hurt(level.damageSources().wither(), damage);
-        entity.addEffect(new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
+        BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
         entity.hurtMarked = true;
         spawnNecroParticles(level, entity.position().add(0, 1, 0));
     }

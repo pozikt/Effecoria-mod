@@ -1,5 +1,6 @@
 package com.effecoria.effect.mental;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.magic.SpellEffectEntry;
 import com.effecoria.core.psi.PlayerPsiData;
@@ -27,8 +28,8 @@ public final class MentalEffects {
             return;
         }
         int ticks = scaledTicks(effect, power, "confusion_ticks", 80);
-        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, ticks, 0));
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ticks, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, ticks, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, ticks, 0));
         finishHit(caster.serverLevel(), target.position());
     }
 
@@ -44,8 +45,8 @@ public final class MentalEffects {
             if (entity.distanceToSqr(caster) > radius * radius) {
                 continue;
             }
-            entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 1));
-            entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, confuseTicks / 2, 0));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 1));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WEAKNESS, confuseTicks / 2, 0));
             spawnMindParticles(level, entity.position());
         }
         spawnMindParticles(level, caster.position().add(0, 1, 0));
@@ -59,9 +60,9 @@ public final class MentalEffects {
         ServerLevel level = caster.serverLevel();
         int slowTicks = scaledTicks(effect, power, "slow_ticks", 60);
         int confuseTicks = Math.max(slowTicks, scaledTicks(effect, power, "confusion_ticks", 100));
-        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 1));
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 2));
-        target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, Math.min(40, slowTicks / 2), 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 2));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.BLINDNESS, Math.min(40, slowTicks / 2), 0));
         finishHit(level, target.position());
         level.playSound(null, target.blockPosition(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.7f, 0.5f);
     }
@@ -71,8 +72,8 @@ public final class MentalEffects {
             return;
         }
         int duration = scaledTicks(effect, power, "duration_ticks", 100);
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 3));
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 3));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, 1));
         finishHit(caster.serverLevel(), target.position());
     }
 
@@ -84,9 +85,9 @@ public final class MentalEffects {
         float lift = effect.params().has("lift_force") ? effect.params().get("lift_force").getAsFloat() : 0.65f;
         int fogTicks = scaledTicks(effect, power, "confusion_ticks", 90);
         target.setDeltaMovement(target.getDeltaMovement().add(0, lift * (power / 50f), 0));
-        target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 30, 0));
-        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, fogTicks, 1));
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, fogTicks, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.LEVITATION, 30, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, fogTicks, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, fogTicks, 1));
         target.hurtMarked = true;
         finishHit(level, target.position());
     }
@@ -103,7 +104,7 @@ public final class MentalEffects {
             if (entity.distanceToSqr(caster) > radius * radius) {
                 continue;
             }
-            entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, ticks, 1));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.CONFUSION, ticks, 1));
             spawnMindParticles(level, entity.position().add(0, 1, 0));
         }
         spawnMindParticles(level, caster.position().add(0, 1, 0));
@@ -111,8 +112,8 @@ public final class MentalEffects {
 
     public static void psychicBarrier(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 200;
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, 1, false, false, true));
         spawnMindParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -121,8 +122,8 @@ public final class MentalEffects {
             return;
         }
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 160;
-        target.addEffect(new MobEffectInstance(MobEffects.GLOWING, duration, 0));
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration / 2, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.GLOWING, duration, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration / 2, 0));
         caster.displayClientMessage(
                 net.minecraft.network.chat.Component.translatable(
                         "message.effecoria.mental.mind_probe",
@@ -138,9 +139,9 @@ public final class MentalEffects {
             return;
         }
         int confuseTicks = scaledTicks(effect, power, "confusion_ticks", 100);
-        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 2));
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, confuseTicks / 2, 1));
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, confuseTicks, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 2));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, confuseTicks / 2, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, confuseTicks, 1));
         finishHit(caster.serverLevel(), target.position());
     }
 
@@ -153,9 +154,9 @@ public final class MentalEffects {
                 ? effect.params().get("psi_gain").getAsFloat()
                 : 4f;
         psiGain *= power / 50f;
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, fogTicks, 1));
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, fogTicks / 2, 1));
-        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, fogTicks / 2, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, fogTicks, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, fogTicks / 2, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, fogTicks / 2, 0));
         PlayerPsiData data = PsiHelper.get(caster);
         data.setCurrentPsi(Math.min(data.maxPsi(), data.currentPsi() + psiGain));
         PsiHelper.set(caster, data);
@@ -164,8 +165,8 @@ public final class MentalEffects {
 
     public static void mentalFortress(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 400;
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 2, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 2, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, duration, 0, false, false, true));
         spawnMindParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -185,8 +186,8 @@ public final class MentalEffects {
             if (entity.position().distanceToSqr(center) > radius * radius) {
                 continue;
             }
-            entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, ticks, 2));
-            entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ticks / 2, 1));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.CONFUSION, ticks, 2));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WEAKNESS, ticks / 2, 1));
             spawnMindParticles(level, entity.position().add(0, 1, 0));
         }
         level.playSound(null, target.blockPosition(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 0.5f, 1.2f);
@@ -208,8 +209,8 @@ public final class MentalEffects {
                 if (entity.distanceToSqr(caster) > radius * radius) {
                     continue;
                 }
-                entity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, ticks, amp));
-                entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ticks / 2, 0));
+                BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.CONFUSION, ticks, amp));
+                BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WEAKNESS, ticks / 2, 0));
             }
         }
         spawnMindParticles(level, caster.position().add(0, 1, 0));
@@ -221,8 +222,8 @@ public final class MentalEffects {
         PlayerPsiData data = PsiHelper.get(caster);
         data.setPhiSenseUntil(caster.level().getGameTime() + duration);
         PsiHelper.set(caster, data);
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration / 2, 0, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration / 2, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration / 2, 0, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration / 2, 0, false, false, true));
         caster.displayClientMessage(
                 net.minecraft.network.chat.Component.translatable("message.effecoria.phi_sense_active"), true);
         spawnMindParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
@@ -234,9 +235,9 @@ public final class MentalEffects {
         PlayerPsiData data = PsiHelper.get(caster);
         data.setPhiSenseUntil(caster.level().getGameTime() + senseTicks);
         PsiHelper.set(caster, data);
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 2, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 1, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 2, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, false, true));
         spawnMindParticles(caster.serverLevel(), caster.position().add(0, 1.2, 0));
         caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.5f, 1.6f);
     }
@@ -277,7 +278,7 @@ public final class MentalEffects {
             if (!MentalCompulsionService.apply(caster, mob, type, duration, fearSource)) {
                 continue;
             }
-            mob.addEffect(new MobEffectInstance(MobEffects.CONFUSION, Math.min(duration, 120), 1));
+            BreathDebuffs.apply(mob, new MobEffectInstance(MobEffects.CONFUSION, Math.min(duration, 120), 1));
             spawnMindParticles(level, mob.position().add(0, 1, 0));
             hit++;
         }
@@ -322,7 +323,7 @@ public final class MentalEffects {
                     true);
             return;
         }
-        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, Math.min(duration, 100), 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, Math.min(duration, 100), 0));
         finishHit(caster.serverLevel(), target.position());
         caster.serverLevel().playSound(
                 null, target.blockPosition(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.55f, 1.5f);
@@ -336,7 +337,7 @@ public final class MentalEffects {
         Vec3 look = caster.getLookAngle().normalize();
         double strength = force * (power / 50f);
         target.setDeltaMovement(target.getDeltaMovement().add(look.scale(strength)));
-        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 40, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, 40, 0));
         target.hurtMarked = true;
         finishHit(caster.serverLevel(), target.position());
     }

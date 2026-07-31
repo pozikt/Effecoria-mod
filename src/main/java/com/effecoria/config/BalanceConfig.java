@@ -63,8 +63,12 @@ public final class BalanceConfig {
             .defineInRange("backlash_damage", 4.0, 0.0, 20.0);
 
     public static final ModConfigSpec.DoubleValue SPELL_COST_FLOOR_RATIO = BUILDER
-            .comment("Minimum spell cost as fraction of base_cost once breathing mastery is fully past unlock")
+            .comment("Spell cost floor once breathing reaches reference mastery (100%) past unlock")
             .defineInRange("spell_cost_floor_ratio", 0.33, 0.1, 1.0);
+
+    public static final ModConfigSpec.DoubleValue SPELL_COST_ASCENSION_FLOOR = BUILDER
+            .comment("Further spell cost floor for post-100% breathing ascension (must be <= spell_cost_floor_ratio)")
+            .defineInRange("spell_cost_ascension_floor", 0.18, 0.05, 1.0);
 
     public static final ModConfigSpec.DoubleValue FOCUS_COST_FLOOR_PER_TIER = BUILDER
             .comment("How much each Resonance Focus tier lowers the spell cost floor ratio")
@@ -107,8 +111,12 @@ public final class BalanceConfig {
             .defineInRange("phi_night_multiplier", 0.75, 0.0, 5.0);
 
     public static final ModConfigSpec.DoubleValue BREATHING_MAX_MASTERY = BUILDER
-            .comment("Maximum breathing technique mastery (1.0 = fully mastered)")
+            .comment("Reference breathing mastery shown as 100%. Unlock thresholds and baseline bonuses scale from this — not a hard cap.")
             .defineInRange("breathing_max_mastery", 1.0, 0.1, 10.0);
+
+    public static final ModConfigSpec.DoubleValue BREATHING_HARD_CAP = BUILDER
+            .comment("Absolute breathing mastery ceiling (0 = uncapped). Default 10.0 ≈ 1000% for ascension beyond mortal mastery.")
+            .defineInRange("breathing_hard_cap", 10.0, 0.0, 100.0);
 
     public static final ModConfigSpec.DoubleValue BREATHING_MEDITATION_GAIN = BUILDER
             .comment("Deprecated — meditation breathing gains removed; kept for config compatibility")
@@ -139,7 +147,7 @@ public final class BalanceConfig {
             .defineInRange("breathing_scroll_gain", 0.08, 0.0, 1.0);
 
     public static final ModConfigSpec.DoubleValue BREATHING_BIOLOGY_BONUS_MAX = BUILDER
-            .comment("Max Orkanum (biologyQ) multiplier bonus at full breathing mastery — e.g. 0.3 = +30% regen")
+            .comment("Orkanum (biologyQ) bonus per reference mastery (100%). Scales past 100% — e.g. 0.3 = +30% at 100%, +60% at 200%.")
             .defineInRange("breathing_biology_bonus_max", 0.30, 0.0, 2.0);
 
     public static final ModConfigSpec.DoubleValue TRAINING_XP_SPRINT = BUILDER
@@ -195,8 +203,20 @@ public final class BalanceConfig {
             .defineInRange("whiff_cost_fraction", 0.25, 0.0, 1.0);
 
     public static final ModConfigSpec.DoubleValue MASTERY_BREATHING_MAX = BUILDER
-            .comment("Spell mastery bonus from breathing at full mastery (linear below cap)")
+            .comment("Spell power mastery bonus per reference breathing mastery (100%). Scales linearly past 100%.")
             .defineInRange("mastery_breathing_max", 0.10, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue DEBUFF_DURATION_PER_REFERENCE = BUILDER
+            .comment("Extra harmful/neutral effect duration per reference breathing mastery (0.35 = +35% at 100%, +70% at 200%)")
+            .defineInRange("debuff_duration_per_reference", 0.35, 0.0, 2.0);
+
+    public static final ModConfigSpec.DoubleValue DEBUFF_AMPLIFIER_PER_REFERENCE = BUILDER
+            .comment("Extra harmful/neutral effect amplifier levels per reference breathing mastery (1.0 = +1 at 100%)")
+            .defineInRange("debuff_amplifier_per_reference", 1.0, 0.0, 5.0);
+
+    public static final ModConfigSpec.IntValue DEBUFF_AMPLIFIER_MAX_BONUS = BUILDER
+            .comment("Cap on breathing-granted amplifier bonus for debuffs")
+            .defineInRange("debuff_amplifier_max_bonus", 6, 0, 20);
 
     public static final ModConfigSpec.DoubleValue MASTERY_ESSENCE_PER_POINT = BUILDER
             .comment("Spell mastery bonus per absorbed essence point")

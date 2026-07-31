@@ -1,5 +1,6 @@
 package com.effecoria.effect.elemental;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
 import com.effecoria.core.magic.SpellEffectEntry;
@@ -104,9 +105,9 @@ public final class ElementalEffects {
             }
             target.hurt(source, scaledDamage);
             target.push(look.x * scaledKnock, 0.2, look.z * scaledKnock);
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0));
             if (blindTicks > 0) {
-                target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, blindTicks, 0));
+                BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.BLINDNESS, blindTicks, 0));
             }
             target.hurtMarked = true;
             spawnSteamBurst(level, target.position());
@@ -312,7 +313,7 @@ public final class ElementalEffects {
                 continue;
             }
             target.hurt(source, damage);
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
             target.setTicksFrozen(Math.min(140, target.getTicksFrozen() + 80));
             target.hurtMarked = true;
             spawnIceParticles(level, target.position().add(0, 1, 0));
@@ -418,7 +419,7 @@ public final class ElementalEffects {
         for (LivingEntity target : hit) {
             target.hurt(source, scaledDamage);
             target.push(look.x * scaledKnock, 0.15, look.z * scaledKnock);
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 0));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 0));
             if (extinguish) {
                 target.clearFire();
             }
@@ -623,8 +624,8 @@ public final class ElementalEffects {
             target.hurt(source, damage);
             Vec3 away = target.position().subtract(caster.position()).normalize();
             target.push(away.x * knock, 0.35, away.z * knock);
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, stunTicks, 2));
-            target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, stunTicks, 0));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, stunTicks, 2));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, stunTicks, 0));
             target.hurtMarked = true;
         }
         level.playSound(null, caster.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7f, 1.4f);
@@ -659,7 +660,7 @@ public final class ElementalEffects {
         caster.syncData(ModAttachments.PSI.get());
 
         ServerLevel level = caster.serverLevel();
-        caster.addEffect(new MobEffectInstance(MobEffects.GLOWING, Math.min(chargeTicks, 200), 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.GLOWING, Math.min(chargeTicks, 200), 0, false, false, true));
         level.playSound(null, caster.blockPosition(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.5f, 1.7f);
         level.sendParticles(
                 ParticleTypes.ELECTRIC_SPARK,
@@ -821,7 +822,7 @@ public final class ElementalEffects {
         JsonObject params = effect.params();
         int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 12000;
         duration = Math.round(duration * (0.85f + power / 120f));
-        subject.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, duration, 0, false, true, true));
+        BreathDebuffs.apply(subject, new MobEffectInstance(MobEffects.WATER_BREATHING, duration, 0, false, true, true));
         subject.clearFire();
         ServerLevel level = caster.serverLevel();
         level.playSound(null, subject.blockPosition(), SoundEvents.BUBBLE_COLUMN_UPWARDS_INSIDE, SoundSource.PLAYERS, 0.9f, 1.2f);
@@ -843,8 +844,8 @@ public final class ElementalEffects {
         int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 200;
         duration = Math.round(duration * (0.85f + power / 120f));
         int amp = power >= 50f ? 1 : 0;
-        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, amp, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, amp, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
         float maintain = params.has("maintain_drain") ? params.get("maintain_drain").getAsFloat() : 0.05f;
         if (maintain > 0f) {
             PlayerPsiData data = PsiHelper.get(caster);
@@ -912,8 +913,8 @@ public final class ElementalEffects {
             target.hurt(source, damage);
             target.hurt(level.damageSources().onFire(), damage * 0.35f);
             target.igniteForSeconds(3);
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, stunTicks, 3));
-            target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, stunTicks, 1));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, stunTicks, 3));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, stunTicks, 1));
             // Soft execute: fragile non-boss leftovers drop from residual voltage.
             if (target.getHealth() > 0f
                     && target.getHealth() <= executeBelow
@@ -979,8 +980,8 @@ public final class ElementalEffects {
                 continue;
             }
             target.hurt(source, damage);
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, stunTicks, 4));
-            target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, stunTicks, 2));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, stunTicks, 4));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.DIG_SLOWDOWN, stunTicks, 2));
             target.push(0, -0.35, 0);
             target.hurtMarked = true;
         }
@@ -1020,7 +1021,7 @@ public final class ElementalEffects {
                 continue;
             }
             target.hurt(source, damage);
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 2));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 2));
             target.setTicksFrozen(Math.min(200, target.getTicksFrozen() + 100));
             target.hurtMarked = true;
             spawnIceParticles(level, target.position().add(0, 1, 0));
@@ -1102,7 +1103,7 @@ public final class ElementalEffects {
             target.hurt(source, damage);
             target.hurt(level.damageSources().onFire(), damage * 0.5f);
             target.igniteForSeconds(8);
-            target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, blindTicks, 0));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.BLINDNESS, blindTicks, 0));
             target.hurtMarked = true;
         }
         ignitePatch(level, BlockPos.containing(center), Math.max(2, Math.round(radius * 0.4f)), 18);
@@ -1125,8 +1126,8 @@ public final class ElementalEffects {
                 continue;
             }
             target.hurt(source, damage);
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, freezeTicks, 6));
-            target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, freezeTicks, 4));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, freezeTicks, 6));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.DIG_SLOWDOWN, freezeTicks, 4));
             target.setTicksFrozen(Math.min(300, target.getTicksFrozen() + 200));
             target.setDeltaMovement(Vec3.ZERO);
             target.hurtMarked = true;

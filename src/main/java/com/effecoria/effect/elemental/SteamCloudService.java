@@ -1,5 +1,6 @@
 package com.effecoria.effect.elemental;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -205,12 +206,20 @@ public final class SteamCloudService {
             }
             boolean isOwner = cloud.owner() != null && cloud.owner().equals(entity.getUUID());
             if (isOwner) {
-                entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 25, 0, false, false, true));
+                BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 25, 0, false, false, true));
                 continue;
             }
-            entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 0, false, false, true));
+            BreathDebuffs.apply(
+                    level,
+                    cloud.owner(),
+                    entity,
+                    new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 0, false, false, true));
             if (cloud.scalding()) {
-                entity.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 40, 0, false, false, true));
+                BreathDebuffs.apply(
+                        level,
+                        cloud.owner(),
+                        entity,
+                        new MobEffectInstance(MobEffects.DARKNESS, 40, 0, false, false, true));
                 if (now % SCALD_INTERVAL == 0) {
                     entity.hurt(source, 1.0f);
                 }

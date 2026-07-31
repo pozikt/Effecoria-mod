@@ -353,7 +353,7 @@
   "message.effecoria.debug_mult": "Множители — Φ: ×%s",
   "message.effecoria.breathing_milestone": "Техника дыхания: %s%%",
   "message.effecoria.breathing_scroll": "Свиток усвоен — дыхание +%s%%",
-  "message.effecoria.breathing_max": "Техника дыхания уже освоена полностью.",
+  "message.effecoria.breathing_max": "Техника дыхания достигла потолка вознесения.",
   "message.effecoria.training_milestone": "Тренировка! Ψ_soul: %s | макс. Ψ: %s",
   "message.effecoria.training_xp": "Тренировка XP: %s",
   "spell.effecoria.binding_seal.desc": "Боевая связывающая печать на цели.",

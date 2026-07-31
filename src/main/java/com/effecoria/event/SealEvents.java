@@ -1,5 +1,6 @@
 package com.effecoria.event;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -116,9 +117,9 @@ public final class SealEvents {
             if (!standingOn.equals(pos)) {
                 continue;
             }
-            entity.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+            BreathDebuffs.apply(level, seal.casterId(), entity, new net.minecraft.world.effect.MobEffectInstance(
                     net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 25, slowAmp));
-            entity.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+            BreathDebuffs.apply(level, seal.casterId(), entity, new net.minecraft.world.effect.MobEffectInstance(
                     net.minecraft.world.effect.MobEffects.DIG_SLOWDOWN, 25, 1));
         }
     }

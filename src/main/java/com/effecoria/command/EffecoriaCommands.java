@@ -183,7 +183,10 @@ public final class EffecoriaCommands {
             return 0;
         }
 
-        float maxBreath = BalanceConfig.BREATHING_MAX_MASTERY.get().floatValue();
+        float hard = BalanceConfig.BREATHING_HARD_CAP.get().floatValue();
+        float maxBreath = hard > 0f
+                ? hard
+                : BalanceConfig.BREATHING_MAX_MASTERY.get().floatValue() * 5f;
         float maxSoul = BalanceConfig.TRAINING_MAX_SOUL.get().floatValue();
         float maxPsi = BalanceConfig.TRAINING_MAX_PSI_CAP.get().floatValue();
 

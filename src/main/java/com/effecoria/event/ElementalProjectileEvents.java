@@ -1,5 +1,6 @@
 package com.effecoria.event;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.EffecoriaMod;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.effect.elemental.ElementalEffects;
@@ -8,6 +9,7 @@ import com.effecoria.effect.elemental.ElementalTags;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -63,7 +65,9 @@ public final class ElementalProjectileEvents {
                     case ElementalTags.KIND_ICE_SHARD -> {
                         target.hurt(source, damage);
                         int slowAmp = damage >= 6f ? 2 : 1;
-                        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, slowAmp));
+                        ServerPlayer caster = projectile.getOwner() instanceof ServerPlayer sp ? sp : null;
+                        BreathDebuffs.apply(
+                                caster, target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, slowAmp));
                         ElementalEffects.spawnIceParticles(level, target.position().add(0, 1, 0));
                     }
                     case ElementalTags.KIND_PLASMA -> {

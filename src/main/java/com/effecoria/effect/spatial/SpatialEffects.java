@@ -1,5 +1,6 @@
 package com.effecoria.effect.spatial;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
 import com.effecoria.core.magic.SpellEffectEntry;
@@ -33,8 +34,8 @@ public final class SpatialEffects {
     public static void spatialWard(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 160;
         int absorb = effect.params().has("absorption_amplifier") ? effect.params().get("absorption_amplifier").getAsInt() : 1;
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, false, true));
         spawnSpatialParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -61,7 +62,7 @@ public final class SpatialEffects {
         float damage = DiceDamage.fromParams(effect.params(), power, 6f);
         int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 60;
         target.hurt(level.damageSources().magic(), damage);
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
         target.hurtMarked = true;
         finishHit(level, target.position());
     }
@@ -80,7 +81,7 @@ public final class SpatialEffects {
             if (entity.distanceToSqr(caster) > radius * radius) {
                 continue;
             }
-            entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 2));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 2));
             Vec3 toward = center.subtract(entity.position()).normalize().scale(pull);
             entity.setDeltaMovement(entity.getDeltaMovement().add(toward));
             entity.hurtMarked = true;
@@ -112,8 +113,8 @@ public final class SpatialEffects {
             return;
         }
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 5));
-        target.addEffect(new MobEffectInstance(MobEffects.GLOWING, duration, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 5));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.GLOWING, duration, 0));
         finishHit(caster.serverLevel(), target.position());
     }
 
@@ -124,7 +125,7 @@ public final class SpatialEffects {
         ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 9f);
         target.hurt(level.damageSources().magic(), damage);
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, 60, 0));
         target.hurtMarked = true;
         finishHit(level, target.position());
         level.playSound(null, target.blockPosition(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.6f, 1.4f);
@@ -217,9 +218,9 @@ public final class SpatialEffects {
     public static void absoluteFold(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int veilTicks = effect.params().has("veil_ticks") ? effect.params().get("veil_ticks").getAsInt() : 100;
         blinkAlongLook(caster, effect, power, 1.05, defaultMaxRange(effect, 220));
-        caster.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, veilTicks, 0, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, veilTicks, 1, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, veilTicks, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.INVISIBILITY, veilTicks, 0, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, veilTicks, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, veilTicks, 1, false, false, true));
     }
 
     private static double defaultMaxRange(SpellEffectEntry effect, double fallback) {

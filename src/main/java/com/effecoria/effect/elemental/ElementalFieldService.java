@@ -1,5 +1,6 @@
 package com.effecoria.effect.elemental;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.phi.CreativeGodMode;
 import com.effecoria.core.psi.ModAttachments;
@@ -306,7 +307,7 @@ public final class ElementalFieldService {
         }
         field.center = owner.position().add(0, 1, 0);
 
-        owner.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 25, 0, false, false, true));
+        BreathDebuffs.apply(owner, new MobEffectInstance(MobEffects.INVISIBILITY, 25, 0, false, false, true));
 
         AABB box = field.bounds();
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
@@ -316,8 +317,8 @@ public final class ElementalFieldService {
             if (!field.contains(entity.position().add(0, entity.getBbHeight() * 0.5, 0))) {
                 continue;
             }
-            entity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 30, 0, false, false, true));
-            entity.addEffect(new MobEffectInstance(MobEffects.GLOWING, 30, 0, false, false, true));
+            BreathDebuffs.apply(owner, entity, new MobEffectInstance(MobEffects.BLINDNESS, 30, 0, false, false, true));
+            BreathDebuffs.apply(owner, entity, new MobEffectInstance(MobEffects.GLOWING, 30, 0, false, false, true));
         }
 
         if (now % 4 == 0) {
@@ -502,7 +503,7 @@ public final class ElementalFieldService {
             if (!field.contains(entity.position().add(0, entity.getBbHeight() * 0.5, 0))) {
                 continue;
             }
-            entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 1, false, false, true));
+            BreathDebuffs.apply(owner, entity, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 1, false, false, true));
             if (now % 20 == 0 && field.damagePerSecond > 0f) {
                 // Mixed elemental pressure: alternate cold / fire / magic slices.
                 float hit = field.damagePerSecond;

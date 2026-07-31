@@ -1,5 +1,6 @@
 package com.effecoria.effect.necromancy;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
@@ -77,7 +78,7 @@ public final class DeathMarkService {
         data.putLong(LIVING_UNTIL_TAG, level.getGameTime() + duration);
         // Snapshot kit while the mob is still alive (bows included).
         data.put(LIVING_EQUIP_TAG, captureEquipment(mob, level.registryAccess()));
-        target.addEffect(new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, true, true));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, true, true));
         NecromancyEffects.spawnNecroParticles(level, target.position().add(0, 1, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.SCULK_CLICKING, SoundSource.PLAYERS, 0.85f, 0.55f);
     }

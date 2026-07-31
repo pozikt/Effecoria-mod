@@ -353,7 +353,7 @@
   "message.effecoria.debug_mult": "Multipliers — Phi: ×%s",
   "message.effecoria.breathing_milestone": "Breathing technique: %s%%",
   "message.effecoria.breathing_scroll": "Scroll absorbed — breathing +%s%%",
-  "message.effecoria.breathing_max": "Breathing technique is already fully mastered.",
+  "message.effecoria.breathing_max": "Breathing technique has reached its ascension ceiling.",
   "message.effecoria.training_milestone": "Training up! soul: %s | max Psi: %s",
   "message.effecoria.training_xp": "Training XP: %s",
   "spell.effecoria.binding_seal.desc": "Combat binding seal on a target.",

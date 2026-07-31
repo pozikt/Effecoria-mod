@@ -1,5 +1,6 @@
 package com.effecoria.effect.organic;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
 import com.effecoria.core.magic.SpellEffectEntry;
@@ -62,7 +63,7 @@ public final class OrganicEffects {
     public static void bloodStasis(ServerPlayer caster, SpellEffectEntry effect, float power) {
         float heal = DiceDamage.healFromParams(effect.params(), power, 2f);
         caster.heal(heal);
-        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 40, 0, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, 40, 0, false, true, true));
         caster.clearFire();
         ServerLevel level = caster.serverLevel();
         spawnOrganicParticles(level, caster.position().add(0, 1, 0));
@@ -79,7 +80,7 @@ public final class OrganicEffects {
             if (entity == caster) {
                 continue;
             }
-            entity.addEffect(new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false, true));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false, true));
             count++;
         }
         caster.displayClientMessage(Component.translatable("message.effecoria.organic.life_sense", count), true);
@@ -93,7 +94,7 @@ public final class OrganicEffects {
         float heal = DiceDamage.healFromParams(effect.params(), power, 4f);
         int regenTicks = effect.params().has("regen_ticks") ? effect.params().get("regen_ticks").getAsInt() : 60;
         subject.heal(heal);
-        subject.addEffect(new MobEffectInstance(MobEffects.REGENERATION, regenTicks, 0));
+        BreathDebuffs.apply(subject, new MobEffectInstance(MobEffects.REGENERATION, regenTicks, 0));
         spawnOrganicParticles(level, subject.position().add(0, 1, 0));
         level.playSound(null, subject.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.7f, 1.4f);
     }
@@ -128,7 +129,7 @@ public final class OrganicEffects {
             return;
         }
         int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 100;
-        target.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
         spawnOrganicParticles(caster.serverLevel(), target.position().add(0, 1, 0));
         caster.serverLevel()
                 .playSound(null, target.blockPosition(), SoundEvents.SPIDER_HURT, SoundSource.PLAYERS, 0.6f, 1.2f);
@@ -142,7 +143,7 @@ public final class OrganicEffects {
         float damage = DiceDamage.fromParams(effect.params(), power, 3f);
         int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 30;
         target.hurt(level.damageSources().wither(), damage);
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 3));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 3));
         target.hurtMarked = true;
         spawnOrganicParticles(level, target.position().add(0, 1, 0));
     }
@@ -152,8 +153,8 @@ public final class OrganicEffects {
         int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 12000;
         duration = Math.round(duration * (0.85f + power / 120f));
         int absorb = power >= 45f ? 1 : 0;
-        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
         ServerLevel level = caster.serverLevel();
         spawnOrganicParticles(level, caster.position().add(0, 1, 0));
         level.playSound(
@@ -200,7 +201,7 @@ public final class OrganicEffects {
         int witherTicks = params.has("wither_ticks") ? params.get("wither_ticks").getAsInt() : 60;
         int witherAmp = params.has("wither_amplifier") ? params.get("wither_amplifier").getAsInt() : 0;
         target.hurt(level.damageSources().wither(), burst);
-        target.addEffect(new MobEffectInstance(MobEffects.WITHER, witherTicks, witherAmp));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, witherAmp));
         target.hurtMarked = true;
         spawnOrganicParticles(level, target.position().add(0, 1, 0));
     }
@@ -210,8 +211,8 @@ public final class OrganicEffects {
             return;
         }
         int stunTicks = effect.params().has("stun_ticks") ? effect.params().get("stun_ticks").getAsInt() : 20;
-        target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, stunTicks, 0));
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, stunTicks, 2));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, stunTicks, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, stunTicks, 2));
         spawnOrganicParticles(caster.serverLevel(), target.position().add(0, 1, 0));
     }
 
@@ -242,22 +243,22 @@ public final class OrganicEffects {
     public static void boneSpur(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
         int amp = effect.params().has("strength_amplifier") ? effect.params().get("strength_amplifier").getAsInt() : 0;
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, amp, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, amp, false, true, true));
         spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void senseSharpening(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 200;
-        caster.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, duration, 0, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.NIGHT_VISION, duration, 0, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0, false, false, true));
         spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void painInhibitor(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 160;
         int absorb = effect.params().has("absorption_amplifier") ? effect.params().get("absorption_amplifier").getAsInt() : 1;
-        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
         spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -266,13 +267,13 @@ public final class OrganicEffects {
         float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 3.5f;
         int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 80;
         int selfTicks = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 200;
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, selfTicks, 0, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, selfTicks, 0, false, true, true));
         AABB box = caster.getBoundingBox().inflate(radius);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == caster) {
                 continue;
             }
-            entity.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
             spawnOrganicParticles(level, entity.position().add(0, 1, 0));
         }
         spawnOrganicParticles(level, caster.position().add(0, 1, 0));
@@ -280,15 +281,15 @@ public final class OrganicEffects {
 
     public static void bioMimicry(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 120;
-        caster.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0, false, false, true));
         spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void organismAdaptation(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 300;
-        caster.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
         spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -299,18 +300,18 @@ public final class OrganicEffects {
         ServerLevel level = caster.serverLevel();
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 160;
         int weakAmp = effect.params().has("weakness_amplifier") ? effect.params().get("weakness_amplifier").getAsInt() : 1;
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, weakAmp));
-        target.addEffect(new MobEffectInstance(MobEffects.POISON, duration / 2, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, weakAmp));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, duration / 2, 0));
         spawnOrganicParticles(level, target.position().add(0, 1, 0));
     }
 
     public static void metabolicBoost(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 200;
         int exhaustTicks = effect.params().has("exhaustion_ticks") ? effect.params().get("exhaustion_ticks").getAsInt() : 120;
-        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 1, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, duration, 0, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, exhaustTicks, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 1, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DIG_SPEED, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, exhaustTicks, 0, false, false, true));
         spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -323,18 +324,18 @@ public final class OrganicEffects {
         int witherTicks = effect.params().has("wither_ticks") ? effect.params().get("wither_ticks").getAsInt() : 100;
         int weakTicks = effect.params().has("weakness_ticks") ? effect.params().get("weakness_ticks").getAsInt() : 80;
         target.hurt(level.damageSources().wither(), damage);
-        target.addEffect(new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, weakTicks, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, weakTicks, 1));
         target.hurtMarked = true;
         spawnOrganicParticles(level, target.position().add(0, 1, 0));
     }
 
     public static void fullRestructuring(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 400;
-        caster.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, duration, 0, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, duration, 0, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.JUMP, duration, 1, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WATER_BREATHING, duration, 0, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.SLOW_FALLING, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.JUMP, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
         spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -351,7 +352,7 @@ public final class OrganicEffects {
             if (entity == caster) {
                 continue;
             }
-            entity.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
             entity.hurt(level.damageSources().magic(), DiceDamage.fromParams(effect.params(), power, 4f) * 0.5f);
             entity.hurtMarked = true;
         }
@@ -389,8 +390,8 @@ public final class OrganicEffects {
         int regenTicks = effect.params().has("regen_ticks") ? effect.params().get("regen_ticks").getAsInt() : 120;
         int regenAmp = effect.params().has("regen_amplifier") ? effect.params().get("regen_amplifier").getAsInt() : 1;
         caster.heal(heal);
-        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, regenTicks, regenAmp, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, regenTicks, regenAmp, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, 100, 0, false, false, true));
         spawnOrganicParticles(level, caster.position().add(0, 1, 0));
     }
 
@@ -407,8 +408,8 @@ public final class OrganicEffects {
             if (entity.distanceToSqr(caster) > radius * radius) {
                 continue;
             }
-            entity.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
-            entity.addEffect(new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
             spawnOrganicParticles(level, entity.position().add(0, 1, 0));
         }
         spawnOrganicParticles(level, caster.position().add(0, 1, 0));
@@ -438,7 +439,7 @@ public final class OrganicEffects {
 
     private static void applyPlagueHit(ServerLevel level, LivingEntity entity, float damage, int poisonTicks) {
         entity.hurt(level.damageSources().wither(), damage);
-        entity.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
+        BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
         entity.hurtMarked = true;
     }
 
@@ -446,18 +447,18 @@ public final class OrganicEffects {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 600;
         int resist = effect.params().has("resistance_amplifier") ? effect.params().get("resistance_amplifier").getAsInt() : 1;
         int absorb = effect.params().has("absorption_amplifier") ? effect.params().get("absorption_amplifier").getAsInt() : 2;
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, resist, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, resist, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, duration, 1, false, false, true));
         spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void beastForm(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 300;
-        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 1, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.JUMP, duration, 1, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 1, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.JUMP, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
         spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -478,27 +479,27 @@ public final class OrganicEffects {
     public static void absoluteRegeneration(ServerPlayer caster, SpellEffectEntry effect, float power) {
         caster.removeAllEffects();
         caster.heal(caster.getMaxHealth());
-        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 60, 1, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 160, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, 60, 1, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, 160, 1, false, false, true));
         spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void cellularDominion(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 1200;
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 0, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, false, true));
         spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void evolutionaryLeap(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 200;
-        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, 3, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 2, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 2, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 2, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, 3, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 2, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, duration, 2, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 2, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 1, false, false, true));
         spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
         caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.6f, 1.2f);
     }
@@ -510,7 +511,7 @@ public final class OrganicEffects {
         int regenTicks = effect.params().has("regen_ticks") ? effect.params().get("regen_ticks").getAsInt() : 120;
         int regenAmp = effect.params().has("regen_amplifier") ? effect.params().get("regen_amplifier").getAsInt() : 1;
         subject.heal(heal);
-        subject.addEffect(new MobEffectInstance(MobEffects.REGENERATION, regenTicks, regenAmp, false, true, true));
+        BreathDebuffs.apply(subject, new MobEffectInstance(MobEffects.REGENERATION, regenTicks, regenAmp, false, true, true));
         spawnOrganicParticles(level, subject.position().add(0, 1, 0));
         level.playSound(null, subject.blockPosition(), SoundEvents.HONEY_DRINK, SoundSource.PLAYERS, 0.7f, 1.2f);
     }
@@ -521,9 +522,9 @@ public final class OrganicEffects {
         int regenTicks = effect.params().has("regen_ticks") ? effect.params().get("regen_ticks").getAsInt() : 400;
         int regenAmp = effect.params().has("regen_amplifier") ? effect.params().get("regen_amplifier").getAsInt() : 2;
         caster.heal(heal);
-        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, regenTicks, regenAmp, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.SATURATION, 40, 0, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 140, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, regenTicks, regenAmp, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.SATURATION, 40, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, 140, 0, false, false, true));
         spawnOrganicParticles(level, caster.position().add(0, 1, 0));
         level.playSound(null, caster.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.5f, 1.3f);
     }
@@ -553,9 +554,9 @@ public final class OrganicEffects {
         ServerLevel level = caster.serverLevel();
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 160;
         target.removeEffect(MobEffects.REGENERATION);
-        target.addEffect(new MobEffectInstance(MobEffects.POISON, duration, 1));
-        target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, 1));
-        target.addEffect(new MobEffectInstance(MobEffects.HUNGER, duration, 2));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, duration, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.HUNGER, duration, 2));
         spawnOrganicParticles(level, target.position().add(0, 1, 0));
     }
 
@@ -575,11 +576,11 @@ public final class OrganicEffects {
 
     public static void fullTransformation(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 400;
-        caster.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 2, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 2, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.JUMP, duration, 2, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 2, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 2, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.JUMP, duration, 2, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.NIGHT_VISION, duration, 0, false, false, true));
         spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -597,7 +598,7 @@ public final class OrganicEffects {
                 continue;
             }
             entity.hurt(level.damageSources().magic(), damage);
-            entity.addEffect(new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
             entity.hurtMarked = true;
             spawnOrganicParticles(level, entity.position().add(0, 1, 0));
         }
@@ -653,10 +654,10 @@ public final class OrganicEffects {
     public static void biologicalImmortality(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 600;
         int aftermath = effect.params().has("aftermath_ticks") ? effect.params().get("aftermath_ticks").getAsInt() : 200;
-        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 3, false, true, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, 3, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, false, true));
-        caster.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, aftermath, 2, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, duration, 3, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, 3, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, aftermath, 2, false, false, true));
         spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
         caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.5f, 0.9f);
     }

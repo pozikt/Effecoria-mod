@@ -292,7 +292,7 @@ public final class PlayerPsiData {
         breathTrainHits++;
         float masteryGain = BalanceConfig.BREATHING_TRAIN_MASTERY_GAIN.get().floatValue();
         if (masteryGain > 0f) {
-            setBreathingMastery(breathingMastery + masteryGain);
+            com.effecoria.core.progression.BreathingService.addMastery(this, masteryGain);
         }
     }
 
@@ -350,11 +350,10 @@ public final class PlayerPsiData {
         return com.effecoria.core.formula.Mastery.factor(breathingMastery, essence);
     }
 
-    /** Orkanum efficiency with breathing technique bonus. */
+    /** Orkanum efficiency with breathing technique bonus (scales past 100%). */
     public float effectiveBiologyQ() {
-        float cap = BalanceConfig.BREATHING_MAX_MASTERY.get().floatValue();
-        float normalized = cap > 0f ? Math.min(1f, breathingMastery / cap) : 0f;
-        float breathingMult = 1f + normalized * BalanceConfig.BREATHING_BIOLOGY_BONUS_MAX.get().floatValue();
+        float ratio = com.effecoria.core.progression.BreathingService.referenceRatio(breathingMastery);
+        float breathingMult = 1f + ratio * BalanceConfig.BREATHING_BIOLOGY_BONUS_MAX.get().floatValue();
         return biologyQ * breathingMult;
     }
 
@@ -465,8 +464,12 @@ public final class PlayerPsiData {
     }
 
     public void setBreathingMastery(float value) {
-        float cap = BalanceConfig.BREATHING_MAX_MASTERY.get().floatValue();
-        this.breathingMastery = Math.clamp(value, 0f, cap);
+        float hard = BalanceConfig.BREATHING_HARD_CAP.get().floatValue();
+        float v = Math.max(0f, value);
+        if (hard > 0f) {
+            v = Math.min(v, hard);
+        }
+        this.breathingMastery = v;
     }
 
     public void addTrainingXp(float amount) {

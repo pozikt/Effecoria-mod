@@ -1,5 +1,6 @@
 package com.effecoria.effect.elemental;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -114,19 +115,19 @@ public final class ElementalShroudService {
     private static void applyBuffs(ServerPlayer player, Kind kind) {
         switch (kind) {
             case WATER -> {
-                player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 25, 0, false, false, true));
-                player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 25, 0, false, false, true));
-                player.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 25, 0, false, false, true));
+                BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 25, 0, false, false, true));
+                BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.DAMAGE_BOOST, 25, 0, false, false, true));
+                BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 25, 0, false, false, true));
             }
             case AIR -> {
-                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 25, 1, false, false, true));
-                player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 25, 0, false, false, true));
-                player.addEffect(new MobEffectInstance(MobEffects.JUMP, 25, 1, false, false, true));
+                BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 25, 1, false, false, true));
+                BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.DAMAGE_BOOST, 25, 0, false, false, true));
+                BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.JUMP, 25, 1, false, false, true));
             }
             case AIR_FORM -> {
-                player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 25, 3, false, false, true));
-                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 25, 2, false, false, true));
-                player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 25, 0, false, false, true));
+                BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 25, 3, false, false, true));
+                BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 25, 2, false, false, true));
+                BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.SLOW_FALLING, 25, 0, false, false, true));
                 if (!player.getAbilities().mayfly) {
                     player.getAbilities().mayfly = true;
                     player.onUpdateAbilities();
@@ -143,8 +144,8 @@ public final class ElementalShroudService {
         ServerLevel level = player.serverLevel();
         AABB box = player.getBoundingBox().inflate(3.5);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != player && e.isAlive())) {
-            entity.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 30, 0, false, false, true));
-            entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 0, false, false, true));
+            BreathDebuffs.apply(player, entity, new MobEffectInstance(MobEffects.WEAKNESS, 30, 0, false, false, true));
+            BreathDebuffs.apply(player, entity, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 0, false, false, true));
         }
     }
 

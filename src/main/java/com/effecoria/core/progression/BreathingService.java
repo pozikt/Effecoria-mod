@@ -7,15 +7,24 @@ import com.effecoria.core.psi.PlayerPsiData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-/** Breathing technique progression — continuous mastery, not discrete tiers. */
+/**
+ * Breathing technique progression — continuous mastery with no mortal 100% ceiling.
+ * {@link BalanceConfig#BREATHING_MAX_MASTERY} is the 100% reference; players may ascend far past it.
+ */
 public final class BreathingService {
     private BreathingService() {}
 
-    public static float maxMastery() {
+    /** Reference mastery shown as 100% (unlock / baseline scaling). */
+    public static float referenceMastery() {
         return BalanceConfig.BREATHING_MAX_MASTERY.get().floatValue();
     }
 
-    /** Standing calm with full breath — meditation stance for breathing gains and exhaustion recovery. */
+    /** Absolute ceiling; {@code 0} means uncapped. */
+    public static float hardCap() {
+        return BalanceConfig.BREATHING_HARD_CAP.get().floatValue();
+    }
+
+    /** Standing calm with full breath — meditation stance for exhaustion recovery and training XP. */
     public static boolean isMeditating(ServerPlayer player) {
         return player.onGround()
                 && !player.isSprinting()
@@ -24,17 +33,34 @@ public final class BreathingService {
                 && player.getAirSupply() >= player.getMaxAirSupply() - 10;
     }
 
-    /** Adds mastery up to the cap; returns the amount actually gained. */
+    /**
+     * Gain scale: full rate up to 100%, then soft diminishing so ascension stays a long climb
+     * without stopping growth entirely.
+     */
+    public static float gainScale(float currentMastery) {
+        float ref = referenceMastery();
+        if (ref <= 0f || currentMastery <= ref) {
+            return 1f;
+        }
+        // At 200% → 0.5, at 500% → 0.2, asymptote toward 0 but never zero.
+        return ref / currentMastery;
+    }
+
+    /** Adds mastery up to the hard cap (if any); returns the amount actually gained. */
     public static float addMastery(PlayerPsiData data, float amount) {
         if (amount <= 0f) {
             return 0f;
         }
-        float cap = maxMastery();
         float before = data.breathingMastery();
-        if (before >= cap) {
+        float hard = hardCap();
+        if (hard > 0f && before >= hard) {
             return 0f;
         }
-        float after = Math.min(cap, before + amount);
+        float scaled = amount * gainScale(before);
+        float after = before + scaled;
+        if (hard > 0f) {
+            after = Math.min(hard, after);
+        }
         data.setBreathingMastery(after);
         return after - before;
     }
@@ -48,14 +74,14 @@ public final class BreathingService {
                 true);
     }
 
-    /** Milestone toast when crossing 25/50/75/100% of max mastery. */
+    /** Milestone toast every 25% of reference mastery, including post-100% ascension. */
     public static void notifyMilestones(ServerPlayer player, float before, float after) {
-        float cap = maxMastery();
-        if (cap <= 0f) {
+        float ref = referenceMastery();
+        if (ref <= 0f) {
             return;
         }
-        int beforeStep = masteryStep(before, cap);
-        int afterStep = masteryStep(after, cap);
+        int beforeStep = masteryStep(before, ref);
+        int afterStep = masteryStep(after, ref);
         if (afterStep > beforeStep) {
             player.displayClientMessage(
                     Component.translatable(
@@ -71,34 +97,28 @@ public final class BreathingService {
     }
 
     public static String formatPercent(float masteryAmount) {
-        float cap = maxMastery();
-        float ratio = cap > 0f ? masteryAmount / cap : masteryAmount;
+        float ref = referenceMastery();
+        float ratio = ref > 0f ? masteryAmount / ref : masteryAmount;
         return String.format("%.0f", ratio * 100f);
     }
 
     public static String formatTotalPercent(float totalMastery) {
-        float cap = maxMastery();
-        float ratio = cap > 0f ? totalMastery / cap : totalMastery;
-        return String.format("%.0f", ratio * 100f);
+        return formatPercent(totalMastery);
     }
 
-    private static int masteryStep(float mastery, float cap) {
-        if (cap <= 0f) {
+    /** Ratio vs reference (1.0 = 100%). Unclamped — used for power/regen scaling. */
+    public static float referenceRatio(float mastery) {
+        float ref = referenceMastery();
+        if (ref <= 0f) {
+            return 0f;
+        }
+        return Math.max(0f, mastery / ref);
+    }
+
+    private static int masteryStep(float mastery, float ref) {
+        if (ref <= 0f) {
             return 0;
         }
-        float ratio = mastery / cap;
-        if (ratio >= 1f) {
-            return 4;
-        }
-        if (ratio >= 0.75f) {
-            return 3;
-        }
-        if (ratio >= 0.5f) {
-            return 2;
-        }
-        if (ratio >= 0.25f) {
-            return 1;
-        }
-        return 0;
+        return Math.max(0, (int) Math.floor(mastery / ref * 4f));
     }
 }
