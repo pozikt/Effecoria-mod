@@ -3,6 +3,7 @@ package com.effecoria.event;
 import com.effecoria.EffecoriaMod;
 import com.effecoria.effect.necromancy.NecroSummonService;
 
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -60,6 +61,15 @@ public final class NecroAllyEvents {
             if (attacker instanceof Mob mob) {
                 mob.setTarget(null);
             }
+        }
+
+        // Necromancer is hurt → thralls focus the attacker.
+        if (victim instanceof ServerPlayer owner && NecroSummonService.countOwned(owner) > 0) {
+            NecroSummonService.syncCombatFocus(owner, attacker);
+        }
+        // Necromancer deals damage → thralls focus that victim.
+        if (attacker instanceof ServerPlayer owner && NecroSummonService.countOwned(owner) > 0) {
+            NecroSummonService.syncCombatFocus(owner, victim);
         }
     }
 }

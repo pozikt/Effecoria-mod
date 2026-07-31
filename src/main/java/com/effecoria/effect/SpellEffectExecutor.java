@@ -60,7 +60,6 @@ public final class SpellEffectExecutor {
             "mind_sting",
             "soul_drain",
             "wither_touch",
-            "shade_summon",
             "root_bind",
             "rift_yank",
             "corrupt_mark",
@@ -82,8 +81,6 @@ public final class SpellEffectExecutor {
             "grave_whisper",
             "life_tap",
             "soul_shackle",
-            "raise_skeleton",
-            "shade_brood",
             "death_coil",
             "symbiotic_graft",
             "genetic_lock",
@@ -93,11 +90,9 @@ public final class SpellEffectExecutor {
             "curse_of_frailty",
             "haunting_visage",
             "corpse_burst",
-            "raise_zombie",
             "bone_volley",
             "soul_anchor",
             "soul_reaper",
-            "army_of_dead",
             "warp_bolt",
             "fold_repulse",
             "rift_slash",
@@ -579,9 +574,6 @@ public final class SpellEffectExecutor {
 
     /** Summon a permanent shade (vex relay) bound to the necromancer — reserves Ψ. */
     private static void shadeSummon(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
         ServerLevel level = caster.serverLevel();
         if (!NecroSummonService.canAffordAnother(caster)) {
             caster.displayClientMessage(

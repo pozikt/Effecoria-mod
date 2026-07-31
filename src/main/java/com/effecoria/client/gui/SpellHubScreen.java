@@ -248,13 +248,27 @@ public class SpellHubScreen extends Screen {
             Component category = Component.translatable(SpellHubLayout.categoryLabelKey(hovered.category()));
             float cost = SpellRadialCosts.previewCost(minecraft.player, spellId);
             Component costLine = formatCost(cost);
+            Component desc = Component.translatable("spell.effecoria." + spellId.getPath() + ".desc");
+            boolean summon = isSummonSpell(spellId);
+            Component reserveHint = summon
+                    ? Component.translatable(
+                            "gui.effecoria.hub.summon_reserve",
+                            (int) com.effecoria.config.BalanceConfig.NECRO_SUMMON_PSI_RESERVE.get().floatValue())
+                    : null;
             int padX = 12;
             int lineH = 10;
-            int panelH = lineH * 3 + 16;
+            int lines = 4 + (summon ? 1 : 0);
+            int panelH = lineH * lines + 18;
             int maxW = Math.max(
                     this.font.width(spellName),
-                    Math.max(this.font.width(school), this.font.width(category.copy().append(" · ").append(costLine))));
-            int panelW = maxW + padX * 2;
+                    Math.max(
+                            this.font.width(school),
+                            Math.max(
+                                    this.font.width(category.copy().append(" · ").append(costLine)),
+                                    Math.max(
+                                            this.font.width(desc),
+                                            reserveHint == null ? 0 : this.font.width(reserveHint)))));
+            int panelW = Math.min(this.width - 24, maxW + padX * 2);
             int left = cx - panelW / 2;
             graphics.fill(left - 1, panelY - 5, left + panelW + 1, panelY + panelH - 3, 0xFF505068);
             graphics.fill(left, panelY - 4, left + panelW, panelY + panelH - 4, 0xF0181828);
@@ -269,10 +283,26 @@ public class SpellHubScreen extends Screen {
                     cx,
                     y,
                     canAffordCost(cost) ? 0x99CCFF : 0xFF8888);
+            y += lineH + 2;
+            graphics.drawCenteredString(this.font, desc, cx, y, 0xAABBBBCC);
+            if (reserveHint != null) {
+                y += lineH + 2;
+                graphics.drawCenteredString(this.font, reserveHint, cx, y, 0xFFCC99AA);
+            }
         } else {
             graphics.drawCenteredString(
                     this.font, Component.translatable("gui.effecoria.hub.hint"), cx, panelY, 0xAAAAAA);
         }
+    }
+
+    private static boolean isSummonSpell(ResourceLocation spellId) {
+        String path = spellId.getPath();
+        return path.equals("shade_summon")
+                || path.equals("shade_brood")
+                || path.equals("shade_swarm")
+                || path.equals("raise_skeleton")
+                || path.equals("raise_zombie")
+                || path.equals("army_of_dead");
     }
 
     private void renderLockedHoverPanel(

@@ -178,16 +178,10 @@ public final class NecromancyEffects {
     }
 
     public static void raiseSkeleton(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
         spawnSkeletonThrall(caster, target, 0);
     }
 
     public static void shadeBrood(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
         ServerLevel level = caster.serverLevel();
         int count = effect.params().has("count") ? effect.params().get("count").getAsInt() : 2;
         count = Math.min(4, Math.max(1, count));
@@ -347,9 +341,6 @@ public final class NecromancyEffects {
     }
 
     public static void raiseZombie(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
         spawnZombieThrall(caster, target, 0);
     }
 
@@ -402,9 +393,6 @@ public final class NecromancyEffects {
     }
 
     public static void armyOfDead(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
         int count = effect.params().has("count") ? effect.params().get("count").getAsInt() : 3;
         count = Math.min(4, Math.max(2, count));
         int spawned = 0;

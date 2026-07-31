@@ -99,6 +99,7 @@ public final class NecroSummonService {
 
     public static void tick(ServerPlayer owner) {
         ServerLevel level = owner.serverLevel();
+        LivingEntity combatFocus = resolveOwnerCombatFocus(owner);
         for (Mob mob : listOwned(owner)) {
             LivingEntity current = mob.getTarget();
             if (current == owner || (current instanceof Mob other && isOwnedBy(other, owner.getUUID()))) {
@@ -106,20 +107,18 @@ public final class NecroSummonService {
                 current = null;
             }
 
-            LivingEntity preferred = null;
-            if (mob.getPersistentData().hasUUID(TARGET_TAG)) {
+            LivingEntity preferred = combatFocus;
+            if (preferred == null && mob.getPersistentData().hasUUID(TARGET_TAG)) {
                 UUID targetId = mob.getPersistentData().getUUID(TARGET_TAG);
                 if (level.getEntity(targetId) instanceof LivingEntity living
-                        && living.isAlive()
-                        && living != owner
-                        && !(living instanceof Mob other && isOwnedBy(other, owner.getUUID()))) {
+                        && isValidFocus(owner, living)) {
                     preferred = living;
                 }
             }
 
             LivingEntity next = preferred != null ? preferred : findHostile(owner, mob);
             if (next != null) {
-                mob.setTarget(next);
+                assignFocus(mob, next);
                 if (mob instanceof Vex vex) {
                     vex.setAggressive(true);
                 }
@@ -128,6 +127,44 @@ public final class NecroSummonService {
                 followOwner(mob, owner);
             }
         }
+    }
+
+    /** Prefer retaliating against whoever hurt the necromancer, else whoever they last struck. */
+    private static LivingEntity resolveOwnerCombatFocus(ServerPlayer owner) {
+        LivingEntity attacker = owner.getLastHurtByMob();
+        if (isValidFocus(owner, attacker)) {
+            return attacker;
+        }
+        LivingEntity struck = owner.getLastHurtMob();
+        if (isValidFocus(owner, struck)) {
+            return struck;
+        }
+        return null;
+    }
+
+    private static boolean isValidFocus(ServerPlayer owner, LivingEntity candidate) {
+        if (candidate == null || !candidate.isAlive() || candidate == owner) {
+            return false;
+        }
+        if (candidate instanceof Mob other && isOwnedBy(other, owner.getUUID())) {
+            return false;
+        }
+        return true;
+    }
+
+    /** Push the necromancer's current fight onto all thralls. */
+    public static void syncCombatFocus(ServerPlayer owner, LivingEntity focus) {
+        if (!isValidFocus(owner, focus)) {
+            return;
+        }
+        for (Mob mob : listOwned(owner)) {
+            assignFocus(mob, focus);
+        }
+    }
+
+    private static void assignFocus(Mob mob, LivingEntity focus) {
+        mob.getPersistentData().putUUID(TARGET_TAG, focus.getUUID());
+        mob.setTarget(focus);
     }
 
     private static LivingEntity findHostile(ServerPlayer owner, Mob thrall) {
