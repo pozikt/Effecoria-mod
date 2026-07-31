@@ -6,6 +6,7 @@ import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
 import com.effecoria.core.magic.SpellEffectEntry;
+import com.effecoria.world.ModDimensions;
 import com.google.gson.JsonObject;
 
 import net.minecraft.core.BlockPos;
@@ -17,6 +18,8 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public final class SpatialEffects {
@@ -229,6 +232,78 @@ public final class SpatialEffects {
     public static void subspaceVoyage(ServerPlayer caster, SpellEffectEntry effect, float power) {
         SubspaceVoyageService.cast(caster);
         spawnSpatialParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+    }
+
+    /**
+     * Exile a small cube of realspace blocks into hyperspace (no loot).
+     * Matter is classified/queued for future Chaos Reefs — see docs/SUBSPACE.md.
+     */
+    public static void riftExcise(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        if (ModDimensions.isSubspace(level)) {
+            caster.displayClientMessage(
+                    net.minecraft.network.chat.Component.translatable("message.effecoria.rift_excise.in_subspace"),
+                    true);
+            return;
+        }
+
+        JsonObject params = effect.params();
+        double range = params.has("range") ? params.get("range").getAsDouble() : 8;
+        int radius = params.has("radius") ? params.get("radius").getAsInt() : 1;
+        radius = Math.max(0, Math.min(3, radius + (power >= 70f ? 1 : 0)));
+
+        HitResult hit = caster.pick(range, 0f, false);
+        BlockPos center;
+        if (hit.getType() == HitResult.Type.BLOCK && hit instanceof BlockHitResult blockHit) {
+            center = blockHit.getBlockPos();
+        } else {
+            Vec3 aim = caster.getEyePosition().add(caster.getLookAngle().normalize().scale(Math.min(range, 5)));
+            center = BlockPos.containing(aim);
+        }
+
+        int excised = 0;
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dy = -radius; dy <= radius; dy++) {
+                for (int dz = -radius; dz <= radius; dz++) {
+                    if (dx * dx + dy * dy + dz * dz > (radius + 0.5f) * (radius + 0.5f)) {
+                        continue;
+                    }
+                    cursor.set(center.getX() + dx, center.getY() + dy, center.getZ() + dz);
+                    if (SubspaceMatterService.exileBlock(level, caster, cursor)) {
+                        excised++;
+                        level.sendParticles(
+                                ModParticleTypes.SPATIAL_RIFT.get(),
+                                cursor.getX() + 0.5,
+                                cursor.getY() + 0.5,
+                                cursor.getZ() + 0.5,
+                                4,
+                                0.15,
+                                0.15,
+                                0.15,
+                                0.02);
+                    }
+                }
+            }
+        }
+
+        spawnSpatialParticles(level, Vec3.atCenterOf(center));
+        level.playSound(
+                null,
+                center,
+                SoundEvents.ENDERMAN_TELEPORT,
+                SoundSource.PLAYERS,
+                0.9f,
+                0.45f);
+        if (excised > 0) {
+            caster.displayClientMessage(
+                    net.minecraft.network.chat.Component.translatable("message.effecoria.rift_excise.done", excised),
+                    true);
+        } else {
+            caster.displayClientMessage(
+                    net.minecraft.network.chat.Component.translatable("message.effecoria.rift_excise.none"),
+                    true);
+        }
     }
 
     private static double defaultMaxRange(SpellEffectEntry effect, double fallback) {

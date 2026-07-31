@@ -195,6 +195,7 @@ public final class SpellProgression {
                     id("dimensional_anchor"),
                     id("far_blink"),
                     id("subspace_voyage"),
+                    id("rift_excise"),
                     id("gravity_well"),
                     id("warp_exchange"),
                     id("spatial_surge"),

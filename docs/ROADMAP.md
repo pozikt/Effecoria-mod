@@ -119,6 +119,7 @@ Materials that were “craft only” in Stage I get proper sources here.
 |------|-------|
 | TSE sites / dungeons | Catalog + d100 generator as design input |
 | Spatial magic risk | Long blink / portals ↔ TSE chance |
+| Subspace hazards | Chaos Reefs, Ψ-ghosts, Ω-pockets — see [SUBSPACE.md](SUBSPACE.md) |
 | ΦR / chronal hooks | Optional ambient effects |
 
 TSE is a **gateway narrative** toward Ω (lore: TSE as Φ sink / Ω interface).

@@ -374,6 +374,7 @@ public final class SpellEffectExecutor {
             case "spatial_singularity" -> SpatialEffects.spatialSingularity(caster, effect, power, target);
             case "absolute_fold" -> SpatialEffects.absoluteFold(caster, effect, power);
             case "subspace_voyage" -> SpatialEffects.subspaceVoyage(caster, effect, power);
+            case "rift_excise" -> SpatialEffects.riftExcise(caster, effect, power);
             case "mind_bolt" -> MentalEffects.mindBolt(caster, effect, power, target);
             case "psychic_scream" -> MentalEffects.psychicScream(caster, effect, power);
             case "thought_lance" -> MentalEffects.thoughtLance(caster, effect, power, target);
