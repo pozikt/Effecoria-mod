@@ -1,6 +1,7 @@
 package com.effecoria.event;
 
 import com.effecoria.core.formula.BreathDebuffs;
+import com.effecoria.core.formula.SpellCombat;
 import com.effecoria.EffecoriaMod;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.effect.elemental.ElementalEffects;
@@ -59,6 +60,9 @@ public final class ElementalProjectileEvents {
                     case ElementalTags.KIND_WEAK_FIRE -> {
                         target.hurt(source, Math.max(0.5f, damage));
                         target.igniteForSeconds(Math.max(2, Math.round(2f + damage)));
+                        if (projectile.getOwner() instanceof LivingEntity owner) {
+                            SpellCombat.alert(target, owner);
+                        }
                         ElementalEffects.spawnFireParticles(level, target.position());
                         ElementalEffects.ignitePatch(level, target.blockPosition(), 0, 1);
                     }

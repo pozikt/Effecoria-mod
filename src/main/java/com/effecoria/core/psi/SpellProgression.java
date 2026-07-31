@@ -41,6 +41,7 @@ public final class SpellProgression {
                     id("telekinetic_crush"),
                     id("psychic_scream"),
                     id("cliff_urge"),
+                    id("drown_urge"),
                     id("mind_probe"),
                     id("mass_confusion"),
                     id("psychic_frenzy"),

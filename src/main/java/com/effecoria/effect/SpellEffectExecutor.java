@@ -1,5 +1,7 @@
 package com.effecoria.effect;
 
+import com.effecoria.core.formula.SpellCombat;
+
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.effect.elemental.AirHandService;
@@ -109,6 +111,7 @@ public final class SpellEffectExecutor {
             "thought_bomb",
             "mind_terror",
             "cliff_urge",
+            "drown_urge",
             "psychic_frenzy",
             "rot_touch",
             "entropy_lash",
@@ -379,6 +382,7 @@ public final class SpellEffectExecutor {
             case "omega_mind" -> MentalEffects.omegaMind(caster, effect, power);
             case "mind_terror" -> MentalEffects.mindTerror(caster, effect, power, target);
             case "cliff_urge" -> MentalEffects.cliffUrge(caster, effect, power, target);
+            case "drown_urge" -> MentalEffects.drownUrge(caster, effect, power, target);
             case "psychic_frenzy" -> MentalEffects.psychicFrenzy(caster, effect, power, target);
             case "mass_hysteria" -> MentalEffects.massHysteria(caster, effect, power);
             case "blink" -> SpatialEffects.standardBlink(caster, effect, power);
@@ -562,7 +566,7 @@ public final class SpellEffectExecutor {
         float damage = effect.params().get("damage").getAsFloat();
         float healRatio = effect.params().has("heal_ratio") ? effect.params().get("heal_ratio").getAsFloat() : 0.5f;
         float scaledDamage = damage * (power / 50f);
-        target.hurt(caster.level().damageSources().magic(), scaledDamage);
+        target.hurt(SpellCombat.magic(caster), scaledDamage);
         caster.heal(scaledDamage * healRatio);
         spawnNecroParticles(level, target.position().add(0, 1, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.7f, 0.8f);
@@ -577,7 +581,7 @@ public final class SpellEffectExecutor {
         float damage = effect.params().get("damage").getAsFloat();
         int witherTicks = effect.params().get("wither_ticks").getAsInt();
         float scaledDamage = damage * (power / 50f);
-        target.hurt(caster.level().damageSources().wither(), scaledDamage);
+        target.hurt(SpellCombat.wither(caster), scaledDamage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
         spawnNecroParticles(level, target.position().add(0, 1, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.7f, 1.2f);
@@ -595,7 +599,7 @@ public final class SpellEffectExecutor {
         Vec3 dest = caster.position().add(caster.getLookAngle().normalize().scale(1.2));
         spawnSpatialParticles(level, target.position().add(0, 1, 0));
         target.teleportTo(dest.x, dest.y, dest.z);
-        target.hurt(caster.level().damageSources().magic(), scaledDamage);
+        target.hurt(SpellCombat.magic(caster), scaledDamage);
         target.hurtMarked = true;
         spawnSpatialParticles(level, dest.add(0, 1, 0));
         level.playSound(null, caster.blockPosition(), SoundEvents.CHORUS_FRUIT_TELEPORT, SoundSource.PLAYERS, 1f, 0.8f);

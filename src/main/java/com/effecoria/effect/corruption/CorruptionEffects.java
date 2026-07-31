@@ -1,5 +1,7 @@
 package com.effecoria.effect.corruption;
 
+import com.effecoria.core.formula.SpellCombat;
+
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
@@ -34,7 +36,7 @@ public final class CorruptionEffects {
         poisonTicks = Math.round(poisonTicks * (0.85f + power / 100f));
         weaknessTicks = Math.round(weaknessTicks * (0.85f + power / 100f));
 
-        target.hurt(level.damageSources().magic(), damage);
+        target.hurt(SpellCombat.magic(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, weaknessTicks, 0));
         spawnCorruptionParticles(level, target.position().add(0, 1, 0));
@@ -79,7 +81,7 @@ public final class CorruptionEffects {
         ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 2.5f);
         int hungerTicks = effect.params().has("hunger_ticks") ? effect.params().get("hunger_ticks").getAsInt() : 100;
-        target.hurt(level.damageSources().wither(), damage);
+        target.hurt(SpellCombat.wither(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.HUNGER, hungerTicks, 1));
         finishHit(level, target);
     }
@@ -91,7 +93,7 @@ public final class CorruptionEffects {
         ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 4f);
         int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 60;
-        target.hurt(level.damageSources().magic(), damage);
+        target.hurt(SpellCombat.magic(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
         finishHit(level, target);
     }
@@ -104,7 +106,7 @@ public final class CorruptionEffects {
         float damage = DiceDamage.fromParams(effect.params(), power, 5f);
         int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 80;
         int weaknessTicks = effect.params().has("weakness_ticks") ? effect.params().get("weakness_ticks").getAsInt() : 60;
-        target.hurt(level.damageSources().magic(), damage);
+        target.hurt(SpellCombat.magic(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, weaknessTicks, 0));
         finishHit(level, target);
@@ -118,7 +120,7 @@ public final class CorruptionEffects {
         float damage = DiceDamage.fromParams(effect.params(), power, 3f);
         int witherTicks = effect.params().has("wither_ticks") ? effect.params().get("wither_ticks").getAsInt() : 80;
         int amp = effect.params().has("wither_amplifier") ? effect.params().get("wither_amplifier").getAsInt() : 1;
-        target.hurt(level.damageSources().wither(), damage);
+        target.hurt(SpellCombat.wither(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, amp));
         finishHit(level, target);
     }
@@ -185,7 +187,7 @@ public final class CorruptionEffects {
         ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 6f);
         float ratio = effect.params().has("heal_ratio") ? effect.params().get("heal_ratio").getAsFloat() : 0.4f;
-        target.hurt(level.damageSources().magic(), damage);
+        target.hurt(SpellCombat.magic(caster), damage);
         target.hurtMarked = true;
         caster.heal(damage * ratio);
         finishHit(level, target);
@@ -249,7 +251,7 @@ public final class CorruptionEffects {
             if (entity.distanceToSqr(caster) > radius * radius) {
                 continue;
             }
-            entity.hurt(level.damageSources().magic(), damage);
+            entity.hurt(SpellCombat.magic(caster), damage);
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
             if (weakness) {
                 BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WEAKNESS, poisonTicks / 2, 0));

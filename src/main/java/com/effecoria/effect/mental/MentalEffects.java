@@ -250,6 +250,10 @@ public final class MentalEffects {
         applyCompulsion(caster, effect, power, target, MentalCompulsionService.Type.CLIFF, 160);
     }
 
+    public static void drownUrge(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        applyCompulsion(caster, effect, power, target, MentalCompulsionService.Type.DROWN, 180);
+    }
+
     public static void psychicFrenzy(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         applyCompulsion(caster, effect, power, target, MentalCompulsionService.Type.FRENZY, 120);
     }
@@ -262,7 +266,8 @@ public final class MentalEffects {
             MentalCompulsionService.Type.TERROR,
             MentalCompulsionService.Type.CLIFF,
             MentalCompulsionService.Type.FRENZY,
-            MentalCompulsionService.Type.DEPRESS
+            MentalCompulsionService.Type.DEPRESS,
+            MentalCompulsionService.Type.DROWN
         };
         AABB box = caster.getBoundingBox().inflate(radius);
         int hit = 0;

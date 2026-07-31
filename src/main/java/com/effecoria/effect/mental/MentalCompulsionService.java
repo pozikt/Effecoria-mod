@@ -32,13 +32,15 @@ public final class MentalCompulsionService {
         TERROR,
         CLIFF,
         FRENZY,
-        DEPRESS;
+        DEPRESS,
+        DROWN;
 
         static Type fromId(String id) {
             return switch (id) {
                 case "cliff" -> CLIFF;
                 case "frenzy" -> FRENZY;
                 case "depress" -> DEPRESS;
+                case "drown" -> DROWN;
                 default -> TERROR;
             };
         }
@@ -48,6 +50,7 @@ public final class MentalCompulsionService {
                 case CLIFF -> "cliff";
                 case FRENZY -> "frenzy";
                 case DEPRESS -> "depress";
+                case DROWN -> "drown";
                 case TERROR -> "terror";
             };
         }
@@ -169,6 +172,7 @@ public final class MentalCompulsionService {
             case CLIFF -> tickCliff(level, mob);
             case FRENZY -> tickFrenzy(level, mob);
             case DEPRESS -> tickDepress(mob);
+            case DROWN -> tickDrown(level, mob);
         }
     }
 
@@ -207,6 +211,73 @@ public final class MentalCompulsionService {
         mob.getNavigation().stop();
         mob.setDeltaMovement(mob.getDeltaMovement().multiply(0.2, 1.0, 0.2));
         mob.hurtMarked = true;
+    }
+
+    private static void tickDrown(ServerLevel level, Mob mob) {
+        mob.setTarget(null);
+        if (mob.isInWaterOrBubble()) {
+            mob.getNavigation().stop();
+            BlockPos deeper = findDeeperWater(level, mob.blockPosition(), 6);
+            if (deeper != null) {
+                mob.getMoveControl().setWantedPosition(
+                        deeper.getX() + 0.5, deeper.getY() + 0.2, deeper.getZ() + 0.5, 1.05);
+            } else {
+                mob.setDeltaMovement(mob.getDeltaMovement().add(0, -0.18, 0));
+                mob.hurtMarked = true;
+            }
+            if (!(mob instanceof net.minecraft.world.entity.animal.WaterAnimal)) {
+                mob.setAirSupply(Math.max(-20, mob.getAirSupply() - 20));
+            }
+            return;
+        }
+
+        BlockPos water = findWaterSurface(level, mob, 16);
+        if (water == null) {
+            if (mob.getNavigation().isDone() && level.getGameTime() % 20 == 0) {
+                double ox = mob.getX() + (mob.getRandom().nextDouble() - 0.5) * 10;
+                double oz = mob.getZ() + (mob.getRandom().nextDouble() - 0.5) * 10;
+                mob.getNavigation().moveTo(ox, mob.getY(), oz, 1.1);
+            }
+            return;
+        }
+        if (mob.getNavigation().isDone() || level.getGameTime() % 10 == 0) {
+            mob.getNavigation().moveTo(water.getX() + 0.5, water.getY(), water.getZ() + 0.5, 1.2);
+        }
+    }
+
+    private static BlockPos findWaterSurface(ServerLevel level, Mob mob, int radius) {
+        BlockPos origin = mob.blockPosition();
+        BlockPos best = null;
+        double bestDist = Double.MAX_VALUE;
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                for (int dy = -4; dy <= 6; dy++) {
+                    BlockPos pos = origin.offset(dx, dy, dz);
+                    if (!level.getFluidState(pos).is(net.minecraft.tags.FluidTags.WATER)) {
+                        continue;
+                    }
+                    double dist = mob.distanceToSqr(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+                    if (dist < bestDist) {
+                        bestDist = dist;
+                        best = pos;
+                    }
+                }
+            }
+        }
+        return best;
+    }
+
+    private static BlockPos findDeeperWater(ServerLevel level, BlockPos from, int maxDepth) {
+        BlockPos.MutableBlockPos cursor = from.mutable();
+        BlockPos deepest = null;
+        for (int y = 1; y <= maxDepth; y++) {
+            cursor.set(from.getX(), from.getY() - y, from.getZ());
+            if (!level.getFluidState(cursor).is(net.minecraft.tags.FluidTags.WATER)) {
+                break;
+            }
+            deepest = cursor.immutable();
+        }
+        return deepest;
     }
 
     private static void tickCliff(ServerLevel level, Mob mob) {

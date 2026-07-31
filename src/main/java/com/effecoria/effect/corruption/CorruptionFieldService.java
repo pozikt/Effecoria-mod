@@ -1,6 +1,7 @@
 package com.effecoria.effect.corruption;
 
 import com.effecoria.core.formula.BreathDebuffs;
+import com.effecoria.core.formula.SpellCombat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -86,7 +87,12 @@ public final class CorruptionFieldService {
             if (entity.position().distanceToSqr(field.center) > (double) field.radius * field.radius) {
                 continue;
             }
-            entity.hurt(level.damageSources().magic(), field.damagePerSecond);
+            ServerPlayer owner = level.getServer().getPlayerList().getPlayer(field.owner);
+            if (owner != null) {
+                SpellCombat.hurtMagic(owner, entity, field.damagePerSecond);
+            } else {
+                entity.hurt(level.damageSources().magic(), field.damagePerSecond);
+            }
             BreathDebuffs.apply(level, field.owner, entity, new MobEffectInstance(MobEffects.POISON, 40, field.poisonAmplifier));
             BreathDebuffs.apply(level, field.owner, entity, new MobEffectInstance(MobEffects.WEAKNESS, 40, 0));
             entity.hurtMarked = true;

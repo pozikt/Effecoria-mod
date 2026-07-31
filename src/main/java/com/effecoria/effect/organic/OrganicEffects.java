@@ -1,5 +1,7 @@
 package com.effecoria.effect.organic;
 
+import com.effecoria.core.formula.SpellCombat;
+
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
@@ -105,7 +107,7 @@ public final class OrganicEffects {
         }
         ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 3f);
-        target.hurt(level.damageSources().wither(), damage);
+        target.hurt(SpellCombat.wither(caster), damage);
         target.hurtMarked = true;
         spawnOrganicParticles(level, target.position().add(0, 1, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 0.8f, 0.7f);
@@ -142,7 +144,7 @@ public final class OrganicEffects {
         ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 3f);
         int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 30;
-        target.hurt(level.damageSources().wither(), damage);
+        target.hurt(SpellCombat.wither(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 3));
         target.hurtMarked = true;
         spawnOrganicParticles(level, target.position().add(0, 1, 0));
@@ -173,7 +175,7 @@ public final class OrganicEffects {
         float damage = DiceDamage.fromParams(params, power, 5f);
         Vec3 look = caster.getLookAngle().normalize();
         Vec3 start = caster.getEyePosition();
-        DamageSource source = level.damageSources().magic();
+        DamageSource source = SpellCombat.magic(caster);
         AABB sweep = caster.getBoundingBox().expandTowards(look.scale(range)).inflate(1.2);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, sweep, e -> e != caster && e.isAlive())) {
             Vec3 to = entity.getBoundingBox().getCenter().subtract(start);
@@ -200,7 +202,7 @@ public final class OrganicEffects {
         float burst = DiceDamage.fromParams(params, power, 5f);
         int witherTicks = params.has("wither_ticks") ? params.get("wither_ticks").getAsInt() : 60;
         int witherAmp = params.has("wither_amplifier") ? params.get("wither_amplifier").getAsInt() : 0;
-        target.hurt(level.damageSources().wither(), burst);
+        target.hurt(SpellCombat.wither(caster), burst);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, witherAmp));
         target.hurtMarked = true;
         spawnOrganicParticles(level, target.position().add(0, 1, 0));
@@ -323,7 +325,7 @@ public final class OrganicEffects {
         float damage = DiceDamage.fromParams(effect.params(), power, 8f);
         int witherTicks = effect.params().has("wither_ticks") ? effect.params().get("wither_ticks").getAsInt() : 100;
         int weakTicks = effect.params().has("weakness_ticks") ? effect.params().get("weakness_ticks").getAsInt() : 80;
-        target.hurt(level.damageSources().wither(), damage);
+        target.hurt(SpellCombat.wither(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, weakTicks, 1));
         target.hurtMarked = true;
@@ -353,7 +355,7 @@ public final class OrganicEffects {
                 continue;
             }
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
-            entity.hurt(level.damageSources().magic(), DiceDamage.fromParams(effect.params(), power, 4f) * 0.5f);
+            entity.hurt(SpellCombat.magic(caster), DiceDamage.fromParams(effect.params(), power, 4f) * 0.5f);
             entity.hurtMarked = true;
         }
         spawnOrganicParticles(level, center.add(0, 0.5, 0));
@@ -423,7 +425,7 @@ public final class OrganicEffects {
         float burst = DiceDamage.fromParams(effect.params(), power, 10f);
         float spread = effect.params().has("spread_radius") ? effect.params().get("spread_radius").getAsFloat() : 5f;
         int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 160;
-        applyPlagueHit(level, target, burst, poisonTicks);
+        applyPlagueHit(level, caster, target, burst, poisonTicks);
         AABB box = target.getBoundingBox().inflate(spread);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == target || entity == caster) {
@@ -432,13 +434,14 @@ public final class OrganicEffects {
             if (entity.distanceToSqr(target) > spread * spread) {
                 continue;
             }
-            applyPlagueHit(level, entity, burst * 0.45f, poisonTicks / 2);
+            applyPlagueHit(level, caster, entity, burst * 0.45f, poisonTicks / 2);
         }
         spawnOrganicParticles(level, target.position().add(0, 1, 0));
     }
 
-    private static void applyPlagueHit(ServerLevel level, LivingEntity entity, float damage, int poisonTicks) {
-        entity.hurt(level.damageSources().wither(), damage);
+    private static void applyPlagueHit(
+            ServerLevel level, ServerPlayer caster, LivingEntity entity, float damage, int poisonTicks) {
+        entity.hurt(SpellCombat.wither(caster), damage);
         BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
         entity.hurtMarked = true;
     }
@@ -567,7 +570,7 @@ public final class OrganicEffects {
         ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 7f);
         int armorDamage = effect.params().has("armor_damage") ? effect.params().get("armor_damage").getAsInt() : 80;
-        target.hurt(level.damageSources().magic(), damage);
+        target.hurt(SpellCombat.magic(caster), damage);
         target.hurtMarked = true;
         shredOrganicArmor(target, armorDamage);
         spawnOrganicParticles(level, target.position().add(0, 1, 0));
@@ -597,7 +600,7 @@ public final class OrganicEffects {
             if (entity.distanceToSqr(caster) > radius * radius) {
                 continue;
             }
-            entity.hurt(level.damageSources().magic(), damage);
+            entity.hurt(SpellCombat.magic(caster), damage);
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.POISON, poisonTicks, 1));
             entity.hurtMarked = true;
             spawnOrganicParticles(level, entity.position().add(0, 1, 0));

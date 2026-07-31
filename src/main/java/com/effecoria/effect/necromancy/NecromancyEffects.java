@@ -1,5 +1,7 @@
 package com.effecoria.effect.necromancy;
 
+import com.effecoria.core.formula.SpellCombat;
+
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
@@ -29,7 +31,7 @@ public final class NecromancyEffects {
         ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 3f);
         int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 80;
-        target.hurt(level.damageSources().wither(), damage);
+        target.hurt(SpellCombat.wither(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
         target.hurtMarked = true;
         finishHit(level, target);
@@ -81,7 +83,7 @@ public final class NecromancyEffects {
             if (entity.distanceToSqr(caster) > radius * radius) {
                 continue;
             }
-            entity.hurt(level.damageSources().magic(), damage);
+            entity.hurt(SpellCombat.magic(caster), damage);
             entity.hurtMarked = true;
             healed += damage * healRatio;
             spawnNecroParticles(level, entity.position().add(0, 1, 0));
@@ -107,7 +109,7 @@ public final class NecromancyEffects {
         ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 6f);
         float healRatio = effect.params().has("heal_ratio") ? effect.params().get("heal_ratio").getAsFloat() : 0.75f;
-        target.hurt(level.damageSources().magic(), damage);
+        target.hurt(SpellCombat.magic(caster), damage);
         caster.heal(damage * healRatio);
         target.hurtMarked = true;
         finishHit(level, target);
@@ -126,7 +128,7 @@ public final class NecromancyEffects {
             if (entity.distanceToSqr(caster) > radius * radius) {
                 continue;
             }
-            entity.hurt(level.damageSources().wither(), damage);
+            entity.hurt(SpellCombat.wither(caster), damage);
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
             entity.hurtMarked = true;
             spawnNecroParticles(level, entity.position().add(0, 1, 0));
@@ -197,7 +199,7 @@ public final class NecromancyEffects {
         float burst = DiceDamage.fromParams(effect.params(), power, 8f);
         float spread = effect.params().has("spread_radius") ? effect.params().get("spread_radius").getAsFloat() : 4f;
         int witherTicks = effect.params().has("wither_ticks") ? effect.params().get("wither_ticks").getAsInt() : 60;
-        applyCoilHit(level, target, burst, witherTicks);
+        applyCoilHit(level, caster, target, burst, witherTicks);
         AABB box = target.getBoundingBox().inflate(spread);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == target || entity == caster) {
@@ -206,7 +208,7 @@ public final class NecromancyEffects {
             if (entity.distanceToSqr(target) > spread * spread) {
                 continue;
             }
-            applyCoilHit(level, entity, burst * 0.5f, witherTicks / 2);
+            applyCoilHit(level, caster, entity, burst * 0.5f, witherTicks / 2);
         }
     }
 
@@ -241,7 +243,7 @@ public final class NecromancyEffects {
         ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 5f);
         int witherTicks = effect.params().has("wither_ticks") ? effect.params().get("wither_ticks").getAsInt() : 40;
-        target.hurt(level.damageSources().wither(), damage);
+        target.hurt(SpellCombat.wither(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
         target.hurtMarked = true;
         finishHit(level, target);
@@ -295,7 +297,7 @@ public final class NecromancyEffects {
             if (entity.position().distanceToSqr(center) > radius * radius) {
                 continue;
             }
-            entity.hurt(level.damageSources().wither(), damage);
+            entity.hurt(SpellCombat.wither(caster), damage);
             entity.hurtMarked = true;
             spawnNecroParticles(level, entity.position().add(0, 1, 0));
         }
@@ -310,7 +312,7 @@ public final class NecromancyEffects {
         int hits = effect.params().has("hits") ? effect.params().get("hits").getAsInt() : 3;
         float perHit = DiceDamage.fromParams(effect.params(), power, 4f) / Math.max(1, hits);
         for (int i = 0; i < hits; i++) {
-            target.hurt(level.damageSources().wither(), perHit);
+            target.hurt(SpellCombat.wither(caster), perHit);
         }
         target.hurtMarked = true;
         finishHit(level, target);
@@ -330,7 +332,7 @@ public final class NecromancyEffects {
             if (entity.distanceToSqr(caster) > radius * radius) {
                 continue;
             }
-            entity.hurt(level.damageSources().wither(), pulse);
+            entity.hurt(SpellCombat.wither(caster), pulse);
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WITHER, 40, 0));
             entity.hurtMarked = true;
             spawnNecroParticles(level, entity.position().add(0, 1, 0));
@@ -396,7 +398,7 @@ public final class NecromancyEffects {
         if (target.getHealth() / target.getMaxHealth() <= threshold) {
             damage *= 1.75f;
         }
-        target.hurt(level.damageSources().wither(), damage);
+        target.hurt(SpellCombat.wither(caster), damage);
         caster.heal(damage * healRatio);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, 100, 1));
         target.hurtMarked = true;
@@ -437,14 +439,14 @@ public final class NecromancyEffects {
             if (entity.position().distanceToSqr(center) > radius * radius) {
                 continue;
             }
-            entity.hurt(level.damageSources().wither(), damage);
+            entity.hurt(SpellCombat.wither(skip), damage);
             entity.hurtMarked = true;
             spawnNecroParticles(level, entity.position().add(0, 1, 0));
         }
     }
 
-    private static void applyCoilHit(ServerLevel level, LivingEntity entity, float damage, int witherTicks) {
-        entity.hurt(level.damageSources().wither(), damage);
+    private static void applyCoilHit(ServerLevel level, ServerPlayer caster, LivingEntity entity, float damage, int witherTicks) {
+        entity.hurt(SpellCombat.wither(caster), damage);
         BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
         entity.hurtMarked = true;
         spawnNecroParticles(level, entity.position().add(0, 1, 0));

@@ -1,5 +1,7 @@
 package com.effecoria.effect.elemental;
 
+import com.effecoria.core.formula.SpellCombat;
+
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
@@ -307,7 +309,7 @@ public final class ElementalEffects {
         }
 
         AABB box = new AABB(center, center).inflate(radius);
-        DamageSource source = level.damageSources().magic();
+        DamageSource source = SpellCombat.magic(caster);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
             if (target.position().distanceToSqr(center) > (double) radius * radius) {
                 continue;
@@ -403,7 +405,7 @@ public final class ElementalEffects {
         float scaledKnock = knockback * (0.75f + power / 100f);
         DamageSource source = cutter
                 ? caster.level().damageSources().playerAttack(caster)
-                : caster.level().damageSources().magic();
+                : SpellCombat.magic(caster);
 
         AABB sweep = caster.getBoundingBox().expandTowards(look.scale(range)).inflate(1.5);
         Set<LivingEntity> hit = new HashSet<>();
@@ -619,7 +621,7 @@ public final class ElementalEffects {
         int stunTicks = params.has("stun_ticks") ? params.get("stun_ticks").getAsInt() : 20;
         float damage = DiceDamage.fromParams(params, power, 7f);
         AABB box = caster.getBoundingBox().inflate(radius);
-        DamageSource source = level.damageSources().magic();
+        DamageSource source = SpellCombat.magic(caster);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
             target.hurt(source, damage);
             Vec3 away = target.position().subtract(caster.position()).normalize();
@@ -867,7 +869,7 @@ public final class ElementalEffects {
         float knock = params.has("knockback") ? params.get("knockback").getAsFloat() : 0.8f;
         Vec3 look = caster.getLookAngle().normalize();
         Vec3 start = caster.getEyePosition();
-        DamageSource source = level.damageSources().magic();
+        DamageSource source = SpellCombat.magic(caster);
         AABB sweep = caster.getBoundingBox().expandTowards(look.scale(range)).inflate(1.2);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, sweep, e -> e != caster && e.isAlive())) {
             Vec3 toTarget = target.getBoundingBox().getCenter().subtract(start);
@@ -904,7 +906,7 @@ public final class ElementalEffects {
             center = hit.getLocation();
         }
 
-        DamageSource source = level.damageSources().magic();
+        DamageSource source = SpellCombat.magic(caster);
         AABB box = new AABB(center, center).inflate(radius);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
             if (target.position().distanceToSqr(center) > (double) radius * radius) {
@@ -973,7 +975,7 @@ public final class ElementalEffects {
         radius *= 0.9f + power / 160f;
 
         Vec3 center = aimPoint(caster, 12);
-        DamageSource source = level.damageSources().magic();
+        DamageSource source = SpellCombat.magic(caster);
         AABB box = new AABB(center, center).inflate(radius);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
             if (target.position().distanceToSqr(center) > (double) radius * radius) {
@@ -1008,7 +1010,7 @@ public final class ElementalEffects {
 
         Vec3 look = caster.getLookAngle().normalize();
         Vec3 start = caster.getEyePosition();
-        DamageSource source = level.damageSources().magic();
+        DamageSource source = SpellCombat.magic(caster);
         AABB sweep = caster.getBoundingBox().expandTowards(look.scale(range)).inflate(coneHalf);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, sweep, e -> e != caster && e.isAlive())) {
             Vec3 toTarget = target.getBoundingBox().getCenter().subtract(start);
@@ -1094,7 +1096,7 @@ public final class ElementalEffects {
         int blindTicks = params.has("blind_ticks") ? params.get("blind_ticks").getAsInt() : 40;
         float damage = DiceDamage.fromParams(params, power, 22f);
         Vec3 center = aimPoint(caster, 16);
-        DamageSource source = level.damageSources().magic();
+        DamageSource source = SpellCombat.magic(caster);
         AABB box = new AABB(center, center).inflate(radius);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
             if (target.position().distanceToSqr(center) > (double) radius * radius) {
@@ -1119,7 +1121,7 @@ public final class ElementalEffects {
         int freezeTicks = params.has("freeze_ticks") ? params.get("freeze_ticks").getAsInt() : 30;
         float damage = DiceDamage.fromParams(params, power, 20f);
         Vec3 center = aimPoint(caster, 12);
-        DamageSource source = level.damageSources().magic();
+        DamageSource source = SpellCombat.magic(caster);
         AABB box = new AABB(center, center).inflate(radius);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
             if (target.position().distanceToSqr(center) > (double) radius * radius) {
@@ -1157,7 +1159,7 @@ public final class ElementalEffects {
         float radius = params.has("radius") ? params.get("radius").getAsFloat() : 28f;
         float damage = DiceDamage.fromParams(params, power, 28f);
         Vec3 center = caster.position();
-        DamageSource source = level.damageSources().magic();
+        DamageSource source = SpellCombat.magic(caster);
         AABB box = caster.getBoundingBox().inflate(radius);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
             if (target.position().distanceToSqr(center) > (double) radius * radius) {

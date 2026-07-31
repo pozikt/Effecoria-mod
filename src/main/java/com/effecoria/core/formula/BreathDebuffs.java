@@ -97,6 +97,11 @@ public final class BreathDebuffs {
         MobEffectInstance toApply = instance;
         if (source != null && target != source) {
             toApply = scale(source, instance);
+            boolean applied = target.addEffect(toApply);
+            if (applied && isScalableDebuff(instance)) {
+                SpellCombat.alert(target, source);
+            }
+            return applied;
         }
         return target.addEffect(toApply);
     }

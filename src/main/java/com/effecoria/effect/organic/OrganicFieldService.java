@@ -1,6 +1,7 @@
 package com.effecoria.effect.organic;
 
 import com.effecoria.core.formula.BreathDebuffs;
+import com.effecoria.core.formula.SpellCombat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -178,7 +179,12 @@ public final class OrganicFieldService {
                 if (entity.position().distanceToSqr(field.center) > (double) field.radius * field.radius) {
                     continue;
                 }
-                entity.hurt(level.damageSources().magic(), field.damagePerSecond);
+                ServerPlayer owner = level.getServer().getPlayerList().getPlayer(field.owner);
+                if (owner != null) {
+                    SpellCombat.hurtMagic(owner, entity, field.damagePerSecond);
+                } else {
+                    entity.hurt(level.damageSources().magic(), field.damagePerSecond);
+                }
                 entity.hurtMarked = true;
             }
             return;
@@ -191,7 +197,12 @@ public final class OrganicFieldService {
                 if (entity.position().distanceToSqr(field.center) > (double) field.radius * field.radius) {
                     continue;
                 }
-                entity.hurt(level.damageSources().wither(), field.damagePerSecond);
+                ServerPlayer owner = level.getServer().getPlayerList().getPlayer(field.owner);
+                if (owner != null) {
+                    SpellCombat.hurtMagic(owner, entity, field.damagePerSecond);
+                } else {
+                    entity.hurt(level.damageSources().magic(), field.damagePerSecond);
+                }
                 entity.hurtMarked = true;
                 if (now % 40 == 0) {
                     BreathDebuffs.apply(level, field.owner, entity, new MobEffectInstance(MobEffects.POISON, 40, 0));

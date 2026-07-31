@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:drown_urge",
+  "school": "mental",
+  "frequency_hz": 10.5,
+  "base_cost": 14,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.06,
+  "min_phi": 0.16,
+  "min_mastery": 0.18,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:drown_urge",
+      "duration_ticks": 180,
+      "range": 14
+    }
+  ]
+}

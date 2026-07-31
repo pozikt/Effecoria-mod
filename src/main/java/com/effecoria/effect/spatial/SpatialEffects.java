@@ -1,5 +1,7 @@
 package com.effecoria.effect.spatial;
 
+import com.effecoria.core.formula.SpellCombat;
+
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
@@ -26,7 +28,7 @@ public final class SpatialEffects {
         }
         ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 5f);
-        target.hurt(level.damageSources().magic(), damage);
+        target.hurt(SpellCombat.magic(caster), damage);
         target.hurtMarked = true;
         finishHit(level, target.position());
     }
@@ -50,7 +52,7 @@ public final class SpatialEffects {
         target.setDeltaMovement(target.getDeltaMovement().add(away.scale(strength)));
         target.hurtMarked = true;
         float damage = DiceDamage.fromParams(effect.params(), power, 2f);
-        target.hurt(level.damageSources().magic(), damage);
+        target.hurt(SpellCombat.magic(caster), damage);
         finishHit(level, target.position());
     }
 
@@ -61,7 +63,7 @@ public final class SpatialEffects {
         ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 6f);
         int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 60;
-        target.hurt(level.damageSources().magic(), damage);
+        target.hurt(SpellCombat.magic(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
         target.hurtMarked = true;
         finishHit(level, target.position());
@@ -124,7 +126,7 @@ public final class SpatialEffects {
         }
         ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 9f);
-        target.hurt(level.damageSources().magic(), damage);
+        target.hurt(SpellCombat.magic(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, 60, 0));
         target.hurtMarked = true;
         finishHit(level, target.position());
@@ -145,7 +147,7 @@ public final class SpatialEffects {
         target.teleportTo(casterPos.x, casterPos.y, casterPos.z);
         target.hurtMarked = true;
         float damage = DiceDamage.fromParams(effect.params(), power, 3f);
-        target.hurt(level.damageSources().magic(), damage);
+        target.hurt(SpellCombat.magic(caster), damage);
         level.playSound(null, caster.blockPosition(), SoundEvents.CHORUS_FRUIT_TELEPORT, SoundSource.PLAYERS, 1f, 0.9f);
     }
 
@@ -161,7 +163,7 @@ public final class SpatialEffects {
             if (entity.distanceToSqr(caster) > radius * radius) {
                 continue;
             }
-            entity.hurt(level.damageSources().magic(), damage);
+            entity.hurt(SpellCombat.magic(caster), damage);
             entity.hurtMarked = true;
             spawnSpatialParticles(level, entity.position().add(0, 1, 0));
         }
@@ -208,7 +210,7 @@ public final class SpatialEffects {
             }
             Vec3 toward = center.subtract(entity.position()).normalize().scale(pull);
             entity.setDeltaMovement(entity.getDeltaMovement().add(toward));
-            entity.hurt(level.damageSources().magic(), damage);
+            entity.hurt(SpellCombat.magic(caster), damage);
             entity.hurtMarked = true;
             spawnSpatialParticles(level, entity.position().add(0, 1, 0));
         }
@@ -288,7 +290,7 @@ public final class SpatialEffects {
             if (entity.position().distanceToSqr(center) > radius * radius) {
                 continue;
             }
-            entity.hurt(level.damageSources().magic(), damage);
+            entity.hurt(SpellCombat.magic(skip), damage);
             entity.hurtMarked = true;
             spawnSpatialParticles(level, entity.position().add(0, 1, 0));
         }

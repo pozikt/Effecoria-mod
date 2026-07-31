@@ -1,6 +1,7 @@
 package com.effecoria.effect.necromancy;
 
 import com.effecoria.core.formula.BreathDebuffs;
+import com.effecoria.core.formula.SpellCombat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -76,7 +77,12 @@ public final class NecroFieldService {
                     if (entity.position().distanceToSqr(field.center) > (double) field.radius * field.radius) {
                         continue;
                     }
-                    entity.hurt(level.damageSources().wither(), field.damagePerSecond);
+                    ServerPlayer owner = level.getServer().getPlayerList().getPlayer(field.owner);
+                    if (owner != null) {
+                        SpellCombat.hurtWither(owner, entity, field.damagePerSecond);
+                    } else {
+                        entity.hurt(level.damageSources().wither(), field.damagePerSecond);
+                    }
                     entity.hurtMarked = true;
                     if (now % 40 == 0) {
                         BreathDebuffs.apply(level, field.owner, entity, new MobEffectInstance(MobEffects.WITHER, 40, 0));
