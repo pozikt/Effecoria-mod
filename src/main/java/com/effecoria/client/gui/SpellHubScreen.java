@@ -249,15 +249,13 @@ public class SpellHubScreen extends Screen {
             float cost = SpellRadialCosts.previewCost(minecraft.player, spellId);
             Component costLine = formatCost(cost);
             Component desc = Component.translatable("spell.effecoria." + spellId.getPath() + ".desc");
-            boolean summon = isSummonSpell(spellId);
-            Component reserveHint = summon
-                    ? Component.translatable(
-                            "gui.effecoria.hub.summon_reserve",
-                            (int) com.effecoria.config.BalanceConfig.NECRO_SUMMON_PSI_RESERVE.get().floatValue())
+            boolean deathMark = isDeathMarkSpell(spellId);
+            Component reserveHint = deathMark
+                    ? Component.translatable("gui.effecoria.hub.death_mark_reserve")
                     : null;
             int padX = 12;
             int lineH = 10;
-            int lines = 4 + (summon ? 1 : 0);
+            int lines = 4 + (deathMark ? 1 : 0);
             int panelH = lineH * lines + 18;
             int maxW = Math.max(
                     this.font.width(spellName),
@@ -295,14 +293,8 @@ public class SpellHubScreen extends Screen {
         }
     }
 
-    private static boolean isSummonSpell(ResourceLocation spellId) {
-        String path = spellId.getPath();
-        return path.equals("shade_summon")
-                || path.equals("shade_brood")
-                || path.equals("shade_swarm")
-                || path.equals("raise_skeleton")
-                || path.equals("raise_zombie")
-                || path.equals("army_of_dead");
+    private static boolean isDeathMarkSpell(ResourceLocation spellId) {
+        return spellId.getPath().equals("death_mark");
     }
 
     private void renderLockedHoverPanel(

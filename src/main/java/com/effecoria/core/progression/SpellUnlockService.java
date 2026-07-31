@@ -3,6 +3,7 @@ package com.effecoria.core.progression;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.magic.MagicSchool;
@@ -17,12 +18,36 @@ import net.minecraft.server.level.ServerPlayer;
 
 /** Unlocks school spells from progression when mastery and essence requirements are met. */
 public final class SpellUnlockService {
+    private static final Set<String> REMOVED_SUMMON_PATHS = Set.of(
+            "shade_summon",
+            "shade_brood",
+            "shade_swarm",
+            "raise_skeleton",
+            "raise_zombie",
+            "army_of_dead");
+
+    private static final ResourceLocation DEATH_MARK =
+            ResourceLocation.fromNamespaceAndPath("effecoria", "death_mark");
+
     private SpellUnlockService() {}
+
+    public static void stripRemovedSummons(PlayerPsiData data) {
+        boolean hadSummon = data.knownSpells().removeIf(id -> REMOVED_SUMMON_PATHS.contains(id.getPath()));
+        if (data.school() == MagicSchool.NECROMANCY) {
+            // Core raise tool — grant if they already passed the early necro band, or lost an old summon.
+            int starters = BalanceConfig.SPELL_STARTER_COUNT.get();
+            if (hadSummon || data.knownSpells().size() >= starters) {
+                data.unlockSpell(DEATH_MARK);
+            }
+        }
+        data.setSelectedSpellIndex(data.selectedSpellIndex());
+    }
 
     public static void tick(ServerPlayer player, PlayerPsiData data) {
         if (!data.initiated() || data.school() == MagicSchool.NONE) {
             return;
         }
+        stripRemovedSummons(data);
         if (player.tickCount % 20 != 0) {
             return;
         }

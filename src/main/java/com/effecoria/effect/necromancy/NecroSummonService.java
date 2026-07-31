@@ -1,6 +1,5 @@
 package com.effecoria.effect.necromancy;
 
-import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 
@@ -18,45 +17,64 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Permanent thralls bound to a necromancer. Each alive thrall reserves Ψ from the caster.
+ * Permanent thralls bound to a necromancer. Each alive thrall reserves Ψ equal to its max health
+ * (or a stored reserve amount from Death Mark raise).
  */
 public final class NecroSummonService {
     public static final String OWNER_TAG = "effecoria:necro_owner";
     public static final String TARGET_TAG = "effecoria:necro_target";
+    public static final String RESERVE_TAG = "effecoria:psi_reserve";
 
     private NecroSummonService() {}
 
-    /** @return false if the caster cannot afford another permanent thrall */
-    public static boolean register(Mob mob, ServerPlayer owner, LivingEntity preferredTarget) {
-        if (!canAffordAnother(owner)) {
+    /** @return false if the caster cannot afford the given Ψ reserve */
+    public static boolean register(Mob mob, ServerPlayer owner, LivingEntity preferredTarget, float reservePsi) {
+        float reserve = Math.max(1f, reservePsi);
+        if (!canAfford(owner, reserve)) {
             mob.discard();
             owner.displayClientMessage(
                     net.minecraft.network.chat.Component.translatable(
-                            "message.effecoria.necro.summon_psi_reserve",
-                            (int) BalanceConfig.NECRO_SUMMON_PSI_RESERVE.get().floatValue()),
+                            "message.effecoria.necro.summon_psi_reserve", (int) Math.ceil(reserve)),
                     true);
             return false;
         }
         mob.getPersistentData().putUUID(OWNER_TAG, owner.getUUID());
+        mob.getPersistentData().putFloat(RESERVE_TAG, reserve);
         if (preferredTarget != null) {
             mob.getPersistentData().putUUID(TARGET_TAG, preferredTarget.getUUID());
         }
         mob.setPersistenceRequired();
-        strengthen(mob);
+        lightlyBuff(mob);
         if (preferredTarget != null && preferredTarget.isAlive() && preferredTarget != owner) {
             mob.setTarget(preferredTarget);
         }
+        DeathMarkService.syncReservedPsi(owner);
         return true;
     }
 
-    public static boolean canAffordAnother(ServerPlayer owner) {
+    public static boolean canAfford(ServerPlayer owner, float reserveCost) {
         PlayerPsiData data = PsiHelper.get(owner);
-        float nextReserve = reservedPsi(owner) + BalanceConfig.NECRO_SUMMON_PSI_RESERVE.get().floatValue();
+        float nextReserve = reservedPsi(owner) + Math.max(0f, reserveCost);
         return nextReserve <= data.maxPsi() - 1f;
     }
 
     public static float reservedPsi(net.minecraft.world.entity.player.Player owner) {
-        return countOwned(owner) * BalanceConfig.NECRO_SUMMON_PSI_RESERVE.get().floatValue();
+        // Prefer networked value on client (PersistentData on thralls is not synced).
+        if (owner.level().isClientSide()) {
+            return PsiHelper.get(owner).necroReservedPsi();
+        }
+        float total = 0f;
+        for (Mob mob : listOwned(owner)) {
+            total += reserveOf(mob);
+        }
+        return total;
+    }
+
+    public static float reserveOf(Mob mob) {
+        if (mob.getPersistentData().contains(RESERVE_TAG)) {
+            return Math.max(1f, mob.getPersistentData().getFloat(RESERVE_TAG));
+        }
+        return Math.max(1f, mob.getMaxHealth());
     }
 
     public static float usablePsi(net.minecraft.world.entity.player.Player owner, PlayerPsiData data) {
@@ -101,6 +119,11 @@ public final class NecroSummonService {
         ServerLevel level = owner.serverLevel();
         LivingEntity combatFocus = resolveOwnerCombatFocus(owner);
         for (Mob mob : listOwned(owner)) {
+            // Undead thralls should not burn in daylight under necro control.
+            if (mob.isOnFire() && level.isDay() && level.canSeeSky(mob.blockPosition())) {
+                mob.clearFire();
+            }
+
             LivingEntity current = mob.getTarget();
             if (current == owner || (current instanceof Mob other && isOwnedBy(other, owner.getUUID()))) {
                 mob.setTarget(null);
@@ -127,6 +150,7 @@ public final class NecroSummonService {
                 followOwner(mob, owner);
             }
         }
+        DeathMarkService.syncReservedPsi(owner);
     }
 
     /** Prefer retaliating against whoever hurt the necromancer, else whoever they last struck. */
@@ -178,7 +202,6 @@ public final class NecroSummonService {
             if (isOwnedBy(monster, owner.getUUID())) {
                 continue;
             }
-            // Prefer what is already aggroed on the necromancer.
             LivingEntity theirTarget = monster.getTarget();
             boolean prioritizesOwner = theirTarget == owner;
             double dist = monster.distanceToSqr(thrall);
@@ -202,22 +225,15 @@ public final class NecroSummonService {
         }
     }
 
-    private static void strengthen(Mob mob) {
-        if (mob.getAttribute(Attributes.MAX_HEALTH) != null) {
-            double health = mob instanceof Vex ? 18.0 : 28.0;
-            mob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(health);
-            mob.setHealth((float) health);
-        }
+    /** Mild combat buff without rewriting max health (reserve is tied to HP). */
+    private static void lightlyBuff(Mob mob) {
         if (mob.getAttribute(Attributes.ATTACK_DAMAGE) != null) {
-            double damage = mob instanceof Vex ? 5.0 : 6.5;
-            mob.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(damage);
-        }
-        if (mob.getAttribute(Attributes.MOVEMENT_SPEED) != null) {
-            double speed = mob.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue();
-            mob.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(speed * 1.15);
+            double damage = mob.getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue();
+            mob.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(Math.max(damage, damage * 1.1));
         }
         if (mob.getAttribute(Attributes.FOLLOW_RANGE) != null) {
-            mob.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(28.0);
+            double range = mob.getAttribute(Attributes.FOLLOW_RANGE).getBaseValue();
+            mob.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(Math.max(range, 28.0));
         }
     }
 }

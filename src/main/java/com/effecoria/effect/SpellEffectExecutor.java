@@ -15,7 +15,6 @@ import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.core.seal.SealPlaceResult;
 import com.effecoria.core.seal.SealService;
 import com.effecoria.core.seal.SealTypes;
-import com.effecoria.effect.necromancy.NecroSummonService;
 import com.effecoria.magic.CastDelivery;
 
 import net.minecraft.core.BlockPos;
@@ -33,9 +32,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.projectile.SmallFireball;
@@ -93,6 +90,7 @@ public final class SpellEffectExecutor {
             "bone_volley",
             "soul_anchor",
             "soul_reaper",
+            "death_mark",
             "warp_bolt",
             "fold_repulse",
             "rift_slash",
@@ -314,7 +312,7 @@ public final class SpellEffectExecutor {
             case "root_bind" -> rootBind(caster, effect, power, target);
             case "soul_drain" -> soulDrain(caster, effect, power, target);
             case "wither_touch" -> witherTouch(caster, effect, power, target);
-            case "shade_summon" -> shadeSummon(caster, effect, power, target);
+            case "death_mark" -> NecromancyEffects.deathMark(caster, effect, power, target);
             case "bone_chill" -> NecromancyEffects.boneChill(caster, effect, power, target);
             case "death_sense" -> NecromancyEffects.deathSense(caster, effect, power);
             case "grave_whisper" -> NecromancyEffects.graveWhisper(caster, effect, power, target);
@@ -326,8 +324,6 @@ public final class SpellEffectExecutor {
             case "soul_shackle" -> NecromancyEffects.soulShackle(caster, effect, power, target);
             case "phantom_step" -> NecromancyEffects.phantomStep(caster, effect, power);
             case "grave_field" -> NecromancyEffects.graveField(caster, effect, power);
-            case "raise_skeleton" -> NecromancyEffects.raiseSkeleton(caster, effect, power, target);
-            case "shade_brood" -> NecromancyEffects.shadeBrood(caster, effect, power, target);
             case "lich_ward" -> NecromancyEffects.lichWard(caster, effect, power);
             case "death_coil" -> NecromancyEffects.deathCoil(caster, effect, power, target);
             case "soul_cataclysm" -> NecromancyEffects.soulCataclysm(caster, effect, power);
@@ -337,11 +333,9 @@ public final class SpellEffectExecutor {
             case "curse_of_frailty" -> NecromancyEffects.curseOfFrailty(caster, effect, power, target);
             case "haunting_visage" -> NecromancyEffects.hauntingVisage(caster, effect, power, target);
             case "corpse_burst" -> NecromancyEffects.corpseBurst(caster, effect, power, target);
-            case "raise_zombie" -> NecromancyEffects.raiseZombie(caster, effect, power, target);
             case "bone_volley" -> NecromancyEffects.boneVolley(caster, effect, power, target);
             case "necrotic_aura" -> NecromancyEffects.necroticAura(caster, effect, power);
             case "soul_anchor" -> NecromancyEffects.soulAnchor(caster, effect, power, target);
-            case "army_of_dead" -> NecromancyEffects.armyOfDead(caster, effect, power, target);
             case "death_gate" -> NecromancyEffects.deathGate(caster, effect, power);
             case "soul_reaper" -> NecromancyEffects.soulReaper(caster, effect, power, target);
             case "phylactery_surge" -> NecromancyEffects.phylacterySurge(caster, effect, power);
@@ -570,37 +564,6 @@ public final class SpellEffectExecutor {
         target.addEffect(new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
         spawnNecroParticles(level, target.position().add(0, 1, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.7f, 1.2f);
-    }
-
-    /** Summon a permanent shade (vex relay) bound to the necromancer — reserves Ψ. */
-    private static void shadeSummon(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        ServerLevel level = caster.serverLevel();
-        if (!NecroSummonService.canAffordAnother(caster)) {
-            caster.displayClientMessage(
-                    Component.translatable(
-                            "message.effecoria.necro.summon_psi_reserve",
-                            (int) com.effecoria.config.BalanceConfig.NECRO_SUMMON_PSI_RESERVE.get().floatValue()),
-                    true);
-            return;
-        }
-        Vec3 look = caster.getLookAngle().normalize();
-        double spawnX = caster.getX() + look.x * 1.5;
-        double spawnZ = caster.getZ() + look.z * 1.5;
-        double spawnY = caster.getY() + 1.0;
-
-        Vex shade = EntityType.VEX.create(level);
-        if (shade == null) {
-            return;
-        }
-        shade.moveTo(spawnX, spawnY, spawnZ, caster.getYRot(), 0f);
-        shade.setAggressive(true);
-        level.addFreshEntity(shade);
-        if (!NecroSummonService.register(shade, caster, target)) {
-            return;
-        }
-
-        spawnNecroParticles(level, new Vec3(spawnX, spawnY, spawnZ));
-        level.playSound(null, caster.blockPosition(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 1f, 0.85f);
     }
 
     /** Fold space and yank the target to the caster. */

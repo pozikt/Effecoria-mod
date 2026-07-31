@@ -38,26 +38,41 @@ public final class PsiHudOverlay {
         int x = 10;
         int y = minecraft.getWindow().getGuiScaledHeight() - 80;
 
-        float psiFill = data.maxPsi() > 0f ? data.currentPsi() / data.maxPsi() : 0f;
-        drawBar(graphics, x, y, 90, 8, psiFill, 0xFF6A0DAD, 0xFF2E0845);
+        float max = data.maxPsi();
+        float current = data.currentPsi();
+        float reserved = Math.min(max, Math.max(0f, data.necroReservedPsi()));
+        float usable = Math.max(0f, current - reserved);
+        float usableFill = max > 0f ? usable / max : 0f;
+        float reservedFill = max > 0f ? reserved / max : 0f;
+
+        // Background → reserved band (right) → usable fill (left).
+        graphics.fill(x, y, x + 90, y + 8, 0xFF2E0845);
+        if (reservedFill > 0.001f) {
+            int reservedWidth = Math.round(90 * reservedFill);
+            graphics.fill(x + 90 - reservedWidth, y, x + 90, y + 8, 0xFF5A3068);
+        }
+        if (usableFill > 0.001f) {
+            graphics.fill(x, y, x + Math.round(90 * Math.clamp(usableFill, 0f, 1f)), y + 8, 0xFF6A0DAD);
+        }
 
         String regenLabel = formatPsiRegen(minecraft.player, data, phi, godMode);
         graphics.drawString(
                 minecraft.font,
-                Component.translatable("hud.effecoria.psi", (int) data.currentPsi(), (int) data.maxPsi(), regenLabel),
+                Component.translatable("hud.effecoria.psi", (int) current, (int) max, regenLabel),
                 x,
                 y - 10,
                 0xE0A8FF);
 
-        float reserved = NecroSummonService.reservedPsi(minecraft.player);
         if (reserved > 0.5f) {
-            float usable = NecroSummonService.usablePsi(minecraft.player, data);
             graphics.drawString(
                     minecraft.font,
-                    Component.translatable("hud.effecoria.psi_reserved", (int) reserved, (int) usable),
+                    Component.translatable(
+                            "hud.effecoria.psi_reserved",
+                            (int) reserved,
+                            (int) NecroSummonService.usablePsi(minecraft.player, data)),
                     x,
                     y - 20,
-                    0xCC8866AA);
+                    0xCCAA88CC);
         }
 
         float phiFill = phi.isInfinite() ? 1f : Math.min(1f, phi.effectiveValue() / 1.2f);

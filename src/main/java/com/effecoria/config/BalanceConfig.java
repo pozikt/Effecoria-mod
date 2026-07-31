@@ -223,7 +223,7 @@ public final class BalanceConfig {
             .defineInRange("spell_unlock_essence_step", 2, 0, 50);
 
     public static final ModConfigSpec.DoubleValue NECRO_SUMMON_PSI_RESERVE = BUILDER
-            .comment("Ψ permanently reserved per living necro thrall (shades / skeletons / zombies)")
+            .comment("Legacy flat thrall reserve (unused — Death Mark thralls reserve max health instead)")
             .defineInRange("necro_summon_psi_reserve", 18.0, 1.0, 100.0);
 
     // --- Biology (hunger / air) ---

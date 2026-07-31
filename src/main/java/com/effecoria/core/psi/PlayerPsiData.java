@@ -48,6 +48,7 @@ public final class PlayerPsiData {
                 ByteBufCodecs.BOOL.encode(buf, data.seenEntropyWarn);
                 ByteBufCodecs.BOOL.encode(buf, data.seenEntropyTutorial);
                 ByteBufCodecs.VAR_INT.encode(buf, data.castSuccessStreak);
+                ByteBufCodecs.FLOAT.encode(buf, data.necroReservedPsi);
                 ByteBufCodecs.INT.encode(buf, data.knownSpells.size());
                 for (ResourceLocation spell : data.knownSpells) {
                     ResourceLocation.STREAM_CODEC.encode(buf, spell);
@@ -93,6 +94,7 @@ public final class PlayerPsiData {
                 data.seenEntropyWarn = ByteBufCodecs.BOOL.decode(buf);
                 data.seenEntropyTutorial = ByteBufCodecs.BOOL.decode(buf);
                 data.castSuccessStreak = ByteBufCodecs.VAR_INT.decode(buf);
+                data.necroReservedPsi = ByteBufCodecs.FLOAT.decode(buf);
                 int spellCount = ByteBufCodecs.INT.decode(buf);
                 data.knownSpells = new ArrayList<>(spellCount);
                 for (int i = 0; i < spellCount; i++) {
@@ -142,6 +144,8 @@ public final class PlayerPsiData {
     private boolean seenEntropyWarn;
     private boolean seenEntropyTutorial;
     private int castSuccessStreak;
+    /** Synced thrall Ψ reserve for client HUD (server recalculates each tick). */
+    private float necroReservedPsi;
     private Map<ResourceLocation, Integer> spellCastCounts = new HashMap<>();
     private Map<ResourceLocation, Long> spellLastCastAt = new HashMap<>();
 
@@ -439,6 +443,14 @@ public final class PlayerPsiData {
         this.castSuccessStreak = Math.max(0, value);
     }
 
+    public float necroReservedPsi() {
+        return necroReservedPsi;
+    }
+
+    public void setNecroReservedPsi(float value) {
+        this.necroReservedPsi = Math.max(0f, value);
+    }
+
     public void setPhiSenseUntil(long gameTime) {
         this.phiSenseUntil = gameTime;
     }
@@ -682,6 +694,7 @@ public final class PlayerPsiData {
         copy.seenEntropyWarn = seenEntropyWarn;
         copy.seenEntropyTutorial = seenEntropyTutorial;
         copy.castSuccessStreak = castSuccessStreak;
+        copy.necroReservedPsi = necroReservedPsi;
         copy.spellCastCounts = new HashMap<>(spellCastCounts);
         copy.spellLastCastAt = new HashMap<>(spellLastCastAt);
         return copy;

@@ -53,7 +53,7 @@
   "gui.effecoria.school_select.hint": "Стихийная · Ментальная · Органическая · Некромантия · Пространственная · Порча · Печати",
   "hud.effecoria.breathing": "Дыхание: %s%%",
   "hud.effecoria.psi": "Ψ: %s / %s  (+%s/с)",
-  "hud.effecoria.psi_reserved": "Призывы держат %s Ψ · доступно %s",
+  "hud.effecoria.psi_reserved": "Слуги держат %s Ψ · доступно %s",
   "hud.effecoria.phi": "Φ: %s",
   "hud.effecoria.phi_day": "Φ: %s  ☀ день",
   "hud.effecoria.phi_night": "Φ: %s  ☾ ночь",
@@ -247,7 +247,14 @@
   "message.effecoria.necro.lich_ascension": "Биология приостановлена — Ψ питает филактерия.",
   "message.effecoria.necro.lich_ended": "Вознесение лича завершено; биология восстановлена.",
   "message.effecoria.necro.lich_locked": "Вознесение лича требует филактерии и башенной инфраструктуры (в мире пока нет).",
-  "message.effecoria.necro.summon_psi_reserve": "Мало свободной Ψ — каждый призыв резервирует %s Ψ",
+  "message.effecoria.necro.summon_psi_reserve": "Мало свободной Ψ — нужно %s в резерве под этого слугу",
+  "message.effecoria.necro.death_mark_invalid": "Метка смерти действует только на живых мобов.",
+  "message.effecoria.necro.death_mark_not_yours": "Эта метка смерти не твоя.",
+  "message.effecoria.necro.death_mark_raised": "Поднят %s под твой контроль (резерв %s Ψ).",
+  "entity.effecoria.death_mark": "Метка смерти · %s · %s Ψ",
+  "spell.effecoria.death_mark": "Метка смерти",
+  "spell.effecoria.death_mark.desc": "Пометь моба. После смерти кликни по метке, чтобы поднять его как слугу.",
+  "gui.effecoria.hub.death_mark_reserve": "Поднятый слуга резервирует Ψ = его макс. здоровье",
   "spell.effecoria.void_step": "Шаг пустоты",
   "spell.effecoria.gravity_well": "Колодец гравитации",
   "spell.effecoria.warp_bolt": "Сдвиговый заряд",
@@ -533,6 +540,5 @@
   "spell.effecoria.void_lance.desc": "Копьё пустоты.",
   "spell.effecoria.void_step.desc": "Короткий телепорт вдоль взгляда. Кратко фазирует вас из-под удара.",
   "spell.effecoria.warp_bolt.desc": "Искажающий заряд по цели.",
-  "spell.effecoria.warp_exchange.desc": "Меняет вас местами с целью.",
-  "gui.effecoria.hub.summon_reserve": "Слуга резервирует %s Ψ, пока жив (не тратится при касте)"
+  "spell.effecoria.warp_exchange.desc": "Меняет вас местами с целью."
 }

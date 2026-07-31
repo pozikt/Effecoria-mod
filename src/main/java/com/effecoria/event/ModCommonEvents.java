@@ -23,6 +23,7 @@ import com.effecoria.effect.elemental.ElementalFieldService;
 import com.effecoria.effect.elemental.ElementalShroudService;
 import com.effecoria.effect.elemental.SteamCloudService;
 import com.effecoria.effect.elemental.SteamFlightService;
+import com.effecoria.effect.necromancy.DeathMarkService;
 import com.effecoria.effect.necromancy.NecroFieldService;
 import com.effecoria.effect.necromancy.NecroSummonService;
 import com.effecoria.effect.organic.OrganicDiagnosticService;
@@ -75,6 +76,7 @@ public final class ModCommonEvents {
             SpatialFieldService.tick(serverLevel);
             CorruptionFieldService.tick(serverLevel);
             ElementalCageService.tick(serverLevel);
+            DeathMarkService.tickMarks(serverLevel);
         }
     }
 
