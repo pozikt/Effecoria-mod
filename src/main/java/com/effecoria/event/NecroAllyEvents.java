@@ -9,12 +9,30 @@ import net.minecraft.world.entity.Mob;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
-/** Keep necro thralls from attacking their necromancer or sibling thralls. */
+/** Keep necro thralls obedient: no friendly fire, no chasing through walls, no loot farm. */
 @EventBusSubscriber(modid = EffecoriaMod.MOD_ID)
 public final class NecroAllyEvents {
     private NecroAllyEvents() {}
+
+    @SubscribeEvent
+    public static void onThrallDrops(LivingDropsEvent event) {
+        if (NecroSummonService.isNecroThrall(event.getEntity())) {
+            event.getDrops().clear();
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onThrallXp(LivingExperienceDropEvent event) {
+        if (NecroSummonService.isNecroThrall(event.getEntity())) {
+            event.setDroppedExperience(0);
+            event.setCanceled(true);
+        }
+    }
 
     @SubscribeEvent
     public static void onChangeTarget(LivingChangeTargetEvent event) {
@@ -31,6 +49,12 @@ public final class NecroAllyEvents {
         var ownerId = mob.getPersistentData().getUUID(NecroSummonService.OWNER_TAG);
         if (next.getUUID().equals(ownerId) || NecroSummonService.sameNecromancer(mob, next)) {
             event.setCanceled(true);
+            return;
+        }
+        // Block autonomous aggro on cave mobs the owner cannot see.
+        if (!(mob.level().getPlayerByUUID(ownerId) instanceof ServerPlayer owner)
+                || !NecroSummonService.canEngage(owner, next)) {
+            event.setCanceled(true);
         }
     }
 
@@ -40,7 +64,6 @@ public final class NecroAllyEvents {
         if (!(event.getSource().getEntity() instanceof LivingEntity attacker)) {
             return;
         }
-        // Thrall must not hurt owner.
         if (attacker instanceof Mob mob
                 && mob.getPersistentData().hasUUID(NecroSummonService.OWNER_TAG)
                 && victim.getUUID().equals(mob.getPersistentData().getUUID(NecroSummonService.OWNER_TAG))) {
@@ -48,14 +71,12 @@ public final class NecroAllyEvents {
             mob.setTarget(null);
             return;
         }
-        // Owner accidental swings shouldn't enrage thralls into revenge on owner (handled by target cancel).
         if (victim instanceof Mob thrall
                 && thrall.getPersistentData().hasUUID(NecroSummonService.OWNER_TAG)
                 && attacker.getUUID().equals(thrall.getPersistentData().getUUID(NecroSummonService.OWNER_TAG))) {
             thrall.setLastHurtByMob(null);
             thrall.setTarget(null);
         }
-        // Sibling thralls.
         if (NecroSummonService.sameNecromancer(attacker, victim)) {
             event.setCanceled(true);
             if (attacker instanceof Mob mob) {
@@ -63,11 +84,9 @@ public final class NecroAllyEvents {
             }
         }
 
-        // Necromancer is hurt → thralls focus the attacker.
         if (victim instanceof ServerPlayer owner && NecroSummonService.countOwned(owner) > 0) {
             NecroSummonService.syncCombatFocus(owner, attacker);
         }
-        // Necromancer deals damage → thralls focus that victim.
         if (attacker instanceof ServerPlayer owner && NecroSummonService.countOwned(owner) > 0) {
             NecroSummonService.syncCombatFocus(owner, victim);
         }

@@ -113,6 +113,7 @@ public final class ModCommonEvents {
             }
             AirHandService.tick(player);
             ElementalShroudService.tick(player);
+            NecroSummonService.tick(player);
             PsiHelper.set(player, flightData);
         }
 
@@ -127,7 +128,6 @@ public final class ModCommonEvents {
 
         ProgressionService.tick(player, data);
         ShadeService.tick(player);
-        NecroSummonService.tick(player);
         SpellUnlockService.tick(player, data);
 
         if (CreativeGodMode.isActive(player)) {
