@@ -14,7 +14,12 @@
       "duration_ticks": 140,
       "damage_dice": "3d6",
       "radius": 7,
-      "poison_ticks": 100
+      "poison_ticks": 100,
+      "curse": true,
+      "permanent": true,
+      "cure_tier": "rare",
+      "contagion_chunks": 2,
+      "soft_dot_per_second": 0.5
     }
   ]
 }

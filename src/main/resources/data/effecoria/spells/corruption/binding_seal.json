@@ -12,7 +12,10 @@
       "type": "effecoria:binding_seal",
       "root_ticks": 70,
       "glow_ticks": 100,
-      "range": 12
+      "range": 12,
+      "curse": true,
+      "cure_tier": "common",
+      "contagion_chunks": 0
     }
   ]
 }

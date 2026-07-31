@@ -13,7 +13,10 @@
       "type": "effecoria:entropy_lash",
       "damage_dice": "1d8",
       "poison_ticks": 60,
-      "range": 11
+      "range": 11,
+      "curse": true,
+      "cure_tier": "common",
+      "contagion_chunks": 0
     }
   ]
 }

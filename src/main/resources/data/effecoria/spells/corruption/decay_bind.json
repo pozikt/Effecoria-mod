@@ -14,7 +14,11 @@
       "root_ticks": 80,
       "glow_ticks": 100,
       "poison_ticks": 80,
-      "range": 10
+      "range": 10,
+      "curse": true,
+      "permanent": true,
+      "cure_tier": "common",
+      "contagion_chunks": 1
     }
   ]
 }

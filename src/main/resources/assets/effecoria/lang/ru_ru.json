@@ -567,6 +567,8 @@
   "message.effecoria.subspace.no_space": "Нет места для разлома.",
   "message.effecoria.subspace.not_voyaging": "Ты не в середине путешествия.",
   "message.effecoria.subspace.no_exit": "Выхода ещё нет — кастуй снова, чтобы открыть.",
+  "message.effecoria.corruption.spread": "Проклятие перекинулось на %s сородичей",
+  "message.effecoria.corruption.cured": "Проклятие порчи снято",
   "block.effecoria.subspace_portal": "Разлом подпространства",
   "spell.effecoria.fold_repulse.desc": "Складывает пространство и отталкивает цель.",
   "spell.effecoria.gravity_snare.desc": "Ловушка гравитации.",

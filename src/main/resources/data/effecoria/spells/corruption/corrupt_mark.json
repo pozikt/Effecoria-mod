@@ -13,7 +13,10 @@
       "damage": 4,
       "poison_ticks": 100,
       "weakness_ticks": 80,
-      "range": 12
+      "range": 12,
+      "curse": true,
+      "cure_tier": "common",
+      "contagion_chunks": 0
     }
   ]
 }

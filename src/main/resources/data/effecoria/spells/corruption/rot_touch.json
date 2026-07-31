@@ -13,7 +13,10 @@
       "type": "effecoria:rot_touch",
       "damage_dice": "1d6",
       "hunger_ticks": 100,
-      "range": 10
+      "range": 10,
+      "curse": true,
+      "cure_tier": "common",
+      "contagion_chunks": 0
     }
   ]
 }

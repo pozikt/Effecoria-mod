@@ -13,13 +13,21 @@
       "damage": 3,
       "poison_ticks": 80,
       "weakness_ticks": 60,
-      "range": 10
+      "range": 10,
+      "curse": true,
+      "permanent": true,
+      "cure_tier": "common",
+      "contagion_chunks": 1
     },
     {
       "type": "effecoria:binding_seal",
       "root_ticks": 50,
       "glow_ticks": 80,
-      "range": 10
+      "range": 10,
+      "curse": true,
+      "permanent": true,
+      "cure_tier": "common",
+      "contagion_chunks": 1
     }
   ]
 }

@@ -14,7 +14,10 @@
       "damage_dice": "2d6",
       "poison_ticks": 80,
       "weakness_ticks": 60,
-      "range": 12
+      "range": 12,
+      "curse": true,
+      "cure_tier": "common",
+      "contagion_chunks": 0
     }
   ]
 }

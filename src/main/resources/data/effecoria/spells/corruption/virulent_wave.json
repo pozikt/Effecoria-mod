@@ -13,7 +13,12 @@
       "type": "effecoria:virulent_wave",
       "radius": 8,
       "poison_ticks": 120,
-      "poison_amplifier": 2
+      "poison_amplifier": 2,
+      "curse": true,
+      "permanent": true,
+      "cure_tier": "rare",
+      "contagion_chunks": 2,
+      "soft_dot_per_second": 0.5
     }
   ]
 }

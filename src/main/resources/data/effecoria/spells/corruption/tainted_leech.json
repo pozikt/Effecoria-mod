@@ -13,7 +13,12 @@
       "type": "effecoria:tainted_leech",
       "damage_dice": "2d8",
       "heal_ratio": 0.4,
-      "range": 11
+      "range": 11,
+      "curse": true,
+      "permanent": true,
+      "cure_tier": "rare",
+      "contagion_chunks": 2,
+      "soft_dot_per_second": 0.5
     }
   ]
 }

@@ -14,7 +14,11 @@
       "damage_dice": "1d10",
       "wither_ticks": 100,
       "wither_amplifier": 1,
-      "range": 11
+      "range": 11,
+      "curse": true,
+      "permanent": true,
+      "cure_tier": "common",
+      "contagion_chunks": 1
     }
   ]
 }

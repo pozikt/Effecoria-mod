@@ -14,7 +14,12 @@
       "damage_dice": "4d8",
       "radius": 10,
       "field_ticks": 180,
-      "field_dps": 3
+      "field_dps": 3,
+      "curse": true,
+      "permanent": true,
+      "cure_tier": "rare",
+      "contagion_chunks": 2,
+      "soft_dot_per_second": 0.75
     }
   ]
 }

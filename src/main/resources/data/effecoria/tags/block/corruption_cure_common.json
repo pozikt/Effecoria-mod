@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:small_flowers",
+    "#minecraft:tall_flowers",
+    "#minecraft:saplings",
+    "#minecraft:logs",
+    "#minecraft:planks",
+    "minecraft:water",
+    "minecraft:kelp",
+    "minecraft:kelp_plant",
+    "minecraft:seagrass",
+    "minecraft:tall_seagrass",
+    "minecraft:dirt",
+    "minecraft:grass_block",
+    "minecraft:coarse_dirt",
+    "minecraft:rooted_dirt",
+    "minecraft:podzol",
+    "minecraft:mud",
+    "minecraft:dirt_path",
+    "minecraft:cobblestone",
+    "minecraft:moss_block",
+    "minecraft:moss_carpet"
+  ]
+}

@@ -567,6 +567,8 @@
   "message.effecoria.subspace.no_space": "No room to open a rift.",
   "message.effecoria.subspace.not_voyaging": "You are not mid-voyage.",
   "message.effecoria.subspace.no_exit": "No exit rift yet — cast again to open one.",
+  "message.effecoria.corruption.spread": "Curse leapt to %s kin",
+  "message.effecoria.corruption.cured": "Corruption curse cleansed",
   "block.effecoria.subspace_portal": "Subspace Rift",
   "spell.effecoria.fold_repulse.desc": "Folds space to repulse a target.",
   "spell.effecoria.gravity_snare.desc": "Snares foes with gravity.",
