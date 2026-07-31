@@ -2,6 +2,7 @@ package com.effecoria.core.psi;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.core.seal.ChunkSealData;
+import com.effecoria.effect.spatial.SubspaceVoyageData;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -62,6 +63,28 @@ public final class ModAttachments {
                         }
                     })
                     .sync(ChunkSealData.STREAM_CODEC)
+                    .build());
+
+    public static final Supplier<AttachmentType<SubspaceVoyageData>> SUBSPACE_VOYAGE = ATTACHMENT_TYPES.register(
+            "subspace_voyage",
+            () -> AttachmentType.builder(SubspaceVoyageData::createDefault)
+                    .serialize(new IAttachmentSerializer<>() {
+                        @Override
+                        public SubspaceVoyageData read(
+                                IAttachmentHolder holder, Tag tag, HolderLookup.Provider provider) {
+                            SubspaceVoyageData data = SubspaceVoyageData.createDefault();
+                            if (tag instanceof CompoundTag compound) {
+                                data.load(provider, compound);
+                            }
+                            return data;
+                        }
+
+                        @Override
+                        public Tag write(SubspaceVoyageData attachment, HolderLookup.Provider provider) {
+                            return attachment.save(provider);
+                        }
+                    })
+                    .copyOnDeath()
                     .build());
 
     public static void register(IEventBus modEventBus) {

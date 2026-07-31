@@ -1,0 +1,16 @@
+{
+  "type": "effecoria:subspace",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "minecraft:the_void",
+      "layers": [
+        {
+          "block": "minecraft:end_stone",
+          "height": 1
+        }
+      ],
+      "structure_overrides": []
+    }
+  }
+}

@@ -225,6 +225,12 @@ public final class SpatialEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, veilTicks, 1, false, false, true));
     }
 
+    /** Open / advance a subspace voyage gate. */
+    public static void subspaceVoyage(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        SubspaceVoyageService.cast(caster);
+        spawnSpatialParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+    }
+
     private static double defaultMaxRange(SpellEffectEntry effect, double fallback) {
         return effect.params().has("max_range") ? effect.params().get("max_range").getAsDouble() : fallback;
     }

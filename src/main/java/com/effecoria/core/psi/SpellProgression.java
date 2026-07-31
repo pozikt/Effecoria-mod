@@ -194,6 +194,7 @@ public final class SpellProgression {
                     id("void_step"),
                     id("dimensional_anchor"),
                     id("far_blink"),
+                    id("subspace_voyage"),
                     id("gravity_well"),
                     id("warp_exchange"),
                     id("spatial_surge"),

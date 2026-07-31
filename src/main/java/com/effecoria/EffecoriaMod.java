@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 
 import com.effecoria.config.BalanceConfig;
 
+import com.effecoria.content.ModBlockEntities;
+
 import com.effecoria.content.ModBlocks;
 
 import com.effecoria.content.ModCreativeTabs;
@@ -55,6 +57,8 @@ public class EffecoriaMod {
         ModAttachments.register(modEventBus);
 
         ModBlocks.BLOCKS.register(modEventBus);
+
+        ModBlockEntities.BLOCK_ENTITY_TYPES.register(modEventBus);
 
         ModItems.ITEMS.register(modEventBus);
 
