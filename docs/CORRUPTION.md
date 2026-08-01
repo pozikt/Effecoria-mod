@@ -11,14 +11,14 @@ Targeted / pulse corruption debuffs go through `CorruptionCurseService` as **cur
 
 ## Cure (individual)
 
-Standing on or picking up a tagged cure:
+Standing on / in a tagged **block**, holding a tagged **item**, or (COMMON only) immersing in water:
 
-| Tier | Tags |
-|------|------|
-| COMMON | `effecoria:corruption_cure_common` (flowers, saplings, logs/planks, dirt/grass, cobble, water/kelp) |
-| RARE | `effecoria:corruption_cure_rare` (clay, mossy stone, ores, amethyst, raw ore blocks) |
+| Tier | Block tag | Item tag |
+|------|-----------|----------|
+| COMMON | flowers, saplings, moss, water/kelp/seagrass | same + logs/planks, water bucket |
+| RARE | clay, mossy stone, ores, amethyst, raw ore blocks | matching items + clay ball |
 
-COMMON curses also accept RARE materials. Only the cured mob is cleansed.
+Dirt, grass, and cobble are not cures. COMMON curses also accept RARE materials. Only the cured mob is cleansed.
 
 ## Soft DoT
 

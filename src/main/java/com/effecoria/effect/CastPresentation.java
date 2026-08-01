@@ -110,6 +110,26 @@ public final class CastPresentation {
             id("psychic_frenzy"),
             id("mass_hysteria"));
 
+    private static final Set<ResourceLocation> CORRUPTION_MARK =
+            Set.of(id("corrupt_mark"), id("blight_brand"));
+    private static final Set<ResourceLocation> CORRUPTION_ROT =
+            Set.of(id("rot_touch"), id("festering_wound"));
+    private static final Set<ResourceLocation> CORRUPTION_PLAGUE = Set.of(
+            id("blight_pulse"),
+            id("plague_bolt"),
+            id("blight_surge"),
+            id("pestilence_wave"),
+            id("virulent_wave"),
+            id("plague_crown"),
+            id("omega_blight"));
+    private static final Set<ResourceLocation> CORRUPTION_BIND =
+            Set.of(id("binding_seal"), id("decay_bind"));
+    private static final Set<ResourceLocation> CORRUPTION_MIASMA =
+            Set.of(id("miasma_cloak"), id("blight_field"));
+    private static final Set<ResourceLocation> CORRUPTION_ENTROPY =
+            Set.of(id("entropy_lash"), id("entropy_aegis"));
+    private static final Set<ResourceLocation> CORRUPTION_LEECH = Set.of(id("tainted_leech"));
+
     private static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath("effecoria", path);
     }
@@ -268,15 +288,7 @@ public final class CastPresentation {
                     1.2f,
                     0.6f,
                     0.95f);
-            case CORRUPTION -> new SchoolTheme(
-                    ModParticleTypes.CORRUPTION_POISON.get(),
-                    ModParticleTypes.CORRUPTION_RUNE.get(),
-                    SoundEvents.SCULK_CLICKING,
-                    SoundEvents.SCULK_SHRIEKER_SHRIEK,
-                    0.45f,
-                    0.8f,
-                    0.45f,
-                    1.15f);
+            case CORRUPTION -> corruptionTheme(spell);
             case SEALS -> new SchoolTheme(
                     ModParticleTypes.SEAL_GLYPH.get(),
                     ModParticleTypes.SEAL_SPARK.get(),
@@ -510,6 +522,96 @@ public final class CastPresentation {
                 1.35f,
                 0.55f,
                 1.25f);
+    }
+
+    private static SchoolTheme corruptionTheme(SpellDefinition spell) {
+        ResourceLocation id = spell.id();
+        if (CORRUPTION_MARK.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.CORRUPTION_RUNE.get(),
+                    ModParticleTypes.CORRUPTION_POISON.get(),
+                    SoundEvents.SCULK_CLICKING,
+                    SoundEvents.SCULK_BLOCK_SPREAD,
+                    0.45f,
+                    0.85f,
+                    0.5f,
+                    0.9f);
+        }
+        if (CORRUPTION_ROT.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.CORRUPTION_ROT.get(),
+                    ModParticleTypes.CORRUPTION_BLOOD.get(),
+                    SoundEvents.SCULK_CLICKING,
+                    SoundEvents.HONEY_BLOCK_PLACE,
+                    0.4f,
+                    0.7f,
+                    0.5f,
+                    0.75f);
+        }
+        if (CORRUPTION_PLAGUE.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.CORRUPTION_POISON.get(),
+                    ModParticleTypes.CORRUPTION_MIASMA.get(),
+                    SoundEvents.SCULK_SHRIEKER_SHRIEK,
+                    SoundEvents.SCULK_CLICKING,
+                    0.45f,
+                    0.75f,
+                    0.5f,
+                    1.1f);
+        }
+        if (CORRUPTION_BIND.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.CORRUPTION_BIND.get(),
+                    ModParticleTypes.CORRUPTION_RUNE.get(),
+                    SoundEvents.ANVIL_LAND,
+                    SoundEvents.CHAIN_PLACE,
+                    0.35f,
+                    1.4f,
+                    0.45f,
+                    1.2f);
+        }
+        if (CORRUPTION_MIASMA.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.CORRUPTION_MIASMA.get(),
+                    ModParticleTypes.CORRUPTION_POISON.get(),
+                    SoundEvents.WARDEN_AMBIENT,
+                    SoundEvents.SCULK_BLOCK_CHARGE,
+                    0.4f,
+                    1.1f,
+                    0.45f,
+                    0.85f);
+        }
+        if (CORRUPTION_ENTROPY.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.CORRUPTION_ENTROPY.get(),
+                    ModParticleTypes.CORRUPTION_RUNE.get(),
+                    SoundEvents.SCULK_CLICKING,
+                    SoundEvents.WITHER_SHOOT,
+                    0.4f,
+                    1.3f,
+                    0.5f,
+                    0.8f);
+        }
+        if (CORRUPTION_LEECH.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.CORRUPTION_BLOOD.get(),
+                    ModParticleTypes.CORRUPTION_POISON.get(),
+                    SoundEvents.SCULK_CLICKING,
+                    SoundEvents.HONEY_DRINK,
+                    0.4f,
+                    0.9f,
+                    0.5f,
+                    1.15f);
+        }
+        return new SchoolTheme(
+                ModParticleTypes.CORRUPTION_POISON.get(),
+                ModParticleTypes.CORRUPTION_RUNE.get(),
+                SoundEvents.SCULK_CLICKING,
+                SoundEvents.SCULK_SHRIEKER_SHRIEK,
+                0.45f,
+                0.8f,
+                0.45f,
+                1.15f);
     }
 
     private record SchoolTheme(

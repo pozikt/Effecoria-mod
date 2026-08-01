@@ -100,6 +100,13 @@ public final class EffecoriaClient {
         event.registerSpriteSet(ModParticleTypes.CORRUPTION_POISON.get(), SchoolParticles.DropParticle.Provider::new);
         event.registerSpriteSet(ModParticleTypes.CORRUPTION_BLOOD.get(), SchoolParticles.BloodParticle.Provider::new);
         event.registerSpriteSet(ModParticleTypes.CORRUPTION_RUNE.get(), SchoolParticles.GlyphParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.CORRUPTION_ROT.get(), SchoolParticles.CorruptionRotParticle.Provider::new);
+        event.registerSpriteSet(
+                ModParticleTypes.CORRUPTION_MIASMA.get(),
+                sprites -> new SchoolParticles.FogParticle.Provider(sprites, 0.7F, 0.022F, 24, 18, 0.35F, 0.25F));
+        event.registerSpriteSet(
+                ModParticleTypes.CORRUPTION_ENTROPY.get(), SchoolParticles.CorruptionEntropyParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.CORRUPTION_BIND.get(), SchoolParticles.CorruptionBindParticle.Provider::new);
 
         // Seals
         event.registerSpriteSet(ModParticleTypes.SEAL_GLYPH.get(), SchoolParticles.GlyphParticle.Provider::new);

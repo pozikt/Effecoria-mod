@@ -1811,4 +1811,156 @@ public final class SchoolParticles {
             }
         }
     }
+
+    /** Brown-green rot flake. */
+    public static class CorruptionRotParticle extends TextureSheetParticle {
+        protected CorruptionRotParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.gravity = 0.04F;
+            this.hasPhysics = false;
+            this.quadSize = 0.07F + this.random.nextFloat() * 0.05F;
+            this.lifetime = 16 + this.random.nextInt(10);
+            this.xd = xd + (this.random.nextFloat() - 0.5F) * 0.03;
+            this.yd = 0.01 + this.random.nextFloat() * 0.02;
+            this.zd = zd + (this.random.nextFloat() - 0.5F) * 0.03;
+            this.sprite = sprites.get(this.random);
+            this.alpha = 0.9F;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.oRoll = this.roll;
+            this.roll += 0.1F;
+            this.alpha = 0.9F * (1.0F - (float) this.age / (float) this.lifetime);
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new CorruptionRotParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Crumbling entropy ash. */
+    public static class CorruptionEntropyParticle extends TextureSheetParticle {
+        protected CorruptionEntropyParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.gravity = -0.005F;
+            this.quadSize = 0.06F + this.random.nextFloat() * 0.05F;
+            this.lifetime = 12 + this.random.nextInt(10);
+            this.xd = xd + (this.random.nextFloat() - 0.5F) * 0.05;
+            this.yd = 0.02 + this.random.nextFloat() * 0.03;
+            this.zd = zd + (this.random.nextFloat() - 0.5F) * 0.05;
+            this.sprite = sprites.get(this.random);
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.xd *= 0.92;
+            this.zd *= 0.92;
+            this.alpha *= 0.9F;
+            this.quadSize *= 0.97F;
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new CorruptionEntropyParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Binding chain link fragment. */
+    public static class CorruptionBindParticle extends TextureSheetParticle {
+        protected CorruptionBindParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.quadSize = 0.08F + this.random.nextFloat() * 0.04F;
+            this.lifetime = 14 + this.random.nextInt(8);
+            this.xd = xd * 0.5 + (this.random.nextFloat() - 0.5F) * 0.02;
+            this.yd = 0.015 + this.random.nextFloat() * 0.02;
+            this.zd = zd * 0.5 + (this.random.nextFloat() - 0.5F) * 0.02;
+            this.sprite = sprites.get(this.random);
+            this.alpha = 0.85F;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.oRoll = this.roll;
+            this.roll += 0.08F;
+            this.alpha = 0.85F * (1.0F - (float) this.age / (float) this.lifetime * 0.9F);
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new CorruptionBindParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
 }

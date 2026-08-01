@@ -877,6 +877,123 @@ def icon_mark(d, cx, cy, color):
     d.line([(cx - 10, cy - 6), (cx + 10, cy - 6)], fill=color, width=3)
 
 
+def icon_corrupt_mark(d, cx, cy, color):
+    rune = (160, 60, 180, 255)
+    venom = (90, 220, 60, 220)
+    d.ellipse((cx - 11, cy - 11, cx + 11, cy + 11), outline=rune, width=2)
+    d.line([(cx, cy - 9), (cx, cy + 9)], fill=rune, width=2)
+    d.line([(cx - 9, cy), (cx + 9, cy)], fill=rune, width=2)
+    draw_disc(d, cx + 8, cy - 8, 2, venom)
+
+
+def icon_binding_seal(d, cx, cy, color):
+    link = (140, 80, 170, 255)
+    for oy in (-8, 0, 8):
+        d.ellipse((cx - 6, cy + oy - 4, cx + 6, cy + oy + 4), outline=link, width=2)
+    d.line([(cx, cy - 10), (cx, cy + 10)], fill=(100, 50, 130, 230), width=2)
+
+
+def icon_blight_pulse(d, cx, cy, color):
+    poison = (80, 200, 50, 230)
+    for r in (6, 11, 15):
+        d.ellipse((cx - r, cy - r, cx + r, cy + r), outline=poison, width=2)
+    draw_disc(d, cx, cy, 3, (140, 255, 90, 255))
+
+
+def icon_rot_touch(d, cx, cy, color):
+    rot = (110, 90, 40, 255)
+    blood = (160, 30, 40, 240)
+    d.polygon([(cx - 10, cy + 8), (cx - 4, cy - 12), (cx + 2, cy - 2), (cx + 10, cy + 10)], fill=rot)
+    draw_disc(d, cx + 4, cy + 2, 3, blood)
+    draw_disc(d, cx - 6, cy + 4, 2, (90, 140, 40, 220))
+
+
+def icon_entropy_lash(d, cx, cy, color):
+    ash = (180, 100, 200, 255)
+    d.line([(cx - 12, cy + 10), (cx + 12, cy - 12)], fill=ash, width=3)
+    for ox, oy in ((-6, 4), (0, -2), (6, -8), (10, -4)):
+        draw_disc(d, cx + ox, cy + oy, 2, (120, 60, 140, 230))
+
+
+def icon_plague_bolt(d, cx, cy, color):
+    bolt = (100, 210, 60, 255)
+    d.polygon([(cx - 2, cy - 14), (cx + 6, cy - 2), (cx + 1, cy), (cx + 7, cy + 14), (cx - 2, cy + 2), (cx + 2, cy)], fill=bolt)
+    draw_disc(d, cx, cy, 2, (200, 255, 140, 240))
+
+
+def icon_festering_wound(d, cx, cy, color):
+    flesh = (160, 50, 60, 255)
+    d.ellipse((cx - 10, cy - 8, cx + 10, cy + 10), fill=flesh)
+    d.polygon([(cx - 4, cy - 2), (cx + 6, cy - 6), (cx + 2, cy + 6)], fill=(40, 15, 20, 255))
+    draw_disc(d, cx - 5, cy + 4, 2, (90, 160, 40, 230))
+
+
+def icon_miasma_cloak(d, cx, cy, color):
+    fog = (100, 70, 130, 200)
+    for ox, oy, r in ((-6, -2, 7), (6, 2, 6), (0, -8, 5), (-2, 8, 4)):
+        draw_disc(d, cx + ox, cy + oy, r, fog)
+    draw_disc(d, cx, cy, 2, (140, 220, 80, 200))
+
+
+def icon_blight_brand(d, cx, cy, color):
+    icon_corrupt_mark(d, cx, cy, color)
+    d.ellipse((cx - 14, cy - 14, cx + 14, cy + 14), outline=(90, 200, 50, 180), width=1)
+
+
+def icon_blight_surge(d, cx, cy, color):
+    icon_blight_pulse(d, cx, cy, color)
+    draw_disc(d, cx - 10, cy - 6, 2, (140, 255, 90, 220))
+    draw_disc(d, cx + 10, cy + 4, 2, (140, 255, 90, 220))
+
+
+def icon_decay_bind(d, cx, cy, color):
+    icon_binding_seal(d, cx, cy, color)
+    draw_disc(d, cx + 8, cy - 8, 2, (90, 200, 50, 230))
+
+
+def icon_pestilence_wave(d, cx, cy, color):
+    wave = (90, 190, 50, 230)
+    d.polygon([(cx - 14, cy + 8), (cx - 4, cy - 10), (cx + 6, cy + 0), (cx + 14, cy - 8), (cx + 14, cy + 12)], fill=wave)
+    draw_disc(d, cx, cy, 3, (160, 255, 100, 240))
+
+
+def icon_blight_field(d, cx, cy, color):
+    icon_miasma_cloak(d, cx, cy, color)
+    d.ellipse((cx - 13, cy - 13, cx + 13, cy + 13), outline=(120, 80, 160, 180), width=1)
+
+
+def icon_entropy_aegis(d, cx, cy, color):
+    shield = (140, 70, 170, 240)
+    d.polygon([(cx, cy - 14), (cx + 11, cy - 4), (cx + 8, cy + 12), (cx - 8, cy + 12), (cx - 11, cy - 4)], fill=shield)
+    for ox, oy in ((-4, -2), (4, 2), (0, 6)):
+        draw_disc(d, cx + ox, cy + oy, 2, (200, 120, 220, 220))
+
+
+def icon_tainted_leech(d, cx, cy, color):
+    body = (140, 40, 50, 255)
+    d.arc((cx - 12, cy - 8, cx + 4, cy + 10), 200, 40, fill=body, width=4)
+    d.arc((cx - 2, cy - 6, cx + 12, cy + 8), 20, 200, fill=(100, 180, 50, 230), width=3)
+    draw_disc(d, cx + 8, cy - 2, 3, (200, 60, 70, 255))
+
+
+def icon_virulent_wave(d, cx, cy, color):
+    icon_pestilence_wave(d, cx, cy, color)
+    draw_disc(d, cx - 8, cy - 4, 2, (180, 255, 120, 230))
+    draw_disc(d, cx + 6, cy + 6, 2, (180, 255, 120, 230))
+
+
+def icon_plague_crown(d, cx, cy, color):
+    crown = (120, 60, 150, 255)
+    d.polygon([(cx - 12, cy + 2), (cx - 8, cy - 10), (cx - 2, cy), (cx + 4, cy - 12), (cx + 10, cy - 2), (cx + 12, cy + 4)], fill=crown)
+    draw_disc(d, cx, cy - 2, 3, (90, 220, 60, 240))
+
+
+def icon_omega_blight(d, cx, cy, color):
+    icon_blight_pulse(d, cx, cy, color)
+    icon_miasma_cloak(d, cx, cy + 2, color)
+    d.ellipse((cx - 14, cy - 14, cx + 14, cy + 14), outline=(160, 60, 180, 200), width=2)
+
+
 def icon_chain(d, cx, cy, color):
     draw_disc(d, cx - 6, cy, 6, None, outline=color, width=2)
     draw_disc(d, cx + 6, cy, 6, None, outline=color, width=2)
@@ -1093,24 +1210,24 @@ DRAWERS = {
     "rift_burst": icon_pulse,
     "spatial_singularity": icon_well,
     "absolute_fold": icon_void,
-    "corrupt_mark": icon_mark,
-    "binding_seal": icon_chain,
-    "blight_pulse": icon_pulse,
-    "blight_brand": icon_mark,
-    "pestilence_wave": icon_wave,
-    "rot_touch": icon_spike,
-    "entropy_lash": icon_lance,
-    "plague_bolt": icon_mark,
-    "festering_wound": icon_mark,
-    "miasma_cloak": icon_steam_veil,
-    "blight_surge": icon_pulse,
-    "decay_bind": icon_chain,
-    "blight_field": icon_well,
-    "entropy_aegis": icon_shield,
-    "tainted_leech": icon_focus,
-    "virulent_wave": icon_wave,
-    "plague_crown": icon_great_fire,
-    "omega_blight": icon_void,
+    "corrupt_mark": icon_corrupt_mark,
+    "binding_seal": icon_binding_seal,
+    "blight_pulse": icon_blight_pulse,
+    "blight_brand": icon_blight_brand,
+    "pestilence_wave": icon_pestilence_wave,
+    "rot_touch": icon_rot_touch,
+    "entropy_lash": icon_entropy_lash,
+    "plague_bolt": icon_plague_bolt,
+    "festering_wound": icon_festering_wound,
+    "miasma_cloak": icon_miasma_cloak,
+    "blight_surge": icon_blight_surge,
+    "decay_bind": icon_decay_bind,
+    "blight_field": icon_blight_field,
+    "entropy_aegis": icon_entropy_aegis,
+    "tainted_leech": icon_tainted_leech,
+    "virulent_wave": icon_virulent_wave,
+    "plague_crown": icon_plague_crown,
+    "omega_blight": icon_omega_blight,
     "trap_seal": icon_trap,
     "fortify_seal": icon_shield,
     "glow_seal": icon_glow,
@@ -1596,6 +1713,51 @@ def particle_corruption_rune(variant: int = 0) -> Image.Image:
     return img
 
 
+def particle_corruption_rot(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    rot = (110, 90, 35, 240) if variant % 2 == 0 else (80, 110, 40, 230)
+    d.polygon([(4, 5), (9, 3), (12, 8), (8, 13), (3, 10)], fill=rot)
+    draw_disc(d, 7, 8, 1, (60, 50, 20, 200))
+    return img
+
+
+def particle_corruption_miasma(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = PARTICLE // 2 + variant - 1, PARTICLE // 2
+    for r, a in ((7, 45), (5, 75), (3, 110)):
+        draw_disc(d, cx, cy, r, (90, 50, 120, a))
+    draw_disc(d, cx, cy, 2, (120, 180, 70, 80))
+    return img
+
+
+def particle_corruption_entropy(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    ash = (170, 90, 200, 230)
+    if variant % 2 == 0:
+        d.point((6, 5), fill=ash)
+        d.point((9, 7), fill=ash)
+        d.point((7, 10), fill=(120, 50, 150, 220))
+        d.point((11, 9), fill=ash)
+    else:
+        d.line([(5, 6), (11, 10)], fill=ash, width=1)
+        draw_disc(d, 8, 8, 1, (220, 160, 255, 200))
+    return img
+
+
+def particle_corruption_bind(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    link = (140, 80, 180, 240)
+    if variant % 2 == 0:
+        d.ellipse((3, 5, 10, 12), outline=link, width=2)
+    else:
+        d.ellipse((6, 4, 13, 11), outline=link, width=2)
+    return img
+
+
 def particle_seal_glyph(variant: int = 0) -> Image.Image:
     img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
@@ -1911,6 +2073,34 @@ def generate_school_particles():
         save_particle_png(name, particle_corruption_rune(i))
         rune_paths.append(f"effecoria:{name}")
     write_particle_json("corruption_rune", rune_paths)
+
+    rot_paths = []
+    for i in range(2):
+        name = f"corruption_rot_{i}"
+        save_particle_png(name, particle_corruption_rot(i))
+        rot_paths.append(f"effecoria:{name}")
+    write_particle_json("corruption_rot", rot_paths)
+
+    miasma_paths = []
+    for i in range(3):
+        name = f"corruption_miasma_{i}"
+        save_particle_png(name, particle_corruption_miasma(i))
+        miasma_paths.append(f"effecoria:{name}")
+    write_particle_json("corruption_miasma", miasma_paths)
+
+    entropy_paths = []
+    for i in range(2):
+        name = f"corruption_entropy_{i}"
+        save_particle_png(name, particle_corruption_entropy(i))
+        entropy_paths.append(f"effecoria:{name}")
+    write_particle_json("corruption_entropy", entropy_paths)
+
+    bind_paths = []
+    for i in range(2):
+        name = f"corruption_bind_{i}"
+        save_particle_png(name, particle_corruption_bind(i))
+        bind_paths.append(f"effecoria:{name}")
+    write_particle_json("corruption_bind", bind_paths)
 
     glyph_paths = []
     for i in range(3):

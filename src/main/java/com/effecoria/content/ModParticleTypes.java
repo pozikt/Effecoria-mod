@@ -119,6 +119,18 @@ public final class ModParticleTypes {
             PARTICLE_TYPES.register("corruption_blood", () -> new SimpleParticleType(false));
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> CORRUPTION_RUNE =
             PARTICLE_TYPES.register("corruption_rune", () -> new SimpleParticleType(false));
+    /** Rot / decay flake. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> CORRUPTION_ROT =
+            PARTICLE_TYPES.register("corruption_rot", () -> new SimpleParticleType(false));
+    /** Thick miasma fog. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> CORRUPTION_MIASMA =
+            PARTICLE_TYPES.register("corruption_miasma", () -> new SimpleParticleType(false));
+    /** Entropy ash / crumbling mote. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> CORRUPTION_ENTROPY =
+            PARTICLE_TYPES.register("corruption_entropy", () -> new SimpleParticleType(false));
+    /** Binding chain link. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> CORRUPTION_BIND =
+            PARTICLE_TYPES.register("corruption_bind", () -> new SimpleParticleType(false));
 
     // Seals
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> SEAL_GLYPH =
