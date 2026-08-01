@@ -63,7 +63,7 @@ public final class EffecoriaClient {
                 ModParticleTypes.NECRO_FOG.get(),
                 sprites -> new SchoolParticles.FogParticle.Provider(sprites, 0.75F, 0.012F));
 
-        // Spatial — distortion-only (Veil); particle types kept registered but unused
+        // Spatial uses Veil distortion only — no particle providers
         // Corruption
         event.registerSpriteSet(ModParticleTypes.CORRUPTION_POISON.get(), SchoolParticles.DropParticle.Provider::new);
         event.registerSpriteSet(ModParticleTypes.CORRUPTION_BLOOD.get(), SchoolParticles.BloodParticle.Provider::new);

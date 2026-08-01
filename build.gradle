@@ -190,3 +190,28 @@ idea {
         downloadJavadoc = true
     }
 }
+
+/** Copies the playable jar into dist/ (deletes older effecoria-*.jar there). */
+tasks.register('packageForShare') {
+    group = 'distribution'
+    description = 'Build and copy effecoria jar to dist/ for sharing'
+    dependsOn tasks.named('build')
+    def jarName = providers.provider { "${base.archivesName.get()}-${version}.jar" }
+    def builtJar = layout.buildDirectory.file(jarName.map { "libs/${it}" })
+    def distDir = layout.projectDirectory.dir('dist')
+    outputs.dir(distDir)
+    doLast {
+        def built = builtJar.get().asFile
+        if (!built.exists()) {
+            throw new GradleException("Missing built jar: ${built}")
+        }
+        def outDir = distDir.asFile
+        outDir.mkdirs()
+        outDir.listFiles()?.findAll { it.name.startsWith('effecoria-') && it.name.endsWith('.jar') }?.each { it.delete() }
+        java.nio.file.Files.copy(
+                built.toPath(),
+                new File(outDir, built.name).toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        println "Share jar ready: ${new File(outDir, built.name).absolutePath}"
+    }
+}

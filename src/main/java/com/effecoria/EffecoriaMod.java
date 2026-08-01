@@ -74,7 +74,7 @@ public class EffecoriaMod {
 
 
 
-        LOGGER.info("Effecoria loaded — phase 2 magic core");
+        LOGGER.info("Effecoria {} loaded — phase 2 magic core", modContainer.getModInfo().getVersion());
 
     }
 

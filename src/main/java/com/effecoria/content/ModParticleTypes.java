@@ -49,12 +49,6 @@ public final class ModParticleTypes {
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> NECRO_FOG =
             PARTICLE_TYPES.register("necro_fog", () -> new SimpleParticleType(false));
 
-    // Spatial
-    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> SPATIAL_RIFT =
-            PARTICLE_TYPES.register("spatial_rift", () -> new SimpleParticleType(false));
-    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> SPATIAL_WARP =
-            PARTICLE_TYPES.register("spatial_warp", () -> new SimpleParticleType(false));
-
     // Corruption
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> CORRUPTION_POISON =
             PARTICLE_TYPES.register("corruption_poison", () -> new SimpleParticleType(false));

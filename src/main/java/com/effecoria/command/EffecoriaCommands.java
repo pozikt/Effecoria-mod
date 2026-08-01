@@ -51,6 +51,11 @@ public final class EffecoriaCommands {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("effecoria")
+                .executes(ctx -> help(ctx.getSource()))
+                .then(Commands.literal("help")
+                        .executes(ctx -> help(ctx.getSource())))
+                .then(Commands.literal("version")
+                        .executes(ctx -> version(ctx.getSource())))
                 .then(Commands.literal("debug")
                         .executes(ctx -> debug(ctx.getSource())))
                 .then(Commands.literal("initiate")
@@ -83,6 +88,22 @@ public final class EffecoriaCommands {
                                         ctx.getSource(), StringArgumentType.getString(ctx, "school"))))));
     }
 
+    private static int help(CommandSourceStack source) {
+        source.sendSuccess(() -> Component.literal(
+                "Effecoria: help | version | debug | initiate <school> | reschool <school> | cast <id> | spells | max [school] | set <stat> <value>"),
+                false);
+        return 1;
+    }
+
+    private static int version(CommandSourceStack source) {
+        String ver = net.neoforged.fml.ModList.get()
+                .getModContainerById(com.effecoria.EffecoriaMod.MOD_ID)
+                .map(c -> c.getModInfo().getVersion().toString())
+                .orElse("unknown");
+        source.sendSuccess(() -> Component.literal("Effecoria " + ver), false);
+        return 1;
+    }
+
     private static int debug(CommandSourceStack source) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         PlayerPsiData data = PsiHelper.get(player);
@@ -109,6 +130,11 @@ public final class EffecoriaCommands {
         source.sendSuccess(() -> Component.translatable(
                 "message.effecoria.debug_mult",
                 String.format("%.2f", data.phiMultiplier())), false);
+        String ver = net.neoforged.fml.ModList.get()
+                .getModContainerById(com.effecoria.EffecoriaMod.MOD_ID)
+                .map(c -> c.getModInfo().getVersion().toString())
+                .orElse("unknown");
+        source.sendSuccess(() -> Component.literal("Effecoria build " + ver), false);
         return 1;
     }
 
