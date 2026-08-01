@@ -1,13 +1,13 @@
 package com.effecoria.event;
 
-import com.effecoria.core.formula.BreathDebuffs;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.core.seal.ChunkSealData;
 import com.effecoria.core.seal.SealInstance;
+import com.effecoria.core.seal.SealProgramEffects;
+import com.effecoria.core.seal.SealProgramRuntime;
 import com.effecoria.core.seal.SealService;
 import com.effecoria.core.seal.SealTypes;
 
@@ -17,10 +17,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
@@ -34,15 +34,36 @@ public final class SealEvents {
             return;
         }
         BlockPos pos = event.getPosition().get();
-        Optional<SealInstance> fortify = SealService.find(event.getEntity().level(), pos, SealTypes.FORTIFY);
-        if (fortify.isEmpty()) {
+        long gameTime = event.getEntity().level().getGameTime();
+        for (SealInstance seal : SealService.getAll(event.getEntity().level(), pos)) {
+            if (seal.isExpired(gameTime)) {
+                continue;
+            }
+            boolean fortify = seal.typeId().equals(SealTypes.FORTIFY)
+                    || (SealProgramRuntime.isProgram(seal)
+                            && SealProgramRuntime.effectiveHardness(seal, gameTime) > 0f);
+            if (!fortify) {
+                continue;
+            }
+            event.setNewSpeed(event.getNewSpeed() * SealService.fortifyBreakFactor(seal, gameTime));
             return;
         }
-        SealInstance seal = fortify.get();
-        if (seal.isExpired(event.getEntity().level().getGameTime())) {
+    }
+
+    @SubscribeEvent
+    public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
+        if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
-        event.setNewSpeed(event.getNewSpeed() * SealService.fortifyBreakFactor(seal));
+        pulseAt(level, event.getPos(), SealProgramRuntime.SenseEvent.HIT, event.getEntity());
+    }
+
+    @SubscribeEvent
+    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (!(event.getLevel() instanceof ServerLevel level)) {
+            return;
+        }
+        pulseAt(level, event.getPos(), SealProgramRuntime.SenseEvent.USE, event.getEntity());
     }
 
     @SubscribeEvent
@@ -50,6 +71,7 @@ public final class SealEvents {
         if (!(event.getLevel() instanceof ServerLevel serverLevel)) {
             return;
         }
+        pulseAt(serverLevel, event.getPos(), SealProgramRuntime.SenseEvent.BREAK, event.getPlayer());
         SealService.remove(serverLevel, event.getPos());
     }
 
@@ -61,16 +83,28 @@ public final class SealEvents {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        if (player.tickCount % 10 != 0) {
+        if (player.tickCount % 5 != 0) {
             return;
         }
         tickSealsNearPlayer(player);
+    }
+
+    private static void pulseAt(
+            ServerLevel level, BlockPos pos, SealProgramRuntime.SenseEvent senseEvent, LivingEntity subject) {
+        long gameTime = level.getGameTime();
+        for (SealInstance seal : SealService.getAll(level, pos)) {
+            if (seal.isExpired(gameTime) || !SealProgramRuntime.isProgram(seal)) {
+                continue;
+            }
+            SealProgramRuntime.pulse(level, pos, seal, gameTime, senseEvent, subject);
+        }
     }
 
     private static void tickSealsNearPlayer(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
         long gameTime = level.getGameTime();
         BlockPos origin = player.blockPosition();
+        BlockPos standingOn = BlockPos.containing(player.getX(), player.getY() - 0.05, player.getZ());
 
         for (int cx = -1; cx <= 1; cx++) {
             for (int cz = -1; cz <= 1; cz++) {
@@ -91,12 +125,21 @@ public final class SealEvents {
                         if (seal.isExpired(gameTime)) {
                             continue;
                         }
-                        if (seal.typeId().equals(SealTypes.DAMAGE_TRAP)) {
-                            applyTrap(level, pos, seal);
+                        if (seal.typeId().equals(SealTypes.PROGRAM)) {
+                            tickProgram(level, chunk, pos, seal, gameTime, player, standingOn);
+                        } else if (seal.typeId().equals(SealTypes.DAMAGE_TRAP)) {
+                            SealProgramEffects.applyStandingHurt(level, pos, seal, SealService.trapDamage(seal));
                         } else if (seal.typeId().equals(SealTypes.SNARE)) {
-                            applySnare(level, pos, seal);
+                            int amp = seal.params() != null && seal.params().contains("slow_amplifier")
+                                    ? seal.params().getInt("slow_amplifier")
+                                    : 3;
+                            SealProgramEffects.applyStandingSlow(level, pos, seal, amp);
                         } else if (seal.typeId().equals(SealTypes.REPULSE)) {
-                            applyRepulse(level, pos, seal);
+                            float force = seal.params() != null && seal.params().contains("repulse_force")
+                                    ? seal.params().getFloat("repulse_force")
+                                    : 0.85f;
+                            force *= Math.max(0.5f, seal.strength() / 40f);
+                            SealProgramEffects.applyStandingPush(level, pos, seal, force);
                         } else if (seal.typeId().equals(SealTypes.GLOW)) {
                             SealService.ensureGlowLight(level, chunk, pos, seal);
                             spawnGlowParticles(level, pos);
@@ -107,68 +150,37 @@ public final class SealEvents {
         }
     }
 
-    private static void applySnare(ServerLevel level, BlockPos pos, SealInstance seal) {
-        int slowAmp = seal.params() != null && seal.params().contains("slow_amplifier")
-                ? seal.params().getInt("slow_amplifier")
-                : 3;
-        AABB box = new AABB(pos).move(0, 1, 0).inflate(0.35, 0.15, 0.35);
-        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
-            BlockPos standingOn = BlockPos.containing(entity.getX(), entity.getY() - 0.05, entity.getZ());
-            if (!standingOn.equals(pos)) {
-                continue;
-            }
-            BreathDebuffs.apply(level, seal.casterId(), entity, new net.minecraft.world.effect.MobEffectInstance(
-                    net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 25, slowAmp));
-            BreathDebuffs.apply(level, seal.casterId(), entity, new net.minecraft.world.effect.MobEffectInstance(
-                    net.minecraft.world.effect.MobEffects.DIG_SLOWDOWN, 25, 1));
-        }
-    }
+    private static void tickProgram(
+            ServerLevel level,
+            LevelChunk chunk,
+            BlockPos pos,
+            SealInstance seal,
+            long gameTime,
+            ServerPlayer player,
+            BlockPos standingOn) {
+        SealProgramRuntime.tickApproach(level, pos, seal, gameTime);
 
-    private static void applyRepulse(ServerLevel level, BlockPos pos, SealInstance seal) {
-        float force = seal.params() != null && seal.params().contains("repulse_force")
-                ? seal.params().getFloat("repulse_force")
-                : 0.85f;
-        force *= Math.max(0.5f, seal.strength() / 40f);
-        AABB box = new AABB(pos).move(0, 1, 0).inflate(0.2, 0.1, 0.2);
-        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
-            BlockPos standingOn = BlockPos.containing(entity.getX(), entity.getY() - 0.05, entity.getZ());
-            if (!standingOn.equals(pos)) {
-                continue;
-            }
-            entity.setDeltaMovement(entity.getDeltaMovement().add(0, force, 0));
-            entity.hurtMarked = true;
-            level.sendParticles(
-                    ParticleTypes.CLOUD,
-                    pos.getX() + 0.5,
-                    pos.getY() + 1.0,
-                    pos.getZ() + 0.5,
-                    6,
-                    0.2,
-                    0.1,
-                    0.2,
-                    0.02);
+        if (standingOn.equals(pos)) {
+            SealProgramRuntime.pulse(level, pos, seal, gameTime, SealProgramRuntime.SenseEvent.STEP, player);
         }
-    }
 
-    private static void applyTrap(ServerLevel level, BlockPos pos, SealInstance seal) {
-        float damage = SealService.trapDamage(seal);
-        AABB box = new AABB(pos).move(0, 1, 0).inflate(0.05, 0.1, 0.05);
-        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
-            BlockPos standingOn = BlockPos.containing(entity.getX(), entity.getY() - 0.05, entity.getZ());
-            if (!standingOn.equals(pos)) {
-                continue;
-            }
-            entity.hurt(level.damageSources().magic(), damage);
-            level.sendParticles(
-                    ParticleTypes.SCULK_SOUL,
-                    pos.getX() + 0.5,
-                    pos.getY() + 1.05,
-                    pos.getZ() + 0.5,
-                    4,
-                    0.15,
-                    0.05,
-                    0.15,
-                    0.01);
+        int glow = SealProgramRuntime.effectiveGlow(seal, gameTime);
+        if (glow > 0) {
+            SealService.ensureGlowLight(level, chunk, pos, seal);
+            spawnGlowParticles(level, pos);
+        }
+
+        float hurt = SealProgramRuntime.effectiveHurt(seal, gameTime);
+        if (hurt > 0f) {
+            SealProgramEffects.applyStandingHurt(level, pos, seal, hurt);
+        }
+        int slow = SealProgramRuntime.effectiveSlow(seal, gameTime);
+        if (slow > 0) {
+            SealProgramEffects.applyStandingSlow(level, pos, seal, slow);
+        }
+        float push = SealProgramRuntime.effectivePush(seal, gameTime);
+        if (push > 0f) {
+            SealProgramEffects.applyStandingPush(level, pos, seal, push);
         }
     }
 

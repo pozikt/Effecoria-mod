@@ -22,6 +22,7 @@ public final class EffecoriaClient {
         event.register(KeyBindings.CAST_SPELL);
         event.register(KeyBindings.OPEN_SPELL_BOOK);
         event.register(KeyBindings.CYCLE_SPELL_MODIFIER);
+        event.register(KeyBindings.OPEN_SEAL_EDITOR);
     }
 
     @SubscribeEvent

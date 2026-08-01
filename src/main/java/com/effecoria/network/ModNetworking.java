@@ -13,6 +13,7 @@ import com.effecoria.core.psi.SpellProgression;
 import com.effecoria.effect.elemental.SteamCloudService;
 import com.effecoria.magic.CastPipeline;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -397,6 +398,87 @@ public final class ModNetworking {
                     player.displayClientMessage(
                             Component.translatable("message.effecoria.breath_train_miss_fatigue", sec), true);
                 }
+            });
+        }
+    }
+
+    /** Client → server: apply a seal word program to a looked-at block. */
+    public record ApplySealProgramPayload(BlockPos pos, List<ResourceLocation> tokens)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<ApplySealProgramPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "apply_seal_program"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, ApplySealProgramPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, p) -> {
+                            buf.writeBlockPos(p.pos());
+                            buf.writeVarInt(p.tokens().size());
+                            for (ResourceLocation id : p.tokens()) {
+                                ResourceLocation.STREAM_CODEC.encode(buf, id);
+                            }
+                        },
+                        buf -> {
+                            BlockPos pos = buf.readBlockPos();
+                            int n = buf.readVarInt();
+                            List<ResourceLocation> tokens = new ArrayList<>(n);
+                            for (int i = 0; i < n; i++) {
+                                tokens.add(ResourceLocation.STREAM_CODEC.decode(buf));
+                            }
+                            return new ApplySealProgramPayload(pos, tokens);
+                        });
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(ApplySealProgramPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                if (payload.tokens().size() > 16) {
+                    return;
+                }
+                if (player.blockPosition().distSqr(payload.pos()) > 16 * 16) {
+                    return;
+                }
+                var status = com.effecoria.core.seal.SealProgramService.apply(
+                        player, payload.pos(), payload.tokens());
+                if (status != com.effecoria.core.seal.SealProgramService.ApplyStatus.OK) {
+                    player.displayClientMessage(
+                            Component.translatable("message.effecoria.seal.apply_failed." + status.name().toLowerCase()),
+                            true);
+                }
+            });
+        }
+    }
+
+    /** Client → server: clear seals on a block. */
+    public record ClearSealProgramPayload(BlockPos pos) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<ClearSealProgramPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "clear_seal_program"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, ClearSealProgramPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        BlockPos.STREAM_CODEC, ClearSealProgramPayload::pos, ClearSealProgramPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(ClearSealProgramPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                if (player.blockPosition().distSqr(payload.pos()) > 16 * 16) {
+                    return;
+                }
+                com.effecoria.core.seal.SealProgramService.clear(player, payload.pos());
             });
         }
     }

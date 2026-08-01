@@ -31,4 +31,12 @@ public final class KeyBindings {
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_LEFT_ALT,
             "key.categories.effecoria");
+
+    /** Open seal word-programming editor while looking at a block (Seals school). */
+    public static final KeyMapping OPEN_SEAL_EDITOR = new KeyMapping(
+            "key.effecoria.open_seal_editor",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_G,
+            "key.categories.effecoria");
 }

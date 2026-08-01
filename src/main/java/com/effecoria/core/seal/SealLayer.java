@@ -10,6 +10,9 @@ public enum SealLayer {
     UTILITY;
 
     public static SealLayer of(ResourceLocation typeId) {
+        if (typeId.equals(SealTypes.PROGRAM)) {
+            return OFFENSIVE;
+        }
         if (typeId.equals(SealTypes.DAMAGE_TRAP)
                 || typeId.equals(SealTypes.SNARE)
                 || typeId.equals(SealTypes.REPULSE)) {

@@ -9,6 +9,7 @@ import com.effecoria.core.progression.EntropyService;
 import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.progression.ProgressionService;
 import com.effecoria.core.progression.SpellUnlockService;
+import com.effecoria.core.progression.SealWordUnlockService;
 import com.effecoria.core.phi.CreativeGodMode;
 import com.effecoria.core.phi.PhiFieldService;
 import com.effecoria.core.phi.PhiHarness;
@@ -54,6 +55,7 @@ public final class ModCommonEvents {
     @SubscribeEvent
     public static void onAddReloadListeners(AddReloadListenerEvent event) {
         event.addListener(SpellRegistry.RELOAD_LISTENER);
+        event.addListener(com.effecoria.core.seal.SealWordRegistry.RELOAD_LISTENER);
     }
 
     @SubscribeEvent
@@ -133,6 +135,7 @@ public final class ModCommonEvents {
         ProgressionService.tick(player, data);
         ShadeService.tick(player);
         SpellUnlockService.tick(player, data);
+        SealWordUnlockService.tick(player, data);
 
         if (CreativeGodMode.isActive(player)) {
             data.setCurrentPsi(data.maxPsi());

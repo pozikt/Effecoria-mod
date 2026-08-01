@@ -136,6 +136,14 @@ public class EffecoriaMod {
                 ModNetworking.BreathTrainMissPayload.TYPE,
                 ModNetworking.BreathTrainMissPayload.STREAM_CODEC,
                 ModNetworking.BreathTrainMissPayload::handle);
+        registrar.playToServer(
+                ModNetworking.ApplySealProgramPayload.TYPE,
+                ModNetworking.ApplySealProgramPayload.STREAM_CODEC,
+                ModNetworking.ApplySealProgramPayload::handle);
+        registrar.playToServer(
+                ModNetworking.ClearSealProgramPayload.TYPE,
+                ModNetworking.ClearSealProgramPayload.STREAM_CODEC,
+                ModNetworking.ClearSealProgramPayload::handle);
     }
 
 }

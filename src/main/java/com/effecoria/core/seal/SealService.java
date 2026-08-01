@@ -61,6 +61,10 @@ public final class SealService {
             float strength,
             int durationTicks,
             CompoundTag params) {
+        if (typeId.equals(SealTypes.PROGRAM)) {
+            placeProgram(level, pos, casterId, strength, params == null ? new CompoundTag() : params.copy());
+            return SealPlaceResult.PLACED;
+        }
         LevelChunk chunk = level.getChunkAt(pos);
         ChunkSealData data = getChunkData(chunk);
         List<SealInstance> layers = new ArrayList<>(data.getAll(pos));
@@ -104,6 +108,24 @@ public final class SealService {
         chunk.setUnsaved(true);
         syncChunk(chunk);
         return result;
+    }
+
+    /** Replace any seals on the block with a single permanent word program. */
+    public static void placeProgram(
+            ServerLevel level, BlockPos pos, UUID casterId, float strength, CompoundTag params) {
+        LevelChunk chunk = level.getChunkAt(pos);
+        ChunkSealData data = getChunkData(chunk);
+        for (SealInstance old : data.getAll(pos)) {
+            clearGlowLight(level, old);
+        }
+        CompoundTag sealParams = params == null ? new CompoundTag() : params.copy();
+        long now = level.getGameTime();
+        List<SealInstance> layers = new ArrayList<>();
+        layers.add(new SealInstance(SealTypes.PROGRAM, casterId, now, SealInstance.PERMANENT, strength, sealParams));
+        data.putLayers(pos, layers);
+        chunk.setData(ModAttachments.CHUNK_SEALS.get(), data);
+        chunk.setUnsaved(true);
+        syncChunk(chunk);
     }
 
     public static boolean remove(ServerLevel level, BlockPos pos) {
@@ -154,7 +176,12 @@ public final class SealService {
     }
 
     public static void clearGlowLight(ServerLevel level, SealInstance seal) {
-        if (!seal.typeId().equals(SealTypes.GLOW)) {
+        boolean glow = seal.typeId().equals(SealTypes.GLOW)
+                || (SealProgramRuntime.isProgram(seal)
+                        && SealProgramRuntime.effectiveGlow(seal, level.getGameTime()) > 0);
+        if (!glow && !(seal.typeId().equals(SealTypes.PROGRAM)
+                && seal.params() != null
+                && seal.params().contains(LIGHT_X))) {
             return;
         }
         CompoundTag params = seal.params();
@@ -190,7 +217,12 @@ public final class SealService {
      * Persists updated coords onto the chunk seal when needed.
      */
     public static void ensureGlowLight(ServerLevel level, LevelChunk chunk, BlockPos sealedPos, SealInstance seal) {
-        if (!seal.typeId().equals(SealTypes.GLOW)) {
+        long gameTime = level.getGameTime();
+        int programGlowLevel = SealProgramRuntime.isProgram(seal)
+                ? SealProgramRuntime.effectiveGlow(seal, gameTime)
+                : 0;
+        boolean programGlow = programGlowLevel > 0;
+        if (!seal.typeId().equals(SealTypes.GLOW) && !programGlow) {
             return;
         }
         CompoundTag params = seal.params();
@@ -204,14 +236,19 @@ public final class SealService {
         updated.remove(LIGHT_X);
         updated.remove(LIGHT_Y);
         updated.remove(LIGHT_Z);
-        attachGlowLight(level, sealedPos, seal.strength(), updated);
+        float strength = seal.strength();
+        if (programGlow) {
+            strength = programGlowLevel * 5f;
+        }
+        attachGlowLight(level, sealedPos, strength, updated);
         if (!updated.contains(LIGHT_X)) {
             return;
         }
         ChunkSealData data = getChunkData(chunk);
         List<SealInstance> layers = new ArrayList<>(data.getAll(sealedPos));
         for (int i = 0; i < layers.size(); i++) {
-            if (layers.get(i).typeId().equals(SealTypes.GLOW)) {
+            if (layers.get(i).typeId().equals(SealTypes.GLOW)
+                    || layers.get(i).typeId().equals(SealTypes.PROGRAM)) {
                 SealInstance old = layers.get(i);
                 layers.set(
                         i,
@@ -253,11 +290,32 @@ public final class SealService {
     }
 
     public static float fortifyBreakFactor(SealInstance seal) {
+        if (SealProgramRuntime.isProgram(seal)) {
+            return fortifyBreakFactor(seal, 0L);
+        }
+        float factor = 1f / (1.5f + Math.max(0.1f, seal.strength() / 40f));
+        return Math.clamp(factor, 0.2f, 0.75f);
+    }
+
+    public static float fortifyBreakFactor(SealInstance seal, long gameTime) {
+        if (SealProgramRuntime.isProgram(seal)) {
+            float mult = SealProgramRuntime.effectiveHardness(seal, gameTime);
+            if (mult > 0f) {
+                return Math.clamp(1f / Math.max(1f, mult), 0.1f, 0.9f);
+            }
+            return 1f;
+        }
         float factor = 1f / (1.5f + Math.max(0.1f, seal.strength() / 40f));
         return Math.clamp(factor, 0.2f, 0.75f);
     }
 
     public static float trapDamage(SealInstance seal) {
+        if (SealProgramRuntime.isProgram(seal)) {
+            float hurt = SealProgramRuntime.effectiveHurt(seal, Long.MAX_VALUE / 4);
+            if (hurt > 0f) {
+                return Math.max(0.5f, hurt);
+            }
+        }
         float mult = 1f;
         if (seal.params() != null && seal.params().contains("trap_damage_mult")) {
             mult = seal.params().getFloat("trap_damage_mult");

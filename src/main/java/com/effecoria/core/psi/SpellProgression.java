@@ -224,20 +224,7 @@ public final class SpellProgression {
                     id("plague_crown"),
                     id("omega_blight"));
 
-            case SEALS -> List.of(
-                    id("trap_seal"),
-                    id("glow_seal"),
-                    id("snare_glyph"),
-                    id("fortify_seal"),
-                    id("beacon_seal"),
-                    id("shock_glyph"),
-                    id("ward_glyph"),
-                    id("repulsion_seal"),
-                    id("anchor_fortify"),
-                    id("permanent_glow"),
-                    id("snare_matrix"),
-                    id("shock_trap"),
-                    id("omega_ward"));
+            case SEALS -> List.of();
 
             default -> List.of();
 
@@ -248,9 +235,10 @@ public final class SpellProgression {
 
 
     public static boolean schoolHasLoadedSpells(MagicSchool school) {
-
+        if (school == MagicSchool.SEALS) {
+            return true;
+        }
         return spellsForSchool(school).stream().allMatch(SpellRegistry::contains);
-
     }
 
     public static List<ResourceLocation> starterSpells(MagicSchool school) {

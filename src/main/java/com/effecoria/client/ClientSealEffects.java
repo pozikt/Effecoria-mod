@@ -68,9 +68,19 @@ public final class ClientSealEffects {
         double x = pos.getX() + 0.5;
         double y = pos.getY() + 0.55;
         double z = pos.getZ() + 0.5;
-        if (seal.typeId().equals(SealTypes.GLOW)) {
+        if (seal.typeId().equals(SealTypes.GLOW)
+                        || (seal.typeId().equals(SealTypes.PROGRAM)
+                        && seal.params() != null
+                        && (seal.params().contains("glow_level")
+                                || seal.params().contains("passives")
+                                || seal.params().contains("rules")))) {
             level.addParticle(ModParticleTypes.SEAL_GLYPH.get(), x, y, z, 0, 0.008, 0);
             level.addParticle(ModParticleTypes.SEAL_SPARK.get(), x + 0.2, y + 0.2, z, 0, 0.012, 0);
+        } else if (seal.typeId().equals(SealTypes.PROGRAM)) {
+            level.addParticle(ModParticleTypes.SEAL_GLYPH.get(), x, y, z, 0, 0.01, 0);
+            if (seal.params() != null && seal.params().contains("hurt_damage")) {
+                level.addParticle(ModParticleTypes.CORRUPTION_RUNE.get(), x, y + 0.45, z, 0, 0.012, 0);
+            }
         } else if (seal.typeId().equals(SealTypes.DAMAGE_TRAP)
                 || seal.typeId().equals(SealTypes.SNARE)
                 || seal.typeId().equals(SealTypes.REPULSE)) {

@@ -73,6 +73,28 @@ public final class ClientInputEvents {
             PacketDistributor.sendToServer(new ModNetworking.CastSpellPayload(index));
         }
 
+        while (KeyBindings.OPEN_SEAL_EDITOR.consumeClick()) {
+            if (minecraft.screen != null) {
+                break;
+            }
+            PlayerPsiData data = minecraft.player.getData(ModAttachments.PSI.get());
+            if (!data.initiated() || data.school() != com.effecoria.core.magic.MagicSchool.SEALS) {
+                minecraft.player.displayClientMessage(
+                        net.minecraft.network.chat.Component.translatable("message.effecoria.seal.need_school"),
+                        true);
+                break;
+            }
+            var hit = minecraft.player.pick(8.0, 0f, false);
+            if (hit.getType() != net.minecraft.world.phys.HitResult.Type.BLOCK) {
+                minecraft.player.displayClientMessage(
+                        net.minecraft.network.chat.Component.translatable("message.effecoria.seal.need_block"),
+                        true);
+                break;
+            }
+            var blockHit = (net.minecraft.world.phys.BlockHitResult) hit;
+            minecraft.setScreen(new com.effecoria.client.gui.SealProgramScreen(blockHit.getBlockPos()));
+        }
+
         if (minecraft.screen != null) {
             resetHoldState();
             return;

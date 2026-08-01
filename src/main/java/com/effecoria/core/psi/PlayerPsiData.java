@@ -55,6 +55,10 @@ public final class PlayerPsiData {
                 for (ResourceLocation spell : data.knownSpells) {
                     ResourceLocation.STREAM_CODEC.encode(buf, spell);
                 }
+                ByteBufCodecs.INT.encode(buf, data.knownSealWords.size());
+                for (ResourceLocation word : data.knownSealWords) {
+                    ResourceLocation.STREAM_CODEC.encode(buf, word);
+                }
                 ByteBufCodecs.INT.encode(buf, data.spellCastCounts.size());
                 for (Map.Entry<ResourceLocation, Integer> entry : data.spellCastCounts.entrySet()) {
                     ResourceLocation.STREAM_CODEC.encode(buf, entry.getKey());
@@ -104,6 +108,11 @@ public final class PlayerPsiData {
                 for (int i = 0; i < spellCount; i++) {
                     data.knownSpells.add(ResourceLocation.STREAM_CODEC.decode(buf));
                 }
+                int wordCount = ByteBufCodecs.INT.decode(buf);
+                data.knownSealWords = new ArrayList<>(wordCount);
+                for (int i = 0; i < wordCount; i++) {
+                    data.knownSealWords.add(ResourceLocation.STREAM_CODEC.decode(buf));
+                }
                 int castCountEntries = ByteBufCodecs.INT.decode(buf);
                 data.spellCastCounts = new HashMap<>(castCountEntries);
                 for (int i = 0; i < castCountEntries; i++) {
@@ -129,6 +138,7 @@ public final class PlayerPsiData {
     private boolean initiated;
     private int selectedSpellIndex;
     private List<ResourceLocation> knownSpells = new ArrayList<>();
+    private List<ResourceLocation> knownSealWords = new ArrayList<>();
     private long phiSenseUntil;
     private float breathingMastery;
     private float trainingXp;
@@ -200,6 +210,24 @@ public final class PlayerPsiData {
 
     public List<ResourceLocation> knownSpells() {
         return knownSpells;
+    }
+
+    public List<ResourceLocation> knownSealWords() {
+        return knownSealWords;
+    }
+
+    public boolean knowsSealWord(ResourceLocation id) {
+        return knownSealWords.contains(id);
+    }
+
+    public void unlockSealWord(ResourceLocation id) {
+        if (!knownSealWords.contains(id)) {
+            knownSealWords.add(id);
+        }
+    }
+
+    public void setKnownSealWords(List<ResourceLocation> words) {
+        this.knownSealWords = new ArrayList<>(words);
     }
 
     public long phiSenseUntil() {
@@ -584,6 +612,12 @@ public final class PlayerPsiData {
         this.phiSenseUntil = 0L;
         this.spellCastCounts.clear();
         this.spellLastCastAt.clear();
+        if (chosenSchool == MagicSchool.SEALS) {
+            this.knownSealWords = new ArrayList<>(com.effecoria.core.seal.SealProgramService.starterWordIds());
+            this.knownSpells = new ArrayList<>();
+        } else if (resetResources) {
+            this.knownSealWords = new ArrayList<>();
+        }
         if (resetResources) {
             this.maxPsi = BalanceConfig.DEFAULT_MAX_PSI.get().floatValue();
             this.currentPsi = BalanceConfig.DEFAULT_STARTING_PSI.get().floatValue();
@@ -630,6 +664,12 @@ public final class PlayerPsiData {
             spellList.add(net.minecraft.nbt.StringTag.valueOf(spell.toString()));
         }
         tag.put("knownSpells", spellList);
+
+        ListTag wordList = new ListTag();
+        for (ResourceLocation word : knownSealWords) {
+            wordList.add(net.minecraft.nbt.StringTag.valueOf(word.toString()));
+        }
+        tag.put("knownSealWords", wordList);
 
         CompoundTag castCounts = new CompoundTag();
         for (Map.Entry<ResourceLocation, Integer> entry : spellCastCounts.entrySet()) {
@@ -695,6 +735,14 @@ public final class PlayerPsiData {
             knownSpells.add(spellId);
         }
 
+        knownSealWords = new ArrayList<>();
+        if (tag.contains("knownSealWords", Tag.TAG_LIST)) {
+            ListTag wordList = tag.getList("knownSealWords", Tag.TAG_STRING);
+            for (Tag entry : wordList) {
+                knownSealWords.add(ResourceLocation.parse(entry.getAsString()));
+            }
+        }
+
         spellCastCounts = new HashMap<>();
         spellLastCastAt = new HashMap<>();
         if (tag.contains("spellCastCounts", Tag.TAG_COMPOUND)) {
@@ -718,6 +766,22 @@ public final class PlayerPsiData {
             school = MagicSchool.CORRUPTION;
             frequencyHz = school.nominalFrequencyHz();
         }
+
+        // Migrate legacy seal spell casters onto the word lexicon.
+        if (school == MagicSchool.SEALS) {
+            knownSpells.removeIf(id -> id.getNamespace().equals("effecoria") && (
+                    id.getPath().endsWith("_seal")
+                            || id.getPath().endsWith("_glyph")
+                            || id.getPath().equals("snare_matrix")
+                            || id.getPath().equals("shock_trap")
+                            || id.getPath().equals("anchor_fortify")
+                            || id.getPath().equals("permanent_glow")
+                            || id.getPath().equals("omega_ward")
+                            || id.getPath().equals("beacon_seal")));
+            if (knownSealWords.isEmpty()) {
+                knownSealWords = new ArrayList<>(com.effecoria.core.seal.SealProgramService.starterWordIds());
+            }
+        }
     }
 
     public PlayerPsiData copy() {
@@ -732,6 +796,7 @@ public final class PlayerPsiData {
         copy.initiated = initiated;
         copy.selectedSpellIndex = selectedSpellIndex;
         copy.knownSpells = new ArrayList<>(knownSpells);
+        copy.knownSealWords = new ArrayList<>(knownSealWords);
         copy.phiSenseUntil = phiSenseUntil;
         copy.breathingMastery = breathingMastery;
         copy.trainingXp = trainingXp;
