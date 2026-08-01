@@ -69,6 +69,7 @@ SPELL_SCHOOL = {
     "genetic_lock": "organic", "biological_cleaving": "organic", "full_transformation": "organic",
     "spore_storm": "organic", "biological_singularity": "organic", "life_creation": "organic",
     "biological_immortality": "organic",
+    "vital_infusion": "organic", "soothing_sap": "organic", "vital_ward": "organic", "adrenal_gift": "organic",
     "soul_drain": "necromancy", "wither_touch": "necromancy", "shade_summon": "necromancy",
     "grave_leech": "necromancy", "shade_swarm": "necromancy",
     "bone_chill": "necromancy", "death_sense": "necromancy", "grave_whisper": "necromancy",
@@ -193,26 +194,72 @@ def icon_heart(d, cx, cy, color):
 
 
 def icon_thorns(d, cx, cy, color):
-    for ang in range(0, 360, 60):
-        rad = math.radians(ang)
-        x2 = cx + int(math.cos(rad) * 14)
-        y2 = cy + int(math.sin(rad) * 14)
-        d.line([(cx, cy), (x2, y2)], fill=color, width=3)
+    for ang in (-50, -15, 20, 55):
+        rad = math.radians(ang - 90)
+        x2 = cx + int(math.cos(rad) * 16)
+        y2 = cy + int(math.sin(rad) * 16)
+        d.line([(cx, cy + 6), (x2, y2)], fill=color, width=3)
+        # barb
+        d.line([(x2, y2), (x2 - 3, y2 + 4)], fill=with_alpha(color, 200), width=2)
 
 
 def icon_roots(d, cx, cy, color):
-    d.line([(cx, cy - 8), (cx, cy + 12)], fill=color, width=3)
-    d.line([(cx, cy + 4), (cx - 10, cy + 12)], fill=color, width=2)
-    d.line([(cx, cy + 4), (cx + 10, cy + 12)], fill=color, width=2)
+    # Trunk stub
+    d.line([(cx, cy - 6), (cx, cy + 2)], fill=color, width=3)
+    # Branching downward tendrils (reads as roots, not a jaw/claw)
+    paths = [
+        [(cx, cy + 2), (cx - 4, cy + 8), (cx - 11, cy + 14)],
+        [(cx, cy + 2), (cx + 1, cy + 10), (cx + 2, cy + 16)],
+        [(cx, cy + 2), (cx + 5, cy + 8), (cx + 12, cy + 13)],
+        [(cx - 2, cy + 6), (cx - 8, cy + 11)],
+        [(cx + 3, cy + 7), (cx + 9, cy + 12)],
+    ]
+    for pts in paths:
+        d.line(pts, fill=color, width=2)
+    soil = with_alpha((90, 70, 40), 220)
+    d.ellipse((cx - 10, cy + 12, cx + 10, cy + 18), fill=soil)
 
 
 def icon_briar(d, cx, cy, color):
-    icon_thorns(d, cx, cy, color)
-    draw_disc(d, cx, cy, 5, (40, 80, 40, 255))
+    icon_roots(d, cx, cy, color)
+    tip = with_alpha((180, 255, 120), 255)
+    for ox, oy in ((-8, 4), (9, 3), (0, -2)):
+        d.line([(cx + ox, cy + oy), (cx + ox - 2, cy + oy - 6)], fill=tip, width=2)
+
+
+def icon_thorn_lash(d, cx, cy, color):
+    # Ground line of erupting spikes
+    d.line([(cx - 14, cy + 10), (cx + 14, cy + 10)], fill=with_alpha((70, 50, 30), 220), width=2)
+    for i, h in enumerate((8, 14, 11, 16, 9)):
+        x = cx - 10 + i * 5
+        d.line([(x, cy + 10), (x, cy + 10 - h)], fill=color, width=2)
+        d.line([(x, cy + 10 - h), (x + 3, cy + 10 - h + 4)], fill=with_alpha(color, 200), width=1)
 
 
 def icon_leaf(d, cx, cy, color):
-    d.polygon([(cx, cy - 12), (cx + 10, cy), (cx, cy + 12), (cx - 10, cy)], fill=color)
+    d.polygon([(cx, cy - 14), (cx + 11, cy - 2), (cx + 4, cy + 12), (cx - 4, cy + 12), (cx - 11, cy - 2)], fill=color)
+    d.line([(cx, cy - 10), (cx, cy + 10)], fill=with_alpha((30, 90, 40), 220), width=1)
+
+
+def icon_sap(d, cx, cy, color):
+    amber = (220, 160, 40, 255)
+    d.ellipse((cx - 6, cy - 2, cx + 6, cy + 12), fill=amber)
+    d.ellipse((cx - 3, cy - 10, cx + 3, cy - 2), fill=amber)
+    draw_disc(d, cx - 2, cy + 2, 2, (255, 220, 120, 200))
+
+
+def icon_cells(d, cx, cy, color):
+    # Red cell + pale stabilizer cell
+    draw_disc(d, cx - 5, cy, 7, (200, 50, 65, 255))
+    draw_disc(d, cx - 5, cy, 3, (140, 30, 45, 255))
+    draw_disc(d, cx + 6, cy - 2, 6, (230, 235, 245, 240))
+    draw_disc(d, cx + 5, cy - 2, 3, (90, 110, 180, 255))
+
+
+def icon_spore(d, cx, cy, color):
+    for ox, oy, r in ((0, 0, 5), (-8, -4, 3), (8, -3, 3), (-5, 7, 2), (6, 6, 2), (0, -9, 2)):
+        draw_disc(d, cx + ox, cy + oy, r, with_alpha(color, 200))
+
 
 
 def icon_soul(d, cx, cy, color):
@@ -555,23 +602,23 @@ DRAWERS = {
     "meteorological_cataclysm": icon_meteorological_cataclysm,
     "quasar": icon_quasar,
     "plasma_barrage": icon_plasma_barrage,
-    "vitality_pulse": icon_heart,
-    "thorn_lash": icon_thorns,
+    "vitality_pulse": icon_cells,
+    "thorn_lash": icon_thorn_lash,
     "root_bind": icon_roots,
     "briar_surge": icon_briar,
-    "verdant_mend": icon_leaf,
+    "verdant_mend": icon_cells,
     "diagnostic_glimpse": icon_eye,
-    "blood_stasis": icon_heart,
+    "blood_stasis": icon_cells,
     "life_sense": icon_eye,
     "bio_strike": icon_spike,
     "bone_needle": icon_arrow,
     "foreign_agent": icon_spike,
     "muscle_spasm": icon_spike,
     "chitin_plates": icon_shield,
-    "acid_gland": icon_spike,
-    "parasitic_infection": icon_skull,
+    "acid_gland": icon_sap,
+    "parasitic_infection": icon_spore,
     "metabolic_shock": icon_focus,
-    "biological_field": icon_leaf,
+    "biological_field": icon_cells,
     "bone_spur": icon_spike,
     "sense_sharpening": icon_eye,
     "pain_inhibitor": icon_heart,
@@ -580,29 +627,33 @@ DRAWERS = {
     "organism_adaptation": icon_shield,
     "immune_suppression": icon_skull,
     "metabolic_boost": icon_focus,
-    "organic_necrosis": icon_skull,
+    "organic_necrosis": icon_sap,
     "full_restructuring": icon_leaf,
     "scorched_earth": icon_briar,
     "bio_fission": icon_pulse,
-    "super_regeneration": icon_heart,
+    "super_regeneration": icon_cells,
     "population_control": icon_wave,
-    "biological_plague": icon_skull,
+    "biological_plague": icon_spore,
     "living_armor": icon_shield,
     "beast_form": icon_spike,
     "bio_cataclysm": icon_meteorological_cataclysm,
-    "absolute_regeneration": icon_heart,
+    "absolute_regeneration": icon_cells,
     "cellular_dominion": icon_focus,
     "evolutionary_leap": icon_leaf,
-    "symbiotic_graft": icon_heart,
-    "limb_regeneration": icon_heart,
+    "symbiotic_graft": icon_cells,
+    "limb_regeneration": icon_cells,
     "verdant_bloom": icon_briar,
     "genetic_lock": icon_skull,
+    "vital_infusion": icon_cells,
+    "soothing_sap": icon_cells,
+    "vital_ward": icon_cells,
+    "adrenal_gift": icon_cells,
+    "spore_storm": icon_spore,
     "biological_cleaving": icon_spike,
     "full_transformation": icon_spike,
-    "spore_storm": icon_wave,
     "biological_singularity": icon_focus,
-    "life_creation": icon_leaf,
-    "biological_immortality": icon_heart,
+    "life_creation": icon_cells,
+    "biological_immortality": icon_cells,
     "soul_drain": icon_soul,
     "wither_touch": icon_skull,
     "shade_summon": icon_shade,
@@ -803,18 +854,33 @@ def particle_organic_leaf(variant: int = 0) -> Image.Image:
     cx, cy = PARTICLE // 2, PARTICLE // 2
     hue = variant * 15
     fill = (60 + hue, 170 - hue // 2, 70, 230)
-    d.polygon([(cx, cy - 6), (cx + 5, cy), (cx, cy + 6), (cx - 5, cy)], fill=fill)
+    tip = (cx, cy - 6 - variant)
+    right = (cx + 5 + variant // 2, cy)
+    bottom = (cx, cy + 6)
+    left = (cx - 5 - variant // 2, cy)
+    d.polygon([tip, right, bottom, left], fill=fill)
     d.line([(cx, cy - 5), (cx, cy + 5)], fill=(40, 110, 50, 200), width=1)
     return img
 
 
-def particle_organic_root() -> Image.Image:
+def particle_organic_root(variant: int = 0) -> Image.Image:
+    """Winding root tendril — not a Y-claw/jaw silhouette."""
     img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    cx, cy = PARTICLE // 2, PARTICLE // 2
-    d.line([(cx, cy - 6), (cx, cy + 6)], fill=(80, 55, 30, 240), width=2)
-    d.line([(cx, cy + 1), (cx - 5, cy + 6)], fill=(90, 60, 35, 220), width=2)
-    d.line([(cx, cy + 1), (cx + 5, cy + 6)], fill=(90, 60, 35, 220), width=2)
+    bark = (92, 62, 32, 245)
+    moss = (70, 110, 45, 200)
+    # S-curve or hook depending on variant
+    if variant == 0:
+        pts = [(8, 1), (7, 4), (9, 7), (6, 10), (8, 13), (5, 15)]
+    elif variant == 1:
+        pts = [(7, 1), (9, 4), (8, 7), (10, 10), (7, 13), (9, 15)]
+    else:
+        pts = [(8, 2), (6, 5), (8, 8), (5, 11), (7, 14)]
+        d.line([(8, 8), (11, 11), (12, 14)], fill=bark, width=2)
+    d.line(pts, fill=bark, width=2)
+    # tiny side sprout
+    mid = pts[len(pts) // 2]
+    d.line([mid, (mid[0] - 3, mid[1] + 2)], fill=moss, width=1)
     return img
 
 
@@ -824,6 +890,68 @@ def particle_organic_fog() -> Image.Image:
     cx, cy = PARTICLE // 2, PARTICLE // 2
     for r, a in ((7, 45), (5, 70), (3, 100)):
         draw_disc(d, cx, cy, r, (80, 200, 90, a))
+    return img
+
+
+def particle_organic_spore(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx = PARTICLE // 2 + (variant - 1)
+    cy = PARTICLE // 2
+    fill = (160, 210, 90, 220) if variant % 2 == 0 else (120, 180, 70, 200)
+    draw_disc(d, cx, cy, 3 + variant % 2, fill)
+    draw_disc(d, cx - 1, cy - 1, 1, (230, 255, 180, 180))
+    return img
+
+
+def particle_organic_thorn() -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    green = (50, 140, 55, 245)
+    tip = (90, 200, 80, 255)
+    d.polygon([(8, 1), (10, 8), (8, 15), (6, 8)], fill=green)
+    d.line([(8, 1), (8, 15)], fill=tip, width=1)
+    d.line([(8, 6), (11, 9)], fill=green, width=1)
+    return img
+
+
+def particle_organic_sap() -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    amber = (210, 150, 35, 230)
+    d.ellipse((5, 4, 11, 14), fill=amber)
+    d.ellipse((6, 1, 10, 5), fill=amber)
+    draw_disc(d, 7, 7, 1, (255, 230, 140, 200))
+    return img
+
+
+def particle_organic_blood_cell(variant: int = 0) -> Image.Image:
+    """Biconcave erythrocyte disc."""
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = PARTICLE // 2 + (variant - 1), PARTICLE // 2
+    rim = (180, 40, 55, 240)
+    body = (210, 55, 70, 220)
+    center = (140, 25, 40, 200)
+    draw_disc(d, cx, cy, 5, rim)
+    draw_disc(d, cx, cy, 4, body)
+    draw_disc(d, cx, cy, 2, center)
+    draw_disc(d, cx - 1, cy - 1, 1, (255, 140, 150, 160))
+    return img
+
+
+def particle_organic_white_cell(variant: int = 0) -> Image.Image:
+    """Leukocyte / stabilizer cell with nucleus."""
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = PARTICLE // 2, PARTICLE // 2 + (variant % 2)
+    membrane = (230, 235, 245, 210)
+    nucleus = (90, 110, 180, 230)
+    granule = (200, 210, 230, 180)
+    draw_disc(d, cx, cy, 6, membrane)
+    draw_disc(d, cx - 1, cy, 3, nucleus)
+    draw_disc(d, cx + 2, cy - 2, 1, granule)
+    draw_disc(d, cx + 1, cy + 2, 1, granule)
     return img
 
 
@@ -1000,8 +1128,42 @@ def generate_school_particles():
         save_particle_png(name, particle_organic_leaf(i))
         leaf_paths.append(f"effecoria:{name}")
     write_particle_json("organic_leaf", leaf_paths)
-    save_particle("organic_root", particle_organic_root())
+
+    root_paths = []
+    for i in range(3):
+        name = f"organic_root_{i}"
+        save_particle_png(name, particle_organic_root(i))
+        root_paths.append(f"effecoria:{name}")
+    write_particle_json("organic_root", root_paths)
+    # Keep legacy single-file for any old refs
+    save_particle_png("organic_root", particle_organic_root(0))
+
     save_particle("organic_fog", particle_organic_fog())
+
+    spore_paths = []
+    for i in range(3):
+        name = f"organic_spore_{i}"
+        save_particle_png(name, particle_organic_spore(i))
+        spore_paths.append(f"effecoria:{name}")
+    write_particle_json("organic_spore", spore_paths)
+    save_particle_png("organic_spore", particle_organic_spore(0))
+
+    save_particle("organic_thorn", particle_organic_thorn())
+    save_particle("organic_sap", particle_organic_sap())
+
+    blood_paths = []
+    for i in range(3):
+        name = f"organic_blood_cell_{i}"
+        save_particle_png(name, particle_organic_blood_cell(i))
+        blood_paths.append(f"effecoria:{name}")
+    write_particle_json("organic_blood_cell", blood_paths)
+
+    white_paths = []
+    for i in range(2):
+        name = f"organic_white_cell_{i}"
+        save_particle_png(name, particle_organic_white_cell(i))
+        white_paths.append(f"effecoria:{name}")
+    write_particle_json("organic_white_cell", white_paths)
 
     shadow_paths = []
     for i in range(3):

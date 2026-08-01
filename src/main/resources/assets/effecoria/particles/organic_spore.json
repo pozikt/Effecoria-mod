@@ -1,5 +1,7 @@
-﻿{
-    "textures":  [
-                     "effecoria:organic_spore"
-                 ]
+{
+  "textures": [
+    "effecoria:organic_spore_0",
+    "effecoria:organic_spore_1",
+    "effecoria:organic_spore_2"
+  ]
 }

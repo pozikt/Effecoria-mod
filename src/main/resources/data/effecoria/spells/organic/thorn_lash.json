@@ -10,7 +10,7 @@
   "radial_category": "combat",
   "effects": [
     {
-      "type": "effecoria:evoker_fangs",
+      "type": "effecoria:root_spike_wave",
       "count": 10,
       "spacing": 0.85,
       "warmup_ticks": 12,

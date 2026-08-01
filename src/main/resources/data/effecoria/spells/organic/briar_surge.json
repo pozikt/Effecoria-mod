@@ -16,9 +16,11 @@
       "range": 10
     },
     {
-      "type": "effecoria:evoker_fangs",
+      "type": "effecoria:root_spike_wave",
       "count": 6,
-      "spacing": 1.2
+      "spacing": 1.2,
+      "warmup_ticks": 10,
+      "stagger_ticks": 2
     }
   ]
 }

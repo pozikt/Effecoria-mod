@@ -12,6 +12,7 @@ import com.effecoria.effect.necromancy.NecromancyEffects;
 import com.effecoria.effect.spatial.SpatialEffects;
 import com.effecoria.effect.spatial.SpatialVfx;
 import com.effecoria.effect.organic.OrganicEffects;
+import com.effecoria.effect.organic.OrganicSpikeWaveService;
 import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.core.magic.SpellEffectEntry;
 import com.effecoria.core.psi.PlayerPsiData;
@@ -36,7 +37,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.entity.projectile.windcharge.WindCharge;
@@ -328,7 +328,7 @@ public final class SpellEffectExecutor {
             case "biological_singularity" -> OrganicEffects.biologicalSingularity(caster, effect, power);
             case "life_creation" -> OrganicEffects.lifeCreation(caster, effect, power);
             case "biological_immortality" -> OrganicEffects.biologicalImmortality(caster, effect, power);
-            case "evoker_fangs" -> evokerFangs(caster, effect, power);
+            case "root_spike_wave", "evoker_fangs" -> OrganicSpikeWaveService.launch(caster, effect, power);
             case "root_bind" -> rootBind(caster, effect, power, target);
             case "soul_drain" -> soulDrain(caster, effect, power, target);
             case "wither_touch" -> witherTouch(caster, effect, power, target);
@@ -542,35 +542,7 @@ public final class SpellEffectExecutor {
     }
 
 
-    /** Evoker-style fang line along the caster's look vector. */
-    private static void evokerFangs(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        ServerLevel level = caster.serverLevel();
-        int count = effect.params().has("count") ? effect.params().get("count").getAsInt() : 8;
-        double spacing = effect.params().has("spacing") ? effect.params().get("spacing").getAsDouble() : 0.9;
-        int warmup = effect.params().has("warmup_ticks") ? effect.params().get("warmup_ticks").getAsInt() : 15;
-        int stagger = effect.params().has("stagger_ticks") ? effect.params().get("stagger_ticks").getAsInt() : 2;
-        count = Math.min(20, Math.max(3, Math.round(count * (0.85f + power / 120f))));
 
-        Vec3 look = caster.getLookAngle();
-        Vec3 horizontal = new Vec3(look.x, 0, look.z);
-        if (horizontal.lengthSqr() < 1.0E-4) {
-            horizontal = new Vec3(caster.getLookAngle().x, 0, caster.getLookAngle().z);
-        }
-        horizontal = horizontal.normalize();
-        float yRot = (float) (Math.atan2(horizontal.x, horizontal.z) * (180.0 / Math.PI));
-
-        for (int i = 0; i < count; i++) {
-            double along = (i + 1) * spacing;
-            double x = caster.getX() + horizontal.x * along;
-            double z = caster.getZ() + horizontal.z * along;
-            double y = findGroundY(level, x, caster.getY(), z);
-            EvokerFangs fangs = new EvokerFangs(level, x, y, z, yRot, warmup + i * stagger, caster);
-            level.addFreshEntity(fangs);
-        }
-
-        level.playSound(null, caster.blockPosition(), SoundEvents.EVOKER_PREPARE_ATTACK, SoundSource.PLAYERS, 1f, 1f);
-        level.playSound(null, caster.blockPosition(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.8f, 1.1f);
-    }
 
     /** Drain life from a target into the caster — external Ψ siphon. */
     private static void soulDrain(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -696,18 +668,6 @@ public final class SpellEffectExecutor {
         return best;
     }
 
-    private static double findGroundY(ServerLevel level, double x, double referenceY, double z) {
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        int startY = (int) Math.floor(referenceY) + 2;
-        for (int dy = 0; dy < 12; dy++) {
-            pos.set((int) Math.floor(x), startY - dy, (int) Math.floor(z));
-            if (!level.getBlockState(pos).isAir() && level.getBlockState(pos).isSolidRender(level, pos)) {
-                return pos.getY() + 1;
-            }
-        }
-        return referenceY;
-    }
-
     /** Root a target in place and optionally bloom nearby crops. */
     private static void rootBind(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         ServerLevel level = caster.serverLevel();
@@ -751,14 +711,11 @@ public final class SpellEffectExecutor {
     }
 
     private static void spawnOrganicParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ModParticleTypes.ORGANIC_LEAF.get(), pos.x, pos.y + 0.5, pos.z, 8, 0.35, 0.4, 0.35, 0.02);
-        level.sendParticles(ModParticleTypes.ORGANIC_ROOT.get(), pos.x, pos.y, pos.z, 4, 0.2, 0.05, 0.2, 0.01);
-        level.sendParticles(ModParticleTypes.ORGANIC_FOG.get(), pos.x, pos.y + 0.8, pos.z, 6, 0.25, 0.3, 0.25, 0.01);
+        OrganicEffects.spawnBloom(level, pos);
     }
 
     private static void spawnOrganicRoots(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ModParticleTypes.ORGANIC_ROOT.get(), pos.x, pos.y, pos.z, 10, 0.25, 0.05, 0.25, 0.015);
-        level.sendParticles(ModParticleTypes.ORGANIC_LEAF.get(), pos.x, pos.y + 0.3, pos.z, 4, 0.2, 0.2, 0.2, 0.01);
+        OrganicEffects.spawnRoots(level, pos);
     }
 
     private static void spawnNecroParticles(ServerLevel level, Vec3 pos) {

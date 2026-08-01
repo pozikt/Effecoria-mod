@@ -1,5 +1,7 @@
 package com.effecoria.effect;
 
+import java.util.Set;
+
 import javax.annotation.Nullable;
 
 import com.effecoria.content.ModParticleTypes;
@@ -10,6 +12,7 @@ import com.effecoria.effect.spatial.SpatialVfx;
 import com.effecoria.magic.CastDelivery;
 
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -27,13 +30,31 @@ import net.minecraft.world.phys.Vec3;
 public final class CastPresentation {
     private CastPresentation() {}
 
+    /** Organic heals use cellular FX; plant/combat organic keep leaf/fog. */
+    private static final Set<ResourceLocation> ORGANIC_HEAL_SPELLS = Set.of(
+            ResourceLocation.fromNamespaceAndPath("effecoria", "blood_stasis"),
+            ResourceLocation.fromNamespaceAndPath("effecoria", "vitality_pulse"),
+            ResourceLocation.fromNamespaceAndPath("effecoria", "verdant_mend"),
+            ResourceLocation.fromNamespaceAndPath("effecoria", "biological_field"),
+            ResourceLocation.fromNamespaceAndPath("effecoria", "super_regeneration"),
+            ResourceLocation.fromNamespaceAndPath("effecoria", "absolute_regeneration"),
+            ResourceLocation.fromNamespaceAndPath("effecoria", "symbiotic_graft"),
+            ResourceLocation.fromNamespaceAndPath("effecoria", "limb_regeneration"),
+            ResourceLocation.fromNamespaceAndPath("effecoria", "vital_infusion"),
+            ResourceLocation.fromNamespaceAndPath("effecoria", "soothing_sap"),
+            ResourceLocation.fromNamespaceAndPath("effecoria", "vital_ward"),
+            ResourceLocation.fromNamespaceAndPath("effecoria", "adrenal_gift"),
+            ResourceLocation.fromNamespaceAndPath("effecoria", "life_creation"),
+            ResourceLocation.fromNamespaceAndPath("effecoria", "biological_immortality"),
+            ResourceLocation.fromNamespaceAndPath("effecoria", "biological_singularity"));
+
     /** Soft school cue at the caster before spell logic runs. */
     public static void playWindUp(ServerPlayer caster, SpellDefinition spell) {
         MagicSchool school = spell.requiredSchool();
         if (school == MagicSchool.NONE) {
             school = MagicSchool.MENTAL;
         }
-        playWindUp(caster, themeFor(school));
+        playWindUp(caster, themeFor(school, spell));
     }
 
     /** Impact / ring on full delivery, or a quiet fizzle on whiff. */
@@ -42,7 +63,7 @@ public final class CastPresentation {
         if (school == MagicSchool.NONE) {
             school = MagicSchool.MENTAL;
         }
-        SchoolTheme theme = themeFor(school);
+        SchoolTheme theme = themeFor(school, spell);
         if (delivery == CastDelivery.WHIFF_NO_TARGET || delivery == CastDelivery.WHIFF_NO_BLOCK) {
             playWhiff(caster, theme);
             return;
@@ -139,7 +160,7 @@ public final class CastPresentation {
         return caster.getEyePosition().add(caster.getLookAngle().scale(Math.min(range, 3.5)));
     }
 
-    private static SchoolTheme themeFor(MagicSchool school) {
+    private static SchoolTheme themeFor(MagicSchool school, SpellDefinition spell) {
         return switch (school) {
             case MENTAL -> new SchoolTheme(
                     ModParticleTypes.MENTAL_FOG.get(),
@@ -159,15 +180,25 @@ public final class CastPresentation {
                     1.25f,
                     0.55f,
                     1.05f);
-            case ORGANIC -> new SchoolTheme(
-                    ModParticleTypes.ORGANIC_LEAF.get(),
-                    ModParticleTypes.ORGANIC_FOG.get(),
-                    SoundEvents.AZALEA_LEAVES_PLACE,
-                    SoundEvents.MOSS_PLACE,
-                    0.5f,
-                    1.15f,
-                    0.55f,
-                    0.95f);
+            case ORGANIC -> ORGANIC_HEAL_SPELLS.contains(spell.id())
+                    ? new SchoolTheme(
+                            ModParticleTypes.ORGANIC_BLOOD_CELL.get(),
+                            ModParticleTypes.ORGANIC_WHITE_CELL.get(),
+                            SoundEvents.HONEY_DRINK,
+                            SoundEvents.AMETHYST_BLOCK_CHIME,
+                            0.4f,
+                            1.35f,
+                            0.5f,
+                            1.45f)
+                    : new SchoolTheme(
+                            ModParticleTypes.ORGANIC_LEAF.get(),
+                            ModParticleTypes.ORGANIC_FOG.get(),
+                            SoundEvents.AZALEA_LEAVES_PLACE,
+                            SoundEvents.MOSS_PLACE,
+                            0.5f,
+                            1.15f,
+                            0.55f,
+                            0.95f);
             case NECROMANCY -> new SchoolTheme(
                     ModParticleTypes.NECRO_SHADOW.get(),
                     ModParticleTypes.NECRO_FOG.get(),

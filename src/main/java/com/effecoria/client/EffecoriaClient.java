@@ -56,6 +56,11 @@ public final class EffecoriaClient {
         event.registerSpriteSet(
                 ModParticleTypes.ORGANIC_FOG.get(),
                 sprites -> new SchoolParticles.FogParticle.Provider(sprites, 0.65F, 0.02F));
+        event.registerSpriteSet(ModParticleTypes.ORGANIC_SPORE.get(), SchoolParticles.SporeParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.ORGANIC_THORN.get(), SchoolParticles.ThornParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.ORGANIC_SAP.get(), SchoolParticles.SapParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.ORGANIC_BLOOD_CELL.get(), SchoolParticles.BloodCellParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.ORGANIC_WHITE_CELL.get(), SchoolParticles.WhiteCellParticle.Provider::new);
 
         // Necromancy
         event.registerSpriteSet(ModParticleTypes.NECRO_SHADOW.get(), SchoolParticles.ShadowParticle.Provider::new);

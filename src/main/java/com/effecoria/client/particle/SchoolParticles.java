@@ -380,19 +380,126 @@ public final class SchoolParticles {
 
     /** Root tendril erupting upward then fading. */
     public static class RootParticle extends TextureSheetParticle {
+        private final float baseSize;
+
         protected RootParticle(ClientLevel level, double x, double y, double z, SpriteSet sprites) {
-            super(level, x, y, z, 0, 0.06, 0);
+            super(level, x, y, z, 0, 0.08, 0);
             this.hasPhysics = false;
-            this.quadSize = 0.14F;
-            this.lifetime = 12 + this.random.nextInt(6);
-            this.roll = this.random.nextFloat() * (float) (Math.PI * 2);
+            this.baseSize = 0.12F + this.random.nextFloat() * 0.08F;
+            this.quadSize = 0.02F;
+            this.lifetime = 16 + this.random.nextInt(8);
+            this.roll = (this.random.nextFloat() - 0.5F) * 0.4F;
+            this.sprite = sprites.get(this.random);
+            this.alpha = 0.95F;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            float t = (float) this.age / (float) this.lifetime;
+            // Grow in then fade — reads as a root pushing up from soil.
+            float grow = t < 0.35F ? t / 0.35F : 1.0F;
+            this.quadSize = this.baseSize * (0.35F + 0.65F * grow);
+            this.yd *= 0.88;
+            this.alpha = t < 0.55F ? 0.95F : 0.95F * (1.0F - (t - 0.55F) / 0.45F);
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new RootParticle(level, x, y, z, this.sprites);
+            }
+        }
+    }
+
+    /** Floating spore mote. */
+    public static class SporeParticle extends TextureSheetParticle {
+        protected SporeParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.gravity = -0.004F;
+            this.quadSize = 0.06F + this.random.nextFloat() * 0.05F;
+            this.lifetime = 24 + this.random.nextInt(16);
+            this.xd = xd + (this.random.nextFloat() - 0.5F) * 0.02;
+            this.zd = zd + (this.random.nextFloat() - 0.5F) * 0.02;
+            this.yd = 0.01 + this.random.nextFloat() * 0.02;
+            this.sprite = sprites.get(this.random);
+            this.alpha = 0.85F;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.xd += (this.random.nextFloat() - 0.5F) * 0.003;
+            this.zd += (this.random.nextFloat() - 0.5F) * 0.003;
+            this.alpha *= 0.97F;
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new SporeParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Sharp thorn shard streak. */
+    public static class ThornParticle extends TextureSheetParticle {
+        protected ThornParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.quadSize = 0.1F + this.random.nextFloat() * 0.05F;
+            this.lifetime = 10 + this.random.nextInt(6);
+            this.roll = (float) Math.atan2(xd, zd);
             this.sprite = sprites.get(this.random);
         }
 
         @Override
         public void tick() {
             super.tick();
-            this.yd *= 0.9;
+            this.xd *= 0.92;
+            this.yd *= 0.92;
+            this.zd *= 0.92;
             this.alpha = 1.0F - ((float) this.age / (float) this.lifetime);
         }
 
@@ -418,7 +525,157 @@ public final class SchoolParticles {
                     double xd,
                     double yd,
                     double zd) {
-                return new RootParticle(level, x, y, z, this.sprites);
+                return new ThornParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Amber sap droplet. */
+    public static class SapParticle extends TextureSheetParticle {
+        protected SapParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.gravity = 0.04F;
+            this.friction = 0.96F;
+            this.quadSize = 0.07F + this.random.nextFloat() * 0.04F;
+            this.lifetime = 18 + this.random.nextInt(10);
+            this.sprite = sprites.get(this.random);
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.alpha = 1.0F - ((float) this.age / (float) this.lifetime) * 0.85F;
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new SapParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Red blood cell — soft disc drifting in plasma. */
+    public static class BloodCellParticle extends TextureSheetParticle {
+        protected BloodCellParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.gravity = -0.002F;
+            this.quadSize = 0.07F + this.random.nextFloat() * 0.05F;
+            this.lifetime = 22 + this.random.nextInt(14);
+            this.xd = xd + (this.random.nextFloat() - 0.5F) * 0.025;
+            this.yd = 0.01 + this.random.nextFloat() * 0.02;
+            this.zd = zd + (this.random.nextFloat() - 0.5F) * 0.025;
+            this.roll = this.random.nextFloat() * (float) Math.PI;
+            this.sprite = sprites.get(this.random);
+            this.alpha = 0.9F;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.oRoll = this.roll;
+            this.roll += 0.08F;
+            this.xd += Mth.sin(this.age * 0.2F) * 0.0015;
+            this.zd += Mth.cos(this.age * 0.18F) * 0.0015;
+            this.alpha = 0.9F * (1.0F - (float) this.age / (float) this.lifetime);
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new BloodCellParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** White / stabilizer cell — larger, slower, pale. */
+    public static class WhiteCellParticle extends TextureSheetParticle {
+        protected WhiteCellParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.gravity = -0.001F;
+            this.quadSize = 0.1F + this.random.nextFloat() * 0.06F;
+            this.lifetime = 28 + this.random.nextInt(16);
+            this.xd = xd * 0.4 + (this.random.nextFloat() - 0.5F) * 0.015;
+            this.yd = 0.008 + this.random.nextFloat() * 0.012;
+            this.zd = zd * 0.4 + (this.random.nextFloat() - 0.5F) * 0.015;
+            this.sprite = sprites.get(this.random);
+            this.alpha = 0.75F;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.xd *= 0.98;
+            this.zd *= 0.98;
+            this.alpha = 0.75F * (1.0F - (float) this.age / (float) this.lifetime * 0.9F);
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new WhiteCellParticle(level, x, y, z, xd, yd, zd, this.sprites);
             }
         }
     }

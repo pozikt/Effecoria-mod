@@ -31,6 +31,7 @@ import com.effecoria.effect.necromancy.NecroFieldService;
 import com.effecoria.effect.necromancy.NecroSummonService;
 import com.effecoria.effect.organic.OrganicDiagnosticService;
 import com.effecoria.effect.organic.OrganicFieldService;
+import com.effecoria.effect.organic.OrganicSpikeWaveService;
 import com.effecoria.effect.corruption.CorruptionFieldService;
 import com.effecoria.effect.spatial.SpatialFieldService;
 import com.effecoria.magic.SpellRegistry;
@@ -78,6 +79,7 @@ public final class ModCommonEvents {
             SteamCloudService.tick(serverLevel);
             ElementalFieldService.tick(serverLevel);
             OrganicFieldService.tick(serverLevel);
+            OrganicSpikeWaveService.tick(serverLevel);
             NecroFieldService.tick(serverLevel);
             SpatialFieldService.tick(serverLevel);
             CorruptionFieldService.tick(serverLevel);

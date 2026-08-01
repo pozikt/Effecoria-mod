@@ -33,7 +33,7 @@ Magic is **not** a separate ruleset — it is Φ-field conversion through the Ψ
 | ID | Effect | Lore note |
 |----|--------|-----------|
 | `vitality_pulse` | Heal + regen | Orkanum tissue mend |
-| `thorn_lash` | Evoker fang wave | Plant-channelled ground spikes |
+| `thorn_lash` | Root-thorn spike wave | Plant-channelled ground spikes along look |
 | `root_bind` | Root target + bloom crops | Ultra-low frequency growth field |
 
 ### Necromancy spells

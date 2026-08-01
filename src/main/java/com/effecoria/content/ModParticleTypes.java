@@ -42,6 +42,18 @@ public final class ModParticleTypes {
             PARTICLE_TYPES.register("organic_root", () -> new SimpleParticleType(false));
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ORGANIC_FOG =
             PARTICLE_TYPES.register("organic_fog", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ORGANIC_SPORE =
+            PARTICLE_TYPES.register("organic_spore", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ORGANIC_THORN =
+            PARTICLE_TYPES.register("organic_thorn", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ORGANIC_SAP =
+            PARTICLE_TYPES.register("organic_sap", () -> new SimpleParticleType(false));
+    /** Erythrocyte — heal / vital FX. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ORGANIC_BLOOD_CELL =
+            PARTICLE_TYPES.register("organic_blood_cell", () -> new SimpleParticleType(false));
+    /** Leukocyte / stabilizer cell — immune + tissue repair FX. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ORGANIC_WHITE_CELL =
+            PARTICLE_TYPES.register("organic_white_cell", () -> new SimpleParticleType(false));
 
     // Necromancy
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> NECRO_SHADOW =

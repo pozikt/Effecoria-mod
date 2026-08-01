@@ -158,7 +158,7 @@ public final class OrganicFieldService {
                     continue;
                 }
                 ally.heal(field.healPerSecond);
-                OrganicEffects.spawnOrganicParticles(level, ally.position().add(0, 1, 0));
+                OrganicEffects.spawnHeal(level, ally.position().add(0, 1, 0));
             }
             return;
         }
@@ -169,7 +169,7 @@ public final class OrganicFieldService {
                 }
                 if (field.healPerSecond > 0f) {
                     ally.heal(field.healPerSecond);
-                    OrganicEffects.spawnOrganicParticles(level, ally.position().add(0, 1, 0));
+                    OrganicEffects.spawnHeal(level, ally.position().add(0, 1, 0));
                 }
             }
             for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
@@ -214,18 +214,28 @@ public final class OrganicFieldService {
     private static void spawnFieldParticles(ServerLevel level, OrganicField field) {
         if (field.kind == Kind.CATACLYSM || field.kind == Kind.SINGULARITY) {
             level.sendParticles(
-                    ModParticleTypes.ORGANIC_FOG.get(),
+                    ModParticleTypes.ORGANIC_SPORE.get(),
                     field.center.x,
                     field.center.y + 0.5,
                     field.center.z,
-                    field.kind == Kind.SINGULARITY ? 14 : 10,
+                    field.kind == Kind.SINGULARITY ? 16 : 12,
                     field.radius * 0.4,
                     0.5,
                     field.radius * 0.4,
                     0.02);
+            level.sendParticles(
+                    ModParticleTypes.ORGANIC_FOG.get(),
+                    field.center.x,
+                    field.center.y + 0.5,
+                    field.center.z,
+                    8,
+                    field.radius * 0.35,
+                    0.4,
+                    field.radius * 0.35,
+                    0.01);
             if (field.kind == Kind.SINGULARITY) {
                 level.sendParticles(
-                        ModParticleTypes.ORGANIC_LEAF.get(),
+                        ModParticleTypes.ORGANIC_BLOOD_CELL.get(),
                         field.center.x,
                         field.center.y + 0.8,
                         field.center.z,
@@ -234,18 +244,39 @@ public final class OrganicFieldService {
                         0.4,
                         field.radius * 0.3,
                         0.01);
+                level.sendParticles(
+                        ModParticleTypes.ORGANIC_WHITE_CELL.get(),
+                        field.center.x,
+                        field.center.y + 0.6,
+                        field.center.z,
+                        4,
+                        field.radius * 0.25,
+                        0.3,
+                        field.radius * 0.25,
+                        0.008);
             }
             return;
         }
+        // Heal field — erythrocytes + stabilizer cells
         level.sendParticles(
-                ModParticleTypes.ORGANIC_FOG.get(),
+                ModParticleTypes.ORGANIC_BLOOD_CELL.get(),
                 field.center.x,
-                field.center.y + 0.5,
+                field.center.y + 0.45,
                 field.center.z,
                 6,
-                field.radius * 0.35,
-                0.4,
-                field.radius * 0.35,
+                field.radius * 0.3,
+                0.35,
+                field.radius * 0.3,
+                0.015);
+        level.sendParticles(
+                ModParticleTypes.ORGANIC_WHITE_CELL.get(),
+                field.center.x,
+                field.center.y + 0.55,
+                field.center.z,
+                3,
+                field.radius * 0.28,
+                0.3,
+                field.radius * 0.28,
                 0.01);
     }
 
