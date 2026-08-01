@@ -3,7 +3,6 @@ package com.effecoria.effect.spatial;
 import com.effecoria.core.formula.SpellCombat;
 
 import com.effecoria.core.formula.BreathDebuffs;
-import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
 import com.effecoria.core.magic.SpellEffectEntry;
 import com.effecoria.world.ModDimensions;
@@ -71,7 +70,7 @@ public final class SpatialEffects {
         target.hurt(SpellCombat.magic(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
         target.hurtMarked = true;
-        SpatialVfx.playAround(caster, target.position().add(0, 1.0, 0), power, 4);
+        SpatialVfx.playAround(caster, target.position().add(0, 1.0, 0), power, 2);
         finishHit(level, target.position());
     }
 
@@ -147,8 +146,8 @@ public final class SpatialEffects {
         ServerLevel level = caster.serverLevel();
         Vec3 casterPos = caster.position();
         Vec3 targetPos = target.position();
-        spawnSpatialParticles(level, casterPos.add(0, 1, 0));
-        spawnSpatialParticles(level, targetPos.add(0, 1, 0));
+        SpatialVfx.playRipple(caster, casterPos.add(0, 1, 0), power);
+        SpatialVfx.playRipple(caster, targetPos.add(0, 1, 0), power);
         caster.teleportTo(targetPos.x, targetPos.y, targetPos.z);
         caster.fallDistance = 0f;
         target.teleportTo(casterPos.x, casterPos.y, casterPos.z);
@@ -196,7 +195,7 @@ public final class SpatialEffects {
         float damage = DiceDamage.fromParams(effect.params(), power, 7f);
         Vec3 center = target.position();
         hurtRadius(level, center, radius, damage, caster);
-        SpatialVfx.playAround(caster, center.add(0, 1.0, 0), power, 5);
+        SpatialVfx.playAround(caster, center.add(0, 1.0, 0), power, 2);
         spawnSpatialParticles(level, center.add(0, 1, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7f, 0.5f);
     }
@@ -279,16 +278,6 @@ public final class SpatialEffects {
                     cursor.set(center.getX() + dx, center.getY() + dy, center.getZ() + dz);
                     if (SubspaceMatterService.exileBlock(level, caster, cursor)) {
                         excised++;
-                        level.sendParticles(
-                                ModParticleTypes.SPATIAL_RIFT.get(),
-                                cursor.getX() + 0.5,
-                                cursor.getY() + 0.5,
-                                cursor.getZ() + 0.5,
-                                4,
-                                0.15,
-                                0.15,
-                                0.15,
-                                0.02);
                     }
                 }
             }
@@ -345,28 +334,15 @@ public final class SpatialEffects {
         }
         Vec3 from = origin.add(0, 1, 0);
         Vec3 to = best.add(0, 1, 0);
-        spawnBlinkTrail(level, from, to);
-        spawnSpatialParticles(level, from);
+        SpatialVfx.playRipple(caster, from, power * 0.85f);
         caster.teleportTo(best.x, best.y, best.z);
         caster.fallDistance = 0f;
-        spawnSpatialParticles(level, to);
+        SpatialVfx.playRipple(caster, to, power);
         level.playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.9f, 1.1f);
     }
 
     private static void spawnBlinkTrail(ServerLevel level, Vec3 from, Vec3 to) {
-        double dist = from.distanceTo(to);
-        if (dist < 1.5) {
-            return;
-        }
-        int steps = Math.min(48, Math.max(4, (int) (dist / 2.5)));
-        for (int i = 0; i <= steps; i++) {
-            double t = i / (double) steps;
-            Vec3 p = from.lerp(to, t);
-            level.sendParticles(ModParticleTypes.SPATIAL_WARP.get(), p.x, p.y, p.z, 2, 0.08, 0.12, 0.08, 0.01);
-            if (i % 2 == 0) {
-                level.sendParticles(ModParticleTypes.SPATIAL_RIFT.get(), p.x, p.y, p.z, 1, 0.05, 0.08, 0.05, 0.02);
-            }
-        }
+        // Spatial VFX is distortion-only; trail particles removed.
     }
 
     private static void hurtRadius(ServerLevel level, Vec3 center, float radius, float damage, ServerPlayer skip) {
@@ -380,17 +356,15 @@ public final class SpatialEffects {
             }
             entity.hurt(SpellCombat.magic(skip), damage);
             entity.hurtMarked = true;
-            spawnSpatialParticles(level, entity.position().add(0, 1, 0));
         }
     }
 
     private static void finishHit(ServerLevel level, Vec3 pos) {
-        spawnSpatialParticles(level, pos.add(0, 1, 0));
         level.playSound(null, BlockPos.containing(pos), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.6f, 1.3f);
     }
 
+    /** No-op: Spatial school uses Veil distortion instead of particles. */
     public static void spawnSpatialParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ModParticleTypes.SPATIAL_RIFT.get(), pos.x, pos.y, pos.z, 16, 0.35, 0.5, 0.35, 0.03);
-        level.sendParticles(ModParticleTypes.SPATIAL_WARP.get(), pos.x, pos.y, pos.z, 10, 0.25, 0.35, 0.25, 0.02);
+        // intentionally empty
     }
 }

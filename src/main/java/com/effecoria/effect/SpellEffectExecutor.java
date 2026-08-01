@@ -608,7 +608,6 @@ public final class SpellEffectExecutor {
         float scaledDamage = damage * (power / 50f);
 
         Vec3 dest = caster.position().add(caster.getLookAngle().normalize().scale(1.2));
-        spawnSpatialParticles(level, target.position().add(0, 1, 0));
         SpatialVfx.playCut(
                 caster,
                 target.position().add(0, 1, 0),
@@ -619,7 +618,6 @@ public final class SpellEffectExecutor {
         target.teleportTo(dest.x, dest.y, dest.z);
         target.hurt(SpellCombat.magic(caster), scaledDamage);
         target.hurtMarked = true;
-        spawnSpatialParticles(level, dest.add(0, 1, 0));
         level.playSound(null, caster.blockPosition(), SoundEvents.CHORUS_FRUIT_TELEPORT, SoundSource.PLAYERS, 1f, 0.8f);
     }
 
@@ -637,8 +635,7 @@ public final class SpellEffectExecutor {
     }
 
     private static void spawnSpatialParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ModParticleTypes.SPATIAL_RIFT.get(), pos.x, pos.y, pos.z, 16, 0.35, 0.5, 0.35, 0.03);
-        level.sendParticles(ModParticleTypes.SPATIAL_WARP.get(), pos.x, pos.y, pos.z, 10, 0.25, 0.35, 0.25, 0.02);
+        // Spatial school uses Veil distortion only — no particles
     }
 
     /** Raycast + cone fallback — works without pixel-perfect crosshair on entity. */

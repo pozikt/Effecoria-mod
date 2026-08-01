@@ -284,6 +284,43 @@ public final class ModNetworking {
         }
     }
 
+    /** Server → nearby clients: world-anchored space ripple (blink / jump). */
+    public record SpatialRippleFxPayload(double x, double y, double z, float intensity, int durationTicks)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<SpatialRippleFxPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "spatial_ripple_fx"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, SpatialRippleFxPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.DOUBLE,
+                        SpatialRippleFxPayload::x,
+                        ByteBufCodecs.DOUBLE,
+                        SpatialRippleFxPayload::y,
+                        ByteBufCodecs.DOUBLE,
+                        SpatialRippleFxPayload::z,
+                        ByteBufCodecs.FLOAT,
+                        SpatialRippleFxPayload::intensity,
+                        ByteBufCodecs.VAR_INT,
+                        SpatialRippleFxPayload::durationTicks,
+                        SpatialRippleFxPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(SpatialRippleFxPayload payload, IPayloadContext context) {
+            context.enqueueWork(
+                    () -> com.effecoria.client.SpatialRippleClient.trigger(
+                            payload.x(),
+                            payload.y(),
+                            payload.z(),
+                            payload.intensity(),
+                            payload.durationTicks()));
+        }
+    }
+
     /** Client reports a successful timing hit; server validates fatigue and grants rewards. */
     public record BreathTrainHitPayload() implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<BreathTrainHitPayload> TYPE =

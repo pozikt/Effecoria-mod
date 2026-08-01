@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
 
 import net.minecraft.server.level.ServerLevel;
@@ -69,18 +68,6 @@ public final class SpatialFieldService {
             }
             if (now % 20 == 0) {
                 tickWell(level, well);
-            }
-            if (now % 8 == 0) {
-                level.sendParticles(
-                        ModParticleTypes.SPATIAL_WARP.get(),
-                        well.center.x,
-                        well.center.y + 0.5,
-                        well.center.z,
-                        8,
-                        well.radius * 0.35,
-                        0.4,
-                        well.radius * 0.35,
-                        0.02);
             }
         }
         WELLS.removeAll(toRemove);

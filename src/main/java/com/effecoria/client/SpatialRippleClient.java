@@ -24,23 +24,17 @@ import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
 /**
- * World-anchored dimensional cuts via Veil post (no particle trails).
+ * World-anchored spatial ripple for blink / jump spells (not a black hole).
  */
 @EventBusSubscriber(modid = EffecoriaMod.MOD_ID, value = Dist.CLIENT)
-public final class SpatialCutClient {
+public final class SpatialRippleClient {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static final ResourceLocation PIPELINE = EffecoriaMod.id("spatial_cut");
-    public static final ResourceLocation SHADER = EffecoriaMod.id("spatial_cut");
+    public static final ResourceLocation PIPELINE = EffecoriaMod.id("spatial_ripple");
+    public static final ResourceLocation SHADER = EffecoriaMod.id("spatial_ripple");
 
-    public static final int MODE_LINE = 0;
-    public static final int MODE_AROUND = 1;
-
-    private static Vec3 worldFrom = Vec3.ZERO;
-    private static Vec3 worldTo = Vec3.ZERO;
+    private static Vec3 worldPos = Vec3.ZERO;
     private static float intensity;
-    private static float slashSeed;
-    private static int cutMode;
     private static int remainingTicks;
     private static int totalTicks = 1;
     private static float timeSeconds;
@@ -48,11 +42,11 @@ public final class SpatialCutClient {
     private static boolean loggedIrisSkip;
     private static boolean eventsHooked;
 
-    private SpatialCutClient() {}
+    private SpatialRippleClient() {}
 
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(SpatialCutClient::hookVeilEvents);
+        event.enqueueWork(SpatialRippleClient::hookVeilEvents);
     }
 
     private static void hookVeilEvents() {
@@ -68,49 +62,28 @@ public final class SpatialCutClient {
             if (shader == null || !shader.isValid()) {
                 return;
             }
-            Projected a = projectToScreen(worldFrom);
-            Projected b = projectToScreen(worldTo);
-            boolean behind = cutMode == MODE_AROUND ? b.behind : (a.behind && b.behind);
-            float progress = pulseProgress();
+            Projected projected = projectToScreen(worldPos);
             shader.getUniformSafe("Intensity").setFloat(intensity);
-            shader.getUniformSafe("Progress").setFloat(progress);
+            shader.getUniformSafe("Progress").setFloat(pulseProgress());
             shader.getUniformSafe("Time").setFloat(timeSeconds);
-            shader.getUniformSafe("SlashSeed").setFloat(slashSeed);
-            shader.getUniformSafe("CutMode").setFloat(cutMode);
-            shader.getUniformSafe("FromUV").setVector(a.u, a.v);
-            shader.getUniformSafe("ToUV").setVector(b.u, b.v);
-            shader.getUniformSafe("FromDepth").setFloat(a.depth);
-            shader.getUniformSafe("ToDepth").setFloat(b.depth);
-            shader.getUniformSafe("BehindCamera").setFloat(behind ? 1f : 0f);
+            shader.getUniformSafe("CenterUV").setVector(projected.u, projected.v);
+            shader.getUniformSafe("CenterDepth").setFloat(projected.depth);
+            shader.getUniformSafe("BehindCamera").setFloat(projected.behind ? 1f : 0f);
         });
-        LOGGER.info("Spatial cut Veil hooks registered");
+        LOGGER.info("Spatial ripple Veil hooks registered");
     }
 
-    public static void trigger(
-            double x0,
-            double y0,
-            double z0,
-            double x1,
-            double y1,
-            double z1,
-            float intensityIn,
-            int slashCountIn,
-            int mode) {
-        worldFrom = new Vec3(x0, y0, z0);
-        worldTo = new Vec3(x1, y1, z1);
-        cutMode = mode == MODE_AROUND ? MODE_AROUND : MODE_LINE;
-        intensity = Mth.clamp(intensityIn, 0.35f, 1.5f);
-        slashSeed = (float) ((x0 * 12.9898 + y0 * 78.233 + z1 * 37.719) % 1000.0);
-
+    public static void trigger(double x, double y, double z, float intensityIn, int durationTicks) {
         if (isIrisShaderPackInUse()) {
             if (!loggedIrisSkip) {
-                LOGGER.info("Spatial cut PostChain skipped — Iris/Oculus shaderpack is active");
+                LOGGER.info("Spatial ripple PostChain skipped — Iris/Oculus shaderpack is active");
                 loggedIrisSkip = true;
             }
             return;
         }
-
-        totalTicks = 20;
+        worldPos = new Vec3(x, y, z);
+        intensity = Mth.clamp(intensityIn, 0.4f, 1.4f);
+        totalTicks = Math.max(16, durationTicks);
         remainingTicks = totalTicks;
         timeSeconds = 0f;
         hookVeilEvents();
@@ -127,13 +100,11 @@ public final class SpatialCutClient {
         }
         float life = 1f - (remainingTicks / (float) totalTicks);
         float t = Mth.clamp(life, 0f, 1f);
-        if (t < 0.12f) {
-            return t / 0.12f;
+        // Fast swell, soft settle
+        if (t < 0.2f) {
+            return t / 0.2f;
         }
-        if (t < 0.32f) {
-            return 1f;
-        }
-        return 1f - (t - 0.32f) / 0.68f;
+        return 1f - (t - 0.2f) / 0.8f;
     }
 
     @SubscribeEvent
@@ -166,7 +137,7 @@ public final class SpatialCutClient {
                 pipelineActive = false;
             }
         } catch (Throwable t) {
-            LOGGER.warn("Failed to toggle spatial cut pipeline", t);
+            LOGGER.warn("Failed to toggle spatial ripple pipeline", t);
             pipelineActive = false;
             remainingTicks = 0;
         }
@@ -176,23 +147,17 @@ public final class SpatialCutClient {
         Minecraft mc = Minecraft.getInstance();
         Camera camera = mc.gameRenderer.getMainCamera();
         Vec3 rel = world.subtract(camera.getPosition());
-
         org.joml.Vector3f local = new org.joml.Vector3f((float) rel.x, (float) rel.y, (float) rel.z);
         camera.rotation().transformInverse(local);
-
         boolean behind = local.z >= -0.05f;
-
         Matrix4f proj = new Matrix4f(mc.gameRenderer.getProjectionMatrix(mc.options.fov().get()));
         Vector4f clip = proj.transform(new Vector4f(local.x, local.y, local.z, 1f));
         if (Math.abs(clip.w) < 1e-5f) {
             return new Projected(0.5f, 0.5f, 1f, true);
         }
-        float ndcX = clip.x / clip.w;
-        float ndcY = clip.y / clip.w;
-        float ndcZ = clip.z / clip.w;
-        float u = ndcX * 0.5f + 0.5f;
-        float v = ndcY * 0.5f + 0.5f;
-        float depth = ndcZ * 0.5f + 0.5f;
+        float u = clip.x / clip.w * 0.5f + 0.5f;
+        float v = clip.y / clip.w * 0.5f + 0.5f;
+        float depth = clip.z / clip.w * 0.5f + 0.5f;
         boolean offscreen = u < -0.2f || u > 1.2f || v < -0.2f || v > 1.2f;
         return new Projected(u, v, depth, behind || offscreen);
     }

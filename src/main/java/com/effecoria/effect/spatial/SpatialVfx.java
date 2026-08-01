@@ -11,19 +11,18 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Set;
 
-/** Server-side Spatial VFX routing: singularity wells vs dimensional cuts. */
+/** Server-side Spatial VFX routing: singularity / cuts / blink ripples. */
 public final class SpatialVfx {
     public enum Bucket {
         SINGULARITY,
         CUT,
+        RIPPLE,
         NONE
     }
 
     /** How a cut is shaped in the world (mirrored by client MODE_* ints). */
     public enum CutMode {
-        /** Seam from A → B (caster→target, yank path, forward surge). */
         LINE(0),
-        /** Radial Judgement cuts through a focus. */
         AROUND(1);
 
         public final int id;
@@ -38,7 +37,6 @@ public final class SpatialVfx {
             "gravity_well",
             "gravity_field",
             "spatial_singularity",
-            "absolute_fold",
             "subspace_voyage",
             "rift_excise");
 
@@ -50,6 +48,14 @@ public final class SpatialVfx {
             "rift_burst",
             "spatial_surge",
             "rift_yank");
+
+    /** Blink / jump / exchange — space ripple, not a black hole. */
+    private static final Set<String> RIPPLE = Set.of(
+            "blink",
+            "far_blink",
+            "void_step",
+            "warp_exchange",
+            "absolute_fold");
 
     private static final Set<String> CUT_AROUND = Set.of("rift_slash", "rift_burst");
 
@@ -65,6 +71,9 @@ public final class SpatialVfx {
         }
         if (CUT.contains(path)) {
             return Bucket.CUT;
+        }
+        if (RIPPLE.contains(path)) {
+            return Bucket.RIPPLE;
         }
         return Bucket.NONE;
     }
@@ -84,6 +93,10 @@ public final class SpatialVfx {
         return bucket(spellId) == Bucket.CUT;
     }
 
+    public static boolean shouldRipple(ResourceLocation spellId) {
+        return bucket(spellId) == Bucket.RIPPLE;
+    }
+
     public static void playSingularity(ServerPlayer caster, Vec3 focus, float power) {
         float intensity = Mth.clamp(power / 70f, 0.55f, 1.35f);
         int duration = 24 + Math.round(intensity * 22f);
@@ -95,6 +108,19 @@ public final class SpatialVfx {
                 focus.z,
                 48.0,
                 new ModNetworking.SingularityFxPayload(focus.x, focus.y, focus.z, intensity, duration));
+    }
+
+    public static void playRipple(ServerPlayer caster, Vec3 focus, float power) {
+        float intensity = Mth.clamp(power / 70f, 0.45f, 1.25f);
+        int duration = 18 + Math.round(intensity * 10f);
+        PacketDistributor.sendToPlayersNear(
+                caster.serverLevel(),
+                null,
+                focus.x,
+                focus.y,
+                focus.z,
+                48.0,
+                new ModNetworking.SpatialRippleFxPayload(focus.x, focus.y, focus.z, intensity, duration));
     }
 
     public static void playCut(
@@ -113,21 +139,18 @@ public final class SpatialVfx {
                         from.x, from.y, from.z, to.x, to.y, to.z, clamped, slashes, mode.id));
     }
 
-    /** Line cut from caster eyes to a world tip (everyone nearby sees the seam). */
     public static void playLineFromCaster(ServerPlayer caster, Vec3 tip, float power, int slashCount) {
         Vec3 from = caster.getEyePosition().add(caster.getLookAngle().scale(0.35));
         float intensity = Mth.clamp(power / 70f, 0.45f, 1.35f);
         playCut(caster, from, tip, intensity, slashCount, CutMode.LINE);
     }
 
-    /** Radial cuts centered on a world focus. */
     public static void playAround(ServerPlayer caster, Vec3 center, float power, int slashCount) {
         float intensity = Mth.clamp(power / 70f, 0.5f, 1.4f);
         double radius = 1.2 + intensity * 0.8;
-        playCut(caster, center.add(-radius, 0, 0), center, intensity, slashCount, CutMode.AROUND);
+        playCut(caster, center.add(-radius, 0, 0), center, intensity, 2, CutMode.AROUND);
     }
 
-    /** Legacy helper: line to feet+1. Prefer {@link #playLineFromCaster} / {@link #playAround}. */
     public static void playCutFromCaster(ServerPlayer caster, Vec3 to, float power, int slashCount) {
         playLineFromCaster(caster, to.add(0, 1.0, 0), power, slashCount);
     }

@@ -45,13 +45,18 @@ public final class CastPresentation {
             return;
         }
         Vec3 focus = resolveFocus(caster, 12.0);
-        playImpact(caster.serverLevel(), focus, theme, power);
-        playRing(caster.serverLevel(), focus, theme, ringRadius(spell, power));
+        if (school != MagicSchool.SPATIAL) {
+            playImpact(caster.serverLevel(), focus, theme, power);
+            playRing(caster.serverLevel(), focus, theme, ringRadius(spell, power));
+        }
         playImpactSound(caster.serverLevel(), focus, theme);
         if (school == MagicSchool.SPATIAL) {
-            // Cuts are owned by hit methods (correct from→to / around geometry for all viewers).
-            if (SpatialVfx.shouldSingularity(spell.id())) {
-                SpatialVfx.playSingularity(caster, focus, power);
+            switch (SpatialVfx.bucket(spell.id())) {
+                case SINGULARITY -> SpatialVfx.playSingularity(caster, focus, power);
+                case RIPPLE -> SpatialVfx.playRipple(caster, caster.position().add(0, 1, 0), power);
+                default -> {
+                    // Cuts owned by hit methods; NONE is sound-only
+                }
             }
         }
     }
@@ -59,8 +64,11 @@ public final class CastPresentation {
     private static void playWindUp(ServerPlayer caster, SchoolTheme theme) {
         ServerLevel level = caster.serverLevel();
         Vec3 hand = caster.getEyePosition().add(caster.getLookAngle().scale(0.55)).add(0, -0.25, 0);
-        level.sendParticles(theme.primary(), hand.x, hand.y, hand.z, 10, 0.18, 0.18, 0.18, 0.02);
-        level.sendParticles(theme.secondary(), hand.x, hand.y, hand.z, 6, 0.12, 0.14, 0.12, 0.01);
+        // Spatial school is distortion-only (no particle bursts)
+        if (theme.primary() != ModParticleTypes.SPATIAL_RIFT.get()) {
+            level.sendParticles(theme.primary(), hand.x, hand.y, hand.z, 10, 0.18, 0.18, 0.18, 0.02);
+            level.sendParticles(theme.secondary(), hand.x, hand.y, hand.z, 6, 0.12, 0.14, 0.12, 0.01);
+        }
         level.playSound(
                 null,
                 caster.blockPosition(),
@@ -73,7 +81,9 @@ public final class CastPresentation {
     private static void playWhiff(ServerPlayer caster, SchoolTheme theme) {
         ServerLevel level = caster.serverLevel();
         Vec3 hand = caster.getEyePosition().add(caster.getLookAngle().scale(0.4));
-        level.sendParticles(theme.secondary(), hand.x, hand.y, hand.z, 4, 0.1, 0.1, 0.1, 0.005);
+        if (theme.primary() != ModParticleTypes.SPATIAL_RIFT.get()) {
+            level.sendParticles(theme.secondary(), hand.x, hand.y, hand.z, 4, 0.1, 0.1, 0.1, 0.005);
+        }
         level.playSound(
                 null,
                 caster.blockPosition(),
