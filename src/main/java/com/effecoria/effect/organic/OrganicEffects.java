@@ -292,9 +292,38 @@ public final class OrganicEffects {
 
     public static void organismAdaptation(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 900;
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, true, true));
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
+        duration = Math.round(duration * (0.85f + power / 120f));
+        int amp = power >= 55f ? 1 : 0;
+
+        String envKey;
+        if (caster.isInLava() || caster.getRemainingFireTicks() > 0 || caster.isOnFire()) {
+            // Fire / lava — heat adaptation
+            BreathDebuffs.apply(
+                    caster, new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, true, true));
+            envKey = "message.effecoria.organic.adaptation.fire";
+        } else if (caster.isInWaterOrBubble()) {
+            // Water — gills + swim
+            BreathDebuffs.apply(
+                    caster, new MobEffectInstance(MobEffects.WATER_BREATHING, duration, 0, false, true, true));
+            BreathDebuffs.apply(
+                    caster, new MobEffectInstance(MobEffects.DOLPHINS_GRACE, duration, amp, false, false, true));
+            envKey = "message.effecoria.organic.adaptation.water";
+        } else if (!caster.onGround() && !caster.onClimbable() && !caster.isPassenger()) {
+            // Mid-air fall / jump — soft landing
+            BreathDebuffs.apply(
+                    caster, new MobEffectInstance(MobEffects.SLOW_FALLING, duration, 0, false, true, true));
+            envKey = "message.effecoria.organic.adaptation.air";
+        } else {
+            // Ground — speed (ускорение)
+            BreathDebuffs.apply(
+                    caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, amp, false, true, true));
+            envKey = "message.effecoria.organic.adaptation.ground";
+        }
+
         spawnDna(caster.serverLevel(), caster.position().add(0, 1, 0));
+        caster.displayClientMessage(Component.translatable(envKey), true);
+        caster.serverLevel()
+                .playSound(null, caster.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.45f, 1.4f);
     }
 
     public static void immuneSuppression(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
