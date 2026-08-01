@@ -1,5 +1,12 @@
 {
   "variants": {
-    "": { "model": "effecoria:block/subspace_portal" }
+    "facing=north,half=lower": { "model": "effecoria:block/subspace_portal" },
+    "facing=north,half=upper": { "model": "effecoria:block/subspace_portal" },
+    "facing=south,half=lower": { "model": "effecoria:block/subspace_portal", "y": 180 },
+    "facing=south,half=upper": { "model": "effecoria:block/subspace_portal", "y": 180 },
+    "facing=west,half=lower": { "model": "effecoria:block/subspace_portal", "y": 270 },
+    "facing=west,half=upper": { "model": "effecoria:block/subspace_portal", "y": 270 },
+    "facing=east,half=lower": { "model": "effecoria:block/subspace_portal", "y": 90 },
+    "facing=east,half=upper": { "model": "effecoria:block/subspace_portal", "y": 90 }
   }
 }

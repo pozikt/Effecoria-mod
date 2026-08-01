@@ -267,7 +267,7 @@ public final class SpatialEffects {
             center = BlockPos.containing(aim);
         }
 
-        int excised = 0;
+        java.util.ArrayList<BlockPos> targets = new java.util.ArrayList<>();
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dy = -radius; dy <= radius; dy++) {
@@ -276,12 +276,12 @@ public final class SpatialEffects {
                         continue;
                     }
                     cursor.set(center.getX() + dx, center.getY() + dy, center.getZ() + dz);
-                    if (SubspaceMatterService.exileBlock(level, caster, cursor)) {
-                        excised++;
-                    }
+                    targets.add(cursor.immutable());
                 }
             }
         }
+
+        SubspaceMatterService.ExileResult result = SubspaceMatterService.exileVolume(level, caster, targets);
 
         spawnSpatialParticles(level, Vec3.atCenterOf(center));
         level.playSound(
@@ -291,10 +291,23 @@ public final class SpatialEffects {
                 SoundSource.PLAYERS,
                 0.9f,
                 0.45f);
-        if (excised > 0) {
-            caster.displayClientMessage(
-                    net.minecraft.network.chat.Component.translatable("message.effecoria.rift_excise.done", excised),
-                    true);
+        if (result.removed() > 0) {
+            if (result.placedInSubspace() && result.dumpCorner() != null) {
+                BlockPos dump = result.dumpCorner();
+                caster.displayClientMessage(
+                        net.minecraft.network.chat.Component.translatable(
+                                "message.effecoria.rift_excise.done_at",
+                                result.removed(),
+                                dump.getX(),
+                                dump.getY(),
+                                dump.getZ()),
+                        true);
+            } else {
+                caster.displayClientMessage(
+                        net.minecraft.network.chat.Component.translatable(
+                                "message.effecoria.rift_excise.done_queued", result.removed()),
+                        true);
+            }
         } else {
             caster.displayClientMessage(
                     net.minecraft.network.chat.Component.translatable("message.effecoria.rift_excise.none"),

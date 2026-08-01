@@ -55,6 +55,14 @@ public final class SubspacePortalBlockEntity extends BlockEntity {
         super(ModBlockEntities.SUBSPACE_PORTAL.get(), pos, state);
     }
 
+    public void armCooldown(UUID entityId, long gameTimeUntil) {
+        playerCooldownUntil.put(entityId, gameTimeUntil);
+        if (playerCooldownUntil.size() > 64) {
+            long now = getLevel() != null ? getLevel().getGameTime() : 0L;
+            playerCooldownUntil.entrySet().removeIf(e -> e.getValue() < now);
+        }
+    }
+
     public void configure(
             UUID owner,
             Role role,
@@ -116,7 +124,8 @@ public final class SubspacePortalBlockEntity extends BlockEntity {
         if (until != null && now < until) {
             return;
         }
-        playerCooldownUntil.put(entity.getUUID(), now + 25L);
+        // Arm before transport so dimension change / re-entry cannot loop in one tick.
+        playerCooldownUntil.put(entity.getUUID(), now + 45L);
 
         if (entity instanceof ServerPlayer player) {
             SubspaceVoyageService.onPortalTouch(player, this);

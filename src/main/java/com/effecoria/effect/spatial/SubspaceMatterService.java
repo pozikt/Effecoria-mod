@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,15 +16,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 /**
  * Tracks matter exiled into hyperspace for future Chaos Reefs / spit-back / Ψ-ghosts.
- * MVP: classify + queue, and dump a physical copy into subspace when available.
+ * Physical copies land in a personal dump yard next to the caster's voyage rendezvous.
  */
 public final class SubspaceMatterService {
     private static final int MAX_QUEUE = 2048;
-    private static final int FLOOR_Y = 1;
+    /** Offset from voyage feet so dumps don't bury the portal landing. */
+    private static final int DUMP_OFFSET_X = 6;
+    private static final int DUMP_OFFSET_Z = 6;
+    /** Horizontal radius of the chaotic debris field around the yard. */
+    private static final int SCATTER_RADIUS = 10;
+    /** Extra vertical loft for floating junk (Φ drift). */
+    private static final int SCATTER_HEIGHT = 7;
+    private static final int SCATTER_TRIES = 12;
     private static final List<ExiledSample> QUEUE = new ArrayList<>();
-    private static final Map<UUID, Integer> DUMP_INDEX = new HashMap<>();
+    /** Spill counter when the field is too dense. */
+    private static final Map<UUID, Integer> DUMP_COLUMN = new HashMap<>();
 
     private SubspaceMatterService() {}
 
@@ -45,75 +56,153 @@ public final class SubspaceMatterService {
             BlockPos originPos,
             String originDim) {}
 
+    public record ExileResult(int removed, @Nullable BlockPos dumpCorner, boolean placedInSubspace) {}
+
+    /**
+     * Exile realspace blocks into hyperspace as a chaotic debris field beside the voyage yard
+     * (not a rebuilt cube — Φ currents scramble the volume).
+     */
+    public static ExileResult exileVolume(ServerLevel level, ServerPlayer caster, Iterable<BlockPos> positions) {
+        List<BlockPos> valid = new ArrayList<>();
+        Map<BlockPos, BlockState> states = new HashMap<>();
+        for (BlockPos pos : positions) {
+            BlockState state = level.getBlockState(pos);
+            if (!canExile(state, level, pos)) {
+                continue;
+            }
+            BlockPos key = pos.immutable();
+            valid.add(key);
+            states.put(key, state);
+        }
+        if (valid.isEmpty()) {
+            return new ExileResult(0, null, false);
+        }
+
+        BlockPos yardOrigin = resolveDumpOrigin(caster);
+        ServerLevel subspace = ModDimensions.subspace(level.getServer());
+        boolean placed = false;
+        // Seed mixes caster + tick so each cast scatters differently, but stays stable mid-cast.
+        java.util.Random rng = new java.util.Random(
+                caster.getUUID().getMostSignificantBits()
+                        ^ Long.rotateLeft(level.getGameTime(), 17)
+                        ^ (valid.size() * 31L));
+
+        for (BlockPos pos : valid) {
+            BlockState state = states.get(pos);
+            MatterClass kind = classify(state);
+            String blockId = state.getBlock().builtInRegistryHolder().key().location().toString();
+            synchronized (QUEUE) {
+                if (QUEUE.size() >= MAX_QUEUE) {
+                    QUEUE.removeFirst();
+                }
+                QUEUE.add(new ExiledSample(
+                        caster.getUUID(),
+                        level.getGameTime(),
+                        kind,
+                        blockId,
+                        pos,
+                        level.dimension().location().toString()));
+            }
+            // No loot — volume is folded into the Φ-sublayer, not broken.
+            level.removeBlock(pos, false);
+
+            if (subspace != null) {
+                BlockPos dest = pickChaoticCell(subspace, caster.getUUID(), yardOrigin, rng);
+                forceChunk(subspace, dest);
+                // Only prop grounded debris; floating junk stays suspended in Φ.
+                if (dest.getY() <= yardOrigin.getY()) {
+                    ensureSupport(subspace, dest);
+                }
+                subspace.setBlock(dest, state, 3);
+                placed = true;
+            }
+        }
+
+        if (subspace != null && placed) {
+            BlockPos marker = yardOrigin.above(4);
+            forceChunk(subspace, marker);
+            if (subspace.getBlockState(marker).isAir()) {
+                subspace.setBlock(marker, Blocks.END_ROD.defaultBlockState(), 3);
+            }
+        }
+
+        return new ExileResult(valid.size(), yardOrigin, placed);
+    }
+
     /** Remove a realspace block with no drops and enqueue a hyperspace sample. */
     public static boolean exileBlock(ServerLevel level, ServerPlayer caster, BlockPos pos) {
-        BlockState state = level.getBlockState(pos);
-        if (!canExile(state, level, pos)) {
-            return false;
-        }
-        MatterClass kind = classify(state);
-        String blockId = state.getBlock().builtInRegistryHolder().key().location().toString();
-        BlockState toPlace = state;
-        synchronized (QUEUE) {
-            if (QUEUE.size() >= MAX_QUEUE) {
-                QUEUE.removeFirst();
-            }
-            QUEUE.add(new ExiledSample(
-                    caster.getUUID(),
-                    level.getGameTime(),
-                    kind,
-                    blockId,
-                    pos.immutable(),
-                    level.dimension().location().toString()));
-        }
-        // No loot — volume is folded into the Φ-sublayer, not broken.
-        level.removeBlock(pos, false);
-
-        ServerLevel subspace = ModDimensions.subspace(level.getServer());
-        if (subspace != null) {
-            placeInDumpPile(subspace, caster.getUUID(), toPlace);
-        }
-        return true;
+        return exileVolume(level, caster, List.of(pos.immutable())).removed() > 0;
     }
 
-    /** Dump pile position derived from caster UUID + growing index; search upward for air. */
-    private static void placeInDumpPile(ServerLevel subspace, UUID casterId, BlockState state) {
-        int index;
-        synchronized (DUMP_INDEX) {
-            index = DUMP_INDEX.merge(casterId, 1, Integer::sum) - 1;
+    /**
+     * Dump yard sits beside the active voyage entry when present; otherwise at the caster's
+     * personal rendezvous (same hash as {@link SubspaceVoyageService#subspaceAnchor(UUID)}).
+     */
+    public static BlockPos resolveDumpOrigin(ServerPlayer caster) {
+        SubspaceVoyageData voyage = SubspaceVoyageService.get(caster);
+        BlockPos entry = voyage.entrySubspacePos();
+        if (entry != null && (voyage.active() || voyage.pendingEntry())) {
+            return entry.offset(DUMP_OFFSET_X, 0, DUMP_OFFSET_Z);
         }
-        BlockPos base = dumpBase(casterId, index);
-        ensureDumpFloor(subspace, base.below());
-        BlockPos.MutableBlockPos cursor = base.mutable();
-        int maxY = Math.min(subspace.getMaxBuildHeight() - 1, base.getY() + 48);
-        while (cursor.getY() <= maxY) {
-            BlockState existing = subspace.getBlockState(cursor);
+        return personalYard(caster.getUUID());
+    }
+
+    /** Personal matter yard — shared with the host's voyage landing when entry uses player UUID. */
+    public static BlockPos personalYard(UUID casterId) {
+        return SubspaceVoyageService.subspaceAnchor(casterId).offset(DUMP_OFFSET_X, 0, DUMP_OFFSET_Z);
+    }
+
+    /** Random free cell in a disk around the yard — mostly ground scrap, some floating shards. */
+    private static BlockPos pickChaoticCell(
+            ServerLevel subspace, UUID casterId, BlockPos yardOrigin, java.util.Random rng) {
+        int minY = subspace.getMinBuildHeight() + 1;
+        int maxY = subspace.getMaxBuildHeight() - 2;
+        for (int attempt = 0; attempt < SCATTER_TRIES; attempt++) {
+            // Polar scatter: denser near center, ragged rim.
+            double angle = rng.nextDouble() * Math.PI * 2.0;
+            double dist = Math.sqrt(rng.nextDouble()) * SCATTER_RADIUS;
+            int dx = (int) Math.round(Math.cos(angle) * dist);
+            int dz = (int) Math.round(Math.sin(angle) * dist);
+            // ~35% float as Φ-drift debris; rest tumble near the sheet.
+            int dy;
+            if (rng.nextFloat() < 0.35f) {
+                dy = 1 + rng.nextInt(SCATTER_HEIGHT);
+            } else {
+                dy = rng.nextInt(3) == 0 ? rng.nextInt(2) : 0;
+            }
+            int y = Math.max(minY, Math.min(maxY, yardOrigin.getY() + dy));
+            BlockPos candidate = new BlockPos(yardOrigin.getX() + dx, y, yardOrigin.getZ() + dz);
+            forceChunk(subspace, candidate);
+            BlockState existing = subspace.getBlockState(candidate);
             if (existing.isAir() || existing.canBeReplaced()) {
-                subspace.setBlock(cursor, state, 3);
-                return;
+                return candidate;
             }
-            cursor.move(0, 1, 0);
         }
+        // Field packed — golden-angle spiral outward (never stack a tower).
+        int column;
+        synchronized (DUMP_COLUMN) {
+            column = DUMP_COLUMN.merge(casterId, 1, Integer::sum);
+        }
+        double angle = column * 2.399963;
+        int ring = SCATTER_RADIUS + 2 + column / 6;
+        int dx = (int) Math.round(Math.cos(angle) * ring);
+        int dz = (int) Math.round(Math.sin(angle) * ring);
+        int dy = column % 5;
+        BlockPos spill = new BlockPos(yardOrigin.getX() + dx, yardOrigin.getY() + dy, yardOrigin.getZ() + dz);
+        forceChunk(subspace, spill);
+        return spill;
     }
 
-    private static BlockPos dumpBase(UUID casterId, int index) {
-        int hash = casterId.hashCode();
-        int baseX = (hash & 0x7FFF) % 3500;
-        int baseZ = ((hash >>> 16) & 0x7FFF) % 3500;
-        if ((hash & 1) == 0) {
-            baseX = -baseX;
-        }
-        if ((hash & 2) == 0) {
-            baseZ = -baseZ;
-        }
-        // Grow outward in a loose grid so consecutive excises stack nearby.
-        int x = baseX + (index % 16);
-        int z = baseZ + (index / 16);
-        return new BlockPos(x, FLOOR_Y + 1, z);
+    private static void forceChunk(ServerLevel level, BlockPos pos) {
+        LevelChunk chunk = level.getChunkAt(pos);
+        // Touch the chunk so setBlock cannot no-op on an unloaded section.
+        chunk.setUnsaved(true);
     }
 
-    private static void ensureDumpFloor(ServerLevel level, BlockPos floor) {
-        if (level.getBlockState(floor).isAir()) {
+    private static void ensureSupport(ServerLevel level, BlockPos feet) {
+        BlockPos floor = feet.below();
+        if (level.getBlockState(floor).isAir() || level.getBlockState(floor).canBeReplaced()) {
+            // Keep dumps standing even above the flat end-stone sheet.
             level.setBlock(floor, Blocks.END_STONE.defaultBlockState(), 3);
         }
     }
@@ -153,7 +242,6 @@ public final class SubspaceMatterService {
                 || state.is(Blocks.ANVIL)
                 || state.is(Blocks.CHIPPED_ANVIL)
                 || state.is(Blocks.DAMAGED_ANVIL)) {
-            // Iron essentializes slowly; still metal — use OTHER conductor-ish bucket for now.
             return MatterClass.METAL_CONDUCTOR;
         }
         if (state.is(BlockTags.BASE_STONE_OVERWORLD)

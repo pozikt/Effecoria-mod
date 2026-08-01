@@ -1,11 +1,13 @@
 package com.effecoria.effect.spatial;
 
+import com.effecoria.block.SubspacePortalBlock;
 import com.effecoria.block.SubspacePortalBlockEntity;
 import com.effecoria.content.ModBlocks;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.world.ModDimensions;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -18,6 +20,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
 
@@ -78,7 +81,8 @@ public final class SubspaceVoyageService {
         }
 
         UUID session = UUID.randomUUID();
-        BlockPos subspaceEntry = subspaceAnchor(session);
+        // Land at the host's personal yard so rift_excise dumps are visible beside the portal.
+        BlockPos subspaceEntry = subspaceAnchor(caster.getUUID());
         ResourceKey<Level> originDim = caster.level().dimension();
         BlockPos originPos = caster.blockPosition().immutable();
 
@@ -95,6 +99,9 @@ public final class SubspaceVoyageService {
 
         data.beginPending(session, caster.getUUID(), originDim, originPos, portalPos, subspaceEntry);
         set(caster, data);
+
+        // Caster must walk in — arm a short grace so placement never sucks them in.
+        armPortalGrace(caster.serverLevel(), portalPos, caster.getUUID(), 40L);
 
         fx(caster.serverLevel(), Vec3.atCenterOf(portalPos));
         caster.displayClientMessage(Component.translatable("message.effecoria.subspace.entry_opened"), true);
@@ -125,7 +132,7 @@ public final class SubspaceVoyageService {
             }
         }
 
-        BlockPos subspaceExit = placePortalAt(caster.serverLevel(), caster.blockPosition());
+        BlockPos subspaceExit = placePortalNear(caster);
         if (subspaceExit == null) {
             caster.displayClientMessage(Component.translatable("message.effecoria.subspace.no_space"), true);
             return;
@@ -134,7 +141,19 @@ public final class SubspaceVoyageService {
         BlockPos mapped = mapToOrigin(data, caster.blockPosition());
         BlockPos overworldExit = findSafeLanding(originLevel, mapped);
         placePlatformIfNeeded(originLevel, overworldExit);
-        originLevel.setBlock(overworldExit, ModBlocks.SUBSPACE_PORTAL.get().defaultBlockState(), 3);
+        // Keep overworld exit one block beside the landing pad, not under the traveler's feet.
+        Direction exitFacing = caster.getDirection();
+        BlockPos overworldPlaced = placePortalAt(
+                originLevel, overworldExit.relative(exitFacing), exitFacing);
+        if (overworldPlaced == null) {
+            overworldPlaced = placePortalAt(originLevel, overworldExit.relative(exitFacing.getClockWise()), exitFacing);
+        }
+        if (overworldPlaced == null) {
+            removePortal(caster.serverLevel(), subspaceExit);
+            caster.displayClientMessage(Component.translatable("message.effecoria.subspace.no_space"), true);
+            return;
+        }
+        overworldExit = overworldPlaced;
 
         configurePortal(
                 caster.serverLevel(),
@@ -159,6 +178,8 @@ public final class SubspaceVoyageService {
 
         data.setExitPortals(subspaceExit, overworldExit);
         set(caster, data);
+
+        armPortalGrace(caster.serverLevel(), subspaceExit, caster.getUUID(), 40L);
 
         if (host) {
             syncSessionExitForNearbyPlayers(caster, data);
@@ -201,7 +222,7 @@ public final class SubspaceVoyageService {
             if (subspace == null || portal.entrySubspacePos() == null) {
                 return;
             }
-            BlockPos spawn = portal.entrySubspacePos();
+            BlockPos spawn = safeLandingBeside(portal.entrySubspacePos());
             ensureFloor(subspace, spawn);
             teleportEntity(entity, subspace, spawn);
             fx(subspace, Vec3.atCenterOf(spawn));
@@ -251,9 +272,11 @@ public final class SubspaceVoyageService {
                 portal.entrySubspacePos());
         set(player, data);
 
-        BlockPos spawn = portal.entrySubspacePos();
+        BlockPos spawn = safeLandingBeside(portal.entrySubspacePos());
         ensureFloor(subspace, spawn);
         teleport(player, subspace, spawn);
+        // Don't bounce straight into a portal if one sits on the yard.
+        armPortalGrace(subspace, spawn, player.getUUID(), 45L);
         fx(subspace, Vec3.atCenterOf(spawn));
         player.displayClientMessage(Component.translatable("message.effecoria.subspace.entered"), true);
     }
@@ -290,12 +313,20 @@ public final class SubspaceVoyageService {
         data.leaveVoyageKeepPortals();
         set(player, data);
 
-        placePlatformIfNeeded(originLevel, stand);
+        // Stand beside the overworld exit puncture — never inside it / never half-delete it here.
+        BlockPos standBeside = stand.relative(Direction.NORTH);
         if (originLevel.getBlockState(stand).is(ModBlocks.SUBSPACE_PORTAL.get())) {
-            originLevel.setBlock(stand, Blocks.AIR.defaultBlockState(), 3);
+            Direction face = originLevel.getBlockState(stand).getValue(SubspacePortalBlock.FACING);
+            standBeside = SubspacePortalBlock.basePos(originLevel.getBlockState(stand), stand)
+                    .relative(face.getOpposite());
         }
-        teleport(player, originLevel, stand);
-        fx(originLevel, Vec3.atCenterOf(stand));
+        placePlatformIfNeeded(originLevel, standBeside);
+        if (ownerLeaving) {
+            // Gates already collapsed above; landing pad only.
+        }
+        teleport(player, originLevel, standBeside);
+        armPortalGrace(originLevel, standBeside, player.getUUID(), 45L);
+        fx(originLevel, Vec3.atCenterOf(standBeside));
         player.displayClientMessage(
                 Component.translatable(
                         ownerLeaving
@@ -472,55 +503,128 @@ public final class SubspaceVoyageService {
             @Nullable BlockPos originPos,
             @Nullable BlockPos entrySubspacePos,
             @Nullable BlockPos exitOverworldPos) {
-        if (level.getBlockEntity(pos) instanceof SubspacePortalBlockEntity be) {
-            be.configure(owner, role, session, originDim, originPos, entrySubspacePos, exitOverworldPos);
+        BlockPos base = pos;
+        BlockState state = level.getBlockState(pos);
+        if (state.is(ModBlocks.SUBSPACE_PORTAL.get())) {
+            base = SubspacePortalBlock.basePos(state, pos);
+        }
+        for (BlockPos at : new BlockPos[] {base, base.above()}) {
+            if (level.getBlockEntity(at) instanceof SubspacePortalBlockEntity be) {
+                be.configure(owner, role, session, originDim, originPos, entrySubspacePos, exitOverworldPos);
+            }
         }
     }
 
     @Nullable
     private static BlockPos placePortalNear(ServerPlayer caster) {
-        BlockPos base = caster.blockPosition().relative(caster.getDirection());
-        for (BlockPos candidate : new BlockPos[] {
-            base, base.above(), caster.blockPosition(), caster.blockPosition().above()
-        }) {
-            BlockPos placed = placePortalAt(caster.serverLevel(), candidate);
-            if (placed != null) {
+        Direction facing = caster.getDirection();
+        ServerLevel level = caster.serverLevel();
+        BlockPos feet = caster.blockPosition();
+        // Prefer 1–2 blocks in front — never the caster's own column (instant teleport).
+        BlockPos[] candidates = new BlockPos[] {
+            feet.relative(facing, 2),
+            feet.relative(facing, 1),
+            feet.relative(facing, 2).relative(facing.getClockWise()),
+            feet.relative(facing, 2).relative(facing.getCounterClockWise()),
+            feet.relative(facing, 1).relative(facing.getClockWise()),
+            feet.relative(facing, 1).relative(facing.getCounterClockWise()),
+            feet.relative(facing, 3)
+        };
+        for (BlockPos candidate : candidates) {
+            BlockPos placed = placePortalAt(level, candidate, facing);
+            if (placed != null && !overlapsPlayerColumn(placed, feet)) {
                 return placed;
             }
         }
         return null;
     }
 
+    private static boolean overlapsPlayerColumn(BlockPos portalFeet, BlockPos playerFeet) {
+        return portalFeet.getX() == playerFeet.getX()
+                && portalFeet.getZ() == playerFeet.getZ()
+                && Math.abs(portalFeet.getY() - playerFeet.getY()) <= 1;
+    }
+
     @Nullable
-    private static BlockPos placePortalAt(ServerLevel level, BlockPos pos) {
+    private static BlockPos placePortalAt(ServerLevel level, BlockPos pos, Direction facing) {
         BlockPos feet = pos;
-        if (!level.getBlockState(feet).canBeReplaced() && !level.getBlockState(feet).isAir()) {
+        if (!isPortalReplaceable(level, feet) || !isPortalReplaceable(level, feet.above())) {
+            // Try one up if standing on a slab-like obstruction at the aim cell.
             feet = pos.above();
         }
-        if (!level.getBlockState(feet).canBeReplaced() && !level.getBlockState(feet).isAir()) {
+        BlockPos head = feet.above();
+        if (!isPortalReplaceable(level, feet) || !isPortalReplaceable(level, head)) {
             return null;
         }
-        level.setBlock(feet, ModBlocks.SUBSPACE_PORTAL.get().defaultBlockState(), 3);
+        // Need solid-ish ground under the puncture so it doesn't float oddly.
+        BlockState below = level.getBlockState(feet.below());
+        if (!below.blocksMotion() && !below.is(ModBlocks.SUBSPACE_PORTAL.get())) {
+            return null;
+        }
+        Direction horizontal = facing.getAxis().isHorizontal() ? facing : Direction.NORTH;
+        BlockState lower = ModBlocks.SUBSPACE_PORTAL
+                .get()
+                .defaultBlockState()
+                .setValue(SubspacePortalBlock.FACING, horizontal)
+                .setValue(SubspacePortalBlock.HALF, DoubleBlockHalf.LOWER);
+        BlockState upper = lower.setValue(SubspacePortalBlock.HALF, DoubleBlockHalf.UPPER);
+        level.setBlock(feet, lower, 3);
+        level.setBlock(head, upper, 3);
         return feet;
     }
 
+    private static boolean isPortalReplaceable(ServerLevel level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        return state.isAir() || state.canBeReplaced();
+    }
+
     private static void removePortal(ServerLevel level, BlockPos pos) {
-        if (level.getBlockState(pos).is(ModBlocks.SUBSPACE_PORTAL.get())) {
-            level.removeBlock(pos, false);
+        BlockState state = level.getBlockState(pos);
+        if (!state.is(ModBlocks.SUBSPACE_PORTAL.get())) {
+            BlockState above = level.getBlockState(pos.above());
+            BlockState below = level.getBlockState(pos.below());
+            if (above.is(ModBlocks.SUBSPACE_PORTAL.get())) {
+                state = above;
+                pos = pos.above();
+            } else if (below.is(ModBlocks.SUBSPACE_PORTAL.get())) {
+                state = below;
+                pos = pos.below();
+            } else {
+                return;
+            }
+        }
+        BlockPos base = SubspacePortalBlock.basePos(state, pos);
+        // Remove upper first so neighbor updates don't fight half-state.
+        level.removeBlock(base.above(), false);
+        level.removeBlock(base, false);
+    }
+
+    /** Clear air for standing — never punch out an existing subspace puncture. */
+    private static void ensureFloor(ServerLevel level, BlockPos feet) {
+        BlockPos floor = feet.below();
+        if (level.getBlockState(floor).isAir() || level.getBlockState(floor).canBeReplaced()) {
+            level.setBlock(floor, Blocks.END_STONE.defaultBlockState(), 3);
+        }
+        clearStandCell(level, feet);
+        clearStandCell(level, feet.above());
+    }
+
+    private static void clearStandCell(ServerLevel level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        if (state.is(ModBlocks.SUBSPACE_PORTAL.get())) {
+            return;
+        }
+        if (!state.isAir() && (state.canBeReplaced() || !state.blocksMotion())) {
+            level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+        } else if (!state.isAir() && state.getDestroySpeed(level, pos) >= 0f && state.getDestroySpeed(level, pos) < 50f) {
+            // Soft debris only — don't chew through bedrock/obsidian pads.
+            level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
         }
     }
 
-    private static void ensureFloor(ServerLevel level, BlockPos feet) {
-        BlockPos floor = feet.below();
-        if (level.getBlockState(floor).isAir()) {
-            level.setBlock(floor, Blocks.END_STONE.defaultBlockState(), 3);
-        }
-        if (!level.getBlockState(feet).isAir()) {
-            level.setBlock(feet, Blocks.AIR.defaultBlockState(), 3);
-        }
-        if (!level.getBlockState(feet.above()).isAir()) {
-            level.setBlock(feet.above(), Blocks.AIR.defaultBlockState(), 3);
-        }
+    private static BlockPos safeLandingBeside(BlockPos entry) {
+        // Offset from the voyage anchor so arrivals don't stand inside an exit puncture.
+        return entry.offset(-2, 0, -2);
     }
 
     private static BlockPos findSafeLanding(ServerLevel level, BlockPos approx) {
@@ -572,10 +676,32 @@ public final class SubspaceVoyageService {
             return null;
         }
         if ((level.getBlockState(feet).isAir() || level.getBlockState(feet).canBeReplaced())
-                && (level.getBlockState(head).isAir() || level.getBlockState(head).canBeReplaced())) {
+                && (level.getBlockState(head).isAir() || level.getBlockState(head).canBeReplaced())
+                && !level.getBlockState(feet).is(ModBlocks.SUBSPACE_PORTAL.get())
+                && !level.getBlockState(head).is(ModBlocks.SUBSPACE_PORTAL.get())) {
             return feet;
         }
         return null;
+    }
+
+    private static void armPortalGrace(ServerLevel level, BlockPos near, UUID traveler, long ticks) {
+        long until = level.getGameTime() + ticks;
+        for (BlockPos at : new BlockPos[] {near, near.above(), near.below(), near.north(), near.south(), near.east(), near.west()}) {
+            if (level.getBlockEntity(at) instanceof SubspacePortalBlockEntity portal) {
+                portal.armCooldown(traveler, until);
+            }
+        }
+        BlockPos base = near;
+        BlockState state = level.getBlockState(near);
+        if (state.is(ModBlocks.SUBSPACE_PORTAL.get())) {
+            base = SubspacePortalBlock.basePos(state, near);
+            if (level.getBlockEntity(base) instanceof SubspacePortalBlockEntity portal) {
+                portal.armCooldown(traveler, until);
+            }
+            if (level.getBlockEntity(base.above()) instanceof SubspacePortalBlockEntity portal) {
+                portal.armCooldown(traveler, until);
+            }
+        }
     }
 
     private static void placePlatformIfNeeded(ServerLevel level, BlockPos feet) {
@@ -583,16 +709,15 @@ public final class SubspaceVoyageService {
         if (!level.getBlockState(floor).blocksMotion()) {
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dz = -1; dz <= 1; dz++) {
-                    level.setBlock(floor.offset(dx, 0, dz), Blocks.END_STONE.defaultBlockState(), 3);
+                    BlockPos at = floor.offset(dx, 0, dz);
+                    if (!level.getBlockState(at).is(ModBlocks.SUBSPACE_PORTAL.get())) {
+                        level.setBlock(at, Blocks.END_STONE.defaultBlockState(), 3);
+                    }
                 }
             }
         }
-        if (!level.getBlockState(feet).isAir() && !level.getBlockState(feet).is(ModBlocks.SUBSPACE_PORTAL.get())) {
-            level.setBlock(feet, Blocks.AIR.defaultBlockState(), 3);
-        }
-        if (!level.getBlockState(feet.above()).isAir()) {
-            level.setBlock(feet.above(), Blocks.AIR.defaultBlockState(), 3);
-        }
+        clearStandCell(level, feet);
+        clearStandCell(level, feet.above());
     }
 
     private static void teleport(ServerPlayer player, ServerLevel dest, BlockPos feet) {

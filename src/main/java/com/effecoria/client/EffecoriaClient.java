@@ -6,12 +6,17 @@ import com.effecoria.client.hud.PsiHudOverlay;
 import com.effecoria.client.particle.SchoolParticles;
 import com.effecoria.client.render.DeathShadowRenderer;
 import com.effecoria.client.render.RootCageRenderer;
+import com.effecoria.client.render.SubspacePortalRenderer;
+import com.effecoria.content.ModBlocks;
 import com.effecoria.content.ModEntities;
 import com.effecoria.content.ModParticleTypes;
 
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -22,6 +27,11 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 public final class EffecoriaClient {
     private EffecoriaClient() {}
 
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(() -> ItemBlockRenderTypes.setRenderLayer(
+                ModBlocks.SUBSPACE_PORTAL.get(), RenderType.translucent()));
+    }
     @SubscribeEvent
     public static void registerKeys(RegisterKeyMappingsEvent event) {
         event.register(KeyBindings.CAST_SPELL);
@@ -34,6 +44,8 @@ public final class EffecoriaClient {
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.ROOT_CAGE.get(), RootCageRenderer::new);
         event.registerEntityRenderer(ModEntities.DEATH_SHADOW.get(), DeathShadowRenderer::new);
+        event.registerBlockEntityRenderer(
+                com.effecoria.content.ModBlockEntities.SUBSPACE_PORTAL.get(), SubspacePortalRenderer::new);
     }
 
     @SubscribeEvent

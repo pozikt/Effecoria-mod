@@ -4,7 +4,7 @@ Living doc for `effecoria:subspace` after the voyage MVP (`subspace_voyage`, 1�
 
 ## Portal rules (shipped)
 
-- **Any player** may walk through an open entry/exit portal (not only Spatial mages).
+- Entry/exit portals are a **two-block-tall puncture** (void oval + ragged rim), oriented to the caster's facing.
 - Opening a gate still requires the Spatial spell `subspace_voyage`.
 - Entry portals stay open while passengers travel; **when the Spatial host walks through an exit, the whole gate network closes** and remaining travelers are returned to the origin.
 - Multiple Spatial mages may run **independent** sessions at once; a passenger Spatial mage can place an *additional* exit without deleting the host’s (until the host exits).
@@ -27,7 +27,7 @@ Tie spatial risk (long blink / portals / voyage distance) into Stage V TSE when 
 
 ## Matter fate when left in the Φ-sublayer
 
-Scaffolding: `SubspaceMatterService` (exile classification + dump queue). Full simulation of reefs / ghosts / spit-back comes later.
+Scaffolding: `SubspaceMatterService` (exile classification + physical dump yard next to `subspaceAnchor(host)` / active voyage entry). Full simulation of reefs / ghosts / spit-back comes later.
 
 ### Organic (limbs, grass, trees)
 
@@ -56,4 +56,4 @@ Scaffolding: `SubspaceMatterService` (exile classification + dump queue). Full s
 | Spell | Role |
 |-------|------|
 | `subspace_voyage` | Travel corridor |
-| `rift_excise` | Exile a small realspace volume into hyperspace (no loot; future dump → reefs) |
+| `rift_excise` | Exile a small realspace volume into hyperspace (physical dump beside the host voyage landing; queue for future reefs) |
