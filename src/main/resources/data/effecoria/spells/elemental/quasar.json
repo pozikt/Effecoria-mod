@@ -11,8 +11,9 @@
   "effects": [
     {
       "type": "effecoria:quasar",
-      "radius": 7.5,
-      "duration_ticks": 1200,
+      "radius": 10.0,
+      "duration_ticks": 800,
+      "move_speed": 0.22,
       "damage_dice_per_round": "6d12"
     }
   ]

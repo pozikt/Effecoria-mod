@@ -1216,11 +1216,20 @@ public final class ElementalEffects {
     public static void quasar(ServerPlayer caster, SpellEffectEntry effect, float power) {
         ServerLevel level = caster.serverLevel();
         JsonObject params = effect.params();
-        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 7.5f;
-        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 1200;
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 10f;
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 800;
         float dps = DiceDamage.perSecondFromParams(params, power, 12f);
-        Vec3 center = aimPoint(caster, 16);
-        ElementalFieldService.spawnQuasar(level, center, caster.getUUID(), radius, duration, dps);
+        // Spawn above the caster — free-roaming eye, not aim-locked.
+        Vec3 center = caster.position().add(0, 2.6, 0);
+        float yaw = level.random.nextFloat() * net.minecraft.util.Mth.TWO_PI;
+        Vec3 moveDir = new Vec3(
+                        net.minecraft.util.Mth.cos(yaw),
+                        0.08,
+                        net.minecraft.util.Mth.sin(yaw))
+                .normalize();
+        float moveSpeed = params.has("move_speed") ? params.get("move_speed").getAsFloat() : 0.22f;
+        ElementalFieldService.spawnQuasar(
+                level, center, caster.getUUID(), radius, duration, dps, moveDir, moveSpeed);
     }
 
     public static void plasmaBarrage(ServerPlayer caster, SpellEffectEntry effect, float power) {

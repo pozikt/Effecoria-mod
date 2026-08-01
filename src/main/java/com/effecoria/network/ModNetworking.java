@@ -225,6 +225,63 @@ public final class ModNetworking {
         }
     }
 
+    /** Server → nearby clients: elemental quasar heat-haze / layered eye FX. */
+    public record QuasarFxPayload(
+            double x, double y, double z, float intensity, float radius, int durationTicks, boolean refresh)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<QuasarFxPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "quasar_fx"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, QuasarFxPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, p) -> {
+                            buf.writeDouble(p.x());
+                            buf.writeDouble(p.y());
+                            buf.writeDouble(p.z());
+                            buf.writeFloat(p.intensity());
+                            buf.writeFloat(p.radius());
+                            buf.writeVarInt(p.durationTicks());
+                            buf.writeBoolean(p.refresh());
+                        },
+                        buf -> new QuasarFxPayload(
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readFloat(),
+                                buf.readFloat(),
+                                buf.readVarInt(),
+                                buf.readBoolean()));
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(QuasarFxPayload payload, IPayloadContext context) {
+            context.enqueueWork(
+                    () -> {
+                        if (payload.refresh()) {
+                            com.effecoria.client.QuasarClient.pulse(
+                                    payload.x(),
+                                    payload.y(),
+                                    payload.z(),
+                                    payload.intensity(),
+                                    payload.radius(),
+                                    payload.durationTicks());
+                        } else {
+                            com.effecoria.client.QuasarClient.trigger(
+                                    payload.x(),
+                                    payload.y(),
+                                    payload.z(),
+                                    payload.intensity(),
+                                    payload.radius(),
+                                    payload.durationTicks());
+                        }
+                    });
+        }
+    }
+
     /** Server → nearby clients: world-anchored dimensional cut (line or around). */
     public record SpatialCutFxPayload(
             double x0,
@@ -479,6 +536,170 @@ public final class ModNetworking {
                     return;
                 }
                 com.effecoria.core.seal.SealProgramService.clear(player, payload.pos());
+            });
+        }
+    }
+
+    /** Server → client: full spell datapack catalog (remote clients have no server reload listener). */
+    public record SpellCatalogPayload(List<com.effecoria.core.magic.SpellDefinition> spells)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<SpellCatalogPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "spell_catalog"));
+
+        private static final com.google.gson.Gson GSON = new com.google.gson.Gson();
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, SpellCatalogPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, payload) -> {
+                            buf.writeVarInt(payload.spells().size());
+                            for (com.effecoria.core.magic.SpellDefinition spell : payload.spells()) {
+                                writeSpell(buf, spell);
+                            }
+                        },
+                        buf -> {
+                            int count = buf.readVarInt();
+                            List<com.effecoria.core.magic.SpellDefinition> list = new ArrayList<>(count);
+                            for (int i = 0; i < count; i++) {
+                                list.add(readSpell(buf));
+                            }
+                            return new SpellCatalogPayload(list);
+                        });
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(SpellCatalogPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                java.util.HashMap<ResourceLocation, com.effecoria.core.magic.SpellDefinition> map =
+                        new java.util.HashMap<>();
+                for (com.effecoria.core.magic.SpellDefinition spell : payload.spells()) {
+                    map.put(spell.id(), spell);
+                }
+                com.effecoria.magic.SpellRegistry.replaceAll(map);
+            });
+        }
+
+        private static void writeSpell(RegistryFriendlyByteBuf buf, com.effecoria.core.magic.SpellDefinition spell) {
+            ResourceLocation.STREAM_CODEC.encode(buf, spell.id());
+            buf.writeUtf(spell.requiredSchool().getSerializedName(), 64);
+            buf.writeFloat(spell.frequencyHz());
+            buf.writeFloat(spell.baseCost());
+            buf.writeFloat(spell.powerMultiplier());
+            buf.writeFloat(spell.sideEntropyRatio());
+            buf.writeFloat(spell.minPhi());
+            buf.writeFloat(spell.minMastery());
+            buf.writeFloat(spell.minPower());
+            buf.writeVarInt(spell.unlockEssenceCost());
+            buf.writeUtf(spell.radialCategory().getSerializedName(), 64);
+            buf.writeVarInt(spell.effects().size());
+            for (com.effecoria.core.magic.SpellEffectEntry effect : spell.effects()) {
+                ResourceLocation.STREAM_CODEC.encode(buf, effect.type());
+                buf.writeUtf(GSON.toJson(effect.params()), 32767);
+            }
+        }
+
+        private static com.effecoria.core.magic.SpellDefinition readSpell(RegistryFriendlyByteBuf buf) {
+            ResourceLocation id = ResourceLocation.STREAM_CODEC.decode(buf);
+            MagicSchool school = MagicSchool.fromSerializedName(buf.readUtf(64));
+            float frequency = buf.readFloat();
+            float baseCost = buf.readFloat();
+            float powerMultiplier = buf.readFloat();
+            float sideEntropy = buf.readFloat();
+            float minPhi = buf.readFloat();
+            float minMastery = buf.readFloat();
+            float minPower = buf.readFloat();
+            int unlockEssence = buf.readVarInt();
+            com.effecoria.core.magic.RadialCategory radial =
+                    com.effecoria.core.magic.RadialCategory.fromSerializedName(buf.readUtf(64));
+            int effectCount = buf.readVarInt();
+            List<com.effecoria.core.magic.SpellEffectEntry> effects = new ArrayList<>(effectCount);
+            for (int i = 0; i < effectCount; i++) {
+                ResourceLocation type = ResourceLocation.STREAM_CODEC.decode(buf);
+                com.google.gson.JsonObject params =
+                        GSON.fromJson(buf.readUtf(32767), com.google.gson.JsonObject.class);
+                if (params == null) {
+                    params = new com.google.gson.JsonObject();
+                }
+                effects.add(new com.effecoria.core.magic.SpellEffectEntry(type, params));
+            }
+            return new com.effecoria.core.magic.SpellDefinition(
+                    id,
+                    school,
+                    frequency,
+                    baseCost,
+                    powerMultiplier,
+                    sideEntropy,
+                    minPhi,
+                    minMastery,
+                    minPower,
+                    unlockEssence,
+                    radial,
+                    effects);
+        }
+    }
+
+    /** Server → client: seal word lexicon for the programming UI. */
+    public record SealWordCatalogPayload(List<com.effecoria.core.seal.SealWordDefinition> words)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<SealWordCatalogPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "seal_word_catalog"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, SealWordCatalogPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, payload) -> {
+                            buf.writeVarInt(payload.words().size());
+                            for (com.effecoria.core.seal.SealWordDefinition word : payload.words()) {
+                                ResourceLocation.STREAM_CODEC.encode(buf, word.id());
+                                buf.writeUtf(word.kind().serializedName(), 32);
+                                buf.writeUtf(word.effect() == null ? "" : word.effect(), 128);
+                                buf.writeFloat(word.numberValue());
+                                buf.writeBoolean(word.soundEvent() != null);
+                                if (word.soundEvent() != null) {
+                                    ResourceLocation.STREAM_CODEC.encode(buf, word.soundEvent());
+                                }
+                                buf.writeFloat(word.psiCost());
+                                buf.writeFloat(word.minMastery());
+                                buf.writeBoolean(word.starter());
+                            }
+                        },
+                        buf -> {
+                            int count = buf.readVarInt();
+                            List<com.effecoria.core.seal.SealWordDefinition> list = new ArrayList<>(count);
+                            for (int i = 0; i < count; i++) {
+                                ResourceLocation id = ResourceLocation.STREAM_CODEC.decode(buf);
+                                com.effecoria.core.seal.SealWordKind kind =
+                                        com.effecoria.core.seal.SealWordKind.fromSerialized(buf.readUtf(32));
+                                String effect = buf.readUtf(128);
+                                float numberValue = buf.readFloat();
+                                ResourceLocation sound = buf.readBoolean()
+                                        ? ResourceLocation.STREAM_CODEC.decode(buf)
+                                        : null;
+                                float psiCost = buf.readFloat();
+                                float minMastery = buf.readFloat();
+                                boolean starter = buf.readBoolean();
+                                list.add(new com.effecoria.core.seal.SealWordDefinition(
+                                        id, kind, effect, numberValue, sound, psiCost, minMastery, starter));
+                            }
+                            return new SealWordCatalogPayload(list);
+                        });
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(SealWordCatalogPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                java.util.HashMap<ResourceLocation, com.effecoria.core.seal.SealWordDefinition> map =
+                        new java.util.HashMap<>();
+                for (com.effecoria.core.seal.SealWordDefinition word : payload.words()) {
+                    map.put(word.id(), word);
+                }
+                com.effecoria.core.seal.SealWordRegistry.replaceAll(map);
             });
         }
     }

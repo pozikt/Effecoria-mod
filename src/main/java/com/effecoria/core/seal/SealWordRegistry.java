@@ -60,6 +60,29 @@ public final class SealWordRegistry {
         return Collections.unmodifiableMap(WORDS);
     }
 
+    public static void replaceAll(Map<ResourceLocation, SealWordDefinition> next) {
+        WORDS.clear();
+        if (next != null && !next.isEmpty()) {
+            WORDS.putAll(next);
+        }
+        LOGGER.info("Seal word lexicon now has {} entries", WORDS.size());
+    }
+
+    public static List<SealWordDefinition> snapshot() {
+        return List.copyOf(WORDS.values());
+    }
+
+    public static void syncTo(net.minecraft.server.level.ServerPlayer player) {
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+                player, new com.effecoria.network.ModNetworking.SealWordCatalogPayload(snapshot()));
+    }
+
+    public static void syncToAll(net.minecraft.server.MinecraftServer server) {
+        for (net.minecraft.server.level.ServerPlayer player : server.getPlayerList().getPlayers()) {
+            syncTo(player);
+        }
+    }
+
     public static List<SealWordDefinition> starters() {
         List<SealWordDefinition> out = new ArrayList<>();
         for (SealWordDefinition word : WORDS.values()) {

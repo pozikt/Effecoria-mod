@@ -121,6 +121,10 @@ public class EffecoriaMod {
                 ModNetworking.SingularityFxPayload.STREAM_CODEC,
                 ModNetworking.SingularityFxPayload::handle);
         registrar.playToClient(
+                ModNetworking.QuasarFxPayload.TYPE,
+                ModNetworking.QuasarFxPayload.STREAM_CODEC,
+                ModNetworking.QuasarFxPayload::handle);
+        registrar.playToClient(
                 ModNetworking.SpatialCutFxPayload.TYPE,
                 ModNetworking.SpatialCutFxPayload.STREAM_CODEC,
                 ModNetworking.SpatialCutFxPayload::handle);
@@ -128,6 +132,14 @@ public class EffecoriaMod {
                 ModNetworking.SpatialRippleFxPayload.TYPE,
                 ModNetworking.SpatialRippleFxPayload.STREAM_CODEC,
                 ModNetworking.SpatialRippleFxPayload::handle);
+        registrar.playToClient(
+                ModNetworking.SpellCatalogPayload.TYPE,
+                ModNetworking.SpellCatalogPayload.STREAM_CODEC,
+                ModNetworking.SpellCatalogPayload::handle);
+        registrar.playToClient(
+                ModNetworking.SealWordCatalogPayload.TYPE,
+                ModNetworking.SealWordCatalogPayload.STREAM_CODEC,
+                ModNetworking.SealWordCatalogPayload::handle);
         registrar.playToServer(
                 ModNetworking.BreathTrainHitPayload.TYPE,
                 ModNetworking.BreathTrainHitPayload.STREAM_CODEC,

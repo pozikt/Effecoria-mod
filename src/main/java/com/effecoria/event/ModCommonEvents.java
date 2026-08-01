@@ -34,6 +34,7 @@ import com.effecoria.effect.organic.OrganicFieldService;
 import com.effecoria.effect.corruption.CorruptionFieldService;
 import com.effecoria.effect.spatial.SpatialFieldService;
 import com.effecoria.magic.SpellRegistry;
+import com.effecoria.core.seal.SealWordRegistry;
 
 import net.minecraft.server.MinecraftServer;
 
@@ -42,6 +43,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -87,10 +89,24 @@ public final class ModCommonEvents {
     }
 
     @SubscribeEvent
+    public static void onDatapackSync(OnDatapackSyncEvent event) {
+        ServerPlayer player = event.getPlayer();
+        if (player != null) {
+            SpellRegistry.syncTo(player);
+            SealWordRegistry.syncTo(player);
+            return;
+        }
+        SpellRegistry.syncToAll(event.getPlayerList().getServer());
+        SealWordRegistry.syncToAll(event.getPlayerList().getServer());
+    }
+
+    @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player
                 && player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
             SteamCloudService.syncToPlayer(player, serverLevel);
+            SpellRegistry.syncTo(player);
+            SealWordRegistry.syncTo(player);
         }
     }
 

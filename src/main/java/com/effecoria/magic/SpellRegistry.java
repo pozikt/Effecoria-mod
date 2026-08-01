@@ -61,6 +61,30 @@ public final class SpellRegistry {
         return Collections.unmodifiableMap(SPELLS);
     }
 
+    /** Replace the in-memory catalog (used when syncing datapack spells to remote clients). */
+    public static void replaceAll(Map<ResourceLocation, SpellDefinition> next) {
+        SPELLS.clear();
+        if (next != null && !next.isEmpty()) {
+            SPELLS.putAll(next);
+        }
+        LOGGER.info("Spell catalog now has {} entries", SPELLS.size());
+    }
+
+    public static List<SpellDefinition> snapshot() {
+        return List.copyOf(SPELLS.values());
+    }
+
+    public static void syncTo(net.minecraft.server.level.ServerPlayer player) {
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+                player, new com.effecoria.network.ModNetworking.SpellCatalogPayload(snapshot()));
+    }
+
+    public static void syncToAll(net.minecraft.server.MinecraftServer server) {
+        for (net.minecraft.server.level.ServerPlayer player : server.getPlayerList().getPlayers()) {
+            syncTo(player);
+        }
+    }
+
     private static SpellDefinition parse(JsonObject json) {
         ResourceLocation id = ResourceLocation.parse(json.get("id").getAsString());
         MagicSchool school = MagicSchool.fromSerializedName(json.get("school").getAsString());
