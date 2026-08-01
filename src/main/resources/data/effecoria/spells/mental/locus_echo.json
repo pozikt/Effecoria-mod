@@ -1,0 +1,20 @@
+{
+  "id": "effecoria:locus_echo",
+  "school": "mental",
+  "frequency_hz": 9.2,
+  "base_cost": 16,
+  "power_multiplier": 0.95,
+  "side_entropy": 0.04,
+  "min_phi": 0.14,
+  "min_mastery": 0.12,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:locus_echo",
+      "search_radius": 96,
+      "offset_min": 200,
+      "offset_max": 300,
+      "display_ticks": 100
+    }
+  ]
+}

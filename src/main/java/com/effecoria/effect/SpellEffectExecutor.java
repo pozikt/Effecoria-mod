@@ -112,6 +112,7 @@ public final class SpellEffectExecutor {
             "neural_lock",
             "telekinetic_crush",
             "mind_probe",
+            "locus_echo",
             "synaptic_overload",
             "psychic_drain",
             "thought_bomb",
@@ -385,6 +386,7 @@ public final class SpellEffectExecutor {
             case "mass_confusion" -> MentalEffects.massConfusion(caster, effect, power);
             case "psychic_barrier" -> MentalEffects.psychicBarrier(caster, effect, power);
             case "mind_probe" -> MentalEffects.mindProbe(caster, effect, power, target);
+            case "locus_echo" -> MentalEffects.locusEcho(caster, effect, power, target);
             case "synaptic_overload" -> MentalEffects.synapticOverload(caster, effect, power, target);
             case "psychic_drain" -> MentalEffects.psychicDrain(caster, effect, power, target);
             case "mental_fortress" -> MentalEffects.mentalFortress(caster, effect, power);

@@ -1,27 +1,45 @@
 package com.effecoria.effect.mental;
 
-import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
+import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.core.magic.SpellEffectEntry;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
+import com.effecoria.network.ModNetworking;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.StructureTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public final class MentalEffects {
     private MentalEffects() {}
+
+    private static final List<TagKey<Structure>> LOCUS_STRUCTURE_TAGS = List.of(
+            StructureTags.VILLAGE,
+            StructureTags.MINESHAFT,
+            StructureTags.OCEAN_RUIN,
+            StructureTags.SHIPWRECK,
+            StructureTags.RUINED_PORTAL,
+            StructureTags.EYE_OF_ENDER_LOCATED,
+            StructureTags.ON_TREASURE_MAPS,
+            StructureTags.DOLPHIN_LOCATED);
 
     public static void mindBolt(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         if (target == null) {
@@ -153,6 +171,65 @@ public final class MentalEffects {
                         Math.round(target.getMaxHealth())),
                 true);
         finishHit(caster.serverLevel(), target.position(), HitFx.SENSE);
+    }
+
+    public static void locusEcho(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        int searchRadius = effect.params().has("search_radius") ? effect.params().get("search_radius").getAsInt() : 96;
+        int offsetMin = effect.params().has("offset_min") ? effect.params().get("offset_min").getAsInt() : 200;
+        int offsetMax = effect.params().has("offset_max") ? effect.params().get("offset_max").getAsInt() : 300;
+        int displayTicks = effect.params().has("display_ticks") ? effect.params().get("display_ticks").getAsInt() : 100;
+        if (offsetMax < offsetMin) {
+            int swap = offsetMin;
+            offsetMin = offsetMax;
+            offsetMax = swap;
+        }
+
+        // Soft afflict gate — reading a place-memory from the target's mind.
+        if (!gateAfflict(caster, target, Math.max(40, displayTicks / 2), true)) {
+            return;
+        }
+
+        ServerLevel level = caster.serverLevel();
+        BlockPos origin = target.blockPosition();
+        List<TagKey<Structure>> pool = new ArrayList<>(LOCUS_STRUCTURE_TAGS);
+        Collections.shuffle(pool, new Random(level.getRandom().nextLong()));
+
+        BlockPos found = null;
+        for (TagKey<Structure> tag : pool) {
+            BlockPos hit = level.findNearestMapStructure(tag, origin, searchRadius, false);
+            if (hit != null) {
+                found = hit;
+                break;
+            }
+        }
+        if (found == null) {
+            caster.displayClientMessage(
+                    net.minecraft.network.chat.Component.translatable("message.effecoria.mental.locus_echo_empty"),
+                    true);
+            spawnSense(level, target.position().add(0, 1, 0));
+            return;
+        }
+
+        var random = level.getRandom();
+        int dist = offsetMin + random.nextInt(Math.max(1, offsetMax - offsetMin + 1));
+        double angle = random.nextDouble() * Math.PI * 2.0;
+        int blurX = found.getX() + (int) Math.round(Math.cos(angle) * dist);
+        int blurZ = found.getZ() + (int) Math.round(Math.sin(angle) * dist);
+        int blurY = found.getY() + random.nextInt(41) - 20;
+
+        PacketDistributor.sendToPlayer(
+                caster, new ModNetworking.BlurredLocusPayload(blurX, blurY, blurZ, displayTicks));
+        finishHit(level, target.position(), HitFx.SENSE);
+        level.playSound(
+                null,
+                target.blockPosition(),
+                SoundEvents.AMETHYST_BLOCK_CHIME,
+                SoundSource.PLAYERS,
+                0.55f,
+                1.55f);
     }
 
     public static void synapticOverload(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {

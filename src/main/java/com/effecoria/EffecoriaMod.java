@@ -121,6 +121,10 @@ public class EffecoriaMod {
                 ModNetworking.SteamCloudsPayload.STREAM_CODEC,
                 ModNetworking.SteamCloudsPayload::handle);
         registrar.playToClient(
+                ModNetworking.BlurredLocusPayload.TYPE,
+                ModNetworking.BlurredLocusPayload.STREAM_CODEC,
+                ModNetworking.BlurredLocusPayload::handle);
+        registrar.playToClient(
                 ModNetworking.SingularityFxPayload.TYPE,
                 ModNetworking.SingularityFxPayload.STREAM_CODEC,
                 ModNetworking.SingularityFxPayload::handle);

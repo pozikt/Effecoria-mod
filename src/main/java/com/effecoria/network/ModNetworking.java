@@ -188,6 +188,36 @@ public final class ModNetworking {
         }
     }
 
+    /** Server → caster: blurred structure coordinates for Locus Echo HUD. */
+    public record BlurredLocusPayload(int x, int y, int z, int displayTicks) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<BlurredLocusPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "blurred_locus"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, BlurredLocusPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.VAR_INT,
+                        BlurredLocusPayload::x,
+                        ByteBufCodecs.VAR_INT,
+                        BlurredLocusPayload::y,
+                        ByteBufCodecs.VAR_INT,
+                        BlurredLocusPayload::z,
+                        ByteBufCodecs.VAR_INT,
+                        BlurredLocusPayload::displayTicks,
+                        BlurredLocusPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(BlurredLocusPayload payload, IPayloadContext context) {
+            context.enqueueWork(
+                    () -> com.effecoria.client.hud.BlurredLocusHud.show(
+                            payload.x(), payload.y(), payload.z(), payload.displayTicks()));
+        }
+    }
+
     /** Server → nearby clients: world-anchored spatial singularity pulse. */
     public record SingularityFxPayload(double x, double y, double z, float intensity, int durationTicks)
             implements CustomPacketPayload {

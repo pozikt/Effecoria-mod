@@ -43,6 +43,7 @@ public final class SpellProgression {
                     id("cliff_urge"),
                     id("drown_urge"),
                     id("mind_probe"),
+                    id("locus_echo"),
                     id("mass_confusion"),
                     id("psychic_frenzy"),
                     id("synaptic_overload"),

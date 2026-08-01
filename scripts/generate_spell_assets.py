@@ -34,7 +34,7 @@ SPELL_SCHOOL = {
     "mind_lance": "mental", "psychic_focus": "mental",
     "mind_bolt": "mental", "psychic_scream": "mental", "thought_lance": "mental",
     "neural_lock": "mental", "telekinetic_crush": "mental", "mass_confusion": "mental",
-    "psychic_barrier": "mental", "mind_probe": "mental", "synaptic_overload": "mental",
+    "psychic_barrier": "mental", "mind_probe": "mental", "locus_echo": "mental", "synaptic_overload": "mental",
     "psychic_drain": "mental", "mental_fortress": "mental", "thought_bomb": "mental",
     "psychic_storm": "mental", "psychic_amplify": "mental", "omega_mind": "mental",
     "mind_terror": "mental", "cliff_urge": "mental", "drown_urge": "mental", "psychic_frenzy": "mental", "mass_hysteria": "mental",
@@ -260,6 +260,26 @@ def icon_mind_probe(d, cx, cy, color):
     icon_mental_eye(d, cx, cy - 2, color)
     d.line([(cx, cy + 6), (cx, cy + 14)], fill=(160, 200, 255, 230), width=2)
     draw_disc(d, cx, cy + 14, 2, (200, 230, 255, 255))
+
+
+def icon_locus_echo(d, cx, cy, color):
+    # Memory reading: open mind + swirling recall fragments
+    head = (150, 120, 220, 255)
+    mist = (200, 170, 255, 200)
+    page = (220, 230, 255, 240)
+    ink = (80, 60, 140, 255)
+    # head / skull silhouette
+    draw_disc(d, cx - 2, cy - 2, 9, head)
+    d.polygon([(cx - 8, cy + 4), (cx + 4, cy + 4), (cx + 2, cy + 12), (cx - 6, cy + 12)], fill=head)
+    # memory page / fragment floating out
+    d.polygon([(cx + 2, cy - 10), (cx + 14, cy - 12), (cx + 13, cy + 4), (cx + 1, cy + 6)], fill=page)
+    d.line([(cx + 5, cy - 6), (cx + 11, cy - 7)], fill=ink, width=1)
+    d.line([(cx + 4, cy - 2), (cx + 10, cy - 3)], fill=ink, width=1)
+    d.line([(cx + 4, cy + 2), (cx + 9, cy + 1)], fill=ink, width=1)
+    # recall wisps
+    draw_disc(d, cx - 10, cy - 8, 2, mist)
+    draw_disc(d, cx + 8, cy + 8, 2, mist)
+    draw_disc(d, cx - 4, cy + 10, 1, (230, 210, 255, 220))
 
 
 def icon_synaptic_overload(d, cx, cy, color):
@@ -914,6 +934,7 @@ DRAWERS = {
     "mass_confusion": icon_mass_confusion,
     "psychic_barrier": icon_psychic_barrier,
     "mind_probe": icon_mind_probe,
+    "locus_echo": icon_locus_echo,
     "synaptic_overload": icon_synaptic_overload,
     "psychic_drain": icon_psychic_drain,
     "mental_fortress": icon_mental_fortress,

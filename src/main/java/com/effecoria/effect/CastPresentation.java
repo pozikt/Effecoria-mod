@@ -92,6 +92,7 @@ public final class CastPresentation {
     private static final Set<ResourceLocation> MENTAL_SENSE = Set.of(
             id("sense_phi"),
             id("mind_probe"),
+            id("locus_echo"),
             id("psychic_focus"),
             id("psychic_amplify"),
             id("omega_mind"));
