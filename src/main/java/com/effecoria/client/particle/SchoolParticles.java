@@ -329,6 +329,210 @@ public final class SchoolParticles {
         }
     }
 
+    /** Rising then drifting ember ash. */
+    public static class EmberParticle extends TextureSheetParticle {
+        protected EmberParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.gravity = 0.02F;
+            this.quadSize = 0.05F + this.random.nextFloat() * 0.04F;
+            this.lifetime = 16 + this.random.nextInt(12);
+            this.xd = xd + (this.random.nextFloat() - 0.5F) * 0.02;
+            this.yd = 0.03 + this.random.nextFloat() * 0.04;
+            this.zd = zd + (this.random.nextFloat() - 0.5F) * 0.02;
+            this.sprite = sprites.get(this.random);
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.xd += Mth.sin(this.age * 0.3F) * 0.0015;
+            this.alpha = 1.0F - (float) this.age / (float) this.lifetime;
+            this.quadSize *= 0.99F;
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new EmberParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Hot plasma core — fast bright flicker. */
+    public static class PlasmaParticle extends TextureSheetParticle {
+        protected PlasmaParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.gravity = -0.02F;
+            this.quadSize = 0.09F + this.random.nextFloat() * 0.07F;
+            this.lifetime = 8 + this.random.nextInt(6);
+            this.xd = xd + (this.random.nextFloat() - 0.5F) * 0.04;
+            this.yd = 0.02 + this.random.nextFloat() * 0.05;
+            this.zd = zd + (this.random.nextFloat() - 0.5F) * 0.04;
+            this.sprite = sprites.get(this.random);
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.oRoll = this.roll;
+            this.roll += 0.25F;
+            this.alpha *= 0.88F;
+            this.quadSize *= 0.96F;
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new PlasmaParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Jagged lightning spark. */
+    public static class LightningSparkParticle extends TextureSheetParticle {
+        protected LightningSparkParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.quadSize = 0.07F + this.random.nextFloat() * 0.06F;
+            this.lifetime = 4 + this.random.nextInt(5);
+            this.xd = xd + (this.random.nextFloat() - 0.5F) * 0.12;
+            this.yd = yd + (this.random.nextFloat() - 0.5F) * 0.12;
+            this.zd = zd + (this.random.nextFloat() - 0.5F) * 0.12;
+            this.sprite = sprites.get(this.random);
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.xd *= 0.85;
+            this.yd *= 0.85;
+            this.zd *= 0.85;
+            this.alpha *= 0.8F;
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new LightningSparkParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Inward vacuum mote. */
+    public static class VacuumParticle extends TextureSheetParticle {
+        protected VacuumParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.gravity = 0.0F;
+            this.quadSize = 0.1F + this.random.nextFloat() * 0.08F;
+            this.lifetime = 14 + this.random.nextInt(10);
+            this.xd = xd;
+            this.yd = yd;
+            this.zd = zd;
+            this.sprite = sprites.get(this.random);
+            this.alpha = 0.7F;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.xd *= 0.9;
+            this.yd *= 0.9;
+            this.zd *= 0.9;
+            this.alpha = 0.7F * (1.0F - (float) this.age / (float) this.lifetime);
+            this.quadSize *= 0.98F;
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new VacuumParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
     /** Drifting leaf with gentle tumble. */
     public static class LeafParticle extends TextureSheetParticle {
         protected LeafParticle(

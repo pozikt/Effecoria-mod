@@ -121,7 +121,7 @@ public final class ElementalFieldService {
                 0f);
         level.playSound(null, center.x, center.y, center.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.35f, 1.8f);
         level.sendParticles(
-                ParticleTypes.ELECTRIC_SPARK,
+                ModParticleTypes.ELEMENTAL_SPARK.get(),
                 center.x,
                 center.y + 0.5,
                 center.z,
@@ -388,7 +388,7 @@ public final class ElementalFieldService {
 
         if (now % 3 == 0) {
             level.sendParticles(
-                    ParticleTypes.ELECTRIC_SPARK,
+                    ModParticleTypes.ELEMENTAL_SPARK.get(),
                     field.center.x,
                     field.center.y + 0.6,
                     field.center.z,
@@ -650,7 +650,7 @@ public final class ElementalFieldService {
         level.sendParticles(
                 ModParticleTypes.PHI_FLAME.get(), center.x, center.y, center.z, 28, 0.25, 0.35, 0.25, 0.04);
         level.sendParticles(
-                ParticleTypes.END_ROD, center.x, center.y, center.z, 36, 0.35, 0.45, 0.35, 0.08);
+                ModParticleTypes.ELEMENTAL_PLASMA.get(), center.x, center.y, center.z, 36, 0.35, 0.45, 0.35, 0.08);
         level.sendParticles(
                 ModParticleTypes.ICE_CRYSTAL.get(),
                 center.x,
@@ -682,7 +682,7 @@ public final class ElementalFieldService {
                 radius * 0.7,
                 0.02);
         level.sendParticles(
-                ParticleTypes.ELECTRIC_SPARK,
+                ModParticleTypes.ELEMENTAL_SPARK.get(),
                 center.x,
                 center.y + 0.5,
                 center.z,
@@ -707,7 +707,7 @@ public final class ElementalFieldService {
             if (i == 0) {
                 level.sendParticles(
                         ModParticleTypes.PHI_FLAME.get(), center.x, center.y, center.z, 2, 0.12, 0.12, 0.12, 0.01);
-                level.sendParticles(ParticleTypes.END_ROD, center.x, center.y, center.z, 2, 0.08, 0.1, 0.08, 0.012);
+                level.sendParticles(ModParticleTypes.ELEMENTAL_PLASMA.get(), center.x, center.y, center.z, 2, 0.08, 0.1, 0.08, 0.012);
                 level.sendParticles(ModParticleTypes.PHI_SPARK.get(), center.x, center.y, center.z, 1, 0.06, 0.06, 0.06, 0.02);
             }
 
@@ -735,8 +735,8 @@ public final class ElementalFieldService {
                 level.sendParticles(ModParticleTypes.PHI_GUST.get(), sx, center.y + 0.6, sz, 1, 0.1, 0.1, 0.1, 0.04);
             }
             if ((now + i) % 6 == 0) {
-                level.sendParticles(ParticleTypes.FLAME, sx, center.y + 0.5, sz, 1, 0.08, 0.08, 0.08, 0.01);
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, sx, center.y + 0.7, sz, 1, 0.12, 0.12, 0.12, 0.05);
+                level.sendParticles(ModParticleTypes.PHI_FLAME.get(), sx, center.y + 0.5, sz, 1, 0.08, 0.08, 0.08, 0.01);
+                level.sendParticles(ModParticleTypes.ELEMENTAL_SPARK.get(), sx, center.y + 0.7, sz, 1, 0.12, 0.12, 0.12, 0.05);
             }
         }
 
@@ -744,7 +744,7 @@ public final class ElementalFieldService {
         if (now % 4 == 0) {
             double yOff = (random.nextDouble() - 0.5) * 0.7;
             level.sendParticles(
-                    ParticleTypes.END_ROD, center.x, center.y + yOff, center.z, 1, 0.04, 0.08, 0.04, 0.01);
+                    ModParticleTypes.ELEMENTAL_PLASMA.get(), center.x, center.y + yOff, center.z, 1, 0.04, 0.08, 0.04, 0.01);
             level.sendParticles(
                     ModParticleTypes.PHI_SPARK.get(), center.x, center.y + yOff * 0.4, center.z, 1, 0.03, 0.05, 0.03, 0.015);
         }

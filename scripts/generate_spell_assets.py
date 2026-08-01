@@ -165,28 +165,324 @@ def icon_focus(d, cx, cy, color):
 
 
 def icon_fire(d, cx, cy, color):
-    d.polygon([(cx, cy - 16), (cx + 10, cy + 4), (cx, cy + 14), (cx - 10, cy + 4)], fill=color)
+    flame = (255, 120, 40, 255)
+    core = (255, 220, 100, 255)
+    d.polygon([(cx, cy - 16), (cx + 11, cy + 2), (cx + 4, cy + 14), (cx - 4, cy + 14), (cx - 11, cy + 2)], fill=flame)
+    d.polygon([(cx, cy - 8), (cx + 5, cy + 4), (cx, cy + 10), (cx - 5, cy + 4)], fill=core)
+    draw_disc(d, cx - 8, cy + 10, 2, (255, 160, 60, 220))
+    draw_disc(d, cx + 9, cy + 8, 2, (255, 160, 60, 220))
 
 
 def icon_wind(d, cx, cy, color):
-    for i in range(3):
-        y = cy - 6 + i * 6
-        d.arc((cx - 14 + i * 2, y - 4, cx + 6 + i * 2, y + 8), 300, 120, fill=color, width=2)
+    gust = (190, 220, 255, 255)
+    for i, (oy, span) in enumerate(((-8, 14), (-1, 16), (6, 12))):
+        y = cy + oy
+        d.arc((cx - span, y - 5, cx + span - 4, y + 7), 200, 340, fill=gust, width=3)
+        d.line([(cx + span - 6, y), (cx + span, y - 3)], fill=gust, width=2)
 
 
 def icon_water(d, cx, cy, color):
-    d.polygon([(cx, cy - 12), (cx + 10, cy + 8), (cx - 10, cy + 8)], fill=color)
-    d.line([(cx - 14, cy + 4), (cx + 14, cy + 4)], fill=color, width=2)
+    drop = (70, 160, 255, 255)
+    highlight = (200, 235, 255, 220)
+    d.polygon([(cx, cy - 14), (cx + 9, cy - 2), (cx + 8, cy + 6), (cx, cy + 12), (cx - 8, cy + 6), (cx - 9, cy - 2)], fill=drop)
+    draw_disc(d, cx - 3, cy - 2, 2, highlight)
 
 
 def icon_steam(d, cx, cy, color):
-    for ox in (-6, 0, 6):
-        d.arc((cx + ox - 4, cy - 10, cx + ox + 4, cy + 2), 200, 340, fill=color, width=2)
+    steam = (210, 225, 235, 230)
+    for ox, oy, r in ((-8, 2, 5), (0, -6, 6), (8, 0, 5), (-2, 8, 4)):
+        draw_disc(d, cx + ox, cy + oy, r, steam)
+    draw_disc(d, cx, cy - 2, 2, (255, 255, 255, 180))
 
 
 def icon_embers(d, cx, cy, color):
-    for ox, oy in [(-8, 4), (0, -6), (8, 4)]:
-        draw_disc(d, cx + ox, cy + oy, 4, color)
+    for ox, oy, r, c in (
+        (-9, 6, 3, (255, 90, 30, 255)),
+        (0, -8, 4, (255, 160, 40, 255)),
+        (9, 4, 3, (255, 110, 30, 255)),
+        (-4, -1, 2, (255, 220, 100, 240)),
+        (5, 10, 2, (255, 180, 60, 240)),
+    ):
+        draw_disc(d, cx + ox, cy + oy, r, c)
+
+
+def icon_ice(d, cx, cy, color):
+    crystal = (160, 220, 255, 255)
+    edge = (230, 250, 255, 255)
+    d.polygon([(cx, cy - 15), (cx + 9, cy - 2), (cx + 5, cy + 12), (cx - 5, cy + 12), (cx - 9, cy - 2)], fill=crystal)
+    d.line([(cx, cy - 12), (cx, cy + 10)], fill=edge, width=2)
+    d.line([(cx - 7, cy), (cx + 7, cy)], fill=edge, width=1)
+    d.line([(cx - 5, cy - 6), (cx + 5, cy + 6)], fill=edge, width=1)
+
+
+def icon_plasma(d, cx, cy, color):
+    # Distinct from fire: violet core + cyan rim, not a purple flame
+    rim = (120, 220, 255, 255)
+    body = (180, 90, 255, 255)
+    core = (255, 255, 255, 255)
+    draw_disc(d, cx, cy, 11, rim)
+    draw_disc(d, cx, cy, 8, body)
+    draw_disc(d, cx, cy, 3, core)
+    for angle in (20, 110, 200, 290):
+        rad = math.radians(angle)
+        x2 = cx + int(round(math.cos(rad) * 14))
+        y2 = cy + int(round(math.sin(rad) * 14))
+        d.line([(cx, cy), (x2, y2)], fill=rim, width=2)
+
+
+def icon_lightning(d, cx, cy, color):
+    # Classic zigzag bolt — readable at 32px
+    bolt = (210, 235, 255, 255)
+    core = (255, 255, 255, 240)
+    d.polygon([
+        (cx + 2, cy - 15), (cx + 8, cy - 2), (cx + 3, cy - 2),
+        (cx + 7, cy + 15), (cx - 2, cy + 1), (cx + 2, cy + 1),
+        (cx - 6, cy - 15),
+    ], fill=bolt)
+    d.line([(cx + 1, cy - 12), (cx + 4, cy - 2), (cx + 0, cy + 0), (cx + 3, cy + 12)], fill=core, width=1)
+
+
+def icon_vacuum(d, cx, cy, color):
+    void = (25, 15, 40, 255)
+    rim = (90, 70, 140, 255)
+    draw_disc(d, cx, cy, 12, rim)
+    draw_disc(d, cx, cy, 8, void)
+    draw_disc(d, cx, cy, 3, (10, 5, 20, 255))
+    for angle in range(0, 360, 60):
+        rad = math.radians(angle)
+        x1 = cx + int(round(math.cos(rad) * 14))
+        y1 = cy + int(round(math.sin(rad) * 14))
+        x2 = cx + int(round(math.cos(rad) * 9))
+        y2 = cy + int(round(math.sin(rad) * 9))
+        d.line([(x1, y1), (x2, y2)], fill=rim, width=2)
+
+
+def icon_sonic(d, cx, cy, color):
+    ring = (180, 210, 255, 230)
+    for r in (6, 10, 14):
+        d.ellipse((cx - r, cy - r, cx + r, cy + r), outline=ring, width=2)
+    draw_disc(d, cx, cy, 3, (240, 250, 255, 255))
+
+
+def icon_hydro_slice(d, cx, cy, color):
+    # Crescent water blade + spray — cut, not drop+bar
+    blade = (90, 180, 255, 255)
+    edge = (220, 245, 255, 255)
+    spray = (140, 210, 255, 230)
+    d.pieslice((cx - 14, cy - 14, cx + 14, cy + 14), 200, 20, fill=blade)
+    d.pieslice((cx - 7, cy - 7, cx + 7, cy + 7), 200, 20, fill=(20, 30, 50, 255))
+    d.arc((cx - 13, cy - 13, cx + 13, cy + 13), 205, 15, fill=edge, width=2)
+    for ox, oy, r in ((10, -6, 2), (12, 2, 2), (8, 8, 1), (-10, 10, 2)):
+        draw_disc(d, cx + ox, cy + oy, r, spray)
+
+
+def icon_frost_wall(d, cx, cy, color):
+    ice = (150, 210, 255, 255)
+    for ox in (-10, -2, 6):
+        d.rectangle((cx + ox, cy - 12, cx + ox + 6, cy + 12), fill=ice)
+        d.line([(cx + ox + 3, cy - 10), (cx + ox + 3, cy + 10)], fill=(230, 250, 255, 200), width=1)
+
+
+def icon_great_fire(d, cx, cy, color):
+    icon_fire(d, cx, cy, color)
+    d.ellipse((cx - 15, cy - 15, cx + 15, cy + 15), outline=(255, 180, 60, 200), width=2)
+    draw_disc(d, cx + 10, cy - 8, 2, (255, 220, 100, 230))
+
+
+def icon_steam_flight(d, cx, cy, color):
+    icon_steam(d, cx, cy + 2, color)
+    wing = (200, 230, 255, 220)
+    d.arc((cx - 16, cy - 10, cx - 2, cy + 6), 200, 20, fill=wing, width=3)
+    d.arc((cx + 2, cy - 10, cx + 16, cy + 6), 160, 340, fill=wing, width=3)
+
+
+def icon_air_hand(d, cx, cy, color):
+    palm = (200, 225, 255, 240)
+    draw_disc(d, cx, cy + 2, 7, palm)
+    for ox in (-8, -3, 3, 8):
+        d.line([(cx + ox // 2, cy - 2), (cx + ox, cy - 14)], fill=palm, width=3)
+    icon_wind(d, cx, cy + 8, color)
+
+
+def icon_water_prison(d, cx, cy, color):
+    cage = (60, 140, 230, 230)
+    d.ellipse((cx - 13, cy - 14, cx + 13, cy + 14), outline=cage, width=3)
+    icon_water(d, cx, cy, color)
+
+
+def icon_vacuum_cage(d, cx, cy, color):
+    icon_vacuum(d, cx, cy, color)
+    d.ellipse((cx - 15, cy - 15, cx + 15, cy + 15), outline=(110, 90, 160, 180), width=1)
+
+
+def icon_water_shield(d, cx, cy, color):
+    shield = (80, 170, 255, 230)
+    d.polygon([(cx, cy - 14), (cx + 12, cy - 4), (cx + 8, cy + 12), (cx - 8, cy + 12), (cx - 12, cy - 4)], fill=shield)
+    draw_disc(d, cx, cy, 4, (200, 235, 255, 220))
+
+
+def icon_shockwave(d, cx, cy, color):
+    icon_sonic(d, cx, cy, color)
+    gust = (170, 200, 240, 200)
+    for ang in (0, 90, 180, 270):
+        rad = math.radians(ang)
+        x2 = cx + int(round(math.cos(rad) * 15))
+        y2 = cy + int(round(math.sin(rad) * 15))
+        d.line([(cx, cy), (x2, y2)], fill=gust, width=2)
+
+
+def icon_ice_sheet(d, cx, cy, color):
+    sheet = (170, 225, 255, 240)
+    d.polygon([(cx - 14, cy + 4), (cx - 6, cy - 10), (cx + 10, cy - 6), (cx + 14, cy + 8), (cx - 8, cy + 12)], fill=sheet)
+    d.line([(cx - 8, cy), (cx + 8, cy + 2)], fill=(230, 250, 255, 220), width=1)
+    icon_ice(d, cx, cy - 2, color)
+
+
+def icon_breath_bubble(d, cx, cy, color):
+    bubble = (150, 220, 255, 200)
+    d.ellipse((cx - 12, cy - 12, cx + 12, cy + 12), outline=bubble, width=3)
+    draw_disc(d, cx - 3, cy - 4, 3, (230, 250, 255, 200))
+    icon_water(d, cx + 2, cy + 2, color)
+
+
+def icon_sonic_lance(d, cx, cy, color):
+    icon_lance(d, cx, cy, (200, 230, 255, 255))
+    icon_sonic(d, cx - 4, cy + 4, color)
+
+
+def icon_ice_prison(d, cx, cy, color):
+    bars = (150, 210, 255, 255)
+    for ox in (-10, -2, 6):
+        d.rectangle((cx + ox, cy - 12, cx + ox + 5, cy + 12), fill=bars)
+    icon_ice(d, cx, cy, color)
+
+
+def icon_air_ionization(d, cx, cy, color):
+    icon_lightning(d, cx, cy, color)
+    d.ellipse((cx - 13, cy - 13, cx + 13, cy + 13), outline=(160, 220, 255, 180), width=2)
+
+
+def icon_mirage(d, cx, cy, color):
+    haze = (255, 200, 120, 180)
+    for oy in (-8, 0, 8):
+        d.arc((cx - 12, cy + oy - 4, cx + 12, cy + oy + 6), 200, 340, fill=haze, width=2)
+    icon_steam(d, cx, cy - 2, (230, 230, 240, 200))
+
+
+def icon_tornado(d, cx, cy, color):
+    funnel = (180, 210, 240, 255)
+    edge = (220, 240, 255, 230)
+    d.polygon([
+        (cx - 12, cy - 12), (cx + 12, cy - 12),
+        (cx + 4, cy + 12), (cx - 4, cy + 12),
+    ], fill=funnel)
+    d.line([(cx - 6, cy - 4), (cx + 8, cy - 4)], fill=edge, width=1)
+    d.line([(cx - 4, cy + 2), (cx + 5, cy + 2)], fill=edge, width=1)
+    d.line([(cx - 2, cy + 8), (cx + 3, cy + 8)], fill=edge, width=1)
+    draw_disc(d, cx, cy - 14, 2, edge)
+
+
+def icon_ion_storm(d, cx, cy, color):
+    icon_lightning(d, cx - 4, cy, color)
+    icon_lightning(d, cx + 6, cy + 2, color)
+    draw_disc(d, cx, cy - 10, 3, (220, 240, 255, 230))
+
+
+def icon_weak_breeze(d, cx, cy, color):
+    soft = (200, 225, 255, 200)
+    for i in range(2):
+        y = cy - 2 + i * 8
+        d.arc((cx - 12, y - 4, cx + 10, y + 6), 210, 330, fill=soft, width=2)
+
+
+def icon_hyper_cooling(d, cx, cy, color):
+    icon_ice(d, cx, cy, color)
+    d.ellipse((cx - 13, cy - 13, cx + 13, cy + 13), outline=(160, 210, 255, 220), width=2)
+    draw_disc(d, cx, cy, 3, (230, 245, 255, 230))
+
+
+def icon_lightning_spear(d, cx, cy, color):
+    tip = (230, 245, 255, 255)
+    d.polygon([(cx - 3, cy + 4), (cx + 3, cy + 4), (cx, cy + 14)], fill=tip)
+    icon_lightning(d, cx, cy - 2, color)
+
+
+def icon_water_shroud(d, cx, cy, color):
+    d.ellipse((cx - 13, cy - 14, cx + 13, cy + 12), outline=(100, 180, 255, 200), width=2)
+    icon_water(d, cx, cy, color)
+
+
+def icon_air_shroud(d, cx, cy, color):
+    d.ellipse((cx - 13, cy - 14, cx + 13, cy + 12), outline=(200, 220, 255, 200), width=2)
+    icon_wind(d, cx, cy, color)
+
+
+def icon_atmospheric_pressure(d, cx, cy, color):
+    icon_shockwave(d, cx, cy, color)
+    draw_disc(d, cx, cy, 5, (70, 80, 100, 230))
+
+
+def icon_cryo_wave(d, cx, cy, color):
+    wave = (150, 220, 255, 230)
+    d.polygon([(cx - 14, cy + 10), (cx - 4, cy - 8), (cx + 6, cy + 2), (cx + 14, cy - 6), (cx + 14, cy + 12)], fill=wave)
+    icon_ice(d, cx - 2, cy, color)
+
+
+def icon_air_form(d, cx, cy, color):
+    icon_wind(d, cx, cy, color)
+    d.ellipse((cx - 10, cy - 12, cx + 10, cy + 8), outline=(255, 255, 255, 160), width=1)
+    draw_disc(d, cx, cy - 2, 4, (220, 235, 255, 180))
+
+
+def icon_hurricane_storm(d, cx, cy, color):
+    icon_tornado(d, cx, cy, color)
+    d.ellipse((cx - 15, cy - 15, cx + 15, cy + 15), outline=(160, 190, 230, 180), width=2)
+    icon_lightning(d, cx + 8, cy - 8, color)
+
+
+def icon_elemental_supremacy(d, cx, cy, color):
+    icon_fire(d, cx - 7, cy - 2, color)
+    icon_ice(d, cx + 7, cy + 2, color)
+    icon_wind(d, cx, cy - 8, color)
+
+
+def icon_thermonuclear_pulse(d, cx, cy, color):
+    icon_plasma(d, cx, cy, color)
+    icon_embers(d, cx, cy, color)
+    d.ellipse((cx - 15, cy - 15, cx + 15, cy + 15), outline=(255, 220, 120, 220), width=2)
+
+
+def icon_absolute_zero(d, cx, cy, color):
+    icon_ice_prison(d, cx, cy, color)
+    draw_disc(d, cx, cy, 4, (240, 250, 255, 240))
+    d.ellipse((cx - 14, cy - 14, cx + 14, cy + 14), outline=(180, 230, 255, 200), width=1)
+
+
+def icon_meteorological_cataclysm(d, cx, cy, color):
+    icon_hurricane_storm(d, cx, cy, color)
+    icon_embers(d, cx - 6, cy + 6, color)
+
+
+def icon_quasar(d, cx, cy, color):
+    draw_disc(d, cx, cy, 4, (255, 240, 220, 255))
+    d.ellipse((cx - 9, cy - 9, cx + 9, cy + 9), outline=(200, 140, 255, 230), width=2)
+    d.ellipse((cx - 14, cy - 14, cx + 14, cy + 14), outline=(120, 80, 200, 180), width=2)
+    for angle in (0, 72, 144, 216, 288):
+        rad = math.radians(angle)
+        x2 = cx + int(round(math.cos(rad) * 15))
+        y2 = cy + int(round(math.sin(rad) * 15))
+        draw_disc(d, x2, y2, 2, (180, 160, 255, 200))
+
+
+def icon_plasma_barrage(d, cx, cy, color):
+    for ox, oy in ((-8, -5), (0, 0), (8, 5), (-4, 7), (5, -8)):
+        draw_disc(d, cx + ox, cy + oy, 3, (180, 100, 255, 240))
+        draw_disc(d, cx + ox, cy + oy, 1, (255, 255, 255, 230))
+
+
+def icon_steam_veil(d, cx, cy, color):
+    icon_steam(d, cx, cy, color)
+    d.ellipse((cx - 14, cy - 16, cx + 14, cy + 6), outline=(200, 220, 235, 180), width=2)
 
 
 def icon_heart(d, cx, cy, color):
@@ -412,188 +708,6 @@ def icon_snare(d, cx, cy, color):
 def icon_beacon(d, cx, cy, color):
     d.polygon([(cx, cy - 14), (cx + 6, cy + 10), (cx - 6, cy + 10)], fill=color)
     d.line([(cx, cy - 14), (cx, cy + 16)], fill=(255, 255, 200, 200), width=2)
-
-
-def icon_hydro_slice(d, cx, cy, color):
-    d.line([(cx - 14, cy + 2), (cx + 14, cy + 2)], fill=color, width=3)
-    d.polygon([(cx, cy - 10), (cx + 8, cy + 6), (cx - 8, cy + 6)], fill=(120, 200, 255, 200))
-
-
-def icon_ice(d, cx, cy, color):
-    d.polygon([(cx, cy - 14), (cx + 6, cy - 2), (cx + 10, cy + 10), (cx, cy + 6), (cx - 10, cy + 10), (cx - 6, cy - 2)], fill=color)
-
-
-def icon_frost_wall(d, cx, cy, color):
-    icon_shield(d, cx, cy, color)
-    d.line([(cx - 8, cy - 6), (cx + 8, cy + 6)], fill=(220, 240, 255, 200), width=2)
-
-
-def icon_plasma(d, cx, cy, color):
-    icon_fire(d, cx, cy, (255, 140, 255, 255))
-    draw_disc(d, cx, cy, 4, (180, 100, 255, 180))
-
-
-def icon_great_fire(d, cx, cy, color):
-    icon_fire(d, cx, cy, (255, 90, 20, 255))
-    d.ellipse((cx - 10, cy - 8, cx + 10, cy + 10), outline=(255, 200, 80, 230), width=2)
-    draw_disc(d, cx, cy, 5, (255, 240, 160, 200))
-
-
-def icon_steam_flight(d, cx, cy, color):
-    icon_steam(d, cx, cy, color)
-    icon_arrow(d, cx, cy - 2, (220, 240, 255, 230))
-
-
-def icon_air_hand(d, cx, cy, color):
-    icon_wind(d, cx, cy, color)
-    d.ellipse((cx + 2, cy - 2, cx + 10, cy + 8), outline=(230, 245, 255, 230), width=2)
-    d.line([(cx - 2, cy + 2), (cx + 4, cy + 2)], fill=(230, 245, 255, 230), width=2)
-
-
-def icon_water_prison(d, cx, cy, color):
-    icon_water(d, cx, cy, color)
-    d.ellipse((cx - 11, cy - 11, cx + 11, cy + 11), outline=(80, 160, 255, 220), width=2)
-
-
-def icon_vacuum_cage(d, cx, cy, color):
-    icon_wind(d, cx, cy, (180, 180, 200, 255))
-    d.ellipse((cx - 11, cy - 11, cx + 11, cy + 11), outline=(60, 60, 80, 230), width=2)
-    draw_disc(d, cx, cy, 3, (20, 20, 30, 220))
-
-
-def icon_water_shield(d, cx, cy, color):
-    icon_water(d, cx, cy, color)
-    icon_shield(d, cx, cy, (120, 200, 255, 220))
-
-
-def icon_shockwave(d, cx, cy, color):
-    icon_wind(d, cx, cy, color)
-    d.ellipse((cx - 12, cy - 12, cx + 12, cy + 12), outline=(220, 230, 255, 200), width=2)
-    d.ellipse((cx - 7, cy - 7, cx + 7, cy + 7), outline=(180, 200, 255, 180), width=1)
-
-
-def icon_ice_sheet(d, cx, cy, color):
-    icon_ice(d, cx, cy, color)
-    d.rectangle((cx - 10, cy + 4, cx + 10, cy + 10), fill=(180, 220, 255, 200))
-
-
-def icon_breath_bubble(d, cx, cy, color):
-    icon_wind(d, cx, cy, (200, 240, 255, 255))
-    d.ellipse((cx - 8, cy - 10, cx + 8, cy + 2), outline=(180, 230, 255, 230), width=2)
-
-
-def icon_sonic_lance(d, cx, cy, color):
-    icon_arrow(d, cx, cy, (230, 240, 255, 255))
-    d.line([(cx - 10, cy), (cx + 10, cy)], fill=(200, 220, 255, 220), width=3)
-
-
-def icon_ice_prison(d, cx, cy, color):
-    icon_ice(d, cx, cy, color)
-    d.ellipse((cx - 11, cy - 11, cx + 11, cy + 11), outline=(140, 200, 255, 230), width=2)
-
-
-def icon_air_ionization(d, cx, cy, color):
-    icon_plasma(d, cx, cy, color)
-    d.line([(cx - 8, cy + 6), (cx, cy - 8), (cx + 8, cy + 6)], fill=(220, 240, 255, 230), width=2)
-
-
-def icon_mirage(d, cx, cy, color):
-    icon_steam_veil(d, cx, cy, (200, 220, 255, 200))
-    d.ellipse((cx - 6, cy - 4, cx + 6, cy + 8), outline=(180, 200, 255, 180), width=1)
-
-
-def icon_tornado(d, cx, cy, color):
-    icon_wind(d, cx, cy, color)
-    d.polygon([(cx, cy - 12), (cx - 10, cy + 10), (cx + 10, cy + 10)], outline=(200, 220, 255, 220))
-
-
-def icon_ion_storm(d, cx, cy, color):
-    icon_plasma(d, cx, cy, color)
-    d.ellipse((cx - 13, cy - 13, cx + 13, cy + 13), outline=(180, 220, 255, 200), width=2)
-
-
-def icon_weak_breeze(d, cx, cy, color):
-    icon_wind(d, cx, cy, (200, 210, 230, 220))
-    d.arc((cx - 10, cy - 6, cx + 4, cy + 8), 200, 340, fill=(180, 200, 230, 200))
-
-
-def icon_hyper_cooling(d, cx, cy, color):
-    icon_ice(d, cx, cy, color)
-    d.ellipse((cx - 12, cy - 12, cx + 12, cy + 12), outline=(160, 210, 255, 220), width=2)
-    draw_disc(d, cx, cy, 3, (220, 240, 255, 230))
-
-
-def icon_lightning_spear(d, cx, cy, color):
-    icon_plasma(d, cx, cy, color)
-    icon_lance(d, cx, cy, (240, 250, 255, 230))
-
-
-def icon_water_shroud(d, cx, cy, color):
-    icon_water(d, cx, cy, color)
-    d.ellipse((cx - 12, cy - 14, cx + 12, cy + 10), outline=(120, 200, 255, 200), width=2)
-
-
-def icon_air_shroud(d, cx, cy, color):
-    icon_wind(d, cx, cy, color)
-    d.ellipse((cx - 12, cy - 14, cx + 12, cy + 10), outline=(200, 220, 255, 200), width=2)
-
-
-def icon_atmospheric_pressure(d, cx, cy, color):
-    icon_shockwave(d, cx, cy, color)
-    d.ellipse((cx - 5, cy - 5, cx + 5, cy + 5), fill=(80, 90, 110, 220))
-
-
-def icon_cryo_wave(d, cx, cy, color):
-    icon_ice(d, cx, cy, color)
-    d.polygon([(cx - 12, cy + 8), (cx, cy - 10), (cx + 12, cy + 8)], outline=(180, 230, 255, 230))
-
-
-def icon_air_form(d, cx, cy, color):
-    icon_steam_flight(d, cx, cy, (210, 230, 255, 230))
-    d.ellipse((cx - 8, cy - 8, cx + 8, cy + 8), outline=(255, 255, 255, 160), width=1)
-
-
-def icon_hurricane_storm(d, cx, cy, color):
-    icon_tornado(d, cx, cy, color)
-    d.ellipse((cx - 14, cy - 14, cx + 14, cy + 14), outline=(180, 200, 230, 180), width=2)
-
-
-def icon_elemental_supremacy(d, cx, cy, color):
-    icon_fire(d, cx - 5, cy - 2, (255, 140, 60, 230))
-    icon_ice(d, cx + 5, cy + 2, (160, 220, 255, 230))
-    icon_wind(d, cx, cy - 6, (200, 220, 255, 180))
-
-
-def icon_thermonuclear_pulse(d, cx, cy, color):
-    icon_great_fire(d, cx, cy, color)
-    d.ellipse((cx - 14, cy - 14, cx + 14, cy + 14), outline=(255, 220, 120, 220), width=2)
-
-
-def icon_absolute_zero(d, cx, cy, color):
-    icon_ice_prison(d, cx, cy, color)
-    draw_disc(d, cx, cy, 4, (230, 245, 255, 240))
-
-
-def icon_meteorological_cataclysm(d, cx, cy, color):
-    icon_hurricane_storm(d, cx, cy, color)
-    icon_plasma(d, cx, cy - 4, (220, 240, 255, 200))
-
-
-def icon_quasar(d, cx, cy, color):
-    draw_disc(d, cx, cy, 5, (255, 240, 200, 255))
-    d.ellipse((cx - 11, cy - 11, cx + 11, cy + 11), outline=(255, 220, 140, 230), width=2)
-    d.ellipse((cx - 15, cy - 15, cx + 15, cy + 15), outline=(180, 200, 255, 160), width=1)
-
-
-def icon_plasma_barrage(d, cx, cy, color):
-    for ox, oy in ((-7, -4), (0, 0), (7, 4), (-3, 6), (4, -7)):
-        draw_disc(d, cx + ox, cy + oy, 2, (255, 180, 80, 240))
-    icon_plasma(d, cx, cy, color)
-
-
-def icon_steam_veil(d, cx, cy, color):
-    icon_steam(d, cx, cy, color)
-    d.ellipse((cx - 14, cy - 16, cx + 14, cy + 4), outline=color, width=2)
 
 
 DRAWERS = {
@@ -1262,6 +1376,47 @@ def particle_ice_crystal() -> Image.Image:
     return img
 
 
+def particle_elemental_ember(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = PARTICLE // 2 + (variant - 1), PARTICLE // 2
+    draw_disc(d, cx, cy, 3, (255, 120, 40, 230))
+    draw_disc(d, cx, cy, 1, (255, 220, 120, 240))
+    return img
+
+
+def particle_elemental_plasma(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = PARTICLE // 2, PARTICLE // 2
+    core = (200, 120, 255, 240) if variant % 2 == 0 else (120, 220, 255, 240)
+    draw_disc(d, cx, cy, 5, core)
+    draw_disc(d, cx, cy, 2, (255, 255, 255, 230))
+    return img
+
+
+def particle_elemental_spark(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    bolt = (180, 230, 255, 255)
+    if variant % 2 == 0:
+        d.line([(3, 2), (7, 7), (5, 9), (12, 14)], fill=bolt, width=2)
+    else:
+        d.line([(12, 2), (8, 6), (10, 9), (4, 14)], fill=bolt, width=2)
+    draw_disc(d, 8, 8, 1, (255, 255, 255, 255))
+    return img
+
+
+def particle_elemental_vacuum(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = PARTICLE // 2, PARTICLE // 2
+    for r, a in ((7, 50), (5, 90), (3, 140)):
+        draw_disc(d, cx, cy, r, (20, 10, 35, a))
+    draw_disc(d, cx, cy, 1, (60, 40, 90, 180))
+    return img
+
+
 def generate_school_particles():
     """Unique sprites + JSON for each magic-school particle type."""
     # Water — drops, splashes, waves (multi-frame sprite sets)
@@ -1278,6 +1433,34 @@ def generate_school_particles():
     save_particle("phi_flame", particle_phi_flame())
     save_particle("phi_gust", particle_phi_gust())
     save_particle("phi_spark", particle_phi_spark())
+
+    ember_paths = []
+    for i in range(3):
+        name = f"elemental_ember_{i}"
+        save_particle_png(name, particle_elemental_ember(i))
+        ember_paths.append(f"effecoria:{name}")
+    write_particle_json("elemental_ember", ember_paths)
+
+    plasma_paths = []
+    for i in range(2):
+        name = f"elemental_plasma_{i}"
+        save_particle_png(name, particle_elemental_plasma(i))
+        plasma_paths.append(f"effecoria:{name}")
+    write_particle_json("elemental_plasma", plasma_paths)
+
+    spark_paths = []
+    for i in range(2):
+        name = f"elemental_spark_{i}"
+        save_particle_png(name, particle_elemental_spark(i))
+        spark_paths.append(f"effecoria:{name}")
+    write_particle_json("elemental_spark", spark_paths)
+
+    vacuum_paths = []
+    for i in range(2):
+        name = f"elemental_vacuum_{i}"
+        save_particle_png(name, particle_elemental_vacuum(i))
+        vacuum_paths.append(f"effecoria:{name}")
+    write_particle_json("elemental_vacuum", vacuum_paths)
 
     fog_paths = []
     for i in range(3):

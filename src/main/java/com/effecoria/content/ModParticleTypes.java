@@ -30,6 +30,18 @@ public final class ModParticleTypes {
             PARTICLE_TYPES.register("phi_flame", () -> new SimpleParticleType(false));
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> PHI_GUST =
             PARTICLE_TYPES.register("phi_gust", () -> new SimpleParticleType(false));
+    /** Fire cinder / ember ash. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ELEMENTAL_EMBER =
+            PARTICLE_TYPES.register("elemental_ember", () -> new SimpleParticleType(false));
+    /** Hot plasma mote — violet-white. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ELEMENTAL_PLASMA =
+            PARTICLE_TYPES.register("elemental_plasma", () -> new SimpleParticleType(false));
+    /** Lightning / ionization spark. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ELEMENTAL_SPARK =
+            PARTICLE_TYPES.register("elemental_spark", () -> new SimpleParticleType(false));
+    /** Vacuum / void swirl. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ELEMENTAL_VACUUM =
+            PARTICLE_TYPES.register("elemental_vacuum", () -> new SimpleParticleType(false));
 
     // Mental
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MENTAL_FOG =

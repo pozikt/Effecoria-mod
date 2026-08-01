@@ -248,7 +248,7 @@ public final class ElementalEffects {
         level.addFreshEntity(plasma);
 
         level.playSound(null, caster.blockPosition(), SoundEvents.WITHER_SHOOT, SoundSource.PLAYERS, 0.8f, 1.6f);
-        level.sendParticles(ModParticleTypes.PHI_FLAME.get(), caster.getX(), caster.getEyeY(), caster.getZ(), 8, 0.1, 0.1, 0.1, 0.03);
+        spawnPlasma(level, caster.getEyePosition().add(look.scale(0.6)));
     }
 
     /** Soft breeze cantrip — light push along the look direction, no real damage. */
@@ -350,7 +350,7 @@ public final class ElementalEffects {
 
         level.playSound(null, BlockPos.containing(center), SoundEvents.PLAYER_HURT_FREEZE, SoundSource.PLAYERS, 0.9f, 0.7f);
         level.sendParticles(
-                ParticleTypes.SNOWFLAKE,
+                ModParticleTypes.ICE_CRYSTAL.get(),
                 center.x,
                 center.y + 0.5,
                 center.z,
@@ -544,7 +544,7 @@ public final class ElementalEffects {
         level.playSound(null, caster.blockPosition(), SoundEvents.GHAST_SHOOT, SoundSource.PLAYERS, 0.85f, 0.7f);
         spawnFireParticles(level, caster.getEyePosition());
         level.sendParticles(
-                ParticleTypes.FLAME,
+                ModParticleTypes.ELEMENTAL_EMBER.get(),
                 caster.getX() + look.x,
                 caster.getEyeY() + look.y,
                 caster.getZ() + look.z,
@@ -652,12 +652,13 @@ public final class ElementalEffects {
             target.hurtMarked = true;
         }
         level.playSound(null, caster.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7f, 1.4f);
+        spawnSonic(level, caster.position().add(0, 1, 0));
         level.sendParticles(
                 ModParticleTypes.PHI_GUST.get(),
                 caster.getX(),
                 caster.getY() + 1,
                 caster.getZ(),
-                28,
+                20,
                 radius * 0.4,
                 0.4,
                 radius * 0.4,
@@ -685,16 +686,7 @@ public final class ElementalEffects {
         ServerLevel level = caster.serverLevel();
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.GLOWING, Math.min(chargeTicks, 200), 0, false, false, true));
         level.playSound(null, caster.blockPosition(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.5f, 1.7f);
-        level.sendParticles(
-                ParticleTypes.ELECTRIC_SPARK,
-                caster.getX(),
-                caster.getEyeY(),
-                caster.getZ(),
-                16,
-                0.35,
-                0.35,
-                0.35,
-                0.12);
+        spawnLightning(level, caster.getEyePosition());
     }
 
     /** Mirage — caster shimmers; nearby foes struggle to aim (blindness + glow). */
@@ -906,6 +898,9 @@ public final class ElementalEffects {
         for (int i = 0; i <= steps; i++) {
             Vec3 p = start.add(look.scale(i * 0.5));
             level.sendParticles(ModParticleTypes.PHI_GUST.get(), p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.01);
+            if (i % 2 == 0) {
+                level.sendParticles(ModParticleTypes.ELEMENTAL_SPARK.get(), p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.02);
+            }
         }
         level.playSound(null, caster.blockPosition(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 1f, 0.7f);
     }
@@ -954,16 +949,7 @@ public final class ElementalEffects {
                 SoundSource.PLAYERS,
                 0.8f,
                 1.2f);
-        level.sendParticles(
-                ParticleTypes.ELECTRIC_SPARK,
-                center.x,
-                center.y + 0.5,
-                center.z,
-                48,
-                radius * 0.3,
-                0.8,
-                radius * 0.3,
-                0.2);
+        spawnLightning(level, center.add(0, 0.5, 0));
         level.sendParticles(ParticleTypes.FLASH, center.x, center.y + 0.5, center.z, 1, 0, 0, 0, 0);
     }
 
@@ -1010,7 +996,7 @@ public final class ElementalEffects {
         }
         level.playSound(null, BlockPos.containing(center), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7f, 0.5f);
         level.sendParticles(
-                ParticleTypes.CLOUD,
+                ModParticleTypes.PHI_GUST.get(),
                 center.x,
                 center.y + 0.5,
                 center.z,
@@ -1019,6 +1005,7 @@ public final class ElementalEffects {
                 0.3,
                 radius * 0.35,
                 0.04);
+        spawnVacuum(level, center.add(0, 0.3, 0));
     }
 
     public static void cryoWave(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -1068,7 +1055,7 @@ public final class ElementalEffects {
 
         for (int i = 0; i <= (int) (range * 2); i++) {
             Vec3 p = start.add(look.scale(i * 0.5));
-            level.sendParticles(ParticleTypes.SNOWFLAKE, p.x, p.y, p.z, 2, 0.15, 0.1, 0.15, 0.01);
+            level.sendParticles(ModParticleTypes.ICE_CRYSTAL.get(), p.x, p.y, p.z, 2, 0.15, 0.1, 0.15, 0.01);
         }
         level.playSound(null, caster.blockPosition(), SoundEvents.PLAYER_HURT_FREEZE, SoundSource.PLAYERS, 1f, 0.6f);
     }
@@ -1132,7 +1119,18 @@ public final class ElementalEffects {
         ignitePatch(level, BlockPos.containing(center), Math.max(2, Math.round(radius * 0.4f)), 18);
         level.playSound(null, BlockPos.containing(center), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.2f, 0.55f);
         level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, center.x, center.y + 0.5, center.z, 1, 0, 0, 0, 0);
-        level.sendParticles(ParticleTypes.FLAME, center.x, center.y + 0.5, center.z, 60, radius * 0.35, 0.5, radius * 0.35, 0.08);
+        spawnPlasma(level, center.add(0, 0.5, 0));
+        spawnFireParticles(level, center.add(0, 0.5, 0));
+        level.sendParticles(
+                ModParticleTypes.ELEMENTAL_EMBER.get(),
+                center.x,
+                center.y + 0.5,
+                center.z,
+                40,
+                radius * 0.35,
+                0.5,
+                radius * 0.35,
+                0.06);
     }
 
     public static void absoluteZero(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -1171,7 +1169,17 @@ public final class ElementalEffects {
             }
         }
         level.playSound(null, ground, SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 1f, 0.4f);
-        level.sendParticles(ParticleTypes.SNOWFLAKE, center.x, center.y + 0.5, center.z, 50, radius * 0.3, 0.5, radius * 0.3, 0.02);
+        level.sendParticles(
+                ModParticleTypes.ICE_CRYSTAL.get(),
+                center.x,
+                center.y + 0.5,
+                center.z,
+                50,
+                radius * 0.3,
+                0.5,
+                radius * 0.3,
+                0.02);
+        spawnCryoBurst(level, center, radius);
     }
 
     public static void meteorologicalCataclysm(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -1209,8 +1217,18 @@ public final class ElementalEffects {
                 40f,
                 0.2f);
         level.playSound(null, caster.blockPosition(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.2f, 0.6f);
-        level.sendParticles(ParticleTypes.CLOUD, center.x, center.y + 3, center.z, 80, radius * 0.25, 2.0, radius * 0.25, 0.05);
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, center.x, center.y + 2, center.z, 40, radius * 0.2, 1.5, radius * 0.2, 0.1);
+        level.sendParticles(
+                ModParticleTypes.STEAM_FOG.get(),
+                center.x,
+                center.y + 3,
+                center.z,
+                60,
+                radius * 0.25,
+                2.0,
+                radius * 0.25,
+                0.05);
+        spawnLightning(level, center.add(0, 2, 0));
+        spawnWind(level, center.add(0, 1.5, 0));
     }
 
     public static void quasar(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -1249,16 +1267,7 @@ public final class ElementalEffects {
             level.addFreshEntity(plasma);
         }
         level.playSound(null, caster.blockPosition(), SoundEvents.WITHER_SHOOT, SoundSource.PLAYERS, 1f, 1.4f);
-        level.sendParticles(
-                ModParticleTypes.PHI_FLAME.get(),
-                caster.getX(),
-                caster.getEyeY(),
-                caster.getZ(),
-                20,
-                0.3,
-                0.3,
-                0.3,
-                0.05);
+        spawnPlasma(level, caster.getEyePosition());
     }
 
     private static Vec3 aimPoint(ServerPlayer caster, double range) {
@@ -1302,7 +1311,7 @@ public final class ElementalEffects {
         }
         level.setBlock(pos, fire, 3);
         level.sendParticles(
-                ParticleTypes.FLAME,
+                ModParticleTypes.PHI_FLAME.get(),
                 pos.getX() + 0.5,
                 pos.getY() + 0.2,
                 pos.getZ() + 0.5,
@@ -1325,6 +1334,31 @@ public final class ElementalEffects {
 
     public static void spawnFireParticles(ServerLevel level, Vec3 pos) {
         level.sendParticles(ModParticleTypes.PHI_FLAME.get(), pos.x, pos.y, pos.z, 10, 0.08, 0.08, 0.08, 0.015);
+        level.sendParticles(ModParticleTypes.ELEMENTAL_EMBER.get(), pos.x, pos.y, pos.z, 6, 0.12, 0.15, 0.12, 0.01);
+    }
+
+    public static void spawnPlasma(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ELEMENTAL_PLASMA.get(), pos.x, pos.y, pos.z, 12, 0.15, 0.2, 0.15, 0.03);
+        level.sendParticles(ModParticleTypes.PHI_SPARK.get(), pos.x, pos.y, pos.z, 4, 0.1, 0.1, 0.1, 0.02);
+    }
+
+    public static void spawnLightning(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ELEMENTAL_SPARK.get(), pos.x, pos.y, pos.z, 18, 0.35, 0.45, 0.35, 0.08);
+        level.sendParticles(ModParticleTypes.PHI_SPARK.get(), pos.x, pos.y + 0.2, pos.z, 6, 0.15, 0.2, 0.15, 0.04);
+    }
+
+    public static void spawnWind(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.PHI_GUST.get(), pos.x, pos.y, pos.z, 10, 0.3, 0.25, 0.3, 0.04);
+    }
+
+    public static void spawnVacuum(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ELEMENTAL_VACUUM.get(), pos.x, pos.y, pos.z, 14, 0.35, 0.35, 0.35, 0.02);
+        level.sendParticles(ModParticleTypes.PHI_GUST.get(), pos.x, pos.y, pos.z, 4, 0.2, 0.2, 0.2, 0.01);
+    }
+
+    public static void spawnSonic(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.PHI_GUST.get(), pos.x, pos.y, pos.z, 8, 0.25, 0.15, 0.25, 0.05);
+        level.sendParticles(ModParticleTypes.ELEMENTAL_SPARK.get(), pos.x, pos.y, pos.z, 4, 0.15, 0.1, 0.15, 0.03);
     }
 
     public static void spawnWaterBeam(ServerLevel level, Vec3 start, Vec3 look, double range) {
@@ -1340,6 +1374,7 @@ public final class ElementalEffects {
 
     public static void spawnWaterHit(ServerLevel level, Vec3 pos) {
         level.sendParticles(ModParticleTypes.WATER_SPLASH.get(), pos.x, pos.y + 0.5, pos.z, 6, 0.2, 0.15, 0.2, 0.02);
+        level.sendParticles(ModParticleTypes.WATER_DROP.get(), pos.x, pos.y + 0.4, pos.z, 5, 0.15, 0.2, 0.15, 0.03);
     }
 
     public static void spawnSteamBeam(ServerLevel level, Vec3 start, Vec3 look, double range) {
@@ -1352,11 +1387,35 @@ public final class ElementalEffects {
 
     public static void spawnSteamBurst(ServerLevel level, Vec3 pos) {
         level.sendParticles(ModParticleTypes.STEAM_FOG.get(), pos.x, pos.y, pos.z, 12, 0.35, 0.4, 0.35, 0.008);
-        level.sendParticles(ParticleTypes.CLOUD, pos.x, pos.y + 0.5, pos.z, 4, 0.15, 0.2, 0.15, 0.01);
+        level.sendParticles(ModParticleTypes.WATER_DROP.get(), pos.x, pos.y + 0.3, pos.z, 4, 0.2, 0.2, 0.2, 0.02);
     }
 
     public static void spawnIceParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ModParticleTypes.ICE_CRYSTAL.get(), pos.x, pos.y, pos.z, 8, 0.2, 0.25, 0.2, 0.02);
+        level.sendParticles(ModParticleTypes.ICE_CRYSTAL.get(), pos.x, pos.y, pos.z, 10, 0.2, 0.25, 0.2, 0.02);
+        level.sendParticles(ModParticleTypes.WATER_DROP.get(), pos.x, pos.y, pos.z, 3, 0.12, 0.12, 0.12, 0.01);
+    }
+
+    public static void spawnCryoBurst(ServerLevel level, Vec3 pos, float radius) {
+        level.sendParticles(
+                ModParticleTypes.ICE_CRYSTAL.get(),
+                pos.x,
+                pos.y + 0.4,
+                pos.z,
+                Math.round(18 + radius * 4),
+                radius * 0.3,
+                0.4,
+                radius * 0.3,
+                0.03);
+        level.sendParticles(
+                ModParticleTypes.STEAM_FOG.get(),
+                pos.x,
+                pos.y + 0.3,
+                pos.z,
+                6,
+                radius * 0.2,
+                0.25,
+                radius * 0.2,
+                0.008);
     }
 
     public static float clampPowerScale(float power) {

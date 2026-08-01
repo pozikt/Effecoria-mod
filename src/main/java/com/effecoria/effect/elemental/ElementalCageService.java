@@ -160,11 +160,12 @@ public final class ElementalCageService {
                 center.x,
                 center.y,
                 center.z,
-                40,
+                24,
                 radius * 0.4,
                 radius * 0.4,
                 radius * 0.4,
                 0.03);
+        ElementalEffects.spawnVacuum(level, center);
     }
 
     /** Legacy single-target vacuum — still creates an AoE sphere around the target. */
@@ -318,11 +319,7 @@ public final class ElementalCageService {
                         ModParticleTypes.WATER_WAVE.get(), c.x, c.y, c.z, 2, r * 0.3, 0.1, r * 0.3, 0.01);
             }
             case ICE -> ElementalEffects.spawnIceParticles(level, c);
-            case VACUUM -> {
-                level.sendParticles(
-                        ModParticleTypes.PHI_GUST.get(), c.x, c.y, c.z, 5, r * 0.35, r * 0.35, r * 0.35, 0.03);
-                level.sendParticles(ParticleTypes.SMOKE, c.x, c.y, c.z, 3, r * 0.25, r * 0.25, r * 0.25, 0.01);
-            }
+            case VACUUM -> ElementalEffects.spawnVacuum(level, c);
         }
     }
 }

@@ -48,6 +48,46 @@ public final class CastPresentation {
             ResourceLocation.fromNamespaceAndPath("effecoria", "biological_immortality"),
             ResourceLocation.fromNamespaceAndPath("effecoria", "biological_singularity"));
 
+    private static final Set<ResourceLocation> ELEMENTAL_FIRE = Set.of(
+            id("fire_burst"), id("great_fireball"), id("ember_volley"), id("thermonuclear_pulse"));
+    private static final Set<ResourceLocation> ELEMENTAL_PLASMA = Set.of(id("plasma_bolt"), id("plasma_barrage"));
+    private static final Set<ResourceLocation> ELEMENTAL_WATER = Set.of(
+            id("water_stream"),
+            id("hydro_slice"),
+            id("water_prison"),
+            id("water_shield"),
+            id("water_shroud"),
+            id("breath_bubble"));
+    private static final Set<ResourceLocation> ELEMENTAL_STEAM =
+            Set.of(id("steam_jet"), id("steam_veil"), id("steam_flight"), id("mirage"));
+    private static final Set<ResourceLocation> ELEMENTAL_ICE = Set.of(
+            id("ice_shard"),
+            id("frost_bastion"),
+            id("ice_prison"),
+            id("ice_sheet"),
+            id("cryo_wave"),
+            id("hyper_cooling"),
+            id("absolute_zero"));
+    private static final Set<ResourceLocation> ELEMENTAL_WIND = Set.of(
+            id("wind_push"),
+            id("weak_breeze"),
+            id("air_hand"),
+            id("air_shroud"),
+            id("air_form"),
+            id("tornado"),
+            id("hurricane_storm"),
+            id("shockwave"),
+            id("sonic_lance"),
+            id("atmospheric_pressure"));
+    private static final Set<ResourceLocation> ELEMENTAL_LIGHTNING =
+            Set.of(id("lightning_spear"), id("air_ionization"), id("ion_storm"), id("meteorological_cataclysm"));
+    private static final Set<ResourceLocation> ELEMENTAL_VACUUM = Set.of(id("vacuum_cage"));
+    private static final Set<ResourceLocation> ELEMENTAL_VEIL_ONLY =
+            Set.of(id("quasar"), id("elemental_supremacy"));
+
+    private static ResourceLocation id(String path) {
+        return ResourceLocation.fromNamespaceAndPath("effecoria", path);
+    }
     /** Soft school cue at the caster before spell logic runs. */
     public static void playWindUp(ServerPlayer caster, SpellDefinition spell) {
         MagicSchool school = spell.requiredSchool();
@@ -171,15 +211,7 @@ public final class CastPresentation {
                     1.35f,
                     0.55f,
                     1.25f);
-            case ELEMENTAL -> new SchoolTheme(
-                    ModParticleTypes.PHI_FLAME.get(),
-                    ModParticleTypes.PHI_GUST.get(),
-                    SoundEvents.BLAZE_SHOOT,
-                    SoundEvents.FIRECHARGE_USE,
-                    0.4f,
-                    1.25f,
-                    0.55f,
-                    1.05f);
+            case ELEMENTAL -> elementalTheme(spell);
             case ORGANIC -> ORGANIC_HEAL_SPELLS.contains(spell.id())
                     ? new SchoolTheme(
                             ModParticleTypes.ORGANIC_BLOOD_CELL.get(),
@@ -247,6 +279,119 @@ public final class CastPresentation {
                     0.3f,
                     1.0f);
         };
+    }
+
+    private static SchoolTheme elementalTheme(SpellDefinition spell) {
+        ResourceLocation id = spell.id();
+        if (ELEMENTAL_VEIL_ONLY.contains(id)) {
+            return new SchoolTheme(
+                    null,
+                    null,
+                    SoundEvents.BEACON_ACTIVATE,
+                    SoundEvents.BEACON_POWER_SELECT,
+                    0.45f,
+                    1.1f,
+                    0.55f,
+                    0.85f);
+        }
+        if (ELEMENTAL_FIRE.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.PHI_FLAME.get(),
+                    ModParticleTypes.ELEMENTAL_EMBER.get(),
+                    SoundEvents.BLAZE_SHOOT,
+                    SoundEvents.FIRECHARGE_USE,
+                    0.4f,
+                    1.2f,
+                    0.55f,
+                    1.0f);
+        }
+        if (ELEMENTAL_PLASMA.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.ELEMENTAL_PLASMA.get(),
+                    ModParticleTypes.PHI_SPARK.get(),
+                    SoundEvents.WITHER_SHOOT,
+                    SoundEvents.FIRECHARGE_USE,
+                    0.4f,
+                    1.5f,
+                    0.55f,
+                    1.35f);
+        }
+        if (ELEMENTAL_WATER.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.WATER_DROP.get(),
+                    ModParticleTypes.WATER_SPLASH.get(),
+                    SoundEvents.BUCKET_EMPTY,
+                    SoundEvents.PLAYER_SPLASH,
+                    0.45f,
+                    1.15f,
+                    0.55f,
+                    1.0f);
+        }
+        if (ELEMENTAL_STEAM.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.STEAM_FOG.get(),
+                    ModParticleTypes.WATER_DROP.get(),
+                    SoundEvents.FIRE_EXTINGUISH,
+                    SoundEvents.GENERIC_EXTINGUISH_FIRE,
+                    0.4f,
+                    1.3f,
+                    0.5f,
+                    1.1f);
+        }
+        if (ELEMENTAL_ICE.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.ICE_CRYSTAL.get(),
+                    ModParticleTypes.WATER_DROP.get(),
+                    SoundEvents.PLAYER_HURT_FREEZE,
+                    SoundEvents.GLASS_BREAK,
+                    0.4f,
+                    1.4f,
+                    0.5f,
+                    1.2f);
+        }
+        if (ELEMENTAL_WIND.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.PHI_GUST.get(),
+                    ModParticleTypes.STEAM_FOG.get(),
+                    SoundEvents.BREEZE_IDLE_GROUND,
+                    SoundEvents.BREEZE_SHOOT,
+                    0.4f,
+                    1.25f,
+                    0.55f,
+                    1.05f);
+        }
+        if (ELEMENTAL_LIGHTNING.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.ELEMENTAL_SPARK.get(),
+                    ModParticleTypes.PHI_SPARK.get(),
+                    SoundEvents.TRIDENT_THUNDER.value(),
+                    SoundEvents.LIGHTNING_BOLT_IMPACT,
+                    0.4f,
+                    1.5f,
+                    0.55f,
+                    1.3f);
+        }
+        if (ELEMENTAL_VACUUM.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.ELEMENTAL_VACUUM.get(),
+                    ModParticleTypes.PHI_GUST.get(),
+                    SoundEvents.BREEZE_WHIRL,
+                    SoundEvents.ENDERMAN_TELEPORT,
+                    0.4f,
+                    0.7f,
+                    0.5f,
+                    0.8f);
+        }
+        // Fallback: sound only — spell FX carry the family look.
+        return new SchoolTheme(
+                null,
+                null,
+                SoundEvents.BLAZE_SHOOT,
+                SoundEvents.FIRECHARGE_USE,
+                0.35f,
+                1.1f,
+                0.45f,
+                1.0f);
     }
 
     private record SchoolTheme(
