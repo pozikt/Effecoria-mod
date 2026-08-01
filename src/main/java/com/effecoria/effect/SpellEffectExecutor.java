@@ -512,6 +512,10 @@ public final class SpellEffectExecutor {
                 : Math.max(slowTicks, 80);
         slowTicks = Math.round(slowTicks * (0.85f + power / 120f));
         fogTicks = Math.round(fogTicks * (0.85f + power / 120f));
+        if (!com.effecoria.effect.mental.MentalityService.tryAfflict(caster, target, fogTicks)) {
+            com.effecoria.effect.mental.MentalityService.notifyFail(caster, target);
+            return;
+        }
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, fogTicks, 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, fogTicks / 2, 0));

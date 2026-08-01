@@ -28,6 +28,9 @@ public final class MentalEffects {
             return;
         }
         int ticks = scaledTicks(effect, power, "confusion_ticks", 80);
+        if (!gateAfflict(caster, target, ticks, true)) {
+            return;
+        }
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, ticks, 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, ticks, 0));
         finishHit(caster.serverLevel(), target.position());
@@ -45,6 +48,9 @@ public final class MentalEffects {
             if (entity.distanceToSqr(caster) > radius * radius) {
                 continue;
             }
+            if (!gateAfflict(caster, entity, confuseTicks, false)) {
+                continue;
+            }
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 1));
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WEAKNESS, confuseTicks / 2, 0));
             spawnMindParticles(level, entity.position());
@@ -60,6 +66,9 @@ public final class MentalEffects {
         ServerLevel level = caster.serverLevel();
         int slowTicks = scaledTicks(effect, power, "slow_ticks", 60);
         int confuseTicks = Math.max(slowTicks, scaledTicks(effect, power, "confusion_ticks", 100));
+        if (!gateAfflict(caster, target, confuseTicks, true)) {
+            return;
+        }
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 1));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 2));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.BLINDNESS, Math.min(40, slowTicks / 2), 0));
@@ -72,6 +81,9 @@ public final class MentalEffects {
             return;
         }
         int duration = scaledTicks(effect, power, "duration_ticks", 100);
+        if (!gateAfflict(caster, target, duration, true)) {
+            return;
+        }
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 3));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, 1));
         finishHit(caster.serverLevel(), target.position());
@@ -84,6 +96,9 @@ public final class MentalEffects {
         ServerLevel level = caster.serverLevel();
         float lift = effect.params().has("lift_force") ? effect.params().get("lift_force").getAsFloat() : 0.65f;
         int fogTicks = scaledTicks(effect, power, "confusion_ticks", 90);
+        if (!gateAfflict(caster, target, fogTicks, true)) {
+            return;
+        }
         target.setDeltaMovement(target.getDeltaMovement().add(0, lift * (power / 50f), 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.LEVITATION, 30, 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, fogTicks, 1));
@@ -104,6 +119,9 @@ public final class MentalEffects {
             if (entity.distanceToSqr(caster) > radius * radius) {
                 continue;
             }
+            if (!gateAfflict(caster, entity, ticks, false)) {
+                continue;
+            }
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.CONFUSION, ticks, 1));
             spawnMindParticles(level, entity.position().add(0, 1, 0));
         }
@@ -122,6 +140,9 @@ public final class MentalEffects {
             return;
         }
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 160;
+        if (!gateAfflict(caster, target, duration, true)) {
+            return;
+        }
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.GLOWING, duration, 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration / 2, 0));
         caster.displayClientMessage(
@@ -139,6 +160,9 @@ public final class MentalEffects {
             return;
         }
         int confuseTicks = scaledTicks(effect, power, "confusion_ticks", 100);
+        if (!gateAfflict(caster, target, confuseTicks, true)) {
+            return;
+        }
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 2));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, confuseTicks / 2, 1));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, confuseTicks, 1));
@@ -150,6 +174,9 @@ public final class MentalEffects {
             return;
         }
         int fogTicks = scaledTicks(effect, power, "fatigue_ticks", 120);
+        if (!gateAfflict(caster, target, fogTicks, true)) {
+            return;
+        }
         float psiGain = effect.params().has("psi_gain")
                 ? effect.params().get("psi_gain").getAsFloat()
                 : 4f;
@@ -186,6 +213,9 @@ public final class MentalEffects {
             if (entity.position().distanceToSqr(center) > radius * radius) {
                 continue;
             }
+            if (!gateAfflict(caster, entity, ticks, false)) {
+                continue;
+            }
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.CONFUSION, ticks, 2));
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WEAKNESS, ticks / 2, 1));
             spawnMindParticles(level, entity.position().add(0, 1, 0));
@@ -207,6 +237,9 @@ public final class MentalEffects {
                     continue;
                 }
                 if (entity.distanceToSqr(caster) > radius * radius) {
+                    continue;
+                }
+                if (!gateAfflict(caster, entity, ticks, false)) {
                     continue;
                 }
                 BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.CONFUSION, ticks, amp));
@@ -322,10 +355,14 @@ public final class MentalEffects {
             return;
         }
         int duration = scaledTicks(effect, power, "duration_ticks", defaultTicks);
-        if (!MentalCompulsionService.apply(caster, target, type, duration)) {
+        if (!(target instanceof Mob) || target instanceof net.minecraft.world.entity.player.Player) {
             caster.displayClientMessage(
                     net.minecraft.network.chat.Component.translatable("message.effecoria.mental.compel_invalid"),
                     true);
+            return;
+        }
+        if (!MentalCompulsionService.apply(caster, target, type, duration)) {
+            MentalityService.notifyFail(caster, target);
             return;
         }
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, Math.min(duration, 100), 0));
@@ -339,12 +376,26 @@ public final class MentalEffects {
             return;
         }
         float force = effect.params().has("force") ? effect.params().get("force").getAsFloat() : 3.5f;
+        if (!gateAfflict(caster, target, 40, true)) {
+            return;
+        }
         Vec3 look = caster.getLookAngle().normalize();
         double strength = force * (power / 50f);
         target.setDeltaMovement(target.getDeltaMovement().add(look.scale(strength)));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, 40, 0));
         target.hurtMarked = true;
         finishHit(caster.serverLevel(), target.position());
+    }
+
+    private static boolean gateAfflict(
+            ServerPlayer caster, LivingEntity target, int durationTicks, boolean notifyOnFail) {
+        if (MentalityService.tryAfflict(caster, target, durationTicks)) {
+            return true;
+        }
+        if (notifyOnFail) {
+            MentalityService.notifyFail(caster, target);
+        }
+        return false;
     }
 
     private static int scaledTicks(SpellEffectEntry effect, float power, String key, int fallback) {

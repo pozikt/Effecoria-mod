@@ -71,6 +71,9 @@ public final class MentalCompulsionService {
             return false;
         }
         durationTicks = BreathDebuffs.scaleDuration(caster, durationTicks);
+        if (!MentalityService.tryAfflict(caster, target, durationTicks)) {
+            return false;
+        }
         CompoundTag data = mob.getPersistentData();
         data.putString(TYPE_TAG, type.id());
         data.putLong(UNTIL_TAG, caster.level().getGameTime() + durationTicks);

@@ -24,6 +24,7 @@ import com.effecoria.effect.elemental.ElementalShroudService;
 import com.effecoria.effect.elemental.SteamCloudService;
 import com.effecoria.effect.elemental.SteamFlightService;
 import com.effecoria.effect.mental.MentalCompulsionService;
+import com.effecoria.effect.mental.MentalityService;
 import com.effecoria.effect.necromancy.DeathMarkService;
 import com.effecoria.effect.necromancy.NecroFieldService;
 import com.effecoria.effect.necromancy.NecroSummonService;
@@ -79,6 +80,7 @@ public final class ModCommonEvents {
             ElementalCageService.tick(serverLevel);
             DeathMarkService.tickMarks(serverLevel);
             MentalCompulsionService.tick(serverLevel);
+            MentalityService.tick(serverLevel);
         }
     }
 
