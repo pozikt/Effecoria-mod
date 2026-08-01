@@ -498,7 +498,7 @@ public final class SpellEffectExecutor {
         double strength = force * (power / 50f);
         target.setDeltaMovement(target.getDeltaMovement().add(look.scale(strength)));
         target.hurtMarked = true;
-        spawnMindParticles(caster.serverLevel(), target.position());
+        MentalEffects.spawnForce(caster.serverLevel(), target.position().add(0, 1, 0));
     }
 
     private static void mindSting(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -520,7 +520,7 @@ public final class SpellEffectExecutor {
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, fogTicks, 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, fogTicks / 2, 0));
-        spawnMindParticles(caster.serverLevel(), target.position());
+        MentalEffects.spawnShard(caster.serverLevel(), target.position().add(0, 1, 0));
     }
 
     private static void phiSense(ServerPlayer caster, SpellEffectEntry effect) {
@@ -530,16 +530,7 @@ public final class SpellEffectExecutor {
         PsiHelper.set(caster, data);
         caster.displayClientMessage(
                 net.minecraft.network.chat.Component.translatable("message.effecoria.phi_sense_active"), true);
-        caster.serverLevel().sendParticles(
-                ModParticleTypes.PHI_SPARK.get(),
-                caster.getX(),
-                caster.getEyeY(),
-                caster.getZ(),
-                24,
-                0.4,
-                0.4,
-                0.4,
-                0.02);
+        MentalEffects.spawnSense(caster.serverLevel(), caster.position().add(0, caster.getEyeHeight() * 0.5, 0));
     }
 
 
@@ -719,11 +710,5 @@ public final class SpellEffectExecutor {
     private static void spawnNecroParticles(ServerLevel level, Vec3 pos) {
         level.sendParticles(ModParticleTypes.NECRO_SHADOW.get(), pos.x, pos.y, pos.z, 10, 0.3, 0.35, 0.3, 0.01);
         level.sendParticles(ModParticleTypes.NECRO_FOG.get(), pos.x, pos.y + 0.5, pos.z, 8, 0.25, 0.4, 0.25, 0.008);
-    }
-
-    /** Brief psychic fog over the target's head. */
-    private static void spawnMindParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ModParticleTypes.MENTAL_FOG.get(), pos.x, pos.y + 1.6, pos.z, 8, 0.25, 0.15, 0.25, 0.005);
-        level.sendParticles(ModParticleTypes.MENTAL_FOG.get(), pos.x, pos.y + 1.2, pos.z, 4, 0.15, 0.1, 0.15, 0.003);
     }
 }

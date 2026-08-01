@@ -57,10 +57,16 @@ public final class EffecoriaClient {
         event.registerSpriteSet(ModParticleTypes.ELEMENTAL_SPARK.get(), SchoolParticles.LightningSparkParticle.Provider::new);
         event.registerSpriteSet(ModParticleTypes.ELEMENTAL_VACUUM.get(), SchoolParticles.VacuumParticle.Provider::new);
 
-        // Mental — brief fog veil
+        // Mental — fog veil + association particles
         event.registerSpriteSet(
                 ModParticleTypes.MENTAL_FOG.get(),
                 sprites -> new SchoolParticles.FogParticle.Provider(sprites, 0.55F, 0.018F));
+        event.registerSpriteSet(ModParticleTypes.MENTAL_SHARD.get(), SchoolParticles.MentalShardParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.MENTAL_FORCE.get(), SchoolParticles.MentalForceParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.MENTAL_SYNAPSE.get(), SchoolParticles.MentalSynapseParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.MENTAL_WARD.get(), SchoolParticles.MentalWardParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.MENTAL_FEAR.get(), SchoolParticles.MentalFearParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.MENTAL_SENSE.get(), SchoolParticles.MentalSenseParticle.Provider::new);
 
         // Organic
         event.registerSpriteSet(ModParticleTypes.ORGANIC_LEAF.get(), SchoolParticles.LeafParticle.Provider::new);

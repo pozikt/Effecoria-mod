@@ -33,7 +33,7 @@ public final class MentalEffects {
         }
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, ticks, 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, ticks, 0));
-        finishHit(caster.serverLevel(), target.position());
+        finishHit(caster.serverLevel(), target.position(), HitFx.SHARD);
     }
 
     public static void psychicScream(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -53,9 +53,9 @@ public final class MentalEffects {
             }
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 1));
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WEAKNESS, confuseTicks / 2, 0));
-            spawnMindParticles(level, entity.position());
+            spawnSynapse(level, entity.position().add(0, 1, 0));
         }
-        spawnMindParticles(level, caster.position().add(0, 1, 0));
+        spawnSynapse(level, caster.position().add(0, 1, 0));
         level.playSound(null, caster.blockPosition(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.8f, 0.6f);
     }
 
@@ -72,7 +72,7 @@ public final class MentalEffects {
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 1));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 2));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.BLINDNESS, Math.min(40, slowTicks / 2), 0));
-        finishHit(level, target.position());
+        finishHit(level, target.position(), HitFx.SHARD);
         level.playSound(null, target.blockPosition(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.7f, 0.5f);
     }
 
@@ -86,7 +86,7 @@ public final class MentalEffects {
         }
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 3));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, 1));
-        finishHit(caster.serverLevel(), target.position());
+        finishHit(caster.serverLevel(), target.position(), HitFx.SYNAPSE);
     }
 
     public static void telekineticCrush(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -104,7 +104,7 @@ public final class MentalEffects {
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, fogTicks, 1));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, fogTicks, 1));
         target.hurtMarked = true;
-        finishHit(level, target.position());
+        finishHit(level, target.position(), HitFx.FORCE);
     }
 
     public static void massConfusion(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -123,16 +123,16 @@ public final class MentalEffects {
                 continue;
             }
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.CONFUSION, ticks, 1));
-            spawnMindParticles(level, entity.position().add(0, 1, 0));
+            spawnFog(level, entity.position().add(0, 1, 0));
         }
-        spawnMindParticles(level, caster.position().add(0, 1, 0));
+        spawnFog(level, caster.position().add(0, 1, 0));
     }
 
     public static void psychicBarrier(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 200;
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, 1, false, false, true));
-        spawnMindParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnWard(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void mindProbe(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -152,7 +152,7 @@ public final class MentalEffects {
                         Math.round(target.getHealth()),
                         Math.round(target.getMaxHealth())),
                 true);
-        finishHit(caster.serverLevel(), target.position());
+        finishHit(caster.serverLevel(), target.position(), HitFx.SENSE);
     }
 
     public static void synapticOverload(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -166,7 +166,7 @@ public final class MentalEffects {
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 2));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, confuseTicks / 2, 1));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, confuseTicks, 1));
-        finishHit(caster.serverLevel(), target.position());
+        finishHit(caster.serverLevel(), target.position(), HitFx.SYNAPSE);
     }
 
     public static void psychicDrain(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -187,14 +187,14 @@ public final class MentalEffects {
         PlayerPsiData data = PsiHelper.get(caster);
         data.setCurrentPsi(Math.min(data.maxPsi(), data.currentPsi() + psiGain));
         PsiHelper.set(caster, data);
-        finishHit(caster.serverLevel(), target.position());
+        finishHit(caster.serverLevel(), target.position(), HitFx.DRAIN);
     }
 
     public static void mentalFortress(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 400;
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 2, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, duration, 0, false, false, true));
-        spawnMindParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnWard(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void thoughtBomb(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -218,8 +218,9 @@ public final class MentalEffects {
             }
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.CONFUSION, ticks, 2));
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WEAKNESS, ticks / 2, 1));
-            spawnMindParticles(level, entity.position().add(0, 1, 0));
+            spawnBomb(level, entity.position().add(0, 1, 0));
         }
+        spawnBomb(level, center.add(0, 1, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 0.5f, 1.2f);
     }
 
@@ -246,7 +247,8 @@ public final class MentalEffects {
                 BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WEAKNESS, ticks / 2, 0));
             }
         }
-        spawnMindParticles(level, caster.position().add(0, 1, 0));
+        spawnFog(level, caster.position().add(0, 1, 0));
+        spawnSynapse(level, caster.position().add(0, 1.2, 0));
         level.playSound(null, caster.blockPosition(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.7f, 0.8f);
     }
 
@@ -259,7 +261,7 @@ public final class MentalEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration / 2, 0, false, false, true));
         caster.displayClientMessage(
                 net.minecraft.network.chat.Component.translatable("message.effecoria.phi_sense_active"), true);
-        spawnMindParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnSense(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void omegaMind(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -271,7 +273,8 @@ public final class MentalEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 2, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 1, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, false, true));
-        spawnMindParticles(caster.serverLevel(), caster.position().add(0, 1.2, 0));
+        spawnSense(caster.serverLevel(), caster.position().add(0, 1.2, 0));
+        spawnWard(caster.serverLevel(), caster.position().add(0, 1, 0));
         caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.5f, 1.6f);
     }
 
@@ -317,10 +320,10 @@ public final class MentalEffects {
                 continue;
             }
             BreathDebuffs.apply(mob, new MobEffectInstance(MobEffects.CONFUSION, Math.min(duration, 120), 1));
-            spawnMindParticles(level, mob.position().add(0, 1, 0));
+            spawnFear(level, mob.position().add(0, 1, 0));
             hit++;
         }
-        spawnMindParticles(level, caster.position().add(0, 1, 0));
+        spawnFear(level, caster.position().add(0, 1, 0));
         level.playSound(null, caster.blockPosition(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 0.45f, 1.35f);
         if (hit == 0) {
             caster.displayClientMessage(
@@ -366,7 +369,7 @@ public final class MentalEffects {
             return;
         }
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, Math.min(duration, 100), 0));
-        finishHit(caster.serverLevel(), target.position());
+        finishHit(caster.serverLevel(), target.position(), HitFx.FEAR);
         caster.serverLevel().playSound(
                 null, target.blockPosition(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.55f, 1.5f);
     }
@@ -384,7 +387,7 @@ public final class MentalEffects {
         target.setDeltaMovement(target.getDeltaMovement().add(look.scale(strength)));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, 40, 0));
         target.hurtMarked = true;
-        finishHit(caster.serverLevel(), target.position());
+        finishHit(caster.serverLevel(), target.position(), HitFx.FORCE);
     }
 
     private static boolean gateAfflict(
@@ -403,14 +406,91 @@ public final class MentalEffects {
         return Math.round(base * (0.85f + power / 120f));
     }
 
-    private static void finishHit(ServerLevel level, Vec3 pos) {
-        spawnMindParticles(level, pos.add(0, 1, 0));
-        level.playSound(null, net.minecraft.core.BlockPos.containing(pos), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.55f, 1.4f);
+    private enum HitFx {
+        FOG,
+        SHARD,
+        FORCE,
+        SYNAPSE,
+        WARD,
+        FEAR,
+        SENSE,
+        DRAIN,
+        BOMB
     }
 
+    private static void finishHit(ServerLevel level, Vec3 pos, HitFx fx) {
+        Vec3 at = pos.add(0, 1, 0);
+        switch (fx) {
+            case SHARD -> spawnShard(level, at);
+            case FORCE -> spawnForce(level, at);
+            case SYNAPSE -> spawnSynapse(level, at);
+            case WARD -> spawnWard(level, at);
+            case FEAR -> spawnFear(level, at);
+            case SENSE -> spawnSense(level, at);
+            case DRAIN -> spawnDrain(level, at);
+            case BOMB -> spawnBomb(level, at);
+            case FOG -> spawnFog(level, at);
+        }
+        level.playSound(
+                null,
+                net.minecraft.core.BlockPos.containing(pos),
+                SoundEvents.ILLUSIONER_CAST_SPELL,
+                SoundSource.PLAYERS,
+                0.55f,
+                1.4f);
+    }
+
+    /** Default / confusion fog. */
+    public static void spawnFog(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.MENTAL_FOG.get(), pos.x, pos.y + 0.5, pos.z, 10, 0.3, 0.2, 0.3, 0.005);
+        level.sendParticles(ModParticleTypes.MENTAL_FOG.get(), pos.x, pos.y, pos.z, 6, 0.2, 0.15, 0.2, 0.003);
+    }
+
+    public static void spawnShard(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.MENTAL_SHARD.get(), pos.x, pos.y, pos.z, 12, 0.25, 0.3, 0.25, 0.04);
+        level.sendParticles(ModParticleTypes.PHI_SPARK.get(), pos.x, pos.y, pos.z, 4, 0.12, 0.15, 0.12, 0.02);
+    }
+
+    public static void spawnForce(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.MENTAL_FORCE.get(), pos.x, pos.y, pos.z, 14, 0.35, 0.25, 0.35, 0.05);
+        level.sendParticles(ModParticleTypes.MENTAL_FOG.get(), pos.x, pos.y, pos.z, 4, 0.2, 0.15, 0.2, 0.003);
+    }
+
+    public static void spawnSynapse(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.MENTAL_SYNAPSE.get(), pos.x, pos.y, pos.z, 16, 0.3, 0.35, 0.3, 0.06);
+        level.sendParticles(ModParticleTypes.PHI_SPARK.get(), pos.x, pos.y, pos.z, 5, 0.15, 0.2, 0.15, 0.03);
+    }
+
+    public static void spawnWard(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.MENTAL_WARD.get(), pos.x, pos.y, pos.z, 12, 0.4, 0.35, 0.4, 0.01);
+        level.sendParticles(ModParticleTypes.PHI_SPARK.get(), pos.x, pos.y, pos.z, 4, 0.2, 0.2, 0.2, 0.02);
+    }
+
+    public static void spawnFear(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.MENTAL_FEAR.get(), pos.x, pos.y, pos.z, 12, 0.3, 0.3, 0.3, 0.02);
+        level.sendParticles(ModParticleTypes.MENTAL_FOG.get(), pos.x, pos.y, pos.z, 5, 0.2, 0.15, 0.2, 0.004);
+    }
+
+    public static void spawnSense(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.MENTAL_SENSE.get(), pos.x, pos.y, pos.z, 14, 0.35, 0.35, 0.35, 0.03);
+        level.sendParticles(ModParticleTypes.PHI_SPARK.get(), pos.x, pos.y, pos.z, 8, 0.25, 0.25, 0.25, 0.02);
+    }
+
+    public static void spawnDrain(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.MENTAL_FORCE.get(), pos.x, pos.y, pos.z, 8, 0.2, 0.25, 0.2, 0.02);
+        level.sendParticles(ModParticleTypes.MENTAL_FEAR.get(), pos.x, pos.y, pos.z, 6, 0.15, 0.2, 0.15, 0.015);
+        level.sendParticles(ModParticleTypes.PHI_SPARK.get(), pos.x, pos.y, pos.z, 4, 0.1, 0.15, 0.1, 0.02);
+    }
+
+    public static void spawnBomb(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.MENTAL_SHARD.get(), pos.x, pos.y, pos.z, 10, 0.4, 0.35, 0.4, 0.05);
+        level.sendParticles(ModParticleTypes.MENTAL_FOG.get(), pos.x, pos.y, pos.z, 10, 0.35, 0.3, 0.35, 0.006);
+        level.sendParticles(ModParticleTypes.MENTAL_SYNAPSE.get(), pos.x, pos.y, pos.z, 6, 0.25, 0.25, 0.25, 0.04);
+    }
+
+    /** Legacy alias — fog + spark. */
     public static void spawnMindParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ModParticleTypes.MENTAL_FOG.get(), pos.x, pos.y + 1.5, pos.z, 10, 0.3, 0.2, 0.3, 0.005);
-        level.sendParticles(ModParticleTypes.MENTAL_FOG.get(), pos.x, pos.y + 1.0, pos.z, 6, 0.2, 0.15, 0.2, 0.003);
-        level.sendParticles(ModParticleTypes.PHI_SPARK.get(), pos.x, pos.y + 0.8, pos.z, 4, 0.15, 0.2, 0.15, 0.02);
+        spawnFog(level, pos);
+        level.sendParticles(ModParticleTypes.PHI_SPARK.get(), pos.x, pos.y - 0.2, pos.z, 4, 0.15, 0.2, 0.15, 0.02);
     }
 }

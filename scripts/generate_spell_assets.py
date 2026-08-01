@@ -164,6 +164,196 @@ def icon_focus(d, cx, cy, color):
     d.ellipse((cx - 14, cy - 18, cx + 14, cy - 4), outline=color, width=2)
 
 
+# --- Mental association icons (hardcoded family colors) ---
+
+def icon_mental_force(d, cx, cy, color):
+    ring = (170, 140, 255, 230)
+    core = (220, 200, 255, 255)
+    for r in (14, 9, 5):
+        d.ellipse((cx - r, cy - r, cx + r, cy + r), outline=ring, width=2)
+    draw_disc(d, cx, cy, 3, core)
+    d.line([(cx - 12, cy), (cx - 16, cy - 4)], fill=ring, width=2)
+    d.line([(cx + 12, cy), (cx + 16, cy + 4)], fill=ring, width=2)
+
+
+def icon_mental_sting(d, cx, cy, color):
+    shard = (190, 160, 255, 255)
+    tip = (240, 230, 255, 255)
+    d.polygon([(cx + 12, cy - 12), (cx - 2, cy - 2), (cx + 2, cy + 2), (cx - 10, cy + 12), (cx - 4, cy + 2), (cx + 2, cy - 4)], fill=shard)
+    d.line([(cx - 6, cy + 6), (cx + 8, cy - 8)], fill=tip, width=1)
+
+
+def icon_mental_eye(d, cx, cy, color):
+    iris = (120, 200, 255, 255)
+    sclera = (220, 235, 255, 255)
+    pupil = (30, 20, 50, 255)
+    d.ellipse((cx - 14, cy - 8, cx + 14, cy + 8), fill=sclera)
+    draw_disc(d, cx, cy, 6, iris)
+    draw_disc(d, cx, cy, 3, pupil)
+    draw_disc(d, cx + 2, cy - 2, 1, (255, 255, 255, 230))
+
+
+def icon_mental_lance(d, cx, cy, color):
+    shaft = (160, 130, 255, 255)
+    tip = (230, 220, 255, 255)
+    d.line([(cx - 14, cy + 12), (cx + 12, cy - 12)], fill=shaft, width=3)
+    d.polygon([(cx + 12, cy - 12), (cx + 4, cy - 10), (cx + 10, cy - 4)], fill=tip)
+    draw_disc(d, cx - 2, cy + 2, 2, (200, 180, 255, 220))
+
+
+def icon_mental_focus(d, cx, cy, color):
+    ring = (150, 180, 255, 255)
+    core = (220, 200, 255, 255)
+    draw_disc(d, cx, cy + 2, 6, core)
+    d.ellipse((cx - 12, cy - 14, cx + 12, cy - 2), outline=ring, width=2)
+    d.line([(cx, cy - 2), (cx, cy + 8)], fill=ring, width=2)
+
+
+def icon_mental_bolt(d, cx, cy, color):
+    bolt = (180, 150, 255, 255)
+    d.polygon([(cx - 2, cy - 14), (cx + 6, cy - 2), (cx + 1, cy - 1), (cx + 8, cy + 14), (cx - 2, cy + 2), (cx + 2, cy + 0)], fill=bolt)
+    draw_disc(d, cx, cy, 2, (255, 255, 255, 220))
+
+
+def icon_psychic_scream(d, cx, cy, color):
+    ring = (190, 160, 255, 220)
+    for r in (6, 10, 14):
+        d.ellipse((cx - r, cy - r // 2 - 2, cx + r, cy + r // 2 + 2), outline=ring, width=2)
+    draw_disc(d, cx, cy, 3, (240, 230, 255, 255))
+
+
+def icon_neural_lock(d, cx, cy, color):
+    glow = (80, 220, 255, 255)
+    lock = (160, 140, 220, 255)
+    d.line([(cx, cy - 12), (cx, cy + 12)], fill=glow, width=2)
+    d.line([(cx - 12, cy), (cx + 12, cy)], fill=glow, width=2)
+    d.rectangle((cx - 5, cy - 2, cx + 5, cy + 6), fill=lock)
+    d.arc((cx - 5, cy - 8, cx + 5, cy + 2), 180, 0, fill=lock, width=2)
+
+
+def icon_telekinetic_crush(d, cx, cy, color):
+    fist = (170, 140, 255, 255)
+    draw_disc(d, cx, cy, 8, fist)
+    d.ellipse((cx - 14, cy - 14, cx + 14, cy + 14), outline=(200, 180, 255, 180), width=2)
+    for ang in (45, 135, 225, 315):
+        rad = math.radians(ang)
+        x2 = cx + int(round(math.cos(rad) * 12))
+        y2 = cy + int(round(math.sin(rad) * 12))
+        d.line([(cx, cy), (x2, y2)], fill=(220, 200, 255, 200), width=2)
+
+
+def icon_mass_confusion(d, cx, cy, color):
+    fog = (160, 130, 230, 200)
+    for ox, oy, r in ((-6, -4, 6), (6, 2, 5), (0, 6, 4), (-2, -8, 3)):
+        draw_disc(d, cx + ox, cy + oy, r, fog)
+    draw_disc(d, cx, cy, 2, (230, 210, 255, 220))
+
+
+def icon_psychic_barrier(d, cx, cy, color):
+    ward = (150, 170, 255, 230)
+    d.polygon([(cx, cy - 14), (cx + 12, cy - 4), (cx + 8, cy + 12), (cx - 8, cy + 12), (cx - 12, cy - 4)], fill=ward)
+    draw_disc(d, cx, cy, 4, (220, 230, 255, 230))
+    d.line([(cx - 4, cy), (cx + 4, cy)], fill=(80, 100, 180, 200), width=1)
+
+
+def icon_mind_probe(d, cx, cy, color):
+    icon_mental_eye(d, cx, cy - 2, color)
+    d.line([(cx, cy + 6), (cx, cy + 14)], fill=(160, 200, 255, 230), width=2)
+    draw_disc(d, cx, cy + 14, 2, (200, 230, 255, 255))
+
+
+def icon_synaptic_overload(d, cx, cy, color):
+    glow = (90, 230, 255, 255)
+    for i in range(5):
+        ang = math.radians(i * 72)
+        x2 = cx + int(round(math.cos(ang) * 12))
+        y2 = cy + int(round(math.sin(ang) * 12))
+        d.line([(cx, cy), (x2, y2)], fill=glow, width=2)
+        draw_disc(d, x2, y2, 2, (220, 255, 255, 255))
+    draw_disc(d, cx, cy, 3, (255, 255, 255, 255))
+
+
+def icon_psychic_drain(d, cx, cy, color):
+    siphon = (140, 80, 200, 255)
+    d.arc((cx - 12, cy - 10, cx + 4, cy + 10), 200, 40, fill=siphon, width=3)
+    d.arc((cx - 4, cy - 8, cx + 12, cy + 8), 20, 200, fill=(180, 120, 230, 230), width=3)
+    draw_disc(d, cx + 8, cy - 4, 3, (230, 200, 255, 255))
+    draw_disc(d, cx - 8, cy + 4, 2, (100, 50, 140, 230))
+
+
+def icon_mental_fortress(d, cx, cy, color):
+    stone = (140, 150, 220, 255)
+    d.rectangle((cx - 10, cy - 4, cx + 10, cy + 12), fill=stone)
+    d.polygon([(cx - 12, cy - 4), (cx, cy - 14), (cx + 12, cy - 4)], fill=(170, 180, 240, 255))
+    draw_disc(d, cx, cy + 2, 3, (220, 230, 255, 230))
+
+
+def icon_thought_bomb(d, cx, cy, color):
+    core = (180, 140, 255, 255)
+    draw_disc(d, cx, cy, 7, core)
+    draw_disc(d, cx, cy, 3, (255, 255, 255, 240))
+    for ang in range(0, 360, 45):
+        rad = math.radians(ang)
+        x2 = cx + int(round(math.cos(rad) * 13))
+        y2 = cy + int(round(math.sin(rad) * 13))
+        draw_disc(d, x2, y2, 2, (200, 170, 255, 220))
+
+
+def icon_psychic_storm(d, cx, cy, color):
+    fog = (150, 120, 230, 200)
+    draw_disc(d, cx, cy, 10, fog)
+    icon_mental_bolt(d, cx - 4, cy, color)
+    icon_mental_bolt(d, cx + 5, cy + 2, color)
+
+
+def icon_omega_mind(d, cx, cy, color):
+    icon_mental_eye(d, cx, cy, color)
+    d.ellipse((cx - 14, cy - 14, cx + 14, cy + 14), outline=(180, 160, 255, 200), width=2)
+    for ang in (0, 120, 240):
+        rad = math.radians(ang)
+        draw_disc(d, cx + int(round(math.cos(rad) * 12)), cy + int(round(math.sin(rad) * 12)), 2, (200, 220, 255, 230))
+
+
+def icon_mind_terror(d, cx, cy, color):
+    fear = (120, 40, 90, 255)
+    d.polygon([(cx, cy - 12), (cx + 10, cy + 2), (cx + 6, cy + 12), (cx - 6, cy + 12), (cx - 10, cy + 2)], fill=fear)
+    draw_disc(d, cx - 3, cy - 2, 2, (220, 80, 100, 255))
+    draw_disc(d, cx + 3, cy - 2, 2, (220, 80, 100, 255))
+    d.arc((cx - 5, cy + 4, cx + 5, cy + 12), 200, 340, fill=(40, 10, 30, 255), width=2)
+
+
+def icon_cliff_urge(d, cx, cy, color):
+    fear = (140, 60, 110, 255)
+    d.polygon([(cx - 12, cy + 10), (cx - 4, cy - 12), (cx + 4, cy - 4), (cx + 12, cy + 10)], fill=fear)
+    d.line([(cx - 8, cy + 4), (cx + 8, cy + 4)], fill=(220, 180, 200, 200), width=1)
+    draw_disc(d, cx, cy - 2, 2, (255, 200, 220, 230))
+
+
+def icon_drown_urge(d, cx, cy, color):
+    fear = (80, 50, 140, 255)
+    d.ellipse((cx - 10, cy - 8, cx + 10, cy + 10), fill=fear)
+    d.arc((cx - 12, cy + 4, cx + 12, cy + 14), 200, 340, fill=(140, 180, 255, 200), width=2)
+    draw_disc(d, cx - 3, cy - 2, 2, (200, 160, 255, 220))
+
+
+def icon_psychic_frenzy(d, cx, cy, color):
+    rage = (200, 60, 100, 255)
+    d.polygon([(cx - 10, cy + 8), (cx - 4, cy - 12), (cx + 2, cy - 2), (cx + 10, cy + 10)], fill=rage)
+    d.polygon([(cx + 8, cy - 8), (cx + 2, cy + 10), (cx - 2, cy + 2)], fill=(240, 120, 140, 230))
+    draw_disc(d, cx, cy, 2, (255, 220, 230, 230))
+
+
+def icon_mass_hysteria(d, cx, cy, color):
+    icon_mass_confusion(d, cx, cy, color)
+    icon_mind_terror(d, cx + 4, cy - 4, color)
+
+
+def icon_psychic_amplify(d, cx, cy, color):
+    icon_mental_focus(d, cx, cy, color)
+    d.ellipse((cx - 14, cy - 14, cx + 14, cy + 14), outline=(160, 200, 255, 180), width=1)
+
+
+
 def icon_fire(d, cx, cy, color):
     flame = (255, 120, 40, 255)
     core = (255, 220, 100, 255)
@@ -711,31 +901,31 @@ def icon_beacon(d, cx, cy, color):
 
 
 DRAWERS = {
-    "mental_push": icon_arrow,
-    "mental_sting": icon_spike,
-    "sense_phi": icon_eye,
-    "mind_lance": icon_lance,
-    "psychic_focus": icon_focus,
-    "mind_bolt": icon_spike,
-    "psychic_scream": icon_shockwave,
-    "thought_lance": icon_lance,
-    "neural_lock": icon_ice_prison,
-    "telekinetic_crush": icon_vacuum_cage,
-    "mass_confusion": icon_mirage,
-    "psychic_barrier": icon_frost_wall,
-    "mind_probe": icon_eye,
-    "synaptic_overload": icon_sonic_lance,
-    "psychic_drain": icon_focus,
-    "mental_fortress": icon_frost_wall,
-    "thought_bomb": icon_great_fire,
-    "psychic_storm": icon_ion_storm,
-    "mass_hysteria": icon_mirage,
-    "psychic_amplify": icon_focus,
-    "omega_mind": icon_eye,
-    "mind_terror": icon_shockwave,
-    "cliff_urge": icon_arrow,
-    "drown_urge": icon_water,
-    "psychic_frenzy": icon_spike,
+    "mental_push": icon_mental_force,
+    "mental_sting": icon_mental_sting,
+    "sense_phi": icon_mental_eye,
+    "mind_lance": icon_mental_lance,
+    "psychic_focus": icon_mental_focus,
+    "mind_bolt": icon_mental_bolt,
+    "psychic_scream": icon_psychic_scream,
+    "thought_lance": icon_mental_lance,
+    "neural_lock": icon_neural_lock,
+    "telekinetic_crush": icon_telekinetic_crush,
+    "mass_confusion": icon_mass_confusion,
+    "psychic_barrier": icon_psychic_barrier,
+    "mind_probe": icon_mind_probe,
+    "synaptic_overload": icon_synaptic_overload,
+    "psychic_drain": icon_psychic_drain,
+    "mental_fortress": icon_mental_fortress,
+    "thought_bomb": icon_thought_bomb,
+    "psychic_storm": icon_psychic_storm,
+    "mass_hysteria": icon_mass_hysteria,
+    "psychic_amplify": icon_psychic_amplify,
+    "omega_mind": icon_omega_mind,
+    "mind_terror": icon_mind_terror,
+    "cliff_urge": icon_cliff_urge,
+    "drown_urge": icon_drown_urge,
+    "psychic_frenzy": icon_psychic_frenzy,
     "fire_burst": icon_fire,
     "wind_push": icon_wind,
     "water_stream": icon_water,
@@ -1019,6 +1209,79 @@ def particle_mental_fog(variant: int = 0) -> Image.Image:
     for r, a in ((7, 50), (5, 80), (3, 120)):
         draw_disc(d, cx, cy, r, (150, 120, 255, a))
     draw_disc(d, cx, cy, 2, (200, 180, 255, 90))
+    return img
+
+
+def particle_mental_shard(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    shard = (190, 160, 255, 255)
+    if variant % 2 == 0:
+        d.polygon([(12, 2), (10, 7), (14, 9), (4, 14), (6, 8), (3, 6)], fill=shard)
+    else:
+        d.polygon([(3, 3), (8, 5), (7, 9), (13, 13), (9, 10), (10, 5)], fill=shard)
+    draw_disc(d, 8, 8, 1, (255, 255, 255, 230))
+    return img
+
+
+def particle_mental_force(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = PARTICLE // 2, PARTICLE // 2
+    ring = (170, 140, 255, 180 - variant * 20)
+    r = 6 - variant
+    d.ellipse((cx - r, cy - r, cx + r, cy + r), outline=ring, width=2)
+    draw_disc(d, cx, cy, 1, (230, 210, 255, 200))
+    return img
+
+
+def particle_mental_synapse(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    glow = (90, 230, 255, 240)
+    core = (230, 255, 255, 255)
+    cx, cy = PARTICLE // 2, PARTICLE // 2
+    d.line([(cx, 2), (cx, 14)], fill=glow, width=1)
+    d.line([(2, cy), (14, cy)], fill=glow, width=1)
+    if variant % 2 == 0:
+        d.line([(3, 3), (13, 13)], fill=glow, width=1)
+    else:
+        d.line([(13, 3), (3, 13)], fill=glow, width=1)
+    draw_disc(d, cx, cy, 2, core)
+    return img
+
+
+def particle_mental_ward(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = PARTICLE // 2, PARTICLE // 2
+    ward = (150, 170, 255, 220)
+    d.polygon([(cx, 2), (cx + 5, cy - 1), (cx + 3, 13), (cx - 3, 13), (cx - 5, cy - 1)], outline=ward)
+    if variant % 2 == 0:
+        draw_disc(d, cx, cy, 2, (220, 230, 255, 230))
+    return img
+
+
+def particle_mental_fear(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = PARTICLE // 2, PARTICLE // 2
+    fear = (120, 40, 90, 220) if variant % 2 == 0 else (90, 30, 70, 200)
+    draw_disc(d, cx, cy, 5, fear)
+    draw_disc(d, cx - 2, cy - 1, 1, (220, 80, 100, 230))
+    draw_disc(d, cx + 2, cy - 1, 1, (220, 80, 100, 230))
+    return img
+
+
+def particle_mental_sense(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = PARTICLE // 2, PARTICLE // 2
+    d.ellipse((cx - 6, cy - 4, cx + 6, cy + 4), fill=(210, 230, 255, 200))
+    draw_disc(d, cx, cy, 3, (100, 190, 255, 240))
+    draw_disc(d, cx, cy, 1, (30, 20, 50, 255))
+    if variant % 2 == 0:
+        draw_disc(d, cx + 1, cy - 1, 1, (255, 255, 255, 230))
     return img
 
 
@@ -1468,6 +1731,48 @@ def generate_school_particles():
         save_particle_png(name, particle_mental_fog(i))
         fog_paths.append(f"effecoria:{name}")
     write_particle_json("mental_fog", fog_paths)
+
+    shard_paths = []
+    for i in range(2):
+        name = f"mental_shard_{i}"
+        save_particle_png(name, particle_mental_shard(i))
+        shard_paths.append(f"effecoria:{name}")
+    write_particle_json("mental_shard", shard_paths)
+
+    force_paths = []
+    for i in range(2):
+        name = f"mental_force_{i}"
+        save_particle_png(name, particle_mental_force(i))
+        force_paths.append(f"effecoria:{name}")
+    write_particle_json("mental_force", force_paths)
+
+    synapse_paths = []
+    for i in range(2):
+        name = f"mental_synapse_{i}"
+        save_particle_png(name, particle_mental_synapse(i))
+        synapse_paths.append(f"effecoria:{name}")
+    write_particle_json("mental_synapse", synapse_paths)
+
+    ward_paths = []
+    for i in range(2):
+        name = f"mental_ward_{i}"
+        save_particle_png(name, particle_mental_ward(i))
+        ward_paths.append(f"effecoria:{name}")
+    write_particle_json("mental_ward", ward_paths)
+
+    fear_paths = []
+    for i in range(2):
+        name = f"mental_fear_{i}"
+        save_particle_png(name, particle_mental_fear(i))
+        fear_paths.append(f"effecoria:{name}")
+    write_particle_json("mental_fear", fear_paths)
+
+    sense_paths = []
+    for i in range(2):
+        name = f"mental_sense_{i}"
+        save_particle_png(name, particle_mental_sense(i))
+        sense_paths.append(f"effecoria:{name}")
+    write_particle_json("mental_sense", sense_paths)
 
     leaf_paths = []
     for i in range(3):

@@ -533,6 +533,311 @@ public final class SchoolParticles {
         }
     }
 
+    /** Sharp psychic shard — bolts / lances / stings. */
+    public static class MentalShardParticle extends TextureSheetParticle {
+        protected MentalShardParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.quadSize = 0.07F + this.random.nextFloat() * 0.05F;
+            this.lifetime = 8 + this.random.nextInt(6);
+            this.xd = xd + (this.random.nextFloat() - 0.5F) * 0.08;
+            this.yd = yd + (this.random.nextFloat() - 0.5F) * 0.06;
+            this.zd = zd + (this.random.nextFloat() - 0.5F) * 0.08;
+            this.sprite = sprites.get(this.random);
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.xd *= 0.88;
+            this.yd *= 0.88;
+            this.zd *= 0.88;
+            this.alpha *= 0.85F;
+            this.quadSize *= 0.97F;
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new MentalShardParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Telekinetic force streak. */
+    public static class MentalForceParticle extends TextureSheetParticle {
+        protected MentalForceParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.quadSize = 0.1F + this.random.nextFloat() * 0.08F;
+            this.lifetime = 10 + this.random.nextInt(8);
+            this.xd = xd + (this.random.nextFloat() - 0.5F) * 0.1;
+            this.yd = 0.01 + this.random.nextFloat() * 0.03;
+            this.zd = zd + (this.random.nextFloat() - 0.5F) * 0.1;
+            this.sprite = sprites.get(this.random);
+            this.alpha = 0.8F;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.xd *= 0.92;
+            this.zd *= 0.92;
+            this.alpha = 0.8F * (1.0F - (float) this.age / (float) this.lifetime);
+            this.quadSize *= 1.02F;
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new MentalForceParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Cyan-violet synapse flash. */
+    public static class MentalSynapseParticle extends TextureSheetParticle {
+        protected MentalSynapseParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.quadSize = 0.06F + this.random.nextFloat() * 0.05F;
+            this.lifetime = 6 + this.random.nextInt(6);
+            this.xd = xd + (this.random.nextFloat() - 0.5F) * 0.07;
+            this.yd = 0.02 + this.random.nextFloat() * 0.05;
+            this.zd = zd + (this.random.nextFloat() - 0.5F) * 0.07;
+            this.sprite = sprites.get(this.random);
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.xd *= 0.88;
+            this.yd *= 0.88;
+            this.zd *= 0.88;
+            this.alpha = 1.0F - (float) this.age / (float) this.lifetime;
+            this.quadSize *= 0.95F;
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new MentalSynapseParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Soft ward hex mote. */
+    public static class MentalWardParticle extends TextureSheetParticle {
+        protected MentalWardParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.gravity = -0.005F;
+            this.quadSize = 0.09F + this.random.nextFloat() * 0.05F;
+            this.lifetime = 18 + this.random.nextInt(10);
+            this.xd = xd * 0.4 + (this.random.nextFloat() - 0.5F) * 0.02;
+            this.yd = 0.01 + this.random.nextFloat() * 0.02;
+            this.zd = zd * 0.4 + (this.random.nextFloat() - 0.5F) * 0.02;
+            this.sprite = sprites.get(this.random);
+            this.alpha = 0.75F;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.oRoll = this.roll;
+            this.roll += 0.08F;
+            this.alpha = 0.75F * (1.0F - (float) this.age / (float) this.lifetime * 0.85F);
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new MentalWardParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Dark compulsion / terror mote. */
+    public static class MentalFearParticle extends TextureSheetParticle {
+        protected MentalFearParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.quadSize = 0.08F + this.random.nextFloat() * 0.06F;
+            this.lifetime = 14 + this.random.nextInt(10);
+            this.xd = xd + (this.random.nextFloat() - 0.5F) * 0.04;
+            this.yd = -0.01 + this.random.nextFloat() * 0.02;
+            this.zd = zd + (this.random.nextFloat() - 0.5F) * 0.04;
+            this.sprite = sprites.get(this.random);
+            this.alpha = 0.85F;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.xd += Mth.sin(this.age * 0.4F) * 0.002;
+            this.alpha = 0.85F * (1.0F - (float) this.age / (float) this.lifetime);
+            this.quadSize *= 0.98F;
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new MentalFearParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Iris / sense spark. */
+    public static class MentalSenseParticle extends TextureSheetParticle {
+        protected MentalSenseParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.gravity = -0.01F;
+            this.quadSize = 0.07F + this.random.nextFloat() * 0.05F;
+            this.lifetime = 12 + this.random.nextInt(8);
+            this.xd = xd + (this.random.nextFloat() - 0.5F) * 0.03;
+            this.yd = 0.02 + this.random.nextFloat() * 0.03;
+            this.zd = zd + (this.random.nextFloat() - 0.5F) * 0.03;
+            this.sprite = sprites.get(this.random);
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.oRoll = this.roll;
+            this.roll += 0.15F;
+            this.alpha *= 0.9F;
+            this.quadSize *= 0.98F;
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new MentalSenseParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
     /** Drifting leaf with gentle tumble. */
     public static class LeafParticle extends TextureSheetParticle {
         protected LeafParticle(

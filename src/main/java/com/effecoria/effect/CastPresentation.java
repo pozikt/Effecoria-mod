@@ -85,6 +85,30 @@ public final class CastPresentation {
     private static final Set<ResourceLocation> ELEMENTAL_VEIL_ONLY =
             Set.of(id("quasar"), id("elemental_supremacy"));
 
+    private static final Set<ResourceLocation> MENTAL_FORCE =
+            Set.of(id("mental_push"), id("telekinetic_crush"));
+    private static final Set<ResourceLocation> MENTAL_SHARD = Set.of(
+            id("mental_sting"), id("mind_lance"), id("mind_bolt"), id("thought_lance"));
+    private static final Set<ResourceLocation> MENTAL_SENSE = Set.of(
+            id("sense_phi"),
+            id("mind_probe"),
+            id("psychic_focus"),
+            id("psychic_amplify"),
+            id("omega_mind"));
+    private static final Set<ResourceLocation> MENTAL_FOG_FAMILY =
+            Set.of(id("mass_confusion"), id("psychic_storm"), id("thought_bomb"));
+    private static final Set<ResourceLocation> MENTAL_SYNAPSE =
+            Set.of(id("neural_lock"), id("synaptic_overload"), id("psychic_scream"));
+    private static final Set<ResourceLocation> MENTAL_WARD =
+            Set.of(id("psychic_barrier"), id("mental_fortress"));
+    private static final Set<ResourceLocation> MENTAL_DRAIN = Set.of(id("psychic_drain"));
+    private static final Set<ResourceLocation> MENTAL_FEAR = Set.of(
+            id("mind_terror"),
+            id("cliff_urge"),
+            id("drown_urge"),
+            id("psychic_frenzy"),
+            id("mass_hysteria"));
+
     private static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath("effecoria", path);
     }
@@ -202,15 +226,7 @@ public final class CastPresentation {
 
     private static SchoolTheme themeFor(MagicSchool school, SpellDefinition spell) {
         return switch (school) {
-            case MENTAL -> new SchoolTheme(
-                    ModParticleTypes.MENTAL_FOG.get(),
-                    ModParticleTypes.PHI_SPARK.get(),
-                    SoundEvents.AMETHYST_BLOCK_CHIME,
-                    SoundEvents.ILLUSIONER_CAST_SPELL,
-                    0.45f,
-                    1.35f,
-                    0.55f,
-                    1.25f);
+            case MENTAL -> mentalTheme(spell);
             case ELEMENTAL -> elementalTheme(spell);
             case ORGANIC -> ORGANIC_HEAL_SPELLS.contains(spell.id())
                     ? new SchoolTheme(
@@ -392,6 +408,107 @@ public final class CastPresentation {
                 1.1f,
                 0.45f,
                 1.0f);
+    }
+
+    private static SchoolTheme mentalTheme(SpellDefinition spell) {
+        ResourceLocation id = spell.id();
+        if (MENTAL_FORCE.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.MENTAL_FORCE.get(),
+                    ModParticleTypes.MENTAL_FOG.get(),
+                    SoundEvents.AMETHYST_BLOCK_CHIME,
+                    SoundEvents.ILLUSIONER_CAST_SPELL,
+                    0.45f,
+                    1.4f,
+                    0.55f,
+                    1.15f);
+        }
+        if (MENTAL_SHARD.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.MENTAL_SHARD.get(),
+                    ModParticleTypes.PHI_SPARK.get(),
+                    SoundEvents.AMETHYST_BLOCK_CHIME,
+                    SoundEvents.ILLUSIONER_CAST_SPELL,
+                    0.4f,
+                    1.5f,
+                    0.55f,
+                    1.35f);
+        }
+        if (MENTAL_SENSE.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.MENTAL_SENSE.get(),
+                    ModParticleTypes.PHI_SPARK.get(),
+                    SoundEvents.AMETHYST_BLOCK_CHIME,
+                    SoundEvents.BEACON_ACTIVATE,
+                    0.4f,
+                    1.55f,
+                    0.45f,
+                    1.6f);
+        }
+        if (MENTAL_SYNAPSE.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.MENTAL_SYNAPSE.get(),
+                    ModParticleTypes.PHI_SPARK.get(),
+                    SoundEvents.AMETHYST_BLOCK_CHIME,
+                    SoundEvents.EVOKER_CAST_SPELL,
+                    0.45f,
+                    1.35f,
+                    0.6f,
+                    0.9f);
+        }
+        if (MENTAL_WARD.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.MENTAL_WARD.get(),
+                    ModParticleTypes.PHI_SPARK.get(),
+                    SoundEvents.AMETHYST_BLOCK_CHIME,
+                    SoundEvents.ENCHANTMENT_TABLE_USE,
+                    0.45f,
+                    1.2f,
+                    0.55f,
+                    1.1f);
+        }
+        if (MENTAL_DRAIN.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.MENTAL_FORCE.get(),
+                    ModParticleTypes.MENTAL_FEAR.get(),
+                    SoundEvents.AMETHYST_BLOCK_CHIME,
+                    SoundEvents.ILLUSIONER_CAST_SPELL,
+                    0.4f,
+                    0.95f,
+                    0.55f,
+                    0.85f);
+        }
+        if (MENTAL_FEAR.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.MENTAL_FEAR.get(),
+                    ModParticleTypes.MENTAL_FOG.get(),
+                    SoundEvents.WARDEN_HEARTBEAT,
+                    SoundEvents.WARDEN_HEARTBEAT,
+                    0.4f,
+                    1.5f,
+                    0.5f,
+                    1.35f);
+        }
+        if (MENTAL_FOG_FAMILY.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.MENTAL_FOG.get(),
+                    ModParticleTypes.MENTAL_SHARD.get(),
+                    SoundEvents.AMETHYST_BLOCK_CHIME,
+                    SoundEvents.ILLUSIONER_CAST_SPELL,
+                    0.45f,
+                    1.25f,
+                    0.55f,
+                    1.1f);
+        }
+        return new SchoolTheme(
+                ModParticleTypes.MENTAL_FOG.get(),
+                ModParticleTypes.PHI_SPARK.get(),
+                SoundEvents.AMETHYST_BLOCK_CHIME,
+                SoundEvents.ILLUSIONER_CAST_SPELL,
+                0.45f,
+                1.35f,
+                0.55f,
+                1.25f);
     }
 
     private record SchoolTheme(

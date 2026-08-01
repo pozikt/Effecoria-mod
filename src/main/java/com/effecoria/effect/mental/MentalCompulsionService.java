@@ -160,7 +160,7 @@ public final class MentalCompulsionService {
                 : null;
 
         level.sendParticles(
-                ModParticleTypes.MENTAL_FOG.get(),
+                ModParticleTypes.MENTAL_FEAR.get(),
                 mob.getX(),
                 mob.getY() + mob.getBbHeight() * 0.7,
                 mob.getZ(),

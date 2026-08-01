@@ -46,6 +46,24 @@ public final class ModParticleTypes {
     // Mental
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MENTAL_FOG =
             PARTICLE_TYPES.register("mental_fog", () -> new SimpleParticleType(false));
+    /** Psychic needle / mind shard. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MENTAL_SHARD =
+            PARTICLE_TYPES.register("mental_shard", () -> new SimpleParticleType(false));
+    /** Telekinetic force ripple. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MENTAL_FORCE =
+            PARTICLE_TYPES.register("mental_force", () -> new SimpleParticleType(false));
+    /** Synapse flash — neural lock / overload / scream. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MENTAL_SYNAPSE =
+            PARTICLE_TYPES.register("mental_synapse", () -> new SimpleParticleType(false));
+    /** Ward / fortress hex mote. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MENTAL_WARD =
+            PARTICLE_TYPES.register("mental_ward", () -> new SimpleParticleType(false));
+    /** Compulsion / terror mote. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MENTAL_FEAR =
+            PARTICLE_TYPES.register("mental_fear", () -> new SimpleParticleType(false));
+    /** Sense / probe / focus iris spark. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MENTAL_SENSE =
+            PARTICLE_TYPES.register("mental_sense", () -> new SimpleParticleType(false));
 
     // Organic
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ORGANIC_LEAF =
