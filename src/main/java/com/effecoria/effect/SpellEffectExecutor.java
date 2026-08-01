@@ -12,6 +12,7 @@ import com.effecoria.effect.necromancy.NecromancyEffects;
 import com.effecoria.effect.spatial.SpatialEffects;
 import com.effecoria.effect.spatial.SpatialVfx;
 import com.effecoria.effect.organic.OrganicEffects;
+import com.effecoria.entity.RootCageEntity;
 import com.effecoria.effect.organic.OrganicSpikeWaveService;
 import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.core.magic.SpellEffectEntry;
@@ -676,10 +677,7 @@ public final class SpellEffectExecutor {
         int scaledTicks = Math.round(rootTicks * (0.8f + power / 100f));
 
         if (target != null) {
-            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, scaledTicks, 4));
-            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.DIG_SLOWDOWN, scaledTicks, 1));
-            spawnOrganicRoots(level, target.position().add(0, 0.2, 0));
-            level.playSound(null, target.blockPosition(), SoundEvents.AZALEA_PLACE, SoundSource.PLAYERS, 1f, 0.7f);
+            RootCageEntity.bind(level, target, caster, scaledTicks, power);
         }
 
         if (bloom) {

@@ -3,11 +3,14 @@ package com.effecoria.client;
 import com.effecoria.EffecoriaMod;
 import com.effecoria.client.hud.PsiHudOverlay;
 import com.effecoria.client.particle.SchoolParticles;
+import com.effecoria.client.render.RootCageRenderer;
+import com.effecoria.content.ModEntities;
 import com.effecoria.content.ModParticleTypes;
 
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
@@ -23,6 +26,11 @@ public final class EffecoriaClient {
         event.register(KeyBindings.OPEN_SPELL_BOOK);
         event.register(KeyBindings.CYCLE_SPELL_MODIFIER);
         event.register(KeyBindings.OPEN_SEAL_EDITOR);
+    }
+
+    @SubscribeEvent
+    public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ModEntities.ROOT_CAGE.get(), RootCageRenderer::new);
     }
 
     @SubscribeEvent

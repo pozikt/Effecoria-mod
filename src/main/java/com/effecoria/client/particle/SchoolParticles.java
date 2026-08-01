@@ -378,16 +378,18 @@ public final class SchoolParticles {
         }
     }
 
-    /** Root tendril erupting upward then fading. */
+    /** Root tendril erupting upward then fading. xd &gt;= 0.4 encodes size scale (root wrap). */
     public static class RootParticle extends TextureSheetParticle {
         private final float baseSize;
 
-        protected RootParticle(ClientLevel level, double x, double y, double z, SpriteSet sprites) {
-            super(level, x, y, z, 0, 0.08, 0);
+        protected RootParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, 0, yd > 0.001 ? yd : 0.08, 0);
             this.hasPhysics = false;
-            this.baseSize = 0.12F + this.random.nextFloat() * 0.08F;
-            this.quadSize = 0.02F;
-            this.lifetime = 16 + this.random.nextInt(8);
+            float scale = xd >= 0.4 ? (float) Mth.clamp(xd, 0.4, 5.0) : 1.0F;
+            this.baseSize = (0.12F + this.random.nextFloat() * 0.08F) * scale;
+            this.quadSize = 0.02F * scale;
+            this.lifetime = 16 + this.random.nextInt(8) + (scale > 1.5F ? 4 : 0);
             this.roll = (this.random.nextFloat() - 0.5F) * 0.4F;
             this.sprite = sprites.get(this.random);
             this.alpha = 0.95F;
@@ -426,7 +428,7 @@ public final class SchoolParticles {
                     double xd,
                     double yd,
                     double zd) {
-                return new RootParticle(level, x, y, z, this.sprites);
+                return new RootParticle(level, x, y, z, xd, yd, zd, this.sprites);
             }
         }
     }

@@ -14,6 +14,8 @@ import com.effecoria.content.ModBlocks;
 
 import com.effecoria.content.ModCreativeTabs;
 
+import com.effecoria.content.ModEntities;
+
 import com.effecoria.content.ModItems;
 
 import com.effecoria.content.ModParticleTypes;
@@ -61,6 +63,8 @@ public class EffecoriaMod {
         ModBlockEntities.BLOCK_ENTITY_TYPES.register(modEventBus);
 
         ModItems.ITEMS.register(modEventBus);
+
+        ModEntities.ENTITY_TYPES.register(modEventBus);
 
         ModParticleTypes.PARTICLE_TYPES.register(modEventBus);
 
