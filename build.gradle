@@ -191,7 +191,7 @@ idea {
     }
 }
 
-/** Copies the playable jar into dist/ (deletes older effecoria-*.jar there). */
+/** Copies the playable jar into dist/ and the local TLauncher Effecoria mods folder if present. */
 tasks.register('packageForShare') {
     group = 'distribution'
     description = 'Build and copy effecoria jar to dist/ for sharing'
@@ -208,10 +208,17 @@ tasks.register('packageForShare') {
         def outDir = distDir.asFile
         outDir.mkdirs()
         outDir.listFiles()?.findAll { it.name.startsWith('effecoria-') && it.name.endsWith('.jar') }?.each { it.delete() }
-        java.nio.file.Files.copy(
-                built.toPath(),
-                new File(outDir, built.name).toPath(),
-                java.nio.file.StandardCopyOption.REPLACE_EXISTING)
-        println "Share jar ready: ${new File(outDir, built.name).absolutePath}"
+        def dest = new File(outDir, built.name)
+        java.nio.file.Files.copy(built.toPath(), dest.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        println "Share jar ready: ${dest.absolutePath}"
+
+        // TLauncher custom gameDir: %AppData%/.minecraft/versions/Effecoria/mods
+        def tlMods = new File(System.getenv('APPDATA'), '.minecraft/versions/Effecoria/mods')
+        if (tlMods.isDirectory()) {
+            tlMods.listFiles()?.findAll { it.name.startsWith('effecoria-') && it.name.endsWith('.jar') }?.each { it.delete() }
+            def tlDest = new File(tlMods, built.name)
+            java.nio.file.Files.copy(built.toPath(), tlDest.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+            println "Installed into TLauncher instance: ${tlDest.absolutePath}"
+        }
     }
 }
