@@ -112,7 +112,10 @@ public final class SealProgramRuntime {
 
     /**
      * Tick reactive rules near a block. {@code event} is the concrete world event (or APPROACH for proximity).
-     * Returns true if a rising-edge pulse fired.
+     * Returns true if a pulse fired.
+     *
+     * <p>{@link SenseEvent#STEP} re-fires on a short dwell while the entity stays on the block
+     * (traps must keep working). Other events stay rising-edge.
      */
     public static boolean pulse(
             ServerLevel level,
@@ -141,17 +144,38 @@ public final class SealProgramRuntime {
             CompoundTag rule = rules.getCompound(i);
             boolean matches = senseMatches(level, pos, rule, event, subject);
             String key = "s" + i;
+            String timeKey = key + "_t";
             boolean wasOn = rt.getBoolean(key);
-            rt.putBoolean(key, matches);
-            if (matches && !wasOn) {
-                fireActions(level, pos, seal, rule, gameTime, rt);
-                anyFired = true;
-            } else if (!matches) {
+            if (!matches) {
                 rt.putBoolean(key, false);
+                continue;
             }
+            boolean rising = !wasOn;
+            boolean dwell =
+                    event == SenseEvent.STEP && wasOn && gameTime - rt.getLong(timeKey) >= 15;
+            if (rising || dwell) {
+                fireActions(level, pos, seal, rule, gameTime, rt);
+                rt.putLong(timeKey, gameTime);
+                anyFired = true;
+            }
+            rt.putBoolean(key, true);
         }
         params.put(SealProgramCompiler.RUNTIME_TAG, rt);
         return anyFired;
+    }
+
+    /** Clears rising-edge latch so the next enter / step can fire again. */
+    public static void clearSenseFlags(SealInstance seal) {
+        if (!isProgram(seal)) {
+            return;
+        }
+        CompoundTag params = seal.params();
+        migrateV1(params);
+        if (!params.contains(SealProgramCompiler.RULES_TAG, Tag.TAG_LIST)) {
+            return;
+        }
+        int ruleCount = params.getList(SealProgramCompiler.RULES_TAG, Tag.TAG_COMPOUND).size();
+        clearSenseFlags(params, ruleCount);
     }
 
     /** Continuous proximity scan for APPROACH senses (edge when someone enters radius). */
@@ -191,8 +215,22 @@ public final class SealProgramRuntime {
         if (any) {
             pulse(level, pos, seal, gameTime, SenseEvent.APPROACH, subject);
         } else {
-            clearSenseFlags(params, rules.size());
+            clearApproachSenseFlags(params, rules);
         }
+    }
+
+    /** Drop approach latches only — do not wipe STEP/HIT/USE/BREAK while someone still stands on the block. */
+    private static void clearApproachSenseFlags(CompoundTag params, ListTag rules) {
+        CompoundTag rt = params.contains(SealProgramCompiler.RUNTIME_TAG)
+                ? params.getCompound(SealProgramCompiler.RUNTIME_TAG)
+                : new CompoundTag();
+        for (int i = 0; i < rules.size(); i++) {
+            Set<String> specs = readSpecs(rules.getCompound(i));
+            if (eventAllowed(specs, SenseEvent.APPROACH)) {
+                rt.putBoolean("s" + i, false);
+            }
+        }
+        params.put(SealProgramCompiler.RUNTIME_TAG, rt);
     }
 
     private static void clearSenseFlags(CompoundTag params, int ruleCount) {

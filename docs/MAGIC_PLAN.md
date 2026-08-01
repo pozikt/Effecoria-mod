@@ -68,7 +68,7 @@ Goal: ZNΦ and wards are gameplay, not lore text.
 2. **Cold iron** tag — optional school-specific debuff (necro/corruption first).
    - **Deferred** with D1 (world tags / materials).
 3. **Seal stacking rules** — one offensive + fortify and/or glow per block. ✅ *see `SealLayer` / `SealPlaceResult`*
-4. **Seal conflicts** — repulse vs trap priority; chunk sync messages.
+4. **Seal conflicts** — repulse vs trap priority; chunk sync messages. ✅ *`SealLayer.offensivePriority` (repulse > snare > trap > program); place feedback names old→new + layer list; `SealInspectHud` reads synced chunk seals*
 
 **Exit:** builders can make a safe ritual room and a trapped corridor.
 
@@ -159,7 +159,8 @@ If choosing a single slice for the next implementation session:
 11. Phase **A5** balance sweep — ✅ done.
 12. Phase **C** Φ harness (dust / focus / Phi Cell / tiers) — ✅ done.
 13. Death Mark thralls + mastery control budget + additive Φ stacking — ✅ baseline shipped.
-14. **Next:** magic **presentation** — Patchouli / first-hour tips / hub+HUD clarity (see backlog above). Then Phase **E** or **D4**.
+14. **Next:** magic **presentation** — Patchouli / first-hour tips / hub+HUD clarity (see backlog above). Then Phase **E**.
+15. Phase **D4** seal conflicts + inspect HUD — ✅ done.
 
 ---
 

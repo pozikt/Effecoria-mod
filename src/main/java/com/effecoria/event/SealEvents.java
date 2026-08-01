@@ -2,6 +2,7 @@ package com.effecoria.event;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.core.formula.BreathDebuffs;
@@ -13,6 +14,7 @@ import com.effecoria.core.seal.SealTypes;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -93,6 +95,11 @@ public final class SealEvents {
         purgeAndMaintainGlowNear(player);
     }
 
+    private static final String PD_SEAL_X = "effecoria_seal_sx";
+    private static final String PD_SEAL_Y = "effecoria_seal_sy";
+    private static final String PD_SEAL_Z = "effecoria_seal_sz";
+    private static final String PD_SEAL_SET = "effecoria_seal_set";
+
     /** Seals keep working under any living entity — even if the caster died / left. */
     @SubscribeEvent
     public static void onEntityTick(EntityTickEvent.Post event) {
@@ -116,6 +123,7 @@ public final class SealEvents {
                 continue;
             }
             SealProgramRuntime.pulse(level, pos, seal, gameTime, senseEvent, subject);
+            SealService.markDirty(level, pos);
         }
     }
 
@@ -161,46 +169,124 @@ public final class SealEvents {
 
     private static void tickSealsUnder(ServerLevel level, LivingEntity living) {
         long gameTime = level.getGameTime();
-        BlockPos standingOn = BlockPos.containing(living.getX(), living.getY() - 0.05, living.getZ());
+        BlockPos standingOn = resolveStandingSealPos(level, living);
+        releaseLeftSupport(level, living, standingOn);
+
         LevelChunk chunk = level.getChunkAt(standingOn);
         SealService.purgeExpired(level, chunk, gameTime);
 
-        for (SealInstance seal : SealService.getAll(level, standingOn)) {
-            if (seal.isExpired(gameTime)) {
-                continue;
-            }
-            if (seal.typeId().equals(SealTypes.PROGRAM)) {
-                SealProgramRuntime.pulse(
-                        level, standingOn, seal, gameTime, SealProgramRuntime.SenseEvent.STEP, living);
-                float hurt = SealProgramRuntime.effectiveHurt(seal, gameTime);
-                if (hurt > 0f) {
-                    living.hurt(level.damageSources().magic(), hurt);
-                }
-                int slow = SealProgramRuntime.effectiveSlow(seal, gameTime);
-                if (slow > 0) {
-                    applySlowTo(living, seal, slow);
-                }
-                float push = SealProgramRuntime.effectivePush(seal, gameTime);
-                if (push > 0f) {
-                    living.setDeltaMovement(living.getDeltaMovement().add(0, push, 0));
-                    living.hurtMarked = true;
-                }
-            } else if (seal.typeId().equals(SealTypes.DAMAGE_TRAP)) {
-                living.hurt(level.damageSources().magic(), SealService.trapDamage(seal));
-            } else if (seal.typeId().equals(SealTypes.SNARE)) {
-                int amp = seal.params() != null && seal.params().contains("slow_amplifier")
-                        ? seal.params().getInt("slow_amplifier")
-                        : 3;
-                applySlowTo(living, seal, amp);
-            } else if (seal.typeId().equals(SealTypes.REPULSE)) {
-                float force = seal.params() != null && seal.params().contains("repulse_force")
-                        ? seal.params().getFloat("repulse_force")
-                        : 0.85f;
-                force *= Math.max(0.5f, seal.strength() / 40f);
-                living.setDeltaMovement(living.getDeltaMovement().add(0, force, 0));
-                living.hurtMarked = true;
+        List<SealInstance> layers = SealService.getAll(level, standingOn);
+        if (layers.isEmpty()) {
+            return;
+        }
+
+        boolean dirty = false;
+        // Exactly one offensive combat layer (repulse > snare > trap > program).
+        Optional<SealInstance> offensive = SealService.getChunkData(chunk).findOffensive(standingOn);
+        if (offensive.isPresent()) {
+            SealInstance seal = offensive.get();
+            if (!seal.isExpired(gameTime)) {
+                dirty |= applyOffensiveStanding(level, standingOn, living, seal, gameTime);
             }
         }
+
+        // Fortify/glow are passive; programs may still need STEP even if somehow not selected —
+        // findOffensive already prefers program only when no trap/snare/repulse.
+        if (dirty) {
+            SealService.markDirty(level, standingOn);
+        }
+    }
+
+    private static boolean applyOffensiveStanding(
+            ServerLevel level, BlockPos standingOn, LivingEntity living, SealInstance seal, long gameTime) {
+        if (seal.typeId().equals(SealTypes.PROGRAM)) {
+            SealProgramRuntime.pulse(
+                    level, standingOn, seal, gameTime, SealProgramRuntime.SenseEvent.STEP, living);
+            float hurt = SealProgramRuntime.effectiveHurt(seal, gameTime);
+            if (hurt > 0f) {
+                living.hurt(level.damageSources().magic(), hurt);
+            }
+            int slow = SealProgramRuntime.effectiveSlow(seal, gameTime);
+            if (slow > 0) {
+                applySlowTo(living, seal, slow);
+            }
+            float push = SealProgramRuntime.effectivePush(seal, gameTime);
+            if (push > 0f) {
+                living.setDeltaMovement(living.getDeltaMovement().add(0, push, 0));
+                living.hurtMarked = true;
+            }
+            return true;
+        }
+        if (seal.typeId().equals(SealTypes.DAMAGE_TRAP)) {
+            living.hurt(level.damageSources().magic(), SealService.trapDamage(seal));
+            return false;
+        }
+        if (seal.typeId().equals(SealTypes.SNARE)) {
+            int amp = seal.params() != null && seal.params().contains("slow_amplifier")
+                    ? seal.params().getInt("slow_amplifier")
+                    : 3;
+            applySlowTo(living, seal, amp);
+            return false;
+        }
+        if (seal.typeId().equals(SealTypes.REPULSE)) {
+            float force = seal.params() != null && seal.params().contains("repulse_force")
+                    ? seal.params().getFloat("repulse_force")
+                    : 0.85f;
+            force *= Math.max(0.5f, seal.strength() / 40f);
+            living.setDeltaMovement(living.getDeltaMovement().add(0, force, 0));
+            living.hurtMarked = true;
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * Block that should host standing seals: prefer {@link LivingEntity#getOnPos()}, then
+     * feet-1 fallbacks, picking the candidate that actually has a seal when ambiguous.
+     */
+    private static BlockPos resolveStandingSealPos(ServerLevel level, LivingEntity living) {
+        BlockPos onPos = living.getOnPos();
+        BlockPos legacy = BlockPos.containing(living.getX(), living.getY() - 0.05, living.getZ());
+        BlockPos belowFeet = living.blockPosition().below();
+        if (!SealService.getAll(level, onPos).isEmpty()) {
+            return onPos;
+        }
+        if (!legacy.equals(onPos) && !SealService.getAll(level, legacy).isEmpty()) {
+            return legacy;
+        }
+        if (!belowFeet.equals(onPos)
+                && !belowFeet.equals(legacy)
+                && !SealService.getAll(level, belowFeet).isEmpty()) {
+            return belowFeet;
+        }
+        return onPos;
+    }
+
+    /** When an entity leaves a sealed block, reset program sense latches so re-entry fires again. */
+    private static void releaseLeftSupport(ServerLevel level, LivingEntity living, BlockPos current) {
+        var pd = living.getPersistentData();
+        if (!pd.getBoolean(PD_SEAL_SET)) {
+            writeSupport(pd, current);
+            return;
+        }
+        BlockPos prev = new BlockPos(pd.getInt(PD_SEAL_X), pd.getInt(PD_SEAL_Y), pd.getInt(PD_SEAL_Z));
+        if (prev.equals(current)) {
+            return;
+        }
+        for (SealInstance seal : SealService.getAll(level, prev)) {
+            if (SealProgramRuntime.isProgram(seal)) {
+                SealProgramRuntime.clearSenseFlags(seal);
+                SealService.markDirty(level, prev);
+            }
+        }
+        writeSupport(pd, current);
+    }
+
+    private static void writeSupport(CompoundTag pd, BlockPos pos) {
+        pd.putBoolean(PD_SEAL_SET, true);
+        pd.putInt(PD_SEAL_X, pos.getX());
+        pd.putInt(PD_SEAL_Y, pos.getY());
+        pd.putInt(PD_SEAL_Z, pos.getZ());
     }
 
     private static void applySlowTo(LivingEntity living, SealInstance seal, int amp) {

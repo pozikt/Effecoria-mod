@@ -36,6 +36,6 @@ Words under `data/effecoria/seal_words/*.json` (`kind`: number, property, trigge
 
 ## Runtime
 
-Compiled to `program_version: 2` with `passives` + `rules`. Rising-edge pulse fires actions; timed overlays live in `_rt.timed`.
+Compiled to `program_version: 2` with `passives` + `rules`. Rising-edge pulse fires actions; **Step** also re-fires about every 15 ticks while you stay on the block. Leaving the block clears the latch so the next step works again. Timed overlays live in `_rt.timed`.
 
 Combat seal casting on **R** is deferred.

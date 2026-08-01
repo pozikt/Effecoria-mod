@@ -18,6 +18,7 @@ import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.core.magic.SpellEffectEntry;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
+import com.effecoria.core.seal.SealPlaceOutcome;
 import com.effecoria.core.seal.SealPlaceResult;
 import com.effecoria.core.seal.SealService;
 import com.effecoria.core.seal.SealTypes;
@@ -450,15 +451,24 @@ public final class SpellEffectExecutor {
                 : 2400;
         float strength = Math.min(power, 64f);
         CompoundTag sealParams = sealParamsFromEffect(effect);
-        SealPlaceResult result =
+        SealPlaceOutcome outcome =
                 SealService.place(level, blockTarget, typeId, caster.getUUID(), strength, duration, sealParams);
 
         spawnSealPlaceParticles(level, blockTarget, typeId);
         level.playSound(null, blockTarget, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 0.8f, 1.2f);
-        Component sealName = Component.translatable("seal.effecoria." + typeId.getPath());
-        Component message = switch (result) {
+        caster.displayClientMessage(formatSealPlaceMessage(outcome, typeId, duration), true);
+    }
+
+    private static Component formatSealPlaceMessage(SealPlaceOutcome outcome, ResourceLocation typeId, int duration) {
+        Component sealName = sealDisplayName(typeId);
+        Component base = switch (outcome.result()) {
             case STACKED -> Component.translatable("message.effecoria.seal_stacked", sealName);
-            case REPLACED_OFFENSIVE -> Component.translatable("message.effecoria.seal_replaced_offensive", sealName);
+            case REPLACED_OFFENSIVE -> {
+                Component previous = outcome.previousOffensive() != null
+                        ? sealDisplayName(outcome.previousOffensive())
+                        : Component.translatable("seal.effecoria.unknown");
+                yield Component.translatable("message.effecoria.seal_replaced_offensive", previous, sealName);
+            }
             case REPLACED_SAME -> Component.translatable(
                     duration < 0 ? "message.effecoria.seal_placed_permanent" : "message.effecoria.seal_refreshed",
                     sealName);
@@ -466,7 +476,27 @@ public final class SpellEffectExecutor {
                     duration < 0 ? "message.effecoria.seal_placed_permanent" : "message.effecoria.seal_placed",
                     sealName);
         };
-        caster.displayClientMessage(message, true);
+        if (outcome.layersAfter().size() <= 1) {
+            return base;
+        }
+        Component layers = formatLayerList(outcome.layersAfter());
+        return base.copy().append(Component.literal(" · ")).append(
+                Component.translatable("message.effecoria.seal_layers", layers));
+    }
+
+    private static Component sealDisplayName(ResourceLocation typeId) {
+        return Component.translatable("seal.effecoria." + typeId.getPath());
+    }
+
+    private static Component formatLayerList(java.util.List<ResourceLocation> layers) {
+        net.minecraft.network.chat.MutableComponent joined = Component.empty();
+        for (int i = 0; i < layers.size(); i++) {
+            if (i > 0) {
+                joined.append(Component.literal(" + "));
+            }
+            joined.append(sealDisplayName(layers.get(i)));
+        }
+        return joined;
     }
 
     private static void spawnSealPlaceParticles(ServerLevel level, BlockPos pos, ResourceLocation typeId) {

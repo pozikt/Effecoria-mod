@@ -48,12 +48,13 @@ public final class SealService {
     }
 
     /**
-     * Places or stacks a seal. Offensive seals replace any existing offensive layer;
-     * fortify and glow may coexist; same type refreshes in place.
+     * Places or stacks a seal. Offensive seals replace any existing offensive layer
+     * (trap / snare / repulse / program — last cast wins at place time).
+     * Fortify and glow may coexist; same type refreshes in place.
      *
      * @param durationTicks {@code -1} for permanent, otherwise lifetime in ticks
      */
-    public static SealPlaceResult place(
+    public static SealPlaceOutcome place(
             ServerLevel level,
             BlockPos pos,
             ResourceLocation typeId,
@@ -63,7 +64,7 @@ public final class SealService {
             CompoundTag params) {
         if (typeId.equals(SealTypes.PROGRAM)) {
             placeProgram(level, pos, casterId, strength, params == null ? new CompoundTag() : params.copy());
-            return SealPlaceResult.PLACED;
+            return SealPlaceOutcome.of(SealPlaceResult.PLACED, null, getAll(level, pos));
         }
         LevelChunk chunk = level.getChunkAt(pos);
         ChunkSealData data = getChunkData(chunk);
@@ -71,12 +72,12 @@ public final class SealService {
         SealLayer layer = SealLayer.of(typeId);
 
         SealPlaceResult result = SealPlaceResult.PLACED;
+        ResourceLocation previousOffensive = null;
         if (layer == SealLayer.OFFENSIVE) {
-            Optional<SealInstance> existing = layers.stream()
-                    .filter(s -> SealLayer.of(s.typeId()) == SealLayer.OFFENSIVE)
-                    .findFirst();
+            Optional<SealInstance> existing = data.findOffensive(pos);
             if (existing.isPresent()) {
-                result = existing.get().typeId().equals(typeId)
+                previousOffensive = existing.get().typeId();
+                result = previousOffensive.equals(typeId)
                         ? SealPlaceResult.REPLACED_SAME
                         : SealPlaceResult.REPLACED_OFFENSIVE;
                 layers.removeIf(s -> SealLayer.of(s.typeId()) == SealLayer.OFFENSIVE);
@@ -107,7 +108,7 @@ public final class SealService {
         chunk.setData(ModAttachments.CHUNK_SEALS.get(), data);
         chunk.setUnsaved(true);
         syncChunk(chunk);
-        return result;
+        return SealPlaceOutcome.of(result, previousOffensive, data.getAll(pos));
     }
 
     /** Replace any seals on the block with a single permanent word program. */
@@ -287,6 +288,15 @@ public final class SealService {
 
     public static void syncChunk(LevelChunk chunk) {
         chunk.syncData(ModAttachments.CHUNK_SEALS.get());
+    }
+
+    /** Persist in-place NBT mutations (program runtime latches) and sync to clients. */
+    public static void markDirty(ServerLevel level, BlockPos pos) {
+        LevelChunk chunk = level.getChunkAt(pos);
+        ChunkSealData data = getChunkData(chunk);
+        chunk.setData(ModAttachments.CHUNK_SEALS.get(), data);
+        chunk.setUnsaved(true);
+        syncChunk(chunk);
     }
 
     public static float fortifyBreakFactor(SealInstance seal) {

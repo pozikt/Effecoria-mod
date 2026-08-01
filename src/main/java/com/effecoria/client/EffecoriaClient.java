@@ -3,6 +3,7 @@ package com.effecoria.client;
 import com.effecoria.EffecoriaMod;
 import com.effecoria.client.hud.BlurredLocusHud;
 import com.effecoria.client.hud.PsiHudOverlay;
+import com.effecoria.client.hud.SealInspectHud;
 import com.effecoria.client.particle.SchoolParticles;
 import com.effecoria.client.render.DeathShadowRenderer;
 import com.effecoria.client.render.RootCageRenderer;
@@ -52,6 +53,7 @@ public final class EffecoriaClient {
     public static void registerGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAbove(VanillaGuiLayers.HOTBAR, EffecoriaMod.id("psi_hud"), PsiHudOverlay::render);
         event.registerAbove(VanillaGuiLayers.HOTBAR, EffecoriaMod.id("blurred_locus"), BlurredLocusHud::render);
+        event.registerAbove(VanillaGuiLayers.CROSSHAIR, EffecoriaMod.id("seal_inspect"), SealInspectHud::render);
     }
 
     @SubscribeEvent

@@ -47,7 +47,7 @@ public final class ChunkSealData {
                         layers.add(decodeSeal(buf));
                     }
                     if (!layers.isEmpty()) {
-                        data.seals.put(pos.immutable(), layers);
+                        data.seals.put(pos.immutable(), new ArrayList<>(ChunkSealData.normalizeLayers(layers)));
                     }
                 }
                 return data;
@@ -86,20 +86,77 @@ public final class ChunkSealData {
     }
 
     public Optional<SealInstance> findOffensive(BlockPos pos) {
+        SealInstance best = null;
+        int bestPriority = Integer.MIN_VALUE;
+        long bestPlaced = Long.MIN_VALUE;
         for (SealInstance seal : getAll(pos)) {
-            if (SealLayer.of(seal.typeId()) == SealLayer.OFFENSIVE) {
-                return Optional.of(seal);
+            if (SealLayer.of(seal.typeId()) != SealLayer.OFFENSIVE) {
+                continue;
+            }
+            int priority = SealLayer.offensivePriority(seal.typeId());
+            if (best == null
+                    || priority > bestPriority
+                    || (priority == bestPriority && seal.placedAt() >= bestPlaced)) {
+                best = seal;
+                bestPriority = priority;
+                bestPlaced = seal.placedAt();
             }
         }
-        return Optional.empty();
+        return Optional.ofNullable(best);
+    }
+
+    /**
+     * Enforces builder rules: one offensive (highest priority), unique fortify/glow types.
+     * Returns a new list; does not mutate the input.
+     */
+    public static List<SealInstance> normalizeLayers(List<SealInstance> layers) {
+        if (layers == null || layers.isEmpty()) {
+            return List.of();
+        }
+        List<SealInstance> out = new ArrayList<>(layers.size());
+        SealInstance offensive = null;
+        int offensivePriority = Integer.MIN_VALUE;
+        long offensivePlaced = Long.MIN_VALUE;
+        for (SealInstance seal : layers) {
+            if (SealLayer.of(seal.typeId()) == SealLayer.OFFENSIVE) {
+                int priority = SealLayer.offensivePriority(seal.typeId());
+                if (offensive == null
+                        || priority > offensivePriority
+                        || (priority == offensivePriority && seal.placedAt() >= offensivePlaced)) {
+                    offensive = seal;
+                    offensivePriority = priority;
+                    offensivePlaced = seal.placedAt();
+                }
+                continue;
+            }
+            boolean duplicateUtility = false;
+            for (int i = 0; i < out.size(); i++) {
+                if (out.get(i).typeId().equals(seal.typeId())) {
+                    // Keep the newer utility of the same type.
+                    if (seal.placedAt() >= out.get(i).placedAt()) {
+                        out.set(i, seal);
+                    }
+                    duplicateUtility = true;
+                    break;
+                }
+            }
+            if (!duplicateUtility) {
+                out.add(seal);
+            }
+        }
+        if (offensive != null) {
+            out.add(offensive);
+        }
+        return out;
     }
 
     public void putLayers(BlockPos pos, List<SealInstance> layers) {
         BlockPos key = pos.immutable();
-        if (layers == null || layers.isEmpty()) {
+        List<SealInstance> normalized = normalizeLayers(layers);
+        if (normalized.isEmpty()) {
             seals.remove(key);
         } else {
-            seals.put(key, new ArrayList<>(layers));
+            seals.put(key, new ArrayList<>(normalized));
         }
     }
 
@@ -168,7 +225,7 @@ public final class ChunkSealData {
                 layers.add(SealInstance.load(entryTag));
             }
             if (!layers.isEmpty()) {
-                seals.put(pos.immutable(), layers);
+                seals.put(pos.immutable(), new ArrayList<>(normalizeLayers(layers)));
             }
         }
     }
