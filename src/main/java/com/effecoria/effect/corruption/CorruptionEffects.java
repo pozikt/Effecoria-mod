@@ -8,6 +8,7 @@ import com.effecoria.core.formula.DiceDamage;
 import com.effecoria.core.magic.SpellEffectEntry;
 import com.google.gson.JsonObject;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -87,11 +88,12 @@ public final class CorruptionEffects {
         level.playSound(null, caster.blockPosition(), SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.PLAYERS, 0.6f, 1.4f);
     }
 
-    public static void rotTouch(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+    public static void rotTouch(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
+        ServerLevel level = caster.serverLevel();
         if (target == null) {
+            finishHit(level, aim.add(0, 0.2, 0), HitFx.ROT);
             return;
         }
-        ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 2.5f);
         int hungerTicks = effect.params().has("hunger_ticks") ? effect.params().get("hunger_ticks").getAsInt() : 100;
         boolean permanent = isPermanent(effect.params());
@@ -106,11 +108,12 @@ public final class CorruptionEffects {
         finishHit(level, target, HitFx.ROT);
     }
 
-    public static void entropyLash(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+    public static void entropyLash(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
+        ServerLevel level = caster.serverLevel();
         if (target == null) {
+            finishHit(level, aim.add(0, 0.2, 0), HitFx.ENTROPY);
             return;
         }
-        ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 4f);
         int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 60;
         boolean permanent = isPermanent(effect.params());
@@ -126,11 +129,12 @@ public final class CorruptionEffects {
         finishHit(level, target, HitFx.ENTROPY);
     }
 
-    public static void plagueBolt(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+    public static void plagueBolt(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
+        ServerLevel level = caster.serverLevel();
         if (target == null) {
+            finishHit(level, aim.add(0, 0.2, 0), HitFx.PLAGUE);
             return;
         }
-        ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 5f);
         int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 80;
         int weaknessTicks = effect.params().has("weakness_ticks") ? effect.params().get("weakness_ticks").getAsInt() : 60;
@@ -245,11 +249,12 @@ public final class CorruptionEffects {
         spawnEntropy(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
-    public static void taintedLeech(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+    public static void taintedLeech(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
+        ServerLevel level = caster.serverLevel();
         if (target == null) {
+            finishHit(level, aim.add(0, 0.2, 0), HitFx.LEECH);
             return;
         }
-        ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 6f);
         float ratio = effect.params().has("heal_ratio") ? effect.params().get("heal_ratio").getAsFloat() : 0.4f;
         boolean permanent = isPermanent(effect.params());
@@ -379,7 +384,10 @@ public final class CorruptionEffects {
     }
 
     private static void finishHit(ServerLevel level, LivingEntity target, HitFx fx) {
-        Vec3 at = target.position().add(0, 1, 0);
+        finishHit(level, target.position().add(0, 1, 0), fx);
+    }
+
+    private static void finishHit(ServerLevel level, Vec3 at, HitFx fx) {
         switch (fx) {
             case MARK -> spawnMark(level, at);
             case ROT -> spawnRot(level, at);
@@ -389,7 +397,7 @@ public final class CorruptionEffects {
             case LEECH -> spawnLeech(level, at);
             case BIND -> spawnBind(level, at);
         }
-        level.playSound(null, target.blockPosition(), SoundEvents.SCULK_CLICKING, SoundSource.PLAYERS, 0.8f, 0.85f);
+        level.playSound(null, BlockPos.containing(at), SoundEvents.SCULK_CLICKING, SoundSource.PLAYERS, 0.8f, 0.85f);
     }
 
     public static void spawnMark(ServerLevel level, Vec3 pos) {

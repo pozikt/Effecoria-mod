@@ -28,17 +28,18 @@ import net.minecraft.world.phys.Vec3;
 public final class NecromancyEffects {
     private NecromancyEffects() {}
 
-    public static void boneChill(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void boneChill(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        float damage = DiceDamage.fromParams(effect.params(), power, 3f);
-        int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 80;
-        target.hurt(SpellCombat.wither(caster), damage);
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
-        target.hurtMarked = true;
-        finishHit(level, target, HitFx.BONE);
+        if (target != null) {
+            float damage = DiceDamage.fromParams(effect.params(), power, 3f);
+            int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 80;
+            target.hurt(SpellCombat.wither(caster), damage);
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
+            target.hurtMarked = true;
+            finishHit(level, target, HitFx.BONE);
+        } else {
+            finishHit(level, aim.add(0, 0.2, 0), HitFx.BONE);
+        }
     }
 
     public static void deathSense(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -63,8 +64,9 @@ public final class NecromancyEffects {
         spawnGrave(level, caster.position().add(0, 1, 0));
     }
 
-    public static void graveWhisper(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+    public static void graveWhisper(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         if (target == null) {
+            finishHit(caster.serverLevel(), aim.add(0, 0.2, 0), HitFx.GRAVE);
             return;
         }
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
@@ -106,11 +108,12 @@ public final class NecromancyEffects {
         spawnBone(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
-    public static void lifeTap(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+    public static void lifeTap(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
+        ServerLevel level = caster.serverLevel();
         if (target == null) {
+            finishHit(level, aim.add(0, 0.2, 0), HitFx.SOUL);
             return;
         }
-        ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 6f);
         float healRatio = effect.params().has("heal_ratio") ? effect.params().get("heal_ratio").getAsFloat() : 0.75f;
         target.hurt(SpellCombat.magic(caster), damage);
@@ -195,21 +198,23 @@ public final class NecromancyEffects {
         spawnShade(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
-    public static void deathCoil(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void deathCoil(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
         float burst = DiceDamage.fromParams(effect.params(), power, 8f);
         float spread = effect.params().has("spread_radius") ? effect.params().get("spread_radius").getAsFloat() : 4f;
         int witherTicks = effect.params().has("wither_ticks") ? effect.params().get("wither_ticks").getAsInt() : 60;
-        applyCoilHit(level, caster, target, burst, witherTicks);
-        AABB box = target.getBoundingBox().inflate(spread);
+        Vec3 center = target != null ? target.position() : aim;
+        if (target != null) {
+            applyCoilHit(level, caster, target, burst, witherTicks);
+        } else {
+            finishHit(level, aim.add(0, 0.2, 0), HitFx.WITHER);
+        }
+        AABB box = new AABB(center, center).inflate(spread);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == target || entity == caster) {
                 continue;
             }
-            if (entity.distanceToSqr(target) > spread * spread) {
+            if (entity.position().distanceToSqr(center) > spread * spread) {
                 continue;
             }
             applyCoilHit(level, caster, entity, burst * 0.5f, witherTicks / 2);
@@ -240,11 +245,12 @@ public final class NecromancyEffects {
         caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.35f, 1.4f);
     }
 
-    public static void necroticBolt(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+    public static void necroticBolt(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
+        ServerLevel level = caster.serverLevel();
         if (target == null) {
+            finishHit(level, aim.add(0, 0.2, 0), HitFx.WITHER);
             return;
         }
-        ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 5f);
         int witherTicks = effect.params().has("wither_ticks") ? effect.params().get("wither_ticks").getAsInt() : 40;
         target.hurt(SpellCombat.wither(caster), damage);
@@ -285,14 +291,11 @@ public final class NecromancyEffects {
         finishHit(caster.serverLevel(), target, HitFx.SHADE);
     }
 
-    public static void corpseBurst(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void corpseBurst(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
         float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 4f;
         float damage = DiceDamage.fromParams(effect.params(), power, 6f);
-        Vec3 center = target.position();
+        Vec3 center = target != null ? target.position() : aim;
         AABB box = new AABB(center, center).inflate(radius);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == caster) {
@@ -305,14 +308,16 @@ public final class NecromancyEffects {
             entity.hurtMarked = true;
             spawnWither(level, entity.position().add(0, 1, 0));
         }
-        level.playSound(null, target.blockPosition(), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.5f, 0.7f);
+        spawnWither(level, center.add(0, 1, 0));
+        level.playSound(null, BlockPos.containing(center), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.5f, 0.7f);
     }
 
-    public static void boneVolley(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+    public static void boneVolley(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
+        ServerLevel level = caster.serverLevel();
         if (target == null) {
+            finishHit(level, aim.add(0, 0.2, 0), HitFx.BONE);
             return;
         }
-        ServerLevel level = caster.serverLevel();
         int hits = effect.params().has("hits") ? effect.params().get("hits").getAsInt() : 3;
         float perHit = DiceDamage.fromParams(effect.params(), power, 4f) / Math.max(1, hits);
         for (int i = 0; i < hits; i++) {
@@ -391,11 +396,12 @@ public final class NecromancyEffects {
         level.playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7f, 0.6f);
     }
 
-    public static void soulReaper(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+    public static void soulReaper(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
+        ServerLevel level = caster.serverLevel();
         if (target == null) {
+            finishHit(level, aim.add(0, 0.2, 0), HitFx.SOUL);
             return;
         }
-        ServerLevel level = caster.serverLevel();
         float damage = DiceDamage.fromParams(effect.params(), power, 9f);
         float threshold = effect.params().has("execute_threshold") ? effect.params().get("execute_threshold").getAsFloat() : 0.35f;
         float healRatio = effect.params().has("heal_ratio") ? effect.params().get("heal_ratio").getAsFloat() : 0.5f;
@@ -491,8 +497,12 @@ public final class NecromancyEffects {
     }
 
     private static void finishHit(ServerLevel level, LivingEntity target, HitFx fx) {
-        spawnFx(level, target.position().add(0, 1, 0), fx);
-        level.playSound(null, target.blockPosition(), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.6f, 1.1f);
+        finishHit(level, target.position().add(0, 1, 0), fx);
+    }
+
+    private static void finishHit(ServerLevel level, Vec3 at, HitFx fx) {
+        spawnFx(level, at, fx);
+        level.playSound(null, BlockPos.containing(at), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.6f, 1.1f);
     }
 
     private static void spawnFx(ServerLevel level, Vec3 pos, HitFx fx) {

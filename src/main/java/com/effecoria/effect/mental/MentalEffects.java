@@ -41,8 +41,9 @@ public final class MentalEffects {
             StructureTags.ON_TREASURE_MAPS,
             StructureTags.DOLPHIN_LOCATED);
 
-    public static void mindBolt(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+    public static void mindBolt(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         if (target == null) {
+            finishHit(caster.serverLevel(), aim, HitFx.SHARD);
             return;
         }
         int ticks = scaledTicks(effect, power, "confusion_ticks", 80);
@@ -77,8 +78,9 @@ public final class MentalEffects {
         level.playSound(null, caster.blockPosition(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.8f, 0.6f);
     }
 
-    public static void thoughtLance(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+    public static void thoughtLance(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         if (target == null) {
+            finishHit(caster.serverLevel(), aim, HitFx.SHARD);
             return;
         }
         ServerLevel level = caster.serverLevel();
@@ -107,8 +109,9 @@ public final class MentalEffects {
         finishHit(caster.serverLevel(), target.position(), HitFx.SYNAPSE);
     }
 
-    public static void telekineticCrush(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+    public static void telekineticCrush(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         if (target == null) {
+            finishHit(caster.serverLevel(), aim, HitFx.FORCE);
             return;
         }
         ServerLevel level = caster.serverLevel();
@@ -232,8 +235,9 @@ public final class MentalEffects {
                 1.55f);
     }
 
-    public static void synapticOverload(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+    public static void synapticOverload(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         if (target == null) {
+            finishHit(caster.serverLevel(), aim, HitFx.SYNAPSE);
             return;
         }
         int confuseTicks = scaledTicks(effect, power, "confusion_ticks", 100);
@@ -246,8 +250,9 @@ public final class MentalEffects {
         finishHit(caster.serverLevel(), target.position(), HitFx.SYNAPSE);
     }
 
-    public static void psychicDrain(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+    public static void psychicDrain(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         if (target == null) {
+            finishHit(caster.serverLevel(), aim, HitFx.DRAIN);
             return;
         }
         int fogTicks = scaledTicks(effect, power, "fatigue_ticks", 120);
@@ -274,14 +279,11 @@ public final class MentalEffects {
         spawnWard(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
-    public static void thoughtBomb(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void thoughtBomb(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
         float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 5f;
         int ticks = scaledTicks(effect, power, "confusion_ticks", 140);
-        Vec3 center = target.position();
+        Vec3 center = target != null ? target.position() : aim;
         AABB box = new AABB(center, center).inflate(radius);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == caster) {
@@ -298,7 +300,7 @@ public final class MentalEffects {
             spawnBomb(level, entity.position().add(0, 1, 0));
         }
         spawnBomb(level, center.add(0, 1, 0));
-        level.playSound(null, target.blockPosition(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 0.5f, 1.2f);
+        level.playSound(null, BlockPos.containing(center), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 0.5f, 1.2f);
     }
 
     public static void psychicStorm(ServerPlayer caster, SpellEffectEntry effect, float power) {

@@ -24,16 +24,16 @@ import net.minecraft.world.phys.Vec3;
 public final class SpatialEffects {
     private SpatialEffects() {}
 
-    public static void warpBolt(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void warpBolt(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        float damage = DiceDamage.fromParams(effect.params(), power, 5f);
-        target.hurt(SpellCombat.magic(caster), damage);
-        target.hurtMarked = true;
-        SpatialVfx.playLineFromCaster(caster, target.position().add(0, 1.0, 0), power, 2);
-        finishHit(level, target.position());
+        Vec3 hit = target != null ? target.position().add(0, 1.0, 0) : aim;
+        if (target != null) {
+            float damage = DiceDamage.fromParams(effect.params(), power, 5f);
+            target.hurt(SpellCombat.magic(caster), damage);
+            target.hurtMarked = true;
+        }
+        SpatialVfx.playLineFromCaster(caster, hit, power, 2);
+        finishHit(level, target != null ? target.position() : aim);
     }
 
     public static void spatialWard(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -44,34 +44,34 @@ public final class SpatialEffects {
         spawnSpatialParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
-    public static void foldRepulse(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void foldRepulse(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        float force = effect.params().has("force") ? effect.params().get("force").getAsFloat() : 2.2f;
-        Vec3 away = target.position().subtract(caster.position()).normalize();
-        double strength = force * (power / 50f);
-        target.setDeltaMovement(target.getDeltaMovement().add(away.scale(strength)));
-        target.hurtMarked = true;
-        float damage = DiceDamage.fromParams(effect.params(), power, 2f);
-        target.hurt(SpellCombat.magic(caster), damage);
-        SpatialVfx.playLineFromCaster(caster, target.position().add(0, 1.0, 0), power, 2);
-        finishHit(level, target.position());
+        Vec3 hit = target != null ? target.position().add(0, 1.0, 0) : aim;
+        if (target != null) {
+            float force = effect.params().has("force") ? effect.params().get("force").getAsFloat() : 2.2f;
+            Vec3 away = target.position().subtract(caster.position()).normalize();
+            double strength = force * (power / 50f);
+            target.setDeltaMovement(target.getDeltaMovement().add(away.scale(strength)));
+            target.hurtMarked = true;
+            float damage = DiceDamage.fromParams(effect.params(), power, 2f);
+            target.hurt(SpellCombat.magic(caster), damage);
+        }
+        SpatialVfx.playLineFromCaster(caster, hit, power, 2);
+        finishHit(level, target != null ? target.position() : aim);
     }
 
-    public static void riftSlash(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void riftSlash(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        float damage = DiceDamage.fromParams(effect.params(), power, 6f);
-        int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 60;
-        target.hurt(SpellCombat.magic(caster), damage);
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
-        target.hurtMarked = true;
-        SpatialVfx.playAround(caster, target.position().add(0, 1.0, 0), power, 2);
-        finishHit(level, target.position());
+        Vec3 center = target != null ? target.position().add(0, 1.0, 0) : aim;
+        if (target != null) {
+            float damage = DiceDamage.fromParams(effect.params(), power, 6f);
+            int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 60;
+            target.hurt(SpellCombat.magic(caster), damage);
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
+            target.hurtMarked = true;
+        }
+        SpatialVfx.playAround(caster, center, power, 2);
+        finishHit(level, target != null ? target.position() : aim);
     }
 
     public static void gravitySnare(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -125,18 +125,18 @@ public final class SpatialEffects {
         finishHit(caster.serverLevel(), target.position());
     }
 
-    public static void voidLance(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void voidLance(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        float damage = DiceDamage.fromParams(effect.params(), power, 9f);
-        target.hurt(SpellCombat.magic(caster), damage);
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, 60, 0));
-        target.hurtMarked = true;
-        SpatialVfx.playLineFromCaster(caster, target.position().add(0, 1.0, 0), power, 3);
-        finishHit(level, target.position());
-        level.playSound(null, target.blockPosition(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.6f, 1.4f);
+        Vec3 hit = target != null ? target.position().add(0, 1.0, 0) : aim;
+        if (target != null) {
+            float damage = DiceDamage.fromParams(effect.params(), power, 9f);
+            target.hurt(SpellCombat.magic(caster), damage);
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, 60, 0));
+            target.hurtMarked = true;
+        }
+        SpatialVfx.playLineFromCaster(caster, hit, power, 3);
+        finishHit(level, target != null ? target.position() : aim);
+        level.playSound(null, BlockPos.containing(hit), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.6f, 1.4f);
     }
 
     public static void warpExchange(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -186,29 +186,23 @@ public final class SpatialEffects {
         blinkAlongLook(caster, effect, power, 1.0, defaultMaxRange(effect, 24));
     }
 
-    public static void riftBurst(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void riftBurst(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
         float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 4f;
         float damage = DiceDamage.fromParams(effect.params(), power, 7f);
-        Vec3 center = target.position();
+        Vec3 center = target != null ? target.position() : aim;
         hurtRadius(level, center, radius, damage, caster);
         SpatialVfx.playAround(caster, center.add(0, 1.0, 0), power, 2);
         spawnSpatialParticles(level, center.add(0, 1, 0));
-        level.playSound(null, target.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7f, 0.5f);
+        level.playSound(null, BlockPos.containing(center), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7f, 0.5f);
     }
 
-    public static void spatialSingularity(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void spatialSingularity(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
         float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 7f;
         float pull = effect.params().has("pull_strength") ? effect.params().get("pull_strength").getAsFloat() : 0.9f;
         float damage = DiceDamage.fromParams(effect.params(), power, 8f);
-        Vec3 center = target.position();
+        Vec3 center = target != null ? target.position() : aim;
         AABB box = new AABB(center, center).inflate(radius);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == caster) {

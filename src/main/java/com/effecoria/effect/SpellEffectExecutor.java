@@ -21,10 +21,10 @@ import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.core.seal.SealPlaceResult;
 import com.effecoria.core.seal.SealService;
 import com.effecoria.core.seal.SealTypes;
+import com.effecoria.magic.CastAim;
 import com.effecoria.magic.CastDelivery;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -32,43 +32,64 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.entity.projectile.SmallFireball;
-import net.minecraft.world.entity.projectile.windcharge.WindCharge;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
-import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public final class SpellEffectExecutor {
-    private static final Set<String> TARGETED_EFFECTS = Set.of(
+    /** Organism-only: no living under aim ⇒ WHIFF_NO_TARGET. */
+    private static final Set<String> LIVING_REQUIRED_EFFECTS = Set.of(
+            "air_hand",
+            "water_prison",
+            "ice_prison",
+            "vacuum_cage",
+            "root_bind",
+            "diagnostic_glimpse",
+            "genetic_lock",
+            "dimensional_anchor",
+            "warp_exchange",
+            "neural_lock",
+            "mind_probe",
+            "locus_echo",
+            "mind_terror",
+            "cliff_urge",
+            "drown_urge",
+            "psychic_frenzy",
+            "death_mark",
+            "death_shadow",
+            "soul_shackle",
+            "grave_bind",
+            "curse_of_frailty",
+            "haunting_visage",
+            "soul_anchor",
+            "corrupt_mark",
+            "binding_seal",
+            "festering_wound",
+            "decay_bind");
+
+    /** Prefer living ally; else apply to caster (never whiff on dirt). */
+    private static final Set<String> HEAL_SELF_FALLBACK_EFFECTS = Set.of(
+            "vital_infusion",
+            "soothing_sap",
+            "symbiotic_graft",
+            "vital_ward",
+            "adrenal_gift");
+
+    /** Combat / utility that always resolves an aim point; FULL cost even with no living hit. */
+    private static final Set<String> AIM_EFFECTS = Set.of(
             "telekinesis",
             "mind_sting",
             "soul_drain",
             "wither_touch",
-            "root_bind",
             "rift_yank",
-            "corrupt_mark",
-            "binding_seal",
-            "water_prison",
-            "air_hand",
-            "ice_prison",
-            "diagnostic_glimpse",
             "bio_strike",
             "foreign_agent",
             "muscle_spasm",
@@ -78,54 +99,30 @@ public final class SpellEffectExecutor {
             "organic_necrosis",
             "scorched_earth",
             "biological_plague",
+            "biological_cleaving",
             "bone_chill",
             "grave_whisper",
             "life_tap",
-            "soul_shackle",
             "death_coil",
-            "symbiotic_graft",
-            "vital_infusion",
-            "soothing_sap",
-            "vital_ward",
-            "adrenal_gift",
-            "genetic_lock",
-            "biological_cleaving",
             "necrotic_bolt",
-            "grave_bind",
-            "curse_of_frailty",
-            "haunting_visage",
             "corpse_burst",
             "bone_volley",
-            "soul_anchor",
             "soul_reaper",
-            "death_mark",
-            "death_shadow",
             "warp_bolt",
             "fold_repulse",
             "rift_slash",
-            "dimensional_anchor",
             "void_lance",
-            "warp_exchange",
             "rift_burst",
             "spatial_singularity",
             "mind_bolt",
             "thought_lance",
-            "neural_lock",
             "telekinetic_crush",
-            "mind_probe",
-            "locus_echo",
             "synaptic_overload",
             "psychic_drain",
             "thought_bomb",
-            "mind_terror",
-            "cliff_urge",
-            "drown_urge",
-            "psychic_frenzy",
             "rot_touch",
             "entropy_lash",
             "plague_bolt",
-            "festering_wound",
-            "decay_bind",
             "tainted_leech");
 
     private static final Set<String> BLOCK_SEAL_EFFECTS = Set.of(
@@ -137,9 +134,10 @@ public final class SpellEffectExecutor {
 
     private SpellEffectExecutor() {}
 
+    /** True if any effect strictly needs a living entity (whiff without one). */
     public static boolean requiresTarget(SpellDefinition spell) {
         for (SpellEffectEntry effect : spell.effects()) {
-            if (TARGETED_EFFECTS.contains(effect.type().getPath())) {
+            if (LIVING_REQUIRED_EFFECTS.contains(effect.type().getPath())) {
                 return true;
             }
         }
@@ -158,15 +156,14 @@ public final class SpellEffectExecutor {
     public static CastDelivery applyAll(ServerPlayer caster, SpellDefinition spell, float power) {
         BreathDebuffs.beginCast(caster);
         try {
-            LivingEntity target = null;
-            if (requiresTarget(spell)) {
-                boolean airHandRelease = isAirHandRelease(caster, spell);
-                if (!airHandRelease) {
-                    target = resolveTarget(caster, spell);
-                    if (target == null) {
-                        return CastDelivery.WHIFF_NO_TARGET;
-                    }
-                }
+            double range = resolveCastRange(caster, spell);
+            CastAim.Result aim = CastAim.resolve(caster, range);
+            LivingEntity living = aim.living();
+
+            boolean needsLiving = requiresTarget(spell);
+            boolean airHandRelease = isAirHandRelease(caster, spell);
+            if (needsLiving && !airHandRelease && living == null) {
+                return CastDelivery.WHIFF_NO_TARGET;
             }
 
             BlockPos blockTarget = null;
@@ -178,7 +175,12 @@ public final class SpellEffectExecutor {
             }
 
             for (SpellEffectEntry effect : spell.effects()) {
-                apply(caster, effect, power, target, blockTarget);
+                String path = effect.type().getPath();
+                LivingEntity effectTarget = living;
+                if (HEAL_SELF_FALLBACK_EFFECTS.contains(path) && effectTarget == null) {
+                    effectTarget = caster;
+                }
+                apply(caster, effect, power, effectTarget, blockTarget, aim.point());
             }
             return CastDelivery.FULL;
         } finally {
@@ -198,17 +200,21 @@ public final class SpellEffectExecutor {
         return false;
     }
 
-    private static LivingEntity resolveTarget(ServerPlayer caster, SpellDefinition spell) {
+    private static double resolveCastRange(ServerPlayer caster, SpellDefinition spell) {
         double range = 12;
         for (SpellEffectEntry effect : spell.effects()) {
-            if (!TARGETED_EFFECTS.contains(effect.type().getPath())) {
+            String path = effect.type().getPath();
+            if (!LIVING_REQUIRED_EFFECTS.contains(path)
+                    && !AIM_EFFECTS.contains(path)
+                    && !HEAL_SELF_FALLBACK_EFFECTS.contains(path)
+                    && !BLOCK_SEAL_EFFECTS.contains(path)) {
                 continue;
             }
             if (effect.params().has("range")) {
                 range = Math.max(range, effect.params().get("range").getAsDouble());
             }
         }
-        return findSpellTarget(caster, range);
+        return range;
     }
 
     private static BlockPos resolveBlockTarget(ServerPlayer caster, SpellDefinition spell) {
@@ -237,10 +243,11 @@ public final class SpellEffectExecutor {
             SpellEffectEntry effect,
             float power,
             LivingEntity target,
-            BlockPos blockTarget) {
+            BlockPos blockTarget,
+            Vec3 aim) {
         switch (effect.type().getPath()) {
-            case "telekinesis" -> telekinesis(caster, effect, power, target);
-            case "mind_sting" -> mindSting(caster, effect, power, target);
+            case "telekinesis" -> telekinesis(caster, effect, power, target, aim);
+            case "mind_sting" -> mindSting(caster, effect, power, target, aim);
             case "phi_sense" -> phiSense(caster, effect);
             case "fireball" -> ElementalEffects.weakFireball(caster, effect, power);
             case "wind_charge" -> ElementalEffects.windCharge(caster, effect, power);
@@ -257,13 +264,12 @@ public final class SpellEffectExecutor {
             case "steam_flight" -> ElementalEffects.steamFlight(caster, effect, power);
             case "air_hand" -> ElementalEffects.airHand(caster, effect, power, target);
             case "water_prison" -> ElementalEffects.waterPrison(caster, effect, power, target);
-            case "vacuum_cage" -> ElementalEffects.vacuumCage(
-                    caster, effect, power, findSpellTarget(caster, 10));
+            case "vacuum_cage" -> ElementalEffects.vacuumCage(caster, effect, power, target);
             case "ice_prison" -> ElementalEffects.icePrison(caster, effect, power, target);
             case "shockwave" -> ElementalEffects.shockwave(caster, effect, power);
             case "ice_sheet" -> ElementalEffects.iceSheet(caster, effect, power);
             case "breath_bubble" -> ElementalEffects.breathBubble(
-                    caster, effect, power, findSpellTarget(caster, 8));
+                    caster, effect, power, target != null ? target : findSpellTarget(caster, 8));
             case "water_shield" -> ElementalEffects.waterShield(caster, effect, power);
             case "sonic_lance" -> ElementalEffects.sonicLance(caster, effect, power);
             case "air_ionization" -> ElementalEffects.airIonization(caster, effect, power);
@@ -287,14 +293,14 @@ public final class SpellEffectExecutor {
             case "diagnostic_glimpse" -> OrganicEffects.diagnosticGlimpse(caster, effect, power, target);
             case "blood_stasis" -> OrganicEffects.bloodStasis(caster, effect, power);
             case "life_sense" -> OrganicEffects.lifeSense(caster, effect, power);
-            case "bio_strike" -> OrganicEffects.bioStrike(caster, effect, power, target);
+            case "bio_strike" -> OrganicEffects.bioStrike(caster, effect, power, target, aim);
             case "bone_needle" -> OrganicEffects.boneNeedle(caster, effect, power);
-            case "foreign_agent" -> OrganicEffects.foreignAgent(caster, effect, power, target);
-            case "muscle_spasm" -> OrganicEffects.muscleSpasm(caster, effect, power, target);
+            case "foreign_agent" -> OrganicEffects.foreignAgent(caster, effect, power, target, aim);
+            case "muscle_spasm" -> OrganicEffects.muscleSpasm(caster, effect, power, target, aim);
             case "chitin_plates" -> OrganicEffects.chitinPlates(caster, effect, power);
             case "acid_gland" -> OrganicEffects.acidGland(caster, effect, power);
-            case "parasitic_infection" -> OrganicEffects.parasiticInfection(caster, effect, power, target);
-            case "metabolic_shock" -> OrganicEffects.metabolicShock(caster, effect, power, target);
+            case "parasitic_infection" -> OrganicEffects.parasiticInfection(caster, effect, power, target, aim);
+            case "metabolic_shock" -> OrganicEffects.metabolicShock(caster, effect, power, target, aim);
             case "biological_field" -> OrganicEffects.biologicalField(caster, effect, power);
             case "bone_spur" -> OrganicEffects.boneSpur(caster, effect, power);
             case "sense_sharpening" -> OrganicEffects.senseSharpening(caster, effect, power);
@@ -302,15 +308,15 @@ public final class SpellEffectExecutor {
             case "poison_thorns" -> OrganicEffects.poisonThorns(caster, effect, power);
             case "bio_mimicry" -> OrganicEffects.bioMimicry(caster, effect, power);
             case "organism_adaptation" -> OrganicEffects.organismAdaptation(caster, effect, power);
-            case "immune_suppression" -> OrganicEffects.immuneSuppression(caster, effect, power, target);
+            case "immune_suppression" -> OrganicEffects.immuneSuppression(caster, effect, power, target, aim);
             case "metabolic_boost" -> OrganicEffects.metabolicBoost(caster, effect, power);
-            case "organic_necrosis" -> OrganicEffects.organicNecrosis(caster, effect, power, target);
+            case "organic_necrosis" -> OrganicEffects.organicNecrosis(caster, effect, power, target, aim);
             case "full_restructuring" -> OrganicEffects.fullRestructuring(caster, effect, power);
-            case "scorched_earth" -> OrganicEffects.scorchedEarth(caster, effect, power, target);
+            case "scorched_earth" -> OrganicEffects.scorchedEarth(caster, effect, power, target, aim);
             case "bio_fission" -> OrganicEffects.bioFission(caster, effect, power);
             case "super_regeneration" -> OrganicEffects.superRegeneration(caster, effect, power);
             case "population_control" -> OrganicEffects.populationControl(caster, effect, power);
-            case "biological_plague" -> OrganicEffects.biologicalPlague(caster, effect, power, target);
+            case "biological_plague" -> OrganicEffects.biologicalPlague(caster, effect, power, target, aim);
             case "living_armor" -> OrganicEffects.livingArmor(caster, effect, power);
             case "beast_form" -> OrganicEffects.beastForm(caster, effect, power);
             case "bio_cataclysm" -> OrganicEffects.bioCataclysm(caster, effect, power);
@@ -325,7 +331,7 @@ public final class SpellEffectExecutor {
             case "limb_regeneration" -> OrganicEffects.limbRegeneration(caster, effect, power);
             case "verdant_bloom" -> OrganicEffects.verdantBloom(caster, effect, power);
             case "genetic_lock" -> OrganicEffects.geneticLock(caster, effect, power, target);
-            case "biological_cleaving" -> OrganicEffects.biologicalCleaving(caster, effect, power, target);
+            case "biological_cleaving" -> OrganicEffects.biologicalCleaving(caster, effect, power, target, aim);
             case "full_transformation" -> OrganicEffects.fullTransformation(caster, effect, power);
             case "spore_storm" -> OrganicEffects.sporeStorm(caster, effect, power);
             case "biological_singularity" -> OrganicEffects.biologicalSingularity(caster, effect, power);
@@ -333,66 +339,66 @@ public final class SpellEffectExecutor {
             case "biological_immortality" -> OrganicEffects.biologicalImmortality(caster, effect, power);
             case "root_spike_wave", "evoker_fangs" -> OrganicSpikeWaveService.launch(caster, effect, power);
             case "root_bind" -> rootBind(caster, effect, power, target);
-            case "soul_drain" -> soulDrain(caster, effect, power, target);
-            case "wither_touch" -> witherTouch(caster, effect, power, target);
+            case "soul_drain" -> soulDrain(caster, effect, power, target, aim);
+            case "wither_touch" -> witherTouch(caster, effect, power, target, aim);
             case "death_mark" -> NecromancyEffects.deathMark(caster, effect, power, target);
             case "death_shadow" -> NecromancyEffects.deathShadow(caster, effect, power, target);
-            case "bone_chill" -> NecromancyEffects.boneChill(caster, effect, power, target);
+            case "bone_chill" -> NecromancyEffects.boneChill(caster, effect, power, target, aim);
             case "death_sense" -> NecromancyEffects.deathSense(caster, effect, power);
-            case "grave_whisper" -> NecromancyEffects.graveWhisper(caster, effect, power, target);
+            case "grave_whisper" -> NecromancyEffects.graveWhisper(caster, effect, power, target, aim);
             case "siphon_pulse" -> NecromancyEffects.siphonPulse(caster, effect, power);
             case "bone_armor" -> NecromancyEffects.boneArmor(caster, effect, power);
-            case "life_tap" -> NecromancyEffects.lifeTap(caster, effect, power, target);
+            case "life_tap" -> NecromancyEffects.lifeTap(caster, effect, power, target, aim);
             case "wither_wave" -> NecromancyEffects.witherWave(caster, effect, power);
             case "dark_pact" -> NecromancyEffects.darkPact(caster, effect, power);
             case "soul_shackle" -> NecromancyEffects.soulShackle(caster, effect, power, target);
             case "phantom_step" -> NecromancyEffects.phantomStep(caster, effect, power);
             case "grave_field" -> NecromancyEffects.graveField(caster, effect, power);
             case "lich_ward" -> NecromancyEffects.lichWard(caster, effect, power);
-            case "death_coil" -> NecromancyEffects.deathCoil(caster, effect, power, target);
+            case "death_coil" -> NecromancyEffects.deathCoil(caster, effect, power, target, aim);
             case "soul_cataclysm" -> NecromancyEffects.soulCataclysm(caster, effect, power);
             case "death_apotheosis" -> NecromancyEffects.deathApotheosis(caster, effect, power);
-            case "necrotic_bolt" -> NecromancyEffects.necroticBolt(caster, effect, power, target);
+            case "necrotic_bolt" -> NecromancyEffects.necroticBolt(caster, effect, power, target, aim);
             case "grave_bind" -> NecromancyEffects.graveBind(caster, effect, power, target);
             case "curse_of_frailty" -> NecromancyEffects.curseOfFrailty(caster, effect, power, target);
             case "haunting_visage" -> NecromancyEffects.hauntingVisage(caster, effect, power, target);
-            case "corpse_burst" -> NecromancyEffects.corpseBurst(caster, effect, power, target);
-            case "bone_volley" -> NecromancyEffects.boneVolley(caster, effect, power, target);
+            case "corpse_burst" -> NecromancyEffects.corpseBurst(caster, effect, power, target, aim);
+            case "bone_volley" -> NecromancyEffects.boneVolley(caster, effect, power, target, aim);
             case "necrotic_aura" -> NecromancyEffects.necroticAura(caster, effect, power);
             case "soul_anchor" -> NecromancyEffects.soulAnchor(caster, effect, power, target);
             case "death_gate" -> NecromancyEffects.deathGate(caster, effect, power);
-            case "soul_reaper" -> NecromancyEffects.soulReaper(caster, effect, power, target);
+            case "soul_reaper" -> NecromancyEffects.soulReaper(caster, effect, power, target, aim);
             case "phylactery_surge" -> NecromancyEffects.phylacterySurge(caster, effect, power);
             case "lich_ascension" -> NecromancyEffects.lichAscension(caster, effect, power);
-            case "warp_bolt" -> SpatialEffects.warpBolt(caster, effect, power, target);
+            case "warp_bolt" -> SpatialEffects.warpBolt(caster, effect, power, target, aim);
             case "spatial_ward" -> SpatialEffects.spatialWard(caster, effect, power);
-            case "fold_repulse" -> SpatialEffects.foldRepulse(caster, effect, power, target);
-            case "rift_slash" -> SpatialEffects.riftSlash(caster, effect, power, target);
+            case "fold_repulse" -> SpatialEffects.foldRepulse(caster, effect, power, target, aim);
+            case "rift_slash" -> SpatialEffects.riftSlash(caster, effect, power, target, aim);
             case "gravity_snare" -> SpatialEffects.gravitySnare(caster, effect, power);
             case "gravity_field" -> SpatialEffects.gravityField(caster, effect, power);
             case "dimensional_anchor" -> SpatialEffects.dimensionalAnchor(caster, effect, power, target);
-            case "void_lance" -> SpatialEffects.voidLance(caster, effect, power, target);
+            case "void_lance" -> SpatialEffects.voidLance(caster, effect, power, target, aim);
             case "warp_exchange" -> SpatialEffects.warpExchange(caster, effect, power, target);
             case "spatial_surge" -> SpatialEffects.spatialSurge(caster, effect, power);
             case "far_blink" -> SpatialEffects.farBlink(caster, effect, power);
-            case "rift_burst" -> SpatialEffects.riftBurst(caster, effect, power, target);
-            case "spatial_singularity" -> SpatialEffects.spatialSingularity(caster, effect, power, target);
+            case "rift_burst" -> SpatialEffects.riftBurst(caster, effect, power, target, aim);
+            case "spatial_singularity" -> SpatialEffects.spatialSingularity(caster, effect, power, target, aim);
             case "absolute_fold" -> SpatialEffects.absoluteFold(caster, effect, power);
             case "subspace_voyage" -> SpatialEffects.subspaceVoyage(caster, effect, power);
             case "rift_excise" -> SpatialEffects.riftExcise(caster, effect, power);
-            case "mind_bolt" -> MentalEffects.mindBolt(caster, effect, power, target);
+            case "mind_bolt" -> MentalEffects.mindBolt(caster, effect, power, target, aim);
             case "psychic_scream" -> MentalEffects.psychicScream(caster, effect, power);
-            case "thought_lance" -> MentalEffects.thoughtLance(caster, effect, power, target);
+            case "thought_lance" -> MentalEffects.thoughtLance(caster, effect, power, target, aim);
             case "neural_lock" -> MentalEffects.neuralLock(caster, effect, power, target);
-            case "telekinetic_crush" -> MentalEffects.telekineticCrush(caster, effect, power, target);
+            case "telekinetic_crush" -> MentalEffects.telekineticCrush(caster, effect, power, target, aim);
             case "mass_confusion" -> MentalEffects.massConfusion(caster, effect, power);
             case "psychic_barrier" -> MentalEffects.psychicBarrier(caster, effect, power);
             case "mind_probe" -> MentalEffects.mindProbe(caster, effect, power, target);
             case "locus_echo" -> MentalEffects.locusEcho(caster, effect, power, target);
-            case "synaptic_overload" -> MentalEffects.synapticOverload(caster, effect, power, target);
-            case "psychic_drain" -> MentalEffects.psychicDrain(caster, effect, power, target);
+            case "synaptic_overload" -> MentalEffects.synapticOverload(caster, effect, power, target, aim);
+            case "psychic_drain" -> MentalEffects.psychicDrain(caster, effect, power, target, aim);
             case "mental_fortress" -> MentalEffects.mentalFortress(caster, effect, power);
-            case "thought_bomb" -> MentalEffects.thoughtBomb(caster, effect, power, target);
+            case "thought_bomb" -> MentalEffects.thoughtBomb(caster, effect, power, target, aim);
             case "psychic_storm" -> MentalEffects.psychicStorm(caster, effect, power);
             case "psychic_amplify" -> MentalEffects.psychicAmplify(caster, effect, power);
             case "omega_mind" -> MentalEffects.omegaMind(caster, effect, power);
@@ -402,21 +408,21 @@ public final class SpellEffectExecutor {
             case "psychic_frenzy" -> MentalEffects.psychicFrenzy(caster, effect, power, target);
             case "mass_hysteria" -> MentalEffects.massHysteria(caster, effect, power);
             case "blink" -> SpatialEffects.standardBlink(caster, effect, power);
-            case "rift_yank" -> riftYank(caster, effect, power, target);
+            case "rift_yank" -> riftYank(caster, effect, power, target, aim);
             case "phase_veil" -> phaseVeil(caster, effect, power);
             case "corrupt_mark" -> CorruptionEffects.corruptMark(caster, effect, power, target);
             case "binding_seal" -> CorruptionEffects.bindingSeal(caster, effect, power, target);
             case "blight_pulse" -> CorruptionEffects.blightPulse(caster, effect, power);
-            case "rot_touch" -> CorruptionEffects.rotTouch(caster, effect, power, target);
-            case "entropy_lash" -> CorruptionEffects.entropyLash(caster, effect, power, target);
-            case "plague_bolt" -> CorruptionEffects.plagueBolt(caster, effect, power, target);
+            case "rot_touch" -> CorruptionEffects.rotTouch(caster, effect, power, target, aim);
+            case "entropy_lash" -> CorruptionEffects.entropyLash(caster, effect, power, target, aim);
+            case "plague_bolt" -> CorruptionEffects.plagueBolt(caster, effect, power, target, aim);
             case "festering_wound" -> CorruptionEffects.festeringWound(caster, effect, power, target);
             case "miasma_cloak" -> CorruptionEffects.miasmaCloak(caster, effect, power);
             case "blight_surge" -> CorruptionEffects.blightSurge(caster, effect, power);
             case "decay_bind" -> CorruptionEffects.decayBind(caster, effect, power, target);
             case "blight_field" -> CorruptionEffects.blightField(caster, effect, power);
             case "entropy_aegis" -> CorruptionEffects.entropyAegis(caster, effect, power);
-            case "tainted_leech" -> CorruptionEffects.taintedLeech(caster, effect, power, target);
+            case "tainted_leech" -> CorruptionEffects.taintedLeech(caster, effect, power, target, aim);
             case "virulent_wave" -> CorruptionEffects.virulentWave(caster, effect, power);
             case "plague_crown" -> CorruptionEffects.plagueCrown(caster, effect, power);
             case "omega_blight" -> CorruptionEffects.omegaBlight(caster, effect, power);
@@ -493,20 +499,20 @@ public final class SpellEffectExecutor {
         return tag;
     }
 
-    private static void telekinesis(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
+    private static void telekinesis(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
+        if (target != null) {
+            float force = effect.params().get("force").getAsFloat();
+            Vec3 look = caster.getLookAngle().normalize();
+            double strength = force * (power / 50f);
+            target.setDeltaMovement(target.getDeltaMovement().add(look.scale(strength)));
+            target.hurtMarked = true;
         }
-        float force = effect.params().get("force").getAsFloat();
-        Vec3 look = caster.getLookAngle().normalize();
-        double strength = force * (power / 50f);
-        target.setDeltaMovement(target.getDeltaMovement().add(look.scale(strength)));
-        target.hurtMarked = true;
-        MentalEffects.spawnForce(caster.serverLevel(), target.position().add(0, 1, 0));
+        MentalEffects.spawnForce(caster.serverLevel(), (target != null ? target.position() : aim).add(0, 1, 0));
     }
 
-    private static void mindSting(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+    private static void mindSting(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         if (target == null) {
+            MentalEffects.spawnShard(caster.serverLevel(), aim.add(0, 0.2, 0));
             return;
         }
         int slowTicks = effect.params().has("slow_duration_ticks")
@@ -541,55 +547,55 @@ public final class SpellEffectExecutor {
 
 
     /** Drain life from a target into the caster — external Ψ siphon. */
-    private static void soulDrain(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    private static void soulDrain(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        float damage = effect.params().get("damage").getAsFloat();
-        float healRatio = effect.params().has("heal_ratio") ? effect.params().get("heal_ratio").getAsFloat() : 0.5f;
-        float scaledDamage = damage * (power / 50f);
-        target.hurt(SpellCombat.magic(caster), scaledDamage);
-        caster.heal(scaledDamage * healRatio);
-        spawnNecroParticles(level, target.position().add(0, 1, 0));
-        level.playSound(null, target.blockPosition(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.7f, 0.8f);
+        Vec3 hit = target != null ? target.position().add(0, 1, 0) : aim.add(0, 0.2, 0);
+        if (target != null) {
+            float damage = effect.params().get("damage").getAsFloat();
+            float healRatio = effect.params().has("heal_ratio") ? effect.params().get("heal_ratio").getAsFloat() : 0.5f;
+            float scaledDamage = damage * (power / 50f);
+            target.hurt(SpellCombat.magic(caster), scaledDamage);
+            caster.heal(scaledDamage * healRatio);
+        }
+        spawnNecroParticles(level, hit);
+        level.playSound(null, BlockPos.containing(hit), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.7f, 0.8f);
     }
 
     /** Withering touch — necrotic damage over time. */
-    private static void witherTouch(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    private static void witherTouch(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        float damage = effect.params().get("damage").getAsFloat();
-        int witherTicks = effect.params().get("wither_ticks").getAsInt();
-        float scaledDamage = damage * (power / 50f);
-        target.hurt(SpellCombat.wither(caster), scaledDamage);
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
-        spawnNecroParticles(level, target.position().add(0, 1, 0));
-        level.playSound(null, target.blockPosition(), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.7f, 1.2f);
+        Vec3 hit = target != null ? target.position().add(0, 1, 0) : aim.add(0, 0.2, 0);
+        if (target != null) {
+            float damage = effect.params().get("damage").getAsFloat();
+            int witherTicks = effect.params().get("wither_ticks").getAsInt();
+            float scaledDamage = damage * (power / 50f);
+            target.hurt(SpellCombat.wither(caster), scaledDamage);
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
+        }
+        spawnNecroParticles(level, hit);
+        level.playSound(null, BlockPos.containing(hit), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.7f, 1.2f);
     }
 
     /** Fold space and yank the target to the caster. */
-    private static void riftYank(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    private static void riftYank(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
         float damage = effect.params().has("damage") ? effect.params().get("damage").getAsFloat() : 3f;
         float scaledDamage = damage * (power / 50f);
 
         Vec3 dest = caster.position().add(caster.getLookAngle().normalize().scale(1.2));
+        Vec3 from = target != null ? target.position().add(0, 1, 0) : aim.add(0, 0.2, 0);
         SpatialVfx.playCut(
                 caster,
-                target.position().add(0, 1, 0),
+                from,
                 dest.add(0, 1, 0),
                 power / 70f,
                 3,
                 SpatialVfx.CutMode.LINE);
-        target.teleportTo(dest.x, dest.y, dest.z);
-        target.hurt(SpellCombat.magic(caster), scaledDamage);
-        target.hurtMarked = true;
+        if (target != null) {
+            target.teleportTo(dest.x, dest.y, dest.z);
+            target.hurt(SpellCombat.magic(caster), scaledDamage);
+            target.hurtMarked = true;
+        }
         level.playSound(null, caster.blockPosition(), SoundEvents.CHORUS_FRUIT_TELEPORT, SoundSource.PLAYERS, 1f, 0.8f);
     }
 
@@ -613,56 +619,7 @@ public final class SpellEffectExecutor {
 
     /** Raycast + cone fallback — works without pixel-perfect crosshair on entity. */
     private static LivingEntity findSpellTarget(ServerPlayer caster, double range) {
-        LivingEntity direct = raycastLivingAlongLook(caster, range);
-        if (direct != null) {
-            return direct;
-        }
-        return findLivingInLookCone(caster, range, 0.65);
-    }
-
-    private static LivingEntity raycastLivingAlongLook(ServerPlayer caster, double range) {
-        Vec3 start = caster.getEyePosition();
-        Vec3 end = start.add(caster.getLookAngle().scale(range));
-        AABB search = caster.getBoundingBox().expandTowards(caster.getLookAngle().scale(range)).inflate(1.0);
-        EntityHitResult hit = ProjectileUtil.getEntityHitResult(
-                caster.level(),
-                caster,
-                start,
-                end,
-                search,
-                entity -> entity instanceof LivingEntity living
-                        && living.isAlive()
-                        && living != caster
-                        && !living.isSpectator());
-        if (hit != null && hit.getEntity() instanceof LivingEntity living) {
-            return living;
-        }
-        return null;
-    }
-
-    private static LivingEntity findLivingInLookCone(ServerPlayer caster, double range, double minDot) {
-        Vec3 look = caster.getLookAngle().normalize();
-        Vec3 eye = caster.getEyePosition();
-        AABB box = new AABB(eye, eye).inflate(range);
-        LivingEntity best = null;
-        double bestDist = range + 1;
-        for (LivingEntity entity : caster.serverLevel().getEntitiesOfClass(
-                LivingEntity.class, box, e -> e != caster && e.isAlive() && !e.isSpectator())) {
-            Vec3 toEntity = entity.getBoundingBox().getCenter().subtract(eye);
-            double dist = toEntity.length();
-            if (dist > range || dist < 0.5) {
-                continue;
-            }
-            double dot = toEntity.normalize().dot(look);
-            if (dot < minDot) {
-                continue;
-            }
-            if (dist < bestDist) {
-                bestDist = dist;
-                best = entity;
-            }
-        }
-        return best;
+        return CastAim.resolve(caster, range).living();
     }
 
     /** Root a target in place and optionally bloom nearby crops. */

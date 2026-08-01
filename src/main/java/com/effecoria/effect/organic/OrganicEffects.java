@@ -101,16 +101,16 @@ public final class OrganicEffects {
         level.playSound(null, subject.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.7f, 1.4f);
     }
 
-    public static void bioStrike(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void bioStrike(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        float damage = DiceDamage.fromParams(effect.params(), power, 3f);
-        target.hurt(SpellCombat.wither(caster), damage);
-        target.hurtMarked = true;
-        spawnFlesh(level, target.position().add(0, 1, 0));
-        level.playSound(null, target.blockPosition(), SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 0.8f, 0.7f);
+        Vec3 hit = target != null ? target.position().add(0, 1, 0) : aim.add(0, 0.2, 0);
+        if (target != null) {
+            float damage = DiceDamage.fromParams(effect.params(), power, 3f);
+            target.hurt(SpellCombat.wither(caster), damage);
+            target.hurtMarked = true;
+        }
+        spawnFlesh(level, hit);
+        level.playSound(null, BlockPos.containing(hit), SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 0.8f, 0.7f);
     }
 
     public static void boneNeedle(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -127,28 +127,28 @@ public final class OrganicEffects {
         level.playSound(null, caster.blockPosition(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 0.7f, 1.5f);
     }
 
-    public static void foreignAgent(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
+    public static void foreignAgent(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
+        Vec3 hit = target != null ? target.position().add(0, 1, 0) : aim.add(0, 0.2, 0);
+        if (target != null) {
+            int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 100;
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
         }
-        int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 100;
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
-        spawnVirus(caster.serverLevel(), target.position().add(0, 1, 0));
+        spawnVirus(caster.serverLevel(), hit);
         caster.serverLevel()
-                .playSound(null, target.blockPosition(), SoundEvents.SPIDER_HURT, SoundSource.PLAYERS, 0.6f, 1.2f);
+                .playSound(null, BlockPos.containing(hit), SoundEvents.SPIDER_HURT, SoundSource.PLAYERS, 0.6f, 1.2f);
     }
 
-    public static void muscleSpasm(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void muscleSpasm(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        float damage = DiceDamage.fromParams(effect.params(), power, 3f);
-        int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 30;
-        target.hurt(SpellCombat.wither(caster), damage);
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 3));
-        target.hurtMarked = true;
-        spawnMuscle(level, target.position().add(0, 1, 0));
+        Vec3 hit = target != null ? target.position().add(0, 1, 0) : aim.add(0, 0.2, 0);
+        if (target != null) {
+            float damage = DiceDamage.fromParams(effect.params(), power, 3f);
+            int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 30;
+            target.hurt(SpellCombat.wither(caster), damage);
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 3));
+            target.hurtMarked = true;
+        }
+        spawnMuscle(level, hit);
     }
 
     public static void chitinPlates(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -195,29 +195,29 @@ public final class OrganicEffects {
         level.playSound(null, caster.blockPosition(), SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 0.8f, 0.9f);
     }
 
-    public static void parasiticInfection(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void parasiticInfection(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        JsonObject params = effect.params();
-        float burst = DiceDamage.fromParams(params, power, 5f);
-        int witherTicks = params.has("wither_ticks") ? params.get("wither_ticks").getAsInt() : 60;
-        int witherAmp = params.has("wither_amplifier") ? params.get("wither_amplifier").getAsInt() : 0;
-        target.hurt(SpellCombat.wither(caster), burst);
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, witherAmp));
-        target.hurtMarked = true;
-        spawnParasites(level, target.position().add(0, 1, 0));
+        Vec3 hit = target != null ? target.position().add(0, 1, 0) : aim.add(0, 0.2, 0);
+        if (target != null) {
+            JsonObject params = effect.params();
+            float burst = DiceDamage.fromParams(params, power, 5f);
+            int witherTicks = params.has("wither_ticks") ? params.get("wither_ticks").getAsInt() : 60;
+            int witherAmp = params.has("wither_amplifier") ? params.get("wither_amplifier").getAsInt() : 0;
+            target.hurt(SpellCombat.wither(caster), burst);
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, witherAmp));
+            target.hurtMarked = true;
+        }
+        spawnParasites(level, hit);
     }
 
-    public static void metabolicShock(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
+    public static void metabolicShock(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
+        Vec3 hit = target != null ? target.position().add(0, 1, 0) : aim.add(0, 0.2, 0);
+        if (target != null) {
+            int stunTicks = effect.params().has("stun_ticks") ? effect.params().get("stun_ticks").getAsInt() : 20;
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, stunTicks, 0));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, stunTicks, 2));
         }
-        int stunTicks = effect.params().has("stun_ticks") ? effect.params().get("stun_ticks").getAsInt() : 20;
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, stunTicks, 0));
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, stunTicks, 2));
-        spawnNerve(caster.serverLevel(), target.position().add(0, 1, 0));
+        spawnNerve(caster.serverLevel(), hit);
     }
 
     public static void biologicalField(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -326,16 +326,16 @@ public final class OrganicEffects {
                 .playSound(null, caster.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.45f, 1.4f);
     }
 
-    public static void immuneSuppression(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void immuneSuppression(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 160;
-        int weakAmp = effect.params().has("weakness_amplifier") ? effect.params().get("weakness_amplifier").getAsInt() : 1;
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, weakAmp));
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, duration / 2, 0));
-        spawnImmuneBreak(level, target.position().add(0, 1, 0));
+        Vec3 hit = target != null ? target.position().add(0, 1, 0) : aim.add(0, 0.2, 0);
+        if (target != null) {
+            int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 160;
+            int weakAmp = effect.params().has("weakness_amplifier") ? effect.params().get("weakness_amplifier").getAsInt() : 1;
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, weakAmp));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, duration / 2, 0));
+        }
+        spawnImmuneBreak(level, hit);
     }
 
     public static void metabolicBoost(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -348,19 +348,19 @@ public final class OrganicEffects {
         spawnNerve(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
-    public static void organicNecrosis(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void organicNecrosis(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        float damage = DiceDamage.fromParams(effect.params(), power, 8f);
-        int witherTicks = effect.params().has("wither_ticks") ? effect.params().get("wither_ticks").getAsInt() : 100;
-        int weakTicks = effect.params().has("weakness_ticks") ? effect.params().get("weakness_ticks").getAsInt() : 80;
-        target.hurt(SpellCombat.wither(caster), damage);
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, weakTicks, 1));
-        target.hurtMarked = true;
-        spawnAcid(level, target.position().add(0, 1, 0));
+        Vec3 hit = target != null ? target.position().add(0, 1, 0) : aim.add(0, 0.2, 0);
+        if (target != null) {
+            float damage = DiceDamage.fromParams(effect.params(), power, 8f);
+            int witherTicks = effect.params().has("wither_ticks") ? effect.params().get("wither_ticks").getAsInt() : 100;
+            int weakTicks = effect.params().has("weakness_ticks") ? effect.params().get("weakness_ticks").getAsInt() : 80;
+            target.hurt(SpellCombat.wither(caster), damage);
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, weakTicks, 1));
+            target.hurtMarked = true;
+        }
+        spawnAcid(level, hit);
     }
 
     public static void fullRestructuring(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -372,14 +372,11 @@ public final class OrganicEffects {
         spawnDna(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
-    public static void scorchedEarth(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void scorchedEarth(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
         float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 4f;
         int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 100;
-        Vec3 center = target.position();
+        Vec3 center = target != null ? target.position() : aim;
         AABB box = new AABB(center, center).inflate(radius);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == caster) {
@@ -391,7 +388,7 @@ public final class OrganicEffects {
         }
         spawnThorns(level, center.add(0, 0.5, 0));
         spawnSpores(level, center.add(0, 0.5, 0));
-        level.playSound(null, target.blockPosition(), SoundEvents.WOLF_GROWL, SoundSource.PLAYERS, 0.7f, 0.6f);
+        level.playSound(null, BlockPos.containing(center), SoundEvents.WOLF_GROWL, SoundSource.PLAYERS, 0.7f, 0.6f);
     }
 
     public static void bioFission(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -449,26 +446,26 @@ public final class OrganicEffects {
         spawnSpores(level, caster.position().add(0, 1, 0));
     }
 
-    public static void biologicalPlague(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void biologicalPlague(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
         float burst = DiceDamage.fromParams(effect.params(), power, 10f);
         float spread = effect.params().has("spread_radius") ? effect.params().get("spread_radius").getAsFloat() : 5f;
         int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 160;
-        applyPlagueHit(level, caster, target, burst, poisonTicks);
-        AABB box = target.getBoundingBox().inflate(spread);
+        Vec3 center = target != null ? target.position() : aim;
+        if (target != null) {
+            applyPlagueHit(level, caster, target, burst, poisonTicks);
+        }
+        AABB box = new AABB(center, center).inflate(spread);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == target || entity == caster) {
                 continue;
             }
-            if (entity.distanceToSqr(target) > spread * spread) {
+            if (entity.position().distanceToSqr(center) > spread * spread) {
                 continue;
             }
             applyPlagueHit(level, caster, entity, burst * 0.45f, poisonTicks / 2);
         }
-        spawnSpores(level, target.position().add(0, 1, 0));
+        spawnSpores(level, center.add(0, 1, 0));
     }
 
     private static void applyPlagueHit(
@@ -669,18 +666,18 @@ public final class OrganicEffects {
         spawnDna(level, target.position().add(0, 1, 0));
     }
 
-    public static void biologicalCleaving(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
+    public static void biologicalCleaving(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        float damage = DiceDamage.fromParams(effect.params(), power, 7f);
-        int armorDamage = effect.params().has("armor_damage") ? effect.params().get("armor_damage").getAsInt() : 80;
-        target.hurt(SpellCombat.magic(caster), damage);
-        target.hurtMarked = true;
-        shredOrganicArmor(target, armorDamage);
-        spawnFlesh(level, target.position().add(0, 1, 0));
-        level.playSound(null, target.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8f, 0.5f);
+        Vec3 hit = target != null ? target.position().add(0, 1, 0) : aim.add(0, 0.2, 0);
+        if (target != null) {
+            float damage = DiceDamage.fromParams(effect.params(), power, 7f);
+            int armorDamage = effect.params().has("armor_damage") ? effect.params().get("armor_damage").getAsInt() : 80;
+            target.hurt(SpellCombat.magic(caster), damage);
+            target.hurtMarked = true;
+            shredOrganicArmor(target, armorDamage);
+        }
+        spawnFlesh(level, hit);
+        level.playSound(null, BlockPos.containing(hit), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8f, 0.5f);
     }
 
     public static void fullTransformation(ServerPlayer caster, SpellEffectEntry effect, float power) {
