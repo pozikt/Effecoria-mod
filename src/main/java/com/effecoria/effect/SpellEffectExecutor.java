@@ -99,6 +99,7 @@ public final class SpellEffectExecutor {
             "soul_anchor",
             "soul_reaper",
             "death_mark",
+            "death_shadow",
             "warp_bolt",
             "fold_repulse",
             "rift_slash",
@@ -335,6 +336,7 @@ public final class SpellEffectExecutor {
             case "soul_drain" -> soulDrain(caster, effect, power, target);
             case "wither_touch" -> witherTouch(caster, effect, power, target);
             case "death_mark" -> NecromancyEffects.deathMark(caster, effect, power, target);
+            case "death_shadow" -> NecromancyEffects.deathShadow(caster, effect, power, target);
             case "bone_chill" -> NecromancyEffects.boneChill(caster, effect, power, target);
             case "death_sense" -> NecromancyEffects.deathSense(caster, effect, power);
             case "grave_whisper" -> NecromancyEffects.graveWhisper(caster, effect, power, target);
@@ -439,8 +441,8 @@ public final class SpellEffectExecutor {
         ServerLevel level = caster.serverLevel();
         int duration = effect.params().has("duration_ticks")
                 ? effect.params().get("duration_ticks").getAsInt()
-                : 600;
-        float strength = power;
+                : 2400;
+        float strength = Math.min(power, 64f);
         CompoundTag sealParams = sealParamsFromEffect(effect);
         SealPlaceResult result =
                 SealService.place(level, blockTarget, typeId, caster.getUUID(), strength, duration, sealParams);
@@ -595,7 +597,8 @@ public final class SpellEffectExecutor {
     private static void phaseVeil(ServerPlayer caster, SpellEffectEntry effect, float power) {
         ServerLevel level = caster.serverLevel();
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 80;
-        duration = Math.round(duration * (0.85f + power / 100f));
+        float scale = Math.min(2.0f, 0.85f + power / 100f);
+        duration = Math.round(duration * scale);
 
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0, false, false));

@@ -158,6 +158,7 @@ public final class SpellProgression {
                     id("soul_drain"),
                     id("wither_touch"),
                     id("death_mark"),
+                    id("death_shadow"),
                     id("grave_whisper"),
                     id("curse_of_frailty"),
                     id("siphon_pulse"),

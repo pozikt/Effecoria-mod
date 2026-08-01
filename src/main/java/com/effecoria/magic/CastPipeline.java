@@ -77,7 +77,12 @@ public final class CastPipeline {
         boolean overcasting = !godMode && usablePsi + 0.001f < fullCost;
         // Overcast still delivers borrowed power as if the cost were paid in full.
         PsiContext powerCtx = overcasting ? ctx.withCurrentPsi(Math.max(usablePsi, fullCost)) : ctx;
-        float power = CreativeGodMode.clampSpellPower(player, FormulaEngine.spellPower(powerCtx, phi, spell));
+        float power = FormulaEngine.spellPower(powerCtx, phi, spell);
+        power = CreativeGodMode.clampSpellPower(player, power);
+        float hardCap = BalanceConfig.SPELL_POWER_HARD_CAP.get().floatValue();
+        if (hardCap > 0f) {
+            power = Math.min(power, hardCap);
+        }
 
         CastPresentation.playWindUp(player, spell);
         CastDelivery delivery = SpellEffectExecutor.applyAll(player, spell, power);

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.magic.MagicSchool;
@@ -11,6 +12,7 @@ import com.effecoria.core.magic.MagicSchool;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -160,6 +162,8 @@ public final class PlayerPsiData {
     private int castSuccessStreak;
     /** Synced thrall Ψ reserve for client HUD (server recalculates each tick). */
     private float necroReservedPsi;
+    /** Server-only thrall UUID ledger (not synced via STREAM_CODEC). */
+    private List<UUID> necroThrallIds = new ArrayList<>();
     private long overcastUntil;
     private float overcastSeverity;
     private Map<ResourceLocation, Integer> spellCastCounts = new HashMap<>();
@@ -484,6 +488,27 @@ public final class PlayerPsiData {
         this.necroReservedPsi = Math.max(0f, value);
     }
 
+    /** Server-only thrall ledger; not included in STREAM_CODEC. */
+    public List<UUID> necroThrallIds() {
+        return necroThrallIds;
+    }
+
+    public void trackThrall(UUID thrallId) {
+        if (thrallId == null) {
+            return;
+        }
+        if (!necroThrallIds.contains(thrallId)) {
+            necroThrallIds.add(thrallId);
+        }
+    }
+
+    public void untrackThrall(UUID thrallId) {
+        if (thrallId == null) {
+            return;
+        }
+        necroThrallIds.remove(thrallId);
+    }
+
     public boolean hasOvercastTrauma(long gameTime) {
         return overcastSeverity > 0f && gameTime < overcastUntil;
     }
@@ -659,6 +684,12 @@ public final class PlayerPsiData {
         tag.putLong("overcastUntil", overcastUntil);
         tag.putFloat("overcastSeverity", overcastSeverity);
 
+        ListTag thrallList = new ListTag();
+        for (UUID thrallId : necroThrallIds) {
+            thrallList.add(StringTag.valueOf(thrallId.toString()));
+        }
+        tag.put("necroThrallIds", thrallList);
+
         ListTag spellList = new ListTag();
         for (ResourceLocation spell : knownSpells) {
             spellList.add(net.minecraft.nbt.StringTag.valueOf(spell.toString()));
@@ -724,6 +755,18 @@ public final class PlayerPsiData {
         castSuccessStreak = tag.contains("castSuccessStreak") ? tag.getInt("castSuccessStreak") : 0;
         overcastUntil = tag.contains("overcastUntil") ? tag.getLong("overcastUntil") : 0L;
         overcastSeverity = tag.contains("overcastSeverity") ? tag.getFloat("overcastSeverity") : 0f;
+
+        necroThrallIds = new ArrayList<>();
+        if (tag.contains("necroThrallIds", Tag.TAG_LIST)) {
+            ListTag thrallList = tag.getList("necroThrallIds", Tag.TAG_STRING);
+            for (Tag entry : thrallList) {
+                try {
+                    necroThrallIds.add(UUID.fromString(entry.getAsString()));
+                } catch (IllegalArgumentException ignored) {
+                    // Skip corrupt entries from older/broken saves.
+                }
+            }
+        }
 
         knownSpells = new ArrayList<>();
         ListTag spellList = tag.getList("knownSpells", Tag.TAG_STRING);
@@ -817,6 +860,7 @@ public final class PlayerPsiData {
         copy.seenEntropyTutorial = seenEntropyTutorial;
         copy.castSuccessStreak = castSuccessStreak;
         copy.necroReservedPsi = necroReservedPsi;
+        copy.necroThrallIds = new ArrayList<>(necroThrallIds);
         copy.overcastUntil = overcastUntil;
         copy.overcastSeverity = overcastSeverity;
         copy.spellCastCounts = new HashMap<>(spellCastCounts);

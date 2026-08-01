@@ -74,14 +74,12 @@ public final class CorruptionCurseService {
         if (target == null || !target.isAlive() || curse == null) {
             return 0;
         }
-        // Players get effects only — no contagion metadata / seek AI.
-        if (target instanceof Player) {
-            applyEffects(caster, target, curse);
-            return 0;
-        }
-
+        // Players also carry curse metadata so they must seek cure blocks/items (no seek AI).
         writeCurse(target, curse, caster);
         applyEffects(caster, target, curse);
+        if (target instanceof Player) {
+            return 0;
+        }
         enablePickupIfNeeded(target);
         ensureSeekGoal(target);
 
@@ -120,7 +118,8 @@ public final class CorruptionCurseService {
 
     private static void applyEffects(ServerPlayer caster, LivingEntity target, CorruptionCurse curse) {
         for (CorruptionCurse.EffectSpec spec : curse.effects()) {
-            BreathDebuffs.apply(caster, target, spec.toInstance());
+            // Curse packages already bake intended duration/amp — don't stack BreathDebuffs again.
+            BreathDebuffs.applyExact(target, spec.toInstance());
         }
     }
 

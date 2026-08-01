@@ -60,7 +60,7 @@ public final class SealProgramEffects {
     }
 
     public static void applyStandingHurt(ServerLevel level, BlockPos pos, SealInstance seal, float damage) {
-        AABB box = new AABB(pos).move(0, 1, 0).inflate(0.05, 0.1, 0.05);
+        AABB box = new AABB(pos).move(0, 1, 0).inflate(0.35, 0.25, 0.35);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             BlockPos standingOn = BlockPos.containing(entity.getX(), entity.getY() - 0.05, entity.getZ());
             if (!standingOn.equals(pos)) {
@@ -71,7 +71,7 @@ public final class SealProgramEffects {
     }
 
     public static void applyStandingSlow(ServerLevel level, BlockPos pos, SealInstance seal, int amp) {
-        AABB box = new AABB(pos).move(0, 1, 0).inflate(0.35, 0.15, 0.35);
+        AABB box = new AABB(pos).move(0, 1, 0).inflate(0.45, 0.25, 0.45);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             BlockPos standingOn = BlockPos.containing(entity.getX(), entity.getY() - 0.05, entity.getZ());
             if (!standingOn.equals(pos)) {
@@ -83,7 +83,7 @@ public final class SealProgramEffects {
     }
 
     public static void applyStandingPush(ServerLevel level, BlockPos pos, SealInstance seal, float force) {
-        AABB box = new AABB(pos).move(0, 1, 0).inflate(0.2, 0.1, 0.2);
+        AABB box = new AABB(pos).move(0, 1, 0).inflate(0.35, 0.25, 0.35);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             BlockPos standingOn = BlockPos.containing(entity.getX(), entity.getY() - 0.05, entity.getZ());
             if (!standingOn.equals(pos)) {

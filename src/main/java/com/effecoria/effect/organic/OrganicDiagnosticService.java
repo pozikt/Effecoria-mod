@@ -17,6 +17,8 @@ import net.minecraft.world.level.Level;
 
 /** Temporary diagnostic labels above diagnosed creatures. */
 public final class OrganicDiagnosticService {
+    public static final String DIAG_FLAG_TAG = "effecoria:organic_diag";
+
     private static final List<PendingRestore> PENDING = new ArrayList<>();
 
     private record PendingRestore(
@@ -56,6 +58,7 @@ public final class OrganicDiagnosticService {
 
         subject.setCustomName(label);
         subject.setCustomNameVisible(true);
+        subject.getPersistentData().putBoolean(DIAG_FLAG_TAG, true);
     }
 
     public static DiagnosticReadout readoutFor(LivingEntity subject) {
@@ -129,6 +132,7 @@ public final class OrganicDiagnosticService {
     private static void restore(LivingEntity living, PendingRestore entry) {
         living.setCustomName(entry.previousName());
         living.setCustomNameVisible(entry.previousNameVisible());
+        living.getPersistentData().remove(DIAG_FLAG_TAG);
     }
 
     public record DiagnosticReadout(ChatFormatting color, String statusKey, List<String> flags, int healthPercent) {}

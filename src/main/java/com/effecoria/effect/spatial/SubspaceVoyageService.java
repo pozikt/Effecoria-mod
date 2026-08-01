@@ -13,6 +13,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -180,6 +182,45 @@ public final class SubspaceVoyageService {
 
         if (portal.role() == SubspacePortalBlockEntity.Role.EXIT && ModDimensions.isSubspace(player.level())) {
             exitViaPortal(player, portal);
+        }
+    }
+
+    /**
+     * Walk living non-players through an open hyperspace gate (mobs only; no voyage attachment).
+     */
+    public static void transportNonPlayer(Entity entity, SubspacePortalBlockEntity portal) {
+        if (!(entity instanceof LivingEntity) || entity instanceof ServerPlayer || portal.sessionId() == null) {
+            return;
+        }
+        if (!(entity.level() instanceof ServerLevel level)) {
+            return;
+        }
+
+        if (portal.role() == SubspacePortalBlockEntity.Role.ENTRY && !ModDimensions.isSubspace(level)) {
+            ServerLevel subspace = ModDimensions.subspace(level.getServer());
+            if (subspace == null || portal.entrySubspacePos() == null) {
+                return;
+            }
+            BlockPos spawn = portal.entrySubspacePos();
+            ensureFloor(subspace, spawn);
+            teleportEntity(entity, subspace, spawn);
+            fx(subspace, Vec3.atCenterOf(spawn));
+            return;
+        }
+
+        if (portal.role() == SubspacePortalBlockEntity.Role.EXIT && ModDimensions.isSubspace(level)) {
+            BlockPos landing = portal.exitOverworldPos();
+            ResourceKey<Level> destDim = portal.originDim();
+            if (landing == null || destDim == null) {
+                return;
+            }
+            ServerLevel originLevel = level.getServer().getLevel(destDim);
+            if (originLevel == null) {
+                return;
+            }
+            placePlatformIfNeeded(originLevel, landing);
+            teleportEntity(entity, originLevel, landing);
+            fx(originLevel, Vec3.atCenterOf(landing));
         }
     }
 
@@ -555,19 +596,23 @@ public final class SubspaceVoyageService {
     }
 
     private static void teleport(ServerPlayer player, ServerLevel dest, BlockPos feet) {
+        teleportEntity(player, dest, feet);
+    }
+
+    private static void teleportEntity(Entity entity, ServerLevel dest, BlockPos feet) {
         double x = feet.getX() + 0.5;
         double y = feet.getY();
         double z = feet.getZ() + 0.5;
-        if (player.level() == dest) {
-            player.teleportTo(x, y, z);
+        if (entity.level() == dest) {
+            entity.teleportTo(x, y, z);
             return;
         }
-        player.changeDimension(new DimensionTransition(
+        entity.changeDimension(new DimensionTransition(
                 dest,
                 new Vec3(x, y, z),
                 Vec3.ZERO,
-                player.getYRot(),
-                player.getXRot(),
+                entity.getYRot(),
+                entity.getXRot(),
                 DimensionTransition.DO_NOTHING));
     }
 

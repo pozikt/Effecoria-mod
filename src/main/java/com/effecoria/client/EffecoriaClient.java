@@ -4,6 +4,7 @@ import com.effecoria.EffecoriaMod;
 import com.effecoria.client.hud.BlurredLocusHud;
 import com.effecoria.client.hud.PsiHudOverlay;
 import com.effecoria.client.particle.SchoolParticles;
+import com.effecoria.client.render.DeathShadowRenderer;
 import com.effecoria.client.render.RootCageRenderer;
 import com.effecoria.content.ModEntities;
 import com.effecoria.content.ModParticleTypes;
@@ -32,6 +33,7 @@ public final class EffecoriaClient {
     @SubscribeEvent
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.ROOT_CAGE.get(), RootCageRenderer::new);
+        event.registerEntityRenderer(ModEntities.DEATH_SHADOW.get(), DeathShadowRenderer::new);
     }
 
     @SubscribeEvent
@@ -94,6 +96,12 @@ public final class EffecoriaClient {
         event.registerSpriteSet(
                 ModParticleTypes.NECRO_FOG.get(),
                 sprites -> new SchoolParticles.FogParticle.Provider(sprites, 0.75F, 0.012F));
+        event.registerSpriteSet(ModParticleTypes.NECRO_BONE.get(), SchoolParticles.NecroBoneParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.NECRO_SOUL.get(), SchoolParticles.NecroSoulParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.NECRO_WITHER.get(), SchoolParticles.NecroWitherParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.NECRO_GRAVE.get(), SchoolParticles.NecroGraveParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.NECRO_SHADE.get(), SchoolParticles.ShadowParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.NECRO_BIND.get(), SchoolParticles.NecroBindParticle.Provider::new);
 
         // Spatial uses Veil distortion only — no particle providers
         // Corruption

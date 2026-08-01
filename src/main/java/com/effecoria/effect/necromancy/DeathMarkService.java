@@ -1,6 +1,5 @@
 package com.effecoria.effect.necromancy;
 
-import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
@@ -17,8 +16,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -50,7 +47,7 @@ public final class DeathMarkService {
     public static final String MARK_EQUIP_TAG = "effecoria:death_mark_equip";
 
     public static final int LIVING_MARK_TICKS = 20 * 90;
-    public static final int WORLD_MARK_TICKS = 20 * 60 * 5;
+    public static final int WORLD_MARK_TICKS = 20 * 60 * 8;
 
     private static final EquipmentSlot[] GEAR_SLOTS = {
         EquipmentSlot.MAINHAND,
@@ -78,7 +75,7 @@ public final class DeathMarkService {
         data.putLong(LIVING_UNTIL_TAG, level.getGameTime() + duration);
         // Snapshot kit while the mob is still alive (bows included).
         data.put(LIVING_EQUIP_TAG, captureEquipment(mob, level.registryAccess()));
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, true, true));
+        // No GLOWING — would reveal foreign marks to every client.
         NecromancyEffects.spawnNecroParticles(level, target.position().add(0, 1, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.SCULK_CLICKING, SoundSource.PLAYERS, 0.85f, 0.55f);
     }
@@ -135,7 +132,8 @@ public final class DeathMarkService {
         stand.setNoGravity(true);
         stand.setInvulnerable(true);
         stand.setSilent(true);
-        stand.setGlowingTag(true);
+        stand.setGlowingTag(false);
+        // Name tag is filtered client-side to the mark owner only.
         stand.setCustomNameVisible(true);
         stand.setCustomName(Component.translatable("entity.effecoria.death_mark", typeName, (int) Math.ceil(hp)));
         stand.setShowArms(true);
@@ -180,18 +178,18 @@ public final class DeathMarkService {
 
         float reserve = tag.getFloat(MARK_HP_TAG);
         ResourceLocation typeId = ResourceLocation.parse(tag.getString(MARK_TYPE_TAG));
-        if (!NecroSummonService.canAfford(player, reserve)) {
-            NecroSummonService.diagnoseControl(player, reserve).ifPresent(block ->
-                    player.displayClientMessage(
-                            NecroSummonService.controlMessage(block, player, reserve), true));
-            return true;
-        }
-
         EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(typeId);
         if (type == null) {
             clicked.discard();
             return true;
         }
+        if (!NecroSummonService.canAfford(player, reserve, type)) {
+            NecroSummonService.diagnoseControl(player, reserve, type).ifPresent(block ->
+                    player.displayClientMessage(
+                            NecroSummonService.controlMessage(block, player, reserve), true));
+            return true;
+        }
+
         Entity created = type.create(level);
         if (!(created instanceof Mob mob) || created instanceof Player) {
             player.displayClientMessage(Component.translatable("message.effecoria.necro.death_mark_invalid"), true);
@@ -243,21 +241,47 @@ public final class DeathMarkService {
             return;
         }
         for (ServerPlayer player : level.players()) {
-            AABB box = player.getBoundingBox().inflate(48);
+            AABB box = player.getBoundingBox().inflate(256);
             for (ArmorStand stand : level.getEntitiesOfClass(ArmorStand.class, box, DeathMarkService::isWorldMark)) {
                 CompoundTag tag = stand.getPersistentData();
                 if (level.getGameTime() > tag.getLong(MARK_EXPIRE_TAG)) {
                     stand.discard();
                     continue;
                 }
+                if (!tag.hasUUID(MARK_OWNER_TAG) || !player.getUUID().equals(tag.getUUID(MARK_OWNER_TAG))) {
+                    continue;
+                }
                 Vec3 p = stand.position().add(0, 0.6, 0);
-                level.sendParticles(ModParticleTypes.NECRO_SHADOW.get(), p.x, p.y, p.z, 2, 0.25, 0.35, 0.25, 0.01);
-                level.sendParticles(ParticleTypes.SOUL, p.x, p.y + 0.2, p.z, 1, 0.15, 0.2, 0.15, 0.01);
+                level.sendParticles(
+                        player, ModParticleTypes.NECRO_SHADOW.get(), false, p.x, p.y, p.z, 2, 0.25, 0.35, 0.25, 0.01);
+                level.sendParticles(
+                        player, ParticleTypes.SOUL, false, p.x, p.y + 0.2, p.z, 1, 0.15, 0.2, 0.15, 0.01);
             }
             // Refresh live equipment snapshot on marked mobs still alive near the player.
             for (Mob mob : level.getEntitiesOfClass(Mob.class, box, DeathMarkService::hasActiveLivingMark)) {
                 mob.getPersistentData().put(LIVING_EQUIP_TAG, captureEquipment(mob, level.registryAccess()));
             }
+        }
+    }
+
+    /** Reliable expiry for world marks that may be far from any player. */
+    public static void tickWorldMarkEntity(ArmorStand stand) {
+        if (!isWorldMark(stand) || !(stand.level() instanceof ServerLevel level)) {
+            return;
+        }
+        CompoundTag tag = stand.getPersistentData();
+        if (!tag.contains(MARK_EXPIRE_TAG)) {
+            return;
+        }
+        if (level.getGameTime() > tag.getLong(MARK_EXPIRE_TAG)) {
+            if (tag.hasUUID(MARK_OWNER_TAG) && level.getServer() != null) {
+                ServerPlayer owner = level.getServer().getPlayerList().getPlayer(tag.getUUID(MARK_OWNER_TAG));
+                if (owner != null) {
+                    owner.displayClientMessage(
+                            Component.translatable("message.effecoria.necro.death_mark_expired"), true);
+                }
+            }
+            stand.discard();
         }
     }
 

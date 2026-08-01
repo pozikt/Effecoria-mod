@@ -64,9 +64,14 @@ public final class ProgressionService {
 
     private static void applyMilestones(ServerPlayer player, PlayerPsiData data) {
         float threshold = BalanceConfig.TRAINING_XP_THRESHOLD.get().floatValue();
+        if (threshold <= 0f) {
+            return;
+        }
         float soulBefore = data.soulStrength();
         float maxPsiBefore = data.maxPsi();
-        while (data.trainingXp() >= threshold) {
+        // Cap iterations so dumping huge XP (e.g. 70k) cannot stall the server.
+        int safety = 64;
+        while (data.trainingXp() >= threshold && safety-- > 0) {
             data.addTrainingXp(-threshold);
 
             float soulGain = BalanceConfig.TRAINING_SOUL_GAIN.get().floatValue();

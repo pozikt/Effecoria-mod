@@ -13,6 +13,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,7 +48,7 @@ public final class SubspacePortalBlockEntity extends BlockEntity {
     private BlockPos entrySubspacePos;
     @Nullable
     private BlockPos exitOverworldPos;
-    /** Per-player cooldown so one traveler does not lock the gate for others. */
+    /** Per-entity cooldown so one traveler does not lock the gate for others. */
     private final Map<UUID, Long> playerCooldownUntil = new HashMap<>();
 
     public SubspacePortalBlockEntity(BlockPos pos, BlockState state) {
@@ -106,19 +108,23 @@ public final class SubspacePortalBlockEntity extends BlockEntity {
     }
 
     public void tryTransport(ServerLevel level, Entity entity) {
-        if (!(entity instanceof ServerPlayer player)) {
-            return;
-        }
         if (sessionId == null) {
             return;
         }
         long now = level.getGameTime();
-        Long until = playerCooldownUntil.get(player.getUUID());
+        Long until = playerCooldownUntil.get(entity.getUUID());
         if (until != null && now < until) {
             return;
         }
-        playerCooldownUntil.put(player.getUUID(), now + 25L);
-        SubspaceVoyageService.onPortalTouch(player, this);
+        playerCooldownUntil.put(entity.getUUID(), now + 25L);
+
+        if (entity instanceof ServerPlayer player) {
+            SubspaceVoyageService.onPortalTouch(player, this);
+            return;
+        }
+        if (entity instanceof LivingEntity living && !(entity instanceof Player)) {
+            SubspaceVoyageService.transportNonPlayer(living, this);
+        }
     }
 
     @Override

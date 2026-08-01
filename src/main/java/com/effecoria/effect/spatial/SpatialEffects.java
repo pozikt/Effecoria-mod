@@ -256,7 +256,7 @@ public final class SpatialEffects {
         JsonObject params = effect.params();
         double range = params.has("range") ? params.get("range").getAsDouble() : 8;
         int radius = params.has("radius") ? params.get("radius").getAsInt() : 1;
-        radius = Math.max(0, Math.min(3, radius + (power >= 70f ? 1 : 0)));
+        radius = Math.max(0, Math.min(4, radius + (power >= 70f ? 1 : 0)));
 
         HitResult hit = caster.pick(range, 0f, false);
         BlockPos center;

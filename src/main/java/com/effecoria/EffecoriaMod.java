@@ -75,6 +75,7 @@ public class EffecoriaMod {
         modContainer.registerConfig(ModConfig.Type.COMMON, BalanceConfig.SPEC);
 
         modEventBus.addListener(EffecoriaMod::registerPayloads);
+        modEventBus.addListener(ModEntities::registerAttributes);
 
 
 

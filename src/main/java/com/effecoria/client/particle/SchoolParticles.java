@@ -1963,4 +1963,264 @@ public final class SchoolParticles {
             }
         }
     }
+
+    /** Bone chip for necromancy bone association. */
+    public static class NecroBoneParticle extends TextureSheetParticle {
+        protected NecroBoneParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.gravity = 0.04F;
+            this.quadSize = 0.07F + this.random.nextFloat() * 0.05F;
+            this.lifetime = 16 + this.random.nextInt(10);
+            this.xd = xd * 0.4 + (this.random.nextFloat() - 0.5F) * 0.03;
+            this.yd = 0.05 + this.random.nextFloat() * 0.04;
+            this.zd = zd * 0.4 + (this.random.nextFloat() - 0.5F) * 0.03;
+            this.sprite = sprites.get(this.random);
+            this.rCol = 0.92F;
+            this.gCol = 0.88F;
+            this.bCol = 0.78F;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.oRoll = this.roll;
+            this.roll += 0.12F;
+            this.alpha = 1.0F - (float) this.age / (float) this.lifetime;
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new NecroBoneParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Bright soul mote. */
+    public static class NecroSoulParticle extends TextureSheetParticle {
+        protected NecroSoulParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.gravity = -0.02F;
+            this.quadSize = 0.1F + this.random.nextFloat() * 0.06F;
+            this.lifetime = 18 + this.random.nextInt(10);
+            this.yd = 0.03 + this.random.nextFloat() * 0.025;
+            this.sprite = sprites.get(this.random);
+            this.rCol = 0.45F;
+            this.gCol = 1.0F;
+            this.bCol = 0.78F;
+            this.alpha = 0.85F;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.quadSize *= 0.97F;
+            this.alpha *= 0.96F;
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new NecroSoulParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Wither ash flake. */
+    public static class NecroWitherParticle extends TextureSheetParticle {
+        protected NecroWitherParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.gravity = 0.01F;
+            this.quadSize = 0.08F + this.random.nextFloat() * 0.05F;
+            this.lifetime = 14 + this.random.nextInt(10);
+            this.xd = (this.random.nextFloat() - 0.5F) * 0.02;
+            this.yd = 0.01 + this.random.nextFloat() * 0.02;
+            this.zd = (this.random.nextFloat() - 0.5F) * 0.02;
+            this.sprite = sprites.get(this.random);
+            this.rCol = 0.15F;
+            this.gCol = 0.08F;
+            this.bCol = 0.12F;
+            this.alpha = 0.8F;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.alpha = 0.8F * (1.0F - (float) this.age / (float) this.lifetime);
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new NecroWitherParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Grave dirt / moss mote. */
+    public static class NecroGraveParticle extends TextureSheetParticle {
+        protected NecroGraveParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.gravity = 0.03F;
+            this.quadSize = 0.09F + this.random.nextFloat() * 0.05F;
+            this.lifetime = 16 + this.random.nextInt(8);
+            this.xd = (this.random.nextFloat() - 0.5F) * 0.025;
+            this.yd = 0.02 + this.random.nextFloat() * 0.03;
+            this.zd = (this.random.nextFloat() - 0.5F) * 0.025;
+            this.sprite = sprites.get(this.random);
+            this.rCol = 0.4F;
+            this.gCol = 0.45F;
+            this.bCol = 0.32F;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.alpha = 1.0F - (float) this.age / (float) this.lifetime * 0.85F;
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new NecroGraveParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
+    /** Necromancy binding chain fragment. */
+    public static class NecroBindParticle extends TextureSheetParticle {
+        protected NecroBindParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.hasPhysics = false;
+            this.quadSize = 0.08F + this.random.nextFloat() * 0.04F;
+            this.lifetime = 14 + this.random.nextInt(8);
+            this.xd = xd * 0.5 + (this.random.nextFloat() - 0.5F) * 0.02;
+            this.yd = 0.015 + this.random.nextFloat() * 0.02;
+            this.zd = zd * 0.5 + (this.random.nextFloat() - 0.5F) * 0.02;
+            this.sprite = sprites.get(this.random);
+            this.rCol = 0.55F;
+            this.gCol = 0.7F;
+            this.bCol = 0.6F;
+            this.alpha = 0.85F;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.oRoll = this.roll;
+            this.roll += 0.1F;
+            this.alpha = 0.85F * (1.0F - (float) this.age / (float) this.lifetime * 0.9F);
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new NecroBindParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
 }

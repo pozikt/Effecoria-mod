@@ -111,6 +111,18 @@ public final class ModParticleTypes {
             PARTICLE_TYPES.register("necro_shadow", () -> new SimpleParticleType(false));
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> NECRO_FOG =
             PARTICLE_TYPES.register("necro_fog", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> NECRO_BONE =
+            PARTICLE_TYPES.register("necro_bone", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> NECRO_SOUL =
+            PARTICLE_TYPES.register("necro_soul", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> NECRO_WITHER =
+            PARTICLE_TYPES.register("necro_wither", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> NECRO_GRAVE =
+            PARTICLE_TYPES.register("necro_grave", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> NECRO_SHADE =
+            PARTICLE_TYPES.register("necro_shade", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> NECRO_BIND =
+            PARTICLE_TYPES.register("necro_bind", () -> new SimpleParticleType(false));
 
     // Corruption
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> CORRUPTION_POISON =

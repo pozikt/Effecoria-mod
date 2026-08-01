@@ -6,10 +6,13 @@ import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
 import com.effecoria.core.magic.SpellEffectEntry;
+import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
+import com.effecoria.entity.DeathShadowEntity;
 import com.google.gson.JsonObject;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -17,6 +20,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -34,7 +38,7 @@ public final class NecromancyEffects {
         target.hurt(SpellCombat.wither(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
         target.hurtMarked = true;
-        finishHit(level, target);
+        finishHit(level, target, HitFx.BONE);
     }
 
     public static void deathSense(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -56,7 +60,7 @@ public final class NecromancyEffects {
         }
         caster.displayClientMessage(
                 net.minecraft.network.chat.Component.translatable("message.effecoria.necro.death_sense", count), true);
-        spawnNecroParticles(level, caster.position().add(0, 1, 0));
+        spawnGrave(level, caster.position().add(0, 1, 0));
     }
 
     public static void graveWhisper(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -66,7 +70,7 @@ public final class NecromancyEffects {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, duration, 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, 0));
-        finishHit(caster.serverLevel(), target);
+        finishHit(caster.serverLevel(), target, HitFx.GRAVE);
     }
 
     public static void siphonPulse(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -86,7 +90,7 @@ public final class NecromancyEffects {
             entity.hurt(SpellCombat.magic(caster), damage);
             entity.hurtMarked = true;
             healed += damage * healRatio;
-            spawnNecroParticles(level, entity.position().add(0, 1, 0));
+            spawnSoul(level, entity.position().add(0, 1, 0));
         }
         if (healed > 0f) {
             caster.heal(healed);
@@ -99,7 +103,7 @@ public final class NecromancyEffects {
         int resist = effect.params().has("resistance_amplifier") ? effect.params().get("resistance_amplifier").getAsInt() : 0;
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, resist, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, 1, false, false, true));
-        spawnNecroParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnBone(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void lifeTap(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -112,7 +116,7 @@ public final class NecromancyEffects {
         target.hurt(SpellCombat.magic(caster), damage);
         caster.heal(damage * healRatio);
         target.hurtMarked = true;
-        finishHit(level, target);
+        finishHit(level, target, HitFx.SOUL);
     }
 
     public static void witherWave(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -131,7 +135,7 @@ public final class NecromancyEffects {
             entity.hurt(SpellCombat.wither(caster), damage);
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
             entity.hurtMarked = true;
-            spawnNecroParticles(level, entity.position().add(0, 1, 0));
+            spawnWither(level, entity.position().add(0, 1, 0));
         }
         level.playSound(null, caster.blockPosition(), SoundEvents.WITHER_SHOOT, SoundSource.PLAYERS, 0.5f, 1.1f);
     }
@@ -142,7 +146,7 @@ public final class NecromancyEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, exhaust, 1, false, false, true));
-        spawnNecroParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnSoul(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void soulShackle(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -152,14 +156,14 @@ public final class NecromancyEffects {
         int rootTicks = effect.params().has("root_ticks") ? effect.params().get("root_ticks").getAsInt() : 100;
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, rootTicks, 4));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.GLOWING, rootTicks, 0));
-        finishHit(caster.serverLevel(), target);
+        finishHit(caster.serverLevel(), target, HitFx.BIND);
     }
 
     public static void phantomStep(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.SLOW_FALLING, duration, 0, false, false, true));
-        spawnNecroParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnShade(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void graveField(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -188,7 +192,7 @@ public final class NecromancyEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, duration, 0, false, false, true));
-        spawnNecroParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnShade(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void deathCoil(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -232,7 +236,7 @@ public final class NecromancyEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 2, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, duration, 1, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
-        spawnNecroParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnGrave(caster.serverLevel(), caster.position().add(0, 1, 0));
         caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.35f, 1.4f);
     }
 
@@ -246,7 +250,7 @@ public final class NecromancyEffects {
         target.hurt(SpellCombat.wither(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
         target.hurtMarked = true;
-        finishHit(level, target);
+        finishHit(level, target, HitFx.WITHER);
     }
 
     public static void graveBind(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -256,7 +260,7 @@ public final class NecromancyEffects {
         int rootTicks = effect.params().has("root_ticks") ? effect.params().get("root_ticks").getAsInt() : 120;
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, rootTicks, 5));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.DIG_SLOWDOWN, rootTicks, 2));
-        finishHit(caster.serverLevel(), target);
+        finishHit(caster.serverLevel(), target, HitFx.BIND);
     }
 
     public static void curseOfFrailty(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -267,7 +271,7 @@ public final class NecromancyEffects {
         int weakAmp = effect.params().has("weakness_amplifier") ? effect.params().get("weakness_amplifier").getAsInt() : 1;
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, weakAmp));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 0));
-        finishHit(caster.serverLevel(), target);
+        finishHit(caster.serverLevel(), target, HitFx.SHADE);
     }
 
     public static void hauntingVisage(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -278,7 +282,7 @@ public final class NecromancyEffects {
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.BLINDNESS, duration / 2, 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, duration, 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.DARKNESS, duration / 2, 0));
-        finishHit(caster.serverLevel(), target);
+        finishHit(caster.serverLevel(), target, HitFx.SHADE);
     }
 
     public static void corpseBurst(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -299,7 +303,7 @@ public final class NecromancyEffects {
             }
             entity.hurt(SpellCombat.wither(caster), damage);
             entity.hurtMarked = true;
-            spawnNecroParticles(level, entity.position().add(0, 1, 0));
+            spawnWither(level, entity.position().add(0, 1, 0));
         }
         level.playSound(null, target.blockPosition(), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.5f, 0.7f);
     }
@@ -315,7 +319,7 @@ public final class NecromancyEffects {
             target.hurt(SpellCombat.wither(caster), perHit);
         }
         target.hurtMarked = true;
-        finishHit(level, target);
+        finishHit(level, target, HitFx.BONE);
     }
 
     public static void necroticAura(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -335,9 +339,9 @@ public final class NecromancyEffects {
             entity.hurt(SpellCombat.wither(caster), pulse);
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WITHER, 40, 0));
             entity.hurtMarked = true;
-            spawnNecroParticles(level, entity.position().add(0, 1, 0));
+            spawnWither(level, entity.position().add(0, 1, 0));
         }
-        spawnNecroParticles(level, caster.position().add(0, 1, 0));
+        spawnWither(level, caster.position().add(0, 1, 0));
     }
 
     public static void soulAnchor(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -349,7 +353,7 @@ public final class NecromancyEffects {
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, 1));
         target.setDeltaMovement(0, target.getDeltaMovement().y, 0);
         target.hurtMarked = true;
-        finishHit(caster.serverLevel(), target);
+        finishHit(caster.serverLevel(), target, HitFx.BIND);
     }
 
     public static void deathGate(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -380,10 +384,10 @@ public final class NecromancyEffects {
             return;
         }
         hurtInRadius(level, origin, trailRadius, trailDamage, caster);
-        spawnNecroParticles(level, origin.add(0, 1, 0));
+        spawnGrave(level, origin.add(0, 1, 0));
         caster.teleportTo(best.x, best.y, best.z);
         caster.fallDistance = 0f;
-        spawnNecroParticles(level, best.add(0, 1, 0));
+        spawnGrave(level, best.add(0, 1, 0));
         level.playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7f, 0.6f);
     }
 
@@ -402,7 +406,7 @@ public final class NecromancyEffects {
         caster.heal(damage * healRatio);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, 100, 1));
         target.hurtMarked = true;
-        finishHit(level, target);
+        finishHit(level, target, HitFx.SOUL);
     }
 
     public static void phylacterySurge(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -420,8 +424,33 @@ public final class NecromancyEffects {
             data.boostPhylacteryEfficiency(gameTime, bonus);
             PsiHelper.set(caster, data);
         }
-        spawnNecroParticles(level, caster.position().add(0, 1, 0));
+        spawnSoul(level, caster.position().add(0, 1, 0));
         level.playSound(null, caster.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.6f, 0.7f);
+    }
+
+    public static void deathShadow(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (!(target instanceof Player subject) || !subject.isAlive()) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.death_shadow_not_player"), true);
+            return;
+        }
+        if (subject == caster) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.death_shadow_self"), true);
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        var death = subject.getData(ModAttachments.LAST_DEATH.get()).site();
+        if (death.isEmpty()) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.death_shadow_none"), true);
+            return;
+        }
+        PlayerLastDeath.DeathSite site = death.get();
+        if (!site.dimension().equals(level.dimension())) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.death_shadow_dim"), true);
+            return;
+        }
+        DeathShadowEntity.spawn(level, subject, site.pos());
+        spawnShade(level, subject.position().add(0, 1, 0));
+        level.playSound(null, subject.blockPosition(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 0.8f, 0.55f);
     }
 
     public static void lichAscension(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -441,7 +470,7 @@ public final class NecromancyEffects {
             }
             entity.hurt(SpellCombat.wither(skip), damage);
             entity.hurtMarked = true;
-            spawnNecroParticles(level, entity.position().add(0, 1, 0));
+            spawnWither(level, entity.position().add(0, 1, 0));
         }
     }
 
@@ -449,16 +478,67 @@ public final class NecromancyEffects {
         entity.hurt(SpellCombat.wither(caster), damage);
         BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WITHER, witherTicks, 0));
         entity.hurtMarked = true;
-        spawnNecroParticles(level, entity.position().add(0, 1, 0));
+        spawnWither(level, entity.position().add(0, 1, 0));
     }
 
-    private static void finishHit(ServerLevel level, LivingEntity target) {
-        spawnNecroParticles(level, target.position().add(0, 1, 0));
+    private enum HitFx {
+        BONE,
+        SOUL,
+        WITHER,
+        GRAVE,
+        SHADE,
+        BIND
+    }
+
+    private static void finishHit(ServerLevel level, LivingEntity target, HitFx fx) {
+        spawnFx(level, target.position().add(0, 1, 0), fx);
         level.playSound(null, target.blockPosition(), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.6f, 1.1f);
     }
 
+    private static void spawnFx(ServerLevel level, Vec3 pos, HitFx fx) {
+        switch (fx) {
+            case BONE -> spawnBone(level, pos);
+            case SOUL -> spawnSoul(level, pos);
+            case WITHER -> spawnWither(level, pos);
+            case GRAVE -> spawnGrave(level, pos);
+            case SHADE -> spawnShade(level, pos);
+            case BIND -> spawnBind(level, pos);
+        }
+    }
+
+    public static void spawnBone(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.NECRO_BONE.get(), pos.x, pos.y, pos.z, 10, 0.3, 0.35, 0.3, 0.02);
+        level.sendParticles(ModParticleTypes.NECRO_FOG.get(), pos.x, pos.y + 0.4, pos.z, 5, 0.2, 0.3, 0.2, 0.008);
+    }
+
+    public static void spawnSoul(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.NECRO_SOUL.get(), pos.x, pos.y, pos.z, 12, 0.28, 0.4, 0.28, 0.02);
+        level.sendParticles(ModParticleTypes.NECRO_SHADOW.get(), pos.x, pos.y + 0.3, pos.z, 6, 0.2, 0.25, 0.2, 0.01);
+    }
+
+    public static void spawnWither(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.NECRO_WITHER.get(), pos.x, pos.y, pos.z, 12, 0.3, 0.35, 0.3, 0.015);
+        level.sendParticles(ModParticleTypes.NECRO_FOG.get(), pos.x, pos.y + 0.45, pos.z, 8, 0.25, 0.35, 0.25, 0.01);
+    }
+
+    public static void spawnGrave(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.NECRO_GRAVE.get(), pos.x, pos.y, pos.z, 10, 0.3, 0.3, 0.3, 0.015);
+        level.sendParticles(ModParticleTypes.NECRO_FOG.get(), pos.x, pos.y + 0.4, pos.z, 7, 0.22, 0.3, 0.22, 0.008);
+    }
+
+    public static void spawnShade(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.NECRO_SHADE.get(), pos.x, pos.y, pos.z, 12, 0.28, 0.4, 0.28, 0.015);
+        level.sendParticles(ModParticleTypes.NECRO_SOUL.get(), pos.x, pos.y + 0.35, pos.z, 5, 0.18, 0.25, 0.18, 0.01);
+    }
+
+    public static void spawnBind(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.NECRO_BIND.get(), pos.x, pos.y, pos.z, 10, 0.28, 0.3, 0.28, 0.02);
+        level.sendParticles(ModParticleTypes.NECRO_SOUL.get(), pos.x, pos.y + 0.3, pos.z, 5, 0.18, 0.22, 0.18, 0.01);
+    }
+
+    /** Generic necro burst — kept for field/summon helpers and legacy callers. */
     public static void spawnNecroParticles(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ModParticleTypes.NECRO_SHADOW.get(), pos.x, pos.y, pos.z, 10, 0.3, 0.35, 0.3, 0.01);
+        spawnShade(level, pos);
         level.sendParticles(ModParticleTypes.NECRO_FOG.get(), pos.x, pos.y + 0.5, pos.z, 8, 0.25, 0.4, 0.25, 0.008);
     }
 }

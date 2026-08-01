@@ -18,6 +18,14 @@ public final class BalanceConfig {
             .comment("Global multiplier for spell effect power")
             .defineInRange("spell_power_scale", 1.0, 0.01, 100.0);
 
+    public static final ModConfigSpec.DoubleValue SPELL_POWER_HARD_CAP = BUILDER
+            .comment("Hard ceiling on delivered spell power for ALL casters (stops freezes at absurd Φ/XP). 0 = uncapped.")
+            .defineInRange("spell_power_hard_cap", 72.0, 0.0, 500.0);
+
+    public static final ModConfigSpec.DoubleValue PHI_MULTIPLIER_BONUS_CAP = BUILDER
+            .comment("Max ambient Φ bonus from player phi_multiplier (bonus = clamp(mult,0,cap) - 1)")
+            .defineInRange("phi_multiplier_bonus_cap", 2.5, 0.0, 50.0);
+
     public static final ModConfigSpec.DoubleValue TECHNO_POWER_SCALE = BUILDER
             .comment("Technomagic: Φ_reactor × C × K scale (phase 5)")
             .defineInRange("techno_power_scale", 1.0, 0.01, 100.0);
@@ -208,15 +216,15 @@ public final class BalanceConfig {
 
     public static final ModConfigSpec.DoubleValue DEBUFF_DURATION_PER_REFERENCE = BUILDER
             .comment("Extra harmful/neutral effect duration per reference breathing mastery (0.35 = +35% at 100%, +70% at 200%)")
-            .defineInRange("debuff_duration_per_reference", 0.35, 0.0, 2.0);
+            .defineInRange("debuff_duration_per_reference", 0.12, 0.0, 2.0);
 
     public static final ModConfigSpec.DoubleValue DEBUFF_AMPLIFIER_PER_REFERENCE = BUILDER
             .comment("Extra harmful/neutral effect amplifier levels per reference breathing mastery (1.0 = +1 at 100%)")
-            .defineInRange("debuff_amplifier_per_reference", 1.0, 0.0, 5.0);
+            .defineInRange("debuff_amplifier_per_reference", 0.25, 0.0, 5.0);
 
     public static final ModConfigSpec.IntValue DEBUFF_AMPLIFIER_MAX_BONUS = BUILDER
             .comment("Cap on breathing-granted amplifier bonus for debuffs")
-            .defineInRange("debuff_amplifier_max_bonus", 6, 0, 20);
+            .defineInRange("debuff_amplifier_max_bonus", 2, 0, 20);
 
     public static final ModConfigSpec.DoubleValue MASTERY_ESSENCE_PER_POINT = BUILDER
             .comment("Spell mastery bonus per absorbed essence point")

@@ -93,7 +93,7 @@ public class RootCageEntity extends Entity {
         entityData.set(DATA_HEIGHT, height);
         refreshDimensions();
 
-        this.maxIntegrity = Mth.clamp(14f + target.getMaxHealth() * 0.45f + power * 0.2f, 16f, 120f);
+        this.maxIntegrity = Mth.clamp(8f + target.getMaxHealth() * 0.2f + power * 0.08f, 8f, 48f);
         this.integrity = this.maxIntegrity;
         entityData.set(DATA_INTEGRITY, 1.0f);
 
@@ -114,7 +114,7 @@ public class RootCageEntity extends Entity {
                 new MobEffectInstance(
                         MobEffects.MOVEMENT_SLOWDOWN,
                         ticks,
-                        BreathDebuffs.scaleAmplifier(caster, 6),
+                        BreathDebuffs.scaleAmplifier(caster, 3),
                         false,
                         false,
                         true));

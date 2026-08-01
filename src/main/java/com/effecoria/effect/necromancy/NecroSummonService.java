@@ -5,8 +5,11 @@ import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -16,6 +19,7 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vex;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
@@ -36,9 +40,11 @@ public final class NecroSummonService {
     /** Soft leash — thralls try to stay within this of the owner. */
     private static final double LEASH = 5.5;
     /** Hard leash — teleport back if farther. */
-    private static final double TELEPORT = 10.0;
+    private static final double TELEPORT = 100.0;
     /** Only engage threats within this of the owner, with line of sight. */
     private static final double ENGAGE_RANGE = 14.0;
+    /** Hostile aggro radius toward thralls. */
+    private static final double PROVOKE_RANGE = 16.0;
 
     public enum ControlBlock {
         TOO_STRONG,
@@ -52,7 +58,11 @@ public final class NecroSummonService {
     /** @return false if the caster cannot afford the given Ψ reserve / control budget */
     public static boolean register(Mob mob, ServerPlayer owner, LivingEntity preferredTarget, float reservePsi) {
         float reserve = Math.max(1f, reservePsi);
-        Optional<ControlBlock> block = diagnoseControl(owner, reserve);
+        EntityType<?> type = mob.getType();
+        boolean spiderTribute = isSpiderTribute(type);
+        boolean beyondCaps = spiderTribute && wouldExceedCaps(owner, reserve);
+
+        Optional<ControlBlock> block = diagnoseControl(owner, reserve, type);
         if (block.isPresent()) {
             mob.discard();
             owner.displayClientMessage(controlMessage(block.get(), owner, reserve), true);
@@ -71,7 +81,13 @@ public final class NecroSummonService {
         } else {
             mob.setTarget(null);
         }
+        PlayerPsiData data = PsiHelper.get(owner);
+        data.trackThrall(mob.getUUID());
+        PsiHelper.set(owner, data);
         DeathMarkService.syncReservedPsi(owner);
+        if (beyondCaps) {
+            owner.displayClientMessage(Component.translatable("message.effecoria.necro.spider_tribute"), true);
+        }
         return true;
     }
 
@@ -79,23 +95,46 @@ public final class NecroSummonService {
         return diagnoseControl(owner, reserveCost).isEmpty();
     }
 
+    public static boolean canAfford(ServerPlayer owner, float reserveCost, EntityType<?> type) {
+        return diagnoseControl(owner, reserveCost, type).isEmpty();
+    }
+
     public static Optional<ControlBlock> diagnoseControl(ServerPlayer owner, float reserveCost) {
+        return diagnoseControl(owner, reserveCost, null);
+    }
+
+    public static Optional<ControlBlock> diagnoseControl(ServerPlayer owner, float reserveCost, EntityType<?> type) {
         PlayerPsiData data = PsiHelper.get(owner);
         float cost = Math.max(0f, reserveCost);
+        boolean spiderTribute = isSpiderTribute(type);
+
         if (cost > maxSingleHp(data) + 0.05f) {
             return Optional.of(ControlBlock.TOO_STRONG);
         }
-        if (countOwned(owner) >= maxThralls(data)) {
+        if (!spiderTribute && countOwned(owner) >= maxThralls(data)) {
             return Optional.of(ControlBlock.TOO_MANY);
         }
         float next = reservedPsi(owner) + cost;
-        if (next > controlBudget(data) + 0.05f) {
+        if (!spiderTribute && next > controlBudget(data) + 0.05f) {
             return Optional.of(ControlBlock.BUDGET);
         }
-        if (next > data.maxPsi() - 1f) {
+        if (cost > usablePsi(owner, data) + 0.05f || next > data.maxPsi() - 1f) {
             return Optional.of(ControlBlock.PSI);
         }
         return Optional.empty();
+    }
+
+    private static boolean wouldExceedCaps(ServerPlayer owner, float reserveCost) {
+        PlayerPsiData data = PsiHelper.get(owner);
+        float cost = Math.max(0f, reserveCost);
+        if (countOwned(owner) >= maxThralls(data)) {
+            return true;
+        }
+        return reservedPsi(owner) + cost > controlBudget(data) + 0.05f;
+    }
+
+    private static boolean isSpiderTribute(EntityType<?> type) {
+        return type == EntityType.SPIDER || type == EntityType.CAVE_SPIDER;
     }
 
     public static Component controlMessage(ControlBlock block, ServerPlayer owner, float reserveCost) {
@@ -136,7 +175,7 @@ public final class NecroSummonService {
         return Math.max(1, base + extra);
     }
 
-    public static float reservedPsi(net.minecraft.world.entity.player.Player owner) {
+    public static float reservedPsi(Player owner) {
         if (owner.level().isClientSide()) {
             return PsiHelper.get(owner).necroReservedPsi();
         }
@@ -154,23 +193,79 @@ public final class NecroSummonService {
         return Math.max(1f, mob.getMaxHealth());
     }
 
-    public static float usablePsi(net.minecraft.world.entity.player.Player owner, PlayerPsiData data) {
+    public static float usablePsi(Player owner, PlayerPsiData data) {
         return Math.max(0f, data.currentPsi() - reservedPsi(owner));
     }
 
-    public static int countOwned(net.minecraft.world.entity.player.Player owner) {
+    public static int countOwned(Player owner) {
         return listOwned(owner).size();
     }
 
-    public static List<Mob> listOwned(net.minecraft.world.entity.player.Player owner) {
-        AABB box = owner.getBoundingBox().inflate(48);
+    /**
+     * Resolves thralls from the owner's server-side UUID ledger across all dimensions.
+     * Prunes missing/dead IDs and resyncs reserved Ψ when the ledger changes.
+     */
+    public static List<Mob> listOwned(Player owner) {
+        if (!(owner instanceof ServerPlayer serverOwner)) {
+            return List.of();
+        }
+        MinecraftServer server = serverOwner.getServer();
+        if (server == null) {
+            return List.of();
+        }
+
+        PlayerPsiData data = PsiHelper.get(serverOwner);
+        List<UUID> ledger = data.necroThrallIds();
         List<Mob> owned = new ArrayList<>();
-        for (Mob mob : owner.level().getEntitiesOfClass(Mob.class, box, Mob::isAlive)) {
-            if (isOwnedBy(mob, owner.getUUID())) {
-                owned.add(mob);
+        List<UUID> stale = new ArrayList<>();
+
+        for (UUID id : new ArrayList<>(ledger)) {
+            Mob found = findThrall(server, id);
+            if (found == null || !found.isAlive() || !isOwnedBy(found, serverOwner.getUUID())) {
+                stale.add(id);
+                continue;
             }
+            owned.add(found);
+        }
+
+        if (!stale.isEmpty()) {
+            for (UUID id : stale) {
+                data.untrackThrall(id);
+            }
+            float total = 0f;
+            for (Mob mob : owned) {
+                total += reserveOf(mob);
+            }
+            data.setNecroReservedPsi(total);
+            PsiHelper.set(serverOwner, data);
         }
         return owned;
+    }
+
+    private static Mob findThrall(MinecraftServer server, UUID id) {
+        for (ServerLevel level : server.getAllLevels()) {
+            Entity entity = level.getEntity(id);
+            if (entity instanceof Mob mob) {
+                return mob;
+            }
+        }
+        return null;
+    }
+
+    /** Backfill ledger entries for thralls that predate the UUID list. */
+    private static void seedNearbyThralls(ServerPlayer owner) {
+        PlayerPsiData data = PsiHelper.get(owner);
+        boolean changed = false;
+        AABB box = owner.getBoundingBox().inflate(48);
+        for (Mob mob : owner.level().getEntitiesOfClass(Mob.class, box, LivingEntity::isAlive)) {
+            if (isOwnedBy(mob, owner.getUUID()) && !data.necroThrallIds().contains(mob.getUUID())) {
+                data.trackThrall(mob.getUUID());
+                changed = true;
+            }
+        }
+        if (changed) {
+            PsiHelper.set(owner, data);
+        }
     }
 
     public static boolean isOwnedBy(Mob mob, UUID ownerId) {
@@ -208,6 +303,9 @@ public final class NecroSummonService {
 
     public static void tick(ServerPlayer owner) {
         ServerLevel level = owner.serverLevel();
+        if (owner.tickCount % 40 == 0) {
+            seedNearbyThralls(owner);
+        }
         LivingEntity combatFocus = resolveOwnerCombatFocus(owner);
         for (Mob mob : listOwned(owner)) {
             if (mob.isOnFire() && level.isDay() && level.canSeeSky(mob.blockPosition())) {
@@ -250,9 +348,36 @@ public final class NecroSummonService {
                 mob.setLastHurtByMob(null);
                 followOwner(mob, owner);
             }
+
+            provokeNearbyHostiles(mob);
         }
         if (owner.tickCount % 10 == 0) {
             DeathMarkService.syncReservedPsi(owner);
+        }
+    }
+
+    /**
+     * Nearby hostiles with line of sight aggro onto the thrall if idle or not already
+     * fighting a player. Skips other thralls of the same owner.
+     */
+    private static void provokeNearbyHostiles(Mob thrall) {
+        if (!thrall.getPersistentData().hasUUID(OWNER_TAG)) {
+            return;
+        }
+        UUID ownerId = thrall.getPersistentData().getUUID(OWNER_TAG);
+        AABB box = thrall.getBoundingBox().inflate(PROVOKE_RANGE);
+        for (Monster monster : thrall.level().getEntitiesOfClass(Monster.class, box, LivingEntity::isAlive)) {
+            if (monster == thrall || isOwnedBy(monster, ownerId)) {
+                continue;
+            }
+            LivingEntity target = monster.getTarget();
+            if (target instanceof Player) {
+                continue;
+            }
+            if (!monster.hasLineOfSight(thrall)) {
+                continue;
+            }
+            monster.setTarget(thrall);
         }
     }
 

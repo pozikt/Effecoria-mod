@@ -35,7 +35,8 @@ public final class BreathDebuffs {
 
     public static float durationMultiplier(float breathingMastery) {
         float ratio = BreathingService.referenceRatio(breathingMastery);
-        return 1f + ratio * BalanceConfig.DEBUFF_DURATION_PER_REFERENCE.get().floatValue();
+        float mult = 1f + ratio * BalanceConfig.DEBUFF_DURATION_PER_REFERENCE.get().floatValue();
+        return Math.min(mult, 2.25f);
     }
 
     public static int scaleDuration(float breathingMastery, int baseTicks) {

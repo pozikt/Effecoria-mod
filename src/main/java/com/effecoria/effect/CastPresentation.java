@@ -130,6 +130,41 @@ public final class CastPresentation {
             Set.of(id("entropy_lash"), id("entropy_aegis"));
     private static final Set<ResourceLocation> CORRUPTION_LEECH = Set.of(id("tainted_leech"));
 
+    private static final Set<ResourceLocation> NECRO_BONE =
+            Set.of(id("bone_chill"), id("bone_armor"), id("bone_volley"));
+    private static final Set<ResourceLocation> NECRO_SOUL = Set.of(
+            id("soul_drain"),
+            id("siphon_pulse"),
+            id("life_tap"),
+            id("dark_pact"),
+            id("soul_reaper"),
+            id("phylactery_surge"),
+            id("soul_cataclysm"),
+            id("grave_leech"));
+    private static final Set<ResourceLocation> NECRO_WITHER = Set.of(
+            id("wither_touch"),
+            id("wither_wave"),
+            id("necrotic_bolt"),
+            id("necrotic_aura"),
+            id("corpse_burst"),
+            id("death_coil"));
+    private static final Set<ResourceLocation> NECRO_GRAVE = Set.of(
+            id("death_sense"),
+            id("death_mark"),
+            id("grave_whisper"),
+            id("grave_field"),
+            id("death_gate"),
+            id("death_apotheosis"));
+    private static final Set<ResourceLocation> NECRO_SHADE = Set.of(
+            id("phantom_step"),
+            id("haunting_visage"),
+            id("curse_of_frailty"),
+            id("lich_ward"),
+            id("lich_ascension"),
+            id("death_shadow"));
+    private static final Set<ResourceLocation> NECRO_BIND =
+            Set.of(id("grave_bind"), id("soul_shackle"), id("soul_anchor"));
+
     private static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath("effecoria", path);
     }
@@ -270,15 +305,7 @@ public final class CastPresentation {
                             1.1f,
                             0.5f,
                             0.95f);
-            case NECROMANCY -> new SchoolTheme(
-                    ModParticleTypes.NECRO_SHADOW.get(),
-                    ModParticleTypes.NECRO_FOG.get(),
-                    SoundEvents.SOUL_ESCAPE.value(),
-                    SoundEvents.WITHER_AMBIENT,
-                    0.45f,
-                    0.85f,
-                    0.5f,
-                    0.75f);
+            case NECROMANCY -> necroTheme(spell);
             case SPATIAL -> new SchoolTheme(
                     null,
                     null,
@@ -522,6 +549,85 @@ public final class CastPresentation {
                 1.35f,
                 0.55f,
                 1.25f);
+    }
+
+    private static SchoolTheme necroTheme(SpellDefinition spell) {
+        ResourceLocation id = spell.id();
+        if (NECRO_BONE.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.NECRO_BONE.get(),
+                    ModParticleTypes.NECRO_FOG.get(),
+                    SoundEvents.SKELETON_HURT,
+                    SoundEvents.BONE_BLOCK_PLACE,
+                    0.4f,
+                    1.1f,
+                    0.5f,
+                    0.9f);
+        }
+        if (NECRO_SOUL.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.NECRO_SOUL.get(),
+                    ModParticleTypes.NECRO_SHADOW.get(),
+                    SoundEvents.SOUL_ESCAPE.value(),
+                    SoundEvents.SCULK_CATALYST_BLOOM,
+                    0.45f,
+                    1.2f,
+                    0.5f,
+                    0.85f);
+        }
+        if (NECRO_WITHER.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.NECRO_WITHER.get(),
+                    ModParticleTypes.NECRO_FOG.get(),
+                    SoundEvents.WITHER_SHOOT,
+                    SoundEvents.WITHER_HURT,
+                    0.4f,
+                    0.85f,
+                    0.5f,
+                    0.75f);
+        }
+        if (NECRO_GRAVE.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.NECRO_GRAVE.get(),
+                    ModParticleTypes.NECRO_FOG.get(),
+                    SoundEvents.SOUL_ESCAPE.value(),
+                    SoundEvents.ROOTED_DIRT_PLACE,
+                    0.4f,
+                    0.75f,
+                    0.5f,
+                    0.8f);
+        }
+        if (NECRO_SHADE.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.NECRO_SHADE.get(),
+                    ModParticleTypes.NECRO_SOUL.get(),
+                    SoundEvents.SOUL_ESCAPE.value(),
+                    SoundEvents.WARDEN_AMBIENT,
+                    0.4f,
+                    1.35f,
+                    0.45f,
+                    0.7f);
+        }
+        if (NECRO_BIND.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.NECRO_BIND.get(),
+                    ModParticleTypes.NECRO_SOUL.get(),
+                    SoundEvents.CHAIN_PLACE,
+                    SoundEvents.SOUL_ESCAPE.value(),
+                    0.4f,
+                    1.15f,
+                    0.5f,
+                    1.0f);
+        }
+        return new SchoolTheme(
+                ModParticleTypes.NECRO_SHADOW.get(),
+                ModParticleTypes.NECRO_FOG.get(),
+                SoundEvents.SOUL_ESCAPE.value(),
+                SoundEvents.WITHER_AMBIENT,
+                0.45f,
+                0.85f,
+                0.5f,
+                0.75f);
     }
 
     private static SchoolTheme corruptionTheme(SpellDefinition spell) {

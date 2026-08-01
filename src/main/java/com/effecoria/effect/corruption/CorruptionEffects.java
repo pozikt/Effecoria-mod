@@ -362,7 +362,10 @@ public final class CorruptionEffects {
     }
 
     private static int scaleTicks(int base, float power, float floor) {
-        return Math.round(base * (floor + power / 100f));
+        float mult = floor + power / 100f;
+        // Soft cap so curse durations don't explode at high Φ/power.
+        mult = Math.min(mult, 2.5f);
+        return Math.max(1, Math.round(base * mult));
     }
 
     private enum HitFx {

@@ -45,8 +45,11 @@ public final class PhiFieldService {
             return new PhiSample(0f, true, isSolarDay(level));
         }
         if (player != null) {
-            // phiMultiplier is stored as a factor around 1.0 → convert to signed bonus.
-            value += Math.max(0f, PsiHelper.get(player).phiMultiplier()) - 1f;
+            // phiMultiplier is stored as a factor around 1.0 → convert to signed bonus (hard-capped).
+            float mult = Math.max(0f, PsiHelper.get(player).phiMultiplier());
+            float cap = BalanceConfig.PHI_MULTIPLIER_BONUS_CAP.get().floatValue();
+            float clamped = Math.min(mult, Math.max(0f, cap));
+            value += clamped - 1f;
         }
         return new PhiSample(Math.max(0f, value), false, isSolarDay(level));
     }

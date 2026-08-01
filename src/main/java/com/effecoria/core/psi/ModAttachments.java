@@ -2,6 +2,7 @@ package com.effecoria.core.psi;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.core.seal.ChunkSealData;
+import com.effecoria.effect.necromancy.PlayerLastDeath;
 import com.effecoria.effect.spatial.SubspaceVoyageData;
 
 import net.minecraft.core.HolderLookup;
@@ -81,6 +82,28 @@ public final class ModAttachments {
 
                         @Override
                         public Tag write(SubspaceVoyageData attachment, HolderLookup.Provider provider) {
+                            return attachment.save(provider);
+                        }
+                    })
+                    .copyOnDeath()
+                    .build());
+
+    public static final Supplier<AttachmentType<PlayerLastDeath>> LAST_DEATH = ATTACHMENT_TYPES.register(
+            "last_death",
+            () -> AttachmentType.builder(PlayerLastDeath::createDefault)
+                    .serialize(new IAttachmentSerializer<>() {
+                        @Override
+                        public PlayerLastDeath read(
+                                IAttachmentHolder holder, Tag tag, HolderLookup.Provider provider) {
+                            PlayerLastDeath data = PlayerLastDeath.createDefault();
+                            if (tag instanceof CompoundTag compound) {
+                                data.load(provider, compound);
+                            }
+                            return data;
+                        }
+
+                        @Override
+                        public Tag write(PlayerLastDeath attachment, HolderLookup.Provider provider) {
                             return attachment.save(provider);
                         }
                     })

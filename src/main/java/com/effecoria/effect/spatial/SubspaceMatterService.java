@@ -1,5 +1,7 @@
 package com.effecoria.effect.spatial;
 
+import com.effecoria.world.ModDimensions;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -8,16 +10,20 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * Tracks matter exiled into hyperspace for future Chaos Reefs / spit-back / Ψ-ghosts.
- * MVP: classify + queue only; transformation timelines live in docs/SUBSPACE.md.
+ * MVP: classify + queue, and dump a physical copy into subspace when available.
  */
 public final class SubspaceMatterService {
     private static final int MAX_QUEUE = 2048;
+    private static final int FLOOR_Y = 1;
     private static final List<ExiledSample> QUEUE = new ArrayList<>();
+    private static final Map<UUID, Integer> DUMP_INDEX = new HashMap<>();
 
     private SubspaceMatterService() {}
 
@@ -47,6 +53,7 @@ public final class SubspaceMatterService {
         }
         MatterClass kind = classify(state);
         String blockId = state.getBlock().builtInRegistryHolder().key().location().toString();
+        BlockState toPlace = state;
         synchronized (QUEUE) {
             if (QUEUE.size() >= MAX_QUEUE) {
                 QUEUE.removeFirst();
@@ -61,7 +68,54 @@ public final class SubspaceMatterService {
         }
         // No loot — volume is folded into the Φ-sublayer, not broken.
         level.removeBlock(pos, false);
+
+        ServerLevel subspace = ModDimensions.subspace(level.getServer());
+        if (subspace != null) {
+            placeInDumpPile(subspace, caster.getUUID(), toPlace);
+        }
         return true;
+    }
+
+    /** Dump pile position derived from caster UUID + growing index; search upward for air. */
+    private static void placeInDumpPile(ServerLevel subspace, UUID casterId, BlockState state) {
+        int index;
+        synchronized (DUMP_INDEX) {
+            index = DUMP_INDEX.merge(casterId, 1, Integer::sum) - 1;
+        }
+        BlockPos base = dumpBase(casterId, index);
+        ensureDumpFloor(subspace, base.below());
+        BlockPos.MutableBlockPos cursor = base.mutable();
+        int maxY = Math.min(subspace.getMaxBuildHeight() - 1, base.getY() + 48);
+        while (cursor.getY() <= maxY) {
+            BlockState existing = subspace.getBlockState(cursor);
+            if (existing.isAir() || existing.canBeReplaced()) {
+                subspace.setBlock(cursor, state, 3);
+                return;
+            }
+            cursor.move(0, 1, 0);
+        }
+    }
+
+    private static BlockPos dumpBase(UUID casterId, int index) {
+        int hash = casterId.hashCode();
+        int baseX = (hash & 0x7FFF) % 3500;
+        int baseZ = ((hash >>> 16) & 0x7FFF) % 3500;
+        if ((hash & 1) == 0) {
+            baseX = -baseX;
+        }
+        if ((hash & 2) == 0) {
+            baseZ = -baseZ;
+        }
+        // Grow outward in a loose grid so consecutive excises stack nearby.
+        int x = baseX + (index % 16);
+        int z = baseZ + (index / 16);
+        return new BlockPos(x, FLOOR_Y + 1, z);
+    }
+
+    private static void ensureDumpFloor(ServerLevel level, BlockPos floor) {
+        if (level.getBlockState(floor).isAir()) {
+            level.setBlock(floor, Blocks.END_STONE.defaultBlockState(), 3);
+        }
     }
 
     public static MatterClass classify(BlockState state) {

@@ -83,6 +83,7 @@ SPELL_SCHOOL = {
     "bone_volley": "necromancy", "necrotic_aura": "necromancy", "soul_anchor": "necromancy",
     "army_of_dead": "necromancy", "death_gate": "necromancy", "soul_reaper": "necromancy",
     "phylactery_surge": "necromancy", "lich_ascension": "necromancy",
+    "death_mark": "necromancy", "death_shadow": "necromancy",
     "blink": "spatial", "rift_yank": "spatial", "phase_veil": "spatial",
     "void_step": "spatial", "gravity_well": "spatial",
     "warp_bolt": "spatial", "spatial_ward": "spatial", "fold_repulse": "spatial",
@@ -828,23 +829,345 @@ def icon_spore(d, cx, cy, color):
 
 
 
-def icon_soul(d, cx, cy, color):
-    draw_disc(d, cx, cy - 4, 8, color)
-    d.polygon([(cx - 8, cy), (cx + 8, cy), (cx, cy + 14)], fill=color)
+# --- Necromancy family accents (hardcoded; ignore school green) ---
+# bone: ivory (230,220,190) + teal (80,200,160)
+# soul: cyan-green (120,255,200) + void (20,40,50)
+# wither: black/purple (40,20,50) + sickly (180,255,100)
+# grave: moss (90,110,80) + tomb gray (140,140,130)
+# shade: violet-black (60,40,80) + pale (200,190,220)
+# bind: iron (160,160,170) + soul green (80,220,150)
+
+def icon_death_sense(d, cx, cy, color):
+    soul = (120, 255, 200, 255)
+    void = (20, 40, 50, 255)
+    draw_disc(d, cx, cy, 10, void)
+    draw_disc(d, cx, cy, 10, None, outline=soul, width=2)
+    draw_disc(d, cx, cy, 4, soul)
+    draw_disc(d, cx + 2, cy - 2, 1, (255, 255, 255, 220))
 
 
-def icon_skull(d, cx, cy, color):
-    draw_disc(d, cx, cy - 2, 10, color)
-    d.rectangle((cx - 8, cy + 4, cx + 8, cy + 12), fill=color)
+def icon_bone_chill(d, cx, cy, color):
+    ivory = (230, 220, 190, 255)
+    teal = (80, 200, 160, 230)
+    d.rectangle((cx - 3, cy - 10, cx + 3, cy + 8), fill=ivory)
+    draw_disc(d, cx - 5, cy - 10, 4, ivory)
+    draw_disc(d, cx + 5, cy - 10, 4, ivory)
+    draw_disc(d, cx - 5, cy + 8, 4, ivory)
+    draw_disc(d, cx + 5, cy + 8, 4, ivory)
+    for ox, oy in ((-8, -4), (8, 2), (0, -14)):
+        draw_disc(d, cx + ox, cy + oy, 2, teal)
 
 
+def icon_necrotic_bolt(d, cx, cy, color):
+    ivory = (230, 220, 190, 255)
+    teal = (80, 200, 160, 255)
+    d.polygon([(cx - 2, cy - 14), (cx + 6, cy - 2), (cx + 1, cy), (cx + 7, cy + 14), (cx - 2, cy + 2), (cx + 2, cy)], fill=ivory)
+    draw_disc(d, cx, cy - 2, 2, teal)
+
+
+def icon_soul_drain(d, cx, cy, color):
+    soul = (120, 255, 200, 255)
+    void = (20, 40, 50, 255)
+    draw_disc(d, cx, cy - 4, 8, soul)
+    d.polygon([(cx - 8, cy), (cx + 8, cy), (cx, cy + 14)], fill=soul)
+    draw_disc(d, cx, cy - 2, 3, void)
+    d.line([(cx + 10, cy - 8), (cx + 16, cy - 14)], fill=soul, width=2)
+
+
+def icon_wither_touch(d, cx, cy, color):
+    dark = (40, 20, 50, 255)
+    sickly = (180, 255, 100, 255)
+    d.polygon([(cx - 10, cy + 8), (cx - 4, cy - 12), (cx + 2, cy - 2), (cx + 10, cy + 10)], fill=dark)
+    draw_disc(d, cx + 2, cy, 3, sickly)
+    draw_disc(d, cx - 4, cy + 4, 2, (120, 180, 60, 220))
+
+
+def icon_death_mark(d, cx, cy, color):
+    dark = (40, 20, 50, 255)
+    sickly = (180, 255, 100, 230)
+    d.ellipse((cx - 11, cy - 11, cx + 11, cy + 11), outline=dark, width=3)
+    d.line([(cx, cy - 9), (cx, cy + 9)], fill=sickly, width=2)
+    d.line([(cx - 9, cy), (cx + 9, cy)], fill=sickly, width=2)
+    draw_disc(d, cx + 8, cy - 8, 2, sickly)
+
+
+def icon_grave_whisper(d, cx, cy, color):
+    moss = (90, 110, 80, 255)
+    tomb = (140, 140, 130, 255)
+    d.rectangle((cx - 8, cy - 4, cx + 8, cy + 12), fill=tomb)
+    d.ellipse((cx - 8, cy - 12, cx + 8, cy), fill=tomb)
+    draw_disc(d, cx - 3, cy - 4, 2, moss)
+    draw_disc(d, cx + 4, cy + 2, 2, moss)
+    d.arc((cx - 14, cy - 10, cx + 6, cy + 6), 200, 40, fill=(180, 200, 160, 180), width=2)
+
+
+def icon_curse_of_frailty(d, cx, cy, color):
+    dark = (40, 20, 50, 255)
+    sickly = (180, 255, 100, 255)
+    d.line([(cx - 10, cy - 10), (cx + 10, cy + 10)], fill=dark, width=3)
+    d.line([(cx + 10, cy - 10), (cx - 10, cy + 10)], fill=dark, width=3)
+    draw_disc(d, cx, cy, 4, sickly)
+    draw_disc(d, cx, cy, 2, dark)
+
+
+def icon_siphon_pulse(d, cx, cy, color):
+    soul = (120, 255, 200, 255)
+    void = (20, 40, 50, 255)
+    for r in (6, 11, 15):
+        d.ellipse((cx - r, cy - r, cx + r, cy + r), outline=soul, width=2)
+    draw_disc(d, cx, cy, 4, void)
+    draw_disc(d, cx, cy, 2, soul)
+
+
+def icon_bone_armor(d, cx, cy, color):
+    ivory = (230, 220, 190, 255)
+    teal = (80, 200, 160, 220)
+    d.polygon([(cx, cy - 14), (cx + 11, cy - 4), (cx + 8, cy + 12), (cx - 8, cy + 12), (cx - 11, cy - 4)], fill=ivory)
+    d.line([(cx - 4, cy - 2), (cx - 4, cy + 8)], fill=teal, width=2)
+    d.line([(cx + 4, cy - 2), (cx + 4, cy + 8)], fill=teal, width=2)
+    d.line([(cx, cy - 8), (cx, cy + 6)], fill=teal, width=1)
+
+
+def icon_phantom_step(d, cx, cy, color):
+    shade = (60, 40, 80, 200)
+    pale = (200, 190, 220, 220)
+    d.ellipse((cx - 12, cy - 16, cx + 12, cy + 10), outline=pale, width=2)
+    d.polygon([(cx - 6, cy - 4), (cx + 8, cy), (cx - 4, cy + 10)], fill=shade)
+    draw_disc(d, cx + 6, cy - 8, 2, pale)
+
+
+def icon_grave_bind(d, cx, cy, color):
+    iron = (160, 160, 170, 255)
+    green = (80, 220, 150, 230)
+    moss = (90, 110, 80, 200)
+    for oy in (-8, 0, 8):
+        d.ellipse((cx - 6, cy + oy - 4, cx + 6, cy + oy + 4), outline=iron, width=2)
+    d.line([(cx, cy - 10), (cx, cy + 10)], fill=green, width=2)
+    draw_disc(d, cx + 8, cy - 8, 2, moss)
+
+
+def icon_life_tap(d, cx, cy, color):
+    soul = (120, 255, 200, 255)
+    void = (20, 40, 50, 255)
+    d.polygon([(cx, cy - 6), (cx + 10, cy), (cx, cy + 12), (cx - 10, cy)], fill=soul)
+    draw_disc(d, cx, cy, 3, void)
+    d.line([(cx - 12, cy - 10), (cx - 4, cy - 2)], fill=soul, width=2)
+    d.line([(cx + 12, cy - 10), (cx + 4, cy - 2)], fill=soul, width=2)
+
+
+def icon_haunting_visage(d, cx, cy, color):
+    shade = (60, 40, 80, 240)
+    pale = (200, 190, 220, 255)
+    draw_disc(d, cx, cy - 2, 11, shade)
+    draw_disc(d, cx - 4, cy - 4, 3, pale)
+    draw_disc(d, cx + 4, cy - 4, 3, pale)
+    draw_disc(d, cx - 4, cy - 4, 1, (20, 10, 30, 255))
+    draw_disc(d, cx + 4, cy - 4, 1, (20, 10, 30, 255))
+    d.arc((cx - 6, cy + 2, cx + 6, cy + 10), 20, 160, fill=pale, width=2)
+
+
+def icon_soul_shackle(d, cx, cy, color):
+    iron = (160, 160, 170, 255)
+    green = (80, 220, 150, 255)
+    draw_disc(d, cx - 6, cy, 6, None, outline=iron, width=2)
+    draw_disc(d, cx + 6, cy, 6, None, outline=iron, width=2)
+    draw_disc(d, cx, cy, 3, green)
+    d.line([(cx - 12, cy - 8), (cx + 12, cy + 8)], fill=green, width=1)
+
+
+def icon_bone_volley(d, cx, cy, color):
+    ivory = (230, 220, 190, 255)
+    teal = (80, 200, 160, 220)
+    for i, (ox, oy) in enumerate(((-6, 4), (0, 0), (6, -4))):
+        d.polygon(
+            [(cx + ox + 8, cy + oy), (cx + ox - 6, cy + oy - 4), (cx + ox - 6, cy + oy + 4)],
+            fill=ivory if i != 1 else teal,
+        )
+
+
+def icon_wither_wave(d, cx, cy, color):
+    dark = (40, 20, 50, 255)
+    sickly = (180, 255, 100, 230)
+    d.arc((cx - 16, cy - 8, cx, cy + 8), 300, 60, fill=dark, width=3)
+    d.arc((cx - 8, cy - 8, cx + 8, cy + 8), 300, 60, fill=sickly, width=2)
+    d.arc((cx, cy - 8, cx + 16, cy + 8), 300, 60, fill=dark, width=2)
+    draw_disc(d, cx + 4, cy - 2, 2, sickly)
+
+
+def icon_necrotic_aura(d, cx, cy, color):
+    ivory = (230, 220, 190, 200)
+    teal = (80, 200, 160, 230)
+    dark = (40, 20, 50, 180)
+    for r in (6, 11, 15):
+        d.ellipse((cx - r, cy - r, cx + r, cy + r), outline=teal if r != 11 else dark, width=2)
+    draw_disc(d, cx, cy, 4, ivory)
+
+
+def icon_dark_pact(d, cx, cy, color):
+    dark = (40, 20, 50, 255)
+    sickly = (180, 255, 100, 255)
+    soul = (120, 255, 200, 200)
+    d.line([(cx, cy - 14), (cx, cy + 14)], fill=dark, width=3)
+    d.line([(cx - 10, cy - 6), (cx + 10, cy - 6)], fill=dark, width=3)
+    draw_disc(d, cx - 8, cy + 6, 3, sickly)
+    draw_disc(d, cx + 8, cy + 6, 3, soul)
+
+
+def icon_grave_leech(d, cx, cy, color):
+    moss = (90, 110, 80, 255)
+    tomb = (140, 140, 130, 255)
+    d.arc((cx - 12, cy - 8, cx + 4, cy + 10), 200, 40, fill=tomb, width=4)
+    d.arc((cx - 2, cy - 6, cx + 12, cy + 8), 20, 200, fill=moss, width=3)
+    draw_disc(d, cx + 8, cy - 2, 3, (120, 255, 200, 220))
+
+
+def icon_corpse_burst(d, cx, cy, color):
+    moss = (90, 110, 80, 255)
+    tomb = (140, 140, 130, 255)
+    draw_disc(d, cx, cy, 6, tomb)
+    for ang in range(0, 360, 45):
+        rad = math.radians(ang)
+        x2 = cx + int(math.cos(rad) * 13)
+        y2 = cy + int(math.sin(rad) * 13)
+        d.line([(cx, cy), (x2, y2)], fill=moss, width=2)
+        draw_disc(d, x2, y2, 2, (180, 200, 140, 220))
+
+
+def icon_grave_field(d, cx, cy, color):
+    moss = (90, 110, 80, 200)
+    tomb = (140, 140, 130, 255)
+    for ox, oy, r in ((-6, -2, 7), (6, 2, 6), (0, -8, 5), (-2, 8, 4)):
+        draw_disc(d, cx + ox, cy + oy, r, moss)
+    d.rectangle((cx - 4, cy - 2, cx + 4, cy + 10), fill=tomb)
+    d.ellipse((cx - 4, cy - 8, cx + 4, cy), fill=tomb)
+
+
+def icon_soul_anchor(d, cx, cy, color):
+    iron = (160, 160, 170, 255)
+    green = (80, 220, 150, 255)
+    void = (20, 40, 50, 255)
+    d.ellipse((cx - 10, cy - 10, cx + 10, cy + 10), outline=iron, width=2)
+    d.line([(cx, cy - 12), (cx, cy + 14)], fill=green, width=2)
+    draw_disc(d, cx, cy, 4, void)
+    draw_disc(d, cx, cy, 2, green)
+
+
+def icon_lich_ward(d, cx, cy, color):
+    ivory = (230, 220, 190, 255)
+    teal = (80, 200, 160, 255)
+    soul = (120, 255, 200, 200)
+    d.polygon([(cx, cy - 14), (cx + 12, cy - 4), (cx + 8, cy + 12), (cx - 8, cy + 12), (cx - 12, cy - 4)], outline=ivory, width=2)
+    draw_disc(d, cx, cy - 2, 5, soul)
+    draw_disc(d, cx, cy - 2, 2, teal)
+
+
+def icon_death_gate(d, cx, cy, color):
+    shade = (60, 40, 80, 255)
+    pale = (200, 190, 220, 255)
+    draw_disc(d, cx, cy, 12, None, outline=pale, width=2)
+    draw_disc(d, cx, cy, 8, shade)
+    d.arc((cx - 6, cy - 10, cx + 6, cy + 10), 270, 90, fill=pale, width=2)
+    draw_disc(d, cx - 4, cy, 2, pale)
+    draw_disc(d, cx + 5, cy, 2, (120, 255, 200, 200))
+
+
+def icon_soul_reaper(d, cx, cy, color):
+    soul = (120, 255, 200, 255)
+    void = (20, 40, 50, 255)
+    d.line([(cx - 4, cy + 12), (cx + 2, cy - 14)], fill=void, width=3)
+    d.polygon([(cx + 2, cy - 14), (cx + 14, cy - 6), (cx + 4, cy - 4)], fill=soul)
+    d.polygon([(cx + 2, cy - 14), (cx + 12, cy - 14), (cx + 4, cy - 8)], fill=void)
+    draw_disc(d, cx - 2, cy + 4, 2, soul)
+
+
+def icon_death_coil(d, cx, cy, color):
+    shade = (60, 40, 80, 255)
+    pale = (200, 190, 220, 230)
+    sickly = (180, 255, 100, 200)
+    d.arc((cx - 12, cy - 12, cx + 12, cy + 12), 30, 300, fill=shade, width=3)
+    d.arc((cx - 8, cy - 8, cx + 8, cy + 8), 60, 280, fill=pale, width=2)
+    draw_disc(d, cx + 6, cy - 6, 3, sickly)
+
+
+def icon_phylactery_surge(d, cx, cy, color):
+    soul = (120, 255, 200, 255)
+    void = (20, 40, 50, 255)
+    ivory = (230, 220, 190, 220)
+    d.rectangle((cx - 7, cy - 4, cx + 7, cy + 10), outline=ivory, width=2)
+    draw_disc(d, cx, cy, 5, soul)
+    draw_disc(d, cx, cy, 2, void)
+    for ox, oy in ((-10, -8), (10, -6), (0, -14)):
+        draw_disc(d, cx + ox, cy + oy, 2, soul)
+
+
+def icon_soul_cataclysm(d, cx, cy, color):
+    soul = (120, 255, 200, 255)
+    void = (20, 40, 50, 255)
+    draw_disc(d, cx, cy, 5, void)
+    for ang in range(0, 360, 40):
+        rad = math.radians(ang)
+        x2 = cx + int(math.cos(rad) * 14)
+        y2 = cy + int(math.sin(rad) * 14)
+        d.line([(cx, cy), (x2, y2)], fill=soul, width=2)
+        draw_disc(d, x2, y2, 2, soul)
+    draw_disc(d, cx, cy, 3, soul)
+
+
+def icon_death_apotheosis(d, cx, cy, color):
+    soul = (120, 255, 200, 255)
+    void = (20, 40, 50, 255)
+    pale = (200, 190, 220, 200)
+    draw_disc(d, cx, cy - 2, 8, soul)
+    d.polygon([(cx - 8, cy), (cx + 8, cy), (cx, cy + 14)], fill=soul)
+    draw_disc(d, cx, cy - 2, 3, void)
+    d.ellipse((cx - 14, cy - 14, cx + 14, cy + 14), outline=pale, width=2)
+    draw_disc(d, cx, cy - 14, 2, soul)
+
+
+def icon_death_shadow(d, cx, cy, color):
+    shade = (60, 40, 80, 240)
+    pale = (200, 190, 220, 200)
+    d.polygon([(cx, cy - 14), (cx + 12, cy + 12), (cx + 4, cy + 10), (cx - 4, cy + 10), (cx - 12, cy + 12)], fill=shade)
+    d.polygon([(cx, cy - 8), (cx + 6, cy + 4), (cx - 6, cy + 4)], fill=pale)
+    draw_disc(d, cx - 3, cy - 2, 1, (255, 255, 255, 220))
+    draw_disc(d, cx + 3, cy - 2, 1, (255, 255, 255, 220))
+
+
+def icon_lich_ascension(d, cx, cy, color):
+    ivory = (230, 220, 190, 255)
+    teal = (80, 200, 160, 255)
+    soul = (120, 255, 200, 255)
+    draw_disc(d, cx, cy - 2, 10, ivory)
+    d.rectangle((cx - 8, cy + 4, cx + 8, cy + 12), fill=ivory)
+    draw_disc(d, cx - 4, cy - 4, 2, (20, 40, 50, 255))
+    draw_disc(d, cx + 4, cy - 4, 2, (20, 40, 50, 255))
+    d.line([(cx - 3, cy + 2), (cx + 3, cy + 2)], fill=(20, 40, 50, 255), width=1)
+    for ox, oy in ((-12, -10), (12, -8), (0, -16)):
+        draw_disc(d, cx + ox, cy + oy, 2, soul if ox == 0 else teal)
+
+
+# Legacy / removed-summon fallbacks (keep DRAWERS resolvable)
 def icon_shade(d, cx, cy, color):
-    d.polygon([(cx, cy - 14), (cx + 12, cy + 12), (cx - 12, cy + 12)], fill=with_alpha(color, 200))
+    icon_death_shadow(d, cx, cy, color)
 
 
 def icon_shades(d, cx, cy, color):
+    pale = (200, 190, 220, 220)
+    shade = (60, 40, 80, 220)
     for ox in (-8, 0, 8):
-        d.polygon([(cx + ox, cy - 10), (cx + ox + 6, cy + 8), (cx + ox - 6, cy + 8)], fill=color)
+        d.polygon([(cx + ox, cy - 10), (cx + ox + 6, cy + 8), (cx + ox - 6, cy + 8)], fill=shade if ox else pale)
+
+
+def icon_skull(d, cx, cy, color):
+    ivory = (230, 220, 190, 255)
+    draw_disc(d, cx, cy - 2, 10, ivory)
+    d.rectangle((cx - 8, cy + 4, cx + 8, cy + 12), fill=ivory)
+    draw_disc(d, cx - 4, cy - 4, 2, (20, 40, 50, 255))
+    draw_disc(d, cx + 4, cy - 4, 2, (20, 40, 50, 255))
+
+
+def icon_soul(d, cx, cy, color):
+    icon_soul_drain(d, cx, cy, color)
 
 
 def icon_blink(d, cx, cy, color):
@@ -1156,42 +1479,44 @@ DRAWERS = {
     "biological_singularity": icon_dna,
     "life_creation": icon_cells,
     "biological_immortality": icon_cells,
-    "soul_drain": icon_soul,
-    "wither_touch": icon_skull,
+    "soul_drain": icon_soul_drain,
+    "wither_touch": icon_wither_touch,
     "shade_summon": icon_shade,
-    "grave_leech": icon_soul,
+    "grave_leech": icon_grave_leech,
     "shade_swarm": icon_shades,
-    "bone_chill": icon_skull,
-    "death_sense": icon_eye,
-    "grave_whisper": icon_skull,
-    "siphon_pulse": icon_pulse,
-    "bone_armor": icon_shield,
-    "life_tap": icon_soul,
-    "wither_wave": icon_wave,
-    "dark_pact": icon_mark,
-    "soul_shackle": icon_chain,
-    "phantom_step": icon_veil,
-    "grave_field": icon_pulse,
+    "bone_chill": icon_bone_chill,
+    "death_sense": icon_death_sense,
+    "grave_whisper": icon_grave_whisper,
+    "siphon_pulse": icon_siphon_pulse,
+    "bone_armor": icon_bone_armor,
+    "life_tap": icon_life_tap,
+    "wither_wave": icon_wither_wave,
+    "dark_pact": icon_dark_pact,
+    "soul_shackle": icon_soul_shackle,
+    "phantom_step": icon_phantom_step,
+    "grave_field": icon_grave_field,
     "raise_skeleton": icon_skull,
     "shade_brood": icon_shades,
-    "lich_ward": icon_shield,
-    "death_coil": icon_skull,
-    "soul_cataclysm": icon_meteorological_cataclysm,
-    "death_apotheosis": icon_soul,
-    "necrotic_bolt": icon_skull,
-    "grave_bind": icon_chain,
-    "curse_of_frailty": icon_mark,
-    "haunting_visage": icon_eye,
-    "corpse_burst": icon_pulse,
+    "lich_ward": icon_lich_ward,
+    "death_coil": icon_death_coil,
+    "soul_cataclysm": icon_soul_cataclysm,
+    "death_apotheosis": icon_death_apotheosis,
+    "necrotic_bolt": icon_necrotic_bolt,
+    "grave_bind": icon_grave_bind,
+    "curse_of_frailty": icon_curse_of_frailty,
+    "haunting_visage": icon_haunting_visage,
+    "corpse_burst": icon_corpse_burst,
     "raise_zombie": icon_skull,
-    "bone_volley": icon_arrow,
-    "necrotic_aura": icon_wave,
-    "soul_anchor": icon_chain,
+    "bone_volley": icon_bone_volley,
+    "necrotic_aura": icon_necrotic_aura,
+    "soul_anchor": icon_soul_anchor,
     "army_of_dead": icon_shades,
-    "death_gate": icon_blink,
-    "soul_reaper": icon_soul,
-    "phylactery_surge": icon_heart,
-    "lich_ascension": icon_soul,
+    "death_gate": icon_death_gate,
+    "soul_reaper": icon_soul_reaper,
+    "phylactery_surge": icon_phylactery_surge,
+    "lich_ascension": icon_lich_ascension,
+    "death_mark": icon_death_mark,
+    "death_shadow": icon_death_shadow,
     "blink": icon_blink,
     "rift_yank": icon_rift,
     "phase_veil": icon_veil,
@@ -1655,6 +1980,91 @@ def particle_necro_fog() -> Image.Image:
     return img
 
 
+def particle_necro_bone(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    ivory = (230, 220, 190, 240) if variant % 2 == 0 else (210, 200, 170, 230)
+    teal = (80, 200, 160, 200)
+    if variant % 2 == 0:
+        d.polygon([(5, 4), (11, 3), (12, 8), (8, 12), (4, 9)], fill=ivory)
+        draw_disc(d, 7, 7, 1, teal)
+    else:
+        d.polygon([(4, 6), (10, 4), (13, 9), (9, 13), (3, 10)], fill=ivory)
+        d.line([(6, 6), (10, 10)], fill=teal, width=1)
+    return img
+
+
+def particle_necro_soul(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx = PARTICLE // 2
+    cy = PARTICLE // 2 - (1 if variant % 2 == 0 else 0)
+    soul = (120, 255, 200, 230) if variant % 2 == 0 else (100, 230, 180, 220)
+    void = (20, 40, 50, 200)
+    draw_disc(d, cx, cy - 1, 4, soul)
+    d.polygon([(cx - 3, cy + 1), (cx + 3, cy + 1), (cx, cy + 6)], fill=soul)
+    draw_disc(d, cx, cy - 1, 1, void)
+    return img
+
+
+def particle_necro_wither(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    dark = (40, 20, 50, 230)
+    sickly = (180, 255, 100, 220)
+    if variant % 2 == 0:
+        d.point((5, 5), fill=dark)
+        d.point((8, 4), fill=sickly)
+        d.point((7, 8), fill=dark)
+        d.point((10, 9), fill=sickly)
+        d.point((4, 10), fill=(60, 40, 70, 200))
+    else:
+        d.line([(5, 6), (11, 10)], fill=dark, width=1)
+        draw_disc(d, 8, 7, 1, sickly)
+        d.point((6, 10), fill=sickly)
+    return img
+
+
+def particle_necro_grave(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    moss = (90, 110, 80, 240) if variant % 2 == 0 else (100, 120, 70, 230)
+    tomb = (140, 140, 130, 220)
+    d.polygon([(4, 6), (9, 4), (12, 9), (8, 13), (3, 10)], fill=moss)
+    draw_disc(d, 7, 8, 1, tomb)
+    if variant % 2 == 1:
+        draw_disc(d, 10, 6, 1, (110, 130, 90, 200))
+    return img
+
+
+def particle_necro_shade(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = PARTICLE // 2 + variant - 1, PARTICLE // 2 + 1
+    shade = (60, 40, 80, 200) if variant % 2 == 0 else (50, 30, 70, 180)
+    pale = (200, 190, 220, 160)
+    d.polygon(
+        [(cx, cy - 5), (cx + 5, cy + 4), (cx + 2, cy + 6), (cx - 2, cy + 6), (cx - 5, cy + 4)],
+        fill=shade,
+    )
+    d.polygon([(cx, cy - 2), (cx + 2, cy + 2), (cx - 2, cy + 2)], fill=pale)
+    return img
+
+
+def particle_necro_bind(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    iron = (160, 160, 170, 240)
+    green = (80, 220, 150, 200)
+    if variant % 2 == 0:
+        d.ellipse((3, 5, 10, 12), outline=iron, width=2)
+        draw_disc(d, 6, 8, 1, green)
+    else:
+        d.ellipse((6, 4, 13, 11), outline=iron, width=2)
+        d.line([(8, 5), (11, 10)], fill=green, width=1)
+    return img
+
+
 def particle_spatial_rift(variant: int = 0) -> Image.Image:
     img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
@@ -2056,6 +2466,48 @@ def generate_school_particles():
         shadow_paths.append(f"effecoria:{name}")
     write_particle_json("necro_shadow", shadow_paths)
     save_particle("necro_fog", particle_necro_fog())
+
+    bone_paths = []
+    for i in range(2):
+        name = f"necro_bone_{i}"
+        save_particle_png(name, particle_necro_bone(i))
+        bone_paths.append(f"effecoria:{name}")
+    write_particle_json("necro_bone", bone_paths)
+
+    soul_paths = []
+    for i in range(2):
+        name = f"necro_soul_{i}"
+        save_particle_png(name, particle_necro_soul(i))
+        soul_paths.append(f"effecoria:{name}")
+    write_particle_json("necro_soul", soul_paths)
+
+    wither_paths = []
+    for i in range(2):
+        name = f"necro_wither_{i}"
+        save_particle_png(name, particle_necro_wither(i))
+        wither_paths.append(f"effecoria:{name}")
+    write_particle_json("necro_wither", wither_paths)
+
+    grave_paths = []
+    for i in range(2):
+        name = f"necro_grave_{i}"
+        save_particle_png(name, particle_necro_grave(i))
+        grave_paths.append(f"effecoria:{name}")
+    write_particle_json("necro_grave", grave_paths)
+
+    shade_paths = []
+    for i in range(2):
+        name = f"necro_shade_{i}"
+        save_particle_png(name, particle_necro_shade(i))
+        shade_paths.append(f"effecoria:{name}")
+    write_particle_json("necro_shade", shade_paths)
+
+    necro_bind_paths = []
+    for i in range(2):
+        name = f"necro_bind_{i}"
+        save_particle_png(name, particle_necro_bind(i))
+        necro_bind_paths.append(f"effecoria:{name}")
+    write_particle_json("necro_bind", necro_bind_paths)
 
     rift_paths = []
     for i in range(3):
