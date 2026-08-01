@@ -224,6 +224,66 @@ public final class ModNetworking {
         }
     }
 
+    /** Server → nearby clients: world-anchored dimensional cut (line or around). */
+    public record SpatialCutFxPayload(
+            double x0,
+            double y0,
+            double z0,
+            double x1,
+            double y1,
+            double z1,
+            float intensity,
+            int slashCount,
+            int mode)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<SpatialCutFxPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "spatial_cut_fx"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, SpatialCutFxPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, p) -> {
+                            buf.writeDouble(p.x0());
+                            buf.writeDouble(p.y0());
+                            buf.writeDouble(p.z0());
+                            buf.writeDouble(p.x1());
+                            buf.writeDouble(p.y1());
+                            buf.writeDouble(p.z1());
+                            buf.writeFloat(p.intensity());
+                            buf.writeVarInt(p.slashCount());
+                            buf.writeVarInt(p.mode());
+                        },
+                        buf -> new SpatialCutFxPayload(
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readFloat(),
+                                buf.readVarInt(),
+                                buf.readVarInt()));
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(SpatialCutFxPayload payload, IPayloadContext context) {
+            context.enqueueWork(
+                    () -> com.effecoria.client.SpatialCutClient.trigger(
+                            payload.x0(),
+                            payload.y0(),
+                            payload.z0(),
+                            payload.x1(),
+                            payload.y1(),
+                            payload.z1(),
+                            payload.intensity(),
+                            payload.slashCount(),
+                            payload.mode()));
+        }
+    }
+
     /** Client reports a successful timing hit; server validates fatigue and grants rewards. */
     public record BreathTrainHitPayload() implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<BreathTrainHitPayload> TYPE =

@@ -33,6 +33,7 @@ public final class SpatialEffects {
         float damage = DiceDamage.fromParams(effect.params(), power, 5f);
         target.hurt(SpellCombat.magic(caster), damage);
         target.hurtMarked = true;
+        SpatialVfx.playLineFromCaster(caster, target.position().add(0, 1.0, 0), power, 2);
         finishHit(level, target.position());
     }
 
@@ -56,6 +57,7 @@ public final class SpatialEffects {
         target.hurtMarked = true;
         float damage = DiceDamage.fromParams(effect.params(), power, 2f);
         target.hurt(SpellCombat.magic(caster), damage);
+        SpatialVfx.playLineFromCaster(caster, target.position().add(0, 1.0, 0), power, 2);
         finishHit(level, target.position());
     }
 
@@ -69,6 +71,7 @@ public final class SpatialEffects {
         target.hurt(SpellCombat.magic(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
         target.hurtMarked = true;
+        SpatialVfx.playAround(caster, target.position().add(0, 1.0, 0), power, 4);
         finishHit(level, target.position());
     }
 
@@ -132,6 +135,7 @@ public final class SpatialEffects {
         target.hurt(SpellCombat.magic(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, 60, 0));
         target.hurtMarked = true;
+        SpatialVfx.playLineFromCaster(caster, target.position().add(0, 1.0, 0), power, 3);
         finishHit(level, target.position());
         level.playSound(null, target.blockPosition(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.6f, 1.4f);
     }
@@ -170,6 +174,8 @@ public final class SpatialEffects {
             entity.hurtMarked = true;
             spawnSpatialParticles(level, entity.position().add(0, 1, 0));
         }
+        Vec3 tip = caster.position().add(0, 1.0, 0).add(caster.getLookAngle().normalize().scale(Math.max(3.0, radius * 0.8)));
+        SpatialVfx.playLineFromCaster(caster, tip, power, 3);
         spawnSpatialParticles(level, caster.position().add(0, 1, 0));
     }
 
@@ -190,6 +196,7 @@ public final class SpatialEffects {
         float damage = DiceDamage.fromParams(effect.params(), power, 7f);
         Vec3 center = target.position();
         hurtRadius(level, center, radius, damage, caster);
+        SpatialVfx.playAround(caster, center.add(0, 1.0, 0), power, 5);
         spawnSpatialParticles(level, center.add(0, 1, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7f, 0.5f);
     }

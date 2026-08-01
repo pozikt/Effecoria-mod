@@ -10,6 +10,7 @@ import com.effecoria.effect.corruption.CorruptionEffects;
 import com.effecoria.effect.mental.MentalEffects;
 import com.effecoria.effect.necromancy.NecromancyEffects;
 import com.effecoria.effect.spatial.SpatialEffects;
+import com.effecoria.effect.spatial.SpatialVfx;
 import com.effecoria.effect.organic.OrganicEffects;
 import com.effecoria.core.magic.SpellDefinition;
 import com.effecoria.core.magic.SpellEffectEntry;
@@ -608,6 +609,13 @@ public final class SpellEffectExecutor {
 
         Vec3 dest = caster.position().add(caster.getLookAngle().normalize().scale(1.2));
         spawnSpatialParticles(level, target.position().add(0, 1, 0));
+        SpatialVfx.playCut(
+                caster,
+                target.position().add(0, 1, 0),
+                dest.add(0, 1, 0),
+                power / 70f,
+                3,
+                SpatialVfx.CutMode.LINE);
         target.teleportTo(dest.x, dest.y, dest.z);
         target.hurt(SpellCombat.magic(caster), scaledDamage);
         target.hurtMarked = true;

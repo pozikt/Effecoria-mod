@@ -120,6 +120,10 @@ public class EffecoriaMod {
                 ModNetworking.SingularityFxPayload.TYPE,
                 ModNetworking.SingularityFxPayload.STREAM_CODEC,
                 ModNetworking.SingularityFxPayload::handle);
+        registrar.playToClient(
+                ModNetworking.SpatialCutFxPayload.TYPE,
+                ModNetworking.SpatialCutFxPayload.STREAM_CODEC,
+                ModNetworking.SpatialCutFxPayload::handle);
         registrar.playToServer(
                 ModNetworking.BreathTrainHitPayload.TYPE,
                 ModNetworking.BreathTrainHitPayload.STREAM_CODEC,
