@@ -20,6 +20,9 @@ public final class SubspaceVoyageData {
     private boolean returnOriginOnRespawn;
     @Nullable
     private UUID sessionId;
+    /** Spatial mage who opened the entry gate; passengers may still travel the same session. */
+    @Nullable
+    private UUID sessionOwner;
     @Nullable
     private ResourceKey<Level> originDim;
     @Nullable
@@ -55,6 +58,11 @@ public final class SubspaceVoyageData {
     }
 
     @Nullable
+    public UUID sessionOwner() {
+        return sessionOwner;
+    }
+
+    @Nullable
     public ResourceKey<Level> originDim() {
         return originDim;
     }
@@ -86,22 +94,60 @@ public final class SubspaceVoyageData {
 
     public void beginPending(
             UUID sessionId,
+            UUID sessionOwner,
             ResourceKey<Level> originDim,
             BlockPos originPos,
-            BlockPos entryPortalPos) {
+            BlockPos entryPortalPos,
+            BlockPos entrySubspacePos) {
         clear();
         this.sessionId = sessionId;
+        this.sessionOwner = sessionOwner;
         this.originDim = originDim;
         this.originPos = originPos.immutable();
         this.entryPortalPos = entryPortalPos.immutable();
+        this.entrySubspacePos = entrySubspacePos.immutable();
         this.pendingEntry = true;
         this.active = false;
+    }
+
+    /** Join an existing open gate (any school / no school). */
+    public void joinSession(
+            UUID sessionId,
+            @Nullable UUID sessionOwner,
+            ResourceKey<Level> originDim,
+            BlockPos originPos,
+            BlockPos entryPortalPos,
+            BlockPos entrySubspacePos) {
+        clear();
+        this.sessionId = sessionId;
+        this.sessionOwner = sessionOwner;
+        this.originDim = originDim;
+        this.originPos = originPos.immutable();
+        this.entryPortalPos = entryPortalPos.immutable();
+        this.entrySubspacePos = entrySubspacePos.immutable();
+        this.pendingEntry = false;
+        this.active = true;
     }
 
     public void markEntered(BlockPos entrySubspacePos) {
         this.entrySubspacePos = entrySubspacePos.immutable();
         this.pendingEntry = false;
         this.active = true;
+    }
+
+    /** Leave hyperspace without tearing down world portals. */
+    public void leaveVoyageKeepPortals() {
+        active = false;
+        pendingEntry = false;
+        sessionId = null;
+        sessionOwner = null;
+        originDim = null;
+        originPos = null;
+        entryPortalPos = null;
+        entrySubspacePos = null;
+        exitPortalSubspacePos = null;
+        exitPortalOverworldPos = null;
+        returnOriginOnRespawn = false;
     }
 
     public void setExitPortals(BlockPos subspaceExit, BlockPos overworldExit) {
@@ -129,6 +175,7 @@ public final class SubspaceVoyageData {
         pendingEntry = false;
         returnOriginOnRespawn = false;
         sessionId = null;
+        sessionOwner = null;
         originDim = null;
         originPos = null;
         entryPortalPos = null;
@@ -144,6 +191,9 @@ public final class SubspaceVoyageData {
         returnOriginOnRespawn = tag.getBoolean("ReturnOriginOnRespawn");
         if (tag.hasUUID("SessionId")) {
             sessionId = tag.getUUID("SessionId");
+        }
+        if (tag.hasUUID("SessionOwner")) {
+            sessionOwner = tag.getUUID("SessionOwner");
         }
         if (tag.contains("OriginDim", Tag.TAG_STRING)) {
             ResourceLocation id = ResourceLocation.tryParse(tag.getString("OriginDim"));
@@ -165,6 +215,9 @@ public final class SubspaceVoyageData {
         tag.putBoolean("ReturnOriginOnRespawn", returnOriginOnRespawn);
         if (sessionId != null) {
             tag.putUUID("SessionId", sessionId);
+        }
+        if (sessionOwner != null) {
+            tag.putUUID("SessionOwner", sessionOwner);
         }
         if (originDim != null) {
             tag.putString("OriginDim", originDim.location().toString());

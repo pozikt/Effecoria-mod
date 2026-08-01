@@ -2,6 +2,14 @@
 
 Living doc for `effecoria:subspace` after the voyage MVP (`subspace_voyage`, 1∶100 scale).
 
+## Portal rules (shipped)
+
+- **Any player** may walk through an open entry/exit portal (not only Spatial mages).
+- Opening a gate still requires the Spatial spell `subspace_voyage`.
+- Entry portals stay open while passengers travel; **when the Spatial host walks through an exit, the whole gate network closes** and remaining travelers are returned to the origin.
+- Multiple Spatial mages may run **independent** sessions at once; a passenger Spatial mage can place an *additional* exit without deleting the host’s (until the host exits).
+- Party members of one session share the same hyperspace rendezvous anchor.
+
 ## Must-add later: cosmological anomalies & hazards
 
 Hyperspace is **not** an empty corridor. Add navigation and survival threats:

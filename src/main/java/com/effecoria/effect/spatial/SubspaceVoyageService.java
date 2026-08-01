@@ -7,11 +7,13 @@ import com.effecoria.world.ModDimensions;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.portal.DimensionTransition;
@@ -23,6 +25,9 @@ import javax.annotation.Nullable;
 
 /**
  * Subspace voyage — walk a foggy flat world where 1 block ≈ 100 overworld blocks.
+ *
+ * <p>Entry/exit portals stay open until replaced by their creating Spatial mage (exit move)
+ * or cleaned up on death of the session owner. Any player may walk through an open portal.
  */
 public final class SubspaceVoyageService {
     public static final int SCALE = 100;
@@ -49,9 +54,15 @@ public final class SubspaceVoyageService {
 
     private static void openEntry(ServerPlayer caster) {
         SubspaceVoyageData data = get(caster);
+        // Stale voyage flags (e.g. after crash) must not block a new independent gate.
         if (data.active() || data.pendingEntry()) {
-            caster.displayClientMessage(Component.translatable("message.effecoria.subspace.already_active"), true);
-            return;
+            if (!hasLivingEntryPortal(caster.server, data)) {
+                data.clear();
+                set(caster, data);
+            } else {
+                caster.displayClientMessage(Component.translatable("message.effecoria.subspace.already_active"), true);
+                return;
+            }
         }
         if (ModDimensions.subspace(caster.server) == null) {
             caster.displayClientMessage(Component.translatable("message.effecoria.subspace.unavailable"), true);
@@ -65,9 +76,22 @@ public final class SubspaceVoyageService {
         }
 
         UUID session = UUID.randomUUID();
-        configurePortal(caster.serverLevel(), portalPos, caster.getUUID(), SubspacePortalBlockEntity.Role.ENTRY, session);
+        BlockPos subspaceEntry = subspaceAnchor(session);
+        ResourceKey<Level> originDim = caster.level().dimension();
+        BlockPos originPos = caster.blockPosition().immutable();
 
-        data.beginPending(session, caster.level().dimension(), caster.blockPosition(), portalPos);
+        configurePortal(
+                caster.serverLevel(),
+                portalPos,
+                caster.getUUID(),
+                SubspacePortalBlockEntity.Role.ENTRY,
+                session,
+                originDim,
+                originPos,
+                subspaceEntry,
+                null);
+
+        data.beginPending(session, caster.getUUID(), originDim, originPos, portalPos, subspaceEntry);
         set(caster, data);
 
         fx(caster.serverLevel(), Vec3.atCenterOf(portalPos));
@@ -87,11 +111,16 @@ public final class SubspaceVoyageService {
             return;
         }
 
-        if (data.exitPortalSubspacePos() != null) {
-            removePortal(caster.serverLevel(), data.exitPortalSubspacePos());
-        }
-        if (data.exitPortalOverworldPos() != null) {
-            removePortal(originLevel, data.exitPortalOverworldPos());
+        // Host may relocate their exit; other Spatial mages on the same trip place an extra exit
+        // without deleting the host's gate (async).
+        boolean host = data.sessionOwner() == null || caster.getUUID().equals(data.sessionOwner());
+        if (host) {
+            if (data.exitPortalSubspacePos() != null) {
+                removePortal(caster.serverLevel(), data.exitPortalSubspacePos());
+            }
+            if (data.exitPortalOverworldPos() != null) {
+                removePortal(originLevel, data.exitPortalOverworldPos());
+            }
         }
 
         BlockPos subspaceExit = placePortalAt(caster.serverLevel(), caster.blockPosition());
@@ -103,7 +132,6 @@ public final class SubspaceVoyageService {
         BlockPos mapped = mapToOrigin(data, caster.blockPosition());
         BlockPos overworldExit = findSafeLanding(originLevel, mapped);
         placePlatformIfNeeded(originLevel, overworldExit);
-        // Clear air at landing then place exit portal block there.
         originLevel.setBlock(overworldExit, ModBlocks.SUBSPACE_PORTAL.get().defaultBlockState(), 3);
 
         configurePortal(
@@ -111,16 +139,28 @@ public final class SubspaceVoyageService {
                 subspaceExit,
                 caster.getUUID(),
                 SubspacePortalBlockEntity.Role.EXIT,
-                data.sessionId());
+                data.sessionId(),
+                data.originDim(),
+                data.originPos(),
+                data.entrySubspacePos(),
+                overworldExit);
         configurePortal(
                 originLevel,
                 overworldExit,
                 caster.getUUID(),
                 SubspacePortalBlockEntity.Role.EXIT,
-                data.sessionId());
+                data.sessionId(),
+                data.originDim(),
+                data.originPos(),
+                data.entrySubspacePos(),
+                overworldExit);
 
         data.setExitPortals(subspaceExit, overworldExit);
         set(caster, data);
+
+        if (host) {
+            syncSessionExitForNearbyPlayers(caster, data);
+        }
 
         fx(caster.serverLevel(), Vec3.atCenterOf(subspaceExit));
         fx(originLevel, Vec3.atCenterOf(overworldExit));
@@ -129,60 +169,142 @@ public final class SubspaceVoyageService {
     }
 
     public static void onPortalTouch(ServerPlayer player, SubspacePortalBlockEntity portal) {
-        SubspaceVoyageData data = get(player);
-        if (data.sessionId() == null || !data.sessionId().equals(portal.sessionId())) {
+        if (portal.sessionId() == null) {
             return;
         }
 
         if (portal.role() == SubspacePortalBlockEntity.Role.ENTRY && !ModDimensions.isSubspace(player.level())) {
-            enterSubspace(player, data);
+            enterViaPortal(player, portal);
             return;
         }
 
         if (portal.role() == SubspacePortalBlockEntity.Role.EXIT && ModDimensions.isSubspace(player.level())) {
-            exitSubspace(player, data);
+            exitViaPortal(player, portal);
         }
     }
 
-    private static void enterSubspace(ServerPlayer player, SubspaceVoyageData data) {
+    private static void enterViaPortal(ServerPlayer player, SubspacePortalBlockEntity portal) {
         ServerLevel subspace = ModDimensions.subspace(player.server);
-        if (subspace == null || data.sessionId() == null) {
+        if (subspace == null
+                || portal.sessionId() == null
+                || portal.originDim() == null
+                || portal.originPos() == null
+                || portal.entrySubspacePos() == null) {
             return;
         }
 
-        BlockPos spawn = subspaceSpawn(player.getUUID());
-        ensureFloor(subspace, spawn);
-        data.markEntered(spawn);
+        SubspaceVoyageData data = get(player);
+        // Already inside this voyage — ignore re-entry spam.
+        if (data.active()
+                && portal.sessionId().equals(data.sessionId())
+                && ModDimensions.isSubspace(player.level())) {
+            return;
+        }
+
+        data.joinSession(
+                portal.sessionId(),
+                portal.owner(),
+                portal.originDim(),
+                portal.originPos(),
+                portal.getBlockPos(),
+                portal.entrySubspacePos());
         set(player, data);
 
+        BlockPos spawn = portal.entrySubspacePos();
+        ensureFloor(subspace, spawn);
         teleport(player, subspace, spawn);
         fx(subspace, Vec3.atCenterOf(spawn));
         player.displayClientMessage(Component.translatable("message.effecoria.subspace.entered"), true);
     }
 
-    private static void exitSubspace(ServerPlayer player, SubspaceVoyageData data) {
-        if (data.exitPortalOverworldPos() == null || data.originDim() == null) {
+    private static void exitViaPortal(ServerPlayer player, SubspacePortalBlockEntity portal) {
+        BlockPos landing = portal.exitOverworldPos();
+        ResourceKey<Level> destDim = portal.originDim();
+        if (landing == null || destDim == null) {
+            SubspaceVoyageData data = get(player);
+            landing = data.exitPortalOverworldPos();
+            destDim = data.originDim();
+        }
+        if (landing == null || destDim == null) {
             player.displayClientMessage(Component.translatable("message.effecoria.subspace.no_exit"), true);
             return;
         }
-        ServerLevel originLevel = resolveOrigin(player.server, data);
+
+        ServerLevel originLevel = player.server.getLevel(destDim);
         if (originLevel == null) {
             return;
         }
 
-        BlockPos landing = data.exitPortalOverworldPos().immutable();
-        collapsePortals(player.server, data);
-        data.clear();
+        BlockPos stand = landing.immutable();
+        SubspaceVoyageData data = get(player);
+        UUID session = portal.sessionId() != null ? portal.sessionId() : data.sessionId();
+        boolean ownerLeaving = (portal.owner() != null && portal.owner().equals(player.getUUID()))
+                || (data.sessionOwner() != null && data.sessionOwner().equals(player.getUUID()));
+
+        if (ownerLeaving) {
+            collapseSessionGates(player.server, session, data);
+            ejectSessionPassengers(player.server, session, player);
+        }
+
+        data.leaveVoyageKeepPortals();
         set(player, data);
 
-        // Landing was a portal block — restore air and stand there.
-        if (originLevel.getBlockState(landing).is(ModBlocks.SUBSPACE_PORTAL.get())) {
-            originLevel.setBlock(landing, Blocks.AIR.defaultBlockState(), 3);
+        placePlatformIfNeeded(originLevel, stand);
+        if (originLevel.getBlockState(stand).is(ModBlocks.SUBSPACE_PORTAL.get())) {
+            originLevel.setBlock(stand, Blocks.AIR.defaultBlockState(), 3);
         }
-        placePlatformIfNeeded(originLevel, landing);
-        teleport(player, originLevel, landing);
-        fx(originLevel, Vec3.atCenterOf(landing));
-        player.displayClientMessage(Component.translatable("message.effecoria.subspace.exited"), true);
+        teleport(player, originLevel, stand);
+        fx(originLevel, Vec3.atCenterOf(stand));
+        player.displayClientMessage(
+                Component.translatable(
+                        ownerLeaving
+                                ? "message.effecoria.subspace.exited_host"
+                                : "message.effecoria.subspace.exited"),
+                true);
+    }
+
+    /** Remove entry + all exit portals for this voyage session. */
+    private static void collapseSessionGates(
+            MinecraftServer server, @Nullable UUID session, SubspaceVoyageData ownerData) {
+        collapsePortals(server, ownerData);
+        if (session == null) {
+            return;
+        }
+        for (ServerPlayer other : server.getPlayerList().getPlayers()) {
+            SubspaceVoyageData otherData = get(other);
+            if (session.equals(otherData.sessionId())) {
+                collapsePortals(server, otherData);
+            }
+        }
+    }
+
+    /** When the host closes the gates, pull remaining travelers back to the origin point. */
+    private static void ejectSessionPassengers(MinecraftServer server, @Nullable UUID session, ServerPlayer owner) {
+        if (session == null) {
+            return;
+        }
+        for (ServerPlayer other : server.getPlayerList().getPlayers()) {
+            if (other == owner) {
+                continue;
+            }
+            SubspaceVoyageData otherData = get(other);
+            if (!session.equals(otherData.sessionId())) {
+                continue;
+            }
+            ResourceKey<Level> originDim = otherData.originDim();
+            BlockPos originPos = otherData.originPos();
+            otherData.leaveVoyageKeepPortals();
+            set(other, otherData);
+            if (ModDimensions.isSubspace(other.level()) && originDim != null && originPos != null) {
+                ServerLevel origin = server.getLevel(originDim);
+                if (origin != null) {
+                    placePlatformIfNeeded(origin, originPos);
+                    teleport(other, origin, originPos);
+                    fx(origin, Vec3.atCenterOf(originPos));
+                }
+            }
+            other.displayClientMessage(Component.translatable("message.effecoria.subspace.gates_closed"), true);
+        }
     }
 
     /** Collapse gates and remember origin for post-death return. */
@@ -196,7 +318,7 @@ public final class SubspaceVoyageService {
         }
         var originDim = data.originDim();
         BlockPos originPos = data.originPos().immutable();
-        collapsePortals(player.server, data);
+        // Do not tear down portals — other players / the Spatial mage may still need them.
         SubspaceVoyageData next = SubspaceVoyageData.createDefault();
         next.prepareRespawnAtOrigin(originDim, originPos);
         set(player, next);
@@ -245,10 +367,11 @@ public final class SubspaceVoyageService {
         return new BlockPos(origin.getX() + dx * SCALE, origin.getY(), origin.getZ() + dz * SCALE);
     }
 
-    public static BlockPos subspaceSpawn(UUID playerId) {
-        int hash = playerId.hashCode();
-        int x = (hash & 0xFFFF) * 16;
-        int z = ((hash >>> 16) & 0xFFFF) * 16;
+    /** Shared hyperspace rendezvous for one voyage session (party meets here). */
+    public static BlockPos subspaceAnchor(UUID sessionId) {
+        int hash = sessionId.hashCode();
+        int x = (hash & 0xFFFF) % 4000;
+        int z = ((hash >>> 16) & 0xFFFF) % 4000;
         if ((hash & 1) == 0) {
             x = -x;
         }
@@ -258,12 +381,59 @@ public final class SubspaceVoyageService {
         return new BlockPos(x, FLOOR_Y + 1, z);
     }
 
+    /** @deprecated use {@link #subspaceAnchor(UUID)} */
+    @Deprecated
+    public static BlockPos subspaceSpawn(UUID playerId) {
+        return subspaceAnchor(playerId);
+    }
+
+    private static boolean hasLivingEntryPortal(MinecraftServer server, SubspaceVoyageData data) {
+        if (data.originDim() == null || data.entryPortalPos() == null) {
+            return false;
+        }
+        ServerLevel origin = server.getLevel(data.originDim());
+        return origin != null && origin.getBlockState(data.entryPortalPos()).is(ModBlocks.SUBSPACE_PORTAL.get());
+    }
+
+    private static void syncSessionExitForNearbyPlayers(ServerPlayer caster, SubspaceVoyageData ownerData) {
+        UUID session = ownerData.sessionId();
+        if (session == null) {
+            return;
+        }
+        for (ServerPlayer other : caster.server.getPlayerList().getPlayers()) {
+            if (other == caster) {
+                continue;
+            }
+            SubspaceVoyageData otherData = get(other);
+            if (!session.equals(otherData.sessionId()) || !otherData.active()) {
+                continue;
+            }
+            otherData.setExitPortals(ownerData.exitPortalSubspacePos(), ownerData.exitPortalOverworldPos());
+            set(other, otherData);
+        }
+    }
+
     @Nullable
     private static ServerLevel resolveOrigin(MinecraftServer server, SubspaceVoyageData data) {
         if (data.originDim() == null) {
             return null;
         }
         return server.getLevel(data.originDim());
+    }
+
+    private static void configurePortal(
+            ServerLevel level,
+            BlockPos pos,
+            UUID owner,
+            SubspacePortalBlockEntity.Role role,
+            UUID session,
+            @Nullable ResourceKey<Level> originDim,
+            @Nullable BlockPos originPos,
+            @Nullable BlockPos entrySubspacePos,
+            @Nullable BlockPos exitOverworldPos) {
+        if (level.getBlockEntity(pos) instanceof SubspacePortalBlockEntity be) {
+            be.configure(owner, role, session, originDim, originPos, entrySubspacePos, exitOverworldPos);
+        }
     }
 
     @Nullable
@@ -291,13 +461,6 @@ public final class SubspaceVoyageService {
         }
         level.setBlock(feet, ModBlocks.SUBSPACE_PORTAL.get().defaultBlockState(), 3);
         return feet;
-    }
-
-    private static void configurePortal(
-            ServerLevel level, BlockPos pos, UUID owner, SubspacePortalBlockEntity.Role role, UUID session) {
-        if (level.getBlockEntity(pos) instanceof SubspacePortalBlockEntity be) {
-            be.configure(owner, role, session);
-        }
     }
 
     private static void removePortal(ServerLevel level, BlockPos pos) {

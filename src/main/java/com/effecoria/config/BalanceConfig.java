@@ -276,6 +276,14 @@ public final class BalanceConfig {
             .comment("Open-sky Φ factor around 1.0 (additive as value-1)")
             .defineInRange("phi_open_sky_bonus", 1.05, 0.5, 2.0);
 
+    public static final ModConfigSpec.DoubleValue PHI_UNDERWATER_MULTIPLIER = BUILDER
+            .comment("Fully submerged in water Φ factor around 1.0 (additive as value-1)")
+            .defineInRange("phi_underwater_multiplier", 0.72, 0.1, 1.5);
+
+    public static final ModConfigSpec.DoubleValue PHI_IN_WATER_MULTIPLIER = BUILDER
+            .comment("Standing/swimming in water (not fully submerged) Φ factor around 1.0")
+            .defineInRange("phi_in_water_multiplier", 0.88, 0.1, 1.5);
+
     // --- Necro thrall control (Death Mark army limits by breathing mastery) ---
     public static final ModConfigSpec.DoubleValue NECRO_CONTROL_BUDGET_BASE = BUILDER
             .comment("Total thrall HP budget at breathing mastery 0")

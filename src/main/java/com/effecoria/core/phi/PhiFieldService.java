@@ -5,8 +5,8 @@ import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.psi.PsiHelper;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -15,6 +15,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Local Φ sampling. Environmental modifiers stack as signed bonuses/penalties on a
  * base of 1.0 — night no longer multiplies (and thus halves) every other buff.
+ *
+ * <p>Must behave the same on client (HUD) and server (cast/regen).
  */
 public final class PhiFieldService {
     private PhiFieldService() {}
@@ -29,21 +31,17 @@ public final class PhiFieldService {
             float phi = BalanceConfig.CREATIVE_PHI_OVERRIDE.get().floatValue();
             return new PhiSample(phi, false, isSolarDay(level));
         }
+        BlockPos pos = BlockPos.containing(position);
         float value = 1f;
-        boolean zeroFlux = false;
 
         value += dimensionBonus(level);
         value += heightBonus(position.y());
-        if (level instanceof ServerLevel serverLevel) {
-            value += timeBonus(serverLevel);
-            value += exposureBonus(serverLevel, BlockPos.containing(position));
-            value += weatherBonus(serverLevel);
-            zeroFlux = isInsideZeroFluxZone(serverLevel, BlockPos.containing(position));
-        } else {
-            value += timeBonus(level);
-        }
+        value += timeBonus(level);
+        value += exposureBonus(level, pos);
+        value += weatherBonus(level);
+        value += fluidBonus(level, pos, player);
 
-        if (zeroFlux) {
+        if (isInsideZeroFluxZone(level, pos)) {
             return new PhiSample(0f, true, isSolarDay(level));
         }
         if (player != null) {
@@ -92,7 +90,7 @@ public final class PhiFieldService {
         return fromMultiplier(mult);
     }
 
-    private static float exposureBonus(ServerLevel level, BlockPos pos) {
+    private static float exposureBonus(Level level, BlockPos pos) {
         if (level.dimension() != Level.OVERWORLD) {
             return 0f;
         }
@@ -102,7 +100,7 @@ public final class PhiFieldService {
         return fromMultiplier(BalanceConfig.PHI_UNDERGROUND_MULTIPLIER.get().floatValue());
     }
 
-    private static float weatherBonus(ServerLevel level) {
+    private static float weatherBonus(Level level) {
         if (level.dimension() != Level.OVERWORLD) {
             return 0f;
         }
@@ -115,7 +113,24 @@ public final class PhiFieldService {
         return 0f;
     }
 
-    private static boolean isInsideZeroFluxZone(ServerLevel level, BlockPos center) {
+    private static float fluidBonus(Level level, BlockPos pos, Player player) {
+        boolean underwater = player != null
+                ? player.isUnderWater()
+                : level.getFluidState(pos).is(FluidTags.WATER)
+                        && level.getFluidState(pos.above()).is(FluidTags.WATER);
+        if (underwater) {
+            return fromMultiplier(BalanceConfig.PHI_UNDERWATER_MULTIPLIER.get().floatValue());
+        }
+        boolean inWater = player != null
+                ? player.isInWaterOrBubble()
+                : level.getFluidState(pos).is(FluidTags.WATER);
+        if (inWater) {
+            return fromMultiplier(BalanceConfig.PHI_IN_WATER_MULTIPLIER.get().floatValue());
+        }
+        return 0f;
+    }
+
+    private static boolean isInsideZeroFluxZone(Level level, BlockPos center) {
         int enclosed = 0;
         for (BlockPos offset : BlockPos.betweenClosed(center.offset(-1, -1, -1), center.offset(1, 1, 1))) {
             if (offset.equals(center)) {

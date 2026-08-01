@@ -179,8 +179,18 @@ public final class PsiHudOverlay {
         if (phi.zeroFlux()) {
             return Component.translatable("hud.effecoria.phi_zero");
         }
+        Minecraft minecraft = Minecraft.getInstance();
+        boolean underwater = minecraft.player != null && minecraft.player.isUnderWater();
+        boolean inWater = minecraft.player != null && minecraft.player.isInWaterOrBubble();
         String phaseKey = phi.solarDay() ? "hud.effecoria.phi_day" : "hud.effecoria.phi_night";
-        return Component.translatable(phaseKey, String.format("%.2f", phi.effectiveValue()));
+        Component base = Component.translatable(phaseKey, String.format("%.2f", phi.effectiveValue()));
+        if (underwater) {
+            return base.copy().append(Component.translatable("hud.effecoria.phi_underwater_suffix"));
+        }
+        if (inWater) {
+            return base.copy().append(Component.translatable("hud.effecoria.phi_water_suffix"));
+        }
+        return base;
     }
 
     private static int phiBarColor(PhiSample phi) {
