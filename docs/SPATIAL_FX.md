@@ -9,7 +9,7 @@ Successful Spatial casts may broadcast an S2C pulse to players within **48 block
 | **Singularity** | `gravity_snare`, `gravity_well` / `gravity_field`, `spatial_singularity` | Black-hole Veil post (`effecoria:singularity`) |
 | **Dimensional cut** | see modes below | Slash Veil post (`effecoria:spatial_cut`) |
 | **Ripple** | `blink`, `far_blink`, `void_step`, `warp_exchange`, `absolute_fold` | Concentric space ripple (`effecoria:spatial_ripple`) — not a black hole |
-| **None** | `phase_veil`, `spatial_ward`, `dimensional_anchor` | Sounds only |
+| **Puncture lens** | Open `subspace_portal` (while on screen) | Persistent gravitational refraction (`effecoria:subspace_puncture`) — living rim + 1/r lens |
 
 ## Cut modes
 

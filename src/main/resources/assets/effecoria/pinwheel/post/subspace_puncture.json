@@ -1,0 +1,10 @@
+{
+  "stages": [
+    {
+      "type": "veil:blit",
+      "shader": "effecoria:subspace_puncture",
+      "in": "minecraft:main",
+      "out": "veil:post"
+    }
+  ]
+}
