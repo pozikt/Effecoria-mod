@@ -190,14 +190,16 @@ public final class CastPresentation {
                             1.35f,
                             0.5f,
                             1.45f)
+                    // Generic organic cast: sound only — no leaf burst around the caster.
+                    // Spell-specific FX (virus, thorns, DNA, …) come from OrganicEffects.
                     : new SchoolTheme(
-                            ModParticleTypes.ORGANIC_LEAF.get(),
-                            ModParticleTypes.ORGANIC_FOG.get(),
-                            SoundEvents.AZALEA_LEAVES_PLACE,
+                            null,
+                            null,
                             SoundEvents.MOSS_PLACE,
+                            SoundEvents.AZALEA_LEAVES_PLACE,
+                            0.45f,
+                            1.1f,
                             0.5f,
-                            1.15f,
-                            0.55f,
                             0.95f);
             case NECROMANCY -> new SchoolTheme(
                     ModParticleTypes.NECRO_SHADOW.get(),

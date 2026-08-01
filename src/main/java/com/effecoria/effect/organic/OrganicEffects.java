@@ -48,7 +48,7 @@ public final class OrganicEffects {
                         readout.healthPercent(),
                         Component.translatable(readout.statusKey())),
                 true);
-        spawnOrganicParticles(level, target.position().add(0, 1, 0));
+        spawnNerve(level, target.position().add(0, 1, 0));
         level.sendParticles(
                 ParticleTypes.HAPPY_VILLAGER,
                 target.getX(),
@@ -86,7 +86,7 @@ public final class OrganicEffects {
             count++;
         }
         caster.displayClientMessage(Component.translatable("message.effecoria.organic.life_sense", count), true);
-        spawnOrganicParticles(level, caster.position().add(0, 1, 0));
+        spawnNerve(level, caster.position().add(0, 1, 0));
     }
 
     public static void applyVitality(
@@ -109,7 +109,7 @@ public final class OrganicEffects {
         float damage = DiceDamage.fromParams(effect.params(), power, 3f);
         target.hurt(SpellCombat.wither(caster), damage);
         target.hurtMarked = true;
-        spawnOrganicParticles(level, target.position().add(0, 1, 0));
+        spawnFlesh(level, target.position().add(0, 1, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 0.8f, 0.7f);
     }
 
@@ -123,6 +123,7 @@ public final class OrganicEffects {
         needle.shoot(look.x, look.y, look.z, speed, 0.4f);
         tagProjectile(needle, damage);
         level.addFreshEntity(needle);
+        spawnBone(level, caster.getEyePosition().add(look.scale(0.6)));
         level.playSound(null, caster.blockPosition(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 0.7f, 1.5f);
     }
 
@@ -132,7 +133,7 @@ public final class OrganicEffects {
         }
         int poisonTicks = effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 100;
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
-        spawnOrganicParticles(caster.serverLevel(), target.position().add(0, 1, 0));
+        spawnVirus(caster.serverLevel(), target.position().add(0, 1, 0));
         caster.serverLevel()
                 .playSound(null, target.blockPosition(), SoundEvents.SPIDER_HURT, SoundSource.PLAYERS, 0.6f, 1.2f);
     }
@@ -147,7 +148,7 @@ public final class OrganicEffects {
         target.hurt(SpellCombat.wither(caster), damage);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 3));
         target.hurtMarked = true;
-        spawnOrganicParticles(level, target.position().add(0, 1, 0));
+        spawnMuscle(level, target.position().add(0, 1, 0));
     }
 
     public static void chitinPlates(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -158,7 +159,7 @@ public final class OrganicEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
         ServerLevel level = caster.serverLevel();
-        spawnBloom(level, caster.position().add(0, 1, 0));
+        spawnChitin(level, caster.position().add(0, 1, 0));
         level.playSound(
                 null,
                 caster.blockPosition(),
@@ -206,7 +207,7 @@ public final class OrganicEffects {
         target.hurt(SpellCombat.wither(caster), burst);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, witherTicks, witherAmp));
         target.hurtMarked = true;
-        spawnSpores(level, target.position().add(0, 1, 0));
+        spawnParasites(level, target.position().add(0, 1, 0));
     }
 
     public static void metabolicShock(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -216,7 +217,7 @@ public final class OrganicEffects {
         int stunTicks = effect.params().has("stun_ticks") ? effect.params().get("stun_ticks").getAsInt() : 20;
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, stunTicks, 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, stunTicks, 2));
-        spawnOrganicParticles(caster.serverLevel(), target.position().add(0, 1, 0));
+        spawnNerve(caster.serverLevel(), target.position().add(0, 1, 0));
     }
 
     public static void biologicalField(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -247,14 +248,14 @@ public final class OrganicEffects {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 300;
         int amp = effect.params().has("strength_amplifier") ? effect.params().get("strength_amplifier").getAsInt() : 0;
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, amp, false, true, true));
-        spawnBloom(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnBone(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void senseSharpening(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 600;
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.NIGHT_VISION, duration, 0, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0, false, false, true));
-        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnNerve(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void painInhibitor(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -262,7 +263,7 @@ public final class OrganicEffects {
         int absorb = effect.params().has("absorption_amplifier") ? effect.params().get("absorption_amplifier").getAsInt() : 1;
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
-        spawnBloom(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnNerve(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void poisonThorns(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -286,14 +287,14 @@ public final class OrganicEffects {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 360;
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0, false, false, true));
-        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnMimic(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void organismAdaptation(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 900;
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
-        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnDna(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void immuneSuppression(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -305,7 +306,7 @@ public final class OrganicEffects {
         int weakAmp = effect.params().has("weakness_amplifier") ? effect.params().get("weakness_amplifier").getAsInt() : 1;
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, weakAmp));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, duration / 2, 0));
-        spawnOrganicParticles(level, target.position().add(0, 1, 0));
+        spawnImmuneBreak(level, target.position().add(0, 1, 0));
     }
 
     public static void metabolicBoost(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -315,7 +316,7 @@ public final class OrganicEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DIG_SPEED, duration, 0, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, exhaustTicks, 0, false, false, true));
-        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnNerve(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void organicNecrosis(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -339,7 +340,7 @@ public final class OrganicEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.SLOW_FALLING, duration, 0, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.JUMP, duration, 1, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
-        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnDna(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void scorchedEarth(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -359,7 +360,8 @@ public final class OrganicEffects {
             entity.hurt(SpellCombat.magic(caster), DiceDamage.fromParams(effect.params(), power, 4f) * 0.5f);
             entity.hurtMarked = true;
         }
-        spawnOrganicParticles(level, center.add(0, 0.5, 0));
+        spawnThorns(level, center.add(0, 0.5, 0));
+        spawnSpores(level, center.add(0, 0.5, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.WOLF_GROWL, SoundSource.PLAYERS, 0.7f, 0.6f);
     }
 
@@ -384,7 +386,7 @@ public final class OrganicEffects {
             }
         }
         caster.displayClientMessage(Component.translatable("message.effecoria.organic.bio_fission", broken), true);
-        spawnOrganicParticles(level, caster.position().add(0, 1, 0));
+        spawnDna(level, caster.position().add(0, 1, 0));
     }
 
     public static void superRegeneration(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -454,7 +456,7 @@ public final class OrganicEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, resist, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, duration, 1, false, false, true));
-        spawnBloom(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnChitin(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void beastForm(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -463,7 +465,7 @@ public final class OrganicEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.JUMP, duration, 1, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
-        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnBeast(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void bioCataclysm(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -494,7 +496,7 @@ public final class OrganicEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, duration, 0, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, false, true));
-        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnDna(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void evolutionaryLeap(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -504,7 +506,7 @@ public final class OrganicEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, duration, 2, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 2, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 1, false, false, true));
-        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnDna(caster.serverLevel(), caster.position().add(0, 1, 0));
         caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.6f, 1.2f);
     }
 
@@ -516,7 +518,7 @@ public final class OrganicEffects {
         int regenAmp = effect.params().has("regen_amplifier") ? effect.params().get("regen_amplifier").getAsInt() : 1;
         subject.heal(heal);
         BreathDebuffs.apply(subject, new MobEffectInstance(MobEffects.REGENERATION, regenTicks, regenAmp, false, true, true));
-        spawnHeal(level, subject.position().add(0, 1, 0));
+        spawnGraft(level, subject.position().add(0, 1, 0));
         level.playSound(null, subject.blockPosition(), SoundEvents.HONEY_DRINK, SoundSource.PLAYERS, 0.7f, 1.2f);
     }
 
@@ -565,7 +567,7 @@ public final class OrganicEffects {
                 : (power >= 45f ? 1 : 0);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, true, true));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
-        spawnOrganicParticles(level, target.position().add(0, 1, 0));
+        spawnHeal(level, target.position().add(0, 1, 0));
         level.playSound(
                 null,
                 target.blockPosition(),
@@ -590,7 +592,7 @@ public final class OrganicEffects {
                 target, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, speedAmp, false, true, true));
         BreathDebuffs.apply(
                 target, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, strengthAmp, false, false, true));
-        spawnHeal(level, target.position().add(0, 1, 0));
+        spawnAdrenal(level, target.position().add(0, 1, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.35f, 1.6f);
     }
 
@@ -635,7 +637,7 @@ public final class OrganicEffects {
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, duration, 1));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, 1));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.HUNGER, duration, 2));
-        spawnOrganicParticles(level, target.position().add(0, 1, 0));
+        spawnDna(level, target.position().add(0, 1, 0));
     }
 
     public static void biologicalCleaving(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -648,7 +650,7 @@ public final class OrganicEffects {
         target.hurt(SpellCombat.magic(caster), damage);
         target.hurtMarked = true;
         shredOrganicArmor(target, armorDamage);
-        spawnOrganicParticles(level, target.position().add(0, 1, 0));
+        spawnFlesh(level, target.position().add(0, 1, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8f, 0.5f);
     }
 
@@ -659,7 +661,8 @@ public final class OrganicEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.JUMP, duration, 2, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.NIGHT_VISION, duration, 0, false, false, true));
-        spawnOrganicParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnDna(caster.serverLevel(), caster.position().add(0, 1, 0));
+        spawnBeast(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void sporeStorm(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -826,5 +829,68 @@ public final class OrganicEffects {
     public static void spawnAcid(ServerLevel level, Vec3 pos) {
         level.sendParticles(ModParticleTypes.ORGANIC_SAP.get(), pos.x, pos.y + 0.5, pos.z, 10, 0.25, 0.3, 0.25, 0.03);
         level.sendParticles(ModParticleTypes.ORGANIC_FOG.get(), pos.x, pos.y + 0.4, pos.z, 5, 0.2, 0.2, 0.2, 0.01);
+    }
+
+    public static void spawnVirus(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ORGANIC_VIRUS.get(), pos.x, pos.y + 0.7, pos.z, 14, 0.3, 0.4, 0.3, 0.025);
+        level.sendParticles(ModParticleTypes.ORGANIC_FOG.get(), pos.x, pos.y + 0.5, pos.z, 4, 0.2, 0.2, 0.2, 0.01);
+    }
+
+    public static void spawnParasites(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ORGANIC_PARASITE.get(), pos.x, pos.y + 0.5, pos.z, 12, 0.35, 0.3, 0.35, 0.04);
+        level.sendParticles(ModParticleTypes.ORGANIC_SPORE.get(), pos.x, pos.y + 0.4, pos.z, 4, 0.2, 0.2, 0.2, 0.01);
+    }
+
+    public static void spawnBone(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ORGANIC_BONE.get(), pos.x, pos.y + 0.6, pos.z, 12, 0.25, 0.35, 0.25, 0.06);
+    }
+
+    public static void spawnChitin(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ORGANIC_CHITIN.get(), pos.x, pos.y + 0.7, pos.z, 14, 0.35, 0.45, 0.35, 0.02);
+        level.sendParticles(ModParticleTypes.ORGANIC_FOG.get(), pos.x, pos.y + 0.5, pos.z, 4, 0.2, 0.2, 0.2, 0.008);
+    }
+
+    public static void spawnMuscle(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ORGANIC_MUSCLE.get(), pos.x, pos.y + 0.55, pos.z, 14, 0.3, 0.35, 0.3, 0.05);
+    }
+
+    public static void spawnFlesh(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ORGANIC_MUSCLE.get(), pos.x, pos.y + 0.5, pos.z, 10, 0.28, 0.3, 0.28, 0.05);
+        level.sendParticles(ModParticleTypes.ORGANIC_BLOOD_CELL.get(), pos.x, pos.y + 0.55, pos.z, 8, 0.25, 0.3, 0.25, 0.03);
+    }
+
+    public static void spawnNerve(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ORGANIC_NERVE.get(), pos.x, pos.y + 0.8, pos.z, 16, 0.35, 0.45, 0.35, 0.04);
+    }
+
+    public static void spawnDna(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ORGANIC_DNA.get(), pos.x, pos.y + 0.7, pos.z, 12, 0.3, 0.4, 0.3, 0.02);
+        level.sendParticles(ModParticleTypes.ORGANIC_WHITE_CELL.get(), pos.x, pos.y + 0.5, pos.z, 4, 0.2, 0.25, 0.2, 0.01);
+    }
+
+    public static void spawnMimic(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ORGANIC_FOG.get(), pos.x, pos.y + 0.6, pos.z, 14, 0.4, 0.5, 0.4, 0.015);
+        level.sendParticles(ModParticleTypes.ORGANIC_WHITE_CELL.get(), pos.x, pos.y + 0.7, pos.z, 4, 0.25, 0.3, 0.25, 0.01);
+    }
+
+    public static void spawnImmuneBreak(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ORGANIC_VIRUS.get(), pos.x, pos.y + 0.65, pos.z, 10, 0.3, 0.35, 0.3, 0.025);
+        level.sendParticles(ModParticleTypes.ORGANIC_WHITE_CELL.get(), pos.x, pos.y + 0.55, pos.z, 8, 0.28, 0.3, 0.28, 0.02);
+    }
+
+    public static void spawnBeast(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ORGANIC_MUSCLE.get(), pos.x, pos.y + 0.55, pos.z, 10, 0.3, 0.35, 0.3, 0.04);
+        level.sendParticles(ModParticleTypes.ORGANIC_BONE.get(), pos.x, pos.y + 0.5, pos.z, 5, 0.2, 0.25, 0.2, 0.03);
+        level.sendParticles(ModParticleTypes.ORGANIC_FOG.get(), pos.x, pos.y + 0.7, pos.z, 4, 0.25, 0.25, 0.25, 0.01);
+    }
+
+    public static void spawnGraft(ServerLevel level, Vec3 pos) {
+        spawnHeal(level, pos);
+        level.sendParticles(ModParticleTypes.ORGANIC_DNA.get(), pos.x, pos.y + 0.75, pos.z, 6, 0.22, 0.3, 0.22, 0.015);
+    }
+
+    public static void spawnAdrenal(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.ORGANIC_BLOOD_CELL.get(), pos.x, pos.y + 0.55, pos.z, 8, 0.25, 0.3, 0.25, 0.025);
+        level.sendParticles(ModParticleTypes.ORGANIC_NERVE.get(), pos.x, pos.y + 0.8, pos.z, 12, 0.3, 0.4, 0.3, 0.05);
     }
 }

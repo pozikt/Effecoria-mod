@@ -61,6 +61,13 @@ public final class EffecoriaClient {
         event.registerSpriteSet(ModParticleTypes.ORGANIC_SAP.get(), SchoolParticles.SapParticle.Provider::new);
         event.registerSpriteSet(ModParticleTypes.ORGANIC_BLOOD_CELL.get(), SchoolParticles.BloodCellParticle.Provider::new);
         event.registerSpriteSet(ModParticleTypes.ORGANIC_WHITE_CELL.get(), SchoolParticles.WhiteCellParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.ORGANIC_VIRUS.get(), SchoolParticles.VirusParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.ORGANIC_PARASITE.get(), SchoolParticles.ParasiteParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.ORGANIC_BONE.get(), SchoolParticles.BoneShardParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.ORGANIC_CHITIN.get(), SchoolParticles.ChitinParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.ORGANIC_MUSCLE.get(), SchoolParticles.MuscleParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.ORGANIC_NERVE.get(), SchoolParticles.NerveParticle.Provider::new);
+        event.registerSpriteSet(ModParticleTypes.ORGANIC_DNA.get(), SchoolParticles.DnaParticle.Provider::new);
 
         // Necromancy
         event.registerSpriteSet(ModParticleTypes.NECRO_SHADOW.get(), SchoolParticles.ShadowParticle.Provider::new);

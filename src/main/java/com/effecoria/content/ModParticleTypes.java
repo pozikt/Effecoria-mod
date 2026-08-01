@@ -54,6 +54,27 @@ public final class ModParticleTypes {
     /** Leukocyte / stabilizer cell — immune + tissue repair FX. */
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ORGANIC_WHITE_CELL =
             PARTICLE_TYPES.register("organic_white_cell", () -> new SimpleParticleType(false));
+    /** Virion / foreign agent. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ORGANIC_VIRUS =
+            PARTICLE_TYPES.register("organic_virus", () -> new SimpleParticleType(false));
+    /** Parasite worm / larva. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ORGANIC_PARASITE =
+            PARTICLE_TYPES.register("organic_parasite", () -> new SimpleParticleType(false));
+    /** Bone shard. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ORGANIC_BONE =
+            PARTICLE_TYPES.register("organic_bone", () -> new SimpleParticleType(false));
+    /** Chitin plate flake. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ORGANIC_CHITIN =
+            PARTICLE_TYPES.register("organic_chitin", () -> new SimpleParticleType(false));
+    /** Muscle fiber streak. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ORGANIC_MUSCLE =
+            PARTICLE_TYPES.register("organic_muscle", () -> new SimpleParticleType(false));
+    /** Nerve / synapse spark. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ORGANIC_NERVE =
+            PARTICLE_TYPES.register("organic_nerve", () -> new SimpleParticleType(false));
+    /** DNA / genetic fragment. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ORGANIC_DNA =
+            PARTICLE_TYPES.register("organic_dna", () -> new SimpleParticleType(false));
 
     // Necromancy
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> NECRO_SHADOW =

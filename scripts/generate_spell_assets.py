@@ -256,6 +256,66 @@ def icon_cells(d, cx, cy, color):
     draw_disc(d, cx + 5, cy - 2, 3, (90, 110, 180, 255))
 
 
+def icon_virus(d, cx, cy, color):
+    core = (170, 70, 200, 255)
+    spike = (220, 150, 240, 255)
+    draw_disc(d, cx, cy, 8, core)
+    draw_disc(d, cx, cy, 3, (240, 210, 255, 255))
+    for angle in range(0, 360, 45):
+        rad = math.radians(angle)
+        x2 = cx + int(round(math.cos(rad) * 14))
+        y2 = cy + int(round(math.sin(rad) * 14))
+        d.line([(cx, cy), (x2, y2)], fill=spike, width=2)
+        draw_disc(d, x2, y2, 2, spike)
+
+
+def icon_parasite(d, cx, cy, color):
+    body = (190, 160, 50, 255)
+    d.arc((cx - 14, cy - 10, cx + 6, cy + 12), 200, 40, fill=body, width=4)
+    d.arc((cx - 4, cy - 8, cx + 14, cy + 10), 20, 200, fill=body, width=4)
+    draw_disc(d, cx + 10, cy - 2, 3, (230, 200, 80, 255))
+
+
+def icon_bone(d, cx, cy, color):
+    bone = (235, 225, 200, 255)
+    d.rectangle((cx - 3, cy - 12, cx + 3, cy + 12), fill=bone)
+    draw_disc(d, cx - 5, cy - 12, 4, bone)
+    draw_disc(d, cx + 5, cy - 12, 4, bone)
+    draw_disc(d, cx - 5, cy + 12, 4, bone)
+    draw_disc(d, cx + 5, cy + 12, 4, bone)
+
+
+def icon_chitin(d, cx, cy, color):
+    shell = (110, 90, 45, 255)
+    d.polygon([(cx, cy - 14), (cx + 12, cy - 2), (cx + 8, cy + 12), (cx - 8, cy + 12), (cx - 12, cy - 2)], fill=shell)
+    d.line([(cx, cy - 10), (cx, cy + 10)], fill=(60, 45, 25, 255), width=2)
+
+
+def icon_muscle(d, cx, cy, color):
+    fiber = (180, 45, 60, 255)
+    for i, oy in enumerate((-8, -2, 4, 10)):
+        d.arc((cx - 14, cy + oy - 6, cx + 14, cy + oy + 6), 200, 340, fill=fiber, width=3)
+
+
+def icon_nerve(d, cx, cy, color):
+    glow = (80, 220, 255, 255)
+    d.line([(cx, cy - 14), (cx, cy + 14)], fill=glow, width=2)
+    d.line([(cx - 12, cy), (cx + 12, cy)], fill=glow, width=2)
+    d.line([(cx - 10, cy - 10), (cx + 10, cy + 10)], fill=glow, width=1)
+    draw_disc(d, cx, cy, 4, (230, 255, 255, 255))
+
+
+def icon_dna(d, cx, cy, color):
+    a = (50, 170, 220, 255)
+    b = (220, 80, 130, 255)
+    for i in range(-12, 13, 2):
+        ox = int(round(math.sin(i * 0.45) * 8))
+        draw_disc(d, cx + ox, cy + i, 2, a)
+        draw_disc(d, cx - ox, cy + i, 2, b)
+        if i % 4 == 0:
+            d.line([(cx + ox, cy + i), (cx - ox, cy + i)], fill=(180, 200, 230, 180), width=1)
+
+
 def icon_spore(d, cx, cy, color):
     for ox, oy, r in ((0, 0, 5), (-8, -4, 3), (8, -3, 3), (-5, 7, 2), (6, 6, 2), (0, -9, 2)):
         draw_disc(d, cx + ox, cy + oy, r, with_alpha(color, 200))
@@ -607,51 +667,51 @@ DRAWERS = {
     "root_bind": icon_roots,
     "briar_surge": icon_briar,
     "verdant_mend": icon_cells,
-    "diagnostic_glimpse": icon_eye,
+    "diagnostic_glimpse": icon_nerve,
     "blood_stasis": icon_cells,
-    "life_sense": icon_eye,
-    "bio_strike": icon_spike,
-    "bone_needle": icon_arrow,
-    "foreign_agent": icon_spike,
-    "muscle_spasm": icon_spike,
-    "chitin_plates": icon_shield,
+    "life_sense": icon_nerve,
+    "bio_strike": icon_muscle,
+    "bone_needle": icon_bone,
+    "foreign_agent": icon_virus,
+    "muscle_spasm": icon_muscle,
+    "chitin_plates": icon_chitin,
     "acid_gland": icon_sap,
-    "parasitic_infection": icon_spore,
-    "metabolic_shock": icon_focus,
+    "parasitic_infection": icon_parasite,
+    "metabolic_shock": icon_nerve,
     "biological_field": icon_cells,
-    "bone_spur": icon_spike,
-    "sense_sharpening": icon_eye,
-    "pain_inhibitor": icon_heart,
+    "bone_spur": icon_bone,
+    "sense_sharpening": icon_nerve,
+    "pain_inhibitor": icon_nerve,
     "poison_thorns": icon_thorns,
     "bio_mimicry": icon_veil,
-    "organism_adaptation": icon_shield,
-    "immune_suppression": icon_skull,
-    "metabolic_boost": icon_focus,
+    "organism_adaptation": icon_dna,
+    "immune_suppression": icon_virus,
+    "metabolic_boost": icon_nerve,
     "organic_necrosis": icon_sap,
-    "full_restructuring": icon_leaf,
+    "full_restructuring": icon_dna,
     "scorched_earth": icon_briar,
-    "bio_fission": icon_pulse,
+    "bio_fission": icon_dna,
     "super_regeneration": icon_cells,
-    "population_control": icon_wave,
+    "population_control": icon_virus,
     "biological_plague": icon_spore,
-    "living_armor": icon_shield,
-    "beast_form": icon_spike,
+    "living_armor": icon_chitin,
+    "beast_form": icon_muscle,
     "bio_cataclysm": icon_meteorological_cataclysm,
     "absolute_regeneration": icon_cells,
-    "cellular_dominion": icon_focus,
-    "evolutionary_leap": icon_leaf,
+    "cellular_dominion": icon_dna,
+    "evolutionary_leap": icon_dna,
     "symbiotic_graft": icon_cells,
     "limb_regeneration": icon_cells,
     "verdant_bloom": icon_briar,
-    "genetic_lock": icon_skull,
+    "genetic_lock": icon_dna,
     "vital_infusion": icon_cells,
     "soothing_sap": icon_cells,
     "vital_ward": icon_cells,
-    "adrenal_gift": icon_cells,
+    "adrenal_gift": icon_nerve,
     "spore_storm": icon_spore,
-    "biological_cleaving": icon_spike,
-    "full_transformation": icon_spike,
-    "biological_singularity": icon_focus,
+    "biological_cleaving": icon_muscle,
+    "full_transformation": icon_dna,
+    "biological_singularity": icon_dna,
     "life_creation": icon_cells,
     "biological_immortality": icon_cells,
     "soul_drain": icon_soul,
@@ -955,6 +1015,110 @@ def particle_organic_white_cell(variant: int = 0) -> Image.Image:
     return img
 
 
+def particle_organic_virus(variant: int = 0) -> Image.Image:
+    """Spiked virion."""
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = PARTICLE // 2, PARTICLE // 2
+    core = (170, 70, 200, 235) if variant % 2 == 0 else (140, 50, 180, 230)
+    spike = (210, 140, 230, 240)
+    draw_disc(d, cx, cy, 4, core)
+    draw_disc(d, cx, cy, 2, (240, 200, 255, 200))
+    for angle in range(0, 360, 45 + variant * 5):
+        rad = math.radians(angle)
+        x2 = cx + int(round(math.cos(rad) * 7))
+        y2 = cy + int(round(math.sin(rad) * 7))
+        d.line([(cx, cy), (x2, y2)], fill=spike, width=1)
+        draw_disc(d, x2, y2, 1, spike)
+    return img
+
+
+def particle_organic_parasite(variant: int = 0) -> Image.Image:
+    """Curved larva / worm."""
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    body = (180, 150, 60, 240)
+    dark = (120, 90, 30, 220)
+    if variant == 0:
+        pts = [(2, 8), (5, 5), (9, 6), (12, 9), (14, 12)]
+    else:
+        pts = [(1, 10), (4, 7), (8, 8), (11, 6), (14, 8)]
+    d.line(pts, fill=body, width=3)
+    d.line(pts, fill=dark, width=1)
+    head = pts[-1]
+    draw_disc(d, head[0], head[1], 2, (220, 190, 80, 255))
+    return img
+
+
+def particle_organic_bone(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    bone = (235, 225, 200, 255)
+    shade = (190, 175, 150, 230)
+    if variant % 2 == 0:
+        d.polygon([(8, 1), (10, 7), (8, 15), (6, 7)], fill=bone)
+        draw_disc(d, 8, 2, 2, bone)
+        draw_disc(d, 8, 14, 2, bone)
+    else:
+        d.polygon([(3, 4), (13, 6), (14, 10), (4, 12)], fill=bone)
+        d.line([(4, 6), (12, 9)], fill=shade, width=1)
+    return img
+
+
+def particle_organic_chitin(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    shell = (110, 80, 45, 245) if variant % 2 == 0 else (90, 120, 55, 235)
+    edge = (60, 45, 25, 220)
+    d.polygon([(8, 2), (14, 7), (12, 14), (4, 14), (2, 7)], fill=shell)
+    d.line([(8, 3), (8, 13)], fill=edge, width=1)
+    d.line([(5, 8), (11, 8)], fill=edge, width=1)
+    return img
+
+
+def particle_organic_muscle(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    fiber = (170, 40, 55, 245)
+    strand = (220, 80, 90, 220)
+    y0 = 3 + variant
+    d.line([(3, y0), (13, y0 + 4)], fill=fiber, width=2)
+    d.line([(4, y0 + 3), (12, y0 + 7)], fill=strand, width=1)
+    d.line([(5, y0 + 6), (11, y0 + 9)], fill=fiber, width=1)
+    return img
+
+
+def particle_organic_nerve(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    glow = (90, 230, 255, 230)
+    core = (220, 255, 255, 255)
+    cx, cy = PARTICLE // 2, PARTICLE // 2
+    d.line([(cx, 1), (cx, 15)], fill=glow, width=1)
+    d.line([(1, cy), (15, cy)], fill=glow, width=1)
+    if variant % 2 == 0:
+        d.line([(3, 3), (13, 13)], fill=glow, width=1)
+    else:
+        d.line([(13, 3), (3, 13)], fill=glow, width=1)
+    draw_disc(d, cx, cy, 2, core)
+    return img
+
+
+def particle_organic_dna(variant: int = 0) -> Image.Image:
+    img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    a = (60, 180, 220, 240)
+    b = (220, 90, 140, 240)
+    # two helix strands
+    for i in range(0, 15, 2):
+        ox = int(round(math.sin((i + variant) * 0.7) * 4))
+        d.point((8 + ox, i + 1), fill=a)
+        d.point((8 - ox, i + 1), fill=b)
+        if i % 4 == 0:
+            d.line([(8 + ox, i + 1), (8 - ox, i + 1)], fill=(180, 200, 220, 160), width=1)
+    return img
+
+
 def particle_necro_shadow(variant: int = 0) -> Image.Image:
     img = Image.new("RGBA", (PARTICLE, PARTICLE), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
@@ -1164,6 +1328,55 @@ def generate_school_particles():
         save_particle_png(name, particle_organic_white_cell(i))
         white_paths.append(f"effecoria:{name}")
     write_particle_json("organic_white_cell", white_paths)
+
+    virus_paths = []
+    for i in range(3):
+        name = f"organic_virus_{i}"
+        save_particle_png(name, particle_organic_virus(i))
+        virus_paths.append(f"effecoria:{name}")
+    write_particle_json("organic_virus", virus_paths)
+
+    parasite_paths = []
+    for i in range(2):
+        name = f"organic_parasite_{i}"
+        save_particle_png(name, particle_organic_parasite(i))
+        parasite_paths.append(f"effecoria:{name}")
+    write_particle_json("organic_parasite", parasite_paths)
+
+    bone_paths = []
+    for i in range(2):
+        name = f"organic_bone_{i}"
+        save_particle_png(name, particle_organic_bone(i))
+        bone_paths.append(f"effecoria:{name}")
+    write_particle_json("organic_bone", bone_paths)
+
+    chitin_paths = []
+    for i in range(2):
+        name = f"organic_chitin_{i}"
+        save_particle_png(name, particle_organic_chitin(i))
+        chitin_paths.append(f"effecoria:{name}")
+    write_particle_json("organic_chitin", chitin_paths)
+
+    muscle_paths = []
+    for i in range(2):
+        name = f"organic_muscle_{i}"
+        save_particle_png(name, particle_organic_muscle(i))
+        muscle_paths.append(f"effecoria:{name}")
+    write_particle_json("organic_muscle", muscle_paths)
+
+    nerve_paths = []
+    for i in range(2):
+        name = f"organic_nerve_{i}"
+        save_particle_png(name, particle_organic_nerve(i))
+        nerve_paths.append(f"effecoria:{name}")
+    write_particle_json("organic_nerve", nerve_paths)
+
+    dna_paths = []
+    for i in range(3):
+        name = f"organic_dna_{i}"
+        save_particle_png(name, particle_organic_dna(i))
+        dna_paths.append(f"effecoria:{name}")
+    write_particle_json("organic_dna", dna_paths)
 
     shadow_paths = []
     for i in range(3):
