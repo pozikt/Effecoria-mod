@@ -414,6 +414,7 @@
   "message.effecoria.stat_set": "Установлено: %s",
   "message.effecoria.max_need_school": "Не инициирован — используй /effecoria max <школа>",
   "message.effecoria.max_magic": "Макс. магия (%s): %s заклинаний, дыхание %s%%, max Ψ %s, эссенция %s",
+  "message.effecoria.max_magic_seals": "Макс. магия (%s): %s слов печати, дыхание %s%%, max Ψ %s, эссенция %s",
   "message.effecoria.cast_command_failed": "Каст не удался: %s",
   "message.effecoria.debug": "Ψ: %s / %s | Φ: %s | Школа: %s | Энтропия: %s | Инициирован: %s",
   "message.effecoria.debug_progression": "Прогрессия — дыхание: %s%% | эссенция: %s | маст.: ×%s | XP трен.: %s | Ψ_soul: %s | Q_eff: %s | истощение: %s",

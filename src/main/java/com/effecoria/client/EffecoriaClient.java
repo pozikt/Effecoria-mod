@@ -63,14 +63,7 @@ public final class EffecoriaClient {
                 ModParticleTypes.NECRO_FOG.get(),
                 sprites -> new SchoolParticles.FogParticle.Provider(sprites, 0.75F, 0.012F));
 
-        // Spatial — wobble / warp
-        event.registerSpriteSet(
-                ModParticleTypes.SPATIAL_RIFT.get(),
-                sprites -> new SchoolParticles.WarpParticle.Provider(sprites, 0.14F, 0.4F, 0.1F));
-        event.registerSpriteSet(
-                ModParticleTypes.SPATIAL_WARP.get(),
-                sprites -> new SchoolParticles.WarpParticle.Provider(sprites, 0.12F, 0.55F, 0.14F));
-
+        // Spatial — distortion-only (Veil); particle types kept registered but unused
         // Corruption
         event.registerSpriteSet(ModParticleTypes.CORRUPTION_POISON.get(), SchoolParticles.DropParticle.Provider::new);
         event.registerSpriteSet(ModParticleTypes.CORRUPTION_BLOOD.get(), SchoolParticles.BloodParticle.Provider::new);

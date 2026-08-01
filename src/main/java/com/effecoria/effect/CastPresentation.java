@@ -1,5 +1,7 @@
 package com.effecoria.effect;
 
+import javax.annotation.Nullable;
+
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.magic.MagicSchool;
 import com.effecoria.core.magic.RadialCategory;
@@ -20,6 +22,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Shared cast readability: school wind-up at the caster, impact burst, and a horizontal AoE ring.
  * Spell-specific FX still run in school effect classes; this layer makes every cast identifiable.
+ * Spatial school is sound + Veil distortion only (no particles).
  */
 public final class CastPresentation {
     private CastPresentation() {}
@@ -45,7 +48,7 @@ public final class CastPresentation {
             return;
         }
         Vec3 focus = resolveFocus(caster, 12.0);
-        if (school != MagicSchool.SPATIAL) {
+        if (theme.usesParticles()) {
             playImpact(caster.serverLevel(), focus, theme, power);
             playRing(caster.serverLevel(), focus, theme, ringRadius(spell, power));
         }
@@ -64,8 +67,7 @@ public final class CastPresentation {
     private static void playWindUp(ServerPlayer caster, SchoolTheme theme) {
         ServerLevel level = caster.serverLevel();
         Vec3 hand = caster.getEyePosition().add(caster.getLookAngle().scale(0.55)).add(0, -0.25, 0);
-        // Spatial school is distortion-only (no particle bursts)
-        if (theme.primary() != ModParticleTypes.SPATIAL_RIFT.get()) {
+        if (theme.usesParticles()) {
             level.sendParticles(theme.primary(), hand.x, hand.y, hand.z, 10, 0.18, 0.18, 0.18, 0.02);
             level.sendParticles(theme.secondary(), hand.x, hand.y, hand.z, 6, 0.12, 0.14, 0.12, 0.01);
         }
@@ -81,7 +83,7 @@ public final class CastPresentation {
     private static void playWhiff(ServerPlayer caster, SchoolTheme theme) {
         ServerLevel level = caster.serverLevel();
         Vec3 hand = caster.getEyePosition().add(caster.getLookAngle().scale(0.4));
-        if (theme.primary() != ModParticleTypes.SPATIAL_RIFT.get()) {
+        if (theme.usesParticles()) {
             level.sendParticles(theme.secondary(), hand.x, hand.y, hand.z, 4, 0.1, 0.1, 0.1, 0.005);
         }
         level.playSound(
@@ -176,8 +178,8 @@ public final class CastPresentation {
                     0.5f,
                     0.75f);
             case SPATIAL -> new SchoolTheme(
-                    ModParticleTypes.SPATIAL_RIFT.get(),
-                    ModParticleTypes.SPATIAL_WARP.get(),
+                    null,
+                    null,
                     SoundEvents.ENDERMAN_TELEPORT,
                     SoundEvents.CHORUS_FRUIT_TELEPORT,
                     0.45f,
@@ -215,12 +217,16 @@ public final class CastPresentation {
     }
 
     private record SchoolTheme(
-            SimpleParticleType primary,
-            SimpleParticleType secondary,
+            @Nullable SimpleParticleType primary,
+            @Nullable SimpleParticleType secondary,
             SoundEvent windUp,
             SoundEvent impact,
             float windUpVolume,
             float windUpPitch,
             float impactVolume,
-            float impactPitch) {}
+            float impactPitch) {
+        boolean usesParticles() {
+            return primary != null && secondary != null;
+        }
+    }
 }

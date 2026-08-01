@@ -60,7 +60,6 @@ public final class ClientPhiSenseEffects {
                 level.addParticle(ModParticleTypes.CORRUPTION_RUNE.get(), at.x, at.y, at.z, 0, 0.02, 0);
             } else if (sample.value() >= 1.05f) {
                 level.addParticle(ModParticleTypes.PHI_SPARK.get(), at.x, at.y, at.z, 0, 0.03, 0);
-                level.addParticle(ModParticleTypes.SPATIAL_WARP.get(), at.x, at.y - 0.2, at.z, 0, 0.01, 0);
             } else if (sample.value() <= 0.55f) {
                 level.addParticle(ModParticleTypes.NECRO_SHADOW.get(), at.x, at.y, at.z, 0, 0.015, 0);
             } else {

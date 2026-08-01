@@ -414,6 +414,7 @@
   "message.effecoria.stat_set": "Set: %s",
   "message.effecoria.max_need_school": "Not initiated — use /effecoria max <school>",
   "message.effecoria.max_magic": "Max magic ready (%s): %s spells, breathing %s%%, max Ψ %s, essence %s",
+  "message.effecoria.max_magic_seals": "Max magic ready (%s): %s seal words, breathing %s%%, max Ψ %s, essence %s",
   "message.effecoria.cast_command_failed": "Cast failed: %s",
   "message.effecoria.debug": "Psi: %s / %s | Phi: %s | School: %s | Entropy: %s | Initiated: %s",
   "message.effecoria.debug_progression": "Progression — breathing: %s%% | essence: %s | mastery: ×%s | train XP: %s | soul: %s | Q_eff: %s | exhaustion: %s",

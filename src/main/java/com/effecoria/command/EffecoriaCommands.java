@@ -10,6 +10,8 @@ import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.core.psi.SpellProgression;
+import com.effecoria.core.seal.SealWordDefinition;
+import com.effecoria.core.seal.SealWordRegistry;
 import com.effecoria.magic.CastPipeline;
 import com.effecoria.magic.SpellRegistry;
 import com.mojang.brigadier.CommandDispatcher;
@@ -26,7 +28,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public final class EffecoriaCommands {
     private static final SuggestionProvider<CommandSourceStack> STAT_SUGGESTIONS = (ctx, builder) ->
@@ -34,6 +38,14 @@ public final class EffecoriaCommands {
                     "psi", "max_psi", "essence", "breathing", "soul", "biology_q",
                     "phi_mult", "entropy", "training_xp"
             }, builder);
+
+    private static final SuggestionProvider<CommandSourceStack> SCHOOL_SUGGESTIONS = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(
+                    Arrays.stream(MagicSchool.values())
+                            .filter(MagicSchool::isPlayable)
+                            .map(MagicSchool::getSerializedName)
+                            .collect(Collectors.toList()),
+                    builder);
 
     private EffecoriaCommands() {}
 
@@ -43,9 +55,11 @@ public final class EffecoriaCommands {
                         .executes(ctx -> debug(ctx.getSource())))
                 .then(Commands.literal("initiate")
                         .then(Commands.argument("school", StringArgumentType.word())
+                                .suggests(SCHOOL_SUGGESTIONS)
                                 .executes(ctx -> initiate(ctx.getSource(), StringArgumentType.getString(ctx, "school")))))
                 .then(Commands.literal("reschool")
                         .then(Commands.argument("school", StringArgumentType.word())
+                                .suggests(SCHOOL_SUGGESTIONS)
                                 .executes(ctx -> reschool(ctx.getSource(), StringArgumentType.getString(ctx, "school")))))
                 .then(Commands.literal("cast")
                         .then(Commands.argument("spell", ResourceLocationArgument.id())
@@ -62,9 +76,9 @@ public final class EffecoriaCommands {
                                                 StringArgumentType.getString(ctx, "stat"),
                                                 FloatArgumentType.getFloat(ctx, "value"))))))
                 .then(Commands.literal("max")
-                        .requires(source -> source.hasPermission(2))
                         .executes(ctx -> maxMagic(ctx.getSource(), null))
                         .then(Commands.argument("school", StringArgumentType.word())
+                                .suggests(SCHOOL_SUGGESTIONS)
                                 .executes(ctx -> maxMagic(
                                         ctx.getSource(), StringArgumentType.getString(ctx, "school"))))));
     }
@@ -206,19 +220,29 @@ public final class EffecoriaCommands {
                 data.unlockSpell(spellId);
             }
         }
+        if (data.school() == MagicSchool.SEALS) {
+            for (SealWordDefinition word : SealWordRegistry.all().values()) {
+                data.unlockSealWord(word.id());
+            }
+        }
 
         PsiHelper.set(player, data);
         player.syncData(ModAttachments.PSI.get());
         String schoolKey = data.school().getSerializedName();
-        int spellCount = data.knownSpells().size();
+        int unlockCount = data.school() == MagicSchool.SEALS
+                ? data.knownSealWords().size()
+                : data.knownSpells().size();
         String breathPct = BreathingService.formatTotalPercent(data.breathingMastery());
         int psiCap = (int) data.maxPsi();
         int essence = data.essence();
+        String messageKey = data.school() == MagicSchool.SEALS
+                ? "message.effecoria.max_magic_seals"
+                : "message.effecoria.max_magic";
         source.sendSuccess(
                 () -> Component.translatable(
-                        "message.effecoria.max_magic",
+                        messageKey,
                         Component.translatable("school.effecoria." + schoolKey),
-                        spellCount,
+                        unlockCount,
                         breathPct,
                         psiCap,
                         essence),
@@ -287,6 +311,12 @@ public final class EffecoriaCommands {
         if (!data.initiated()) {
             source.sendFailure(Component.translatable("message.effecoria.not_initiated"));
             return 0;
+        }
+        if (data.school() == MagicSchool.SEALS) {
+            for (ResourceLocation wordId : data.knownSealWords()) {
+                source.sendSuccess(() -> Component.literal(wordId.toString()), false);
+            }
+            return data.knownSealWords().size();
         }
         for (ResourceLocation spellId : data.knownSpells()) {
             SpellRegistry.get(spellId).ifPresent(spell -> source.sendSuccess(
