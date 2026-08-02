@@ -410,6 +410,106 @@ public final class ModNetworking {
         }
     }
 
+    /** Server → nearby clients: area spacetime curvature (gravity well bowl, not a black hole). */
+    public record SpatialWarpFxPayload(
+            double x, double y, double z, float intensity, float radius, int durationTicks, boolean refresh)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<SpatialWarpFxPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "spatial_warp_fx"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, SpatialWarpFxPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, p) -> {
+                            buf.writeDouble(p.x());
+                            buf.writeDouble(p.y());
+                            buf.writeDouble(p.z());
+                            buf.writeFloat(p.intensity());
+                            buf.writeFloat(p.radius());
+                            buf.writeVarInt(p.durationTicks());
+                            buf.writeBoolean(p.refresh());
+                        },
+                        buf -> new SpatialWarpFxPayload(
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readFloat(),
+                                buf.readFloat(),
+                                buf.readVarInt(),
+                                buf.readBoolean()));
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(SpatialWarpFxPayload payload, IPayloadContext context) {
+            context.enqueueWork(
+                    () -> {
+                        if (payload.refresh()) {
+                            com.effecoria.client.SpatialWarpClient.pulse(
+                                    payload.x(),
+                                    payload.y(),
+                                    payload.z(),
+                                    payload.intensity(),
+                                    payload.radius(),
+                                    payload.durationTicks());
+                        } else {
+                            com.effecoria.client.SpatialWarpClient.trigger(
+                                    payload.x(),
+                                    payload.y(),
+                                    payload.z(),
+                                    payload.intensity(),
+                                    payload.radius(),
+                                    payload.durationTicks());
+                        }
+                    });
+        }
+    }
+
+    /** Server → nearby clients: expanding gravitational wave fronts. */
+    public record SpatialWaveFxPayload(
+            double x, double y, double z, float intensity, float radius, int durationTicks)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<SpatialWaveFxPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "spatial_wave_fx"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, SpatialWaveFxPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, p) -> {
+                            buf.writeDouble(p.x());
+                            buf.writeDouble(p.y());
+                            buf.writeDouble(p.z());
+                            buf.writeFloat(p.intensity());
+                            buf.writeFloat(p.radius());
+                            buf.writeVarInt(p.durationTicks());
+                        },
+                        buf -> new SpatialWaveFxPayload(
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readFloat(),
+                                buf.readFloat(),
+                                buf.readVarInt()));
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(SpatialWaveFxPayload payload, IPayloadContext context) {
+            context.enqueueWork(
+                    () -> com.effecoria.client.SpatialWaveClient.trigger(
+                            payload.x(),
+                            payload.y(),
+                            payload.z(),
+                            payload.intensity(),
+                            payload.radius(),
+                            payload.durationTicks()));
+        }
+    }
+
     /** Client reports a successful timing hit; server validates fatigue and grants rewards. */
     public record BreathTrainHitPayload() implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<BreathTrainHitPayload> TYPE =

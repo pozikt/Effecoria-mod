@@ -746,7 +746,7 @@
   "spell.effecoria.ward_glyph.desc": "Inscribes a fortify seal on a block.",
   "spell.effecoria.absolute_fold.desc": "Metric cocoon: brief near-invulnerability. Risk of sealing yourself.",
   "spell.effecoria.blink.desc": "Short teleport along your gaze. Wall exits are refused for safety.",
-  "spell.effecoria.dimensional_anchor.desc": "Time loop on a target. Risk of catching yourself; raises b.",
+  "spell.effecoria.dimensional_anchor.desc": "Locks a target into repeating the same actions toward where you stood. Risk of catching yourself; raises b.",
   "spell.effecoria.far_blink.desc": "Long jump. Without compass/beacon/anchor you may miss by tens of meters.",
   "spell.effecoria.subspace_voyage.desc": "Stable micro-world (subspace): refuge and lab outside ordinary space.",
   "spell.effecoria.rift_excise.desc": "Folds a small volume of matter into hyperspace — gone without drops.",
@@ -772,7 +772,7 @@
   "entity.effecoria.root_cage": "Root Cage",
   "spell.effecoria.fold_repulse.desc": "Antigravity pulse from you. Does not spare allies.",
   "spell.effecoria.gravity_snare.desc": "Shift local down — walk walls. May cause nausea.",
-  "spell.effecoria.gravity_well.desc": "Raises local gravity: foes crushed and slowed.",
+  "spell.effecoria.gravity_well.desc": "Warps space across an area into a gravity bowl: foes crushed and pulled in.",
   "spell.effecoria.phase_veil.desc": "Phases you briefly out of harm.",
   "spell.effecoria.rift_burst.desc": "Burst from a closing rift — damages and breaks nearby blocks.",
   "spell.effecoria.rift_slash.desc": "Micro-portal through the target — a clean cut. Needs precision.",
@@ -823,7 +823,7 @@
   "message.effecoria.spatial.cocoon_on": "Space cocoon sealed",
   "message.effecoria.spatial.cocoon_seal": "The cocoon nearly sealed you in!",
   "message.effecoria.spatial.pulsar": "Mini-pulsar flared — you are spent",
-  "message.effecoria.spatial.loop_cast": "The target is stuck in a moment-loop",
+  "message.effecoria.spatial.loop_cast": "The target is stuck repeating that moment toward your old position",
   "message.effecoria.spatial.loop_self": "The loop caught you too!",
   "message.effecoria.spatial.pocket_collapse": "Spatial pocket collapsed — items spilled out"
 }

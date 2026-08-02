@@ -1,0 +1,10 @@
+{
+  "stages": [
+    {
+      "type": "veil:blit",
+      "shader": "effecoria:spatial_wave",
+      "in": "minecraft:main",
+      "out": "veil:post"
+    }
+  ]
+}

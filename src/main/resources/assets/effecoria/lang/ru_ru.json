@@ -775,7 +775,7 @@
   "spell.effecoria.ward_glyph.desc": "Наносит на блок печать укрепления.",
   "spell.effecoria.absolute_fold.desc": "Кокон метрики: краткая почти-неуязвимость. Риск «запечатывания».",
   "spell.effecoria.blink.desc": "Короткая телепортация по взгляду. Ошибка в стене смертельна — ищем свободное место.",
-  "spell.effecoria.dimensional_anchor.desc": "Петля времени на цели. Риск самому попасть в неё; копит b.",
+  "spell.effecoria.dimensional_anchor.desc": "Цель повторяет одни и те же действия в точку, где ты стоял. Риск самому попасть в петлю; копит b.",
   "spell.effecoria.far_blink.desc": "Дальний прыжок. Без компаса/маяка/якоря — промах на десятки метров.",
   "spell.effecoria.subspace_voyage.desc": "Стабильный микро-мир (подпространство): убежище и лаборатория вне обычного мира.",
   "spell.effecoria.rift_excise.desc": "Складывает небольшой объём материи в гиперпространство — без дропа.",
@@ -801,7 +801,7 @@
   "entity.effecoria.root_cage": "Клетка корней",
   "spell.effecoria.fold_repulse.desc": "Импульс антигравитации от себя. Не различает своих и чужих.",
   "spell.effecoria.gravity_snare.desc": "Меняет вектор «низа» — ходишь по стенам. Может тошнить.",
-  "spell.effecoria.gravity_well.desc": "Усиливает тяжесть в области: враг прижат, кости трещат.",
+  "spell.effecoria.gravity_well.desc": "Искривляет пространство по площади в гравитационную чашу: враг прижат и стянут внутрь.",
   "spell.effecoria.phase_veil.desc": "Кратко фазирует вас из-под удара.",
   "spell.effecoria.rift_burst.desc": "Взрыв закрывающегося разлома — урон и ломка блоков вокруг.",
   "spell.effecoria.rift_slash.desc": "Микро-портал внутри цели — чистый разрез. Требует точного прицела.",
@@ -823,7 +823,7 @@
   "message.effecoria.spatial.cocoon_on": "Кокон пространства сомкнут",
   "message.effecoria.spatial.cocoon_seal": "Кокон почти запечатал тебя!",
   "message.effecoria.spatial.pulsar": "Мини-пульсар вспыхнул — ты на пределе",
-  "message.effecoria.spatial.loop_cast": "Цель застряла в петле мгновения",
+  "message.effecoria.spatial.loop_cast": "Цель зациклила мгновение и бьёт туда, где ты был",
   "message.effecoria.spatial.loop_self": "Петля задела и тебя!",
   "message.effecoria.spatial.pocket_collapse": "Пространственный карман схлапнулся — вещи выпали"
 }

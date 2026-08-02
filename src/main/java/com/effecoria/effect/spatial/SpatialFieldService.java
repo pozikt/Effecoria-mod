@@ -27,6 +27,7 @@ public final class SpatialFieldService {
         UUID owner;
         float pullStrength;
         float damagePerSecond;
+        float power;
     }
 
     private SpatialFieldService() {}
@@ -39,6 +40,18 @@ public final class SpatialFieldService {
             int durationTicks,
             float pullStrength,
             float damagePerSecond) {
+        spawnGravityWell(level, center, owner, radius, durationTicks, pullStrength, damagePerSecond, 55f);
+    }
+
+    public static void spawnGravityWell(
+            ServerLevel level,
+            Vec3 center,
+            UUID owner,
+            float radius,
+            int durationTicks,
+            float pullStrength,
+            float damagePerSecond,
+            float power) {
         GravityWell well = new GravityWell();
         well.level = level;
         well.center = center;
@@ -47,8 +60,10 @@ public final class SpatialFieldService {
         well.owner = owner;
         well.pullStrength = Math.max(0.02f, pullStrength);
         well.damagePerSecond = Math.max(0f, damagePerSecond);
+        well.power = power;
         WELLS.add(well);
         level.playSound(null, center.x, center.y, center.z, SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.5f, 0.5f);
+        SpatialVfx.playWarpField(level, center, well.radius, power, false);
     }
 
     public static void clearFor(UUID owner) {
@@ -65,6 +80,10 @@ public final class SpatialFieldService {
             if (now >= well.expireAt) {
                 toRemove.add(well);
                 continue;
+            }
+            // Sustain area curvature while the well lives.
+            if (now % 15 == 0) {
+                SpatialVfx.playWarpField(level, well.center, well.radius, well.power, true);
             }
             if (now % 20 == 0) {
                 tickWell(level, well);

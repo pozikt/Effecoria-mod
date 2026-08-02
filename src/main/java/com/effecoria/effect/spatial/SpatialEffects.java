@@ -111,7 +111,7 @@ public final class SpatialEffects {
         SpatialAugments.setLens(caster, caster.level().getGameTime() + duration);
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
         caster.displayClientMessage(Component.translatable("message.effecoria.spatial.lens_on"), true);
-        spawnSpatialParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        SpatialVfx.playRipple(caster, caster.position().add(0, 1, 0), power);
     }
 
     public static void foldRepulse(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
@@ -119,7 +119,7 @@ public final class SpatialEffects {
         float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 5f;
         float force = effect.params().has("force") ? effect.params().get("force").getAsFloat() : 2.4f;
         float damage = DiceDamage.fromParams(effect.params(), power, 2f);
-        Vec3 center = caster.position();
+        Vec3 center = caster.position().add(0, 0.5, 0);
         AABB box = caster.getBoundingBox().inflate(radius);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == caster) {
@@ -138,9 +138,8 @@ public final class SpatialEffects {
             entity.setDeltaMovement(entity.getDeltaMovement().add(away.scale(strength)).add(0, 0.35, 0));
             entity.hurt(SpellCombat.magic(caster), damage);
             entity.hurtMarked = true;
-            spawnSpatialParticles(level, entity.position().add(0, 1, 0));
         }
-        SpatialVfx.playRipple(caster, center.add(0, 1, 0), power);
+        SpatialVfx.playGravityWave(level, center, radius, power);
         level.playSound(null, caster.blockPosition(), SoundEvents.WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 0.8f, 0.7f);
     }
 
@@ -174,7 +173,7 @@ public final class SpatialEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.SLOW_FALLING, duration, 0, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.JUMP, duration, 1, false, false, true));
         caster.displayClientMessage(Component.translatable("message.effecoria.spatial.wall_walk"), true);
-        spawnSpatialParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        SpatialVfx.playRipple(caster, caster.position().add(0, 1, 0), power);
     }
 
     public static void gravityField(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -192,22 +191,28 @@ public final class SpatialEffects {
                 radius,
                 duration,
                 pull,
-                Math.max(dps, 1.5f));
+                Math.max(dps, 1.5f),
+                power);
         caster.displayClientMessage(Component.translatable("message.effecoria.spatial.gravity_well"), true);
     }
 
-    /** Chronal anomaly — freeze target in a short time loop. */
+    /** Chronal anomaly — freeze target in a short time loop aimed at the caster's position. */
     public static void dimensionalAnchor(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         if (target == null) {
             return;
         }
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
-        SpatialAugments.beginTimeLoop(target, caster.level().getGameTime() + duration);
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 6));
+        Vec3 aimPoint = caster.getEyePosition();
+        SpatialAugments.beginTimeLoop(target, caster.level().getGameTime() + duration, aimPoint);
+        // Root lightly — they must still be able to repeat attacks toward the frozen point.
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 2));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.GLOWING, duration, 0));
-        // Mage may slip into their own loop.
+        SpatialVfx.playRipple(caster, target.position().add(0, 1, 0), power);
+        SpatialVfx.playLensBend(caster.serverLevel(), aimPoint);
+        // Mage may slip into their own loop (aiming at where they stood).
         if (caster.getRandom().nextFloat() < 0.12f) {
-            SpatialAugments.beginTimeLoop(caster, caster.level().getGameTime() + duration / 2);
+            SpatialAugments.beginTimeLoop(
+                    caster, caster.level().getGameTime() + duration / 2, aimPoint);
             caster.displayClientMessage(Component.translatable("message.effecoria.spatial.loop_self"), true);
         }
         PlayerPsiData data = PsiHelper.get(caster);
@@ -389,7 +394,7 @@ public final class SpatialEffects {
                 Component.translatable("gui.effecoria.spatial_pocket")));
         // Persist on close via listener already writing into pocket list — flush attachment.
         caster.setData(ModAttachments.SPATIAL_POCKET.get(), pocket);
-        spawnSpatialParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        SpatialVfx.playPocketOpen(caster, power);
         caster.serverLevel()
                 .playSound(null, caster.blockPosition(), SoundEvents.ENDER_CHEST_OPEN, SoundSource.PLAYERS, 0.6f, 1.4f);
     }

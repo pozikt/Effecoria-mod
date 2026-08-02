@@ -4,9 +4,12 @@ import com.effecoria.EffecoriaMod;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.effect.spatial.SpatialAugments;
 import com.effecoria.effect.spatial.SpatialPocketData;
+import com.effecoria.effect.spatial.SpatialVfx;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.EntityHitResult;
@@ -15,6 +18,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -40,8 +44,9 @@ public final class SpatialAugmentEvents {
             return;
         }
         Projectile projectile = event.getProjectile();
-        // Lens / cocoon: bend trajectory around the mage.
+        // Lens / cocoon: bend trajectory around the mage and warp space at the contact point.
         event.setCanceled(true);
+        Vec3 impact = hit.getLocation();
         Vec3 away = projectile.position().subtract(living.position()).normalize();
         if (away.lengthSqr() < 1.0e-4) {
             away = living.getLookAngle();
@@ -49,6 +54,9 @@ public final class SpatialAugmentEvents {
         projectile.setDeltaMovement(away.scale(Math.max(0.6, projectile.getDeltaMovement().length())));
         projectile.hasImpulse = true;
         projectile.hurtMarked = true;
+        if (living.level() instanceof ServerLevel level) {
+            SpatialVfx.playLensBend(level, impact);
+        }
     }
 
     @SubscribeEvent
@@ -76,8 +84,34 @@ public final class SpatialAugmentEvents {
     }
 
     @SubscribeEvent
+    public static void onChangeTarget(LivingChangeTargetEvent event) {
+        if (!(event.getEntity() instanceof Mob mob) || mob.level().isClientSide()) {
+            return;
+        }
+        long time = mob.level().getGameTime();
+        if (!SpatialAugments.hasTimeLoop(mob, time)) {
+            return;
+        }
+        LivingEntity next = event.getNewAboutToBeSetTarget();
+        if (next != null && next.getTags().contains(SpatialAugments.ECHO_TAG)) {
+            return;
+        }
+        // Chronal lock — keep attacking the frozen echo point.
+        event.setCanceled(true);
+    }
+
+    @SubscribeEvent
     public static void onEntityTick(EntityTickEvent.Post event) {
-        if (!(event.getEntity() instanceof LivingEntity living) || living.level().isClientSide()) {
+        if (event.getEntity().level().isClientSide()) {
+            return;
+        }
+
+        if (event.getEntity() instanceof Projectile projectile) {
+            redirectLoopedProjectile(projectile);
+            return;
+        }
+
+        if (!(event.getEntity() instanceof LivingEntity living)) {
             return;
         }
         long time = living.level().getGameTime();
@@ -86,7 +120,6 @@ public final class SpatialAugmentEvents {
         if (SpatialAugments.hasWallWalk(living, time) && living instanceof ServerPlayer player) {
             // Artificial gravity — climb when pressed into a wall / ceiling.
             if (player.horizontalCollision) {
-                Vec3 look = player.getLookAngle();
                 double up = player.isShiftKeyDown() ? -0.25 : 0.28;
                 player.setDeltaMovement(player.getDeltaMovement().x * 0.7, up, player.getDeltaMovement().z * 0.7);
                 player.fallDistance = 0f;
@@ -104,13 +137,45 @@ public final class SpatialAugmentEvents {
         }
     }
 
+    /** Projectiles from a looped shooter keep flying at the frozen aim point. */
+    private static void redirectLoopedProjectile(Projectile projectile) {
+        if (!(projectile.getOwner() instanceof LivingEntity owner)) {
+            return;
+        }
+        long time = owner.level().getGameTime();
+        if (!SpatialAugments.hasTimeLoop(owner, time)) {
+            return;
+        }
+        if (projectile.tickCount > 8) {
+            return;
+        }
+        Vec3 aim = SpatialAugments.getLoopAim(owner);
+        if (aim == null) {
+            return;
+        }
+        Vec3 dir = aim.subtract(projectile.position());
+        if (dir.lengthSqr() < 1.0e-6) {
+            return;
+        }
+        double speed = Math.max(0.85, projectile.getDeltaMovement().length());
+        projectile.setDeltaMovement(dir.normalize().scale(speed));
+        projectile.hasImpulse = true;
+        projectile.hurtMarked = true;
+    }
+
     private static boolean lookUp(ServerPlayer player) {
         return player.getXRot() < -35f;
     }
 
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player) || player.level().isClientSide()) {
+        LivingEntity dead = event.getEntity();
+        if (dead.level().isClientSide()) {
+            return;
+        }
+        SpatialAugments.clearTimeLoop(dead);
+
+        if (!(dead instanceof ServerPlayer player)) {
             return;
         }
         SpatialPocketData pocket = player.getData(ModAttachments.SPATIAL_POCKET.get());

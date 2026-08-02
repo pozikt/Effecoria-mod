@@ -11,7 +11,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Set;
 
-/** Server-side Spatial VFX routing: singularity / cuts / blink ripples. */
+/** Server-side Spatial VFX routing: singularity / cuts / ripples / warp field / waves. */
 public final class SpatialVfx {
     public enum Bucket {
         SINGULARITY,
@@ -32,17 +32,13 @@ public final class SpatialVfx {
         }
     }
 
-    private static final Set<String> SINGULARITY = Set.of(
-            "gravity_snare",
-            "gravity_well",
-            "gravity_field",
-            "spatial_singularity");
+    /** Only the mini-pulsar keeps a true singularity look. */
+    private static final Set<String> SINGULARITY = Set.of("spatial_singularity");
 
     private static final Set<String> CUT = Set.of(
             "warp_bolt",
             "rift_slash",
             "void_lance",
-            "fold_repulse",
             "rift_burst",
             "spatial_surge",
             "rift_yank");
@@ -51,10 +47,10 @@ public final class SpatialVfx {
     private static final Set<String> RIPPLE = Set.of(
             "blink",
             "far_blink",
-            "void_step",
             "warp_exchange",
             "absolute_fold",
-            "rift_excise");
+            "rift_excise",
+            "spatial_ward");
 
     private static final Set<String> CUT_AROUND = Set.of("rift_slash", "rift_burst");
 
@@ -110,16 +106,70 @@ public final class SpatialVfx {
     }
 
     public static void playRipple(ServerPlayer caster, Vec3 focus, float power) {
+        playRipple(caster.serverLevel(), focus, power);
+    }
+
+    public static void playRipple(ServerLevel level, Vec3 focus, float power) {
         float intensity = Mth.clamp(power / 70f, 0.45f, 1.25f);
         int duration = 18 + Math.round(intensity * 10f);
         PacketDistributor.sendToPlayersNear(
-                caster.serverLevel(),
+                level,
                 null,
                 focus.x,
                 focus.y,
                 focus.z,
                 48.0,
                 new ModNetworking.SpatialRippleFxPayload(focus.x, focus.y, focus.z, intensity, duration));
+    }
+
+    /** Short lens bend flash at a projectile deflection / impact point. */
+    public static void playLensBend(ServerLevel level, Vec3 focus) {
+        PacketDistributor.sendToPlayersNear(
+                level,
+                null,
+                focus.x,
+                focus.y,
+                focus.z,
+                40.0,
+                new ModNetworking.SpatialRippleFxPayload(focus.x, focus.y, focus.z, 0.85f, 14));
+    }
+
+    public static void playWarpField(ServerLevel level, Vec3 center, float radius, float power, boolean refresh) {
+        float intensity = Mth.clamp(power / 70f, 0.55f, 1.25f);
+        int duration = refresh ? 45 : 90;
+        PacketDistributor.sendToPlayersNear(
+                level,
+                null,
+                center.x,
+                center.y,
+                center.z,
+                64.0,
+                new ModNetworking.SpatialWarpFxPayload(
+                        center.x, center.y, center.z, intensity, radius, duration, refresh));
+    }
+
+    public static void playGravityWave(ServerLevel level, Vec3 center, float radius, float power) {
+        float intensity = Mth.clamp(power / 70f, 0.55f, 1.4f);
+        int duration = 22 + Math.round(intensity * 8f);
+        PacketDistributor.sendToPlayersNear(
+                level,
+                null,
+                center.x,
+                center.y,
+                center.z,
+                56.0,
+                new ModNetworking.SpatialWaveFxPayload(
+                        center.x, center.y, center.z, intensity, radius, duration));
+    }
+
+    /** Pocket mouth — vertical seam + soft ripple (never a singularity). */
+    public static void playPocketOpen(ServerPlayer caster, float power) {
+        Vec3 eye = caster.getEyePosition();
+        Vec3 look = caster.getLookAngle().normalize();
+        Vec3 mouth = eye.add(look.scale(1.15));
+        Vec3 up = new Vec3(0, 0.85, 0);
+        playCut(caster, mouth.subtract(up), mouth.add(up), Mth.clamp(power / 70f, 0.5f, 1.2f), 1, CutMode.LINE);
+        playRipple(caster.serverLevel(), mouth, power * 0.9f);
     }
 
     public static void playCut(
