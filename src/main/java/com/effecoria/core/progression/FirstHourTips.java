@@ -52,9 +52,6 @@ public final class FirstHourTips {
 
         Component body = Component.translatable("tip.effecoria." + tip.name().toLowerCase());
         player.displayClientMessage(body, true);
-        player.sendSystemMessage(Component.translatable(
-                "tip.effecoria.primer_hint",
-                Component.translatable("item.effecoria.magic_primer")));
         return true;
     }
 

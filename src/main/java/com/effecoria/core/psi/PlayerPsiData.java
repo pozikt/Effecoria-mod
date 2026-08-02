@@ -50,6 +50,7 @@ public final class PlayerPsiData {
                 ByteBufCodecs.BOOL.encode(buf, data.seenEntropyWarn);
                 ByteBufCodecs.BOOL.encode(buf, data.seenEntropyTutorial);
                 ByteBufCodecs.VAR_INT.encode(buf, data.primerTipsMask);
+                ByteBufCodecs.VAR_INT.encode(buf, data.primerSeenMask);
                 ByteBufCodecs.VAR_INT.encode(buf, data.castSuccessStreak);
                 ByteBufCodecs.FLOAT.encode(buf, data.necroReservedPsi);
                 ByteBufCodecs.VAR_LONG.encode(buf, data.overcastUntil);
@@ -103,6 +104,7 @@ public final class PlayerPsiData {
                 data.seenEntropyWarn = ByteBufCodecs.BOOL.decode(buf);
                 data.seenEntropyTutorial = ByteBufCodecs.BOOL.decode(buf);
                 data.primerTipsMask = ByteBufCodecs.VAR_INT.decode(buf);
+                data.primerSeenMask = ByteBufCodecs.VAR_INT.decode(buf);
                 data.castSuccessStreak = ByteBufCodecs.VAR_INT.decode(buf);
                 data.necroReservedPsi = ByteBufCodecs.FLOAT.decode(buf);
                 data.overcastUntil = ByteBufCodecs.VAR_LONG.decode(buf);
@@ -163,6 +165,8 @@ public final class PlayerPsiData {
     private boolean seenEntropyTutorial;
     /** Bitmask of first-hour tip IDs already shown ({@link com.effecoria.core.progression.FirstHourTips}). */
     private int primerTipsMask;
+    /** Bitmask of Magic Primer chapters the player has opened ({@link com.effecoria.core.progression.PrimerChapters}). */
+    private int primerSeenMask;
     private int castSuccessStreak;
     /** Synced thrall Ψ reserve for client HUD (server recalculates each tick). */
     private float necroReservedPsi;
@@ -484,6 +488,14 @@ public final class PlayerPsiData {
         this.primerTipsMask = value;
     }
 
+    public int primerSeenMask() {
+        return primerSeenMask;
+    }
+
+    public void setPrimerSeenMask(int value) {
+        this.primerSeenMask = value;
+    }
+
     public int castSuccessStreak() {
         return castSuccessStreak;
     }
@@ -693,6 +705,7 @@ public final class PlayerPsiData {
         tag.putBoolean("seenEntropyWarn", seenEntropyWarn);
         tag.putBoolean("seenEntropyTutorial", seenEntropyTutorial);
         tag.putInt("primerTipsMask", primerTipsMask);
+        tag.putInt("primerSeenMask", primerSeenMask);
         tag.putInt("castSuccessStreak", castSuccessStreak);
         tag.putLong("overcastUntil", overcastUntil);
         tag.putFloat("overcastSeverity", overcastSeverity);
@@ -766,6 +779,7 @@ public final class PlayerPsiData {
         seenEntropyWarn = tag.contains("seenEntropyWarn") && tag.getBoolean("seenEntropyWarn");
         seenEntropyTutorial = tag.contains("seenEntropyTutorial") && tag.getBoolean("seenEntropyTutorial");
         primerTipsMask = tag.contains("primerTipsMask") ? tag.getInt("primerTipsMask") : 0;
+        primerSeenMask = tag.contains("primerSeenMask") ? tag.getInt("primerSeenMask") : 0;
         castSuccessStreak = tag.contains("castSuccessStreak") ? tag.getInt("castSuccessStreak") : 0;
         overcastUntil = tag.contains("overcastUntil") ? tag.getLong("overcastUntil") : 0L;
         overcastSeverity = tag.contains("overcastSeverity") ? tag.getFloat("overcastSeverity") : 0f;
@@ -873,6 +887,7 @@ public final class PlayerPsiData {
         copy.seenEntropyWarn = seenEntropyWarn;
         copy.seenEntropyTutorial = seenEntropyTutorial;
         copy.primerTipsMask = primerTipsMask;
+        copy.primerSeenMask = primerSeenMask;
         copy.castSuccessStreak = castSuccessStreak;
         copy.necroReservedPsi = necroReservedPsi;
         copy.necroThrallIds = new ArrayList<>(necroThrallIds);

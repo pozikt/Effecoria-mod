@@ -51,12 +51,21 @@ public class SpellHubScreen extends Screen {
             hubTipSent = true;
             PacketDistributor.sendToServer(new ModNetworking.HubOpenedPayload());
         }
-        // Top-left — keep bottom free for hover panel + constellation rim.
-        addRenderableWidget(Button.builder(Component.translatable("gui.effecoria.hub.primer"), b -> {
+        addRenderableWidget(Button.builder(primerLabel(), b -> {
                     ClientGuiHooks.openMagicGuide(this);
                 })
-                .bounds(8, 8, 72, 18)
+                .bounds(8, 8, 88, 18)
                 .build());
+    }
+
+    private Component primerLabel() {
+        if (minecraft != null && minecraft.player != null) {
+            PlayerPsiData data = minecraft.player.getData(ModAttachments.PSI.get());
+            if (com.effecoria.core.progression.PrimerChapters.hasUnseen(data)) {
+                return Component.translatable("gui.effecoria.hub.primer_new");
+            }
+        }
+        return Component.translatable("gui.effecoria.hub.primer");
     }
 
     /** Hub draws its own veil; menu blur smears spell nodes drawn before widgets. */

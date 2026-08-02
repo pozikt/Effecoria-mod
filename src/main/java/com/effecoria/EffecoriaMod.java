@@ -169,6 +169,10 @@ public class EffecoriaMod {
                 ModNetworking.HubOpenedPayload.TYPE,
                 ModNetworking.HubOpenedPayload.STREAM_CODEC,
                 ModNetworking.HubOpenedPayload::handle);
+        registrar.playToServer(
+                ModNetworking.MarkPrimerChapterSeenPayload.TYPE,
+                ModNetworking.MarkPrimerChapterSeenPayload.STREAM_CODEC,
+                ModNetworking.MarkPrimerChapterSeenPayload::handle);
     }
 
 }

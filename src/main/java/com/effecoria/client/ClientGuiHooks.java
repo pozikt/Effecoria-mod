@@ -26,7 +26,7 @@ public final class ClientGuiHooks {
         Minecraft.getInstance().setScreen(new MagicGuideScreen(parent));
     }
 
-    public static void openMagicGuideChapter(MagicGuideScreen.Chapter chapter) {
+    public static void openMagicGuideChapter(com.effecoria.core.progression.PrimerChapters.Chapter chapter) {
         Minecraft.getInstance().setScreen(new MagicGuideScreen(chapter));
     }
 }

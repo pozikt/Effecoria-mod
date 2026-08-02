@@ -758,4 +758,43 @@ public final class ModNetworking {
             });
         }
     }
+
+    /** Client marks a Magic Primer chapter as read — NEW badges / foil stay in sync. */
+    public record MarkPrimerChapterSeenPayload(int chapterBit) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<MarkPrimerChapterSeenPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "primer_chapter_seen"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, MarkPrimerChapterSeenPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.VAR_INT,
+                        MarkPrimerChapterSeenPayload::chapterBit,
+                        MarkPrimerChapterSeenPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(MarkPrimerChapterSeenPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                com.effecoria.core.progression.PrimerChapters.Chapter chapter =
+                        com.effecoria.core.progression.PrimerChapters.byBitIndex(payload.chapterBit());
+                if (chapter == null) {
+                    return;
+                }
+                var data = com.effecoria.core.psi.PsiHelper.get(player);
+                int next = data.primerSeenMask() | chapter.mask();
+                if (next == data.primerSeenMask()) {
+                    return;
+                }
+                data.setPrimerSeenMask(next);
+                com.effecoria.core.psi.PsiHelper.set(player, data);
+                player.syncData(com.effecoria.core.psi.ModAttachments.PSI.get());
+            });
+        }
+    }
 }
