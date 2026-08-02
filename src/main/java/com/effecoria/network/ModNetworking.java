@@ -800,7 +800,7 @@ public final class ModNetworking {
 
     /** Server opens Organic gene editor for a living host. */
     public record OpenGeneEditorPayload(
-            int entityId, String targetName, List<String> current, List<String> unlocked)
+            int entityId, String targetName, List<String> current, List<String> unlocked, int maxSlots)
             implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<OpenGeneEditorPayload> TYPE =
                 new CustomPacketPayload.Type<>(
@@ -819,6 +819,8 @@ public final class ModNetworking {
                         OpenGeneEditorPayload::current,
                         STRING_LIST,
                         OpenGeneEditorPayload::unlocked,
+                        ByteBufCodecs.VAR_INT,
+                        OpenGeneEditorPayload::maxSlots,
                         OpenGeneEditorPayload::new);
 
         @Override
@@ -828,7 +830,11 @@ public final class ModNetworking {
 
         public static void handle(OpenGeneEditorPayload payload, IPayloadContext context) {
             context.enqueueWork(() -> com.effecoria.client.ClientGuiHooks.openGeneEditor(
-                    payload.entityId(), payload.targetName(), payload.current(), payload.unlocked()));
+                    payload.entityId(),
+                    payload.targetName(),
+                    payload.current(),
+                    payload.unlocked(),
+                    payload.maxSlots()));
         }
     }
 

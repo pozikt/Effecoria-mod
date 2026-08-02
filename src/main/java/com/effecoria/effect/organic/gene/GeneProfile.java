@@ -23,6 +23,9 @@ public final class GeneProfile {
                 ByteBufCodecs.VAR_INT.encode(buf, data.modMask);
                 ByteBufCodecs.FLOAT.encode(buf, data.regenAccruedFraction);
                 ByteBufCodecs.VAR_LONG.encode(buf, data.appliedGameTime);
+                ByteBufCodecs.FLOAT.encode(buf, data.psiBonusApplied);
+                ByteBufCodecs.FLOAT.encode(buf, data.phiBonusApplied);
+                ByteBufCodecs.VAR_INT.encode(buf, data.mutationCycles);
                 ByteBufCodecs.BOOL.encode(buf, data.engineerId != null);
                 if (data.engineerId != null) {
                     buf.writeUUID(data.engineerId);
@@ -33,6 +36,9 @@ public final class GeneProfile {
                 data.modMask = ByteBufCodecs.VAR_INT.decode(buf);
                 data.regenAccruedFraction = ByteBufCodecs.FLOAT.decode(buf);
                 data.appliedGameTime = ByteBufCodecs.VAR_LONG.decode(buf);
+                data.psiBonusApplied = ByteBufCodecs.FLOAT.decode(buf);
+                data.phiBonusApplied = ByteBufCodecs.FLOAT.decode(buf);
+                data.mutationCycles = ByteBufCodecs.VAR_INT.decode(buf);
                 if (ByteBufCodecs.BOOL.decode(buf)) {
                     data.engineerId = buf.readUUID();
                 }
@@ -43,6 +49,11 @@ public final class GeneProfile {
     /** Cumulative HP healed as fraction of max — spends hunger/slow every 0.25. */
     private float regenAccruedFraction;
     private long appliedGameTime;
+    /** Reversible Φ-heart bonuses applied to PlayerPsiData. */
+    private float psiBonusApplied;
+    private float phiBonusApplied;
+    /** Cell-immortality replication error counter. */
+    private int mutationCycles;
     @Nullable
     private UUID engineerId;
 
@@ -82,6 +93,27 @@ public final class GeneProfile {
         return appliedGameTime;
     }
 
+    public float psiBonusApplied() {
+        return psiBonusApplied;
+    }
+
+    public float phiBonusApplied() {
+        return phiBonusApplied;
+    }
+
+    public void setChannelBonuses(float psiBonus, float phiBonus) {
+        this.psiBonusApplied = psiBonus;
+        this.phiBonusApplied = phiBonus;
+    }
+
+    public int mutationCycles() {
+        return mutationCycles;
+    }
+
+    public void addMutationCycle() {
+        mutationCycles = Math.min(99, mutationCycles + 1);
+    }
+
     @Nullable
     public UUID engineerId() {
         return engineerId;
@@ -92,13 +124,17 @@ public final class GeneProfile {
         this.engineerId = engineer;
         this.appliedGameTime = gameTime;
         this.regenAccruedFraction = 0f;
+        // Keep mutationCycles across rewrites — DNA remembers strain.
     }
 
     public void clear() {
         modMask = 0;
         regenAccruedFraction = 0f;
         appliedGameTime = 0L;
+        psiBonusApplied = 0f;
+        phiBonusApplied = 0f;
         engineerId = null;
+        // mutationCycles intentionally kept
     }
 
     public List<String> modIds() {
@@ -121,6 +157,9 @@ public final class GeneProfile {
         }
         regenAccruedFraction = tag.contains("regenAccrued") ? tag.getFloat("regenAccrued") : 0f;
         appliedGameTime = tag.contains("appliedAt") ? tag.getLong("appliedAt") : 0L;
+        psiBonusApplied = tag.contains("psiBonus") ? tag.getFloat("psiBonus") : 0f;
+        phiBonusApplied = tag.contains("phiBonus") ? tag.getFloat("phiBonus") : 0f;
+        mutationCycles = tag.contains("mutationCycles") ? tag.getInt("mutationCycles") : 0;
         engineerId = tag.hasUUID("engineer") ? tag.getUUID("engineer") : null;
     }
 
@@ -134,6 +173,9 @@ public final class GeneProfile {
         tag.put("mods", list);
         tag.putFloat("regenAccrued", regenAccruedFraction);
         tag.putLong("appliedAt", appliedGameTime);
+        tag.putFloat("psiBonus", psiBonusApplied);
+        tag.putFloat("phiBonus", phiBonusApplied);
+        tag.putInt("mutationCycles", mutationCycles);
         if (engineerId != null) {
             tag.putUUID("engineer", engineerId);
         }

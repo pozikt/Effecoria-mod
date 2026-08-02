@@ -676,10 +676,11 @@ public final class OrganicEffects {
             return;
         }
         String name = host.getName().getString();
+        int slots = com.effecoria.effect.organic.gene.GeneEngineeringService.slotsFor(caster);
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
                 caster,
                 new com.effecoria.network.ModNetworking.OpenGeneEditorPayload(
-                        host.getId(), name, profile.modIds(), unlocked));
+                        host.getId(), name, profile.modIds(), unlocked, slots));
         spawnDna(caster.serverLevel(), host.position().add(0, 1, 0));
         caster.serverLevel()
                 .playSound(

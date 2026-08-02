@@ -32,7 +32,11 @@ public final class ClientGuiHooks {
     }
 
     public static void openGeneEditor(
-            int entityId, String targetName, java.util.List<String> current, java.util.List<String> unlocked) {
-        Minecraft.getInstance().setScreen(new GeneEditorScreen(entityId, targetName, current, unlocked));
+            int entityId,
+            String targetName,
+            java.util.List<String> current,
+            java.util.List<String> unlocked,
+            int maxSlots) {
+        Minecraft.getInstance().setScreen(new GeneEditorScreen(entityId, targetName, current, unlocked, maxSlots));
     }
 }

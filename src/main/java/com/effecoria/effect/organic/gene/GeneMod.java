@@ -10,29 +10,49 @@ import java.util.Set;
 import net.minecraft.network.chat.Component;
 
 /**
- * Stage-I gene grafts an Organic mage can inscribe onto a living host.
- * Keep bits stable — append only.
+ * Organic gene grafts. Bit indices are stable — append new mods only at the end.
+ *
+ * <p>Tier 1 = basic body craft, Tier 2 = advanced, Tier 3 = master / near-metamorphosis.
  */
 public enum GeneMod {
-    HYPER_REGEN(0, 0.55f, 18f),
-    SPRINT_LIMBS(1, 0.40f, 12f),
-    KEEN_EYES(2, 0.40f, 10f),
-    ECHO_SENSE(3, 0.65f, 16f),
-    ORKANUMN_WEAVE(4, 0.50f, 14f),
-    KERATIN_PLATES(5, 0.45f, 12f),
-    GILL_BUDS(6, 0.55f, 12f),
-    TOXIN_GLANDS(7, 0.70f, 16f);
+    // —— Tier 1 (existing bits 0–7 kept) ——
+    HYPER_REGEN(0, Tier.BASIC, 0.55f, 18f, false),
+    SPRINT_LIMBS(1, Tier.BASIC, 0.40f, 12f, false),
+    KEEN_EYES(2, Tier.BASIC, 0.40f, 10f, false),
+    ECHO_SENSE(3, Tier.ADVANCED, 0.65f, 16f, false),
+    ORKANUMN_WEAVE(4, Tier.BASIC, 0.50f, 14f, false),
+    KERATIN_PLATES(5, Tier.BASIC, 0.45f, 12f, false),
+    GILL_BUDS(6, Tier.BASIC, 0.50f, 12f, false),
+    TOXIN_GLANDS(7, Tier.ADVANCED, 0.70f, 16f, false),
+    // —— New ——
+    BONE_WEAPONS(8, Tier.BASIC, 0.42f, 12f, false),
+    MUSCLE_HYPERTROPHY(9, Tier.BASIC, 0.48f, 14f, false),
+    MEMBRANE_WINGS(10, Tier.ADVANCED, 0.72f, 22f, false),
+    EXTRA_LIMBS(11, Tier.ADVANCED, 0.75f, 20f, false),
+    LIMB_REGEN(12, Tier.ADVANCED, 0.78f, 24f, false),
+    BEAST_MORPH(13, Tier.MASTER, 0.88f, 28f, false),
+    PHI_HEART(14, Tier.MASTER, 0.90f, 32f, true),
+    CELL_IMMORTAL(15, Tier.MASTER, 0.92f, 30f, true),
+    SYMBIOTE_COLONY(16, Tier.MASTER, 0.85f, 26f, true);
 
-    public static final int MAX_SLOTS = 2;
+    public enum Tier {
+        BASIC,
+        ADVANCED,
+        MASTER
+    }
 
     private final int bitIndex;
+    private final Tier tier;
     private final float minMastery;
     private final float applyPsiCost;
+    private final boolean playerOnly;
 
-    GeneMod(int bitIndex, float minMastery, float applyPsiCost) {
+    GeneMod(int bitIndex, Tier tier, float minMastery, float applyPsiCost, boolean playerOnly) {
         this.bitIndex = bitIndex;
+        this.tier = tier;
         this.minMastery = minMastery;
         this.applyPsiCost = applyPsiCost;
+        this.playerOnly = playerOnly;
     }
 
     public int bitIndex() {
@@ -41,6 +61,10 @@ public enum GeneMod {
 
     public int mask() {
         return 1 << bitIndex;
+    }
+
+    public Tier tier() {
+        return tier;
     }
 
     public String id() {
@@ -55,6 +79,10 @@ public enum GeneMod {
         return applyPsiCost;
     }
 
+    public boolean playerOnly() {
+        return playerOnly;
+    }
+
     public Component title() {
         return Component.translatable("gene.effecoria." + id());
     }
@@ -65,6 +93,21 @@ public enum GeneMod {
 
     public Component cost() {
         return Component.translatable("gene.effecoria." + id() + ".cost");
+    }
+
+    public Component tierLabel() {
+        return Component.translatable("gene.effecoria.tier." + tier.name().toLowerCase(Locale.ROOT));
+    }
+
+    /** Graft slots scale with engineer breathing mastery. */
+    public static int maxSlots(float mastery) {
+        if (mastery >= 0.82f) {
+            return 4;
+        }
+        if (mastery >= 0.60f) {
+            return 3;
+        }
+        return 2;
     }
 
     public static Optional<GeneMod> byId(String id) {
@@ -98,6 +141,24 @@ public enum GeneMod {
             return false;
         }
         if (chosen.contains(HYPER_REGEN) && chosen.contains(TOXIN_GLANDS)) {
+            return false;
+        }
+        if (chosen.contains(HYPER_REGEN) && chosen.contains(LIMB_REGEN)) {
+            return false;
+        }
+        if (chosen.contains(MUSCLE_HYPERTROPHY) && chosen.contains(EXTRA_LIMBS)) {
+            return false;
+        }
+        if (chosen.contains(MEMBRANE_WINGS) && chosen.contains(GILL_BUDS)) {
+            return false;
+        }
+        if (chosen.contains(PHI_HEART) && chosen.contains(SYMBIOTE_COLONY)) {
+            return false;
+        }
+        if (chosen.contains(BEAST_MORPH) && chosen.contains(CELL_IMMORTAL)) {
+            return false;
+        }
+        if (chosen.contains(BONE_WEAPONS) && chosen.contains(TOXIN_GLANDS)) {
             return false;
         }
         return true;

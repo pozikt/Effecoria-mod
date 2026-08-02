@@ -1,9 +1,9 @@
 package com.effecoria.event;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.effect.organic.gene.GeneEngineeringService;
 import com.effecoria.effect.organic.gene.GeneProfile;
-import com.effecoria.core.psi.ModAttachments;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -27,14 +27,15 @@ public final class GeneEngineeringEvents {
 
     @SubscribeEvent
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
-        LivingEntity host = event.getEntity();
-        if (host.level().isClientSide()) {
+        LivingEntity victim = event.getEntity();
+        if (victim.level().isClientSide()) {
             return;
         }
-        var source = event.getSource().getEntity();
-        if (source instanceof LivingEntity attacker) {
-            GeneEngineeringService.onHostHurt(host, attacker);
+        if (!(event.getSource().getEntity() instanceof LivingEntity attacker)) {
+            return;
         }
+        GeneEngineeringService.onHostHurt(victim, attacker);
+        GeneEngineeringService.onHostAttack(attacker, victim, bonus -> event.setAmount(event.getAmount() + bonus));
     }
 
     @SubscribeEvent
