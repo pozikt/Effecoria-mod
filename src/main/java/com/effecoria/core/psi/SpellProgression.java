@@ -172,26 +172,23 @@ public final class SpellProgression {
                     id("soul_reaper"));
 
             case SPATIAL -> List.of(
-                    id("blink"),
+                    // I — basic
                     id("warp_bolt"),
-                    id("phase_veil"),
-                    id("spatial_ward"),
-                    id("rift_yank"),
-                    id("fold_repulse"),
-                    id("rift_slash"),
-                    id("gravity_snare"),
+                    id("blink"),
                     id("void_step"),
-                    id("dimensional_anchor"),
+                    // II — advanced
                     id("far_blink"),
-                    id("subspace_voyage"),
-                    id("rift_excise"),
+                    id("spatial_ward"),
                     id("gravity_well"),
-                    id("warp_exchange"),
-                    id("spatial_surge"),
-                    id("void_lance"),
-                    id("rift_burst"),
+                    id("fold_repulse"),
+                    // III — master
+                    id("absolute_fold"),
+                    id("gravity_snare"),
+                    id("rift_slash"),
+                    // IV — legendary
                     id("spatial_singularity"),
-                    id("absolute_fold"));
+                    id("dimensional_anchor"),
+                    id("subspace_voyage"));
 
             case CORRUPTION -> List.of(
                     id("corrupt_mark"),

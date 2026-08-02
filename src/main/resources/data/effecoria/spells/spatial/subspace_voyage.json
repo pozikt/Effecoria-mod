@@ -1,13 +1,13 @@
 {
   "id": "effecoria:subspace_voyage",
   "school": "spatial",
-  "frequency_hz": 140.0,
-  "base_cost": 32,
-  "power_multiplier": 1.1,
-  "side_entropy": 0.1,
-  "min_phi": 0.28,
-  "min_mastery": 0.35,
-  "radial_category": "movement",
+  "frequency_hz": 155.0,
+  "base_cost": 36,
+  "power_multiplier": 1.12,
+  "side_entropy": 0.16,
+  "min_phi": 0.75,
+  "min_mastery": 0.92,
+  "radial_category": "utility",
   "effects": [
     {
       "type": "effecoria:subspace_voyage"

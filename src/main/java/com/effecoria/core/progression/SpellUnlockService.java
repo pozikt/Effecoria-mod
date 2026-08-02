@@ -52,12 +52,25 @@ public final class SpellUnlockService {
             "death_coil",
             "death_apotheosis");
 
+    /** Filler dropped when spatial was slimmed to lore pillars. */
+    private static final Set<String> RETIRED_SPATIAL_FILLER = Set.of(
+            "phase_veil",
+            "rift_yank",
+            "rift_excise",
+            "warp_exchange",
+            "spatial_surge",
+            "void_lance",
+            "rift_burst");
+
     private SpellUnlockService() {}
 
     public static void stripRemovedSummons(PlayerPsiData data) {
         data.knownSpells().removeIf(id -> REMOVED_SUMMON_PATHS.contains(id.getPath()));
         if (data.school() == MagicSchool.NECROMANCY) {
             data.knownSpells().removeIf(id -> RETIRED_NECRO_FILLER.contains(id.getPath()));
+        }
+        if (data.school() == MagicSchool.SPATIAL) {
+            data.knownSpells().removeIf(id -> RETIRED_SPATIAL_FILLER.contains(id.getPath()));
         }
         data.setSelectedSpellIndex(data.selectedSpellIndex());
     }

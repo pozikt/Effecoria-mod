@@ -1,20 +1,17 @@
 {
   "id": "effecoria:absolute_fold",
   "school": "spatial",
-  "frequency_hz": 145.0,
-  "base_cost": 23,
-  "power_multiplier": 1.1,
-  "side_entropy": 0.1,
-  "min_phi": 0.45,
-  "min_mastery": 0.6,
-  "radial_category": "movement",
+  "frequency_hz": 140.0,
+  "base_cost": 28,
+  "power_multiplier": 1.12,
+  "side_entropy": 0.14,
+  "min_phi": 0.55,
+  "min_mastery": 0.68,
+  "radial_category": "utility",
   "effects": [
     {
       "type": "effecoria:absolute_fold",
-      "range": 220,
-      "max_range": 220,
-      "min_range": 5,
-      "veil_ticks": 100
+      "veil_ticks": 80
     }
   ]
 }

@@ -1,18 +1,17 @@
 {
   "id": "effecoria:spatial_ward",
   "school": "spatial",
-  "frequency_hz": 119.0,
-  "base_cost": 10,
-  "power_multiplier": 1.1,
-  "side_entropy": 0.05,
-  "min_phi": 0.15,
-  "min_mastery": 0.14,
+  "frequency_hz": 110.0,
+  "base_cost": 14,
+  "power_multiplier": 1.05,
+  "side_entropy": 0.07,
+  "min_phi": 0.28,
+  "min_mastery": 0.42,
   "radial_category": "utility",
   "effects": [
     {
       "type": "effecoria:spatial_ward",
-      "duration_ticks": 160,
-      "absorption_amplifier": 1
+      "duration_ticks": 160
     }
   ]
 }

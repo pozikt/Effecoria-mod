@@ -133,6 +133,32 @@ public final class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    /** Spatial pocket inventory — dumps on death (no copyOnDeath). */
+    public static final Supplier<AttachmentType<com.effecoria.effect.spatial.SpatialPocketData>> SPATIAL_POCKET =
+            ATTACHMENT_TYPES.register(
+                    "spatial_pocket",
+                    () -> AttachmentType.builder(com.effecoria.effect.spatial.SpatialPocketData::createDefault)
+                            .serialize(new IAttachmentSerializer<>() {
+                                @Override
+                                public com.effecoria.effect.spatial.SpatialPocketData read(
+                                        IAttachmentHolder holder, Tag tag, HolderLookup.Provider provider) {
+                                    com.effecoria.effect.spatial.SpatialPocketData data =
+                                            com.effecoria.effect.spatial.SpatialPocketData.createDefault();
+                                    if (tag instanceof CompoundTag compound) {
+                                        data.load(provider, compound);
+                                    }
+                                    return data;
+                                }
+
+                                @Override
+                                public Tag write(
+                                        com.effecoria.effect.spatial.SpatialPocketData attachment,
+                                        HolderLookup.Provider provider) {
+                                    return attachment.save(provider);
+                                }
+                            })
+                            .build());
+
     public static void register(IEventBus modEventBus) {
         ATTACHMENT_TYPES.register(modEventBus);
     }

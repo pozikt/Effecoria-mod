@@ -5,17 +5,28 @@ import com.effecoria.core.formula.SpellCombat;
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.core.formula.DiceDamage;
 import com.effecoria.core.magic.SpellEffectEntry;
+import com.effecoria.core.psi.ModAttachments;
+import com.effecoria.core.psi.PlayerPsiData;
+import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.world.ModDimensions;
 import com.google.gson.JsonObject;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -24,42 +35,113 @@ import net.minecraft.world.phys.Vec3;
 public final class SpatialEffects {
     private SpatialEffects() {}
 
+    /** Φ-location — sense cavities, traps, invisible entities. */
     public static void warpBolt(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        Vec3 hit = target != null ? target.position().add(0, 1.0, 0) : aim;
-        if (target != null) {
-            float damage = DiceDamage.fromParams(effect.params(), power, 5f);
-            target.hurt(SpellCombat.magic(caster), damage);
-            target.hurtMarked = true;
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 12f;
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 80;
+        int cavities = 0;
+        int traps = 0;
+        int hidden = 0;
+
+        BlockPos origin = caster.blockPosition();
+        int r = Math.min(16, Math.round(radius));
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dy = -4; dy <= 4; dy++) {
+                for (int dz = -r; dz <= r; dz++) {
+                    if (dx * dx + dz * dz > r * r) {
+                        continue;
+                    }
+                    cursor.set(origin.getX() + dx, origin.getY() + dy, origin.getZ() + dz);
+                    BlockState state = level.getBlockState(cursor);
+                    Block block = state.getBlock();
+                    if (block == Blocks.TRIPWIRE
+                            || block == Blocks.TRIPWIRE_HOOK
+                            || block == Blocks.STONE_PRESSURE_PLATE
+                            || block == Blocks.OAK_PRESSURE_PLATE
+                            || block == Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE
+                            || block == Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE
+                            || block == Blocks.SCULK_SENSOR
+                            || block == Blocks.CALIBRATED_SCULK_SENSOR) {
+                        traps++;
+                    }
+                    if (state.isAir()) {
+                        int solids = 0;
+                        for (var dir : net.minecraft.core.Direction.values()) {
+                            if (level.getBlockState(cursor.relative(dir)).isSolidRender(level, cursor.relative(dir))) {
+                                solids++;
+                            }
+                        }
+                        if (solids >= 4) {
+                            cavities++;
+                        }
+                    }
+                }
+            }
         }
-        cutAlongCasterLook(caster, hit, power);
-        SpatialVfx.playLineFromCaster(caster, hit, power, 2);
-        finishHit(level, target != null ? target.position() : aim);
+
+        AABB box = caster.getBoundingBox().inflate(radius);
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (entity == caster) {
+                continue;
+            }
+            if (entity.isInvisible() || entity.hasEffect(MobEffects.INVISIBILITY)) {
+                BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false, true));
+                hidden++;
+            }
+        }
+
+        if (ModDimensions.isSubspace(level) || caster.getData(ModAttachments.SUBSPACE_VOYAGE.get()).active()) {
+            BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.CONFUSION, 60, 0, false, false, true));
+            PlayerPsiData data = PsiHelper.get(caster);
+            data.setEntropyB(data.entropyB() + 0.04f);
+            PsiHelper.set(caster, data);
+            caster.displayClientMessage(Component.translatable("message.effecoria.spatial.sense_warped"), true);
+        }
+
+        caster.displayClientMessage(
+                Component.translatable("message.effecoria.spatial.sense", cavities, traps, hidden), true);
+        SpatialVfx.playRipple(caster, caster.position().add(0, 1, 0), power);
     }
 
+    /** Lens — bend projectile trajectories around the mage. */
     public static void spatialWard(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 160;
-        int absorb = effect.params().has("absorption_amplifier") ? effect.params().get("absorption_amplifier").getAsInt() : 1;
+        SpatialAugments.setLens(caster, caster.level().getGameTime() + duration);
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, false, true));
+        caster.displayClientMessage(Component.translatable("message.effecoria.spatial.lens_on"), true);
         spawnSpatialParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void foldRepulse(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        Vec3 hit = target != null ? target.position().add(0, 1.0, 0) : aim;
-        if (target != null) {
-            float force = effect.params().has("force") ? effect.params().get("force").getAsFloat() : 2.2f;
-            Vec3 away = target.position().subtract(caster.position()).normalize();
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 5f;
+        float force = effect.params().has("force") ? effect.params().get("force").getAsFloat() : 2.4f;
+        float damage = DiceDamage.fromParams(effect.params(), power, 2f);
+        Vec3 center = caster.position();
+        AABB box = caster.getBoundingBox().inflate(radius);
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (entity == caster) {
+                continue;
+            }
+            if (entity.distanceToSqr(caster) > radius * radius) {
+                continue;
+            }
+            Vec3 away = entity.position().subtract(center);
+            if (away.lengthSqr() < 1.0e-4) {
+                away = caster.getLookAngle();
+            } else {
+                away = away.normalize();
+            }
             double strength = force * (power / 50f);
-            target.setDeltaMovement(target.getDeltaMovement().add(away.scale(strength)));
-            target.hurtMarked = true;
-            float damage = DiceDamage.fromParams(effect.params(), power, 2f);
-            target.hurt(SpellCombat.magic(caster), damage);
+            entity.setDeltaMovement(entity.getDeltaMovement().add(away.scale(strength)).add(0, 0.35, 0));
+            entity.hurt(SpellCombat.magic(caster), damage);
+            entity.hurtMarked = true;
+            spawnSpatialParticles(level, entity.position().add(0, 1, 0));
         }
-        cutAlongCasterLook(caster, hit, power);
-        SpatialVfx.playLineFromCaster(caster, hit, power, 2);
-        finishHit(level, target != null ? target.position() : aim);
+        SpatialVfx.playRipple(caster, center.add(0, 1, 0), power);
+        level.playSound(null, caster.blockPosition(), SoundEvents.WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 0.8f, 0.7f);
     }
 
     public static void riftSlash(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
@@ -85,27 +167,14 @@ public final class SpatialEffects {
         finishHit(level, target != null ? target.position() : aim);
     }
 
+    /** Artificial gravity — walk walls / ceilings for a while. */
     public static void gravitySnare(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        ServerLevel level = caster.serverLevel();
-        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 6f;
-        int slowTicks = effect.params().has("slow_ticks") ? effect.params().get("slow_ticks").getAsInt() : 80;
-        float pull = effect.params().has("pull_strength") ? effect.params().get("pull_strength").getAsFloat() : 0.35f;
-        Vec3 center = caster.position();
-        AABB box = caster.getBoundingBox().inflate(radius);
-        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
-            if (entity == caster) {
-                continue;
-            }
-            if (entity.distanceToSqr(caster) > radius * radius) {
-                continue;
-            }
-            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 2));
-            Vec3 toward = center.subtract(entity.position()).normalize().scale(pull);
-            entity.setDeltaMovement(entity.getDeltaMovement().add(toward));
-            entity.hurtMarked = true;
-            spawnSpatialParticles(level, entity.position().add(0, 1, 0));
-        }
-        spawnSpatialParticles(level, center.add(0, 1, 0));
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 200;
+        SpatialAugments.setWallWalk(caster, caster.level().getGameTime() + duration);
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.SLOW_FALLING, duration, 0, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.JUMP, duration, 1, false, false, true));
+        caster.displayClientMessage(Component.translatable("message.effecoria.spatial.wall_walk"), true);
+        spawnSpatialParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void gravityField(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -123,16 +192,28 @@ public final class SpatialEffects {
                 radius,
                 duration,
                 pull,
-                dps);
+                Math.max(dps, 1.5f));
+        caster.displayClientMessage(Component.translatable("message.effecoria.spatial.gravity_well"), true);
     }
 
+    /** Chronal anomaly — freeze target in a short time loop. */
     public static void dimensionalAnchor(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         if (target == null) {
             return;
         }
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
-        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 5));
+        SpatialAugments.beginTimeLoop(target, caster.level().getGameTime() + duration);
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 6));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.GLOWING, duration, 0));
+        // Mage may slip into their own loop.
+        if (caster.getRandom().nextFloat() < 0.12f) {
+            SpatialAugments.beginTimeLoop(caster, caster.level().getGameTime() + duration / 2);
+            caster.displayClientMessage(Component.translatable("message.effecoria.spatial.loop_self"), true);
+        }
+        PlayerPsiData data = PsiHelper.get(caster);
+        data.setEntropyB(data.entropyB() + 0.1f);
+        PsiHelper.set(caster, data);
+        caster.displayClientMessage(Component.translatable("message.effecoria.spatial.loop_cast"), true);
         finishHit(caster.serverLevel(), target.position());
     }
 
@@ -193,7 +274,39 @@ public final class SpatialEffects {
     }
 
     public static void farBlink(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        boolean anchored = hasSpatialAnchor(caster);
+        double miss = anchored ? 0.0 : 8.0 + caster.getRandom().nextDouble() * 24.0;
+        if (!anchored) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.spatial.far_no_anchor"), true);
+        }
         blinkAlongLook(caster, effect, power, 1.0, defaultMaxRange(effect, 200));
+        if (miss > 0.5) {
+            // Without beacon/lodestone — lateral miss.
+            double ang = caster.getRandom().nextDouble() * Math.PI * 2;
+            caster.teleportTo(
+                    caster.getX() + Math.cos(ang) * miss,
+                    caster.getY(),
+                    caster.getZ() + Math.sin(ang) * miss);
+            caster.fallDistance = 0f;
+        }
+    }
+
+    private static boolean hasSpatialAnchor(ServerPlayer caster) {
+        for (int i = 0; i < caster.getInventory().getContainerSize(); i++) {
+            var stack = caster.getInventory().getItem(i);
+            if (stack.is(Items.COMPASS) || stack.is(Items.RECOVERY_COMPASS)) {
+                return true;
+            }
+        }
+        BlockPos origin = caster.blockPosition();
+        for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-8, -4, -8), origin.offset(8, 4, 8))) {
+            if (caster.level().getBlockState(pos).is(Blocks.BEACON)
+                    || caster.level().getBlockState(pos).is(Blocks.LODESTONE)
+                    || caster.level().getBlockState(pos).is(Blocks.RESPAWN_ANCHOR)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void standardBlink(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -212,36 +325,73 @@ public final class SpatialEffects {
         level.playSound(null, BlockPos.containing(center), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7f, 0.5f);
     }
 
+    /** Mini-pulsar — soul-burn AoE; exhausts the caster. */
     public static void spatialSingularity(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 7f;
-        float pull = effect.params().has("pull_strength") ? effect.params().get("pull_strength").getAsFloat() : 0.9f;
-        float damage = DiceDamage.fromParams(effect.params(), power, 8f);
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 8f;
+        float damage = DiceDamage.fromParams(effect.params(), power, 10f);
         Vec3 center = target != null ? target.position() : aim;
         AABB box = new AABB(center, center).inflate(radius);
+        boolean cocooned = SpatialAugments.hasCocoon(caster, level.getGameTime());
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
-            if (entity == caster) {
+            if (entity == caster && cocooned) {
                 continue;
             }
             if (entity.position().distanceToSqr(center) > radius * radius) {
                 continue;
             }
-            Vec3 toward = center.subtract(entity.position()).normalize().scale(pull);
-            entity.setDeltaMovement(entity.getDeltaMovement().add(toward));
             entity.hurt(SpellCombat.magic(caster), damage);
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WITHER, 100, 1));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WEAKNESS, 120, 1));
             entity.hurtMarked = true;
             spawnSpatialParticles(level, entity.position().add(0, 1, 0));
         }
+        // Exhaustion — Stage 1-2 feel.
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, 200, 1));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 160, 1));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.HUNGER, 100, 1));
+        PlayerPsiData data = PsiHelper.get(caster);
+        data.setCurrentPsi(Math.max(0f, data.currentPsi() * 0.25f));
+        data.setEntropyB(data.entropyB() + 0.15f);
+        PsiHelper.set(caster, data);
+        caster.displayClientMessage(Component.translatable("message.effecoria.spatial.pulsar"), true);
         cutSphere(level, caster, center.add(0, 0.5, 0), Math.min(radius * 0.55f, 4f), power, 64);
-        spawnSpatialParticles(level, center.add(0, 1, 0));
+        SpatialVfx.playAround(caster, center.add(0, 1, 0), power, 4);
+        level.playSound(null, BlockPos.containing(center), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 0.7f, 0.6f);
     }
 
+    /** Space cocoon — absolute short invulnerability fold. */
     public static void absoluteFold(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        int veilTicks = effect.params().has("veil_ticks") ? effect.params().get("veil_ticks").getAsInt() : 100;
-        blinkAlongLook(caster, effect, power, 1.05, defaultMaxRange(effect, 220));
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.INVISIBILITY, veilTicks, 0, false, true, true));
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, veilTicks, 1, false, false, true));
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, veilTicks, 1, false, false, true));
+        int duration = effect.params().has("veil_ticks") ? effect.params().get("veil_ticks").getAsInt() : 80;
+        SpatialAugments.setCocoon(caster, caster.level().getGameTime() + duration);
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 3, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, false, true));
+        // Sealed syndrome risk — brief self-lock after.
+        if (caster.getRandom().nextFloat() < 0.1f) {
+            BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 4));
+            BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 100, 2));
+            caster.displayClientMessage(Component.translatable("message.effecoria.spatial.cocoon_seal"), true);
+        } else {
+            caster.displayClientMessage(Component.translatable("message.effecoria.spatial.cocoon_on"), true);
+        }
+        PlayerPsiData data = PsiHelper.get(caster);
+        data.setCurrentPsi(Math.max(0f, data.currentPsi() - 12f));
+        PsiHelper.set(caster, data);
+        SpatialVfx.playRipple(caster, caster.position().add(0, 1, 0), power);
+    }
+
+    /** Open the personal spatial pocket (9 slots). */
+    public static void spatialPocket(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        SpatialPocketData pocket = caster.getData(ModAttachments.SPATIAL_POCKET.get());
+        var container = pocket.asContainer();
+        caster.openMenu(new SimpleMenuProvider(
+                (id, inv, player) -> new ChestMenu(MenuType.GENERIC_9x1, id, inv, container, 1),
+                Component.translatable("gui.effecoria.spatial_pocket")));
+        // Persist on close via listener already writing into pocket list — flush attachment.
+        caster.setData(ModAttachments.SPATIAL_POCKET.get(), pocket);
+        spawnSpatialParticles(caster.serverLevel(), caster.position().add(0, 1, 0));
+        caster.serverLevel()
+                .playSound(null, caster.blockPosition(), SoundEvents.ENDER_CHEST_OPEN, SoundSource.PLAYERS, 0.6f, 1.4f);
     }
 
     /** Open / advance a subspace voyage gate. */
