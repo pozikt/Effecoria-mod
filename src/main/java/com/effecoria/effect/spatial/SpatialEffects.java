@@ -32,6 +32,7 @@ public final class SpatialEffects {
             target.hurt(SpellCombat.magic(caster), damage);
             target.hurtMarked = true;
         }
+        cutAlongCasterLook(caster, hit, power);
         SpatialVfx.playLineFromCaster(caster, hit, power, 2);
         finishHit(level, target != null ? target.position() : aim);
     }
@@ -56,6 +57,7 @@ public final class SpatialEffects {
             float damage = DiceDamage.fromParams(effect.params(), power, 2f);
             target.hurt(SpellCombat.magic(caster), damage);
         }
+        cutAlongCasterLook(caster, hit, power);
         SpatialVfx.playLineFromCaster(caster, hit, power, 2);
         finishHit(level, target != null ? target.position() : aim);
     }
@@ -70,6 +72,15 @@ public final class SpatialEffects {
             BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slowTicks, 1));
             target.hurtMarked = true;
         }
+        cutAlongCasterLook(caster, center, power);
+        // Slash also nicks a short transverse ribbon through the hit point.
+        Vec3 look = caster.getLookAngle().normalize();
+        Vec3 side = look.cross(new Vec3(0, 1, 0));
+        if (side.lengthSqr() < 1.0e-4) {
+            side = look.cross(new Vec3(1, 0, 0));
+        }
+        side = side.normalize().scale(1.4);
+        cutAlongSegment(level, caster, center.subtract(side), center.add(side), power, 0);
         SpatialVfx.playAround(caster, center, power, 2);
         finishHit(level, target != null ? target.position() : aim);
     }
@@ -134,6 +145,7 @@ public final class SpatialEffects {
             BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, 60, 0));
             target.hurtMarked = true;
         }
+        cutAlongCasterLook(caster, hit, power);
         SpatialVfx.playLineFromCaster(caster, hit, power, 3);
         finishHit(level, target != null ? target.position() : aim);
         level.playSound(null, BlockPos.containing(hit), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.6f, 1.4f);
@@ -174,6 +186,8 @@ public final class SpatialEffects {
             spawnSpatialParticles(level, entity.position().add(0, 1, 0));
         }
         Vec3 tip = caster.position().add(0, 1.0, 0).add(caster.getLookAngle().normalize().scale(Math.max(3.0, radius * 0.8)));
+        cutAlongCasterLook(caster, tip, power);
+        cutSphere(level, caster, caster.position().add(0, 1.0, 0), Math.min(radius, 3.5f), power, 36);
         SpatialVfx.playLineFromCaster(caster, tip, power, 3);
         spawnSpatialParticles(level, caster.position().add(0, 1, 0));
     }
@@ -192,6 +206,7 @@ public final class SpatialEffects {
         float damage = DiceDamage.fromParams(effect.params(), power, 7f);
         Vec3 center = target != null ? target.position() : aim;
         hurtRadius(level, center, radius, damage, caster);
+        cutSphere(level, caster, center.add(0, 0.5, 0), Math.min(radius, 3.5f), power, 48);
         SpatialVfx.playAround(caster, center.add(0, 1.0, 0), power, 2);
         spawnSpatialParticles(level, center.add(0, 1, 0));
         level.playSound(null, BlockPos.containing(center), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7f, 0.5f);
@@ -217,6 +232,7 @@ public final class SpatialEffects {
             entity.hurtMarked = true;
             spawnSpatialParticles(level, entity.position().add(0, 1, 0));
         }
+        cutSphere(level, caster, center.add(0, 0.5, 0), Math.min(radius * 0.55f, 4f), power, 64);
         spawnSpatialParticles(level, center.add(0, 1, 0));
     }
 
@@ -364,6 +380,102 @@ public final class SpatialEffects {
             entity.hurt(SpellCombat.magic(skip), damage);
             entity.hurtMarked = true;
         }
+    }
+
+    /** Rift-cut blocks from the caster's eyes to the hit point (skips the first metre). */
+    private static void cutAlongCasterLook(ServerPlayer caster, Vec3 to, float power) {
+        if (to == null) {
+            return;
+        }
+        cutAlongSegment(caster.serverLevel(), caster, caster.getEyePosition(), to, power, 1.0);
+    }
+
+    private static void cutAlongSegment(
+            ServerLevel level, ServerPlayer caster, Vec3 from, Vec3 to, float power, double skipMeters) {
+        Vec3 delta = to.subtract(from);
+        double length = delta.length();
+        if (length < 0.2) {
+            return;
+        }
+        Vec3 dir = delta.scale(1.0 / length);
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        java.util.HashSet<BlockPos> seen = new java.util.HashSet<>();
+        int steps = Math.max(1, (int) Math.ceil(length * 4.0));
+        int startStep = Math.max(0, (int) Math.ceil(skipMeters * 4.0));
+        for (int i = startStep; i <= steps; i++) {
+            Vec3 point = from.add(dir.scale(i * 0.25));
+            cursor.set(point.x, point.y, point.z);
+            BlockPos immutable = cursor.immutable();
+            if (!seen.add(immutable)) {
+                continue;
+            }
+            if (isNearCasterFeet(caster, immutable)) {
+                continue;
+            }
+            tryRiftCut(level, caster, immutable, power);
+        }
+    }
+
+    private static void cutSphere(
+            ServerLevel level, ServerPlayer caster, Vec3 center, float radius, float power, int budget) {
+        int broken = 0;
+        int r = Math.max(1, (int) Math.ceil(radius));
+        BlockPos origin = BlockPos.containing(center);
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        float r2 = radius * radius;
+        for (int dx = -r; dx <= r && broken < budget; dx++) {
+            for (int dy = -r; dy <= r && broken < budget; dy++) {
+                for (int dz = -r; dz <= r && broken < budget; dz++) {
+                    if (dx * dx + dy * dy + dz * dz > r2 + 0.01f) {
+                        continue;
+                    }
+                    cursor.set(origin.getX() + dx, origin.getY() + dy, origin.getZ() + dz);
+                    if (isNearCasterFeet(caster, cursor)) {
+                        continue;
+                    }
+                    if (tryRiftCut(level, caster, cursor.immutable(), power)) {
+                        broken++;
+                    }
+                }
+            }
+        }
+    }
+
+    private static boolean isNearCasterFeet(ServerPlayer caster, BlockPos pos) {
+        BlockPos feet = caster.blockPosition();
+        return pos.getX() == feet.getX()
+                && pos.getZ() == feet.getZ()
+                && pos.getY() >= feet.getY() - 1
+                && pos.getY() <= feet.getY() + 1;
+    }
+
+    /**
+     * Simple break with drops — spatial rifts shear matter that isn't indestructible.
+     * Hardness gate scales with cast power; bedrock / portals / barriers stay forbidden.
+     */
+    private static boolean tryRiftCut(ServerLevel level, ServerPlayer caster, BlockPos pos, float power) {
+        var state = level.getBlockState(pos);
+        if (!canRiftCut(state, level, pos, power)) {
+            return false;
+        }
+        return level.destroyBlock(pos, true, caster);
+    }
+
+    private static boolean canRiftCut(
+            net.minecraft.world.level.block.state.BlockState state, ServerLevel level, BlockPos pos, float power) {
+        if (!SubspaceMatterService.canExile(state, level, pos)) {
+            return false;
+        }
+        float hardness = state.getDestroySpeed(level, pos);
+        if (hardness < 0f) {
+            return false;
+        }
+        return hardness <= maxRiftCutHardness(power);
+    }
+
+    private static float maxRiftCutHardness(float power) {
+        // Dirt/sand early → stone mid → deepslate-ish at high mastery. Never obsidian/bedrock.
+        return Math.min(5f, 1.2f + power / 22f);
     }
 
     private static void finishHit(ServerLevel level, Vec3 pos) {

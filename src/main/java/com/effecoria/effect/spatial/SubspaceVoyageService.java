@@ -103,6 +103,21 @@ public final class SubspaceVoyageService {
         // Caster must walk in — arm a short grace so placement never sucks them in.
         armPortalGrace(caster.serverLevel(), portalPos, caster.getUUID(), 40L);
 
+        // Twin return puncture at the hyperspace yard (was missing — arrivals had no gate).
+        ServerLevel subspace = ModDimensions.subspace(caster.server);
+        if (subspace != null) {
+            ensureYardReturnPortal(
+                    subspace,
+                    caster.serverLevel(),
+                    portalPos,
+                    caster.getUUID(),
+                    session,
+                    originDim,
+                    originPos,
+                    subspaceEntry,
+                    null);
+        }
+
         fx(caster.serverLevel(), Vec3.atCenterOf(portalPos));
         caster.displayClientMessage(Component.translatable("message.effecoria.subspace.entry_opened"), true);
     }
@@ -222,6 +237,16 @@ public final class SubspaceVoyageService {
             if (subspace == null || portal.entrySubspacePos() == null) {
                 return;
             }
+            ensureYardReturnPortal(
+                    subspace,
+                    level,
+                    portal.getBlockPos(),
+                    portal.owner() != null ? portal.owner() : entity.getUUID(),
+                    portal.sessionId(),
+                    portal.originDim(),
+                    portal.originPos(),
+                    portal.entrySubspacePos(),
+                    null);
             BlockPos spawn = safeLandingBeside(portal.entrySubspacePos());
             ensureFloor(subspace, spawn);
             teleportEntity(entity, subspace, spawn);
@@ -272,11 +297,23 @@ public final class SubspaceVoyageService {
                 portal.entrySubspacePos());
         set(player, data);
 
+        ensureYardReturnPortal(
+                subspace,
+                player.serverLevel(),
+                portal.getBlockPos(),
+                portal.owner() != null ? portal.owner() : player.getUUID(),
+                portal.sessionId(),
+                portal.originDim(),
+                portal.originPos(),
+                portal.entrySubspacePos(),
+                player.getUUID());
+
         BlockPos spawn = safeLandingBeside(portal.entrySubspacePos());
         ensureFloor(subspace, spawn);
         teleport(player, subspace, spawn);
-        // Don't bounce straight into a portal if one sits on the yard.
+        // Don't bounce straight into the yard return puncture.
         armPortalGrace(subspace, spawn, player.getUUID(), 45L);
+        armPortalGrace(subspace, portal.entrySubspacePos(), player.getUUID(), 45L);
         fx(subspace, Vec3.atCenterOf(spawn));
         player.displayClientMessage(Component.translatable("message.effecoria.subspace.entered"), true);
     }
@@ -423,8 +460,14 @@ public final class SubspaceVoyageService {
             }
         }
         ServerLevel subspace = ModDimensions.subspace(server);
-        if (subspace != null && data.exitPortalSubspacePos() != null) {
-            removePortal(subspace, data.exitPortalSubspacePos());
+        if (subspace != null) {
+            if (data.exitPortalSubspacePos() != null) {
+                removePortal(subspace, data.exitPortalSubspacePos());
+            }
+            // Yard twin of the overworld entry — always at the voyage anchor.
+            if (data.entrySubspacePos() != null) {
+                removePortal(subspace, data.entrySubspacePos());
+            }
         }
     }
 
@@ -491,6 +534,87 @@ public final class SubspaceVoyageService {
             return null;
         }
         return server.getLevel(data.originDim());
+    }
+
+    /**
+     * Place (or refresh) the hyperspace-side twin of the overworld ENTRY puncture.
+     * Linked as EXIT back to that entry so voyagers can walk home without casting again.
+     * Not tracked as {@code exitPortal*} — those remain the optional 1∶100 mapped far-exit.
+     */
+    private static void ensureYardReturnPortal(
+            ServerLevel subspace,
+            ServerLevel originLevel,
+            BlockPos overworldPortalPos,
+            UUID owner,
+            UUID session,
+            @Nullable ResourceKey<Level> originDim,
+            @Nullable BlockPos originPos,
+            BlockPos yard,
+            @Nullable UUID gracePlayer) {
+        if (yard == null || session == null) {
+            return;
+        }
+        // Touch chunk so setBlock cannot no-op on an unloaded section.
+        subspace.getChunkAt(yard);
+
+        BlockState owState = originLevel.getBlockState(overworldPortalPos);
+        BlockPos overworldBase = overworldPortalPos;
+        Direction face = Direction.NORTH;
+        if (owState.is(ModBlocks.SUBSPACE_PORTAL.get())) {
+            overworldBase = SubspacePortalBlock.basePos(owState, overworldPortalPos);
+            face = owState.getValue(SubspacePortalBlock.FACING);
+        }
+
+        preparePortalColumn(subspace, yard);
+        BlockPos placed = yard;
+        if (!subspace.getBlockState(yard).is(ModBlocks.SUBSPACE_PORTAL.get())
+                && !subspace.getBlockState(yard.above()).is(ModBlocks.SUBSPACE_PORTAL.get())) {
+            BlockPos result = placePortalAt(subspace, yard, face);
+            if (result == null) {
+                return;
+            }
+            placed = result;
+        } else if (subspace.getBlockState(yard).is(ModBlocks.SUBSPACE_PORTAL.get())) {
+            placed = SubspacePortalBlock.basePos(subspace.getBlockState(yard), yard);
+        } else if (subspace.getBlockState(yard.above()).is(ModBlocks.SUBSPACE_PORTAL.get())) {
+            placed = SubspacePortalBlock.basePos(subspace.getBlockState(yard.above()), yard.above());
+        }
+
+        configurePortal(
+                subspace,
+                placed,
+                owner,
+                SubspacePortalBlockEntity.Role.EXIT,
+                session,
+                originDim,
+                originPos,
+                placed,
+                overworldBase);
+
+        if (gracePlayer != null) {
+            armPortalGrace(subspace, placed, gracePlayer, 45L);
+        }
+        fx(subspace, Vec3.atCenterOf(placed));
+    }
+
+    /** Floor + clear the two-block portal volume so placePortalAt can succeed at the yard. */
+    private static void preparePortalColumn(ServerLevel level, BlockPos feet) {
+        ensureFloor(level, feet);
+        for (BlockPos at : new BlockPos[] {feet, feet.above()}) {
+            BlockState state = level.getBlockState(at);
+            if (state.is(ModBlocks.SUBSPACE_PORTAL.get()) || state.isAir()) {
+                continue;
+            }
+            float hardness = state.getDestroySpeed(level, at);
+            if (state.canBeReplaced() || (hardness >= 0f && hardness < 50f)) {
+                level.setBlock(at, Blocks.AIR.defaultBlockState(), 3);
+            }
+        }
+        // Re-assert floor after clears.
+        BlockPos floor = feet.below();
+        if (!level.getBlockState(floor).blocksMotion()) {
+            level.setBlock(floor, Blocks.END_STONE.defaultBlockState(), 3);
+        }
     }
 
     private static void configurePortal(
