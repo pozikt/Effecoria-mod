@@ -13,9 +13,12 @@ import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 
 /** Lightweight in-mod primer — Patchouli substitute for Stage I teaching. */
 public class MagicGuideScreen extends Screen {
+    private static final int LINE_H = 12;
+
     public enum Chapter {
         CAST_LOOP,
         PSI_PHI,
@@ -37,6 +40,7 @@ public class MagicGuideScreen extends Screen {
     private final Screen parent;
     private Chapter chapter;
     private final List<FormattedCharSequence> wrapped = new ArrayList<>();
+    private int scrollPx;
 
     public MagicGuideScreen() {
         this(null, Chapter.CAST_LOOP);
@@ -87,6 +91,7 @@ public class MagicGuideScreen extends Screen {
 
     private void select(Chapter next) {
         chapter = next;
+        scrollPx = 0;
         rebuildBody();
     }
 
@@ -97,12 +102,26 @@ public class MagicGuideScreen extends Screen {
         }
         int textWidth = Math.max(120, this.width - 168);
         wrapped.addAll(this.font.split(chapter.body(), textWidth));
+        clampScroll();
+    }
+
+    private int bodyViewportH() {
+        return Math.max(40, this.height - 36 - 24 - 26 - 8);
+    }
+
+    private int maxScroll() {
+        int content = wrapped.size() * LINE_H;
+        return Math.max(0, content - bodyViewportH());
+    }
+
+    private void clampScroll() {
+        scrollPx = Mth.clamp(scrollPx, 0, maxScroll());
     }
 
     /** Solid veil only — menu blur would smear body text drawn in the same frame. */
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        graphics.fill(0, 0, this.width, this.height, 0xFF0A1018);
+        graphics.fill(0, 0, this.width, this.height, 0xFF100E14);
     }
 
     @Override
@@ -113,26 +132,45 @@ public class MagicGuideScreen extends Screen {
         int panelTop = 24;
         int panelRight = this.width - 12;
         int panelBottom = this.height - 36;
-        graphics.fill(panelLeft, panelTop, panelRight, panelBottom, 0xFF141A24);
-        graphics.fill(panelLeft, panelTop, panelLeft + 1, panelBottom, 0xFF3A4868);
-        graphics.fill(panelLeft, panelTop, panelRight, panelTop + 1, 0xFF3A4868);
+        graphics.fill(panelLeft, panelTop, panelRight, panelBottom, 0xFF1A1520);
+        graphics.fill(panelLeft, panelTop, panelLeft + 1, panelBottom, 0xFFC9A06A);
+        graphics.fill(panelLeft, panelTop, panelRight, panelTop + 1, 0xFF8A6A48);
 
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFE8F0FF);
-        graphics.drawString(this.font, chapter.title(), panelLeft + 10, panelTop + 8, 0xFFE0A060, false);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFF0D8);
+        graphics.drawString(this.font, chapter.title(), panelLeft + 10, panelTop + 8, 0xFFE8B878, false);
 
-        int y = panelTop + 26;
-        int maxY = panelBottom - 8;
+        int textTop = panelTop + 26;
+        int textBottom = panelBottom - 8;
+        int y = textTop - scrollPx;
         for (FormattedCharSequence line : wrapped) {
-            graphics.drawString(this.font, line, panelLeft + 10, y, 0xFFE8EEF4, false);
-            y += 12;
-            if (y > maxY) {
-                break;
+            if (y + LINE_H >= textTop && y <= textBottom) {
+                graphics.drawString(this.font, line, panelLeft + 10, y, 0xFFFFF6E8, false);
             }
+            y += LINE_H;
+        }
+        if (maxScroll() > 0) {
+            graphics.drawString(
+                    this.font,
+                    Component.translatable("guide.effecoria.scroll_hint"),
+                    panelLeft + 10,
+                    panelBottom - 12,
+                    0xFF9A8A78,
+                    false);
         }
 
         for (Renderable renderable : this.renderables) {
             renderable.render(graphics, mouseX, mouseY, partialTick);
         }
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (maxScroll() <= 0) {
+            return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        }
+        scrollPx -= (int) Math.round(scrollY * LINE_H * 2);
+        clampScroll();
+        return true;
     }
 
     @Override
