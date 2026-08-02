@@ -59,6 +59,7 @@ public final class ModNetworking {
                 }
                 PsiHelper.initiate(player, school);
                 player.syncData(ModAttachments.PSI.get());
+                com.effecoria.core.progression.FirstHourTips.onInitiated(player, school);
                 player.sendSystemMessage(Component.translatable(
                         "message.effecoria.initiated",
                         Component.translatable("school.effecoria." + school.getSerializedName())));
@@ -730,6 +731,30 @@ public final class ModNetworking {
                     map.put(word.id(), word);
                 }
                 com.effecoria.core.seal.SealWordRegistry.replaceAll(map);
+            });
+        }
+    }
+
+    /** Client notifies server that the spell hub was opened — first-hour tip. */
+    public record HubOpenedPayload() implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<HubOpenedPayload> TYPE =
+                new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "hub_opened"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, HubOpenedPayload> STREAM_CODEC =
+                StreamCodec.unit(new HubOpenedPayload());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(HubOpenedPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                com.effecoria.core.progression.FirstHourTips.tryShow(
+                        player, com.effecoria.core.progression.FirstHourTips.Tip.OPEN_HUB);
             });
         }
     }

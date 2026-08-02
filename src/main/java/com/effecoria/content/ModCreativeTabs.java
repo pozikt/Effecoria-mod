@@ -27,6 +27,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.RESONANCE_FOCUS.get());
                         output.accept(ModItems.PHI_CELL.get());
                         output.accept(ModItems.BREATHING_SCROLL.get());
+                        output.accept(ModItems.MAGIC_PRIMER.get());
                     })
                     .build());
 }

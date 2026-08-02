@@ -31,4 +31,9 @@ public final class ModItems {
     public static final DeferredItem<Item> BREATHING_SCROLL = ITEMS.register(
             "breathing_scroll",
             () -> new BreathingScrollItem(new Item.Properties().stacksTo(16)));
+
+    /** First-hour magic guide (cast loop, Ψ/Φ, entropy, seals). */
+    public static final DeferredItem<Item> MAGIC_PRIMER = ITEMS.register(
+            "magic_primer",
+            () -> new MagicPrimerItem(new Item.Properties().stacksTo(1)));
 }

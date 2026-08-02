@@ -159,8 +159,9 @@ If choosing a single slice for the next implementation session:
 11. Phase **A5** balance sweep — ✅ done.
 12. Phase **C** Φ harness (dust / focus / Phi Cell / tiers) — ✅ done.
 13. Death Mark thralls + mastery control budget + additive Φ stacking — ✅ baseline shipped.
-14. **Next:** magic **presentation** — Patchouli / first-hour tips / hub+HUD clarity (see backlog above). Then Phase **E**.
-15. Phase **D4** seal conflicts + inspect HUD — ✅ done.
+14. Phase **D4** seal conflicts + inspect HUD — ✅ done.
+15. Magic **presentation** (Primer guide + first-hour tips + hub/HUD clarity) — ✅ done.
+16. **Next:** Phase **E** breathing/body (air/hunger → biologyQ, trainer), or optional overcast/hold-charge polish.
 
 ---
 

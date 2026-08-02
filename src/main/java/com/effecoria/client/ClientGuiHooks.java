@@ -1,5 +1,6 @@
 package com.effecoria.client;
 
+import com.effecoria.client.gui.MagicGuideScreen;
 import com.effecoria.client.gui.SchoolSelectScreen;
 import com.effecoria.client.gui.SpellHubScreen;
 import com.effecoria.core.psi.PsiHelper;
@@ -19,5 +20,13 @@ public final class ClientGuiHooks {
         } else {
             Minecraft.getInstance().setScreen(new SpellHubScreen());
         }
+    }
+
+    public static void openMagicGuide(net.minecraft.client.gui.screens.Screen parent) {
+        Minecraft.getInstance().setScreen(new MagicGuideScreen(parent));
+    }
+
+    public static void openMagicGuideChapter(MagicGuideScreen.Chapter chapter) {
+        Minecraft.getInstance().setScreen(new MagicGuideScreen(chapter));
     }
 }

@@ -22,17 +22,23 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import com.effecoria.client.ClientGuiHooks;
+import com.effecoria.client.KeyBindings;
+
 /** Hold-X spell constellation — core hub with threaded spell nodes + breathing train. */
 public class SpellHubScreen extends Screen {
     private SpellHubLayout.Layout layout;
     private SpellHubLayout.SpellNode hovered;
     private boolean trainHovered;
+
+    private boolean hubTipSent;
 
     public SpellHubScreen() {
         super(Component.translatable("gui.effecoria.hub"));
@@ -41,6 +47,22 @@ public class SpellHubScreen extends Screen {
     @Override
     protected void init() {
         rebuildLayout();
+        if (!hubTipSent) {
+            hubTipSent = true;
+            PacketDistributor.sendToServer(new ModNetworking.HubOpenedPayload());
+        }
+        // Top-left — keep bottom free for hover panel + constellation rim.
+        addRenderableWidget(Button.builder(Component.translatable("gui.effecoria.hub.primer"), b -> {
+                    ClientGuiHooks.openMagicGuide(this);
+                })
+                .bounds(8, 8, 72, 18)
+                .build());
+    }
+
+    /** Hub draws its own veil; menu blur smears spell nodes drawn before widgets. */
+    @Override
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        // no-op
     }
 
     private void rebuildLayout() {
@@ -130,6 +152,19 @@ public class SpellHubScreen extends Screen {
 
         RenderSystem.disableBlend();
         renderHoverPanel(graphics, cx, cy, scale);
+        renderKeyFooter(graphics);
+        for (var renderable : this.renderables) {
+            renderable.render(graphics, mouseX, mouseY, partialTick);
+        }
+    }
+
+    private void renderKeyFooter(GuiGraphics graphics) {
+        Component line = Component.translatable(
+                "gui.effecoria.hub.keys",
+                KeyBindings.CAST_SPELL.getTranslatedKeyMessage(),
+                KeyBindings.OPEN_SPELL_BOOK.getTranslatedKeyMessage(),
+                KeyBindings.CYCLE_SPELL_MODIFIER.getTranslatedKeyMessage());
+        graphics.drawCenteredString(this.font, line, this.width / 2, this.height - 14, 0xFF9AABB8);
     }
 
     private void drawCore(GuiGraphics graphics, int cx, int cy, float radius, float scale) {

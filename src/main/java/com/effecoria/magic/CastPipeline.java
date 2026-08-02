@@ -10,6 +10,7 @@ import com.effecoria.core.phi.PhiFieldService;
 import com.effecoria.core.phi.PhiHarness;
 import com.effecoria.core.progression.EntropyService;
 import com.effecoria.core.progression.ExhaustionService;
+import com.effecoria.core.progression.FirstHourTips;
 import com.effecoria.core.progression.OvercastService;
 import com.effecoria.core.progression.ProgressionService;
 import com.effecoria.core.psi.ModAttachments;
@@ -129,19 +130,23 @@ public final class CastPipeline {
             player.displayClientMessage(
                     Component.translatable("message.effecoria.cast_whiff_no_target", spellName, whiffPercent),
                     true);
+            FirstHourTips.tryShow(player, FirstHourTips.Tip.FIRST_WHIFF);
         } else if (delivery == CastDelivery.WHIFF_NO_BLOCK) {
             int whiffPercent = Math.round(BalanceConfig.WHIFF_COST_FRACTION.get().floatValue() * 100f);
             player.displayClientMessage(
                     Component.translatable("message.effecoria.cast_whiff_no_block", spellName, whiffPercent),
                     true);
+            FirstHourTips.tryShow(player, FirstHourTips.Tip.FIRST_WHIFF);
         } else if (overcasting) {
             player.displayClientMessage(
                     Component.translatable("message.effecoria.cast_overcast_success", spellName),
                     true);
+            FirstHourTips.tryShow(player, FirstHourTips.Tip.FIRST_CAST);
         } else {
             player.displayClientMessage(
                     Component.translatable("message.effecoria.cast_success", spellName),
                     true);
+            FirstHourTips.tryShow(player, FirstHourTips.Tip.FIRST_CAST);
         }
         return CastResult.SUCCESS;
     }

@@ -165,6 +165,10 @@ public class EffecoriaMod {
                 ModNetworking.ClearSealProgramPayload.TYPE,
                 ModNetworking.ClearSealProgramPayload.STREAM_CODEC,
                 ModNetworking.ClearSealProgramPayload::handle);
+        registrar.playToServer(
+                ModNetworking.HubOpenedPayload.TYPE,
+                ModNetworking.HubOpenedPayload.STREAM_CODEC,
+                ModNetworking.HubOpenedPayload::handle);
     }
 
 }

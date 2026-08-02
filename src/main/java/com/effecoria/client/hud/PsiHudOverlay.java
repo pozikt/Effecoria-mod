@@ -99,6 +99,15 @@ public final class PsiHudOverlay {
                     x,
                     y - 34,
                     0xAA88FF);
+        } else if ((data.primerTipsMask() & com.effecoria.core.progression.FirstHourTips.Tip.FIRST_CAST.mask())
+                == 0
+                && data.initiated()) {
+            graphics.drawString(
+                    minecraft.font,
+                    Component.translatable("hud.effecoria.primer_nudge"),
+                    x,
+                    y - 34,
+                    0xCCD4A060);
         }
 
         if (data.breathingMastery() > 0f) {

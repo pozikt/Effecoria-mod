@@ -37,6 +37,7 @@ public final class EntropyService {
         }
         data.setSeenEntropyWarn(true);
         player.displayClientMessage(Component.translatable("message.effecoria.entropy_warn"), true);
+        FirstHourTips.tryShow(player, FirstHourTips.Tip.ENTROPY);
     }
 
     /** First backlash: longer chat explanation after the action-bar flash. */
