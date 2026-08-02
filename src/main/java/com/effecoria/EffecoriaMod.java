@@ -173,6 +173,18 @@ public class EffecoriaMod {
                 ModNetworking.MarkPrimerChapterSeenPayload.TYPE,
                 ModNetworking.MarkPrimerChapterSeenPayload.STREAM_CODEC,
                 ModNetworking.MarkPrimerChapterSeenPayload::handle);
+        registrar.playToClient(
+                ModNetworking.OpenGeneEditorPayload.TYPE,
+                ModNetworking.OpenGeneEditorPayload.STREAM_CODEC,
+                ModNetworking.OpenGeneEditorPayload::handle);
+        registrar.playToServer(
+                ModNetworking.ApplyGeneModsPayload.TYPE,
+                ModNetworking.ApplyGeneModsPayload.STREAM_CODEC,
+                ModNetworking.ApplyGeneModsPayload::handle);
+        registrar.playToServer(
+                ModNetworking.ClearGeneModsPayload.TYPE,
+                ModNetworking.ClearGeneModsPayload.STREAM_CODEC,
+                ModNetworking.ClearGeneModsPayload::handle);
     }
 
 }

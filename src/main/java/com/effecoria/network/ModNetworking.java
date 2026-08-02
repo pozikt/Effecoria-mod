@@ -797,4 +797,112 @@ public final class ModNetworking {
             });
         }
     }
+
+    /** Server opens Organic gene editor for a living host. */
+    public record OpenGeneEditorPayload(
+            int entityId, String targetName, List<String> current, List<String> unlocked)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<OpenGeneEditorPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "open_gene_editor"));
+
+        private static final StreamCodec<RegistryFriendlyByteBuf, List<String>> STRING_LIST =
+                ByteBufCodecs.collection(ArrayList::new, ByteBufCodecs.STRING_UTF8);
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, OpenGeneEditorPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.VAR_INT,
+                        OpenGeneEditorPayload::entityId,
+                        ByteBufCodecs.STRING_UTF8,
+                        OpenGeneEditorPayload::targetName,
+                        STRING_LIST,
+                        OpenGeneEditorPayload::current,
+                        STRING_LIST,
+                        OpenGeneEditorPayload::unlocked,
+                        OpenGeneEditorPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(OpenGeneEditorPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> com.effecoria.client.ClientGuiHooks.openGeneEditor(
+                    payload.entityId(), payload.targetName(), payload.current(), payload.unlocked()));
+        }
+    }
+
+    /** Client applies selected gene grafts to a host. */
+    public record ApplyGeneModsPayload(int entityId, List<String> mods) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<ApplyGeneModsPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "apply_gene_mods"));
+
+        private static final StreamCodec<RegistryFriendlyByteBuf, List<String>> STRING_LIST =
+                ByteBufCodecs.collection(ArrayList::new, ByteBufCodecs.STRING_UTF8);
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, ApplyGeneModsPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.VAR_INT,
+                        ApplyGeneModsPayload::entityId,
+                        STRING_LIST,
+                        ApplyGeneModsPayload::mods,
+                        ApplyGeneModsPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(ApplyGeneModsPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                var level = player.serverLevel();
+                var entity = level.getEntity(payload.entityId());
+                if (!(entity instanceof net.minecraft.world.entity.LivingEntity living)) {
+                    player.displayClientMessage(
+                            Component.translatable("message.effecoria.gene.no_host"), true);
+                    return;
+                }
+                boolean ok = com.effecoria.effect.organic.gene.GeneEngineeringService.applyFromEngineer(
+                        player, living, payload.mods(), 8.0);
+                player.displayClientMessage(
+                        Component.translatable(
+                                ok ? "message.effecoria.gene.applied" : "message.effecoria.gene.failed"),
+                        true);
+            });
+        }
+    }
+
+    /** Client clears gene grafts from a host. */
+    public record ClearGeneModsPayload(int entityId) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<ClearGeneModsPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "clear_gene_mods"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, ClearGeneModsPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.VAR_INT, ClearGeneModsPayload::entityId, ClearGeneModsPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(ClearGeneModsPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                var entity = player.serverLevel().getEntity(payload.entityId());
+                if (!(entity instanceof net.minecraft.world.entity.LivingEntity living)) {
+                    return;
+                }
+                com.effecoria.effect.organic.gene.GeneEngineeringService.clearFromEngineer(player, living, 8.0);
+                player.displayClientMessage(Component.translatable("message.effecoria.gene.cleared"), true);
+            });
+        }
+    }
 }

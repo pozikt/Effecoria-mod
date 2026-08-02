@@ -1,5 +1,6 @@
 package com.effecoria.client;
 
+import com.effecoria.client.gui.GeneEditorScreen;
 import com.effecoria.client.gui.MagicGuideScreen;
 import com.effecoria.client.gui.SchoolSelectScreen;
 import com.effecoria.client.gui.SpellHubScreen;
@@ -28,5 +29,10 @@ public final class ClientGuiHooks {
 
     public static void openMagicGuideChapter(com.effecoria.core.progression.PrimerChapters.Chapter chapter) {
         Minecraft.getInstance().setScreen(new MagicGuideScreen(chapter));
+    }
+
+    public static void openGeneEditor(
+            int entityId, String targetName, java.util.List<String> current, java.util.List<String> unlocked) {
+        Minecraft.getInstance().setScreen(new GeneEditorScreen(entityId, targetName, current, unlocked));
     }
 }

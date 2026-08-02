@@ -137,6 +137,7 @@ public final class SpellProgression {
                     id("limb_regeneration"),
                     id("population_control"),
                     id("genetic_lock"),
+                    id("gene_engineering"),
                     id("biological_plague"),
                     id("biological_cleaving"),
                     id("living_armor"),

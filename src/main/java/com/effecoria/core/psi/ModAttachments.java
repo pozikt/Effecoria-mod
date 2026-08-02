@@ -3,6 +3,7 @@ package com.effecoria.core.psi;
 import com.effecoria.EffecoriaMod;
 import com.effecoria.core.seal.ChunkSealData;
 import com.effecoria.effect.necromancy.PlayerLastDeath;
+import com.effecoria.effect.organic.gene.GeneProfile;
 import com.effecoria.effect.spatial.SubspaceVoyageData;
 
 import net.minecraft.core.HolderLookup;
@@ -104,6 +105,28 @@ public final class ModAttachments {
 
                         @Override
                         public Tag write(PlayerLastDeath attachment, HolderLookup.Provider provider) {
+                            return attachment.save(provider);
+                        }
+                    })
+                    .copyOnDeath()
+                    .build());
+
+    /** Gene grafts on any living host (Organic gene engineering). */
+    public static final Supplier<AttachmentType<GeneProfile>> GENE_PROFILE = ATTACHMENT_TYPES.register(
+            "gene_profile",
+            () -> AttachmentType.builder(GeneProfile::createDefault)
+                    .serialize(new IAttachmentSerializer<>() {
+                        @Override
+                        public GeneProfile read(IAttachmentHolder holder, Tag tag, HolderLookup.Provider provider) {
+                            GeneProfile data = GeneProfile.createDefault();
+                            if (tag instanceof CompoundTag compound) {
+                                data.load(provider, compound);
+                            }
+                            return data;
+                        }
+
+                        @Override
+                        public Tag write(GeneProfile attachment, HolderLookup.Provider provider) {
                             return attachment.save(provider);
                         }
                     })

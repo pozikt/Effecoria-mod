@@ -82,7 +82,8 @@ public final class SpellEffectExecutor {
             "soothing_sap",
             "symbiotic_graft",
             "vital_ward",
-            "adrenal_gift");
+            "adrenal_gift",
+            "gene_engineering");
 
     /** Combat / utility that always resolves an aim point; FULL cost even with no living hit. */
     private static final Set<String> AIM_EFFECTS = Set.of(
@@ -332,6 +333,7 @@ public final class SpellEffectExecutor {
             case "limb_regeneration" -> OrganicEffects.limbRegeneration(caster, effect, power);
             case "verdant_bloom" -> OrganicEffects.verdantBloom(caster, effect, power);
             case "genetic_lock" -> OrganicEffects.geneticLock(caster, effect, power, target);
+            case "gene_engineering" -> OrganicEffects.geneEngineering(caster, effect, power, target);
             case "biological_cleaving" -> OrganicEffects.biologicalCleaving(caster, effect, power, target, aim);
             case "full_transformation" -> OrganicEffects.fullTransformation(caster, effect, power);
             case "spore_storm" -> OrganicEffects.sporeStorm(caster, effect, power);

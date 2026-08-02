@@ -666,6 +666,31 @@ public final class OrganicEffects {
         spawnDna(level, target.position().add(0, 1, 0));
     }
 
+    /** Opens the gene-engineering editor for a living host (self if no other target). */
+    public static void geneEngineering(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        LivingEntity host = target != null ? target : caster;
+        var profile = com.effecoria.effect.organic.gene.GeneEngineeringService.get(host);
+        java.util.List<String> unlocked = com.effecoria.effect.organic.gene.GeneEngineeringService.unlockedIds(caster);
+        if (unlocked.isEmpty()) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.gene.locked"), true);
+            return;
+        }
+        String name = host.getName().getString();
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+                caster,
+                new com.effecoria.network.ModNetworking.OpenGeneEditorPayload(
+                        host.getId(), name, profile.modIds(), unlocked));
+        spawnDna(caster.serverLevel(), host.position().add(0, 1, 0));
+        caster.serverLevel()
+                .playSound(
+                        null,
+                        host.blockPosition(),
+                        SoundEvents.ENCHANTMENT_TABLE_USE,
+                        SoundSource.PLAYERS,
+                        0.6f,
+                        1.4f);
+    }
+
     public static void biologicalCleaving(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
         Vec3 hit = target != null ? target.position().add(0, 1, 0) : aim.add(0, 0.2, 0);
