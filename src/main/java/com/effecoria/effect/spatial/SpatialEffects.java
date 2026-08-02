@@ -35,61 +35,35 @@ import net.minecraft.world.phys.Vec3;
 public final class SpatialEffects {
     private SpatialEffects() {}
 
-    /** Φ-location — sense cavities, traps, invisible entities. */
+    /** Φ-location — spatial sonar through connected cavities; fades every 5 path-blocks. */
     public static void warpBolt(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
-        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 12f;
-        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 80;
-        int cavities = 0;
-        int traps = 0;
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 52f;
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 140;
+        int attenuateEvery =
+                effect.params().has("attenuate_every") ? effect.params().get("attenuate_every").getAsInt() : 5;
+        int maxRange = Math.min(64, Math.round(radius * (0.9f + power / 180f)));
+
+        SpatialSenseService.ScanResult scan =
+                SpatialSenseService.scan(level, caster.blockPosition(), maxRange, attenuateEvery);
+        SpatialSenseService.sendTo(caster, scan, duration);
+
         int hidden = 0;
-
-        BlockPos origin = caster.blockPosition();
-        int r = Math.min(16, Math.round(radius));
-        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
-        for (int dx = -r; dx <= r; dx++) {
-            for (int dy = -4; dy <= 4; dy++) {
-                for (int dz = -r; dz <= r; dz++) {
-                    if (dx * dx + dz * dz > r * r) {
-                        continue;
-                    }
-                    cursor.set(origin.getX() + dx, origin.getY() + dy, origin.getZ() + dz);
-                    BlockState state = level.getBlockState(cursor);
-                    Block block = state.getBlock();
-                    if (block == Blocks.TRIPWIRE
-                            || block == Blocks.TRIPWIRE_HOOK
-                            || block == Blocks.STONE_PRESSURE_PLATE
-                            || block == Blocks.OAK_PRESSURE_PLATE
-                            || block == Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE
-                            || block == Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE
-                            || block == Blocks.SCULK_SENSOR
-                            || block == Blocks.CALIBRATED_SCULK_SENSOR) {
-                        traps++;
-                    }
-                    if (state.isAir()) {
-                        int solids = 0;
-                        for (var dir : net.minecraft.core.Direction.values()) {
-                            if (level.getBlockState(cursor.relative(dir)).isSolidRender(level, cursor.relative(dir))) {
-                                solids++;
-                            }
-                        }
-                        if (solids >= 4) {
-                            cavities++;
-                        }
-                    }
-                }
-            }
-        }
-
-        AABB box = caster.getBoundingBox().inflate(radius);
+        // Only entities inside the sensed network (near a hit) get revealed.
+        double revealR = Math.max(4.0, maxRange * 0.35);
+        AABB box = caster.getBoundingBox().inflate(revealR);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == caster) {
                 continue;
             }
-            if (entity.isInvisible() || entity.hasEffect(MobEffects.INVISIBILITY)) {
-                BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false, true));
-                hidden++;
+            if (!(entity.isInvisible() || entity.hasEffect(MobEffects.INVISIBILITY))) {
+                continue;
             }
+            if (!nearSenseNetwork(entity.blockPosition(), scan)) {
+                continue;
+            }
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false, true));
+            hidden++;
         }
 
         if (ModDimensions.isSubspace(level) || caster.getData(ModAttachments.SUBSPACE_VOYAGE.get()).active()) {
@@ -101,8 +75,32 @@ public final class SpatialEffects {
         }
 
         caster.displayClientMessage(
-                Component.translatable("message.effecoria.spatial.sense", cavities, traps, hidden), true);
-        SpatialVfx.playRipple(caster, caster.position().add(0, 1, 0), power);
+                Component.translatable(
+                        "message.effecoria.spatial.sense",
+                        scan.cavities(),
+                        scan.traps(),
+                        hidden,
+                        scan.maxReach()),
+                true);
+        SpatialVfx.playRipple(caster, SpatialSenseService.pingCenter(caster), power);
+        level.playSound(
+                null,
+                caster.blockPosition(),
+                SoundEvents.BELL_BLOCK,
+                SoundSource.PLAYERS,
+                0.35f,
+                1.55f);
+    }
+
+    private static boolean nearSenseNetwork(BlockPos entityPos, SpatialSenseService.ScanResult scan) {
+        BlockPos origin = scan.origin();
+        for (SpatialSenseService.Hit hit : scan.hits()) {
+            BlockPos mark = origin.offset(hit.dx(), hit.dy(), hit.dz());
+            if (mark.closerThan(entityPos, 3.5)) {
+                return true;
+            }
+        }
+        return entityPos.closerThan(origin, 4.0);
     }
 
     /** Lens — bend projectile trajectories around the mage. */

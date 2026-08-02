@@ -11,6 +11,7 @@ import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.core.psi.SpellProgression;
 import com.effecoria.effect.elemental.SteamCloudService;
+import com.effecoria.effect.spatial.SpatialSenseService;
 import com.effecoria.magic.CastPipeline;
 
 import net.minecraft.core.BlockPos;
@@ -407,6 +408,64 @@ public final class ModNetworking {
                             payload.z(),
                             payload.intensity(),
                             payload.durationTicks()));
+        }
+    }
+
+    /** Server → caster: spatial sonar hits (relative cavity/trap marks with fade strength). */
+    public record SpatialSensePayload(
+            int originX, int originY, int originZ, int durationTicks, List<SpatialSenseService.Hit> hits)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<SpatialSensePayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "spatial_sense_fx"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, SpatialSensePayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, p) -> {
+                            buf.writeVarInt(p.originX());
+                            buf.writeVarInt(p.originY());
+                            buf.writeVarInt(p.originZ());
+                            buf.writeVarInt(p.durationTicks());
+                            buf.writeVarInt(p.hits().size());
+                            for (SpatialSenseService.Hit hit : p.hits()) {
+                                buf.writeByte(hit.dx());
+                                buf.writeByte(hit.dy());
+                                buf.writeByte(hit.dz());
+                                buf.writeByte(hit.strength());
+                                buf.writeByte(hit.kind());
+                            }
+                        },
+                        buf -> {
+                            int ox = buf.readVarInt();
+                            int oy = buf.readVarInt();
+                            int oz = buf.readVarInt();
+                            int duration = buf.readVarInt();
+                            int count = Math.min(900, Math.max(0, buf.readVarInt()));
+                            List<SpatialSenseService.Hit> hits = new ArrayList<>(count);
+                            for (int i = 0; i < count; i++) {
+                                hits.add(new SpatialSenseService.Hit(
+                                        buf.readByte(),
+                                        buf.readByte(),
+                                        buf.readByte(),
+                                        buf.readByte(),
+                                        buf.readByte()));
+                            }
+                            return new SpatialSensePayload(ox, oy, oz, duration, hits);
+                        });
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(SpatialSensePayload payload, IPayloadContext context) {
+            context.enqueueWork(
+                    () -> com.effecoria.client.ClientSpatialSense.activate(
+                            payload.originX(),
+                            payload.originY(),
+                            payload.originZ(),
+                            payload.durationTicks(),
+                            payload.hits()));
         }
     }
 

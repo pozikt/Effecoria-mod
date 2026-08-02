@@ -11,8 +11,9 @@
   "effects": [
     {
       "type": "effecoria:warp_bolt",
-      "radius": 12,
-      "duration_ticks": 80
+      "radius": 52,
+      "duration_ticks": 140,
+      "attenuate_every": 5
     }
   ]
 }

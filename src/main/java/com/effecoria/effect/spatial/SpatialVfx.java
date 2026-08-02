@@ -36,7 +36,6 @@ public final class SpatialVfx {
     private static final Set<String> SINGULARITY = Set.of("spatial_singularity");
 
     private static final Set<String> CUT = Set.of(
-            "warp_bolt",
             "rift_slash",
             "void_lance",
             "rift_burst",
@@ -50,7 +49,8 @@ public final class SpatialVfx {
             "warp_exchange",
             "absolute_fold",
             "rift_excise",
-            "spatial_ward");
+            "spatial_ward",
+            "warp_bolt");
 
     private static final Set<String> CUT_AROUND = Set.of("rift_slash", "rift_burst");
 

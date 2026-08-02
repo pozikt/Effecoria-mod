@@ -142,6 +142,10 @@ public class EffecoriaMod {
                 ModNetworking.SpatialRippleFxPayload.STREAM_CODEC,
                 ModNetworking.SpatialRippleFxPayload::handle);
         registrar.playToClient(
+                ModNetworking.SpatialSensePayload.TYPE,
+                ModNetworking.SpatialSensePayload.STREAM_CODEC,
+                ModNetworking.SpatialSensePayload::handle);
+        registrar.playToClient(
                 ModNetworking.SpatialWarpFxPayload.TYPE,
                 ModNetworking.SpatialWarpFxPayload.STREAM_CODEC,
                 ModNetworking.SpatialWarpFxPayload::handle);
