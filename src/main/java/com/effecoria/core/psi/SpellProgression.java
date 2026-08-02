@@ -153,37 +153,23 @@ public final class SpellProgression {
                     id("evolutionary_leap"));
 
             case NECROMANCY -> List.of(
+                    // I — basic
                     id("death_sense"),
-                    id("bone_chill"),
-                    id("necrotic_bolt"),
-                    id("soul_drain"),
-                    id("wither_touch"),
                     id("death_mark"),
-                    id("death_shadow"),
                     id("grave_whisper"),
-                    id("curse_of_frailty"),
-                    id("siphon_pulse"),
-                    id("bone_armor"),
-                    id("phantom_step"),
-                    id("grave_bind"),
-                    id("life_tap"),
-                    id("haunting_visage"),
+                    id("raise_skeleton"),
+                    // II — advanced
+                    id("shade_summon"),
                     id("soul_shackle"),
-                    id("bone_volley"),
-                    id("wither_wave"),
-                    id("necrotic_aura"),
-                    id("dark_pact"),
-                    id("grave_leech"),
-                    id("corpse_burst"),
-                    id("grave_field"),
-                    id("soul_anchor"),
                     id("lich_ward"),
-                    id("death_gate"),
-                    id("soul_reaper"),
-                    id("death_coil"),
-                    id("phylactery_surge"),
+                    // III — master
                     id("soul_cataclysm"),
-                    id("death_apotheosis"));
+                    id("lich_ascension"),
+                    id("phylactery_surge"),
+                    id("army_of_dead"),
+                    // IV — legendary (no Ω-veil portal)
+                    id("dark_pact"),
+                    id("soul_reaper"));
 
             case SPATIAL -> List.of(
                     id("blink"),

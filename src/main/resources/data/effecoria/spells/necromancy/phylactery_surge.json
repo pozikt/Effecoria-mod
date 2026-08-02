@@ -2,18 +2,19 @@
   "id": "effecoria:phylactery_surge",
   "school": "necromancy",
   "frequency_hz": 92.0,
-  "base_cost": 36,
-  "power_multiplier": 1.1,
-  "side_entropy": 0.11,
-  "min_phi": 0.52,
-  "min_mastery": 0.7,
+  "base_cost": 22,
+  "power_multiplier": 1.08,
+  "side_entropy": 0.10,
+  "min_phi": 0.55,
+  "min_mastery": 0.74,
   "radial_category": "utility",
   "effects": [
     {
       "type": "effecoria:phylactery_surge",
-      "heal_dice": "3d8",
+      "radius": 5,
       "damage_dice": "2d6",
-      "radius": 5
+      "heal_dice": "2d6",
+      "phyl_boost": 0.12
     }
   ]
 }

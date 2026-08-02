@@ -373,6 +373,9 @@ public final class SpellEffectExecutor {
             case "soul_reaper" -> NecromancyEffects.soulReaper(caster, effect, power, target, aim);
             case "phylactery_surge" -> NecromancyEffects.phylacterySurge(caster, effect, power);
             case "lich_ascension" -> NecromancyEffects.lichAscension(caster, effect, power);
+            case "raise_skeleton" -> NecromancyEffects.raiseSkeleton(caster, effect, power);
+            case "shade_summon" -> NecromancyEffects.shadeSummon(caster, effect, power, target);
+            case "army_of_dead" -> NecromancyEffects.armyOfDead(caster, effect, power);
             case "warp_bolt" -> SpatialEffects.warpBolt(caster, effect, power, target, aim);
             case "spatial_ward" -> SpatialEffects.spatialWard(caster, effect, power);
             case "fold_repulse" -> SpatialEffects.foldRepulse(caster, effect, power, target, aim);

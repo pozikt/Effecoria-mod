@@ -6,7 +6,7 @@
   "power_multiplier": 1.05,
   "side_entropy": 0.06,
   "min_phi": 0.14,
-  "min_mastery": 0.05,
+  "min_mastery": 0.12,
   "radial_category": "combat",
   "effects": [
     {

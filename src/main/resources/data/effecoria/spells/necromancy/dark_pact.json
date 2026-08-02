@@ -1,18 +1,18 @@
 {
   "id": "effecoria:dark_pact",
   "school": "necromancy",
-  "frequency_hz": 64.0,
-  "base_cost": 28,
-  "power_multiplier": 1.1,
-  "side_entropy": 0.08,
-  "min_phi": 0.28,
-  "min_mastery": 0.35,
+  "frequency_hz": 100.0,
+  "base_cost": 36,
+  "power_multiplier": 1.15,
+  "side_entropy": 0.22,
+  "min_phi": 0.70,
+  "min_mastery": 0.85,
   "radial_category": "utility",
   "effects": [
     {
       "type": "effecoria:dark_pact",
-      "duration_ticks": 200,
-      "exhaustion_ticks": 120
+      "duration_ticks": 280,
+      "exhaustion_ticks": 180
     }
   ]
 }

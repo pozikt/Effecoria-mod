@@ -2,16 +2,17 @@
   "id": "effecoria:soul_shackle",
   "school": "necromancy",
   "frequency_hz": 66.0,
-  "base_cost": 22,
-  "power_multiplier": 1.1,
-  "side_entropy": 0.08,
-  "min_phi": 0.3,
-  "min_mastery": 0.35,
-  "radial_category": "combat",
+  "base_cost": 18,
+  "power_multiplier": 1.08,
+  "side_entropy": 0.10,
+  "min_phi": 0.30,
+  "min_mastery": 0.40,
+  "radial_category": "utility",
   "effects": [
     {
       "type": "effecoria:soul_shackle",
-      "root_ticks": 100
+      "root_ticks": 100,
+      "forced": false
     }
   ]
 }

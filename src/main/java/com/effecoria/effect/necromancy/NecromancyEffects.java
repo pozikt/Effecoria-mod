@@ -44,35 +44,109 @@ public final class NecromancyEffects {
 
     public static void deathSense(ServerPlayer caster, SpellEffectEntry effect, float power) {
         ServerLevel level = caster.serverLevel();
-        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 12f;
-        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 60;
-        float threshold = effect.params().has("health_fraction") ? effect.params().get("health_fraction").getAsFloat() : 0.5f;
-        int count = 0;
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 16f;
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
+        float threshold = effect.params().has("health_fraction") ? effect.params().get("health_fraction").getAsFloat() : 0.45f;
+        long freshTicks = effect.params().has("fresh_ticks") ? effect.params().get("fresh_ticks").getAsLong() : 20L * 60L * 30L;
+        int dying = 0;
+        int echoes = 0;
+        int marks = 0;
         AABB box = caster.getBoundingBox().inflate(radius);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == caster) {
                 continue;
             }
-            if (entity.getHealth() / entity.getMaxHealth() > threshold) {
-                continue;
+            if (entity.getHealth() / entity.getMaxHealth() <= threshold) {
+                BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false, true));
+                dying++;
             }
-            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false, true));
-            count++;
+            if (entity instanceof Player player) {
+                var death = player.getData(ModAttachments.LAST_DEATH.get());
+                if (death.present()) {
+                    var site = death.site().orElse(null);
+                    if (site != null
+                            && site.dimension().equals(level.dimension())
+                            && site.pos().distanceToSqr(caster.position()) <= radius * radius) {
+                        echoes++;
+                        long age = level.getGameTime() - site.gameTime();
+                        String freshness = age <= freshTicks
+                                ? Component.translatable("message.effecoria.necro.death_sense_fresh").getString()
+                                : Component.translatable("message.effecoria.necro.death_sense_old").getString();
+                        caster.sendSystemMessage(Component.translatable(
+                                "message.effecoria.necro.death_sense_echo",
+                                player.getName().getString(),
+                                freshness,
+                                (int) site.pos().x,
+                                (int) site.pos().y,
+                                (int) site.pos().z));
+                    }
+                }
+            }
         }
+        for (var stand : level.getEntitiesOfClass(
+                net.minecraft.world.entity.decoration.ArmorStand.class,
+                box,
+                DeathMarkService::isWorldMark)) {
+            marks++;
+            BreathDebuffs.apply(stand, new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false, true));
+        }
+        // Echo of death accumulates b faster.
+        PlayerPsiData data = PsiHelper.get(caster);
+        data.setEntropyB(data.entropyB() + 0.015f + 0.008f * echoes);
+        PsiHelper.set(caster, data);
         caster.displayClientMessage(
-                net.minecraft.network.chat.Component.translatable("message.effecoria.necro.death_sense", count), true);
+                Component.translatable("message.effecoria.necro.death_sense", dying, echoes, marks), true);
         spawnGrave(level, caster.position().add(0, 1, 0));
     }
 
     public static void graveWhisper(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
+        ServerLevel level = caster.serverLevel();
         if (target == null) {
-            finishHit(caster.serverLevel(), aim.add(0, 0.2, 0), HitFx.GRAVE);
+            finishHit(level, aim.add(0, 0.2, 0), HitFx.GRAVE);
             return;
         }
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 100;
+        // Ψ-imprint of last moments.
+        if (target instanceof Player player) {
+            var death = player.getData(ModAttachments.LAST_DEATH.get());
+            if (death.present()) {
+                var site = death.site().orElse(null);
+                String cause = death.cause().isBlank()
+                        ? Component.translatable("message.effecoria.necro.echo_unknown").getString()
+                        : death.cause();
+                caster.sendSystemMessage(Component.translatable(
+                        "message.effecoria.necro.echo_replay",
+                        player.getName().getString(),
+                        cause,
+                        site != null ? (int) site.pos().x : 0,
+                        site != null ? (int) site.pos().y : 0,
+                        site != null ? (int) site.pos().z : 0));
+            } else {
+                caster.displayClientMessage(Component.translatable("message.effecoria.necro.echo_none"), true);
+            }
+        } else {
+            float frac = target.getHealth() / Math.max(1f, target.getMaxHealth());
+            caster.sendSystemMessage(Component.translatable(
+                    "message.effecoria.necro.echo_creature",
+                    target.getName().getString(),
+                    (int) (frac * 100)));
+        }
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, duration, 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, 0));
-        finishHit(caster.serverLevel(), target, HitFx.GRAVE);
+        // Loop risk — mental assault on nearby.
+        if (caster.getRandom().nextFloat() < 0.28f) {
+            float radius = effect.params().has("loop_radius") ? effect.params().get("loop_radius").getAsFloat() : 5f;
+            AABB box = target.getBoundingBox().inflate(radius);
+            for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+                BreathDebuffs.apply(e, new MobEffectInstance(MobEffects.CONFUSION, duration / 2, 1));
+                BreathDebuffs.apply(e, new MobEffectInstance(MobEffects.BLINDNESS, 40, 0));
+            }
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.echo_loop"), true);
+            PlayerPsiData data = PsiHelper.get(caster);
+            data.setEntropyB(data.entropyB() + 0.05f);
+            PsiHelper.set(caster, data);
+        }
+        finishHit(level, target, HitFx.GRAVE);
     }
 
     public static void siphonPulse(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -144,21 +218,63 @@ public final class NecromancyEffects {
     }
 
     public static void darkPact(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 200;
-        int exhaust = effect.params().has("exhaustion_ticks") ? effect.params().get("exhaustion_ticks").getAsInt() : 120;
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, true, true));
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
+        // Ω-eldritch contract approximation — temporary ally + heavy b.
+        int lifetime = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 240;
+        int exhaust = effect.params().has("exhaustion_ticks") ? effect.params().get("exhaustion_ticks").getAsInt() : 160;
+        boolean ok = NecroSummonService.spawnEldritchAlly(caster, lifetime);
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, lifetime, 1, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, lifetime, 0, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, exhaust, 1, false, false, true));
+        if (ok) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.eldritch_bound"), true);
+        }
         spawnSoul(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void soulShackle(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         if (target == null) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.interrogate_need"), true);
             return;
         }
         int rootTicks = effect.params().has("root_ticks") ? effect.params().get("root_ticks").getAsInt() : 100;
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, rootTicks, 4));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.GLOWING, rootTicks, 0));
+        // Extract a "memory" — approximate interrogation.
+        boolean forced = effect.params().has("forced") && effect.params().get("forced").getAsBoolean();
+        boolean lies = !forced && caster.getRandom().nextFloat() < 0.35f;
+        BlockPos tip = target.blockPosition().offset(
+                caster.getRandom().nextInt(17) - 8,
+                caster.getRandom().nextInt(5) - 1,
+                caster.getRandom().nextInt(17) - 8);
+        if (lies) {
+            tip = tip.offset(32, 0, -24);
+            caster.sendSystemMessage(Component.translatable(
+                    "message.effecoria.necro.interrogate_lie", target.getName().getString()));
+        } else if (target instanceof Player player) {
+            var death = player.getData(ModAttachments.LAST_DEATH.get());
+            if (death.present() && death.site().isPresent()) {
+                tip = BlockPos.containing(death.site().get().pos());
+            }
+            caster.sendSystemMessage(Component.translatable(
+                    "message.effecoria.necro.interrogate_truth",
+                    target.getName().getString(),
+                    tip.getX(),
+                    tip.getY(),
+                    tip.getZ()));
+        } else {
+            caster.sendSystemMessage(Component.translatable(
+                    "message.effecoria.necro.interrogate_truth",
+                    target.getName().getString(),
+                    tip.getX(),
+                    tip.getY(),
+                    tip.getZ()));
+        }
+        if (forced || caster.getRandom().nextFloat() < 0.4f) {
+            PlayerPsiData data = PsiHelper.get(caster);
+            data.setEntropyB(data.entropyB() + 0.06f);
+            PsiHelper.set(caster, data);
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.interrogate_pollute"), true);
+        }
         finishHit(caster.serverLevel(), target, HitFx.BIND);
     }
 
@@ -191,11 +307,30 @@ public final class NecromancyEffects {
     }
 
     public static void lichWard(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 500;
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, true, true));
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, false, true));
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, duration, 0, false, false, true));
-        spawnShade(caster.serverLevel(), caster.position().add(0, 1, 0));
+        // Eternal guard — husk at aim point.
+        Vec3 look = caster.getEyePosition().add(caster.getLookAngle().scale(3.5));
+        BlockPos feet = BlockPos.containing(look);
+        ServerLevel level = caster.serverLevel();
+        while (feet.getY() > level.getMinBuildHeight() + 1
+                && level.getBlockState(feet.below()).isAir()) {
+            feet = feet.below();
+        }
+        Vec3 post = new Vec3(feet.getX() + 0.5, feet.getY(), feet.getZ() + 0.5);
+        boolean ok = NecroSummonService.spawnEternalGuard(caster, post);
+        if (ok) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.guard_raised"), true);
+        }
+        spawnShade(level, post.add(0, 1, 0));
+    }
+
+    public static void soulCataclysm(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        // Ψ-surgery — fuse thralls into a doll.
+        boolean ok = NecroSummonService.fuseIntoDoll(caster);
+        if (ok) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.doll_forged"), true);
+            BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.CONFUSION, 80, 0, false, false, true));
+        }
+        spawnSoul(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void deathCoil(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
@@ -219,20 +354,6 @@ public final class NecromancyEffects {
             }
             applyCoilHit(level, caster, entity, burst * 0.5f, witherTicks / 2);
         }
-    }
-
-    public static void soulCataclysm(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        JsonObject params = effect.params();
-        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 14f;
-        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 220;
-        float dps = NecroFieldService.dpsFromParams(params, power);
-        NecroFieldService.spawn(
-                caster.serverLevel(),
-                caster.position().add(0, 0.5, 0),
-                caster.getUUID(),
-                radius,
-                duration,
-                dps * 1.35f);
     }
 
     public static void deathApotheosis(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -397,19 +518,73 @@ public final class NecromancyEffects {
     }
 
     public static void soulReaper(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
+        // Forbidden call — steal from Rest: revive a recently dead player, or assault living.
         ServerLevel level = caster.serverLevel();
+        PlayerPsiData data = PsiHelper.get(caster);
+        data.setEntropyB(data.entropyB() + 0.18f);
+        PsiHelper.set(caster, data);
+
+        if (target instanceof ServerPlayer deadPlayer && !deadPlayer.isAlive()) {
+            // Unreachable via living target ray — handled below via nearby ghosts of death sites.
+        }
+
+        // Prefer: revive a player who died recently in range (offline body not available — heal if low / respawn-like).
+        ServerPlayer revive = null;
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 10f;
+        long fresh = effect.params().has("fresh_ticks") ? effect.params().get("fresh_ticks").getAsLong() : 20L * 60L * 5L;
+        for (ServerPlayer p : level.players()) {
+            if (p == caster || !p.isAlive()) {
+                continue;
+            }
+            var death = p.getData(ModAttachments.LAST_DEATH.get());
+            if (!death.present()) {
+                continue;
+            }
+            var site = death.site().orElse(null);
+            if (site == null || !site.dimension().equals(level.dimension())) {
+                continue;
+            }
+            if (level.getGameTime() - site.gameTime() > fresh) {
+                continue;
+            }
+            if (site.pos().distanceToSqr(caster.position()) > radius * radius) {
+                continue;
+            }
+            revive = p;
+            break;
+        }
+
+        if (revive != null) {
+            // Pull from Rest — imperfect return.
+            float roll = caster.getRandom().nextFloat();
+            revive.heal(revive.getMaxHealth());
+            if (roll < 0.33f) {
+                // Without b — numb.
+                BreathDebuffs.apply(revive, new MobEffectInstance(MobEffects.WEAKNESS, 400, 1));
+                BreathDebuffs.apply(revive, new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 400, 1));
+                caster.sendSystemMessage(Component.translatable("message.effecoria.necro.rest_numb", revive.getName().getString()));
+            } else if (roll < 0.66f) {
+                // Wrong b — mad.
+                BreathDebuffs.apply(revive, new MobEffectInstance(MobEffects.CONFUSION, 300, 1));
+                BreathDebuffs.apply(revive, new MobEffectInstance(MobEffects.BLINDNESS, 100, 0));
+                BreathDebuffs.apply(revive, new MobEffectInstance(MobEffects.DAMAGE_BOOST, 300, 1));
+                caster.sendSystemMessage(Component.translatable("message.effecoria.necro.rest_mad", revive.getName().getString()));
+            } else {
+                caster.sendSystemMessage(Component.translatable("message.effecoria.necro.rest_ok", revive.getName().getString()));
+            }
+            spawnSoul(level, revive.position().add(0, 1, 0));
+            level.playSound(null, revive.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.4f, 0.5f);
+            return;
+        }
+
         if (target == null) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.rest_none"), true);
             finishHit(level, aim.add(0, 0.2, 0), HitFx.SOUL);
             return;
         }
+        // Living target: brutal reaping as fallback.
         float damage = DiceDamage.fromParams(effect.params(), power, 9f);
-        float threshold = effect.params().has("execute_threshold") ? effect.params().get("execute_threshold").getAsFloat() : 0.35f;
-        float healRatio = effect.params().has("heal_ratio") ? effect.params().get("heal_ratio").getAsFloat() : 0.5f;
-        if (target.getHealth() / target.getMaxHealth() <= threshold) {
-            damage *= 1.75f;
-        }
         target.hurt(SpellCombat.wither(caster), damage);
-        caster.heal(damage * healRatio);
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WITHER, 100, 1));
         target.hurtMarked = true;
         finishHit(level, target, HitFx.SOUL);
@@ -460,9 +635,82 @@ public final class NecromancyEffects {
     }
 
     public static void lichAscension(ServerPlayer caster, SpellEffectEntry effect, float power) {
-        // Gated until mage-tower / phylactery content (Stage IV). See docs/MAGIC_PLAN.md.
-        caster.displayClientMessage(
-                net.minecraft.network.chat.Component.translatable("message.effecoria.necro.lich_locked"), true);
+        // Phylactery surrogate: totem or nether star in inventory.
+        if (!hasPhylacterySurrogate(caster)) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.lich_need_phyl"), true);
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        long gameTime = level.getGameTime();
+        PlayerPsiData data = PsiHelper.get(caster);
+        if (data.isLichAscensionActive(gameTime)) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.lich_already"), true);
+            return;
+        }
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 240;
+        float phyl = effect.params().has("phyl_efficiency") ? effect.params().get("phyl_efficiency").getAsFloat() : 0.85f;
+        float storedQ = Math.max(0.05f, data.biologyQ());
+        data.beginLichAscension(gameTime + duration, storedQ, phyl);
+        data.setEntropyB(data.entropyB() + 0.1f);
+        PsiHelper.set(caster, data);
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, true, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.FIRE_RESISTANCE, duration, 0, false, false, true));
+        caster.displayClientMessage(Component.translatable("message.effecoria.necro.lich_ascension"), true);
+        spawnSoul(level, caster.position().add(0, 1, 0));
+        level.playSound(null, caster.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.7f, 0.55f);
+    }
+
+    public static void raiseSkeleton(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        boolean overcharge = caster.getRandom().nextFloat() < 0.22f
+                || (effect.params().has("force_chaos") && effect.params().get("force_chaos").getAsBoolean());
+        // Higher power → more chaos risk (drunk skeleton).
+        if (power > 70f && caster.getRandom().nextFloat() < 0.35f) {
+            overcharge = true;
+        }
+        boolean ok = NecroSummonService.spawnBoneServant(caster, overcharge);
+        if (ok) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.bone_servant"), true);
+        }
+        spawnBone(caster.serverLevel(), caster.position().add(0, 1, 0));
+    }
+
+    public static void shadeSummon(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        boolean ok = NecroSummonService.spawnSpiritContract(caster, target);
+        if (ok) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.spirit_bound"), true);
+            PlayerPsiData data = PsiHelper.get(caster);
+            data.setEntropyB(data.entropyB() + 0.04f);
+            PsiHelper.set(caster, data);
+        }
+        spawnShade(caster.serverLevel(), caster.position().add(0, 1.2, 0));
+    }
+
+    public static void armyOfDead(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int count = effect.params().has("count") ? effect.params().get("count").getAsInt() : 4;
+        count = Math.min(8, Math.max(2, count + (int) (power / 80f)));
+        int raised = NecroSummonService.spawnArmy(caster, count);
+        PlayerPsiData data = PsiHelper.get(caster);
+        data.setEntropyB(data.entropyB() + 0.05f * raised);
+        PsiHelper.set(caster, data);
+        caster.displayClientMessage(Component.translatable("message.effecoria.necro.army_raised", raised), true);
+        spawnGrave(caster.serverLevel(), caster.position().add(0, 1, 0));
+        caster.serverLevel()
+                .playSound(null, caster.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.35f, 0.8f);
+    }
+
+    private static boolean hasPhylacterySurrogate(ServerPlayer player) {
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            var stack = player.getInventory().getItem(i);
+            if (stack.isEmpty()) {
+                continue;
+            }
+            if (stack.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING)
+                    || stack.is(net.minecraft.world.item.Items.NETHER_STAR)
+                    || stack.is(net.minecraft.world.item.Items.END_CRYSTAL)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void hurtInRadius(ServerLevel level, Vec3 center, float radius, float damage, ServerPlayer skip) {

@@ -18,27 +18,46 @@ import net.minecraft.server.level.ServerPlayer;
 
 /** Unlocks school spells from progression when mastery and essence requirements are met. */
 public final class SpellUnlockService {
+    /** Legacy multi-summons retired in favor of army_of_dead / raise_skeleton. */
     private static final Set<String> REMOVED_SUMMON_PATHS = Set.of(
-            "shade_summon",
             "shade_brood",
             "shade_swarm",
-            "raise_skeleton",
-            "raise_zombie",
-            "army_of_dead");
+            "raise_zombie");
 
-    private static final ResourceLocation DEATH_MARK =
-            ResourceLocation.fromNamespaceAndPath("effecoria", "death_mark");
+    /**
+     * Combat filler dropped when necromancy was slimmed to lore pillars.
+     * Kept as JSON for packs; stripped from known lists on tick.
+     */
+    private static final Set<String> RETIRED_NECRO_FILLER = Set.of(
+            "bone_chill",
+            "necrotic_bolt",
+            "soul_drain",
+            "wither_touch",
+            "death_shadow",
+            "curse_of_frailty",
+            "siphon_pulse",
+            "bone_armor",
+            "phantom_step",
+            "grave_bind",
+            "life_tap",
+            "haunting_visage",
+            "bone_volley",
+            "wither_wave",
+            "necrotic_aura",
+            "grave_leech",
+            "corpse_burst",
+            "grave_field",
+            "soul_anchor",
+            "death_gate",
+            "death_coil",
+            "death_apotheosis");
 
     private SpellUnlockService() {}
 
     public static void stripRemovedSummons(PlayerPsiData data) {
-        boolean hadSummon = data.knownSpells().removeIf(id -> REMOVED_SUMMON_PATHS.contains(id.getPath()));
+        data.knownSpells().removeIf(id -> REMOVED_SUMMON_PATHS.contains(id.getPath()));
         if (data.school() == MagicSchool.NECROMANCY) {
-            // Core raise tool — grant if they already passed the early necro band, or lost an old summon.
-            int starters = BalanceConfig.SPELL_STARTER_COUNT.get();
-            if (hadSummon || data.knownSpells().size() >= starters) {
-                data.unlockSpell(DEATH_MARK);
-            }
+            data.knownSpells().removeIf(id -> RETIRED_NECRO_FILLER.contains(id.getPath()));
         }
         data.setSelectedSpellIndex(data.selectedSpellIndex());
     }

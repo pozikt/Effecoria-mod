@@ -131,7 +131,7 @@ public final class CastPresentation {
     private static final Set<ResourceLocation> CORRUPTION_LEECH = Set.of(id("tainted_leech"));
 
     private static final Set<ResourceLocation> NECRO_BONE =
-            Set.of(id("bone_chill"), id("bone_armor"), id("bone_volley"));
+            Set.of(id("bone_chill"), id("bone_armor"), id("bone_volley"), id("raise_skeleton"), id("army_of_dead"));
     private static final Set<ResourceLocation> NECRO_SOUL = Set.of(
             id("soul_drain"),
             id("siphon_pulse"),
@@ -140,7 +140,8 @@ public final class CastPresentation {
             id("soul_reaper"),
             id("phylactery_surge"),
             id("soul_cataclysm"),
-            id("grave_leech"));
+            id("grave_leech"),
+            id("lich_ascension"));
     private static final Set<ResourceLocation> NECRO_WITHER = Set.of(
             id("wither_touch"),
             id("wither_wave"),
@@ -154,13 +155,13 @@ public final class CastPresentation {
             id("grave_whisper"),
             id("grave_field"),
             id("death_gate"),
-            id("death_apotheosis"));
+            id("death_apotheosis"),
+            id("lich_ward"));
     private static final Set<ResourceLocation> NECRO_SHADE = Set.of(
             id("phantom_step"),
             id("haunting_visage"),
             id("curse_of_frailty"),
-            id("lich_ward"),
-            id("lich_ascension"),
+            id("shade_summon"),
             id("death_shadow"));
     private static final Set<ResourceLocation> NECRO_BIND =
             Set.of(id("grave_bind"), id("soul_shackle"), id("soul_anchor"));

@@ -1,19 +1,16 @@
 {
   "id": "effecoria:soul_cataclysm",
   "school": "necromancy",
-  "frequency_hz": 95.0,
-  "base_cost": 36,
+  "frequency_hz": 88.0,
+  "base_cost": 32,
   "power_multiplier": 1.1,
-  "side_entropy": 0.12,
-  "min_phi": 0.55,
-  "min_mastery": 0.75,
-  "radial_category": "combat",
+  "side_entropy": 0.16,
+  "min_phi": 0.52,
+  "min_mastery": 0.68,
+  "radial_category": "utility",
   "effects": [
     {
-      "type": "effecoria:soul_cataclysm",
-      "radius": 14,
-      "duration_ticks": 220,
-      "damage_dice_per_round": "4d10"
+      "type": "effecoria:soul_cataclysm"
     }
   ]
 }

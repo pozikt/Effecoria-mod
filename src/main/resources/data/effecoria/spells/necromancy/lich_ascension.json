@@ -1,18 +1,18 @@
 {
   "id": "effecoria:lich_ascension",
   "school": "necromancy",
-  "frequency_hz": 105.0,
-  "base_cost": 28,
+  "frequency_hz": 95.0,
+  "base_cost": 30,
   "power_multiplier": 1.1,
   "side_entropy": 0.14,
-  "min_phi": 0.68,
-  "min_mastery": 0.9,
+  "min_phi": 0.58,
+  "min_mastery": 0.72,
   "radial_category": "utility",
   "effects": [
     {
       "type": "effecoria:lich_ascension",
-      "duration_ticks": 240,
-      "aftermath_ticks": 160
+      "duration_ticks": 360,
+      "phyl_efficiency": 0.9
     }
   ]
 }

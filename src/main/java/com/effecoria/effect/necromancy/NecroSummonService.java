@@ -17,10 +17,14 @@ import net.minecraft.world.entity.ai.goal.FleeSunGoal;
 import net.minecraft.world.entity.ai.goal.RestrictSunGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
+import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.monster.Vex;
+import net.minecraft.world.entity.monster.WitherSkeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +40,18 @@ public final class NecroSummonService {
     public static final String OWNER_TAG = "effecoria:necro_owner";
     public static final String TARGET_TAG = "effecoria:necro_target";
     public static final String RESERVE_TAG = "effecoria:psi_reserve";
+    /** Drunk skeleton — chaotic targeting. */
+    public static final String CHAOS_TAG = "effecoria:necro_chaos";
+    /** Spirit contract — may break and attack the mage. */
+    public static final String CONTRACT_TAG = "effecoria:necro_contract";
+    /** Stationary eternal guard. */
+    public static final String GUARD_TAG = "effecoria:necro_guard";
+    public static final String GUARD_X = "effecoria:necro_guard_x";
+    public static final String GUARD_Y = "effecoria:necro_guard_y";
+    public static final String GUARD_Z = "effecoria:necro_guard_z";
+    /** Multi-soul doll — stronger, unstable. */
+    public static final String DOLL_TAG = "effecoria:necro_doll";
+    public static final String LOOSE_TAG = "effecoria:necro_loose";
 
     /** Soft leash — thralls try to stay within this of the owner. */
     private static final double LEASH = 5.5;
@@ -307,14 +323,51 @@ public final class NecroSummonService {
             seedNearbyThralls(owner);
         }
         LivingEntity combatFocus = resolveOwnerCombatFocus(owner);
+        PlayerPsiData data = PsiHelper.get(owner);
+        float usable = usablePsi(owner, data);
+
         for (Mob mob : listOwned(owner)) {
             if (mob.isOnFire() && level.isDay() && level.canSeeSky(mob.blockPosition())) {
                 mob.clearFire();
             }
 
-            // Re-strip in case goals were re-added (rare) or entity reloaded mid-session.
             if (owner.tickCount % 40 == 0) {
                 stripAutonomousAi(mob);
+            }
+
+            // Eternal guard: hold post; starve → go loose and attack everyone.
+            if (mob.getPersistentData().getBoolean(GUARD_TAG)) {
+                tickGuard(owner, mob, usable);
+                continue;
+            }
+
+            // Lost army / broken contract.
+            if (mob.getPersistentData().getBoolean(LOOSE_TAG)) {
+                tickLoose(mob);
+                continue;
+            }
+
+            if (mob.getPersistentData().getBoolean(CHAOS_TAG) && owner.tickCount % 35 == 0) {
+                tickChaos(owner, mob);
+                continue;
+            }
+
+            if (mob.getPersistentData().getBoolean(CONTRACT_TAG) && owner.tickCount % 100 == 0) {
+                long until = mob.getPersistentData().getLong("effecoria:necro_pact_until");
+                if (until > 0 && level.getGameTime() >= until) {
+                    breakContract(owner, mob);
+                    continue;
+                }
+                if (owner.getRandom().nextFloat() < 0.08f || usable < 4f) {
+                    breakContract(owner, mob);
+                    continue;
+                }
+            }
+
+            if (mob.getPersistentData().getBoolean(DOLL_TAG) && owner.tickCount % 80 == 0) {
+                if (owner.getRandom().nextFloat() < 0.2f) {
+                    BreathDebuffsProxy.confuse(mob);
+                }
             }
 
             LivingEntity current = mob.getTarget();
@@ -338,7 +391,6 @@ public final class NecroSummonService {
                 if (mob instanceof Vex vex) {
                     vex.setAggressive(true);
                 }
-                // Don't chase so far that they leave the owner's side.
                 if (mob.distanceToSqr(owner) > LEASH * LEASH * 1.8) {
                     followOwner(mob, owner);
                 }
@@ -351,15 +403,313 @@ public final class NecroSummonService {
 
             provokeNearbyHostiles(mob);
         }
+
+        // Army control loss when Ψ is drained.
+        if (usable < 2f && owner.tickCount % 60 == 0) {
+            for (Mob mob : listOwned(owner)) {
+                if (mob.getPersistentData().getBoolean(GUARD_TAG)) {
+                    continue;
+                }
+                if (owner.getRandom().nextFloat() < 0.25f) {
+                    releaseControl(owner, mob);
+                }
+            }
+        }
+
         if (owner.tickCount % 10 == 0) {
             DeathMarkService.syncReservedPsi(owner);
         }
     }
 
-    /**
-     * Nearby hostiles with line of sight aggro onto the thrall if idle or not already
-     * fighting a player. Skips other thralls of the same owner.
-     */
+    private static void tickGuard(ServerPlayer owner, Mob mob, float usablePsi) {
+        double gx = mob.getPersistentData().getDouble(GUARD_X);
+        double gy = mob.getPersistentData().getDouble(GUARD_Y);
+        double gz = mob.getPersistentData().getDouble(GUARD_Z);
+        if (mob.distanceToSqr(gx, gy, gz) > 9.0) {
+            mob.getNavigation().moveTo(gx, gy, gz, 1.0);
+        }
+        // Upkeep — without Ψ the seal dims.
+        if (usablePsi < 1.5f) {
+            if (owner.getRandom().nextFloat() < 0.15f) {
+                mob.getPersistentData().putBoolean(LOOSE_TAG, true);
+                mob.getPersistentData().remove(OWNER_TAG);
+                PlayerPsiData data = PsiHelper.get(owner);
+                data.untrackThrall(mob.getUUID());
+                PsiHelper.set(owner, data);
+                owner.displayClientMessage(Component.translatable("message.effecoria.necro.guard_loose"), true);
+            } else if (owner.tickCount % 40 == 0) {
+                // Sleep: freeze in place.
+                mob.setTarget(null);
+                mob.getNavigation().stop();
+                BreathDebuffsProxy.slowness(mob, 50, 6);
+            }
+            return;
+        }
+        LivingEntity focus = resolveOwnerCombatFocus(owner);
+        if (focus != null && mob.distanceToSqr(focus) < 100) {
+            mob.setTarget(focus);
+        } else {
+            LivingEntity near = findGuardHostile(mob);
+            mob.setTarget(near);
+        }
+        // Soft Ψ drain via reserve already; nudge entropy feel with tiny reserve bump ignored.
+    }
+
+    private static void tickLoose(Mob mob) {
+        AABB box = mob.getBoundingBox().inflate(12);
+        LivingEntity nearest = null;
+        double best = Double.MAX_VALUE;
+        for (LivingEntity e : mob.level().getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (e == mob) {
+                continue;
+            }
+            double d = mob.distanceToSqr(e);
+            if (d < best) {
+                best = d;
+                nearest = e;
+            }
+        }
+        mob.setTarget(nearest);
+    }
+
+    private static void tickChaos(ServerPlayer owner, Mob mob) {
+        AABB box = mob.getBoundingBox().inflate(10);
+        var list = mob.level().getEntitiesOfClass(LivingEntity.class, box, e -> e.isAlive() && e != mob);
+        if (list.isEmpty()) {
+            followOwner(mob, owner);
+            return;
+        }
+        LivingEntity pick = list.get(owner.getRandom().nextInt(list.size()));
+        mob.setTarget(pick);
+    }
+
+    private static void breakContract(ServerPlayer owner, Mob mob) {
+        mob.getPersistentData().putBoolean(LOOSE_TAG, true);
+        mob.getPersistentData().remove(CONTRACT_TAG);
+        mob.setTarget(owner);
+        owner.displayClientMessage(Component.translatable("message.effecoria.necro.contract_break"), true);
+        PlayerPsiData data = PsiHelper.get(owner);
+        data.setEntropyB(data.entropyB() + 0.12f);
+        PsiHelper.set(owner, data);
+    }
+
+    public static void releaseControl(ServerPlayer owner, Mob mob) {
+        mob.getPersistentData().putBoolean(LOOSE_TAG, true);
+        mob.getPersistentData().remove(OWNER_TAG);
+        PlayerPsiData data = PsiHelper.get(owner);
+        data.untrackThrall(mob.getUUID());
+        PsiHelper.set(owner, data);
+        owner.displayClientMessage(Component.translatable("message.effecoria.necro.army_loose"), true);
+    }
+
+    private static LivingEntity findGuardHostile(Mob guard) {
+        AABB box = guard.getBoundingBox().inflate(10);
+        LivingEntity best = null;
+        double bestDist = Double.MAX_VALUE;
+        for (Monster monster : guard.level().getEntitiesOfClass(Monster.class, box, LivingEntity::isAlive)) {
+            if (monster == guard) {
+                continue;
+            }
+            if (monster.getPersistentData().hasUUID(OWNER_TAG)) {
+                continue;
+            }
+            double d = monster.distanceToSqr(guard);
+            if (d < bestDist) {
+                bestDist = d;
+                best = monster;
+            }
+        }
+        return best;
+    }
+
+    /** Raise a bone servant at the caster's look-hit / feet. */
+    public static boolean spawnBoneServant(ServerPlayer owner, boolean overcharge) {
+        ServerLevel level = owner.serverLevel();
+        float reserve = 12f;
+        Optional<ControlBlock> block = diagnoseControl(owner, reserve, EntityType.SKELETON);
+        if (block.isPresent()) {
+            owner.displayClientMessage(controlMessage(block.get(), owner, reserve), true);
+            return false;
+        }
+        Skeleton skeleton = EntityType.SKELETON.create(level);
+        if (skeleton == null) {
+            return false;
+        }
+        Vec3 at = owner.position().add(owner.getLookAngle().scale(1.5)).add(0, 0.1, 0);
+        skeleton.moveTo(at.x, at.y, at.z, owner.getYRot(), 0f);
+        level.addFreshEntity(skeleton);
+        if (!register(skeleton, owner, null, reserve)) {
+            return false;
+        }
+        if (overcharge) {
+            skeleton.getPersistentData().putBoolean(CHAOS_TAG, true);
+            owner.displayClientMessage(Component.translatable("message.effecoria.necro.drunk_skeleton"), true);
+        }
+        return true;
+    }
+
+    /** Spirit contract — vex thrall that may betray. */
+    public static boolean spawnSpiritContract(ServerPlayer owner, LivingEntity preferred) {
+        ServerLevel level = owner.serverLevel();
+        float reserve = 14f;
+        Optional<ControlBlock> block = diagnoseControl(owner, reserve, EntityType.VEX);
+        if (block.isPresent()) {
+            owner.displayClientMessage(controlMessage(block.get(), owner, reserve), true);
+            return false;
+        }
+        Vex vex = EntityType.VEX.create(level);
+        if (vex == null) {
+            return false;
+        }
+        Vec3 at = owner.position().add(0, 1.2, 0);
+        vex.moveTo(at.x, at.y, at.z, owner.getYRot(), 0f);
+        level.addFreshEntity(vex);
+        if (!register(vex, owner, preferred, reserve)) {
+            return false;
+        }
+        vex.getPersistentData().putBoolean(CONTRACT_TAG, true);
+        return true;
+    }
+
+    /** Long-lived husk guard at a block position. */
+    public static boolean spawnEternalGuard(ServerPlayer owner, Vec3 post) {
+        ServerLevel level = owner.serverLevel();
+        float reserve = 18f;
+        Optional<ControlBlock> block = diagnoseControl(owner, reserve, EntityType.HUSK);
+        if (block.isPresent()) {
+            owner.displayClientMessage(controlMessage(block.get(), owner, reserve), true);
+            return false;
+        }
+        Husk husk = EntityType.HUSK.create(level);
+        if (husk == null) {
+            return false;
+        }
+        husk.moveTo(post.x, post.y, post.z, owner.getYRot(), 0f);
+        level.addFreshEntity(husk);
+        if (!register(husk, owner, null, reserve)) {
+            return false;
+        }
+        husk.getPersistentData().putBoolean(GUARD_TAG, true);
+        husk.getPersistentData().putDouble(GUARD_X, post.x);
+        husk.getPersistentData().putDouble(GUARD_Y, post.y);
+        husk.getPersistentData().putDouble(GUARD_Z, post.z);
+        return true;
+    }
+
+    /** Merge thralls into one stronger doll (wither skeleton). */
+    public static boolean fuseIntoDoll(ServerPlayer owner) {
+        List<Mob> owned = listOwned(owner);
+        if (owned.size() < 2) {
+            owner.displayClientMessage(Component.translatable("message.effecoria.necro.doll_need_thralls"), true);
+            return false;
+        }
+        ServerLevel level = owner.serverLevel();
+        float totalReserve = 0f;
+        int take = Math.min(3, owned.size());
+        List<Mob> sacrifice = owned.subList(0, take);
+        Vec3 at = sacrifice.get(0).position();
+        for (Mob mob : new ArrayList<>(sacrifice)) {
+            totalReserve += reserveOf(mob);
+            mob.discard();
+            PlayerPsiData data = PsiHelper.get(owner);
+            data.untrackThrall(mob.getUUID());
+            PsiHelper.set(owner, data);
+        }
+        float reserve = Math.min(maxSingleHp(PsiHelper.get(owner)), Math.max(20f, totalReserve * 0.85f));
+        Optional<ControlBlock> block = diagnoseControl(owner, reserve, EntityType.WITHER_SKELETON);
+        if (block.isPresent()) {
+            owner.displayClientMessage(controlMessage(block.get(), owner, reserve), true);
+            return false;
+        }
+        WitherSkeleton doll = EntityType.WITHER_SKELETON.create(level);
+        if (doll == null) {
+            return false;
+        }
+        doll.moveTo(at.x, at.y, at.z, owner.getYRot(), 0f);
+        if (doll.getAttribute(Attributes.MAX_HEALTH) != null) {
+            doll.getAttribute(Attributes.MAX_HEALTH).setBaseValue(Math.min(60, 20 + take * 12));
+            doll.setHealth(doll.getMaxHealth());
+        }
+        level.addFreshEntity(doll);
+        if (!register(doll, owner, null, reserve)) {
+            return false;
+        }
+        doll.getPersistentData().putBoolean(DOLL_TAG, true);
+        PlayerPsiData data = PsiHelper.get(owner);
+        data.setEntropyB(data.entropyB() + 0.08f * take);
+        PsiHelper.set(owner, data);
+        return true;
+    }
+
+    /** Mass raise skeletons near the caster. */
+    public static int spawnArmy(ServerPlayer owner, int count) {
+        int raised = 0;
+        for (int i = 0; i < count; i++) {
+            float reserve = 10f;
+            if (diagnoseControl(owner, reserve, EntityType.SKELETON).isPresent()) {
+                break;
+            }
+            ServerLevel level = owner.serverLevel();
+            Skeleton skeleton = EntityType.SKELETON.create(level);
+            if (skeleton == null) {
+                break;
+            }
+            double ang = (Math.PI * 2 * i) / Math.max(1, count);
+            Vec3 at = owner.position().add(Math.cos(ang) * 2.2, 0.1, Math.sin(ang) * 2.2);
+            skeleton.moveTo(at.x, at.y, at.z, owner.getYRot(), 0f);
+            level.addFreshEntity(skeleton);
+            if (register(skeleton, owner, null, reserve)) {
+                raised++;
+            }
+        }
+        return raised;
+    }
+
+    /** Temporary eldritch ally — wither skeleton that turns on everyone when the pact ends. */
+    public static boolean spawnEldritchAlly(ServerPlayer owner, int lifetimeTicks) {
+        ServerLevel level = owner.serverLevel();
+        float reserve = 28f;
+        Optional<ControlBlock> block = diagnoseControl(owner, reserve, EntityType.WITHER_SKELETON);
+        if (block.isPresent()) {
+            owner.displayClientMessage(controlMessage(block.get(), owner, reserve), true);
+            return false;
+        }
+        WitherSkeleton demon = EntityType.WITHER_SKELETON.create(level);
+        if (demon == null) {
+            return false;
+        }
+        Vec3 at = owner.position().add(owner.getLookAngle().scale(2));
+        demon.moveTo(at.x, at.y, at.z, owner.getYRot(), 0f);
+        if (demon.getAttribute(Attributes.MAX_HEALTH) != null) {
+            demon.getAttribute(Attributes.MAX_HEALTH).setBaseValue(40);
+            demon.setHealth(40);
+        }
+        level.addFreshEntity(demon);
+        if (!register(demon, owner, null, reserve)) {
+            return false;
+        }
+        demon.getPersistentData().putBoolean(CONTRACT_TAG, true);
+        demon.getPersistentData().putLong("effecoria:necro_pact_until", level.getGameTime() + lifetimeTicks);
+        PlayerPsiData data = PsiHelper.get(owner);
+        data.setEntropyB(data.entropyB() + 0.2f);
+        PsiHelper.set(owner, data);
+        return true;
+    }
+
+    /** Tiny indirection so NecroSummonService need not import BreathDebuffs at top for every call site. */
+    private static final class BreathDebuffsProxy {
+        static void confuse(Mob mob) {
+            com.effecoria.core.formula.BreathDebuffs.apply(
+                    mob, new net.minecraft.world.effect.MobEffectInstance(
+                            net.minecraft.world.effect.MobEffects.CONFUSION, 60, 0, true, false, true));
+        }
+
+        static void slowness(Mob mob, int ticks, int amp) {
+            com.effecoria.core.formula.BreathDebuffs.apply(
+                    mob, new net.minecraft.world.effect.MobEffectInstance(
+                            net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, ticks, amp, true, false, true));
+        }
+    }
     private static void provokeNearbyHostiles(Mob thrall) {
         if (!thrall.getPersistentData().hasUUID(OWNER_TAG)) {
             return;
