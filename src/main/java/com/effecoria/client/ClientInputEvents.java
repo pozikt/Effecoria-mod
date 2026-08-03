@@ -10,11 +10,13 @@ import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
+import net.minecraft.client.player.LocalPlayer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 @EventBusSubscriber(modid = EffecoriaMod.MOD_ID, value = Dist.CLIENT)
@@ -30,6 +32,51 @@ public final class ClientInputEvents {
     private static float castCharge;
 
     private ClientInputEvents() {}
+
+    /**
+     * Spell hub is a Screen, so vanilla KeyMappings go idle — reinject WASD/sprint from
+     * physical keys so you can keep running while picking a spell.
+     */
+    @SubscribeEvent
+    public static void onMovementInput(MovementInputUpdateEvent event) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (!(minecraft.screen instanceof SpellHubScreen) || !(event.getEntity() instanceof LocalPlayer player)) {
+            return;
+        }
+        var options = minecraft.options;
+        boolean up = isKeyPhysicallyDown(minecraft, options.keyUp.getKey());
+        boolean down = isKeyPhysicallyDown(minecraft, options.keyDown.getKey());
+        boolean left = isKeyPhysicallyDown(minecraft, options.keyLeft.getKey());
+        boolean right = isKeyPhysicallyDown(minecraft, options.keyRight.getKey());
+        boolean jumping = isKeyPhysicallyDown(minecraft, options.keyJump.getKey());
+        boolean shift = isKeyPhysicallyDown(minecraft, options.keyShift.getKey());
+        boolean sprint = isKeyPhysicallyDown(minecraft, options.keySprint.getKey());
+
+        var input = event.getInput();
+        input.up = up;
+        input.down = down;
+        input.left = left;
+        input.right = right;
+        input.jumping = jumping;
+        input.shiftKeyDown = shift;
+
+        float forward = (up == down) ? 0f : (up ? 1f : -1f);
+        float strafe = (left == right) ? 0f : (left ? 1f : -1f);
+        if (shift) {
+            // KeyboardInput uses ~0.3 when sneaking.
+            forward *= 0.3f;
+            strafe *= 0.3f;
+        }
+        input.forwardImpulse = forward;
+        input.leftImpulse = strafe;
+
+        // Keep / start sprint while moving forward in the hub.
+        if (forward > 0f && (sprint || player.isSprinting())) {
+            player.setSprinting(true);
+        } else if (forward <= 0f) {
+            player.setSprinting(false);
+        }
+    }
 
     /** 0..1 charge while holding cast; 0 when idle. */
     public static float castChargeFraction() {
