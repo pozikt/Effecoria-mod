@@ -199,21 +199,109 @@ public final class MentalEffects {
             BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, 40, 0));
             caster.displayClientMessage(Component.translatable("message.effecoria.mental.probe_trauma"), true);
         }
-        String held = "—";
-        if (target instanceof net.minecraft.world.entity.player.Player p) {
-            held = p.getMainHandItem().isEmpty() ? "—" : p.getMainHandItem().getHoverName().getString();
-        } else if (target instanceof Mob) {
-            held = target.getMainHandItem().isEmpty() ? "—" : target.getMainHandItem().getHoverName().getString();
+
+        // Force a precise dump into chat (not only the action bar).
+        deliverProbeConfession(caster, target);
+        finishHit(caster.serverLevel(), target.position(), HitFx.SENSE);
+    }
+
+    private static void deliverProbeConfession(ServerPlayer caster, LivingEntity target) {
+        var typeId = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(target.getType());
+        MentalityService.Kind kind = MentalityService.of(target);
+        caster.sendSystemMessage(Component.translatable(
+                "message.effecoria.mental.probe_header",
+                target.getDisplayName(),
+                Component.translatable(
+                        "message.effecoria.mental.kind."
+                                + kind.name().toLowerCase(java.util.Locale.ROOT))));
+        caster.sendSystemMessage(Component.translatable(
+                "message.effecoria.mental.probe_identity",
+                typeId != null ? typeId.toString() : "?",
+                String.format("%.2f", target.getHealth()),
+                String.format("%.2f", target.getMaxHealth()),
+                String.format("%.0f", target.getYRot()),
+                target.blockPosition().getX(),
+                target.blockPosition().getY(),
+                target.blockPosition().getZ()));
+
+        if (target instanceof Mob mob) {
+            LivingEntity aggro = mob.getTarget();
+            LivingEntity lastHurt = mob.getLastHurtByMob();
+            caster.sendSystemMessage(Component.translatable(
+                    "message.effecoria.mental.probe_mob_ai",
+                    aggro != null ? aggro.getDisplayName() : Component.literal("—"),
+                    lastHurt != null ? lastHurt.getDisplayName() : Component.literal("—"),
+                    mob.isAggressive()));
         }
+
+        if (target instanceof net.minecraft.world.entity.player.Player victim) {
+            var inv = victim.getInventory();
+            StringBuilder bag = new StringBuilder();
+            int listed = 0;
+            for (int i = 0; i < inv.getContainerSize() && listed < 12; i++) {
+                var stack = inv.getItem(i);
+                if (stack.isEmpty()) {
+                    continue;
+                }
+                if (listed > 0) {
+                    bag.append(", ");
+                }
+                bag.append(stack.getHoverName().getString()).append("×").append(stack.getCount());
+                listed++;
+            }
+            caster.sendSystemMessage(Component.translatable(
+                    "message.effecoria.mental.probe_player_bag",
+                    bag.isEmpty() ? "—" : bag.toString()));
+        }
+
+        String gear = String.join(
+                " · ",
+                slotLabel(target, net.minecraft.world.entity.EquipmentSlot.MAINHAND),
+                slotLabel(target, net.minecraft.world.entity.EquipmentSlot.OFFHAND),
+                slotLabel(target, net.minecraft.world.entity.EquipmentSlot.HEAD),
+                slotLabel(target, net.minecraft.world.entity.EquipmentSlot.CHEST),
+                slotLabel(target, net.minecraft.world.entity.EquipmentSlot.LEGS),
+                slotLabel(target, net.minecraft.world.entity.EquipmentSlot.FEET));
+        caster.sendSystemMessage(Component.translatable("message.effecoria.mental.probe_gear", gear));
+
+        StringBuilder effects = new StringBuilder();
+        int n = 0;
+        for (var inst : target.getActiveEffects()) {
+            if (n > 0) {
+                effects.append(", ");
+            }
+            effects
+                    .append(Component.translatable(inst.getDescriptionId()).getString())
+                    .append(" ")
+                    .append(inst.getAmplifier() + 1)
+                    .append(" (")
+                    .append(inst.getDuration() / 20)
+                    .append("s)");
+            n++;
+            if (n >= 8) {
+                break;
+            }
+        }
+        caster.sendSystemMessage(Component.translatable(
+                "message.effecoria.mental.probe_effects", effects.isEmpty() ? "—" : effects.toString()));
+
+        // Compact action-bar summary for combat glance.
         caster.displayClientMessage(
                 Component.translatable(
                         "message.effecoria.mental.mind_probe_deep",
                         target.getDisplayName(),
-                        Math.round(target.getHealth()),
-                        Math.round(target.getMaxHealth()),
-                        held),
+                        String.format("%.1f", target.getHealth()),
+                        String.format("%.1f", target.getMaxHealth()),
+                        slotLabel(target, net.minecraft.world.entity.EquipmentSlot.MAINHAND)),
                 true);
-        finishHit(caster.serverLevel(), target.position(), HitFx.SENSE);
+    }
+
+    private static String slotLabel(LivingEntity target, net.minecraft.world.entity.EquipmentSlot slot) {
+        var stack = target.getItemBySlot(slot);
+        if (stack.isEmpty()) {
+            return "—";
+        }
+        return stack.getHoverName().getString() + (stack.getCount() > 1 ? "×" + stack.getCount() : "");
     }
 
     public static void locusEcho(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
@@ -546,16 +634,21 @@ public final class MentalEffects {
         finishHit(caster.serverLevel(), target.position(), HitFx.FOG);
     }
 
-    /** II.5 Sensory illusion — brief invis vs target + false glow decoy. */
+    /** II.5 Sensory illusion — victim body stays; soul walks a private mirage. */
     public static void mindIllusion(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        int duration = scaledTicks(effect, power, "duration_ticks", 100);
+        int duration = scaledTicks(effect, power, "duration_ticks", 160);
         ServerLevel level = caster.serverLevel();
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, false, true));
         if (target != null && gateAfflict(caster, target, duration, false)) {
-            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.BLINDNESS, Math.min(60, duration / 2), 0));
-            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, duration / 2, 0));
+            if (target instanceof ServerPlayer victim) {
+                float pulse = effect.params().has("mirage_pulse")
+                        ? effect.params().get("mirage_pulse").getAsFloat()
+                        : 2.5f * (0.85f + power / 120f);
+                MirageWorldService.start(victim, caster, duration, pulse);
+            } else {
+                BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.BLINDNESS, Math.min(60, duration / 2), 0));
+                BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, duration / 2, 0));
+            }
         }
-        // Decoy shimmer at look point.
         Vec3 aim = caster.getEyePosition().add(caster.getLookAngle().normalize().scale(4));
         spawnFog(level, aim);
         spawnSense(level, caster.position().add(0, 1, 0));

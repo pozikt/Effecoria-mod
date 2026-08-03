@@ -126,6 +126,18 @@ public class EffecoriaMod {
                 ModNetworking.BlurredLocusPayload.STREAM_CODEC,
                 ModNetworking.BlurredLocusPayload::handle);
         registrar.playToClient(
+                ModNetworking.MirageStartPayload.TYPE,
+                ModNetworking.MirageStartPayload.STREAM_CODEC,
+                ModNetworking.MirageStartPayload::handle);
+        registrar.playToClient(
+                ModNetworking.MirageHurtPayload.TYPE,
+                ModNetworking.MirageHurtPayload.STREAM_CODEC,
+                ModNetworking.MirageHurtPayload::handle);
+        registrar.playToClient(
+                ModNetworking.MirageEndPayload.TYPE,
+                ModNetworking.MirageEndPayload.STREAM_CODEC,
+                ModNetworking.MirageEndPayload::handle);
+        registrar.playToClient(
                 ModNetworking.SingularityFxPayload.TYPE,
                 ModNetworking.SingularityFxPayload.STREAM_CODEC,
                 ModNetworking.SingularityFxPayload::handle);

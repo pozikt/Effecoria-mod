@@ -222,6 +222,82 @@ public final class ModNetworking {
         }
     }
 
+    /** Server → victim: enter client-only illusory space (no world edits). */
+    public record MirageStartPayload(int durationTicks, float maxHp, float intensity) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<MirageStartPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "mirage_start"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, MirageStartPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.VAR_INT,
+                        MirageStartPayload::durationTicks,
+                        ByteBufCodecs.FLOAT,
+                        MirageStartPayload::maxHp,
+                        ByteBufCodecs.FLOAT,
+                        MirageStartPayload::intensity,
+                        MirageStartPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(MirageStartPayload payload, IPayloadContext context) {
+            context.enqueueWork(
+                    () -> com.effecoria.client.MirageClient.onStart(
+                            payload.durationTicks(), payload.maxHp(), payload.intensity()));
+        }
+    }
+
+    /** Server → victim: illusory hurt pulse (sound/flash/HUD only). */
+    public record MirageHurtPayload(float amount, float remainingHp, float maxHp) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<MirageHurtPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "mirage_hurt"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, MirageHurtPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.FLOAT,
+                        MirageHurtPayload::amount,
+                        ByteBufCodecs.FLOAT,
+                        MirageHurtPayload::remainingHp,
+                        ByteBufCodecs.FLOAT,
+                        MirageHurtPayload::maxHp,
+                        MirageHurtPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(MirageHurtPayload payload, IPayloadContext context) {
+            context.enqueueWork(
+                    () -> com.effecoria.client.MirageClient.onHurt(
+                            payload.amount(), payload.remainingHp(), payload.maxHp()));
+        }
+    }
+
+    /** Server → victim: leave illusory space. */
+    public record MirageEndPayload(boolean collapsed) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<MirageEndPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "mirage_end"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, MirageEndPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.BOOL, MirageEndPayload::collapsed, MirageEndPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(MirageEndPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> com.effecoria.client.MirageClient.onEnd(payload.collapsed()));
+        }
+    }
+
     /** Server → nearby clients: world-anchored spatial singularity pulse. */
     public record SingularityFxPayload(double x, double y, double z, float intensity, int durationTicks)
             implements CustomPacketPayload {

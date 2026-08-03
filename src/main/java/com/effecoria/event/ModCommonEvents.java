@@ -26,6 +26,7 @@ import com.effecoria.effect.elemental.SteamCloudService;
 import com.effecoria.effect.elemental.SteamFlightService;
 import com.effecoria.effect.mental.MentalCompulsionService;
 import com.effecoria.effect.mental.MentalityService;
+import com.effecoria.effect.mental.MirageWorldService;
 import com.effecoria.effect.necromancy.DeathMarkService;
 import com.effecoria.effect.necromancy.NecroFieldService;
 import com.effecoria.effect.necromancy.NecroSummonService;
@@ -87,6 +88,7 @@ public final class ModCommonEvents {
             DeathMarkService.tickMarks(serverLevel);
             MentalCompulsionService.tick(serverLevel);
             MentalityService.tick(serverLevel);
+            MirageWorldService.tick(serverLevel);
         }
     }
 
@@ -128,6 +130,8 @@ public final class ModCommonEvents {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
+
+        MirageWorldService.playerTick(player);
 
         PlayerPsiData flightData = PsiHelper.get(player);
         if (flightData.initiated()) {

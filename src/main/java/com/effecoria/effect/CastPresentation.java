@@ -85,8 +85,7 @@ public final class CastPresentation {
     private static final Set<ResourceLocation> ELEMENTAL_VEIL_ONLY =
             Set.of(id("quasar"), id("elemental_supremacy"));
 
-    private static final Set<ResourceLocation> MENTAL_FORCE =
-            Set.of(id("mental_push"), id("telekinetic_crush"));
+    private static final Set<ResourceLocation> MENTAL_FORCE = Set.of(id("mental_push"));
     private static final Set<ResourceLocation> MENTAL_SHARD = Set.of(
             id("mental_sting"), id("mind_lance"), id("mind_bolt"), id("thought_lance"));
     private static final Set<ResourceLocation> MENTAL_SENSE = Set.of(

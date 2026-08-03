@@ -11,8 +11,9 @@
   "effects": [
     {
       "type": "effecoria:mind_illusion",
-      "duration_ticks": 100,
-      "range": 14
+      "duration_ticks": 160,
+      "range": 14,
+      "mirage_pulse": 2.5
     }
   ]
 }

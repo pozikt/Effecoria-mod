@@ -64,6 +64,7 @@ public final class SpellUnlockService {
             "psychic_storm",
             "mental_fortress",
             "thought_bomb",
+            "telekinetic_crush",
             "omega_mind");
 
     /** Elemental fireball / weather / shroud duplicates of four-state pillars. */
