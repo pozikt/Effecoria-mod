@@ -2,11 +2,15 @@ package com.effecoria.event;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.command.EffecoriaCommands;
+import com.effecoria.content.ModItems;
+import com.effecoria.content.PhiHarnessItems;
+import com.effecoria.core.formula.CastBlockReason;
 import com.effecoria.core.formula.FormulaEngine;
 import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.magic.ShadeService;
 import com.effecoria.core.progression.EntropyService;
 import com.effecoria.core.progression.ExhaustionService;
+import com.effecoria.core.progression.FirstHourTips;
 import com.effecoria.core.progression.ProgressionService;
 import com.effecoria.core.progression.SpellUnlockService;
 import com.effecoria.core.progression.SealWordUnlockService;
@@ -102,6 +106,18 @@ public final class ModCommonEvents {
         }
         SpellRegistry.syncToAll(event.getPlayerList().getServer());
         SealWordRegistry.syncToAll(event.getPlayerList().getServer());
+    }
+
+    @SubscribeEvent
+    public static void onItemCrafted(PlayerEvent.ItemCraftedEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer)) {
+            return;
+        }
+        var crafted = event.getCrafting();
+        if (crafted.is(ModItems.PHI_CELL.get()) && PhiHarnessItems.cellCharge(crafted) <= 0.001f) {
+            // Fresh cell ships with a starter buffer so the first cave cast can demonstrate assist.
+            PhiHarnessItems.setCellCharge(crafted, 0.35f);
+        }
     }
 
     @SubscribeEvent

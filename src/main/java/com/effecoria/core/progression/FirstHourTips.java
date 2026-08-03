@@ -21,7 +21,8 @@ public final class FirstHourTips {
         FIRST_CAST(2),
         FIRST_WHIFF(3),
         ENTROPY(4),
-        SEALS(5);
+        SEALS(5),
+        HARNESS(6);
 
         private final int bit;
 

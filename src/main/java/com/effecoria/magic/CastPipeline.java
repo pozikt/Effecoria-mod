@@ -1,6 +1,7 @@
 package com.effecoria.magic;
 
 import com.effecoria.config.BalanceConfig;
+import com.effecoria.core.formula.CastBlockReason;
 import com.effecoria.core.formula.FormulaEngine;
 import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.formula.PsiContext;
@@ -91,6 +92,9 @@ public final class CastPipeline {
             var block = FormulaEngine.diagnoseCannotCast(ctx, phi, spell, usablePsi);
             if (block.isPresent()) {
                 player.displayClientMessage(Component.translatable(block.get().messageKey()), true);
+                if (block.get() == CastBlockReason.LOW_PHI) {
+                    FirstHourTips.tryShow(player, FirstHourTips.Tip.HARNESS);
+                }
                 return CastResult.CANNOT_CAST;
             }
         }

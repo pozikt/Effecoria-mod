@@ -1,0 +1,27 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_amethyst": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:amethyst_shard"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_amethyst"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "effecoria:essonite_dust_from_crystal",
+      "effecoria:resonance_focus",
+      "effecoria:phi_cell"
+    ]
+  }
+}
