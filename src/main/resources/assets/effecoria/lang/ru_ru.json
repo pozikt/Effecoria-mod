@@ -242,7 +242,7 @@
   "message.effecoria.mental.kind.humanoid": "гуманоид",
   "message.effecoria.mental.kind.construct": "конструкт",
   "message.effecoria.mental.illusion_on": "Сенсорная подмена активна",
-  "message.effecoria.mental.mirage_enter": "Тело осталось в яви — душа ступила на костяные равнины под красным небом.",
+  "message.effecoria.mental.mirage_enter": "Тело осталось в яви — душа ступила на костяные равнины. Иди — мир растёт перед тобой.",
   "message.effecoria.mental.mirage_cast": "Душа %s утянута в кровавый морок; тело стоит и тошнит",
   "message.effecoria.mental.mirage_fade": "Душа возвращается в тело",
   "message.effecoria.mental.mirage_collapse": "Моральный удар сразил иллюзорное тело — душа вернулась",

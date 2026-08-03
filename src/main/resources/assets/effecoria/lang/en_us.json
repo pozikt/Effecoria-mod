@@ -242,7 +242,7 @@
   "message.effecoria.mental.kind.humanoid": "humanoid",
   "message.effecoria.mental.kind.construct": "construct",
   "message.effecoria.mental.illusion_on": "Sensory swap active",
-  "message.effecoria.mental.mirage_enter": "Your body stays in waking — the soul steps onto bone plains under a red sky.",
+  "message.effecoria.mental.mirage_enter": "Your body stays in waking — the soul steps onto bone plains. Walk, and the world grows ahead.",
   "message.effecoria.mental.mirage_cast": "%s's soul is pulled into the blood mirage; the body stands and retches",
   "message.effecoria.mental.mirage_fade": "The soul returns to the body",
   "message.effecoria.mental.mirage_collapse": "A moral blow fells the illusory body — the soul returns",
