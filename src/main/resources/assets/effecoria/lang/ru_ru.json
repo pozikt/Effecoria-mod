@@ -929,6 +929,7 @@
   "message.effecoria.corruption.spread": "Проклятие перекинулось на %s сородичей",
   "message.effecoria.corruption.cured": "Проклятие порчи снято",
   "block.effecoria.subspace_portal": "Прокол подпространства",
+  "block.effecoria.phi_veil": "Φ-вуаль",
   "entity.effecoria.root_cage": "Клетка корней",
   "spell.effecoria.fold_repulse.desc": "Импульс антигравитации от себя. Не различает своих и чужих.",
   "spell.effecoria.gravity_snare.desc": "Меняет вектор «низа» — ходишь по стенам. Может тошнить.",

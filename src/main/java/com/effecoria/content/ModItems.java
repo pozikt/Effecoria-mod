@@ -26,6 +26,10 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> BASALT_ESSENITE_ORE =
             ITEMS.registerSimpleBlockItem("basalt_essonite_ore", ModBlocks.BASALT_ESSENITE_ORE);
 
+    /** Hyperspace Φ-membrane (creative / debug; worldgen places it in subspace). */
+    public static final DeferredItem<BlockItem> PHI_VEIL =
+            ITEMS.registerSimpleBlockItem("phi_veil", ModBlocks.PHI_VEIL);
+
     /** Refined Φ-conductive dust — smelted from essonite ore. */
     public static final DeferredItem<Item> ESSENITE_DUST = ITEMS.registerSimpleItem("essonite_dust");
 

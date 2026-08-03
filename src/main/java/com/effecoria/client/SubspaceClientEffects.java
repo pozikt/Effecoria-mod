@@ -20,7 +20,8 @@ public final class SubspaceClientEffects {
                 new DimensionSpecialEffects(Float.NaN, true, DimensionSpecialEffects.SkyType.NONE, false, false) {
                     @Override
                     public Vec3 getBrightnessDependentFogColor(Vec3 biomeFogColor, float daylight) {
-                        return new Vec3(0.04, 0.015, 0.07);
+                        // Compressed Φ ocean — deep ultramarine / indigo.
+                        return new Vec3(0.03, 0.06, 0.28);
                     }
 
                     @Override

@@ -31,8 +31,10 @@ public final class EffecoriaClient {
 
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> ItemBlockRenderTypes.setRenderLayer(
-                ModBlocks.SUBSPACE_PORTAL.get(), RenderType.translucent()));
+        event.enqueueWork(() -> {
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.SUBSPACE_PORTAL.get(), RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_VEIL.get(), RenderType.translucent());
+        });
     }
     @SubscribeEvent
     public static void registerKeys(RegisterKeyMappingsEvent event) {

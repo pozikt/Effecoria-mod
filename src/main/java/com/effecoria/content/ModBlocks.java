@@ -40,6 +40,24 @@ public final class ModBlocks {
     public static final DeferredBlock<Block> BASALT_ESSENITE_ORE =
             registerOre("basalt_essonite_ore", MapColor.COLOR_BLACK, 3.2f, 3f, SoundType.BASALT);
 
+    /**
+     * Translucent Φ-membrane underfoot in hyperspace — replaces the old end-stone sheet so the
+     * ultramarine Φ-ocean shows through.
+     */
+    public static final DeferredBlock<Block> PHI_VEIL = BLOCKS.register(
+            "phi_veil",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .strength(-1.0f, 3600000.0f)
+                    .sound(SoundType.GLASS)
+                    .lightLevel(state -> 4)
+                    .noOcclusion()
+                    .isViewBlocking((state, level, pos) -> false)
+                    .isSuffocating((state, level, pos) -> false)
+                    .isRedstoneConductor((state, level, pos) -> false)
+                    .pushReaction(PushReaction.BLOCK)
+                    .noLootTable()));
+
     /** Soft spatial rift — two-block puncture used by subspace voyage. */
     public static final DeferredBlock<SubspacePortalBlock> SUBSPACE_PORTAL = BLOCKS.register(
             "subspace_portal",

@@ -201,9 +201,11 @@ public final class SubspaceMatterService {
 
     private static void ensureSupport(ServerLevel level, BlockPos feet) {
         BlockPos floor = feet.below();
-        if (level.getBlockState(floor).isAir() || level.getBlockState(floor).canBeReplaced()) {
-            // Keep dumps standing even above the flat end-stone sheet.
-            level.setBlock(floor, Blocks.END_STONE.defaultBlockState(), 3);
+        if (level.getBlockState(floor).isAir()
+                || level.getBlockState(floor).canBeReplaced()
+                || level.getBlockState(floor).is(Blocks.END_STONE)) {
+            // Keep dumps standing on the translucent Φ membrane.
+            level.setBlock(floor, SubspaceTerrain.floorState(), 3);
         }
     }
 

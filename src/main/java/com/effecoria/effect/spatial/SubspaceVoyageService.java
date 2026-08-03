@@ -249,6 +249,7 @@ public final class SubspaceVoyageService {
                     null);
             BlockPos spawn = safeLandingBeside(portal.entrySubspacePos());
             ensureFloor(subspace, spawn);
+            SubspaceTerrain.sanitizeAround(subspace, spawn, 8);
             teleportEntity(entity, subspace, spawn);
             fx(subspace, Vec3.atCenterOf(spawn));
             return;
@@ -310,6 +311,8 @@ public final class SubspaceVoyageService {
 
         BlockPos spawn = safeLandingBeside(portal.entrySubspacePos());
         ensureFloor(subspace, spawn);
+        SubspaceTerrain.sanitizeAround(subspace, spawn, 12);
+        SubspaceTerrain.sanitizeAround(subspace, portal.entrySubspacePos(), 8);
         teleport(player, subspace, spawn);
         // Don't bounce straight into the yard return puncture.
         armPortalGrace(subspace, spawn, player.getUUID(), 45L);
@@ -612,8 +615,8 @@ public final class SubspaceVoyageService {
         }
         // Re-assert floor after clears.
         BlockPos floor = feet.below();
-        if (!level.getBlockState(floor).blocksMotion()) {
-            level.setBlock(floor, Blocks.END_STONE.defaultBlockState(), 3);
+        if (!level.getBlockState(floor).blocksMotion() || level.getBlockState(floor).is(Blocks.END_STONE)) {
+            level.setBlock(floor, SubspaceTerrain.floorState(), 3);
         }
     }
 
@@ -725,10 +728,7 @@ public final class SubspaceVoyageService {
 
     /** Clear air for standing — never punch out an existing subspace puncture. */
     private static void ensureFloor(ServerLevel level, BlockPos feet) {
-        BlockPos floor = feet.below();
-        if (level.getBlockState(floor).isAir() || level.getBlockState(floor).canBeReplaced()) {
-            level.setBlock(floor, Blocks.END_STONE.defaultBlockState(), 3);
-        }
+        SubspaceTerrain.ensureFloorCell(level, feet);
         clearStandCell(level, feet);
         clearStandCell(level, feet.above());
     }
@@ -830,12 +830,12 @@ public final class SubspaceVoyageService {
 
     private static void placePlatformIfNeeded(ServerLevel level, BlockPos feet) {
         BlockPos floor = feet.below();
-        if (!level.getBlockState(floor).blocksMotion()) {
+        if (!level.getBlockState(floor).blocksMotion() || level.getBlockState(floor).is(Blocks.END_STONE)) {
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dz = -1; dz <= 1; dz++) {
                     BlockPos at = floor.offset(dx, 0, dz);
                     if (!level.getBlockState(at).is(ModBlocks.SUBSPACE_PORTAL.get())) {
-                        level.setBlock(at, Blocks.END_STONE.defaultBlockState(), 3);
+                        level.setBlock(at, SubspaceTerrain.floorState(), 3);
                     }
                 }
             }

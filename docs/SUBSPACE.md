@@ -12,6 +12,11 @@ Living doc for `effecoria:subspace` after the voyage MVP (`subspace_voyage`, 1�
 - Multiple Spatial mages may run **independent** sessions at once; a passenger Spatial mage can place an *additional* exit without deleting the host’s (until the host exits).
 - Party members of one session share the same hyperspace rendezvous anchor.
 
+## Floor / Φ-vision (shipped)
+
+- Hyperspace stands on translucent **`phi_veil`** (not End stone). Leftover End stone under landings is migrated on entry.
+- Client Φ-landscape: ultramarine fog ocean, star-hills, planet motes, black-hole spirals, TSE knots, Ω glitch snow (`SubspacePhiLandscapeClient`).
+
 ## Must-add later: cosmological anomalies & hazards
 
 Hyperspace is **not** an empty corridor. Add navigation and survival threats:

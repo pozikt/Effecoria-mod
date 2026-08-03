@@ -900,6 +900,7 @@
   "message.effecoria.corruption.spread": "Curse leapt to %s kin",
   "message.effecoria.corruption.cured": "Corruption curse cleansed",
   "block.effecoria.subspace_portal": "Subspace Puncture",
+  "block.effecoria.phi_veil": "Φ Veil",
   "entity.effecoria.root_cage": "Root Cage",
   "spell.effecoria.fold_repulse.desc": "Antigravity pulse from you. Does not spare allies.",
   "spell.effecoria.gravity_snare.desc": "Shift local down — walk walls. May cause nausea.",
