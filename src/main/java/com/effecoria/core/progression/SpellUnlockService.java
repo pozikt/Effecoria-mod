@@ -25,104 +25,69 @@ public final class SpellUnlockService {
             "raise_zombie");
 
     /**
-     * Combat filler dropped when necromancy was slimmed to lore pillars.
-     * Kept as JSON for packs; stripped from known lists on tick.
+     * Duplicate-effect fillers only — unique authored spells stay in progression.
+     * JSON kept for packs; these paths are stripped from known lists on tick.
      */
     private static final Set<String> RETIRED_NECRO_FILLER = Set.of(
             "bone_chill",
             "necrotic_bolt",
             "soul_drain",
             "wither_touch",
-            "death_shadow",
             "curse_of_frailty",
             "siphon_pulse",
             "bone_armor",
-            "phantom_step",
             "grave_bind",
             "life_tap",
-            "haunting_visage",
             "bone_volley",
             "wither_wave",
             "necrotic_aura",
             "grave_leech",
-            "corpse_burst",
             "grave_field",
-            "soul_anchor",
-            "death_gate",
             "death_coil",
             "death_apotheosis");
 
-    /** Filler dropped when spatial was slimmed to lore pillars. */
+    /** Spatial duplicates of kept rift/fold combat lanes. */
     private static final Set<String> RETIRED_SPATIAL_FILLER = Set.of(
-            "phase_veil",
-            "rift_yank",
-            "rift_excise",
-            "warp_exchange",
             "spatial_surge",
             "void_lance",
             "rift_burst");
 
-    /** Filler dropped when mental was slimmed to 12 lore techniques. */
+    /** Mental confusion/buff duplicates of the 12 lore techniques. */
     private static final Set<String> RETIRED_MENTAL_FILLER = Set.of(
-            "mental_push",
             "mind_bolt",
             "mental_sting",
             "psychic_amplify",
-            "neural_lock",
-            "mind_terror",
             "mind_lance",
-            "thought_lance",
-            "telekinetic_crush",
-            "cliff_urge",
-            "drown_urge",
-            "locus_echo",
             "mass_confusion",
-            "psychic_frenzy",
             "synaptic_overload",
-            "psychic_drain",
             "psychic_focus",
             "psychic_storm",
             "mental_fortress",
             "thought_bomb",
-            "mass_hysteria",
             "omega_mind");
 
-    /** Filler dropped when elemental was slimmed to four-state pillars. */
+    /** Elemental fireball / weather / shroud duplicates of four-state pillars. */
     private static final Set<String> RETIRED_ELEMENTAL_FILLER = Set.of(
             "ember_volley",
-            "steam_veil",
-            "breath_bubble",
-            "shockwave",
-            "mirage",
-            "ice_sheet",
-            "air_hand",
-            "sonic_lance",
             "ion_storm",
             "hyper_cooling",
-            "water_prison",
             "great_fireball",
-            "vacuum_cage",
             "water_shroud",
             "air_shroud",
-            "ice_prison",
-            "atmospheric_pressure",
             "cryo_wave",
-            "air_form",
             "hurricane_storm",
-            "steam_flight",
             "thermonuclear_pulse",
             "absolute_zero",
             "meteorological_cataclysm",
             "plasma_barrage");
 
-    /** Filler dropped when corruption was slimmed to the curse pipeline. */
+    /** Corruption wrappers that reuse mark/bind/pulse lanes. */
     private static final Set<String> RETIRED_CORRUPTION_FILLER = Set.of(
             "entropy_lash",
             "binding_seal",
             "blight_brand",
             "blight_surge",
-            "pestilence_wave",
-            "entropy_aegis");
+            "pestilence_wave");
 
     private SpellUnlockService() {}
 

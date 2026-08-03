@@ -1,46 +1,43 @@
 package com.effecoria.core.psi;
 
-
-
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.magic.MagicSchool;
-
 import com.effecoria.magic.SpellRegistry;
-
-
 
 import net.minecraft.resources.ResourceLocation;
 
-
-
 import java.util.List;
 
-
-
 public final class SpellProgression {
-
     private SpellProgression() {}
 
-
-
     public static List<ResourceLocation> spellsForSchool(MagicSchool school) {
-
         return switch (school) {
-
             case MENTAL -> List.of(
                     // I — basic
                     id("sense_phi"),
                     id("psi_whisper"),
                     id("psychic_barrier"),
+                    id("mental_push"),
                     // II — advanced
                     id("mind_probe"),
+                    id("locus_echo"),
                     id("mind_illusion"),
                     id("psychic_scream"),
+                    id("neural_lock"),
+                    id("mind_terror"),
+                    id("psychic_drain"),
                     // III — master
+                    id("thought_lance"),
+                    id("telekinetic_crush"),
                     id("mind_dominate"),
+                    id("cliff_urge"),
+                    id("drown_urge"),
+                    id("psychic_frenzy"),
                     id("false_memory"),
                     id("dream_lock"),
                     // IV — legendary
+                    id("mass_hysteria"),
                     id("hive_mind"),
                     id("psi_echo"),
                     id("total_veil"));
@@ -56,12 +53,25 @@ public final class SpellProgression {
                     id("steam_jet"),
                     id("wind_push"),
                     id("air_ionization"),
+                    id("breath_bubble"),
+                    id("ice_sheet"),
+                    id("shockwave"),
+                    id("steam_veil"),
                     // III — shaped working
                     id("hydro_slice"),
                     id("frost_bastion"),
                     id("plasma_bolt"),
+                    id("air_hand"),
+                    id("sonic_lance"),
+                    id("mirage"),
+                    id("water_prison"),
+                    id("ice_prison"),
+                    id("vacuum_cage"),
                     id("tornado"),
                     // IV — legendary
+                    id("atmospheric_pressure"),
+                    id("air_form"),
+                    id("steam_flight"),
                     id("lightning_spear"),
                     id("elemental_supremacy"),
                     id("quasar"));
@@ -127,16 +137,22 @@ public final class SpellProgression {
                     id("death_mark"),
                     id("grave_whisper"),
                     id("raise_skeleton"),
+                    id("death_shadow"),
                     // II — advanced
                     id("shade_summon"),
                     id("soul_shackle"),
                     id("lich_ward"),
+                    id("phantom_step"),
+                    id("haunting_visage"),
+                    id("corpse_burst"),
                     // III — master
+                    id("death_gate"),
+                    id("soul_anchor"),
                     id("soul_cataclysm"),
                     id("lich_ascension"),
                     id("phylactery_surge"),
                     id("army_of_dead"),
-                    // IV — legendary (no Ω-veil portal)
+                    // IV — legendary
                     id("dark_pact"),
                     id("soul_reaper"));
 
@@ -145,15 +161,19 @@ public final class SpellProgression {
                     id("warp_bolt"),
                     id("blink"),
                     id("void_step"),
+                    id("phase_veil"),
                     // II — advanced
                     id("far_blink"),
                     id("spatial_ward"),
                     id("gravity_well"),
                     id("fold_repulse"),
+                    id("rift_yank"),
+                    id("warp_exchange"),
                     // III — master
                     id("absolute_fold"),
                     id("gravity_snare"),
                     id("rift_slash"),
+                    id("rift_excise"),
                     // IV — legendary
                     id("spatial_singularity"),
                     id("dimensional_anchor"),
@@ -168,6 +188,7 @@ public final class SpellProgression {
                     id("plague_bolt"),
                     id("festering_wound"),
                     id("decay_bind"),
+                    id("entropy_aegis"),
                     // III — field
                     id("miasma_cloak"),
                     id("blight_field"),
@@ -180,12 +201,8 @@ public final class SpellProgression {
             case SEALS -> List.of();
 
             default -> List.of();
-
         };
-
     }
-
-
 
     public static boolean schoolHasLoadedSpells(MagicSchool school) {
         if (school == MagicSchool.SEALS) {
@@ -210,14 +227,7 @@ public final class SpellProgression {
         return -1;
     }
 
-
-
     private static ResourceLocation id(String path) {
-
         return ResourceLocation.fromNamespaceAndPath("effecoria", path);
-
     }
-
 }
-
-

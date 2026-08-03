@@ -162,7 +162,13 @@ public final class PsiHudOverlay {
                     x,
                     barY + 6,
                     0xFFE8C060);
-            extraY += 16;
+            graphics.drawString(
+                    minecraft.font,
+                    Component.translatable("hud.effecoria.cast_charge_hint"),
+                    x,
+                    barY + 16,
+                    0xCCBBA070);
+            extraY += 26;
         }
 
         if (data.exhaustion() >= BalanceConfig.EXHAUSTION_WARM.get().floatValue()) {
