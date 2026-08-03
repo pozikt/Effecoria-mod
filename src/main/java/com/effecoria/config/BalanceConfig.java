@@ -267,6 +267,26 @@ public final class BalanceConfig {
             .comment("biologyQ multiplier at very low air supply")
             .defineInRange("biology_air_min", 0.6, 0.1, 1.0);
 
+    public static final ModConfigSpec.DoubleValue BIOLOGY_DEFAULT_BASELINE = BUILDER
+            .comment("Default Orkanum baseline for humans (Stage II races override via BiologyService.applyRaceBaseline)")
+            .defineInRange("biology_default_baseline", 0.6, 0.05, 2.0);
+
+    public static final ModConfigSpec.DoubleValue BIOLOGY_SPELL_POWER_WEIGHT = BUILDER
+            .comment("How much effective Orkanum (biologyQ×body) soft-scales spell power; 0 = regen-only")
+            .defineInRange("biology_spell_power_weight", 0.12, 0.0, 0.5);
+
+    public static final ModConfigSpec.DoubleValue BIOLOGY_SPELL_POWER_MIN = BUILDER
+            .comment("Floor for Orkanum spell-power multiplier")
+            .defineInRange("biology_spell_power_min", 0.88, 0.5, 1.0);
+
+    public static final ModConfigSpec.DoubleValue BIOLOGY_SPELL_POWER_MAX = BUILDER
+            .comment("Ceiling for Orkanum spell-power multiplier")
+            .defineInRange("biology_spell_power_max", 1.12, 1.0, 1.5);
+
+    public static final ModConfigSpec.IntValue BREATHING_TRAIN_MIN_INTERVAL_MS = BUILDER
+            .comment("Server-side minimum real-time gap between accepted breathing-train hits (anti-spam)")
+            .defineInRange("breathing_train_min_interval_ms", 280, 50, 5000);
+
     // --- Phi environment (factors around 1.0; PhiFieldService adds (factor - 1)) ---
     public static final ModConfigSpec.DoubleValue PHI_RAIN_MULTIPLIER = BUILDER
             .comment("Rain Φ factor around 1.0 (additive as value-1)")

@@ -74,11 +74,14 @@ Goal: ZNΦ and wards are gameplay, not lore text.
 
 ---
 
-### Phase E — Breathing & body (Orkanum)
+### Phase E — Breathing & body (Orkanum) ✅
 
-1. Air / hunger coupling to `biologyQ` (hooks exist in `BiologyService`).
-2. Optional **breathing trainer** block or scroll mini-game.
-3. Race baselines (when Stage II starts) plug into same multiplier.
+1. Air / hunger coupling to `biologyQ` via `BiologyService.bodyFactor` → `PsiHelper.toContext` → Ψ regen. ✅
+2. Soft Orkanum spell-power scale (`biology_spell_power_*` config). ✅
+3. Hub breathing trainer + scroll + fatigue; server hit rate-limit. ✅
+4. HUD: always show breathing after initiation; Orkanum strain / fatigue / drill bonus. ✅
+5. First-hour tip `BREATHING` on hub open. ✅
+6. Race baselines — `BiologyService.applyRaceBaseline` hook ready for Stage II.
 
 ---
 
@@ -161,7 +164,8 @@ If choosing a single slice for the next implementation session:
 13. Death Mark thralls + mastery control budget + additive Φ stacking — ✅ baseline shipped.
 14. Phase **D4** seal conflicts + inspect HUD — ✅ done.
 15. Magic **presentation** (Primer guide + first-hour tips + hub/HUD clarity) — ✅ done.
-16. **Next:** Phase **E** breathing/body (air/hunger → biologyQ, trainer), or optional overcast/hold-charge polish.
+16. Phase **E** breathing/body (air/hunger → Orkanum, soft cast scale, HUD, train rate-limit, tip) — ✅ done.
+17. **Next:** Stage I exit polish (playtest funnel), or intentional start of Stage II environment.
 
 ---
 

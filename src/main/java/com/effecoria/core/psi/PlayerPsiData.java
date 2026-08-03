@@ -154,6 +154,8 @@ public final class PlayerPsiData {
     private int breathTrainHits;
     private int breathTrainSessionMisses;
     private long breathTrainFatigueUntilMs;
+    /** Server-only anti-spam clock for breathing-train hits (not persisted / not synced). */
+    private transient long lastBreathTrainHitMs;
     private boolean steamFlightActive;
     private float steamFlightDrainPerTick;
     private int ionChargeTicksRemaining;
@@ -181,6 +183,7 @@ public final class PlayerPsiData {
         PlayerPsiData data = new PlayerPsiData();
         data.maxPsi = BalanceConfig.DEFAULT_MAX_PSI.get().floatValue();
         data.currentPsi = data.maxPsi * 0.5f;
+        data.biologyQ = com.effecoria.core.progression.BiologyService.defaultBaseline();
         return data;
     }
 
@@ -284,6 +287,16 @@ public final class PlayerPsiData {
 
     public long breathTrainFatigueRemainingMs() {
         return Math.max(0L, breathTrainFatigueUntilMs - System.currentTimeMillis());
+    }
+
+    /** @return true if enough real time has passed since the last accepted hit. */
+    public boolean tryAcceptBreathTrainHit(long minIntervalMs) {
+        long now = System.currentTimeMillis();
+        if (now - lastBreathTrainHitMs < Math.max(0L, minIntervalMs)) {
+            return false;
+        }
+        lastBreathTrainHitMs = now;
+        return true;
     }
 
     public boolean steamFlightActive() {
@@ -659,6 +672,9 @@ public final class PlayerPsiData {
         this.selectedSpellIndex = 0;
         this.entropyB = 0f;
         this.phiSenseUntil = 0L;
+        if (resetResources && biologyQ <= 0.001f) {
+            biologyQ = com.effecoria.core.progression.BiologyService.defaultBaseline();
+        }
         this.spellCastCounts.clear();
         this.spellLastCastAt.clear();
         if (chosenSchool == MagicSchool.SEALS) {

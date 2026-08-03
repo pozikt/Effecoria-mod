@@ -61,6 +61,7 @@ public final class FormulaEngine {
                 * resonance
                 * spell.powerMultiplier()
                 * ctx.mastery()
+                * com.effecoria.core.progression.BiologyService.spellPowerFactor(ctx.biologyQ())
                 * BalanceConfig.SPELL_POWER_SCALE.get().floatValue();
     }
 

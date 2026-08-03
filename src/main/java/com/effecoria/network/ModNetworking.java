@@ -675,6 +675,10 @@ public final class ModNetworking {
                             Component.translatable("message.effecoria.breath_train_fatigued", sec), true);
                     return;
                 }
+                long minGap = com.effecoria.config.BalanceConfig.BREATHING_TRAIN_MIN_INTERVAL_MS.get();
+                if (!data.tryAcceptBreathTrainHit(minGap)) {
+                    return;
+                }
                 float before = data.breathingMastery();
                 data.recordSuccessfulBreathTrain();
                 com.effecoria.core.progression.ProgressionService.onBreathTrainHit(player, data);
@@ -992,6 +996,8 @@ public final class ModNetworking {
                 }
                 com.effecoria.core.progression.FirstHourTips.tryShow(
                         player, com.effecoria.core.progression.FirstHourTips.Tip.OPEN_HUB);
+                com.effecoria.core.progression.FirstHourTips.tryShow(
+                        player, com.effecoria.core.progression.FirstHourTips.Tip.BREATHING);
             });
         }
     }

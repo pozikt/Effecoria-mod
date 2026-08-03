@@ -124,29 +124,52 @@ public final class PsiHudOverlay {
             primerNudgeSince = -1L;
         }
 
-        if (data.breathingMastery() > 0f) {
-            graphics.drawString(
-                    minecraft.font,
-                    Component.translatable(
-                            "hud.effecoria.breathing",
-                            BreathingService.formatTotalPercent(data.breathingMastery())),
-                    x,
-                    y + 52,
-                    0x88FFCC);
-        }
+        int lineY = y + 52;
+        graphics.drawString(
+                minecraft.font,
+                Component.translatable(
+                        "hud.effecoria.breathing",
+                        BreathingService.formatTotalPercent(data.breathingMastery())),
+                x,
+                lineY,
+                0x88FFCC);
+        lineY += 10;
 
-        int extraY = 0;
+        int extraY = 10; // breathing line always present after initiation
         if (!godMode && !data.isLichAscensionActive(minecraft.level.getGameTime())) {
+            float orkanum = BiologyService.effectiveOrkanum(minecraft.player, data);
             float body = BiologyService.bodyFactor(minecraft.player);
             if (body < 0.995f) {
-                int hintY = data.breathingMastery() > 0f ? y + 62 : y + 52;
                 graphics.drawString(
                         minecraft.font,
-                        Component.translatable("hud.effecoria.body_low", (int) (body * 100f)),
+                        Component.translatable("hud.effecoria.body_low", (int) (orkanum * 100f)),
                         x,
-                        hintY,
+                        lineY,
                         0xFFCCAA66);
-                extraY = 10;
+                lineY += 10;
+                extraY += 10;
+            }
+            if (data.isBreathTrainFatigued()) {
+                int sec = (int) Math.ceil(data.breathTrainFatigueRemainingMs() / 1000.0);
+                graphics.drawString(
+                        minecraft.font,
+                        Component.translatable("hud.effecoria.breath_fatigue", sec),
+                        x,
+                        lineY,
+                        0xFFFF8866);
+                lineY += 10;
+                extraY += 10;
+            } else if (data.breathTrainRegenBonus() > 0.001f) {
+                graphics.drawString(
+                        minecraft.font,
+                        Component.translatable(
+                                "hud.effecoria.breath_train_bonus",
+                                String.format("%.0f", data.breathTrainRegenBonus() * 100f)),
+                        x,
+                        lineY,
+                        0xAA88FFCC);
+                lineY += 10;
+                extraY += 10;
             }
         }
 
@@ -154,7 +177,7 @@ public final class PsiHudOverlay {
             float charge = ClientInputEvents.castChargeFraction();
             float min = BalanceConfig.CAST_CHARGE_MIN_POWER.get().floatValue();
             float powerPct = min + (1f - min) * charge;
-            int barY = y + 52 + (data.breathingMastery() > 0f ? 10 : 0) + extraY;
+            int barY = y + 52 + extraY;
             drawBar(graphics, x, barY, 90, 4, charge, 0xFFE8C060, 0xFF3A3018);
             graphics.drawString(
                     minecraft.font,

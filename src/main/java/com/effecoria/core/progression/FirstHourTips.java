@@ -22,7 +22,8 @@ public final class FirstHourTips {
         FIRST_WHIFF(3),
         ENTROPY(4),
         SEALS(5),
-        HARNESS(6);
+        HARNESS(6),
+        BREATHING(7);
 
         private final int bit;
 
