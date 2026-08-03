@@ -5,6 +5,7 @@ import com.effecoria.core.formula.SpellCombat;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.effect.elemental.AirHandService;
+import com.effecoria.effect.elemental.ElementalCraftEffects;
 import com.effecoria.effect.elemental.ElementalEffects;
 import com.effecoria.effect.corruption.CorruptionEffects;
 import com.effecoria.effect.mental.MentalEffects;
@@ -132,12 +133,15 @@ public final class SpellEffectExecutor {
             "plague_bolt",
             "tainted_leech");
 
-    private static final Set<String> BLOCK_SEAL_EFFECTS = Set.of(
+    private static final Set<String> BLOCK_TARGET_EFFECTS = Set.of(
             "place_trap_seal",
             "place_fortify_seal",
             "place_glow_seal",
             "place_snare_seal",
-            "place_repulse_seal");
+            "place_repulse_seal",
+            "ore_smelt");
+
+    private static final Set<String> HELD_COOK_EFFECTS = Set.of("sear");
 
     private SpellEffectExecutor() {}
 
@@ -153,7 +157,16 @@ public final class SpellEffectExecutor {
 
     public static boolean requiresBlockTarget(SpellDefinition spell) {
         for (SpellEffectEntry effect : spell.effects()) {
-            if (BLOCK_SEAL_EFFECTS.contains(effect.type().getPath())) {
+            if (BLOCK_TARGET_EFFECTS.contains(effect.type().getPath())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean requiresCookableHeld(SpellDefinition spell) {
+        for (SpellEffectEntry effect : spell.effects()) {
+            if (HELD_COOK_EFFECTS.contains(effect.type().getPath())) {
                 return true;
             }
         }
@@ -179,10 +192,21 @@ public final class SpellEffectExecutor {
                 return CastDelivery.WHIFF_NO_TARGET;
             }
 
+            if (requiresCookableHeld(spell) && !ElementalCraftEffects.canSearHeld(caster)) {
+                caster.displayClientMessage(Component.translatable("message.effecoria.sear.need_raw"), true);
+                return CastDelivery.WHIFF_NO_TARGET;
+            }
+
             BlockPos blockTarget = null;
             if (requiresBlockTarget(spell)) {
                 blockTarget = resolveBlockTarget(caster, spell);
                 if (blockTarget == null) {
+                    return CastDelivery.WHIFF_NO_BLOCK;
+                }
+                if (hasEffect(spell, "ore_smelt")
+                        && !ElementalCraftEffects.canSmeltBlock(caster.serverLevel(), blockTarget)) {
+                    caster.displayClientMessage(
+                            Component.translatable("message.effecoria.ore_smelt.no_recipe"), true);
                     return CastDelivery.WHIFF_NO_BLOCK;
                 }
             }
@@ -213,6 +237,15 @@ public final class SpellEffectExecutor {
         return false;
     }
 
+    private static boolean hasEffect(SpellDefinition spell, String path) {
+        for (SpellEffectEntry effect : spell.effects()) {
+            if (path.equals(effect.type().getPath())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static double resolveCastRange(ServerPlayer caster, SpellDefinition spell) {
         double range = 12;
         for (SpellEffectEntry effect : spell.effects()) {
@@ -220,7 +253,8 @@ public final class SpellEffectExecutor {
             if (!LIVING_REQUIRED_EFFECTS.contains(path)
                     && !AIM_EFFECTS.contains(path)
                     && !HEAL_SELF_FALLBACK_EFFECTS.contains(path)
-                    && !BLOCK_SEAL_EFFECTS.contains(path)) {
+                    && !BLOCK_TARGET_EFFECTS.contains(path)
+                    && !HELD_COOK_EFFECTS.contains(path)) {
                 continue;
             }
             if (effect.params().has("range")) {
@@ -233,7 +267,7 @@ public final class SpellEffectExecutor {
     private static BlockPos resolveBlockTarget(ServerPlayer caster, SpellDefinition spell) {
         double range = 8;
         for (SpellEffectEntry effect : spell.effects()) {
-            if (!BLOCK_SEAL_EFFECTS.contains(effect.type().getPath())) {
+            if (!BLOCK_TARGET_EFFECTS.contains(effect.type().getPath())) {
                 continue;
             }
             if (effect.params().has("range")) {
@@ -263,6 +297,8 @@ public final class SpellEffectExecutor {
             case "phi_sense" -> MentalEffects.empathicScan(caster, effect, power);
             case "mind_sting" -> mindSting(caster, effect, power, target, aim);
             case "fireball" -> ElementalEffects.weakFireball(caster, effect, power);
+            case "sear" -> ElementalCraftEffects.sear(caster, effect, power);
+            case "ore_smelt" -> ElementalCraftEffects.oreSmelt(caster, effect, power, blockTarget);
             case "wind_charge" -> ElementalEffects.windCharge(caster, effect, power);
             case "weak_breeze" -> ElementalEffects.weakBreeze(caster, effect, power);
             case "hyper_cooling" -> ElementalEffects.hyperCooling(caster, effect, power);

@@ -44,6 +44,7 @@ public final class SpellProgression {
             case ELEMENTAL -> List.of(
                     // I — four states entry
                     id("fire_burst"),
+                    id("sear"),
                     id("weak_breeze"),
                     id("water_stream"),
                     id("ice_shard"),
@@ -56,6 +57,7 @@ public final class SpellProgression {
                     id("ice_sheet"),
                     id("shockwave"),
                     id("steam_veil"),
+                    id("ore_smelt"),
                     // III — shaped working
                     id("hydro_slice"),
                     id("frost_bastion"),

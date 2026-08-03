@@ -1,0 +1,17 @@
+{
+  "id": "effecoria:ore_smelt",
+  "school": "elemental",
+  "frequency_hz": 21.5,
+  "base_cost": 12,
+  "power_multiplier": 0.7,
+  "side_entropy": 0.04,
+  "min_phi": 0.12,
+  "min_mastery": 0.15,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:ore_smelt",
+      "range": 6
+    }
+  ]
+}
