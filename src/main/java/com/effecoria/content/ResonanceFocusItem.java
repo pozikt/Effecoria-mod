@@ -2,8 +2,6 @@ package com.effecoria.content;
 
 import java.util.List;
 
-import com.effecoria.client.ClientGuiHooks;
-
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -18,6 +16,7 @@ import net.minecraft.world.level.Level;
 /**
  * Initiation focus + tiered resonance gear.
  * Sneak-use with Essonite Dust in the offhand to raise focus tier.
+ * Client GUI opens via reflection so this class stays dedicated-server safe.
  */
 public class ResonanceFocusItem extends Item {
     public ResonanceFocusItem(Properties properties) {
@@ -31,9 +30,19 @@ public class ResonanceFocusItem extends Item {
             return tryUpgrade(level, player, hand, stack);
         }
         if (level.isClientSide()) {
-            ClientGuiHooks.openResonanceFocusScreen(player);
+            openFocusScreenClient(player);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+    }
+
+    private static void openFocusScreenClient(Player player) {
+        try {
+            Class.forName("com.effecoria.client.ClientGuiHooks")
+                    .getMethod("openResonanceFocusScreen", Player.class)
+                    .invoke(null, player);
+        } catch (ReflectiveOperationException ignored) {
+            // Client-only; never expected on dedicated server.
+        }
     }
 
     private InteractionResultHolder<ItemStack> tryUpgrade(

@@ -4,9 +4,11 @@ import com.effecoria.client.gui.GeneEditorScreen;
 import com.effecoria.client.gui.MagicGuideScreen;
 import com.effecoria.client.gui.SchoolSelectScreen;
 import com.effecoria.client.gui.SpellHubScreen;
+import com.effecoria.core.progression.PrimerChapters;
 import com.effecoria.core.psi.PsiHelper;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -23,12 +25,20 @@ public final class ClientGuiHooks {
         }
     }
 
-    public static void openMagicGuide(net.minecraft.client.gui.screens.Screen parent) {
+    public static void openMagicGuide(Screen parent) {
         Minecraft.getInstance().setScreen(new MagicGuideScreen(parent));
     }
 
-    public static void openMagicGuideChapter(com.effecoria.core.progression.PrimerChapters.Chapter chapter) {
+    public static void openMagicGuideChapter(PrimerChapters.Chapter chapter) {
         Minecraft.getInstance().setScreen(new MagicGuideScreen(chapter));
+    }
+
+    public static boolean primerHasUnseenPages() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) {
+            return false;
+        }
+        return PrimerChapters.hasUnseen(PsiHelper.get(mc.player));
     }
 
     public static void openGeneEditor(

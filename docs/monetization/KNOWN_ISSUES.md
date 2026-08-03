@@ -8,7 +8,6 @@ Honest list for Discord / Modrinth release notes. Update when shipping a demo bu
 |-------|----------|-------|
 | Essonite / Phi Cell loot only in **new** chunks & **new** structure chests | Low | Old worlds need exploration beyond already-generated regions |
 | Magic Primer uses vanilla writable-book look | Low | Content is custom; cover art optional |
-| Dedicated-server smoke not formally signed off | Med | Run `runServer` before public hosted play |
 | Overcast has cast feedback but no dedicated first-hour tip | Low | Primer Orkanum chapter covers it |
 | Race Orkanum baselines not content yet | Low | Hook `BiologyService.applyRaceBaseline` ready for Stage II |
 | Lich ascension / dragon thrall intentionally disabled | Info | Stage IV+ |

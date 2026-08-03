@@ -166,7 +166,8 @@ If choosing a single slice for the next implementation session:
 15. Magic **presentation** (Primer guide + first-hour tips + hub/HUD clarity) — ✅ done.
 16. Phase **E** breathing/body (air/hunger → Orkanum, soft cast scale, HUD, train rate-limit, tip) — ✅ done.
 17. Stage I **exit polish** (tip sequencing, seal tip, funnel/known-issues docs) — ✅ done.
-18. **Next:** package Demo 1–3 builds + dedicated-server smoke; or intentional Stage II environment.
+18. Dedicated-server smoke (`runServer` → Done) — ✅ Primer/Focus no longer pull client classes on DEDICATED_SERVER.
+19. **Next:** package Demo 1–3 builds; or intentional Stage II environment.
 
 ---
 
