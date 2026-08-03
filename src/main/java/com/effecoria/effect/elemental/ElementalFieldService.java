@@ -398,6 +398,18 @@ public final class ElementalFieldService {
                     field.radius * 0.45,
                     0.08);
         }
+        if (now % 40 == 0) {
+            double ang = level.random.nextDouble() * Math.PI * 2.0;
+            double dist = level.random.nextDouble() * field.radius * 0.85;
+            Vec3 strike = field.center.add(Math.cos(ang) * dist, 0.1, Math.sin(ang) * dist);
+            Vec3 from = field.center.add(0, 2.5, 0);
+            ServerPlayer cause = level.getServer().getPlayerList().getPlayer(field.owner);
+            if (cause != null) {
+                from = ElementalEffects.handCastOrigin(cause);
+            }
+            ElementalLightningFx.playArc(level, from, strike, 0.85f, 8);
+            ElementalEffects.spawnLightningSparks(level, strike);
+        }
     }
 
     private static void tickTornado(ServerLevel level, ActiveField field, long now) {

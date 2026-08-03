@@ -3,6 +3,7 @@ package com.effecoria.effect.organic;
 import com.effecoria.core.formula.SpellCombat;
 
 import com.effecoria.core.formula.BreathDebuffs;
+import com.effecoria.core.formula.DelayedEffectService;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.DiceDamage;
 import com.effecoria.core.magic.SpellEffectEntry;
@@ -344,7 +345,8 @@ public final class OrganicEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 1, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, duration, 1, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DIG_SPEED, duration, 0, false, false, true));
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, exhaustTicks, 0, false, false, true));
+        BreathDebuffs.applyAfter(
+                caster, new MobEffectInstance(MobEffects.WEAKNESS, exhaustTicks, 0, false, false, true), duration);
         spawnNerve(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -509,10 +511,13 @@ public final class OrganicEffects {
     }
 
     public static void absoluteRegeneration(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        DelayedEffectService.clearFor(caster.getUUID());
         caster.removeAllEffects();
         caster.heal(caster.getMaxHealth());
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, 60, 1, false, true, true));
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, 160, 1, false, false, true));
+        int surgeTicks = 60;
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, surgeTicks, 1, false, true, true));
+        BreathDebuffs.applyAfter(
+                caster, new MobEffectInstance(MobEffects.WEAKNESS, 160, 1, false, false, true), surgeTicks);
         spawnHeal(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
@@ -630,7 +635,8 @@ public final class OrganicEffects {
         caster.heal(heal);
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, regenTicks, regenAmp, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.SATURATION, 40, 0, false, false, true));
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, 140, 0, false, false, true));
+        BreathDebuffs.applyAfter(
+                caster, new MobEffectInstance(MobEffects.WEAKNESS, 140, 0, false, false, true), regenTicks);
         spawnHeal(level, caster.position().add(0, 1, 0));
         level.playSound(null, caster.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.5f, 1.3f);
     }
@@ -790,7 +796,8 @@ public final class OrganicEffects {
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.REGENERATION, duration, 3, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, 3, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, false, true));
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, aftermath, 2, false, false, true));
+        BreathDebuffs.applyAfter(
+                caster, new MobEffectInstance(MobEffects.WEAKNESS, aftermath, 2, false, false, true), duration);
         spawnHeal(caster.serverLevel(), caster.position().add(0, 1, 0));
         caster.serverLevel().playSound(null, caster.blockPosition(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.5f, 0.9f);
     }

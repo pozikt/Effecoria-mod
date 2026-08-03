@@ -224,7 +224,8 @@ public final class NecromancyEffects {
         boolean ok = NecroSummonService.spawnEldritchAlly(caster, lifetime);
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_BOOST, lifetime, 1, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, lifetime, 0, false, false, true));
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, exhaust, 1, false, false, true));
+        BreathDebuffs.applyAfter(
+                caster, new MobEffectInstance(MobEffects.WEAKNESS, exhaust, 1, false, false, true), lifetime);
         if (ok) {
             caster.displayClientMessage(Component.translatable("message.effecoria.necro.eldritch_bound"), true);
         }

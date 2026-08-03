@@ -54,7 +54,6 @@ public final class CastPresentation {
     private static final Set<ResourceLocation> ELEMENTAL_WATER = Set.of(
             id("water_stream"),
             id("hydro_slice"),
-            id("water_prison"),
             id("water_shield"),
             id("water_shroud"),
             id("breath_bubble"));

@@ -57,6 +57,23 @@ public final class ElementalShroudService {
         }
     }
 
+    public static boolean isActive(ServerPlayer player, Kind kind) {
+        ActiveShroud shroud = ACTIVE.get(player.getUUID());
+        return shroud != null && shroud.kind == kind;
+    }
+
+    /** Ends an active shroud of the given kind. Returns true if something was cleared. */
+    public static boolean deactivate(ServerPlayer player, Kind kind) {
+        ActiveShroud shroud = ACTIVE.get(player.getUUID());
+        if (shroud == null || shroud.kind != kind) {
+            return false;
+        }
+        stop(player);
+        ServerLevel level = player.serverLevel();
+        level.playSound(null, player.blockPosition(), SoundEvents.BREEZE_LAND, SoundSource.PLAYERS, 0.7f, 1.2f);
+        return true;
+    }
+
     public static void clearFor(UUID playerId) {
         ACTIVE.remove(playerId);
     }

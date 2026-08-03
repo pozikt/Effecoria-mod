@@ -51,7 +51,6 @@ public final class SpellEffectExecutor {
     /** Organism-only: no living under aim ⇒ WHIFF_NO_TARGET. */
     private static final Set<String> LIVING_REQUIRED_EFFECTS = Set.of(
             "air_hand",
-            "water_prison",
             "ice_prison",
             "vacuum_cage",
             "root_bind",
@@ -277,7 +276,6 @@ public final class SpellEffectExecutor {
             case "great_fireball" -> ElementalEffects.greatFireball(caster, effect, power);
             case "steam_flight" -> ElementalEffects.steamFlight(caster, effect, power);
             case "air_hand" -> ElementalEffects.airHand(caster, effect, power, target);
-            case "water_prison" -> ElementalEffects.waterPrison(caster, effect, power, target);
             case "vacuum_cage" -> ElementalEffects.vacuumCage(caster, effect, power, target);
             case "ice_prison" -> ElementalEffects.icePrison(caster, effect, power, target);
             case "shockwave" -> ElementalEffects.shockwave(caster, effect, power);

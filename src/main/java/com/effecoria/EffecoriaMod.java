@@ -154,6 +154,10 @@ public class EffecoriaMod {
                 ModNetworking.SpatialCutFxPayload.STREAM_CODEC,
                 ModNetworking.SpatialCutFxPayload::handle);
         registrar.playToClient(
+                ModNetworking.LightningArcFxPayload.TYPE,
+                ModNetworking.LightningArcFxPayload.STREAM_CODEC,
+                ModNetworking.LightningArcFxPayload::handle);
+        registrar.playToClient(
                 ModNetworking.SpatialRippleFxPayload.TYPE,
                 ModNetworking.SpatialRippleFxPayload.STREAM_CODEC,
                 ModNetworking.SpatialRippleFxPayload::handle);

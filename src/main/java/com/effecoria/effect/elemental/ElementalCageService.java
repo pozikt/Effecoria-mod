@@ -25,13 +25,12 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Timed elemental cages: water / ice prisons and vacuum voids.
+ * Timed elemental cages: ice prisons and vacuum voids.
  */
 public final class ElementalCageService {
     private static final List<Cage> CAGES = new ArrayList<>();
 
     public enum Kind {
-        WATER,
         VACUUM,
         ICE
     }
@@ -50,35 +49,6 @@ public final class ElementalCageService {
             long untilTick,
             float damagePerSecond,
             boolean aoe) {}
-
-    public static void imprisonWater(
-            ServerLevel level, LivingEntity target, UUID casterId, float radius, int durationTicks, float damagePerSecond) {
-        Vec3 center = target.position().add(0, target.getBbHeight() * 0.5, 0);
-        ServerPlayer caster = resolveCaster(level, casterId);
-        int duration = Math.max(40, BreathDebuffs.scaleDuration(caster, durationTicks));
-        placeWaterShell(level, BlockPos.containing(center), Math.max(1, Math.round(radius)), duration);
-        pinTarget(caster, target, duration);
-        CAGES.add(new Cage(
-                Kind.WATER,
-                target.getUUID(),
-                casterId,
-                center,
-                radius,
-                level.getGameTime() + duration,
-                damagePerSecond,
-                false));
-        level.playSound(null, target.blockPosition(), SoundEvents.PLAYER_SPLASH_HIGH_SPEED, SoundSource.PLAYERS, 1f, 0.7f);
-        level.sendParticles(
-                ModParticleTypes.WATER_SPLASH.get(),
-                center.x,
-                center.y,
-                center.z,
-                24,
-                radius * 0.4,
-                radius * 0.4,
-                radius * 0.4,
-                0.04);
-    }
 
     public static void imprisonIce(
             ServerLevel level, LivingEntity target, UUID casterId, float radius, int durationTicks, float damagePerSecond) {
@@ -203,7 +173,6 @@ public final class ElementalCageService {
         restrainTowardCenter(target, cage);
         if (cage.damagePerSecond() > 0f && now % 10 == 0) {
             DamageSource source = switch (cage.kind()) {
-                case WATER -> level.damageSources().drown();
                 case ICE -> level.damageSources().freeze();
                 case VACUUM -> level.damageSources().magic();
             };
@@ -275,23 +244,6 @@ public final class ElementalCageService {
                         true));
     }
 
-    private static void placeWaterShell(ServerLevel level, BlockPos center, int radius, int durationTicks) {
-        BlockState water = Blocks.WATER.defaultBlockState();
-        for (int dx = -radius; dx <= radius; dx++) {
-            for (int dy = -radius; dy <= radius; dy++) {
-                for (int dz = -radius; dz <= radius; dz++) {
-                    int manh = Math.abs(dx) + Math.abs(dy) + Math.abs(dz);
-                    boolean shell = manh >= radius && manh <= radius + 1;
-                    boolean core = Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && Math.abs(dz) <= 1;
-                    if (!shell && !core) {
-                        continue;
-                    }
-                    ElementalBlockService.placeTemporary(level, center.offset(dx, dy, dz), water, durationTicks);
-                }
-            }
-        }
-    }
-
     private static void placeIceShell(ServerLevel level, BlockPos center, int radius, int durationTicks) {
         BlockState ice = Blocks.PACKED_ICE.defaultBlockState();
         for (int dx = -radius; dx <= radius; dx++) {
@@ -310,14 +262,7 @@ public final class ElementalCageService {
 
     private static void spawnCageFx(ServerLevel level, Cage cage) {
         Vec3 c = cage.center();
-        float r = cage.radius();
         switch (cage.kind()) {
-            case WATER -> {
-                level.sendParticles(
-                        ModParticleTypes.WATER_DROP.get(), c.x, c.y, c.z, 6, r * 0.4, r * 0.4, r * 0.4, 0.02);
-                level.sendParticles(
-                        ModParticleTypes.WATER_WAVE.get(), c.x, c.y, c.z, 2, r * 0.3, 0.1, r * 0.3, 0.01);
-            }
             case ICE -> ElementalEffects.spawnIceParticles(level, c);
             case VACUUM -> ElementalEffects.spawnVacuum(level, c);
         }

@@ -63,7 +63,6 @@ public final class SpellProgression {
                     id("air_hand"),
                     id("sonic_lance"),
                     id("mirage"),
-                    id("water_prison"),
                     id("ice_prison"),
                     id("vacuum_cage"),
                     id("tornado"),

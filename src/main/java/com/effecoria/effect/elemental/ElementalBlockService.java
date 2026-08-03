@@ -37,6 +37,25 @@ public final class ElementalBlockService {
         return true;
     }
 
+    /** Immediately restore a temporary block (e.g. when a moving water shell relocates). */
+    public static void restoreNow(ServerLevel level, BlockPos pos) {
+        RestoreEntry restore = RESTORES.remove(pos.immutable());
+        if (restore == null || restore.level() != level) {
+            return;
+        }
+        if (restore.original() == null || restore.original().isAir()) {
+            level.removeBlock(pos, false);
+        } else {
+            level.setBlock(pos, restore.original(), 3);
+        }
+    }
+
+    public static void restoreNow(ServerLevel level, Iterable<BlockPos> positions) {
+        for (BlockPos pos : positions) {
+            restoreNow(level, pos);
+        }
+    }
+
     /** Queue a block to appear later — used for rising ice walls. */
     public static void scheduleTemporary(
             ServerLevel level, BlockPos pos, BlockState replacement, int durationTicks, long placeAtGameTime) {

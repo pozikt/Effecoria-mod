@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -589,21 +590,6 @@ public final class ElementalEffects {
         return AirHandService.toggleOrGrab(caster, target, holdDistance, duration, drainPerSecond);
     }
 
-    /** Submerge and root a target in a temporary water shell. */
-    public static void waterPrison(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        if (target == null) {
-            return;
-        }
-        JsonObject params = effect.params();
-        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 2f;
-        radius *= 0.9f + power / 160f;
-        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 100;
-        duration = Math.round(duration * (0.85f + power / 120f));
-        float dps = DiceDamage.perSecondFromParams(params, power, 2f);
-        ElementalCageService.imprisonWater(
-                caster.serverLevel(), target, caster.getUUID(), radius, duration, dps);
-    }
-
     /** Absolute vacuum sphere around the looked-at target (or aim point). */
     public static void vacuumCage(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         JsonObject params = effect.params();
@@ -686,7 +672,9 @@ public final class ElementalEffects {
         ServerLevel level = caster.serverLevel();
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.GLOWING, Math.min(chargeTicks, 200), 0, false, false, true));
         level.playSound(null, caster.blockPosition(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.5f, 1.7f);
-        spawnLightning(level, caster.getEyePosition());
+        Vec3 hand = handCastOrigin(caster);
+        ElementalLightningFx.playArc(level, hand, hand.add(caster.getLookAngle().normalize().scale(1.2)), 0.7f, 8);
+        spawnLightningSparks(level, hand);
     }
 
     /** Mirage — caster shimmers; nearby foes struggle to aim (blindness + glow). */
@@ -942,14 +930,8 @@ public final class ElementalEffects {
             target.hurtMarked = true;
         }
 
-        level.playSound(
-                null,
-                BlockPos.containing(center),
-                SoundEvents.LIGHTNING_BOLT_THUNDER,
-                SoundSource.PLAYERS,
-                0.8f,
-                1.2f);
-        spawnLightning(level, center.add(0, 0.5, 0));
+        Vec3 hand = handCastOrigin(caster);
+        strikeLightningFromHand(level, caster, hand, center, power);
         level.sendParticles(ParticleTypes.FLASH, center.x, center.y + 0.5, center.z, 1, 0, 0, 0, 0);
     }
 
@@ -1061,10 +1043,15 @@ public final class ElementalEffects {
     }
 
     public static void airForm(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        if (ElementalShroudService.deactivate(caster, ElementalShroudService.Kind.AIR_FORM)) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.air_form_ended"), true);
+            return;
+        }
         JsonObject params = effect.params();
         int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 12000;
         duration = Math.round(duration * (0.85f + power / 140f));
         ElementalShroudService.activate(caster, ElementalShroudService.Kind.AIR_FORM, duration, 0f);
+        caster.displayClientMessage(Component.translatable("message.effecoria.air_form_started"), true);
     }
 
     public static void hurricaneStorm(ServerPlayer caster, SpellEffectEntry effect, float power) {
@@ -1227,7 +1214,15 @@ public final class ElementalEffects {
                 2.0,
                 radius * 0.25,
                 0.05);
-        spawnLightning(level, center.add(0, 2, 0));
+        // Several slanted arcs from the caster outward.
+        Vec3 hand = handCastOrigin(caster);
+        for (int i = 0; i < 5; i++) {
+            double ang = (Math.PI * 2.0 * i) / 5.0 + level.random.nextDouble() * 0.4;
+            double dist = 4.0 + level.random.nextDouble() * Math.min(10.0, radius * 0.35);
+            Vec3 strike = center.add(Math.cos(ang) * dist, 0.2 + level.random.nextDouble(), Math.sin(ang) * dist);
+            ElementalLightningFx.playArc(level, hand, strike, 1.1f, 12);
+            spawnLightningSparks(level, strike);
+        }
         spawnWind(level, center.add(0, 1.5, 0));
     }
 
@@ -1342,9 +1337,85 @@ public final class ElementalEffects {
         level.sendParticles(ModParticleTypes.PHI_SPARK.get(), pos.x, pos.y, pos.z, 4, 0.1, 0.1, 0.1, 0.02);
     }
 
-    public static void spawnLightning(ServerLevel level, Vec3 pos) {
+    /** Approximate right-hand cast point in front of the caster. */
+    public static Vec3 handCastOrigin(ServerPlayer caster) {
+        Vec3 look = caster.getLookAngle().normalize();
+        Vec3 up = new Vec3(0, 1, 0);
+        Vec3 right = look.cross(up);
+        if (right.lengthSqr() < 1.0e-6) {
+            right = new Vec3(1, 0, 0);
+        } else {
+            right = right.normalize();
+        }
+        return caster.getEyePosition()
+                .add(look.scale(0.35))
+                .add(right.scale(0.28))
+                .add(0, -0.25, 0);
+    }
+
+    /**
+     * Slanted lightning arc from the casting hand to the strike point (custom client beam).
+     */
+    public static void strikeLightningFromHand(
+            ServerLevel level, ServerPlayer caster, Vec3 hand, Vec3 strike, float power) {
+        float intensity = Mth.clamp(0.65f + power / 90f, 0.55f, 1.55f);
+        ElementalLightningFx.playArc(level, hand, strike, intensity, 12);
+        spawnLightningSparks(level, strike);
+        spawnLightningSparks(level, hand);
+        Vec3 delta = strike.subtract(hand);
+        double length = delta.length();
+        if (length >= 0.2) {
+            Vec3 step = delta.normalize().scale(0.55);
+            int steps = Math.min(40, Math.max(2, (int) (length / 0.55)));
+            Vec3 cursor = hand;
+            for (int i = 0; i <= steps; i++) {
+                if (i % 2 == 0) {
+                    level.sendParticles(
+                            ModParticleTypes.ELEMENTAL_SPARK.get(),
+                            cursor.x,
+                            cursor.y,
+                            cursor.z,
+                            1,
+                            0.03,
+                            0.03,
+                            0.03,
+                            0.04);
+                }
+                cursor = cursor.add(step);
+            }
+        }
+        level.playSound(
+                null,
+                BlockPos.containing(strike),
+                SoundEvents.LIGHTNING_BOLT_THUNDER,
+                SoundSource.PLAYERS,
+                0.85f,
+                1.05f + level.random.nextFloat() * 0.2f);
+        level.playSound(
+                null,
+                BlockPos.containing(hand),
+                SoundEvents.LIGHTNING_BOLT_IMPACT,
+                SoundSource.PLAYERS,
+                0.45f,
+                1.4f);
+    }
+
+    public static void spawnLightningSparks(ServerLevel level, Vec3 pos) {
         level.sendParticles(ModParticleTypes.ELEMENTAL_SPARK.get(), pos.x, pos.y, pos.z, 18, 0.35, 0.45, 0.35, 0.08);
         level.sendParticles(ModParticleTypes.PHI_SPARK.get(), pos.x, pos.y + 0.2, pos.z, 6, 0.15, 0.2, 0.15, 0.04);
+    }
+
+    /** @deprecated Prefer {@link #spawnLightningSparks(ServerLevel, Vec3)} / arc FX. */
+    @Deprecated
+    public static void spawnLightning(ServerLevel level, ServerPlayer cause, Vec3 pos, boolean visualOnly) {
+        ElementalLightningFx.playArc(level, pos.add(0, 4, 0), pos, 0.9f, 8);
+        spawnLightningSparks(level, pos);
+    }
+
+    /** Particle-only fallback used by older call sites. */
+    @Deprecated
+    public static void spawnLightning(ServerLevel level, Vec3 pos) {
+        spawnLightningSparks(level, pos);
     }
 
     public static void spawnWind(ServerLevel level, Vec3 pos) {

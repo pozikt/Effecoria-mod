@@ -452,6 +452,62 @@ public final class ModNetworking {
         }
     }
 
+    /** Server → nearby clients: slanted lightning arc from hand to strike. */
+    public record LightningArcFxPayload(
+            double x0,
+            double y0,
+            double z0,
+            double x1,
+            double y1,
+            double z1,
+            float intensity,
+            int durationTicks)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<LightningArcFxPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "lightning_arc_fx"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, LightningArcFxPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, p) -> {
+                            buf.writeDouble(p.x0());
+                            buf.writeDouble(p.y0());
+                            buf.writeDouble(p.z0());
+                            buf.writeDouble(p.x1());
+                            buf.writeDouble(p.y1());
+                            buf.writeDouble(p.z1());
+                            buf.writeFloat(p.intensity());
+                            buf.writeVarInt(p.durationTicks());
+                        },
+                        buf -> new LightningArcFxPayload(
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readFloat(),
+                                buf.readVarInt()));
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(LightningArcFxPayload payload, IPayloadContext context) {
+            context.enqueueWork(
+                    () -> com.effecoria.client.LightningArcClient.trigger(
+                            payload.x0(),
+                            payload.y0(),
+                            payload.z0(),
+                            payload.x1(),
+                            payload.y1(),
+                            payload.z1(),
+                            payload.intensity(),
+                            payload.durationTicks()));
+        }
+    }
+
     /** Server → nearby clients: world-anchored space ripple (blink / jump). */
     public record SpatialRippleFxPayload(double x, double y, double z, float intensity, int durationTicks)
             implements CustomPacketPayload {

@@ -124,6 +124,21 @@ public final class BreathDebuffs {
         return apply(CAST_CASTER.get(), target, instance);
     }
 
+    /**
+     * Apply immediately if {@code delayTicks <= 0}; otherwise schedule after the delay.
+     * Used for rush→crash (buff now, weakness after the buff window).
+     */
+    public static void applyAfter(LivingEntity target, MobEffectInstance instance, int delayTicks) {
+        if (target == null || instance == null) {
+            return;
+        }
+        if (delayTicks <= 0) {
+            apply(target, instance);
+            return;
+        }
+        DelayedEffectService.schedule(target, instance, delayTicks);
+    }
+
     /** Apply without breathing scale (duration/amp already finalized). */
     public static boolean applyExact(LivingEntity target, MobEffectInstance instance) {
         if (target == null || instance == null) {

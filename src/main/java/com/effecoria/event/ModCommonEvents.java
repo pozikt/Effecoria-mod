@@ -5,6 +5,7 @@ import com.effecoria.command.EffecoriaCommands;
 import com.effecoria.content.ModItems;
 import com.effecoria.content.PhiHarnessItems;
 import com.effecoria.core.formula.CastBlockReason;
+import com.effecoria.core.formula.DelayedEffectService;
 import com.effecoria.core.formula.FormulaEngine;
 import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.magic.ShadeService;
@@ -80,6 +81,7 @@ public final class ModCommonEvents {
     @SubscribeEvent
     public static void onLevelTick(LevelTickEvent.Post event) {
         if (event.getLevel() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            DelayedEffectService.tick(serverLevel);
             ElementalBlockService.tick(serverLevel);
             SteamCloudService.tick(serverLevel);
             ElementalFieldService.tick(serverLevel);
