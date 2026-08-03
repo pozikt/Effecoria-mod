@@ -2,6 +2,7 @@ package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.entity.DeathShadowEntity;
+import com.effecoria.entity.MirageHorrorEntity;
 import com.effecoria.entity.RootCageEntity;
 
 import net.minecraft.core.registries.Registries;
@@ -38,7 +39,18 @@ public final class ModEntities {
                             .fireImmune()
                             .build(EffecoriaMod.id("death_shadow").toString()));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<MirageHorrorEntity>> MIRAGE_HORROR =
+            ENTITY_TYPES.register(
+                    "mirage_horror",
+                    () -> EntityType.Builder.<MirageHorrorEntity>of(MirageHorrorEntity::new, MobCategory.MONSTER)
+                            .sized(1.4f, 3.6f)
+                            .clientTrackingRange(64)
+                            .updateInterval(1)
+                            .fireImmune()
+                            .build(EffecoriaMod.id("mirage_horror").toString()));
+
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(DEATH_SHADOW.get(), LivingEntity.createLivingAttributes().build());
+        event.put(MIRAGE_HORROR.get(), MirageHorrorEntity.createAttributes().build());
     }
 }

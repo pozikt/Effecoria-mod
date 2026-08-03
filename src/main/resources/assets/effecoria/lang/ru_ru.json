@@ -1,6 +1,8 @@
 {
   "itemGroup.effecoria": "Effecoria",
   "block.effecoria.essonite_ore": "Эссенитовая руда",
+  "block.effecoria.blood_fluid": "Кровь",
+  "fluid.effecoria.blood": "Кровь",
   "item.effecoria.essonite_ore": "Эссенитовая руда",
   "item.effecoria.essonite_dust": "Эссенитовая пыль",
   "item.effecoria.breathing_scroll": "Свиток техники дыхания",
@@ -249,6 +251,9 @@
   "message.effecoria.mental.mirage_kill": "Морок %s исчерпан (реальный HP не тронут)",
   "message.effecoria.mental.mirage_spear_fall": "С неба падает световое копьё…",
   "message.effecoria.mental.mirage_spear_hit": "Копьё света ранит дух — моральный удар",
+  "message.effecoria.mental.mirage_horror_seen": "Из крови поднимается нечто…",
+  "message.effecoria.mental.mirage_horror_strike": "Щупальца рвут дух — моральный удар",
+  "entity.effecoria.mirage_horror": "Ужас морока",
   "message.effecoria.mental.echo_strike": "Эхо-удар вернулся в тебя",
   "message.effecoria.mental.memory_ok": "Память %s переписана",
   "message.effecoria.mental.memory_scar": "Грубое вмешательство оставило шрам",

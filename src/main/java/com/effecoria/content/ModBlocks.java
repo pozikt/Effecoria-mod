@@ -4,6 +4,7 @@ import com.effecoria.EffecoriaMod;
 import com.effecoria.block.SubspacePortalBlock;
 
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -35,4 +36,19 @@ public final class ModBlocks {
                     .noLootTable()
                     .isViewBlocking((state, level, pos) -> false)
                     .isSuffocating((state, level, pos) -> false)));
+
+    /** Mirage blood lake fluid — client-tinted crimson water. */
+    public static final DeferredBlock<LiquidBlock> BLOOD_FLUID = BLOCKS.register(
+            "blood_fluid",
+            () -> new LiquidBlock(
+                    ModFluids.BLOOD.get(),
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_RED)
+                            .replaceable()
+                            .noCollission()
+                            .strength(100.0f)
+                            .pushReaction(PushReaction.DESTROY)
+                            .noLootTable()
+                            .liquid()
+                            .sound(SoundType.EMPTY)));
 }

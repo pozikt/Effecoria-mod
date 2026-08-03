@@ -6,6 +6,7 @@ import com.effecoria.client.hud.PsiHudOverlay;
 import com.effecoria.client.hud.SealInspectHud;
 import com.effecoria.client.particle.SchoolParticles;
 import com.effecoria.client.render.DeathShadowRenderer;
+import com.effecoria.client.render.MirageHorrorRenderer;
 import com.effecoria.client.render.RootCageRenderer;
 import com.effecoria.client.render.SubspacePortalRenderer;
 import com.effecoria.content.ModBlocks;
@@ -45,6 +46,7 @@ public final class EffecoriaClient {
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.ROOT_CAGE.get(), RootCageRenderer::new);
         event.registerEntityRenderer(ModEntities.DEATH_SHADOW.get(), DeathShadowRenderer::new);
+        event.registerEntityRenderer(ModEntities.MIRAGE_HORROR.get(), MirageHorrorRenderer::new);
         event.registerBlockEntityRenderer(
                 com.effecoria.content.ModBlockEntities.SUBSPACE_PORTAL.get(), SubspacePortalRenderer::new);
     }

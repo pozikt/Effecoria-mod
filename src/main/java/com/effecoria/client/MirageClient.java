@@ -1,8 +1,10 @@
 package com.effecoria.client;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.content.ModFluids;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -10,10 +12,15 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
-/** Red-sky mirage atmosphere for the soul; blocks arrive via vanilla block-update packets. */
+import org.joml.Vector3f;
+
+/** Red-sky mirage atmosphere + blood-fluid tint for the soul. */
 @EventBusSubscriber(modid = EffecoriaMod.MOD_ID, value = Dist.CLIENT)
 public final class MirageClient {
+    private static final int BLOOD_TINT = 0xFF9A0C14;
     private static boolean active;
     private static long expireAtMs;
 
@@ -77,6 +84,52 @@ public final class MirageClient {
             active = false;
         }
         return active;
+    }
+
+    @SubscribeEvent
+    public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
+        event.registerFluidType(
+                new IClientFluidTypeExtensions() {
+                    @Override
+                    public ResourceLocation getStillTexture() {
+                        return ResourceLocation.withDefaultNamespace("block/water_still");
+                    }
+
+                    @Override
+                    public ResourceLocation getFlowingTexture() {
+                        return ResourceLocation.withDefaultNamespace("block/water_flow");
+                    }
+
+                    @Override
+                    public ResourceLocation getOverlayTexture() {
+                        return ResourceLocation.withDefaultNamespace("block/water_overlay");
+                    }
+
+                    @Override
+                    public int getTintColor() {
+                        return BLOOD_TINT;
+                    }
+
+                    @Override
+                    public int getTintColor(
+                            net.minecraft.world.level.material.FluidState state,
+                            net.minecraft.world.level.BlockAndTintGetter getter,
+                            net.minecraft.core.BlockPos pos) {
+                        return BLOOD_TINT;
+                    }
+
+                    @Override
+                    public Vector3f modifyFogColor(
+                            net.minecraft.client.Camera camera,
+                            float partialTick,
+                            net.minecraft.client.multiplayer.ClientLevel level,
+                            int renderDistance,
+                            float darkenWorldAmount,
+                            Vector3f fluidFogColor) {
+                        return new Vector3f(0.42f, 0.02f, 0.04f);
+                    }
+                },
+                ModFluids.BLOOD_TYPE.value());
     }
 
     @SubscribeEvent

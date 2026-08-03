@@ -1,6 +1,7 @@
 package com.effecoria.effect.mental;
 
 import com.effecoria.core.formula.BreathDebuffs;
+import com.effecoria.entity.MirageHorrorEntity;
 import com.effecoria.network.ModNetworking;
 
 import net.minecraft.core.BlockPos;
@@ -136,10 +137,23 @@ public final class MirageWorldService {
             BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.CONFUSION, 70, 1, false, false, true));
         }
         tickSpears(player, session);
+        tickHorror(player, session);
         session.ticksAlive++;
         if (session.ticksAlive % RESYNC_INTERVAL == 0 && session.pushQueue.isEmpty()) {
             enqueueNearby(session, player.blockPosition().getX(), player.blockPosition().getZ());
         }
+    }
+
+    /** Illusory moral damage from spears / horror — never real HP. */
+    public static void applyMoralDamage(ServerPlayer victim, float amount) {
+        Session session = SESSIONS.get(victim.getUUID());
+        if (session == null) {
+            return;
+        }
+        session.illusoryHp = Math.max(0f, session.illusoryHp - amount);
+        PacketDistributor.sendToPlayer(
+                victim,
+                new ModNetworking.MirageHurtPayload(amount, session.illusoryHp, session.illusoryMaxHp));
     }
 
     public static void tick(ServerLevel level) {
@@ -202,6 +216,7 @@ public final class MirageWorldService {
     }
 
     private static void cleanup(ServerPlayer victim, Session session, boolean returnToBody) {
+        discardHorror(victim.serverLevel(), session);
         if (victim.level() instanceof ServerLevel level) {
             for (BlockPos pos : session.overlays.keySet()) {
                 victim.connection.send(new ClientboundBlockUpdatePacket(pos, level.getBlockState(pos)));
@@ -279,6 +294,45 @@ public final class MirageWorldService {
             entity.discard();
         }
         session.bodyId = null;
+    }
+
+    private static void discardHorror(ServerLevel level, Session session) {
+        if (session.horrorId == null) {
+            return;
+        }
+        var entity = level.getEntity(session.horrorId);
+        if (entity != null) {
+            entity.discard();
+        }
+        session.horrorId = null;
+    }
+
+    private static void tickHorror(ServerPlayer victim, Session session) {
+        if (session.horrorId != null) {
+            var existing = victim.serverLevel().getEntity(session.horrorId);
+            if (existing == null || !existing.isAlive()) {
+                session.horrorId = null;
+            } else {
+                return;
+            }
+        }
+        if (session.nextHorrorAt < 0) {
+            session.nextHorrorAt = session.ticksAlive + 70 + victim.getRandom().nextInt(50);
+        }
+        if (session.ticksAlive < session.nextHorrorAt) {
+            return;
+        }
+        // Appear ahead of the soul's gaze — always in view for fear impact.
+        Vec3 look = victim.getLookAngle().normalize();
+        double dist = 9.0 + victim.getRandom().nextDouble() * 5.0;
+        double x = victim.getX() + look.x * dist + (victim.getRandom().nextDouble() - 0.5) * 3.0;
+        double z = victim.getZ() + look.z * dist + (victim.getRandom().nextDouble() - 0.5) * 3.0;
+        double y = session.origin.getY();
+        MirageHorrorEntity horror = MirageHorrorEntity.spawnFor(victim, x, y, z);
+        if (horror != null) {
+            session.horrorId = horror.getUUID();
+            session.nextHorrorAt = session.ticksAlive + 160 + victim.getRandom().nextInt(80);
+        }
     }
 
     // --- Streaming chunks --------------------------------------------------
@@ -402,26 +456,23 @@ public final class MirageWorldService {
         float bump = fbm(wx / 9f, wz / 9f, seed + 3);
         int groundY = baseY + (bump > 0.72f ? 1 : 0);
 
-        boolean isBlood = blood > 0.62f || river < 0.035f;
-        boolean puddle = !isBlood && blood > 0.54f && blood <= 0.62f;
+        boolean isRiver = river < 0.036f;
+        boolean isBloodLake = !isRiver && blood > 0.58f;
+        boolean isBloodPuddle = !isRiver && !isBloodLake && blood > 0.50f;
 
-        putTerrain(session, new BlockPos(wx, groundY - 1, wz), Blocks.NETHERRACK.defaultBlockState());
-        if (isBlood) {
-            putTerrain(session, new BlockPos(wx, groundY, wz), bloodSurface(random, river < 0.035f));
-            if (blood > 0.78f) {
-                putTerrain(session, new BlockPos(wx, groundY + 1, wz), Blocks.RED_STAINED_GLASS.defaultBlockState());
-            }
-        } else if (puddle) {
-            putTerrain(session, new BlockPos(wx, groundY, wz), Blocks.RED_CONCRETE.defaultBlockState());
+        if (isRiver || isBloodLake || isBloodPuddle) {
+            int depth = isBloodLake && blood > 0.78f ? 2 : 1;
+            placeBloodWater(session, wx, groundY, wz, depth);
         } else {
-            putTerrain(session, new BlockPos(wx, groundY, wz), boneSurface(random, bump));
+            placeBoneLand(session, wx, groundY, wz, random, bump);
         }
 
         for (int ay = 1; ay <= AIR_CLEAR; ay++) {
-            if (isBlood && blood > 0.78f && ay == 1) {
-                continue;
+            BlockPos air = new BlockPos(wx, groundY + ay, wz);
+            BlockState existing = session.terrain.get(air.immutable());
+            if (existing == null || existing.getFluidState().isEmpty()) {
+                putTerrain(session, air, Blocks.AIR.defaultBlockState());
             }
-            putTerrain(session, new BlockPos(wx, groundY + ay, wz), Blocks.AIR.defaultBlockState());
         }
 
         // Safe pad at cast origin.
@@ -433,6 +484,12 @@ public final class MirageWorldService {
             putTerrain(session, new BlockPos(wx, baseY + 1, wz), Blocks.AIR.defaultBlockState());
             putTerrain(session, new BlockPos(wx, baseY + 2, wz), Blocks.AIR.defaultBlockState());
         }
+    }
+
+    private static void placeBoneLand(
+            Session session, int wx, int groundY, int wz, RandomSource random, float bump) {
+        putTerrain(session, new BlockPos(wx, groundY - 1, wz), Blocks.NETHERRACK.defaultBlockState());
+        putTerrain(session, new BlockPos(wx, groundY, wz), boneSurface(random, bump));
     }
 
     private static void decorateChunk(Session session, int cx, int cz, int baseY, RandomSource random) {
@@ -500,11 +557,20 @@ public final class MirageWorldService {
         }
     }
 
-    private static BlockState bloodSurface(RandomSource random, boolean river) {
-        if (river) {
-            return Blocks.RED_CONCRETE.defaultBlockState();
+    /**
+     * Blood water: custom crimson fluid (vanilla water cannot be retinted — NeoForge owns its tint).
+     */
+    private static void placeBloodWater(Session session, int x, int surfaceY, int z, int depth) {
+        int d = Math.max(1, depth);
+        putTerrain(session, new BlockPos(x, surfaceY - d, z), bloodBed(session.seed ^ (x * 31) ^ (z * 17)));
+        BlockState blood = com.effecoria.content.ModBlocks.BLOOD_FLUID.get().defaultBlockState();
+        for (int i = d - 1; i >= 0; i--) {
+            putTerrain(session, new BlockPos(x, surfaceY - i, z), blood);
         }
-        float r = random.nextFloat();
+    }
+
+    private static BlockState bloodBed(int salt) {
+        float r = hash2(salt, salt * 7, 99);
         if (r < 0.45f) {
             return Blocks.RED_CONCRETE.defaultBlockState();
         }
@@ -711,7 +777,7 @@ public final class MirageWorldService {
     private static void applyPhysics(ServerPlayer player, Session session) {
         BlockPos below = BlockPos.containing(player.getX(), player.getY() - 0.02, player.getZ());
         BlockState floor = visibleState(session, below.immutable());
-        if (floor != null && floor.blocksMotion()) {
+        if (floor != null && supportsStanding(floor)) {
             double top = below.getY() + 1.0;
             if (player.getY() >= top - 0.65 && player.getY() <= top + 0.08 && player.getDeltaMovement().y <= 0.08) {
                 player.setPos(player.getX(), top, player.getZ());
@@ -732,6 +798,14 @@ public final class MirageWorldService {
             }
             resolvePenetration(player, cursor);
         }
+    }
+
+    private static boolean supportsStanding(BlockState state) {
+        if (state.blocksMotion()) {
+            return true;
+        }
+        // Walk on mirage water surfaces instead of falling through.
+        return !state.getFluidState().isEmpty();
     }
 
     private static void resolvePenetration(ServerPlayer player, BlockPos pos) {
@@ -848,8 +922,10 @@ public final class MirageWorldService {
         int lastFocusCx = Integer.MIN_VALUE;
         int lastFocusCz = Integer.MIN_VALUE;
         UUID bodyId;
+        UUID horrorId;
         int ticksAlive;
         int nextSpearAt = -1;
+        int nextHorrorAt = -1;
 
         Session(
                 UUID victimId,

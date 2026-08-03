@@ -94,3 +94,11 @@ Phase 0: project skeleton, FormulaEngine, data-driven spell templates.
     ordering="NONE"
     side="CLIENT"
     reason="Spatial singularity post-processing (black-hole cast FX)"
+
+[[dependencies.${mod_id}]]
+    modId="geckolib"
+    type="required"
+    versionRange="${geckolib_version_range}"
+    ordering="NONE"
+    side="BOTH"
+    reason="Animated mirage horror entity"
