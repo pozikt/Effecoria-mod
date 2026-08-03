@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:iron_ore",
+    "minecraft:deepslate_iron_ore",
+    "minecraft:cauldron",
+    "minecraft:lava_cauldron",
+    "minecraft:water_cauldron",
+    "minecraft:powder_snow_cauldron"
+  ]
+}

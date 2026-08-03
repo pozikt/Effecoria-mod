@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -23,7 +24,7 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 /** Colored hitbox outlines for living entities while phi-sense is active. */
 @EventBusSubscriber(modid = EffecoriaMod.MOD_ID, value = Dist.CLIENT)
 public final class ClientPhiSenseOutline {
-    private static final double ENTITY_RADIUS = 32;
+    private static final double ENTITY_RADIUS = ClientPhiSenseEffects.SENSE_RADIUS;
 
     private ClientPhiSenseOutline() {}
 
@@ -63,6 +64,21 @@ public final class ClientPhiSenseOutline {
             }
             AABB box = entity.getBoundingBox().inflate(0.05);
             LevelRenderer.renderLineBox(poseStack, lines, box, rgb[0], rgb[1], rgb[2], 1.0f);
+        }
+
+        // Purple wireframes on tagged anti-magic blocks in sense range.
+        BlockPos origin = BlockPos.containing(minecraft.player.getEyePosition());
+        int r = (int) Math.ceil(ENTITY_RADIUS);
+        for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-r, -3, -r), origin.offset(r, 3, r))) {
+            if (pos.distToCenterSqr(minecraft.player.getX(), minecraft.player.getY() + 1.0, minecraft.player.getZ())
+                    > ENTITY_RADIUS * ENTITY_RADIUS) {
+                continue;
+            }
+            if (!PhiFieldService.isAntiMagicBlock(minecraft.level.getBlockState(pos))) {
+                continue;
+            }
+            AABB box = new AABB(pos).inflate(0.002);
+            LevelRenderer.renderLineBox(poseStack, lines, box, 0.75f, 0.2f, 0.9f, 0.85f);
         }
 
         poseStack.popPose();

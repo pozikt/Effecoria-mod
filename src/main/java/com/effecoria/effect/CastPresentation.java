@@ -294,11 +294,9 @@ public final class CastPresentation {
                             1.35f,
                             0.5f,
                             1.45f)
-                    // Generic organic cast: sound only — no leaf burst around the caster.
-                    // Spell-specific FX (virus, thorns, DNA, …) come from OrganicEffects.
                     : new SchoolTheme(
-                            null,
-                            null,
+                            ModParticleTypes.ORGANIC_SPORE.get(),
+                            ModParticleTypes.ORGANIC_LEAF.get(),
                             SoundEvents.MOSS_PLACE,
                             SoundEvents.AZALEA_LEAVES_PLACE,
                             0.45f,
@@ -438,10 +436,10 @@ public final class CastPresentation {
                     0.5f,
                     0.8f);
         }
-        // Fallback: sound only — spell FX carry the family look.
+        // Fallback: ember + spark so unlisted starters still read as elemental.
         return new SchoolTheme(
-                null,
-                null,
+                ModParticleTypes.ELEMENTAL_EMBER.get(),
+                ModParticleTypes.PHI_SPARK.get(),
                 SoundEvents.BLAZE_SHOOT,
                 SoundEvents.FIRECHARGE_USE,
                 0.35f,

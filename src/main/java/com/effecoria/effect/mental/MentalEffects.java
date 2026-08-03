@@ -546,6 +546,7 @@ public final class MentalEffects {
         PlayerPsiData data = PsiHelper.get(caster);
         data.setPhiSenseUntil(caster.level().getGameTime() + duration);
         PsiHelper.set(caster, data);
+        caster.displayClientMessage(Component.translatable("message.effecoria.phi_sense_active"), true);
 
         ServerLevel level = caster.serverLevel();
         AABB box = caster.getBoundingBox().inflate(radius);

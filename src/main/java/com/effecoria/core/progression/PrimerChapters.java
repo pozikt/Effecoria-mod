@@ -22,7 +22,13 @@ public final class PrimerChapters {
         SEALS(5),
         SCHOOL(6),
         MENTAL(7),
-        ORKANUM(8);
+        ORKANUM(8),
+        ANTI_MAGIC(9),
+        ELEMENTAL(10),
+        ORGANIC(11),
+        NECROMANCY(12),
+        CORRUPTION(13),
+        SPATIAL(14);
 
         private final int bitIndex;
 
@@ -86,12 +92,15 @@ public final class PrimerChapters {
     }
 
     private static Predicate<PlayerPsiData> visibility(Chapter chapter) {
-        if (chapter == Chapter.SEALS) {
-            return data -> !data.initiated() || data.school() == MagicSchool.SEALS;
-        }
-        if (chapter == Chapter.MENTAL) {
-            return data -> !data.initiated() || data.school() == MagicSchool.MENTAL;
-        }
-        return data -> true;
+        return switch (chapter) {
+            case SEALS -> data -> !data.initiated() || data.school() == MagicSchool.SEALS;
+            case MENTAL -> data -> !data.initiated() || data.school() == MagicSchool.MENTAL;
+            case ELEMENTAL -> data -> !data.initiated() || data.school() == MagicSchool.ELEMENTAL;
+            case ORGANIC -> data -> !data.initiated() || data.school() == MagicSchool.ORGANIC;
+            case NECROMANCY -> data -> !data.initiated() || data.school() == MagicSchool.NECROMANCY;
+            case CORRUPTION -> data -> !data.initiated() || data.school() == MagicSchool.CORRUPTION;
+            case SPATIAL -> data -> !data.initiated() || data.school() == MagicSchool.SPATIAL;
+            default -> data -> true;
+        };
     }
 }

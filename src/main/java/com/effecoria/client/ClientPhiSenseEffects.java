@@ -17,11 +17,12 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
-/** Client visuals while phi-sense is active — motes on Φ gradients and living targets. */
+/** Client visuals while phi-sense is active — motes on Φ gradients, ZNΦ mass, and living targets. */
 @EventBusSubscriber(modid = EffecoriaMod.MOD_ID, value = Dist.CLIENT)
 public final class ClientPhiSenseEffects {
-    private static final double ENTITY_RADIUS = 32;
-    private static final int BLOCK_RING = 5;
+    /** Matches default {@code sense_phi} JSON radius. */
+    public static final double SENSE_RADIUS = 16;
+    private static final int BLOCK_RING = 8;
 
     private ClientPhiSenseEffects() {}
 
@@ -40,18 +41,18 @@ public final class ClientPhiSenseEffects {
         Level level = minecraft.level;
         Vec3 eye = minecraft.player.getEyePosition();
         highlightLiving(level, minecraft.player, eye);
-        if (minecraft.player.tickCount % 12 == 0) {
+        if (minecraft.player.tickCount % 8 == 0) {
             sampleBlockGradients(level, minecraft.player, eye);
         }
     }
 
     private static void highlightLiving(Level level, net.minecraft.world.entity.player.Player viewer, Vec3 eye) {
-        AABB box = viewer.getBoundingBox().inflate(ENTITY_RADIUS);
+        AABB box = viewer.getBoundingBox().inflate(SENSE_RADIUS);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == viewer) {
                 continue;
             }
-            if (entity.distanceToSqr(viewer) > ENTITY_RADIUS * ENTITY_RADIUS) {
+            if (entity.distanceToSqr(viewer) > SENSE_RADIUS * SENSE_RADIUS) {
                 continue;
             }
             Vec3 at = entity.getEyePosition();
@@ -71,17 +72,26 @@ public final class ClientPhiSenseEffects {
     private static void sampleBlockGradients(Level level, net.minecraft.world.entity.player.Player viewer, Vec3 eye) {
         BlockPos center = BlockPos.containing(eye);
         for (int dx = -BLOCK_RING; dx <= BLOCK_RING; dx++) {
-            for (int dy = -2; dy <= 2; dy++) {
+            for (int dy = -3; dy <= 3; dy++) {
                 for (int dz = -BLOCK_RING; dz <= BLOCK_RING; dz++) {
-                    if ((dx * dx + dz * dz) > BLOCK_RING * BLOCK_RING) {
+                    if ((dx * dx + dy * dy + dz * dz) > BLOCK_RING * BLOCK_RING) {
                         continue;
                     }
                     BlockPos pos = center.offset(dx, dy, dz);
-                    PhiSample sample = PhiFieldService.sample(level, Vec3.atCenterOf(pos), viewer);
-                    if (sample.zeroFlux()) {
+                    if (PhiFieldService.isAntiMagicBlock(level.getBlockState(pos))) {
+                        double x = pos.getX() + 0.5;
+                        double y = pos.getY() + 0.55;
+                        double z = pos.getZ() + 0.5;
+                        level.addParticle(ModParticleTypes.CORRUPTION_RUNE.get(), x, y, z, 0, 0.012, 0);
                         continue;
                     }
-                    if (sample.value() < 0.45f || sample.value() > 1.15f) {
+                    PhiSample sample = PhiFieldService.sample(level, Vec3.atCenterOf(pos), viewer);
+                    if (sample.zeroFlux()) {
+                        double x = pos.getX() + 0.5;
+                        double y = pos.getY() + 0.55;
+                        double z = pos.getZ() + 0.5;
+                        level.addParticle(ModParticleTypes.NECRO_SHADOW.get(), x, y, z, 0, 0.006, 0);
+                    } else if (sample.value() < 0.45f || sample.value() > 1.15f) {
                         double x = pos.getX() + 0.5;
                         double y = pos.getY() + 0.55;
                         double z = pos.getZ() + 0.5;

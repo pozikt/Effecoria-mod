@@ -1,15 +1,15 @@
 package com.effecoria.core.phi;
 
 import com.effecoria.config.BalanceConfig;
+import com.effecoria.content.ModBlockTags;
 import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.psi.PsiHelper;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -20,6 +20,11 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class PhiFieldService {
     private PhiFieldService() {}
+
+    /** Chebyshev radius for dense {@link ModBlockTags#ZERO_FLUX} materials. */
+    public static final int ZERO_FLUX_RANGE = 2;
+    /** Chebyshev radius for {@link ModBlockTags#COLD_IRON}. */
+    public static final int COLD_IRON_RANGE = 1;
 
     public static PhiSample sample(Level level, Vec3 position) {
         return sample(level, position, null);
@@ -45,7 +50,6 @@ public final class PhiFieldService {
             return new PhiSample(0f, true, isSolarDay(level));
         }
         if (player != null) {
-            // phiMultiplier is stored as a factor around 1.0 → convert to signed bonus (hard-capped).
             float mult = Math.max(0f, PsiHelper.get(player).phiMultiplier());
             float cap = BalanceConfig.PHI_MULTIPLIER_BONUS_CAP.get().floatValue();
             float clamped = Math.min(mult, Math.max(0f, cap));
@@ -61,7 +65,35 @@ public final class PhiFieldService {
         return level.getDayTime() % 24000L < 12000L;
     }
 
-    /** Config multipliers are interpreted as {@code bonus = multiplier - 1}. */
+    /** True if {@code state} is tagged as anti-magic mass (ZNΦ or cold iron). */
+    public static boolean isAntiMagicBlock(BlockState state) {
+        return state.is(ModBlockTags.ZERO_FLUX) || state.is(ModBlockTags.COLD_IRON);
+    }
+
+    /**
+     * Tag-based ZNΦ: dense zero-flux materials within 2 blocks, or cold iron within 1.
+     * Replaces the old stone-shell enclosure heuristic.
+     */
+    public static boolean isInsideZeroFluxZone(Level level, BlockPos center) {
+        int r = ZERO_FLUX_RANGE;
+        for (BlockPos offset : BlockPos.betweenClosed(center.offset(-r, -r, -r), center.offset(r, r, r))) {
+            BlockState state = level.getBlockState(offset);
+            if (state.is(ModBlockTags.ZERO_FLUX)) {
+                return true;
+            }
+            if (state.is(ModBlockTags.COLD_IRON) && chebyshev(center, offset) <= COLD_IRON_RANGE) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static int chebyshev(BlockPos a, BlockPos b) {
+        return Math.max(
+                Math.max(Math.abs(a.getX() - b.getX()), Math.abs(a.getY() - b.getY())),
+                Math.abs(a.getZ() - b.getZ()));
+    }
+
     private static float fromMultiplier(float multiplier) {
         return multiplier - 1f;
     }
@@ -131,19 +163,5 @@ public final class PhiFieldService {
             return fromMultiplier(BalanceConfig.PHI_IN_WATER_MULTIPLIER.get().floatValue());
         }
         return 0f;
-    }
-
-    private static boolean isInsideZeroFluxZone(Level level, BlockPos center) {
-        int enclosed = 0;
-        for (BlockPos offset : BlockPos.betweenClosed(center.offset(-1, -1, -1), center.offset(1, 1, 1))) {
-            if (offset.equals(center)) {
-                continue;
-            }
-            var state = level.getBlockState(offset);
-            if (state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(Blocks.OBSIDIAN)) {
-                enclosed++;
-            }
-        }
-        return enclosed >= 20;
     }
 }
