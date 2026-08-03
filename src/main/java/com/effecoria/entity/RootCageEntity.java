@@ -1,5 +1,6 @@
 package com.effecoria.entity;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -30,16 +31,36 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.AnimationState;
+import software.bernie.geckolib.animation.PlayState;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
+
 /**
- * Static mangrove-root prison that stuns a captive until duration ends or they struggle free.
+ * Living GeckoLib root prison that wraps a captive until duration ends or they struggle free.
  */
-public class RootCageEntity extends Entity {
+public class RootCageEntity extends Entity implements GeoEntity {
     private static final EntityDataAccessor<Float> DATA_WIDTH =
             SynchedEntityData.defineId(RootCageEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> DATA_HEIGHT =
             SynchedEntityData.defineId(RootCageEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> DATA_INTEGRITY =
             SynchedEntityData.defineId(RootCageEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Optional<UUID>> DATA_CAPTIVE =
+            SynchedEntityData.defineId(RootCageEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    private static final EntityDataAccessor<Boolean> DATA_GRABBING =
+            SynchedEntityData.defineId(RootCageEntity.class, EntityDataSerializers.BOOLEAN);
+
+    private static final RawAnimation GRAB = RawAnimation.begin().thenPlay("animation.root_cage.grab");
+    private static final RawAnimation CONSTRICT =
+            RawAnimation.begin().thenLoop("animation.root_cage.constrict");
+    private static final int GRAB_TICKS = 17;
+
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     private UUID captiveId;
     private UUID ownerId;
@@ -84,6 +105,8 @@ public class RootCageEntity extends Entity {
             clearExistingNear(server, target);
         }
         this.captiveId = target.getUUID();
+        entityData.set(DATA_CAPTIVE, Optional.of(this.captiveId));
+        entityData.set(DATA_GRABBING, true);
         this.ownerId = owner != null ? owner.getUUID() : null;
         this.lifeTicks = Math.max(20, durationTicks);
 
@@ -162,11 +185,21 @@ public class RootCageEntity extends Entity {
         return entityData.get(DATA_INTEGRITY);
     }
 
+    public Optional<UUID> getCaptiveId() {
+        return entityData.get(DATA_CAPTIVE);
+    }
+
+    public boolean isGrabbing() {
+        return entityData.get(DATA_GRABBING);
+    }
+
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(DATA_WIDTH, 1.0f);
         builder.define(DATA_HEIGHT, 1.8f);
         builder.define(DATA_INTEGRITY, 1.0f);
+        builder.define(DATA_CAPTIVE, Optional.empty());
+        builder.define(DATA_GRABBING, true);
     }
 
     @Override
@@ -174,6 +207,10 @@ public class RootCageEntity extends Entity {
         super.tick();
         if (level().isClientSide) {
             return;
+        }
+
+        if (isGrabbing() && tickCount >= GRAB_TICKS) {
+            entityData.set(DATA_GRABBING, false);
         }
 
         lifeTicks--;
@@ -331,6 +368,7 @@ public class RootCageEntity extends Entity {
     protected void readAdditionalSaveData(CompoundTag tag) {
         if (tag.hasUUID("Captive")) {
             captiveId = tag.getUUID("Captive");
+            entityData.set(DATA_CAPTIVE, Optional.of(captiveId));
         }
         if (tag.hasUUID("Owner")) {
             ownerId = tag.getUUID("Owner");
@@ -341,6 +379,7 @@ public class RootCageEntity extends Entity {
         entityData.set(DATA_WIDTH, Math.max(0.5f, tag.getFloat("CageW")));
         entityData.set(DATA_HEIGHT, Math.max(0.8f, tag.getFloat("CageH")));
         entityData.set(DATA_INTEGRITY, Mth.clamp(integrity / maxIntegrity, 0f, 1f));
+        entityData.set(DATA_GRABBING, tag.contains("Grabbing") ? tag.getBoolean("Grabbing") : tickCount < GRAB_TICKS);
         savedNoAi = tag.getBoolean("SavedNoAi");
         hadNoAi = tag.getBoolean("HadNoAi");
         refreshDimensions();
@@ -361,6 +400,7 @@ public class RootCageEntity extends Entity {
         tag.putFloat("CageH", getCageHeight());
         tag.putBoolean("SavedNoAi", savedNoAi);
         tag.putBoolean("HadNoAi", hadNoAi);
+        tag.putBoolean("Grabbing", isGrabbing());
     }
 
     @Override
@@ -372,5 +412,24 @@ public class RootCageEntity extends Entity {
             }
         }
         super.remove(reason);
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "roots", 2, this::predicate));
+    }
+
+    private PlayState predicate(AnimationState<RootCageEntity> state) {
+        if (isGrabbing()) {
+            state.setAnimation(GRAB);
+        } else {
+            state.setAnimation(CONSTRICT);
+        }
+        return PlayState.CONTINUE;
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
     }
 }

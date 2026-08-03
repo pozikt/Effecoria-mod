@@ -1,86 +1,133 @@
 package com.effecoria.client.render;
 
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+
 import com.effecoria.entity.RootCageEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.AABB;
 
-/** Static mangrove-root cage scaled to the captive's hitbox. */
-public class RootCageRenderer extends EntityRenderer<RootCageEntity> {
-    private static final BlockState ROOTS = Blocks.MANGROVE_ROOTS.defaultBlockState();
-    private static final BlockState MUDDY = Blocks.MUDDY_MANGROVE_ROOTS.defaultBlockState();
+import software.bernie.geckolib.cache.object.BakedGeoModel;
+import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
+/** Living GeckoLib roots scaled to the captive and loosely pinned to humanoid limbs when available. */
+public class RootCageRenderer extends GeoEntityRenderer<RootCageEntity> {
     public RootCageRenderer(EntityRendererProvider.Context context) {
-        super(context);
+        super(context, new RootCageModel());
         this.shadowRadius = 0.0f;
     }
 
     @Override
-    public void render(
-            RootCageEntity entity,
-            float entityYaw,
-            float partialTick,
-            PoseStack poseStack,
-            MultiBufferSource buffer,
-            int packedLight) {
-        float width = entity.getCageWidth();
-        float height = entity.getCageHeight();
-        float integrity = entity.getIntegrityRatio();
-        int strands = Mth.clamp(Math.round(5 + width * 4.5f), 6, 14);
-        // Damaged cages shed outer strands.
-        int visible = Math.max(3, Math.round(strands * (0.45f + 0.55f * integrity)));
-        double radius = width * 0.42;
-
-        BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
-        float age = entity.tickCount + partialTick;
-
-        poseStack.pushPose();
-        // Entity origin is feet; lift slightly so roots sit in dirt.
-        poseStack.translate(-0.5, 0.0, -0.5);
-
-        for (int i = 0; i < visible; i++) {
-            double angle = (Math.PI * 2.0 * i) / strands + age * 0.01;
-            double x = Math.cos(angle) * radius;
-            double z = Math.sin(angle) * radius;
-            float lean = (float) Math.sin(angle * 2.0 + age * 0.03) * 8.0f;
-            float strandH = height * (0.75f + 0.25f * integrity) * (0.85f + (i % 3) * 0.08f);
-
-            poseStack.pushPose();
-            poseStack.translate(x + 0.5, 0.0, z + 0.5);
-            poseStack.mulPose(Axis.YP.rotationDegrees((float) (angle * (180.0 / Math.PI))));
-            poseStack.mulPose(Axis.ZP.rotationDegrees(lean));
-            float xz = Mth.clamp(0.35f + width * 0.12f, 0.35f, 0.85f) * (0.7f + 0.3f * integrity);
-            poseStack.scale(xz, strandH, xz);
-            BlockState state = (i % 3 == 0) ? MUDDY : ROOTS;
-            dispatcher.renderSingleBlock(state, poseStack, buffer, packedLight, OverlayTexture.NO_OVERLAY);
-            poseStack.popPose();
-        }
-
-        // Low root mat under the feet.
-        poseStack.pushPose();
-        poseStack.translate(0.5, 0.02, 0.5);
-        float mat = Mth.clamp(width * 0.9f, 0.8f, 2.4f);
-        poseStack.scale(mat, 0.35f * integrity + 0.15f, mat);
-        poseStack.translate(-0.5, 0.0, -0.5);
-        dispatcher.renderSingleBlock(MUDDY, poseStack, buffer, packedLight, OverlayTexture.NO_OVERLAY);
-        poseStack.popPose();
-
-        poseStack.popPose();
-        super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
+    public RenderType getRenderType(
+            RootCageEntity animatable,
+            ResourceLocation texture,
+            @Nullable MultiBufferSource bufferSource,
+            float partialTick) {
+        return RenderType.entityTranslucent(texture);
     }
 
     @Override
-    public ResourceLocation getTextureLocation(RootCageEntity entity) {
-        return ResourceLocation.withDefaultNamespace("textures/block/mangrove_roots.png");
+    public void preRender(
+            PoseStack poseStack,
+            RootCageEntity animatable,
+            BakedGeoModel model,
+            @Nullable MultiBufferSource bufferSource,
+            @Nullable VertexConsumer buffer,
+            boolean isReRender,
+            float partialTick,
+            int packedLight,
+            int packedOverlay,
+            int colour) {
+        LivingEntity captive = resolveCaptive(animatable);
+        RootSkeletonHints hints = RootSkeletonHints.forCaptive(captive, partialTick);
+        // Pivot wrap bones onto biped / humanoid anchors (reference model space).
+        applyWrapBone(model, "wrap_neck", hints.neckX, hints.neckY, hints.neckZ);
+        applyWrapBone(model, "wrap_torso", hints.torsoX, hints.torsoY, hints.torsoZ);
+        applyWrapBone(model, "wrap_arm_l", hints.armLX, hints.armLY, hints.armLZ);
+        applyWrapBone(model, "wrap_arm_r", hints.armRX, hints.armRY, hints.armRZ);
+        applyWrapBone(model, "wrap_leg_l", hints.legLX, hints.legLY, hints.legLZ);
+        applyWrapBone(model, "wrap_leg_r", hints.legRX, hints.legRY, hints.legRZ);
+
+        float sx = Mth.clamp(animatable.getCageWidth() / 0.9f, 0.55f, 3.2f);
+        float sy = Mth.clamp(animatable.getCageHeight() / 1.8f, 0.55f, 3.2f);
+        poseStack.scale(sx, sy, sx);
+        super.preRender(
+                poseStack,
+                animatable,
+                model,
+                bufferSource,
+                buffer,
+                isReRender,
+                partialTick,
+                packedLight,
+                packedOverlay,
+                colour);
+    }
+
+    private static void applyWrapBone(BakedGeoModel model, String name, float x, float y, float z) {
+        Optional<GeoBone> bone = model.getBone(name);
+        if (bone.isEmpty()) {
+            return;
+        }
+        bone.get().updatePivot(x, y, z);
+    }
+
+    @Override
+    public void actuallyRender(
+            PoseStack poseStack,
+            RootCageEntity animatable,
+            BakedGeoModel model,
+            RenderType renderType,
+            MultiBufferSource bufferSource,
+            VertexConsumer buffer,
+            boolean isReRender,
+            float partialTick,
+            int packedLight,
+            int packedOverlay,
+            int colour) {
+        float integrity = animatable.getIntegrityRatio();
+        int alpha = Math.round(Mth.clamp(0.4f + 0.6f * integrity, 0.4f, 1f) * 255f);
+        int tinted = (alpha << 24) | (colour & 0x00FFFFFF);
+        super.actuallyRender(
+                poseStack,
+                animatable,
+                model,
+                renderType,
+                bufferSource,
+                buffer,
+                isReRender,
+                partialTick,
+                packedLight,
+                OverlayTexture.NO_OVERLAY,
+                tinted);
+    }
+
+    @Nullable
+    private static LivingEntity resolveCaptive(RootCageEntity cage) {
+        Optional<UUID> id = cage.getCaptiveId();
+        if (id.isEmpty() || cage.level() == null) {
+            return null;
+        }
+        UUID captiveId = id.get();
+        AABB box = cage.getBoundingBox().inflate(3.0);
+        for (Entity entity : cage.level().getEntities(cage, box)) {
+            if (entity instanceof LivingEntity living && captiveId.equals(living.getUUID())) {
+                return living;
+            }
+        }
+        return null;
     }
 }
