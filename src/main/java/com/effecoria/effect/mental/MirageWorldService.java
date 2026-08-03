@@ -33,6 +33,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -105,6 +107,106 @@ public final class MirageWorldService {
     public static boolean isMirageBlock(ServerPlayer player, BlockPos pos) {
         Session s = SESSIONS.get(player.getUUID());
         return s != null && visibleState(s, pos.immutable()) != null;
+    }
+
+    /**
+     * Pick a solid mirage surface the horror can latch onto, biased toward {@code preferDir}.
+     * Prefers floor tops and low walls near body height — not ceilings / mid-air.
+     */
+    public static Optional<Vec3> findGrabSurface(ServerPlayer victim, Vec3 from, Vec3 preferDir, double reach) {
+        Session s = SESSIONS.get(victim.getUUID());
+        if (s == null) {
+            return Optional.empty();
+        }
+        Vec3 dir = preferDir.lengthSqr() < 1.0e-6 ? new Vec3(0, 0, 1) : preferDir.normalize();
+        // Flatten preference — crawl along the plains, not up into the sky.
+        Vec3 flatDir = new Vec3(dir.x, 0, dir.z);
+        if (flatDir.lengthSqr() > 1.0e-6) {
+            flatDir = flatDir.normalize();
+        } else {
+            flatDir = new Vec3(0, 0, 1);
+        }
+        BlockPos origin = BlockPos.containing(from);
+        int r = Mth.ceil(reach);
+        Vec3 best = null;
+        double bestScore = Double.NEGATIVE_INFINITY;
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dy = -2; dy <= 3; dy++) {
+                for (int dz = -r; dz <= r; dz++) {
+                    BlockPos pos = origin.offset(dx, dy, dz);
+                    BlockState state = visibleState(s, pos);
+                    if (state == null || state.isAir() || !state.getFluidState().isEmpty() || !state.blocksMotion()) {
+                        continue;
+                    }
+                    Direction openFace = null;
+                    for (Direction face : Direction.values()) {
+                        if (face == Direction.DOWN) {
+                            continue; // don't latch under blocks into the void
+                        }
+                        BlockPos neighbor = pos.relative(face);
+                        BlockState nState = visibleState(s, neighbor);
+                        if (nState == null || nState.isAir() || !nState.getFluidState().isEmpty() || !nState.blocksMotion()) {
+                            openFace = face;
+                            break;
+                        }
+                    }
+                    if (openFace == null) {
+                        continue;
+                    }
+                    Vec3 faceCenter = Vec3.atCenterOf(pos).add(
+                            openFace.getStepX() * 0.55,
+                            openFace.getStepY() * 0.55,
+                            openFace.getStepZ() * 0.55);
+                    Vec3 to = faceCenter.subtract(from);
+                    double dist = to.length();
+                    if (dist < 1.0 || dist > reach) {
+                        continue;
+                    }
+                    Vec3 toFlat = new Vec3(to.x, 0, to.z);
+                    double alignment = toFlat.lengthSqr() < 1.0e-6 ? 0 : toFlat.normalize().dot(flatDir);
+                    double heightBias = openFace == Direction.UP ? 0.7 : 0.35;
+                    double lowBias = -Math.abs(faceCenter.y - from.y) * 0.55;
+                    double score = alignment * 2.6 - dist * 0.14 + heightBias + lowBias;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        best = faceCenter;
+                    }
+                }
+            }
+        }
+        return Optional.ofNullable(best);
+    }
+
+    /** Top standing Y on mirage terrain at (x, z), or empty if no session. */
+    public static OptionalDouble findStandY(ServerPlayer victim, double x, double z) {
+        Session s = SESSIONS.get(victim.getUUID());
+        if (s == null) {
+            return OptionalDouble.empty();
+        }
+        int ix = Mth.floor(x);
+        int iz = Mth.floor(z);
+        int top = s.origin.getY() + 10;
+        int bottom = s.origin.getY() - 8;
+        for (int y = top; y >= bottom; y--) {
+            BlockPos pos = new BlockPos(ix, y, iz);
+            BlockState state = visibleState(s, pos);
+            if (state == null || state.isAir()) {
+                continue;
+            }
+            BlockPos above = pos.above();
+            BlockState up = visibleState(s, above);
+            boolean openAbove = up == null || up.isAir() || !up.getFluidState().isEmpty() || !up.blocksMotion();
+            if (!openAbove) {
+                continue;
+            }
+            if (state.blocksMotion() && state.getFluidState().isEmpty()) {
+                return OptionalDouble.of(y + 1.0);
+            }
+            if (!state.getFluidState().isEmpty()) {
+                return OptionalDouble.of(y + 0.85);
+            }
+        }
+        return OptionalDouble.of(s.origin.getY());
     }
 
     public static void resend(ServerPlayer player, BlockPos pos) {
@@ -327,7 +429,7 @@ public final class MirageWorldService {
         double dist = 9.0 + victim.getRandom().nextDouble() * 5.0;
         double x = victim.getX() + look.x * dist + (victim.getRandom().nextDouble() - 0.5) * 3.0;
         double z = victim.getZ() + look.z * dist + (victim.getRandom().nextDouble() - 0.5) * 3.0;
-        double y = session.origin.getY();
+        double y = MirageWorldService.findStandY(victim, x, z).orElse(session.origin.getY());
         MirageHorrorEntity horror = MirageHorrorEntity.spawnFor(victim, x, y, z);
         if (horror != null) {
             session.horrorId = horror.getUUID();

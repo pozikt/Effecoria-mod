@@ -8,6 +8,8 @@ import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.effect.mental.MirageWorldService;
 
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -25,6 +27,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -36,26 +39,54 @@ import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 /**
- * Serpentine mirage horror — real entity, rendered only for the bound victim.
- * Deals illusory moral damage, never real HP.
+ * Horizontal serpentine mirage horror — long floor-bound tail, 2–3 rising front segments.
+ * Limbs latch onto mirage ground/walls and haul the body; never flies.
  */
 public class MirageHorrorEntity extends Mob implements GeoEntity {
+    public static final int POSE_IDLE = 0;
+    public static final int POSE_CRAWL = 1;
+    public static final int POSE_REACH = 2;
+    public static final int POSE_PULL = 3;
+    public static final int POSE_LUNGE = 4;
+
     private static final EntityDataAccessor<Optional<UUID>> DATA_VICTIM =
             SynchedEntityData.defineId(MirageHorrorEntity.class, EntityDataSerializers.OPTIONAL_UUID);
-    private static final EntityDataAccessor<Boolean> DATA_LUNGING =
-            SynchedEntityData.defineId(MirageHorrorEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> DATA_POSE =
+            SynchedEntityData.defineId(MirageHorrorEntity.class, EntityDataSerializers.INT);
 
     private static final RawAnimation IDLE =
             RawAnimation.begin().thenLoop("animation.mirage_horror.idle");
+    private static final RawAnimation CRAWL =
+            RawAnimation.begin().thenLoop("animation.mirage_horror.crawl");
+    private static final RawAnimation REACH =
+            RawAnimation.begin().thenPlay("animation.mirage_horror.reach");
+    private static final RawAnimation PULL =
+            RawAnimation.begin().thenPlay("animation.mirage_horror.pull");
     private static final RawAnimation LUNGE =
             RawAnimation.begin().thenPlay("animation.mirage_horror.lunge");
+
+    private static final int REACH_TICKS = 5;
+    private static final int PULL_TICKS = 8;
+    private static final double GRAB_REACH = 7.0;
+    /** Sustained chase: above walk (~0.22), near sprint (~0.28) — must run to escape. */
+    private static final double CRAWL_NEAR = 0.24;
+    private static final double CRAWL_FAR = 0.30;
+    private static final double REACH_CREEP = 0.10;
+    private static final double PULL_YANK = 0.78;
+    private static final double PULL_CHASE = 0.38;
+    private static final double LUNGE_STEP = 0.42;
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private int lungeCooldown;
     private int lifeTicks = 20 * 40;
+    private int gaitPhase;
+    private int gaitTicks;
+    private Vec3 grabTarget = Vec3.ZERO;
+    private Vec3 pullVelocity = Vec3.ZERO;
 
     public MirageHorrorEntity(EntityType<? extends MirageHorrorEntity> type, Level level) {
         super(type, level);
+        // Mirage terrain is client-fake; real world has no floor. Stay grounded via snapToGround.
         this.noPhysics = true;
         this.setNoGravity(true);
         this.setSilent(true);
@@ -65,7 +96,7 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 40.0)
-                .add(Attributes.MOVEMENT_SPEED, 0.28)
+                .add(Attributes.MOVEMENT_SPEED, 0.32)
                 .add(Attributes.FOLLOW_RANGE, 48.0)
                 .add(Attributes.ATTACK_DAMAGE, 0.0)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
@@ -77,7 +108,8 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
         if (horror == null) {
             return null;
         }
-        horror.moveTo(x, y, z, victim.getYRot() + 180f, 0f);
+        double standY = MirageWorldService.findStandY(victim, x, z).orElse(y);
+        horror.moveTo(x, standY, z, victim.getYRot() + 180f, 0f);
         horror.setVictim(victim.getUUID());
         level.addFreshEntity(horror);
         level.playSound(
@@ -105,15 +137,21 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
         return getVictimId().filter(playerId::equals).isPresent();
     }
 
-    public boolean isLunging() {
-        return entityData.get(DATA_LUNGING);
+    public int getPoseAnim() {
+        return entityData.get(DATA_POSE);
+    }
+
+    private void setPoseAnim(int pose) {
+        if (getPoseAnim() != pose) {
+            entityData.set(DATA_POSE, pose);
+        }
     }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(DATA_VICTIM, Optional.empty());
-        builder.define(DATA_LUNGING, false);
+        builder.define(DATA_POSE, POSE_IDLE);
     }
 
     @Override
@@ -141,42 +179,182 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
             return;
         }
 
-        // Drift toward the soul.
-        Vec3 to = victim.position().subtract(position());
-        double dist = to.length();
-        if (dist > 0.05) {
-            Vec3 dir = to.normalize();
-            double speed = dist > 10 ? 0.18 : 0.09;
-            setDeltaMovement(dir.scale(speed));
-            float yaw = (float) (Mth.atan2(dir.z, dir.x) * (180f / Math.PI)) - 90f;
-            setYRot(yaw);
-            setYBodyRot(yaw);
-            setYHeadRot(yaw);
-        }
+        Vec3 toVictim = flat(victim.position().subtract(position()));
+        double dist = toVictim.length();
+        faceToward(toVictim);
 
         if (lungeCooldown > 0) {
             lungeCooldown--;
-            if (lungeCooldown == 12) {
-                entityData.set(DATA_LUNGING, false);
+            if (lungeCooldown == 12 && getPoseAnim() == POSE_LUNGE) {
+                setPoseAnim(POSE_IDLE);
             }
-        } else if (dist < 4.5) {
+        } else if (dist < 4.8 && gaitPhase == 0) {
             performFearStrike(victim);
             lungeCooldown = 55;
-            entityData.set(DATA_LUNGING, true);
+            setPoseAnim(POSE_LUNGE);
+            crawlBy(victim, toVictim.normalize().scale(LUNGE_STEP));
+            snapToGround(victim);
+            return;
         }
+
+        tickGrabLocomotion(serverLevel, victim, toVictim, dist);
+        snapToGround(victim);
 
         if (tickCount % 8 == 0) {
             serverLevel.sendParticles(
                     ModParticleTypes.MENTAL_FEAR.get(),
                     getX(),
-                    getY() + 1.6,
+                    getY() + 1.1,
                     getZ(),
                     4,
-                    0.4,
-                    0.8,
-                    0.4,
+                    0.55,
+                    0.35,
+                    0.9,
                     0.01);
         }
+    }
+
+    private void tickGrabLocomotion(ServerLevel level, ServerPlayer victim, Vec3 toVictim, double dist) {
+        if (gaitPhase == 1) {
+            gaitTicks--;
+            setPoseAnim(POSE_REACH);
+            crawlBy(victim, toVictim.normalize().scale(REACH_CREEP));
+            if (gaitTicks <= 0) {
+                gaitPhase = 2;
+                gaitTicks = PULL_TICKS;
+                Vec3 pullDir = flat(grabTarget.subtract(position()));
+                if (pullDir.lengthSqr() < 0.25) {
+                    pullDir = toVictim;
+                }
+                Vec3 yank = pullDir.normalize().scale(PULL_YANK);
+                if (toVictim.lengthSqr() > 1.0e-4) {
+                    yank = yank.add(toVictim.normalize().scale(PULL_CHASE));
+                }
+                pullVelocity = yank;
+                spawnGrabBurst(level, grabTarget);
+                level.playSound(
+                        null,
+                        blockPosition(),
+                        SoundEvents.SPIDER_STEP,
+                        SoundSource.HOSTILE,
+                        0.7f,
+                        0.45f + random.nextFloat() * 0.2f);
+            }
+            return;
+        }
+
+        if (gaitPhase == 2) {
+            gaitTicks--;
+            setPoseAnim(POSE_PULL);
+            crawlBy(victim, pullVelocity);
+            pullVelocity = pullVelocity.scale(0.86);
+            if (gaitTicks <= 0) {
+                gaitPhase = 0;
+                gaitTicks = 2 + random.nextInt(3);
+                setPoseAnim(dist > 2.5 ? POSE_CRAWL : POSE_IDLE);
+                setDeltaMovement(Vec3.ZERO);
+            }
+            return;
+        }
+
+        if (gaitTicks > 0) {
+            gaitTicks--;
+            setPoseAnim(dist > 3.0 ? POSE_CRAWL : POSE_IDLE);
+            if (dist > 0.4) {
+                crawlBy(victim, toVictim.normalize().scale(dist > 12 ? CRAWL_FAR : CRAWL_NEAR));
+            } else {
+                setDeltaMovement(Vec3.ZERO);
+            }
+            return;
+        }
+
+        Optional<Vec3> grab =
+                MirageWorldService.findGrabSurface(victim, position().add(0, 0.6, 0), toVictim, GRAB_REACH);
+        if (grab.isEmpty() && dist > 1.0) {
+            Vec3 ahead = position().add(toVictim.normalize().scale(3.2));
+            double gy = MirageWorldService.findStandY(victim, ahead.x, ahead.z).orElse(getY());
+            grab = Optional.of(new Vec3(ahead.x, gy + 0.05, ahead.z));
+        }
+        if (grab.isPresent()) {
+            grabTarget = grab.get();
+            gaitPhase = 1;
+            gaitTicks = REACH_TICKS;
+            setPoseAnim(POSE_REACH);
+            level.playSound(
+                    null,
+                    blockPosition(),
+                    SoundEvents.SLIME_SQUISH_SMALL,
+                    SoundSource.HOSTILE,
+                    0.45f,
+                    0.55f);
+        } else {
+            setPoseAnim(POSE_IDLE);
+            setDeltaMovement(Vec3.ZERO);
+            gaitTicks = 3;
+        }
+    }
+
+    /** Horizontal step only — Y is forced to mirage floor afterward. */
+    private void crawlBy(ServerPlayer victim, Vec3 delta) {
+        Vec3 flat = flat(delta);
+        if (flat.lengthSqr() < 1.0e-8) {
+            setDeltaMovement(Vec3.ZERO);
+            return;
+        }
+        setDeltaMovement(flat);
+    }
+
+    private void snapToGround(ServerPlayer victim) {
+        MirageWorldService.findStandY(victim, getX(), getZ()).ifPresent(y -> {
+            if (Math.abs(getY() - y) > 0.02) {
+                setPos(getX(), y, getZ());
+            }
+        });
+        // Kill any residual vertical velocity so the entity never drifts upward.
+        Vec3 motion = getDeltaMovement();
+        if (Math.abs(motion.y) > 1.0e-4) {
+            setDeltaMovement(motion.x, 0, motion.z);
+        }
+        setXRot(0f);
+    }
+
+    private static Vec3 flat(Vec3 v) {
+        return new Vec3(v.x, 0, v.z);
+    }
+
+    private void spawnGrabBurst(ServerLevel level, Vec3 at) {
+        level.sendParticles(
+                new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
+                at.x,
+                at.y,
+                at.z,
+                10,
+                0.25,
+                0.15,
+                0.25,
+                0.05);
+        level.sendParticles(
+                ModParticleTypes.MENTAL_FEAR.get(),
+                at.x,
+                at.y,
+                at.z,
+                4,
+                0.2,
+                0.15,
+                0.2,
+                0.01);
+    }
+
+    private void faceToward(Vec3 to) {
+        if (to.lengthSqr() < 1.0e-4) {
+            return;
+        }
+        Vec3 dir = to.normalize();
+        float yaw = (float) (Mth.atan2(dir.z, dir.x) * (180f / Math.PI)) - 90f;
+        setYRot(yaw);
+        setYBodyRot(yaw);
+        setYHeadRot(yaw);
+        setXRot(0f);
     }
 
     private void performFearStrike(ServerPlayer victim) {
@@ -220,6 +398,7 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
         super.addAdditionalSaveData(tag);
         getVictimId().ifPresent(id -> tag.putUUID("Victim", id));
         tag.putInt("Life", lifeTicks);
+        tag.putInt("Pose", getPoseAnim());
     }
 
     @Override
@@ -229,17 +408,34 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
             setVictim(tag.getUUID("Victim"));
         }
         lifeTicks = tag.getInt("Life");
+        setPoseAnim(tag.getInt("Pose"));
     }
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 4, state -> {
-            if (isLunging()) {
-                state.setAnimation(LUNGE);
-                return PlayState.CONTINUE;
-            }
-            state.setAnimation(IDLE);
-            return PlayState.CONTINUE;
+        controllers.add(new AnimationController<>(this, "main", 3, state -> {
+            return switch (getPoseAnim()) {
+                case POSE_LUNGE -> {
+                    state.setAnimation(LUNGE);
+                    yield PlayState.CONTINUE;
+                }
+                case POSE_REACH -> {
+                    state.setAnimation(REACH);
+                    yield PlayState.CONTINUE;
+                }
+                case POSE_PULL -> {
+                    state.setAnimation(PULL);
+                    yield PlayState.CONTINUE;
+                }
+                case POSE_CRAWL -> {
+                    state.setAnimation(CRAWL);
+                    yield PlayState.CONTINUE;
+                }
+                default -> {
+                    state.setAnimation(IDLE);
+                    yield PlayState.CONTINUE;
+                }
+            };
         }));
     }
 
