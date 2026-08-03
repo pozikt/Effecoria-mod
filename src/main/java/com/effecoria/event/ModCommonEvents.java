@@ -22,6 +22,7 @@ import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.core.psi.SpellProgression;
+import com.effecoria.effect.common.CommonWardService;
 import com.effecoria.effect.elemental.AirHandService;
 import com.effecoria.effect.elemental.ElementalBlockService;
 import com.effecoria.effect.elemental.ElementalCageService;
@@ -171,6 +172,8 @@ public final class ModCommonEvents {
         if (!data.initiated()) {
             return;
         }
+
+        CommonWardService.tickPlayer(player);
 
         ProgressionService.tick(player, data);
         ShadeService.tick(player);

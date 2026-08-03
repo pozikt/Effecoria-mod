@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:psi_adrenaline",
+  "school": "common",
+  "frequency_hz": 8.0,
+  "base_cost": 14,
+  "power_multiplier": 0.85,
+  "side_entropy": 0.06,
+  "min_phi": 0.05,
+  "min_mastery": 0.0,
+  "unlock_essence_cost": 0,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:psi_adrenaline",
+      "duration_ticks": 120
+    }
+  ]
+}

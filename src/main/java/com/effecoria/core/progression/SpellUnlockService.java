@@ -120,7 +120,18 @@ public final class SpellUnlockService {
         if (player.tickCount % 20 != 0) {
             return;
         }
-        List<ResourceLocation> progression = SpellProgression.spellsForSchool(data.school());
+        // Common techniques unlock for every school, then school-specific progression.
+        if (tryUnlockFromList(player, data, SpellProgression.commonSpells(), MagicSchool.COMMON)) {
+            return;
+        }
+        tryUnlockFromList(player, data, SpellProgression.spellsForSchool(data.school()), data.school());
+    }
+
+    private static boolean tryUnlockFromList(
+            ServerPlayer player,
+            PlayerPsiData data,
+            List<ResourceLocation> progression,
+            MagicSchool costSchool) {
         for (ResourceLocation spellId : progression) {
             if (data.knownSpells().contains(spellId)) {
                 continue;
@@ -132,7 +143,7 @@ public final class SpellUnlockService {
             if (data.breathingMastery() < def.minMastery()) {
                 continue;
             }
-            int cost = resolveUnlockCost(spellId, data.school(), def);
+            int cost = resolveUnlockCost(spellId, costSchool, def);
             if (cost > 0 && data.essence() < cost) {
                 continue;
             }
@@ -148,8 +159,9 @@ public final class SpellUnlockService {
                             Component.translatable("spell.effecoria." + spellId.getPath()),
                             cost),
                     true);
-            return;
+            return true;
         }
+        return false;
     }
 
     /** Next spells in school progression that are not yet known (for hub ghost nodes). */
@@ -158,7 +170,19 @@ public final class SpellUnlockService {
             return List.of();
         }
         List<ResourceLocation> out = new ArrayList<>();
-        for (ResourceLocation spellId : SpellProgression.spellsForSchool(data.school())) {
+        appendUpcoming(data, SpellProgression.commonSpells(), out, limit);
+        if (out.size() < limit) {
+            appendUpcoming(data, SpellProgression.spellsForSchool(data.school()), out, limit);
+        }
+        return out;
+    }
+
+    private static void appendUpcoming(
+            PlayerPsiData data, List<ResourceLocation> progression, List<ResourceLocation> out, int limit) {
+        for (ResourceLocation spellId : progression) {
+            if (out.size() >= limit) {
+                return;
+            }
             if (data.knownSpells().contains(spellId)) {
                 continue;
             }
@@ -166,11 +190,7 @@ public final class SpellUnlockService {
                 continue;
             }
             out.add(spellId);
-            if (out.size() >= limit) {
-                break;
-            }
         }
-        return out;
     }
 
     /** First unknown spell in progression — the only one research can unlock next. */
@@ -227,6 +247,16 @@ public final class SpellUnlockService {
     public static int resolveUnlockCost(ResourceLocation spellId, MagicSchool school, SpellDefinition def) {
         if (def.unlockEssenceCost() >= 0) {
             return def.unlockEssenceCost();
+        }
+        if (SpellProgression.isCommon(spellId)) {
+            int index = SpellProgression.progressionIndex(MagicSchool.COMMON, spellId);
+            if (index < 0) {
+                return 1;
+            }
+            if (index < SpellProgression.commonStarterSpells().size()) {
+                return 0;
+            }
+            return 1 + (index - SpellProgression.commonStarterSpells().size());
         }
         int index = SpellProgression.progressionIndex(school, spellId);
         if (index < 0) {

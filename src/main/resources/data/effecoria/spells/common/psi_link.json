@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:psi_link",
+  "school": "common",
+  "frequency_hz": 7.8,
+  "base_cost": 6,
+  "power_multiplier": 0.55,
+  "side_entropy": 0.02,
+  "min_phi": 0.05,
+  "min_mastery": 0.1,
+  "unlock_essence_cost": 1,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:psi_link",
+      "range": 24,
+      "signal": "danger"
+    }
+  ]
+}

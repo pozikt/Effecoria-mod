@@ -46,6 +46,9 @@ public record PsiContext(
     }
 
     public boolean hasAffinity(MagicSchool required) {
+        if (required == MagicSchool.COMMON) {
+            return school != MagicSchool.NONE && school != null;
+        }
         return school == required;
     }
 }

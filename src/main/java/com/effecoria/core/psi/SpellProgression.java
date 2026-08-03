@@ -200,8 +200,34 @@ public final class SpellProgression {
 
             case SEALS -> List.of();
 
+            case COMMON -> commonSpells();
+
             default -> List.of();
         };
+    }
+
+    /**
+     * Universal lore techniques shared by every initiated school (encyclopedia §2.2–2.6).
+     * Unlocked alongside school progression; not a playable initiation path.
+     */
+    public static List<ResourceLocation> commonSpells() {
+        return List.of(
+                id("psi_adrenaline"),
+                id("phi_glow"),
+                id("psi_charge"),
+                id("psi_link"),
+                id("psi_ward"));
+    }
+
+    public static boolean isCommon(ResourceLocation spellId) {
+        return commonSpells().contains(spellId);
+    }
+
+    /** First common spells granted free at initiation. */
+    public static List<ResourceLocation> commonStarterSpells() {
+        List<ResourceLocation> all = commonSpells();
+        int count = Math.min(2, all.size());
+        return List.copyOf(all.subList(0, count));
     }
 
     public static boolean schoolHasLoadedSpells(MagicSchool school) {

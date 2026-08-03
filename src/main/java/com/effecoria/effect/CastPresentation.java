@@ -322,6 +322,15 @@ public final class CastPresentation {
                     1.2f,
                     0.55f,
                     1.1f);
+            case COMMON -> new SchoolTheme(
+                    ModParticleTypes.PHI_SPARK.get(),
+                    ModParticleTypes.MENTAL_WARD.get(),
+                    SoundEvents.AMETHYST_BLOCK_CHIME,
+                    SoundEvents.BEACON_ACTIVATE,
+                    0.45f,
+                    1.35f,
+                    0.5f,
+                    1.25f);
             case NONE -> new SchoolTheme(
                     ModParticleTypes.PHI_SPARK.get(),
                     ModParticleTypes.PHI_SPARK.get(),

@@ -7,6 +7,7 @@ import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.effect.elemental.AirHandService;
 import com.effecoria.effect.elemental.ElementalCraftEffects;
 import com.effecoria.effect.elemental.ElementalEffects;
+import com.effecoria.effect.common.CommonEffects;
 import com.effecoria.effect.corruption.CorruptionEffects;
 import com.effecoria.effect.mental.MentalEffects;
 import com.effecoria.effect.necromancy.NecromancyEffects;
@@ -80,7 +81,8 @@ public final class SpellEffectExecutor {
             "corrupt_mark",
             "binding_seal",
             "festering_wound",
-            "decay_bind");
+            "decay_bind",
+            "psi_link");
 
     /** Prefer living ally; else apply to caster (never whiff on dirt). */
     private static final Set<String> HEAL_SELF_FALLBACK_EFFECTS = Set.of(
@@ -142,6 +144,7 @@ public final class SpellEffectExecutor {
             "ore_smelt");
 
     private static final Set<String> HELD_COOK_EFFECTS = Set.of("sear");
+    private static final Set<String> HELD_CHARGE_EFFECTS = Set.of("psi_charge");
 
     private SpellEffectExecutor() {}
 
@@ -173,6 +176,15 @@ public final class SpellEffectExecutor {
         return false;
     }
 
+    public static boolean requiresChargeableCell(SpellDefinition spell) {
+        for (SpellEffectEntry effect : spell.effects()) {
+            if (HELD_CHARGE_EFFECTS.contains(effect.type().getPath())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static CastDelivery applyAll(ServerPlayer caster, SpellDefinition spell, float power) {
         return applyAll(caster, spell, power, null);
     }
@@ -194,6 +206,12 @@ public final class SpellEffectExecutor {
 
             if (requiresCookableHeld(spell) && !ElementalCraftEffects.canSearHeld(caster)) {
                 caster.displayClientMessage(Component.translatable("message.effecoria.sear.need_raw"), true);
+                return CastDelivery.WHIFF_NO_TARGET;
+            }
+
+            if (requiresChargeableCell(spell) && !CommonEffects.canChargePhiCell(caster)) {
+                caster.displayClientMessage(
+                        Component.translatable("message.effecoria.common.charge_need_cell"), true);
                 return CastDelivery.WHIFF_NO_TARGET;
             }
 
@@ -254,7 +272,8 @@ public final class SpellEffectExecutor {
                     && !AIM_EFFECTS.contains(path)
                     && !HEAL_SELF_FALLBACK_EFFECTS.contains(path)
                     && !BLOCK_TARGET_EFFECTS.contains(path)
-                    && !HELD_COOK_EFFECTS.contains(path)) {
+                    && !HELD_COOK_EFFECTS.contains(path)
+                    && !HELD_CHARGE_EFFECTS.contains(path)) {
                 continue;
             }
             if (effect.params().has("range")) {
@@ -299,6 +318,11 @@ public final class SpellEffectExecutor {
             case "fireball" -> ElementalEffects.weakFireball(caster, effect, power);
             case "sear" -> ElementalCraftEffects.sear(caster, effect, power);
             case "ore_smelt" -> ElementalCraftEffects.oreSmelt(caster, effect, power, blockTarget);
+            case "psi_adrenaline" -> CommonEffects.psiAdrenaline(caster, effect, power);
+            case "phi_glow" -> CommonEffects.phiGlow(caster, effect, power);
+            case "psi_charge" -> CommonEffects.psiCharge(caster, effect, power);
+            case "psi_link" -> CommonEffects.psiLink(caster, effect, power, target);
+            case "psi_ward" -> CommonEffects.psiWard(caster, effect, power);
             case "wind_charge" -> ElementalEffects.windCharge(caster, effect, power);
             case "weak_breeze" -> ElementalEffects.weakBreeze(caster, effect, power);
             case "hyper_cooling" -> ElementalEffects.hyperCooling(caster, effect, power);

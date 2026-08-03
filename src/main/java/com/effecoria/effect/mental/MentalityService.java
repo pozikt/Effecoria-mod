@@ -3,6 +3,7 @@ package com.effecoria.effect.mental;
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.core.progression.BreathingService;
 import com.effecoria.core.psi.PsiHelper;
+import com.effecoria.effect.common.CommonWardService;
 import com.effecoria.effect.necromancy.NecroSummonService;
 
 import net.minecraft.server.level.ServerLevel;
@@ -191,6 +192,10 @@ public final class MentalityService {
             return false;
         }
         if (target == caster && !BreathDebuffs.allowSelfTarget()) {
+            return false;
+        }
+        if (CommonWardService.hasWard(target, target.level().getGameTime())
+                || hasShield(target, target.level().getGameTime())) {
             return false;
         }
         Kind kind = of(target);

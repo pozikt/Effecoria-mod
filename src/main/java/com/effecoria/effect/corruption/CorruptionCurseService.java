@@ -3,6 +3,7 @@ package com.effecoria.effect.corruption;
 import com.effecoria.EffecoriaMod;
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.core.formula.SpellCombat;
+import com.effecoria.effect.common.CommonWardService;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -72,6 +73,14 @@ public final class CorruptionCurseService {
      */
     public static int apply(ServerPlayer caster, LivingEntity target, CorruptionCurse curse, boolean allowSpread) {
         if (target == null || !target.isAlive() || curse == null) {
+            return 0;
+        }
+        if (target.level() instanceof ServerLevel level
+                && CommonWardService.hasWard(target, level.getGameTime())) {
+            if (caster != null) {
+                caster.displayClientMessage(
+                        Component.translatable("message.effecoria.common.ward_blocks_corruption"), true);
+            }
             return 0;
         }
         // Players also carry curse metadata so they must seek cure blocks/items (no seek AI).

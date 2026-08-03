@@ -44,7 +44,13 @@ public final class PsiHelper {
 
     public static void initiate(Player player, MagicSchool school) {
         PlayerPsiData data = get(player);
-        data.initiate(school, SpellProgression.starterSpells(school));
+        java.util.ArrayList<ResourceLocation> starters = new java.util.ArrayList<>(SpellProgression.starterSpells(school));
+        for (ResourceLocation id : SpellProgression.commonStarterSpells()) {
+            if (!starters.contains(id)) {
+                starters.add(id);
+            }
+        }
+        data.initiate(school, starters);
         set(player, data);
     }
 
@@ -52,8 +58,13 @@ public final class PsiHelper {
         PlayerPsiData data = get(player);
         java.util.List<ResourceLocation> progression = SpellProgression.spellsForSchool(school);
         java.util.ArrayList<ResourceLocation> kept = new java.util.ArrayList<>(SpellProgression.starterSpells(school));
+        for (ResourceLocation id : SpellProgression.commonStarterSpells()) {
+            if (!kept.contains(id)) {
+                kept.add(id);
+            }
+        }
         for (ResourceLocation id : data.knownSpells()) {
-            if (progression.contains(id) && !kept.contains(id)) {
+            if ((progression.contains(id) || SpellProgression.isCommon(id)) && !kept.contains(id)) {
                 kept.add(id);
             }
         }

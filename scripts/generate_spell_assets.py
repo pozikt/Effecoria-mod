@@ -39,6 +39,7 @@ SPELL_SCHOOL = {
     "psychic_storm": "mental", "psychic_amplify": "mental", "omega_mind": "mental",
     "mind_terror": "mental", "cliff_urge": "mental", "drown_urge": "mental", "psychic_frenzy": "mental", "mass_hysteria": "mental",
     "fire_burst": "elemental", "sear": "elemental", "ore_smelt": "elemental", "wind_push": "elemental", "water_stream": "elemental",
+    "psi_adrenaline": "mental", "phi_glow": "mental", "psi_charge": "mental", "psi_link": "mental", "psi_ward": "mental",
     "steam_jet": "elemental", "steam_veil": "elemental", "ember_volley": "elemental",
     "ice_shard": "elemental", "frost_bastion": "elemental", "plasma_bolt": "elemental",
     "hydro_slice": "elemental", "great_fireball": "elemental", "steam_flight": "elemental",

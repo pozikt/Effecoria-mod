@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:psi_charge",
+  "school": "common",
+  "frequency_hz": 9.0,
+  "base_cost": 10,
+  "power_multiplier": 0.7,
+  "side_entropy": 0.02,
+  "min_phi": 0.05,
+  "min_mastery": 0.05,
+  "unlock_essence_cost": 1,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:psi_charge",
+      "charge": 0.25
+    }
+  ]
+}

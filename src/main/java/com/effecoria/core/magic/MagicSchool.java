@@ -20,6 +20,11 @@ public enum MagicSchool implements StringRepresentable {
     CORRUPTION("corruption", 0.5f),
     /** seal inscriptions on blocks / later items */
     SEALS("seals", 0.45f),
+    /**
+     * Universal workings available to every initiated mage (body boost, Φ-light, charge, link, ward).
+     * Not a playable initiation school.
+     */
+    COMMON("common", 0f),
     /** uninitiated */
     NONE("none", 0f);
 
