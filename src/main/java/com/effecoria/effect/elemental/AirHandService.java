@@ -38,7 +38,10 @@ public final class AirHandService {
             release(caster);
             return true;
         }
-        if (target == null || !target.isAlive() || target == caster) {
+        if (target == null || !target.isAlive()) {
+            return false;
+        }
+        if (target == caster && !com.effecoria.core.formula.BreathDebuffs.allowSelfTarget()) {
             return false;
         }
         float drainPerTick = Math.max(0.02f, drainPerSecond / 20f);

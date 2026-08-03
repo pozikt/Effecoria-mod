@@ -1,5 +1,6 @@
 package com.effecoria.effect.mental;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.core.progression.BreathingService;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.effect.necromancy.NecroSummonService;
@@ -186,7 +187,10 @@ public final class MentalityService {
      * @param durationHint ticks to track for breakout sweeps; {@code <= 0} uses a short default window
      */
     public static boolean tryAfflict(ServerPlayer caster, LivingEntity target, int durationHint) {
-        if (target == null || !target.isAlive() || target == caster) {
+        if (target == null || !target.isAlive()) {
+            return false;
+        }
+        if (target == caster && !BreathDebuffs.allowSelfTarget()) {
             return false;
         }
         Kind kind = of(target);

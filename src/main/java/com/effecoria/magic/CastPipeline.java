@@ -25,6 +25,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
+
+import javax.annotation.Nullable;
 
 import java.util.Optional;
 
@@ -40,10 +43,19 @@ public final class CastPipeline {
     private CastPipeline() {}
 
     public static CastResult tryCast(ServerPlayer player, ResourceLocation spellId) {
-        return tryCast(player, spellId, 1f);
+        return tryCast(player, spellId, 1f, null);
     }
 
     public static CastResult tryCast(ServerPlayer player, ResourceLocation spellId, float charge) {
+        return tryCast(player, spellId, charge, null);
+    }
+
+    /**
+     * @param forcedTarget when non-null, living-targeted effects hit this entity (including the caster)
+     *                     instead of the look ray. Ops (perm 2) may also cast unknown spells this way for testing.
+     */
+    public static CastResult tryCast(
+            ServerPlayer player, ResourceLocation spellId, float charge, @Nullable LivingEntity forcedTarget) {
         PlayerPsiData data = PsiHelper.get(player);
         if (!data.initiated()) {
             player.displayClientMessage(Component.translatable("message.effecoria.not_initiated"), true);
@@ -57,7 +69,8 @@ public final class CastPipeline {
         }
 
         SpellDefinition spell = spellOpt.get();
-        if (!data.knownSpells().contains(spellId)) {
+        boolean opTestCast = player.hasPermissions(2) && forcedTarget != null;
+        if (!data.knownSpells().contains(spellId) && !opTestCast) {
             player.displayClientMessage(Component.translatable("message.effecoria.spell_not_known"), true);
             return CastResult.UNKNOWN_SPELL;
         }
@@ -84,7 +97,6 @@ public final class CastPipeline {
 
         float fullCost = godMode ? 0f : FormulaEngine.spellCost(ctx, phi, spell) * chargeScale;
         boolean overcasting = !godMode && usablePsi + 0.001f < fullCost;
-        // Overcast still delivers borrowed power as if the cost were paid in full.
         PsiContext powerCtx = overcasting ? ctx.withCurrentPsi(Math.max(usablePsi, fullCost)) : ctx;
         float power = FormulaEngine.spellPower(powerCtx, phi, spell) * chargeScale;
         power = CreativeGodMode.clampSpellPower(player, power);
@@ -94,7 +106,7 @@ public final class CastPipeline {
         }
 
         CastPresentation.playWindUp(player, spell);
-        CastDelivery delivery = SpellEffectExecutor.applyAll(player, spell, power);
+        CastDelivery delivery = SpellEffectExecutor.applyAll(player, spell, power, forcedTarget);
         CastPresentation.playResolve(player, spell, power, delivery);
 
         data.recordSpellCast(spellId, player.level().getGameTime());
@@ -112,7 +124,6 @@ public final class CastPipeline {
             if (deficit > 0.05f && delivery == CastDelivery.FULL) {
                 OvercastService.apply(player, data, deficit, actualCost);
             } else if (deficit > 0.05f) {
-                // Whiff overcast — lighter trauma (half deficit).
                 OvercastService.apply(player, data, deficit * 0.5f, Math.max(actualCost, 0.01f));
             } else {
                 ExhaustionService.onHealthyCast(player, data);

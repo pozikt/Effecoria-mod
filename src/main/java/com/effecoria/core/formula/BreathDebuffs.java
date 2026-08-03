@@ -17,20 +17,32 @@ import java.util.UUID;
  * Bind a caster with {@link #beginCast}/{@link #endCast} during spell resolve, or pass the caster explicitly.
  */
 public final class BreathDebuffs {
-    private static final ThreadLocal<ServerPlayer> CAST_CASTER = new ThreadLocal<>();
+    private static final ThreadLocal<ServerPlayer> CAST_CASTER = ThreadLocal.withInitial(() -> null);
+    private static final ThreadLocal<Boolean> ALLOW_SELF_TARGET = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
     private BreathDebuffs() {}
 
     public static void beginCast(ServerPlayer caster) {
+        beginCast(caster, false);
+    }
+
+    public static void beginCast(ServerPlayer caster, boolean allowSelfTarget) {
         CAST_CASTER.set(caster);
+        ALLOW_SELF_TARGET.set(allowSelfTarget);
     }
 
     public static void endCast() {
         CAST_CASTER.remove();
+        ALLOW_SELF_TARGET.remove();
     }
 
     public static ServerPlayer currentCaster() {
         return CAST_CASTER.get();
+    }
+
+    /** True during command/self-test casts that may afflict the caster. */
+    public static boolean allowSelfTarget() {
+        return Boolean.TRUE.equals(ALLOW_SELF_TARGET.get());
     }
 
     public static float durationMultiplier(float breathingMastery) {

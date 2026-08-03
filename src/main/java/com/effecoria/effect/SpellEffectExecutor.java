@@ -43,6 +43,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
+import javax.annotation.Nullable;
+
 import java.util.Set;
 
 public final class SpellEffectExecutor {
@@ -160,11 +162,17 @@ public final class SpellEffectExecutor {
     }
 
     public static CastDelivery applyAll(ServerPlayer caster, SpellDefinition spell, float power) {
-        BreathDebuffs.beginCast(caster);
+        return applyAll(caster, spell, power, null);
+    }
+
+    public static CastDelivery applyAll(
+            ServerPlayer caster, SpellDefinition spell, float power, @Nullable LivingEntity forcedTarget) {
+        BreathDebuffs.beginCast(caster, forcedTarget != null && forcedTarget == caster);
         try {
             double range = resolveCastRange(caster, spell);
             CastAim.Result aim = CastAim.resolve(caster, range);
-            LivingEntity living = aim.living();
+            LivingEntity living = forcedTarget != null ? forcedTarget : aim.living();
+            Vec3 aimPoint = forcedTarget != null ? forcedTarget.getBoundingBox().getCenter() : aim.point();
 
             boolean needsLiving = requiresTarget(spell);
             boolean airHandRelease = isAirHandRelease(caster, spell);
@@ -186,7 +194,7 @@ public final class SpellEffectExecutor {
                 if (HEAL_SELF_FALLBACK_EFFECTS.contains(path) && effectTarget == null) {
                     effectTarget = caster;
                 }
-                apply(caster, effect, power, effectTarget, blockTarget, aim.point());
+                apply(caster, effect, power, effectTarget, blockTarget, aimPoint);
             }
             return CastDelivery.FULL;
         } finally {

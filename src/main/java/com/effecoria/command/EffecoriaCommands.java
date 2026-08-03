@@ -23,10 +23,13 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -68,7 +71,20 @@ public final class EffecoriaCommands {
                                 .executes(ctx -> reschool(ctx.getSource(), StringArgumentType.getString(ctx, "school")))))
                 .then(Commands.literal("cast")
                         .then(Commands.argument("spell", ResourceLocationArgument.id())
-                                .executes(ctx -> cast(ctx.getSource(), ResourceLocationArgument.getId(ctx, "spell")))))
+                                .executes(ctx -> cast(
+                                        ctx.getSource(),
+                                        ResourceLocationArgument.getId(ctx, "spell"),
+                                        null))
+                                .then(Commands.literal("self")
+                                        .executes(ctx -> cast(
+                                                ctx.getSource(),
+                                                ResourceLocationArgument.getId(ctx, "spell"),
+                                                ctx.getSource().getPlayerOrException())))
+                                .then(Commands.argument("target", EntityArgument.entity())
+                                        .executes(ctx -> cast(
+                                                ctx.getSource(),
+                                                ResourceLocationArgument.getId(ctx, "spell"),
+                                                EntityArgument.getEntity(ctx, "target"))))))
                 .then(Commands.literal("spells")
                         .executes(ctx -> listSpells(ctx.getSource())))
                 .then(Commands.literal("set")
@@ -90,7 +106,7 @@ public final class EffecoriaCommands {
 
     private static int help(CommandSourceStack source) {
         source.sendSuccess(() -> Component.literal(
-                "Effecoria: help | version | debug | initiate <school> | reschool <school> | cast <id> | spells | max [school] | set <stat> <value>"),
+                "Effecoria: help | version | debug | initiate <school> | reschool <school> | cast <id> [self|@e] | spells | max [school] | set <stat> <value>"),
                 false);
         return 1;
     }
@@ -321,10 +337,28 @@ public final class EffecoriaCommands {
         return school;
     }
 
-    private static int cast(CommandSourceStack source, ResourceLocation spellId) throws CommandSyntaxException {
+    private static int cast(CommandSourceStack source, ResourceLocation spellId, Entity targetEntity)
+            throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
-        CastPipeline.CastResult result = CastPipeline.tryCast(player, spellId);
+        LivingEntity forcedTarget = null;
+        if (targetEntity != null) {
+            if (!(targetEntity instanceof LivingEntity living) || !living.isAlive()) {
+                source.sendFailure(Component.translatable("message.effecoria.cast_command_bad_target"));
+                return 0;
+            }
+            forcedTarget = living;
+        }
+        CastPipeline.CastResult result = CastPipeline.tryCast(player, spellId, 1f, forcedTarget);
         if (result == CastPipeline.CastResult.SUCCESS) {
+            if (forcedTarget != null) {
+                LivingEntity shown = forcedTarget;
+                source.sendSuccess(
+                        () -> Component.translatable(
+                                "message.effecoria.cast_command_targeted",
+                                Component.translatable("spell.effecoria." + spellId.getPath()),
+                                shown.getDisplayName()),
+                        true);
+            }
             return 1;
         }
         source.sendFailure(Component.translatable("message.effecoria.cast_command_failed", result.name()));
