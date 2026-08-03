@@ -2,7 +2,7 @@
 
 NeoForge mod for **Minecraft 1.21.1**, based on the [Effecoria universe](https://github.com/pozikt/Effecoria) (ЕТЭВ / Φ-field theory).
 
-**Status:** Phase 2 — magic UI, breathing passives, physical training foundation.
+**Status:** Stage I — magic loop playable (7 schools, breathing/Orkanum, Φ harness, seals, primer). Funnel polish toward “recommend to a friend.”
 
 ## Requirements
 
@@ -20,16 +20,19 @@ cd Effecoria-mod
 
 First launch downloads NeoForge and Minecraft — expect several minutes.
 
-### Phase 1 gameplay
+### First hour (survival / creative)
 
-1. Take **Resonance Focus** from creative tab Effecoria
-2. **Right-click** Resonance Focus → school selection menu (Elemental / Mental / Organic / Necromancy)
-3. HUD shows Ψ (purple) and Φ (blue) bars at bottom-left
-4. **R** — cast selected spell | **X** — spell book
-5. `/effecoria debug` — stats in chat
-6. `/effecoria reschool elemental` — switch school without recreating world
-7. **Creative mode:** Φ shows ∞, casts are free, Ψ stays full (toggle `creative_god_mode` in config)
-8. `/effecoria cast effecoria:fire_burst` — direct cast (cheat sheet)
+1. **Resonance Focus** (Effecoria creative tab) → right-click → pick a school (7 schools, including Seals)
+2. First join also opens school select if not initiated; you get a **Magic Primer**
+3. HUD: **Ψ** (purple) and **Φ** (blue) bottom-left; breathing % after initiation
+4. **Hold X** — Resonance Hub (pick spell / left node = breathing drill). **Hold R** — charge cast, release to fire
+5. Hungry or drowning → Orkanum strain (weaker regen / soft cast power). Eat and surface
+6. Craft **Essonite Dust** → **Phi Cell** / upgrade Focus; ore generates underground; cells also in structure chests
+7. Seals school: look at a block, **G** — word editor
+8. Testers: `/effecoria debug`, `/effecoria reschool <school>`, `/effecoria max [school]`
+9. Creative: Φ ∞ / free casts when `creative_god_mode` is on (config)
+
+Known issues: [docs/monetization/KNOWN_ISSUES.md](docs/monetization/KNOWN_ISSUES.md) · Funnel gate: [STAGE_I_FUNNEL.md](docs/monetization/STAGE_I_FUNNEL.md)
 
 ## Project layout
 
@@ -41,7 +44,8 @@ src/main/java/com/effecoria/
   content/          Blocks, items, tabs
 
 src/main/resources/data/effecoria/spells/   MVP spell JSON (phase 1 loader)
-docs/                                       Design & architecture
+addons/school-codex/                        Paid DLC scaffold (drafts only)
+docs/                                       Design, architecture, monetization
 src/test/java/                              Unit tests (optional, WIP)
 ```
 
@@ -56,6 +60,7 @@ src/test/java/                              Unit tests (optional, WIP)
 | [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Guide for collaborators |
 | [docs/BALANCE.md](docs/BALANCE.md) | Starting balance numbers |
 | [docs/ART_BRIEF.md](docs/ART_BRIEF.md) | Texture/particle brief |
+| [docs/monetization/](docs/monetization/README.md) | Free core + Boosty/Patreon + server + DLC playbook |
 
 ## Tests
 

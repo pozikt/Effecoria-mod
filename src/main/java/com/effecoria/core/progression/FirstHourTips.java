@@ -60,9 +60,7 @@ public final class FirstHourTips {
     public static void onInitiated(ServerPlayer player, MagicSchool school) {
         givePrimer(player);
         tryShow(player, Tip.INITIATED);
-        if (school == MagicSchool.SEALS) {
-            tryShow(player, Tip.SEALS);
-        }
+        // SEALS tip waits for first successful program apply — avoids overwriting INITIATED.
     }
 
     public static void givePrimer(ServerPlayer player) {

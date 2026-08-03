@@ -165,7 +165,8 @@ If choosing a single slice for the next implementation session:
 14. Phase **D4** seal conflicts + inspect HUD — ✅ done.
 15. Magic **presentation** (Primer guide + first-hour tips + hub/HUD clarity) — ✅ done.
 16. Phase **E** breathing/body (air/hunger → Orkanum, soft cast scale, HUD, train rate-limit, tip) — ✅ done.
-17. **Next:** Stage I exit polish (playtest funnel), or intentional start of Stage II environment.
+17. Stage I **exit polish** (tip sequencing, seal tip, funnel/known-issues docs) — ✅ done.
+18. **Next:** package Demo 1–3 builds + dedicated-server smoke; or intentional Stage II environment.
 
 ---
 

@@ -779,6 +779,9 @@ public final class ModNetworking {
                     player.displayClientMessage(
                             Component.translatable("message.effecoria.seal.apply_failed." + status.name().toLowerCase()),
                             true);
+                } else {
+                    com.effecoria.core.progression.FirstHourTips.tryShow(
+                            player, com.effecoria.core.progression.FirstHourTips.Tip.SEALS);
                 }
             });
         }
@@ -994,10 +997,16 @@ public final class ModNetworking {
                 if (!(context.player() instanceof ServerPlayer player)) {
                     return;
                 }
-                com.effecoria.core.progression.FirstHourTips.tryShow(
-                        player, com.effecoria.core.progression.FirstHourTips.Tip.OPEN_HUB);
-                com.effecoria.core.progression.FirstHourTips.tryShow(
-                        player, com.effecoria.core.progression.FirstHourTips.Tip.BREATHING);
+                // One tip per open — avoid action-bar overwrite of OPEN_HUB by BREATHING.
+                PlayerPsiData data = PsiHelper.get(player);
+                if (!com.effecoria.core.progression.FirstHourTips.hasSeen(
+                        data, com.effecoria.core.progression.FirstHourTips.Tip.OPEN_HUB)) {
+                    com.effecoria.core.progression.FirstHourTips.tryShow(
+                            player, com.effecoria.core.progression.FirstHourTips.Tip.OPEN_HUB);
+                } else {
+                    com.effecoria.core.progression.FirstHourTips.tryShow(
+                            player, com.effecoria.core.progression.FirstHourTips.Tip.BREATHING);
+                }
             });
         }
     }

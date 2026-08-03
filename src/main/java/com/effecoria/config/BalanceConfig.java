@@ -144,7 +144,7 @@ public final class BalanceConfig {
 
     public static final ModConfigSpec.IntValue BREATHING_TRAIN_FATIGUE_MS = BUILDER
             .comment("Real-time fatigue after miss limit (ms) — blocks retraining and cuts regen")
-            .defineInRange("breathing_train_fatigue_ms", 300_000, 0, 3_600_000);
+            .defineInRange("breathing_train_fatigue_ms", 120_000, 0, 3_600_000);
 
     public static final ModConfigSpec.DoubleValue BREATHING_TRAIN_FATIGUE_REGEN_MULT = BUILDER
             .comment("Ψ regen multiplier while breathing-train fatigue is active")
