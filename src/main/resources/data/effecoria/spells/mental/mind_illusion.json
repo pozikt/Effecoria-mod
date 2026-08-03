@@ -2,16 +2,16 @@
   "id": "effecoria:mind_illusion",
   "school": "mental",
   "frequency_hz": 11.0,
-  "base_cost": 14,
+  "base_cost": 16,
   "power_multiplier": 1.05,
-  "side_entropy": 0.08,
+  "side_entropy": 0.1,
   "min_phi": 0.28,
   "min_mastery": 0.35,
   "radial_category": "utility",
   "effects": [
     {
       "type": "effecoria:mind_illusion",
-      "duration_ticks": 160,
+      "duration_ticks": 240,
       "range": 14,
       "mirage_pulse": 2.5
     }

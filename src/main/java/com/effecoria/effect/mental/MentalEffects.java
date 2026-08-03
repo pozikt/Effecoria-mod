@@ -636,7 +636,7 @@ public final class MentalEffects {
 
     /** II.5 Sensory illusion — victim body stays; soul walks a private mirage. */
     public static void mindIllusion(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
-        int duration = scaledTicks(effect, power, "duration_ticks", 160);
+        int duration = scaledTicks(effect, power, "duration_ticks", 240);
         ServerLevel level = caster.serverLevel();
         if (target != null && gateAfflict(caster, target, duration, false)) {
             if (target instanceof ServerPlayer victim) {

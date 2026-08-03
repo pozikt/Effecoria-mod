@@ -1,66 +1,86 @@
 package com.effecoria.effect.mental;
 
+import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.network.ModNetworking;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Per-victim illusory terrain via client-only block updates.
- * Real body stays as an armor-stand shell at the cast point; the player (soul) walks the mirage.
+ * Procedural bone-and-blood mirage plains (client-only blocks).
+ * Body shell stays in waking; the soul walks the false realm under a red sky.
  */
 public final class MirageWorldService {
     public static final String BODY_TAG = "effecoria:mirage_body";
 
     private static final Map<UUID, Session> SESSIONS = new ConcurrentHashMap<>();
-    private static final int RADIUS = 4;
-    private static final int HEIGHT = 5;
-    private static final int RESYNC_INTERVAL = 40;
+    /** Flat plains radius — large enough to feel like another world. */
+    private static final int RADIUS = 18;
+    /** Clear air above the plains so real terrain does not poke through. */
+    private static final int AIR_CLEAR = 14;
+    private static final int PUSH_PER_TICK = 220;
+    private static final int RESYNC_INTERVAL = 100;
+    private static final int SPEAR_MIN_INTERVAL = 45;
+    private static final int SPEAR_MAX_INTERVAL = 95;
+    private static final int SPEAR_LENGTH_MIN = 22;
+    private static final int SPEAR_LENGTH_MAX = 36;
 
     private MirageWorldService() {}
 
     public static void start(ServerPlayer victim, ServerPlayer caster, int durationTicks, float pulseDamage) {
         endQuiet(victim);
-        float maxHp = Math.max(8f, victim.getMaxHealth());
+        float maxHp = Math.max(12f, victim.getMaxHealth() * 1.25f);
         BlockPos origin = victim.blockPosition().immutable();
-        Vec3 bodyPos = victim.position();
-        float yRot = victim.getYRot();
-        float xRot = victim.getXRot();
+        int seed = Long.hashCode(victim.getUUID().getMostSignificantBits()
+                ^ (victim.level().getGameTime() * 31L)
+                ^ caster.getUUID().getLeastSignificantBits());
 
         Session session = new Session(
                 victim.getUUID(),
                 caster.getUUID(),
-                victim.level().getGameTime() + Math.max(80, durationTicks),
+                victim.level().getGameTime() + Math.max(120, durationTicks),
                 maxHp,
                 maxHp,
                 Mth.clamp(pulseDamage, 0.5f, 6f),
                 origin,
-                bodyPos,
-                yRot,
-                xRot);
-        buildChamber(victim.serverLevel(), session, victim.getRandom());
+                victim.position(),
+                victim.getYRot(),
+                victim.getXRot(),
+                seed);
+        buildPlains(session, RandomSource.create(seed));
         session.bodyId = spawnBodyShell(victim, session);
         enterSoul(victim);
+        BreathDebuffs.apply(victim, new MobEffectInstance(MobEffects.CONFUSION, 80, 1, false, false, true));
         SESSIONS.put(victim.getUUID(), session);
-        pushAll(victim, session);
+        enqueueAll(session);
         PacketDistributor.sendToPlayer(
                 victim, new ModNetworking.MirageStartPayload(durationTicks, maxHp, 1f));
         victim.displayClientMessage(Component.translatable("message.effecoria.mental.mirage_enter"), true);
@@ -75,7 +95,7 @@ public final class MirageWorldService {
 
     public static boolean isMirageBlock(ServerPlayer player, BlockPos pos) {
         Session s = SESSIONS.get(player.getUUID());
-        return s != null && s.fakes.containsKey(pos.immutable());
+        return s != null && visibleState(s, pos.immutable()) != null;
     }
 
     public static void resend(ServerPlayer player, BlockPos pos) {
@@ -83,7 +103,7 @@ public final class MirageWorldService {
         if (s == null) {
             return;
         }
-        BlockState fake = s.fakes.get(pos.immutable());
+        BlockState fake = visibleState(s, pos.immutable());
         if (fake != null) {
             player.connection.send(new ClientboundBlockUpdatePacket(pos, fake));
         }
@@ -94,20 +114,22 @@ public final class MirageWorldService {
         if (session == null) {
             return;
         }
-        if (!(player.level() instanceof ServerLevel) || player.level().getGameTime() >= session.endTick) {
+        if (!(player.level() instanceof ServerLevel level) || player.level().getGameTime() >= session.endTick) {
             return;
         }
-        // Soul ignores real collision; mirage solids are applied below.
         player.noPhysics = true;
         player.setInvisible(true);
+        drainPushQueue(player, session);
         applyPhysics(player, session);
-        keepBodyShell(player.serverLevel(), session);
-        session.ticksAlive++;
-        if (session.ticksAlive % RESYNC_INTERVAL == 0) {
-            pushAll(player, session);
+        keepBodyShell(level, session);
+        // Body nausea — the waking shell "reacts" to the soul's vision.
+        if (session.ticksAlive % 35 == 0) {
+            BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.CONFUSION, 70, 1, false, false, true));
         }
-        if (session.ticksAlive % 10 == 0) {
-            tickHazards(player, session);
+        tickSpears(player, session);
+        session.ticksAlive++;
+        if (session.ticksAlive % RESYNC_INTERVAL == 0 && session.pushQueue.isEmpty()) {
+            enqueueAll(session);
         }
     }
 
@@ -130,7 +152,6 @@ public final class MirageWorldService {
                 }
                 continue;
             }
-            // Only the victim's dimension owns expiry — never tear down from other dims' ticks.
             if (victim.level() != level) {
                 continue;
             }
@@ -172,9 +193,18 @@ public final class MirageWorldService {
     }
 
     private static void cleanup(ServerPlayer victim, Session session, boolean returnToBody) {
-        restoreBlocks(victim, session);
+        // Restore overlays then terrain.
+        if (victim.level() instanceof ServerLevel level) {
+            for (BlockPos pos : session.overlays.keySet()) {
+                victim.connection.send(new ClientboundBlockUpdatePacket(pos, level.getBlockState(pos)));
+            }
+            for (BlockPos pos : session.terrain.keySet()) {
+                victim.connection.send(new ClientboundBlockUpdatePacket(pos, level.getBlockState(pos)));
+            }
+        }
         discardBody(victim.serverLevel(), session);
         exitSoul(victim);
+        victim.removeEffect(MobEffects.CONFUSION);
         if (returnToBody) {
             victim.teleportTo(session.bodyPos.x, session.bodyPos.y, session.bodyPos.z);
             victim.setYRot(session.bodyYRot);
@@ -243,122 +273,352 @@ public final class MirageWorldService {
         session.bodyId = null;
     }
 
-    private static void tickHazards(ServerPlayer victim, Session session) {
-        BlockPos feet = victim.blockPosition();
-        BlockPos below = feet.below();
-        boolean hazard = isHazard(session.fakes.get(feet)) || isHazard(session.fakes.get(below));
-        if (!hazard && session.ticksAlive % 40 != 0) {
-            return;
-        }
-        float amount = hazard ? session.pulseDamage : session.pulseDamage * 0.35f;
-        session.illusoryHp = Math.max(0f, session.illusoryHp - amount);
-        PacketDistributor.sendToPlayer(
-                victim,
-                new ModNetworking.MirageHurtPayload(amount, session.illusoryHp, session.illusoryMaxHp));
-    }
+    // --- Procedural plains -------------------------------------------------
 
-    private static boolean isHazard(BlockState state) {
-        return state != null
-                && (state.is(Blocks.MAGMA_BLOCK)
-                        || state.is(Blocks.SOUL_FIRE)
-                        || state.is(Blocks.FIRE)
-                        || state.is(Blocks.LAVA));
-    }
-
-    private static void buildChamber(ServerLevel level, Session session, RandomSource random) {
+    private static void buildPlains(Session session, RandomSource random) {
         BlockPos origin = session.origin;
+        int baseY = origin.getY() - 1;
+        int seed = session.seed;
+
         for (int dx = -RADIUS; dx <= RADIUS; dx++) {
             for (int dz = -RADIUS; dz <= RADIUS; dz++) {
-                for (int dy = -1; dy <= HEIGHT; dy++) {
-                    BlockPos pos = origin.offset(dx, dy, dz);
-                    boolean shell = Math.abs(dx) == RADIUS
-                            || Math.abs(dz) == RADIUS
-                            || dy == -1
-                            || dy == HEIGHT;
-                    boolean pillar = (Math.abs(dx) == 2 && Math.abs(dz) == 2) && dy >= 0 && dy < HEIGHT;
-                    BlockState real = level.getBlockState(pos);
+                if (dx * dx + dz * dz > RADIUS * RADIUS) {
+                    continue;
+                }
+                int wx = origin.getX() + dx;
+                int wz = origin.getZ() + dz;
+                float blood = fbm(wx / 11f, wz / 11f, seed);
+                float river = Math.abs(fbm(wx / 17f, wz / 17f, seed + 19) - 0.5f);
+                float bump = fbm(wx / 9f, wz / 9f, seed + 3);
+                int groundY = baseY + (bump > 0.72f ? 1 : 0);
 
-                    if (shell) {
-                        putFake(session, pos, pickShell(dy, dx, dz, random));
-                    } else if (pillar) {
-                        putFake(session, pos, Blocks.PURPUR_PILLAR.defaultBlockState());
-                    } else if (!real.isAir() && !real.canBeReplaced()) {
-                        putFake(session, pos, pickRetexture(random));
-                    } else if (dy == 0 && dx == 0 && dz == 0) {
-                        putFake(session, pos, Blocks.AIR.defaultBlockState());
-                        putFake(session, pos.above(), Blocks.AIR.defaultBlockState());
+                boolean isBlood = blood > 0.62f || river < 0.035f;
+                boolean puddle = !isBlood && blood > 0.54f && blood <= 0.62f;
+
+                // Subsoil
+                putTerrain(session, new BlockPos(wx, groundY - 1, wz), Blocks.NETHERRACK.defaultBlockState());
+                if (isBlood) {
+                    putTerrain(session, new BlockPos(wx, groundY, wz), bloodSurface(random, river < 0.035f));
+                    if (blood > 0.78f) {
+                        putTerrain(session, new BlockPos(wx, groundY + 1, wz), Blocks.RED_STAINED_GLASS.defaultBlockState());
                     }
+                } else if (puddle) {
+                    putTerrain(session, new BlockPos(wx, groundY, wz), Blocks.RED_CONCRETE.defaultBlockState());
+                } else {
+                    putTerrain(session, new BlockPos(wx, groundY, wz), boneSurface(random, bump));
+                }
+
+                // Clear real-world clutter above the plains.
+                for (int ay = 1; ay <= AIR_CLEAR; ay++) {
+                    int y = groundY + ay;
+                    if (isBlood && blood > 0.78f && ay == 1) {
+                        continue;
+                    }
+                    putTerrain(session, new BlockPos(wx, y, wz), Blocks.AIR.defaultBlockState());
+                }
+
+                if (dx == 0 && dz == 0) {
+                    // Safe landing pad under the soul.
+                    putTerrain(session, new BlockPos(wx, baseY, wz), Blocks.BONE_BLOCK.defaultBlockState()
+                            .setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y));
+                    putTerrain(session, new BlockPos(wx, baseY + 1, wz), Blocks.AIR.defaultBlockState());
+                    putTerrain(session, new BlockPos(wx, baseY + 2, wz), Blocks.AIR.defaultBlockState());
                 }
             }
         }
-        putFake(session, origin.offset(RADIUS - 1, HEIGHT, RADIUS - 1), Blocks.SHROOMLIGHT.defaultBlockState());
-        putFake(session, origin.offset(-(RADIUS - 1), HEIGHT, RADIUS - 1), Blocks.SHROOMLIGHT.defaultBlockState());
-        putFake(session, origin.offset(RADIUS - 1, HEIGHT, -(RADIUS - 1)), Blocks.SHROOMLIGHT.defaultBlockState());
-        putFake(session, origin.offset(-(RADIUS - 1), HEIGHT, -(RADIUS - 1)), Blocks.SHROOMLIGHT.defaultBlockState());
+
+        placeArches(session, random, baseY);
+        placeSkulls(session, random, baseY);
+        placeRibs(session, random, baseY);
+        placeBoneSpurs(session, random, baseY);
     }
 
-    private static BlockState pickShell(int dy, int dx, int dz, RandomSource random) {
-        if (dy == -1) {
-            // Safe pad under spawn — no instant magma under the soul.
-            if (dx == 0 && dz == 0) {
-                return Blocks.AMETHYST_BLOCK.defaultBlockState();
-            }
-            if (((dx + dz) & 3) == 0) {
-                return Blocks.MAGMA_BLOCK.defaultBlockState();
-            }
-            return random.nextBoolean()
-                    ? Blocks.POLISHED_BLACKSTONE.defaultBlockState()
-                    : Blocks.AMETHYST_BLOCK.defaultBlockState();
+    private static BlockState bloodSurface(RandomSource random, boolean river) {
+        if (river) {
+            return Blocks.RED_CONCRETE.defaultBlockState();
         }
-        if (dy == HEIGHT) {
-            return Blocks.BLACKSTONE.defaultBlockState();
-        }
-        if (random.nextFloat() < 0.18f) {
-            return Blocks.CRYING_OBSIDIAN.defaultBlockState();
-        }
-        if (random.nextFloat() < 0.22f) {
-            return Blocks.SCULK.defaultBlockState();
-        }
-        return Blocks.DEEPSLATE_BRICKS.defaultBlockState();
-    }
-
-    private static BlockState pickRetexture(RandomSource random) {
         float r = random.nextFloat();
-        if (r < 0.35f) {
-            return Blocks.SCULK.defaultBlockState();
+        if (r < 0.45f) {
+            return Blocks.RED_CONCRETE.defaultBlockState();
         }
-        if (r < 0.6f) {
-            return Blocks.CRYING_OBSIDIAN.defaultBlockState();
+        if (r < 0.7f) {
+            return Blocks.NETHER_WART_BLOCK.defaultBlockState();
         }
-        if (r < 0.8f) {
-            return Blocks.PURPUR_BLOCK.defaultBlockState();
+        if (r < 0.88f) {
+            return Blocks.CRIMSON_NYLIUM.defaultBlockState();
         }
-        return Blocks.BLACKSTONE.defaultBlockState();
+        return Blocks.NETHERRACK.defaultBlockState();
     }
 
-    private static void putFake(Session session, BlockPos pos, BlockState state) {
-        session.fakes.put(pos.immutable(), state);
+    private static BlockState boneSurface(RandomSource random, float bump) {
+        float r = random.nextFloat();
+        if (bump > 0.66f && r < 0.55f) {
+            return Blocks.BONE_BLOCK.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y);
+        }
+        if (r < 0.4f) {
+            return Blocks.BONE_BLOCK.defaultBlockState()
+                    .setValue(RotatedPillarBlock.AXIS, random.nextBoolean() ? Direction.Axis.X : Direction.Axis.Z);
+        }
+        if (r < 0.7f) {
+            return Blocks.CALCITE.defaultBlockState();
+        }
+        if (r < 0.88f) {
+            return Blocks.WHITE_TERRACOTTA.defaultBlockState();
+        }
+        return Blocks.SMOOTH_QUARTZ.defaultBlockState();
     }
 
-    private static void pushAll(ServerPlayer victim, Session session) {
-        for (Map.Entry<BlockPos, BlockState> e : session.fakes.entrySet()) {
-            victim.connection.send(new ClientboundBlockUpdatePacket(e.getKey(), e.getValue()));
+    private static void placeArches(Session session, RandomSource random, int baseY) {
+        int count = 5 + random.nextInt(4);
+        for (int i = 0; i < count; i++) {
+            int dx = random.nextInt(RADIUS * 2 + 1) - RADIUS;
+            int dz = random.nextInt(RADIUS * 2 + 1) - RADIUS;
+            if (dx * dx + dz * dz > (RADIUS - 3) * (RADIUS - 3) || (Math.abs(dx) < 2 && Math.abs(dz) < 2)) {
+                continue;
+            }
+            boolean alongX = random.nextBoolean();
+            int span = 3 + random.nextInt(3);
+            int height = 4 + random.nextInt(3);
+            int ox = session.origin.getX() + dx;
+            int oz = session.origin.getZ() + dz;
+            BlockState boneY = Blocks.BONE_BLOCK.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y);
+            BlockState boneBeam = Blocks.BONE_BLOCK.defaultBlockState()
+                    .setValue(RotatedPillarBlock.AXIS, alongX ? Direction.Axis.X : Direction.Axis.Z);
+            for (int h = 1; h <= height; h++) {
+                putTerrain(session, new BlockPos(ox, baseY + h, oz), boneY);
+                putTerrain(
+                        session,
+                        new BlockPos(
+                                alongX ? ox + span : ox,
+                                baseY + h,
+                                alongX ? oz : oz + span),
+                        boneY);
+            }
+            for (int s = 0; s <= span; s++) {
+                putTerrain(
+                        session,
+                        new BlockPos(
+                                alongX ? ox + s : ox,
+                                baseY + height,
+                                alongX ? oz : oz + s),
+                        boneBeam);
+            }
         }
     }
 
-    private static void restoreBlocks(ServerPlayer victim, Session session) {
-        if (!(victim.level() instanceof ServerLevel level)) {
-            return;
+    private static void placeSkulls(Session session, RandomSource random, int baseY) {
+        int count = 8 + random.nextInt(6);
+        for (int i = 0; i < count; i++) {
+            int dx = random.nextInt(RADIUS * 2 + 1) - RADIUS;
+            int dz = random.nextInt(RADIUS * 2 + 1) - RADIUS;
+            if (dx * dx + dz * dz > (RADIUS - 2) * (RADIUS - 2)) {
+                continue;
+            }
+            int x = session.origin.getX() + dx;
+            int z = session.origin.getZ() + dz;
+            BlockState skull = (random.nextFloat() < 0.35f
+                            ? Blocks.WITHER_SKELETON_SKULL
+                            : Blocks.SKELETON_SKULL)
+                    .defaultBlockState()
+                    .setValue(SkullBlock.ROTATION, random.nextInt(16));
+            putTerrain(session, new BlockPos(x, baseY + 1, z), skull);
         }
-        for (BlockPos pos : session.fakes.keySet()) {
+    }
+
+    private static void placeRibs(Session session, RandomSource random, int baseY) {
+        int count = 3 + random.nextInt(3);
+        for (int i = 0; i < count; i++) {
+            int dx = random.nextInt(RADIUS * 2 + 1) - RADIUS;
+            int dz = random.nextInt(RADIUS * 2 + 1) - RADIUS;
+            if (dx * dx + dz * dz > (RADIUS - 4) * (RADIUS - 4)) {
+                continue;
+            }
+            int ox = session.origin.getX() + dx;
+            int oz = session.origin.getZ() + dz;
+            boolean alongX = random.nextBoolean();
+            BlockState bone = Blocks.BONE_BLOCK.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y);
+            for (int r = 0; r < 5; r++) {
+                int h = 2 + (r < 3 ? r : 5 - r);
+                int px = alongX ? ox + r : ox;
+                int pz = alongX ? oz : oz + r;
+                for (int y = 1; y <= h; y++) {
+                    putTerrain(session, new BlockPos(px, baseY + y, pz), bone);
+                }
+            }
+        }
+    }
+
+    private static void placeBoneSpurs(Session session, RandomSource random, int baseY) {
+        int count = 12 + random.nextInt(10);
+        for (int i = 0; i < count; i++) {
+            int dx = random.nextInt(RADIUS * 2 + 1) - RADIUS;
+            int dz = random.nextInt(RADIUS * 2 + 1) - RADIUS;
+            if (dx * dx + dz * dz > (RADIUS - 1) * (RADIUS - 1)) {
+                continue;
+            }
+            int h = 2 + random.nextInt(4);
+            int x = session.origin.getX() + dx;
+            int z = session.origin.getZ() + dz;
+            BlockState bone = Blocks.BONE_BLOCK.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y);
+            for (int y = 1; y <= h; y++) {
+                putTerrain(session, new BlockPos(x, baseY + y, z), bone);
+            }
+        }
+    }
+
+    private static void putTerrain(Session session, BlockPos pos, BlockState state) {
+        session.terrain.put(pos.immutable(), state);
+    }
+
+    private static BlockState visibleState(Session session, BlockPos pos) {
+        BlockState overlay = session.overlays.get(pos);
+        if (overlay != null) {
+            return overlay;
+        }
+        return session.terrain.get(pos);
+    }
+
+    private static void enqueueAll(Session session) {
+        session.pushQueue.clear();
+        for (BlockPos pos : session.terrain.keySet()) {
+            session.pushQueue.addLast(pos);
+        }
+        for (BlockPos pos : session.overlays.keySet()) {
+            session.pushQueue.addLast(pos);
+        }
+    }
+
+    private static void drainPushQueue(ServerPlayer victim, Session session) {
+        int n = 0;
+        while (n < PUSH_PER_TICK && !session.pushQueue.isEmpty()) {
+            BlockPos pos = session.pushQueue.removeFirst();
+            BlockState state = visibleState(session, pos);
+            if (state != null) {
+                victim.connection.send(new ClientboundBlockUpdatePacket(pos, state));
+            }
+            n++;
+        }
+    }
+
+    private static void sendOne(ServerPlayer victim, Session session, BlockPos pos) {
+        BlockState state = visibleState(session, pos);
+        if (state != null) {
+            victim.connection.send(new ClientboundBlockUpdatePacket(pos, state));
+        } else if (victim.level() instanceof ServerLevel level) {
             victim.connection.send(new ClientboundBlockUpdatePacket(pos, level.getBlockState(pos)));
         }
     }
 
+    // --- Light spears ------------------------------------------------------
+
+    private static void tickSpears(ServerPlayer victim, Session session) {
+        // Advance active spears.
+        Iterator<LightSpear> it = session.spears.iterator();
+        while (it.hasNext()) {
+            LightSpear spear = it.next();
+            if (!spear.impacted) {
+                int grow = 3;
+                for (int i = 0; i < grow && spear.filled < spear.length; i++) {
+                    int y = spear.topY - spear.filled;
+                    BlockPos pos = new BlockPos(spear.x, y, spear.z);
+                    session.overlays.put(pos.immutable(), spearBlock(spear.filled));
+                    sendOne(victim, session, pos);
+                    spear.filled++;
+                }
+                if (spear.filled >= spear.length) {
+                    spear.impacted = true;
+                    spear.linger = 28;
+                    strikeMoral(victim, session, spear);
+                }
+            } else {
+                spear.linger--;
+                if (spear.linger <= 0) {
+                    for (int i = 0; i < spear.length; i++) {
+                        BlockPos pos = new BlockPos(spear.x, spear.topY - i, spear.z).immutable();
+                        session.overlays.remove(pos);
+                        sendOne(victim, session, pos);
+                    }
+                    it.remove();
+                }
+            }
+        }
+
+        if (session.nextSpearAt < 0) {
+            session.nextSpearAt = session.ticksAlive
+                    + SPEAR_MIN_INTERVAL
+                    + victim.getRandom().nextInt(SPEAR_MAX_INTERVAL - SPEAR_MIN_INTERVAL + 1);
+        }
+        if (session.ticksAlive < session.nextSpearAt || !session.spears.isEmpty()) {
+            return;
+        }
+        spawnSpear(victim, session);
+        session.nextSpearAt = session.ticksAlive
+                + SPEAR_MIN_INTERVAL
+                + victim.getRandom().nextInt(SPEAR_MAX_INTERVAL - SPEAR_MIN_INTERVAL + 1);
+    }
+
+    private static void spawnSpear(ServerPlayer victim, Session session) {
+        RandomSource random = victim.getRandom();
+        int tx = victim.blockPosition().getX() + random.nextInt(5) - 2;
+        int tz = victim.blockPosition().getZ() + random.nextInt(5) - 2;
+        // Bias toward the player — often a near-hit or direct hit.
+        if (random.nextFloat() < 0.55f) {
+            tx = victim.blockPosition().getX();
+            tz = victim.blockPosition().getZ();
+        }
+        int length = SPEAR_LENGTH_MIN + random.nextInt(SPEAR_LENGTH_MAX - SPEAR_LENGTH_MIN + 1);
+        int groundY = session.origin.getY() - 1;
+        int tipY = groundY + 1;
+        int topY = tipY + length - 1;
+        LightSpear spear = new LightSpear(tx, tz, topY, length);
+        session.spears.add(spear);
+        victim.displayClientMessage(Component.translatable("message.effecoria.mental.mirage_spear_fall"), true);
+        victim.serverLevel().playSound(
+                null,
+                victim.blockPosition(),
+                SoundEvents.LIGHTNING_BOLT_THUNDER,
+                SoundSource.PLAYERS,
+                0.45f,
+                1.6f);
+    }
+
+    private static BlockState spearBlock(int indexFromTop) {
+        if (indexFromTop < 2) {
+            return Blocks.END_ROD.defaultBlockState();
+        }
+        if (indexFromTop % 5 == 0) {
+            return Blocks.OCHRE_FROGLIGHT.defaultBlockState();
+        }
+        return Blocks.END_ROD.defaultBlockState();
+    }
+
+    private static void strikeMoral(ServerPlayer victim, Session session, LightSpear spear) {
+        float amount = 7f + session.pulseDamage * 1.8f;
+        // Direct hit if spear column intersects player column.
+        if (victim.blockPosition().getX() == spear.x && victim.blockPosition().getZ() == spear.z) {
+            amount *= 1.65f;
+        }
+        session.illusoryHp = Math.max(0f, session.illusoryHp - amount);
+        BreathDebuffs.apply(victim, new MobEffectInstance(MobEffects.CONFUSION, 100, 2, false, false, true));
+        PacketDistributor.sendToPlayer(
+                victim,
+                new ModNetworking.MirageHurtPayload(amount, session.illusoryHp, session.illusoryMaxHp));
+        victim.displayClientMessage(Component.translatable("message.effecoria.mental.mirage_spear_hit"), true);
+        victim.serverLevel().playSound(
+                null,
+                victim.blockPosition(),
+                SoundEvents.WARDEN_SONIC_BOOM,
+                SoundSource.PLAYERS,
+                0.55f,
+                1.35f);
+    }
+
+    // --- Physics -----------------------------------------------------------
+
     private static void applyPhysics(ServerPlayer player, Session session) {
         BlockPos below = BlockPos.containing(player.getX(), player.getY() - 0.02, player.getZ());
-        BlockState floor = session.fakes.get(below.immutable());
-        if (floor != null && blocksMotion(floor)) {
+        BlockState floor = visibleState(session, below.immutable());
+        if (floor != null && floor.blocksMotion()) {
             double top = below.getY() + 1.0;
             if (player.getY() >= top - 0.65 && player.getY() <= top + 0.08 && player.getDeltaMovement().y <= 0.08) {
                 player.setPos(player.getX(), top, player.getZ());
@@ -373,16 +633,12 @@ public final class MirageWorldService {
         BlockPos min = BlockPos.containing(box.minX - 0.05, box.minY - 0.05, box.minZ - 0.05);
         BlockPos max = BlockPos.containing(box.maxX + 0.05, box.maxY + 0.05, box.maxZ + 0.05);
         for (BlockPos cursor : BlockPos.betweenClosed(min, max)) {
-            BlockState fake = session.fakes.get(cursor.immutable());
-            if (fake == null || !blocksMotion(fake)) {
+            BlockState fake = visibleState(session, cursor.immutable());
+            if (fake == null || !fake.blocksMotion()) {
                 continue;
             }
             resolvePenetration(player, cursor);
         }
-    }
-
-    private static boolean blocksMotion(BlockState state) {
-        return state.blocksMotion();
     }
 
     private static void resolvePenetration(ServerPlayer player, BlockPos pos) {
@@ -431,6 +687,51 @@ public final class MirageWorldService {
         player.hasImpulse = true;
     }
 
+    // --- Noise -------------------------------------------------------------
+
+    private static float hash2(int x, int z, int seed) {
+        int n = x * 374761393 + z * 668265263 + seed * 1274126177;
+        n = (n ^ (n >> 13)) * 1274126177;
+        return ((n ^ (n >> 16)) & 0xffff) / 65535f;
+    }
+
+    private static float smoothNoise(float x, float z, int seed) {
+        int x0 = Mth.floor(x);
+        int z0 = Mth.floor(z);
+        float fx = x - x0;
+        float fz = z - z0;
+        fx = fx * fx * (3f - 2f * fx);
+        fz = fz * fz * (3f - 2f * fz);
+        float a = hash2(x0, z0, seed);
+        float b = hash2(x0 + 1, z0, seed);
+        float c = hash2(x0, z0 + 1, seed);
+        float d = hash2(x0 + 1, z0 + 1, seed);
+        return Mth.lerp(fz, Mth.lerp(fx, a, b), Mth.lerp(fx, c, d));
+    }
+
+    private static float fbm(float x, float z, int seed) {
+        return smoothNoise(x, z, seed) * 0.5f
+                + smoothNoise(x * 2f, z * 2f, seed + 1) * 0.25f
+                + smoothNoise(x * 4f, z * 4f, seed + 2) * 0.125f;
+    }
+
+    private static final class LightSpear {
+        final int x;
+        final int z;
+        final int topY;
+        final int length;
+        int filled;
+        boolean impacted;
+        int linger;
+
+        LightSpear(int x, int z, int topY, int length) {
+            this.x = x;
+            this.z = z;
+            this.topY = topY;
+            this.length = length;
+        }
+    }
+
     private static final class Session {
         final UUID victimId;
         final UUID casterId;
@@ -442,9 +743,14 @@ public final class MirageWorldService {
         final Vec3 bodyPos;
         final float bodyYRot;
         final float bodyXRot;
-        final Map<BlockPos, BlockState> fakes = new HashMap<>();
+        final int seed;
+        final Map<BlockPos, BlockState> terrain = new HashMap<>();
+        final Map<BlockPos, BlockState> overlays = new HashMap<>();
+        final ArrayDeque<BlockPos> pushQueue = new ArrayDeque<>();
+        final List<LightSpear> spears = new ArrayList<>();
         UUID bodyId;
         int ticksAlive;
+        int nextSpearAt = -1;
 
         Session(
                 UUID victimId,
@@ -456,7 +762,8 @@ public final class MirageWorldService {
                 BlockPos origin,
                 Vec3 bodyPos,
                 float bodyYRot,
-                float bodyXRot) {
+                float bodyXRot,
+                int seed) {
             this.victimId = victimId;
             this.casterId = casterId;
             this.endTick = endTick;
@@ -467,6 +774,7 @@ public final class MirageWorldService {
             this.bodyPos = bodyPos;
             this.bodyYRot = bodyYRot;
             this.bodyXRot = bodyXRot;
+            this.seed = seed;
         }
     }
 }
