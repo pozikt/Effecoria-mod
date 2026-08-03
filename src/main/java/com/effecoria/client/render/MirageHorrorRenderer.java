@@ -29,7 +29,12 @@ public class MirageHorrorRenderer extends GeoEntityRenderer<MirageHorrorEntity> 
             MultiBufferSource bufferSource,
             int packedLight) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || !entity.isBoundTo(mc.player.getUUID()) || !MirageClient.isActive()) {
+        if (mc.player == null) {
+            return;
+        }
+        // Preview models are for inspection; mirage horrors stay victim-only.
+        if (!entity.isPreview()
+                && (!entity.isBoundTo(mc.player.getUUID()) || !MirageClient.isActive())) {
             return;
         }
         poseStack.pushPose();

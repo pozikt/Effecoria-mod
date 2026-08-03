@@ -137,8 +137,9 @@ public final class MirageClient {
         if (!isActive()) {
             return;
         }
-        event.setNearPlaneDistance(0.5f);
-        event.setFarPlaneDistance(18f);
+        event.setNearPlaneDistance(1.0f);
+        // ~2 chunks of visibility; terrain still streams farther ahead into the fog.
+        event.setFarPlaneDistance(32f);
         event.setCanceled(true);
     }
 

@@ -1,5 +1,6 @@
 package com.effecoria.command;
 
+import com.effecoria.entity.MirageHorrorEntity;
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.magic.MagicSchool;
@@ -101,12 +102,15 @@ public final class EffecoriaCommands {
                         .then(Commands.argument("school", StringArgumentType.word())
                                 .suggests(SCHOOL_SUGGESTIONS)
                                 .executes(ctx -> maxMagic(
-                                        ctx.getSource(), StringArgumentType.getString(ctx, "school"))))));
+                                        ctx.getSource(), StringArgumentType.getString(ctx, "school")))))
+                .then(Commands.literal("horror")
+                        .requires(source -> source.hasPermission(2))
+                        .executes(ctx -> spawnHorrorPreview(ctx.getSource()))));
     }
 
     private static int help(CommandSourceStack source) {
         source.sendSuccess(() -> Component.literal(
-                "Effecoria: help | version | debug | initiate <school> | reschool <school> | cast <id> [self|@e] | spells | max [school] | set <stat> <value>"),
+                "Effecoria: help | version | debug | initiate <school> | reschool <school> | cast <id> [self|@e] | spells | max [school] | set <stat> <value> | horror"),
                 false);
         return 1;
     }
@@ -383,6 +387,18 @@ public final class EffecoriaCommands {
                     () -> Component.literal(spellId + " [" + spell.requiredSchool().getSerializedName() + "]"),
                     false));
         }
+        return 1;
+    }
+
+    /** Spawns a visible mirage-horror preview for model/animation inspection (op only). */
+    private static int spawnHorrorPreview(CommandSourceStack source) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        MirageHorrorEntity horror = MirageHorrorEntity.spawnPreview(player);
+        if (horror == null) {
+            source.sendFailure(Component.translatable("message.effecoria.horror_preview_failed"));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("message.effecoria.horror_preview"), true);
         return 1;
     }
 }

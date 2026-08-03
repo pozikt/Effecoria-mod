@@ -49,11 +49,13 @@ public final class MirageWorldService {
     private static final Map<UUID, Session> SESSIONS = new ConcurrentHashMap<>();
 
     private static final int CHUNK = 8;
-    /** Chunks kept generated around the soul (Chebyshev). */
-    private static final int VIEW_RANGE = 3;
+    /** Chunks always kept around the soul (Chebyshev) — matches short fog visibility. */
+    private static final int KEEP_RANGE = 2;
+    /** Extra mirage chunks generated along look/move direction. */
+    private static final int AHEAD_RANGE = 5;
     /** Chunks beyond this are restored to the real world. */
-    private static final int UNLOAD_RANGE = 5;
-    private static final int CHUNKS_PER_TICK = 2;
+    private static final int UNLOAD_RANGE = 7;
+    private static final int CHUNKS_PER_TICK = 3;
     private static final int AIR_CLEAR = 14;
     private static final int PUSH_PER_TICK = 260;
     private static final int RESYNC_INTERVAL = 80;
@@ -87,7 +89,7 @@ public final class MirageWorldService {
         // Seed a small landing ring; the rest streams as the soul walks.
         queueAround(session, origin.getX(), origin.getZ(), 1);
         flushPendingChunks(session, 9);
-        queueAround(session, origin.getX(), origin.getZ(), VIEW_RANGE);
+        queueAround(session, origin.getX(), origin.getZ(), KEEP_RANGE);
         session.bodyId = spawnBodyShell(victim, session);
         enterSoul(victim);
         BreathDebuffs.apply(victim, new MobEffectInstance(MobEffects.CONFUSION, 80, 1, false, false, true));
@@ -441,13 +443,35 @@ public final class MirageWorldService {
         if (session.ticksAlive < session.nextHorrorAt) {
             return;
         }
-        // Appear ahead of the soul's gaze — always in view for fear impact.
-        Vec3 look = victim.getLookAngle().normalize();
-        double dist = 9.0 + victim.getRandom().nextDouble() * 5.0;
-        double x = victim.getX() + look.x * dist + (victim.getRandom().nextDouble() - 0.5) * 3.0;
-        double z = victim.getZ() + look.z * dist + (victim.getRandom().nextDouble() - 0.5) * 3.0;
-        double y = MirageWorldService.findStandY(victim, x, z).orElse(session.origin.getY());
-        MirageHorrorEntity horror = MirageHorrorEntity.spawnFor(victim, x, y, z);
+        // Rise out of sight — behind or to the flank, never dead-ahead in the gaze.
+        Vec3 look = victim.getLookAngle();
+        Vec3 flatLook = new Vec3(look.x, 0, look.z);
+        if (flatLook.lengthSqr() < 1.0e-6) {
+            flatLook = new Vec3(0, 0, 1);
+        } else {
+            flatLook = flatLook.normalize();
+        }
+        Vec3 right = new Vec3(-flatLook.z, 0, flatLook.x);
+        RandomSource random = victim.getRandom();
+        Vec3 spawnDir;
+        if (random.nextFloat() < 0.6f) {
+            // Behind, with a slight lateral bias.
+            spawnDir = flatLook.scale(-1.0).add(right.scale((random.nextDouble() - 0.5) * 1.1));
+        } else {
+            // Strong flank, slightly to the rear.
+            double side = random.nextBoolean() ? 1.0 : -1.0;
+            spawnDir = right.scale(side).add(flatLook.scale(-0.35 + random.nextDouble() * 0.25));
+        }
+        if (spawnDir.lengthSqr() < 1.0e-6) {
+            spawnDir = flatLook.scale(-1.0);
+        } else {
+            spawnDir = spawnDir.normalize();
+        }
+        double dist = 12.0 + random.nextDouble() * 7.0;
+        double x = victim.getX() + spawnDir.x * dist;
+        double z = victim.getZ() + spawnDir.z * dist;
+        double y = findStandY(victim, x, z).orElse(session.origin.getY());
+        MirageHorrorEntity horror = MirageHorrorEntity.spawnEmerging(victim, x, y, z);
         if (horror != null) {
             session.horrorId = horror.getUUID();
             session.nextHorrorAt = session.ticksAlive + 160 + victim.getRandom().nextInt(80);
@@ -459,9 +483,42 @@ public final class MirageWorldService {
     private static void streamChunks(ServerPlayer player, Session session) {
         int px = player.blockPosition().getX();
         int pz = player.blockPosition().getZ();
-        queueAround(session, px, pz, VIEW_RANGE);
+        session.lastFocusCx = Math.floorDiv(px, CHUNK);
+        session.lastFocusCz = Math.floorDiv(pz, CHUNK);
+        queueAround(session, px, pz, KEEP_RANGE);
+        queueAhead(session, player, AHEAD_RANGE);
         flushPendingChunks(session, CHUNKS_PER_TICK);
         unloadFarChunks(player, session, px, pz);
+    }
+
+    /** Prefetch mirage terrain along look / move so the fog ahead already has ground. */
+    private static void queueAhead(Session session, ServerPlayer player, int aheadRange) {
+        Vec3 look = player.getLookAngle();
+        Vec3 move = player.getDeltaMovement();
+        Vec3 dir = look;
+        if (move.horizontalDistanceSqr() > 0.0025) {
+            dir = new Vec3(move.x, 0, move.z);
+        }
+        Vec3 flat = new Vec3(dir.x, 0, dir.z);
+        if (flat.lengthSqr() < 1.0e-6) {
+            return;
+        }
+        flat = flat.normalize();
+        int pcx = Math.floorDiv(player.blockPosition().getX(), CHUNK);
+        int pcz = Math.floorDiv(player.blockPosition().getZ(), CHUNK);
+        for (int step = 1; step <= aheadRange; step++) {
+            int cx = pcx + (int) Math.round(flat.x * step);
+            int cz = pcz + (int) Math.round(flat.z * step);
+            int width = step >= 4 ? 2 : 1;
+            for (int w = -width; w <= width; w++) {
+                int ox = (int) Math.round(-flat.z * w);
+                int oz = (int) Math.round(flat.x * w);
+                long key = chunkKey(cx + ox, cz + oz);
+                if (!session.generatedChunks.contains(key)) {
+                    session.pendingChunks.add(key);
+                }
+            }
+        }
     }
 
     private static void queueAround(Session session, int worldX, int worldZ, int range) {
@@ -481,13 +538,18 @@ public final class MirageWorldService {
         int done = 0;
         while (done < budget && !session.pendingChunks.isEmpty()) {
             long best = Long.MIN_VALUE;
-            int bestDist = Integer.MAX_VALUE;
+            int bestScore = Integer.MAX_VALUE;
             for (long key : session.pendingChunks) {
                 int cx = unpackCx(key);
                 int cz = unpackCz(key);
                 int dist = Math.max(Math.abs(cx - session.lastFocusCx), Math.abs(cz - session.lastFocusCz));
-                if (dist < bestDist) {
-                    bestDist = dist;
+                // Prefer nearby keep-disk, then anything already queued (ahead strip).
+                int score = dist * 10;
+                if (dist > KEEP_RANGE) {
+                    score += 3;
+                }
+                if (score < bestScore) {
+                    bestScore = score;
                     best = key;
                 }
             }
@@ -506,8 +568,6 @@ public final class MirageWorldService {
     private static void unloadFarChunks(ServerPlayer player, Session session, int worldX, int worldZ) {
         int pcx = Math.floorDiv(worldX, CHUNK);
         int pcz = Math.floorDiv(worldZ, CHUNK);
-        session.lastFocusCx = pcx;
-        session.lastFocusCz = pcz;
         List<Long> toUnload = new ArrayList<>();
         for (long key : session.generatedChunks) {
             int cx = unpackCx(key);
@@ -747,7 +807,7 @@ public final class MirageWorldService {
         for (long key : session.generatedChunks) {
             int cx = unpackCx(key);
             int cz = unpackCz(key);
-            if (Math.max(Math.abs(cx - pcx), Math.abs(cz - pcz)) > VIEW_RANGE) {
+            if (Math.max(Math.abs(cx - pcx), Math.abs(cz - pcz)) > KEEP_RANGE) {
                 continue;
             }
             List<BlockPos> positions = session.chunkBlocks.get(key);

@@ -8,6 +8,7 @@ import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.effect.mental.MirageWorldService;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -48,11 +49,14 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
     public static final int POSE_REACH = 2;
     public static final int POSE_PULL = 3;
     public static final int POSE_LUNGE = 4;
+    public static final int POSE_EMERGE = 5;
 
     private static final EntityDataAccessor<Optional<UUID>> DATA_VICTIM =
             SynchedEntityData.defineId(MirageHorrorEntity.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<Integer> DATA_POSE =
             SynchedEntityData.defineId(MirageHorrorEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> DATA_PREVIEW =
+            SynchedEntityData.defineId(MirageHorrorEntity.class, EntityDataSerializers.BOOLEAN);
 
     private static final RawAnimation IDLE =
             RawAnimation.begin().thenLoop("animation.mirage_horror.idle");
@@ -64,6 +68,8 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
             RawAnimation.begin().thenPlay("animation.mirage_horror.pull");
     private static final RawAnimation LUNGE =
             RawAnimation.begin().thenPlay("animation.mirage_horror.lunge");
+    private static final RawAnimation EMERGE =
+            RawAnimation.begin().thenPlay("animation.mirage_horror.emerge");
 
     private static final int REACH_TICKS = 12;
     private static final int PULL_TICKS = 12;
@@ -82,6 +88,7 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
     private static final double STRIKE_RANGE = 5.8;
     private static final int STUCK_CHECK_TICKS = 35;
     private static final double STUCK_MOVE_EPS = 0.45;
+    private static final int EMERGE_TICKS = 48;
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private int lungeCooldown;
@@ -92,6 +99,9 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
     private Vec3 pullVelocity = Vec3.ZERO;
     private Vec3 stuckAnchor = Vec3.ZERO;
     private int stuckTicks;
+    private int emergeTicks;
+    private double emergeStartY;
+    private double emergeTargetY;
 
     public MirageHorrorEntity(EntityType<? extends MirageHorrorEntity> type, Level level) {
         super(type, level);
@@ -112,25 +122,86 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
     }
 
     public static MirageHorrorEntity spawnFor(ServerPlayer victim, double x, double y, double z) {
+        return spawnEmerging(victim, x, y, z);
+    }
+
+    /** Burrows from below the mirage floor, then begins the chase. */
+    public static MirageHorrorEntity spawnEmerging(ServerPlayer victim, double x, double y, double z) {
         ServerLevel level = victim.serverLevel();
         MirageHorrorEntity horror = ModEntities.MIRAGE_HORROR.get().create(level);
         if (horror == null) {
             return null;
         }
         double standY = MirageWorldService.findStandY(victim, x, z).orElse(y);
-        horror.moveTo(x, standY, z, victim.getYRot() + 180f, 0f);
+        horror.emergeTargetY = standY;
+        horror.emergeStartY = standY - 3.2;
+        horror.emergeTicks = EMERGE_TICKS;
+        float yaw = (float) (Mth.atan2(victim.getZ() - z, victim.getX() - x) * (180f / Math.PI)) - 90f;
+        horror.moveTo(x, horror.emergeStartY, z, yaw, 0f);
         horror.setVictim(victim.getUUID());
+        horror.setPoseAnim(POSE_EMERGE);
         level.addFreshEntity(horror);
         level.playSound(
                 null,
-                victim.blockPosition(),
-                SoundEvents.WARDEN_AGITATED,
+                BlockPos.containing(x, standY, z),
+                SoundEvents.WARDEN_DIG,
                 SoundSource.HOSTILE,
-                0.55f,
+                0.85f,
                 0.55f);
+        level.playSound(
+                null,
+                victim.blockPosition(),
+                SoundEvents.SCULK_SHRIEKER_SHRIEK,
+                SoundSource.HOSTILE,
+                0.35f,
+                0.45f);
         victim.displayClientMessage(
-                net.minecraft.network.chat.Component.translatable("message.effecoria.mental.mirage_horror_seen"),
+                net.minecraft.network.chat.Component.translatable("message.effecoria.mental.mirage_horror_stir"),
                 true);
+        return horror;
+    }
+
+    /**
+     * Debug preview: visible to everyone, no mirage session required.
+     * Spawns a few blocks in front of {@code player} with the emerge animation.
+     */
+    public static MirageHorrorEntity spawnPreview(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        MirageHorrorEntity horror = ModEntities.MIRAGE_HORROR.get().create(level);
+        if (horror == null) {
+            return null;
+        }
+        Vec3 look = player.getLookAngle();
+        Vec3 flat = new Vec3(look.x, 0, look.z);
+        if (flat.lengthSqr() < 1.0e-6) {
+            flat = new Vec3(0, 0, 1);
+        } else {
+            flat = flat.normalize();
+        }
+        double x = player.getX() + flat.x * 8.0;
+        double z = player.getZ() + flat.z * 8.0;
+        int topY = level.getHeight(
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                Mth.floor(x),
+                Mth.floor(z));
+        double standY = topY;
+        horror.setPreview(true);
+        horror.setVictim(player.getUUID());
+        horror.lifeTicks = 20 * 60 * 30; // 30 min — inspect freely
+        horror.emergeTargetY = standY;
+        horror.emergeStartY = standY - 3.2;
+        horror.emergeTicks = EMERGE_TICKS;
+        float yaw = (float) (Mth.atan2(player.getZ() - z, player.getX() - x) * (180f / Math.PI)) - 90f;
+        horror.moveTo(x, horror.emergeStartY, z, yaw, 0f);
+        horror.setPoseAnim(POSE_EMERGE);
+        level.addFreshEntity(horror);
+        level.playSound(
+                null,
+                BlockPos.containing(x, standY, z),
+                SoundEvents.WARDEN_DIG,
+                SoundSource.HOSTILE,
+                0.7f,
+                0.6f);
         return horror;
     }
 
@@ -144,6 +215,14 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
 
     public boolean isBoundTo(UUID playerId) {
         return getVictimId().filter(playerId::equals).isPresent();
+    }
+
+    public boolean isPreview() {
+        return entityData.get(DATA_PREVIEW);
+    }
+
+    public void setPreview(boolean preview) {
+        entityData.set(DATA_PREVIEW, preview);
     }
 
     public int getPoseAnim() {
@@ -161,6 +240,7 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
         super.defineSynchedData(builder);
         builder.define(DATA_VICTIM, Optional.empty());
         builder.define(DATA_POSE, POSE_IDLE);
+        builder.define(DATA_PREVIEW, false);
     }
 
     @Override
@@ -177,6 +257,12 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
         if (!(level() instanceof ServerLevel serverLevel)) {
             return;
         }
+
+        if (isPreview()) {
+            tickPreview(serverLevel);
+            return;
+        }
+
         UUID victimId = getVictimId().orElse(null);
         if (victimId == null) {
             discard();
@@ -185,6 +271,10 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
         ServerPlayer victim = serverLevel.getServer().getPlayerList().getPlayer(victimId);
         if (victim == null || !victim.isAlive() || !MirageWorldService.isActive(victim)) {
             discard();
+            return;
+        }
+
+        if (tickEmergence(serverLevel, victim)) {
             return;
         }
 
@@ -222,6 +312,126 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
                     1.4,
                     0.01);
         }
+    }
+
+    /** Debug inspect mode — no mirage chase, just stand/emerge for model review. */
+    private void tickPreview(ServerLevel level) {
+        ServerPlayer watcher = getVictimId()
+                .map(id -> level.getServer().getPlayerList().getPlayer(id))
+                .orElse(null);
+        if (emergeTicks > 0) {
+            emergeTicks--;
+            float t = 1f - emergeTicks / (float) EMERGE_TICKS;
+            float ease = 1f - (1f - t) * (1f - t) * (1f - t);
+            double y = Mth.lerp(ease, emergeStartY, emergeTargetY);
+            setPos(getX(), y, getZ());
+            setDeltaMovement(Vec3.ZERO);
+            setPoseAnim(POSE_EMERGE);
+            if (watcher != null) {
+                faceToward(flat(watcher.position().subtract(position())));
+            }
+            if (tickCount % 2 == 0) {
+                level.sendParticles(
+                        new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
+                        getX(),
+                        emergeTargetY + 0.1,
+                        getZ(),
+                        6,
+                        0.6,
+                        0.12,
+                        0.6,
+                        0.06);
+            }
+            if (emergeTicks <= 0) {
+                setPos(getX(), emergeTargetY, getZ());
+                setPoseAnim(POSE_IDLE);
+                level.playSound(
+                        null,
+                        blockPosition(),
+                        SoundEvents.WARDEN_AGITATED,
+                        SoundSource.HOSTILE,
+                        0.55f,
+                        0.6f);
+            }
+            return;
+        }
+        setDeltaMovement(Vec3.ZERO);
+        if (watcher != null && watcher.isAlive()) {
+            faceToward(flat(watcher.position().subtract(position())));
+        }
+        // Cycle crawl / idle so animations can be reviewed in place.
+        if (tickCount % 200 < 100) {
+            setPoseAnim(POSE_CRAWL);
+        } else if (tickCount % 200 < 140) {
+            setPoseAnim(POSE_REACH);
+        } else if (tickCount % 200 < 170) {
+            setPoseAnim(POSE_PULL);
+        } else {
+            setPoseAnim(POSE_IDLE);
+        }
+    }
+
+    /** Rise from under the mirage floor with digging FX. Returns true while emerging. */
+    private boolean tickEmergence(ServerLevel level, ServerPlayer victim) {
+        if (emergeTicks <= 0) {
+            return false;
+        }
+        emergeTicks--;
+        float t = 1f - emergeTicks / (float) EMERGE_TICKS;
+        float ease = 1f - (1f - t) * (1f - t) * (1f - t);
+        double y = Mth.lerp(ease, emergeStartY, emergeTargetY);
+        setPos(getX(), y, getZ());
+        setDeltaMovement(Vec3.ZERO);
+        setPoseAnim(POSE_EMERGE);
+        faceToward(flat(victim.position().subtract(position())));
+
+        if (tickCount % 2 == 0) {
+            level.sendParticles(
+                    new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
+                    getX(),
+                    emergeTargetY + 0.1,
+                    getZ(),
+                    8,
+                    0.7,
+                    0.15,
+                    0.7,
+                    0.08);
+            level.sendParticles(
+                    ModParticleTypes.MENTAL_FEAR.get(),
+                    getX(),
+                    emergeTargetY + 0.4,
+                    getZ(),
+                    3,
+                    0.45,
+                    0.35,
+                    0.45,
+                    0.01);
+        }
+        if (emergeTicks == EMERGE_TICKS / 2) {
+            level.playSound(
+                    null,
+                    blockPosition(),
+                    SoundEvents.WARDEN_EMERGE,
+                    SoundSource.HOSTILE,
+                    0.9f,
+                    0.65f);
+        }
+        if (emergeTicks <= 0) {
+            setPos(getX(), emergeTargetY, getZ());
+            setPoseAnim(POSE_IDLE);
+            level.playSound(
+                    null,
+                    blockPosition(),
+                    SoundEvents.WARDEN_AGITATED,
+                    SoundSource.HOSTILE,
+                    0.75f,
+                    0.55f);
+            victim.displayClientMessage(
+                    net.minecraft.network.chat.Component.translatable("message.effecoria.mental.mirage_horror_seen"),
+                    true);
+            snapToGround(victim);
+        }
+        return true;
     }
 
     private void tickGrabLocomotion(ServerLevel level, ServerPlayer victim, Vec3 toVictim, double dist) {
@@ -453,6 +663,10 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
         getVictimId().ifPresent(id -> tag.putUUID("Victim", id));
         tag.putInt("Life", lifeTicks);
         tag.putInt("Pose", getPoseAnim());
+        tag.putInt("Emerge", emergeTicks);
+        tag.putDouble("EmergeStart", emergeStartY);
+        tag.putDouble("EmergeTarget", emergeTargetY);
+        tag.putBoolean("Preview", isPreview());
     }
 
     @Override
@@ -463,12 +677,20 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
         }
         lifeTicks = tag.getInt("Life");
         setPoseAnim(tag.getInt("Pose"));
+        emergeTicks = tag.getInt("Emerge");
+        emergeStartY = tag.getDouble("EmergeStart");
+        emergeTargetY = tag.getDouble("EmergeTarget");
+        setPreview(tag.getBoolean("Preview"));
     }
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "main", 2, state -> {
             return switch (getPoseAnim()) {
+                case POSE_EMERGE -> {
+                    state.setAnimation(EMERGE);
+                    yield PlayState.CONTINUE;
+                }
                 case POSE_LUNGE -> {
                     state.setAnimation(LUNGE);
                     yield PlayState.CONTINUE;
