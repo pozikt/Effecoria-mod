@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:false_memory",
+  "school": "mental",
+  "frequency_hz": 14.0,
+  "base_cost": 20,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.11,
+  "min_phi": 0.48,
+  "min_mastery": 0.62,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:false_memory",
+      "duration_ticks": 160,
+      "range": 10
+    }
+  ]
+}

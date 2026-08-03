@@ -40,6 +40,10 @@ public final class CastPipeline {
     private CastPipeline() {}
 
     public static CastResult tryCast(ServerPlayer player, ResourceLocation spellId) {
+        return tryCast(player, spellId, 1f);
+    }
+
+    public static CastResult tryCast(ServerPlayer player, ResourceLocation spellId, float charge) {
         PlayerPsiData data = PsiHelper.get(player);
         if (!data.initiated()) {
             player.displayClientMessage(Component.translatable("message.effecoria.not_initiated"), true);
@@ -58,6 +62,10 @@ public final class CastPipeline {
             return CastResult.UNKNOWN_SPELL;
         }
 
+        float charge01 = Math.clamp(charge, 0f, 1f);
+        float minPower = BalanceConfig.CAST_CHARGE_MIN_POWER.get().floatValue();
+        float chargeScale = minPower + (1f - minPower) * charge01;
+
         PsiContext ctx = PsiHelper.toContext(player, data);
         boolean godMode = CreativeGodMode.isActive(player);
         PhiSample phi = PhiFieldService.sample(player.level(), player.position(), player);
@@ -74,11 +82,11 @@ public final class CastPipeline {
             }
         }
 
-        float fullCost = godMode ? 0f : FormulaEngine.spellCost(ctx, phi, spell);
+        float fullCost = godMode ? 0f : FormulaEngine.spellCost(ctx, phi, spell) * chargeScale;
         boolean overcasting = !godMode && usablePsi + 0.001f < fullCost;
         // Overcast still delivers borrowed power as if the cost were paid in full.
         PsiContext powerCtx = overcasting ? ctx.withCurrentPsi(Math.max(usablePsi, fullCost)) : ctx;
-        float power = FormulaEngine.spellPower(powerCtx, phi, spell);
+        float power = FormulaEngine.spellPower(powerCtx, phi, spell) * chargeScale;
         power = CreativeGodMode.clampSpellPower(player, power);
         float hardCap = BalanceConfig.SPELL_POWER_HARD_CAP.get().floatValue();
         if (hardCap > 0f) {
@@ -152,13 +160,17 @@ public final class CastPipeline {
     }
 
     public static CastResult tryCastSelected(ServerPlayer player) {
+        return tryCastSelected(player, 1f);
+    }
+
+    public static CastResult tryCastSelected(ServerPlayer player, float charge) {
         PlayerPsiData data = PsiHelper.get(player);
         ResourceLocation selected = data.selectedSpell();
         if (selected == null) {
             player.displayClientMessage(Component.translatable("message.effecoria.no_spell_selected"), true);
             return CastResult.NO_SPELL_SELECTED;
         }
-        return tryCast(player, selected);
+        return tryCast(player, selected, charge);
     }
 
     private static void applyBacklash(ServerPlayer player, PlayerPsiData data) {

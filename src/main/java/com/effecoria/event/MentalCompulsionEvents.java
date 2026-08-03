@@ -22,14 +22,18 @@ public final class MentalCompulsionEvents {
         MentalCompulsionService.Type type = MentalCompulsionService.typeOf(mob);
         LivingEntity next = event.getNewAboutToBeSetTarget();
         switch (type) {
-            case TERROR, CLIFF -> {
-                // Compelled mobs must not pick combat targets.
+            case TERROR, CLIFF, DROWN, WHISPER, DOMINATE -> {
+                if (next != null) {
+                    event.setCanceled(true);
+                }
+            }
+            case DEPRESS -> {
                 if (next != null) {
                     event.setCanceled(true);
                 }
             }
             case FRENZY -> {
-                // Frenzy may retarget freely; blocking null clears is enough via tick.
+                // Frenzy may retarget freely.
             }
         }
     }

@@ -20,7 +20,9 @@ public final class PrimerChapters {
         BREATHING(3),
         HUB_KEYS(4),
         SEALS(5),
-        SCHOOL(6);
+        SCHOOL(6),
+        MENTAL(7),
+        ORKANUM(8);
 
         private final int bitIndex;
 
@@ -86,6 +88,9 @@ public final class PrimerChapters {
     private static Predicate<PlayerPsiData> visibility(Chapter chapter) {
         if (chapter == Chapter.SEALS) {
             return data -> !data.initiated() || data.school() == MagicSchool.SEALS;
+        }
+        if (chapter == Chapter.MENTAL) {
+            return data -> !data.initiated() || data.school() == MagicSchool.MENTAL;
         }
         return data -> true;
     }

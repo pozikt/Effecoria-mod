@@ -38,6 +38,7 @@ import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.SnowGolem;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.phys.AABB;
@@ -56,6 +57,8 @@ public final class MentalityService {
     public static final String AFFLICT_UNTIL_TAG = "effecoria:mental_afflict_until";
     public static final String AFFLICT_MASTERY_TAG = "effecoria:mental_afflict_mastery";
     public static final String AFFLICT_OWNER_TAG = "effecoria:mental_afflict_owner";
+    /** Mental shield — blocks empathic scan / deep probe while active. */
+    public static final String SHIELD_UNTIL_TAG = "effecoria:mental_shield_until";
 
     public enum Kind {
         BEAST,
@@ -64,6 +67,14 @@ public final class MentalityService {
     }
 
     private MentalityService() {}
+
+    public static void setShield(LivingEntity entity, long untilGameTime) {
+        entity.getPersistentData().putLong(SHIELD_UNTIL_TAG, untilGameTime);
+    }
+
+    public static boolean hasShield(LivingEntity entity, long gameTime) {
+        return entity.getPersistentData().getLong(SHIELD_UNTIL_TAG) > gameTime;
+    }
 
     public static Kind of(LivingEntity entity) {
         if (entity instanceof Player) {
@@ -272,16 +283,30 @@ public final class MentalityService {
     }
 
     public static void tick(ServerLevel level) {
-        if (level.getGameTime() % 20 != 0) {
-            return;
-        }
-        for (ServerPlayer player : level.players()) {
-            AABB box = player.getBoundingBox().inflate(48);
-            for (Mob mob : level.getEntitiesOfClass(Mob.class, box, LivingEntity::isAlive)) {
-                if (!isAfflicted(mob) && !MentalCompulsionService.hasActive(mob)) {
-                    continue;
+        long now = level.getGameTime();
+        if (now % 20 == 0) {
+            for (ServerPlayer player : level.players()) {
+                AABB box = player.getBoundingBox().inflate(48);
+                for (Mob mob : level.getEntitiesOfClass(Mob.class, box, LivingEntity::isAlive)) {
+                    if (!isAfflicted(mob) && !MentalCompulsionService.hasActive(mob)) {
+                        continue;
+                    }
+                    tryBreakout(mob);
                 }
-                tryBreakout(mob);
+            }
+        }
+        if (now % 10 == 0) {
+            for (ServerPlayer player : level.players()) {
+                AABB box = player.getBoundingBox().inflate(32);
+                for (ArmorStand stand : level.getEntitiesOfClass(ArmorStand.class, box, e -> true)) {
+                    var data = stand.getPersistentData();
+                    if (!data.contains("effecoria:psi_echo_until")) {
+                        continue;
+                    }
+                    if (now >= data.getLong("effecoria:psi_echo_until")) {
+                        stand.discard();
+                    }
+                }
             }
         }
     }

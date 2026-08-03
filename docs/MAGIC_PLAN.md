@@ -114,7 +114,7 @@ Ship only after Stage I magic **presentation** and thrall budget feel solid.
 
 - **Patchouli** — one page per school + cast loop + entropy + Death Mark / control budget.
 - **Initiation ritual** — multiblock or block sequence instead of instant school select.
-- **Spell variants** — overcast / hold-to-charge using existing power pipeline.
+- **Spell variants** — overcast shipped; hold-to-charge: hold cast key (R), release to fire (power/cost ramp via `CAST_CHARGE_*`).
 
 ---
 

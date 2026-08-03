@@ -8,6 +8,7 @@ import com.effecoria.EffecoriaMod;
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.core.seal.ChunkSealData;
 import com.effecoria.core.seal.SealInstance;
+import com.effecoria.core.seal.SealProgramEffects;
 import com.effecoria.core.seal.SealProgramRuntime;
 import com.effecoria.core.seal.SealService;
 import com.effecoria.core.seal.SealTypes;
@@ -68,6 +69,22 @@ public final class SealEvents {
         if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
+        long gameTime = level.getGameTime();
+        for (SealInstance seal : SealService.getAll(level, event.getPos())) {
+            if (seal.isExpired(gameTime) || !SealProgramRuntime.isProgram(seal)) {
+                continue;
+            }
+            if (SealProgramRuntime.effectiveClausura(seal, gameTime)
+                    || SealProgramRuntime.effectiveServare(seal, gameTime)) {
+                event.setCanceled(true);
+                if (event.getEntity() instanceof ServerPlayer player) {
+                    player.displayClientMessage(
+                            net.minecraft.network.chat.Component.translatable("message.effecoria.seal.locked"),
+                            true);
+                }
+                break;
+            }
+        }
         pulseAt(level, event.getPos(), SealProgramRuntime.SenseEvent.USE, event.getEntity());
     }
 
@@ -112,6 +129,7 @@ public final class SealEvents {
         if (living.tickCount % 5 != 0) {
             return;
         }
+        SealProgramEffects.tickAbnegatio(living, level.getGameTime());
         tickSealsUnder(level, living);
     }
 
@@ -156,7 +174,9 @@ public final class SealEvents {
                                         && SealProgramRuntime.effectiveGlow(seal, gameTime) > 0);
                         if (glow) {
                             SealService.ensureGlowLight(level, chunk, pos, seal);
-                            spawnGlowParticles(level, pos);
+                            if (!SealProgramRuntime.effectiveUmbra(seal, gameTime)) {
+                                spawnGlowParticles(level, pos);
+                            }
                         }
                         if (SealProgramRuntime.isProgram(seal)) {
                             SealProgramRuntime.tickApproach(level, pos, seal, gameTime);
@@ -214,6 +234,17 @@ public final class SealEvents {
             if (push > 0f) {
                 living.setDeltaMovement(living.getDeltaMovement().add(0, push, 0));
                 living.hurtMarked = true;
+            }
+            float calor = SealProgramRuntime.effectiveCalor(seal, gameTime);
+            if (calor > 0f) {
+                living.igniteForSeconds(Math.max(1, Math.round(calor / 2f)));
+            }
+            if (SealProgramRuntime.effectiveServare(seal, gameTime)) {
+                applySlowTo(living, seal, 4);
+            }
+            if (SealProgramRuntime.effectiveAbnegatio(seal, gameTime)) {
+                living.getPersistentData().putLong("effecoria_abnegatio_until", gameTime + 30);
+                living.noPhysics = true;
             }
             return true;
         }

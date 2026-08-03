@@ -182,10 +182,12 @@ public class BreathingTrainScreen extends Screen {
         graphics.drawCenteredString(this.font, this.title, cx, cy - 70, 0xE8F0FF);
         graphics.drawCenteredString(
                 this.font,
-                Component.translatable("gui.effecoria.breath_train.hint"),
+                fatigued
+                        ? Component.translatable("gui.effecoria.breath_train.hint_fatigued")
+                        : Component.translatable("gui.effecoria.breath_train.hint"),
                 cx,
                 cy - 56,
-                0x99AABBCC);
+                fatigued ? 0xFFAA8888 : 0x99AABBCC);
 
         int barLeft = cx - BAR_W / 2;
         int barTop = cy - BAR_H / 2;
@@ -203,6 +205,10 @@ public class BreathingTrainScreen extends Screen {
         int mx = barLeft + Math.round(marker * BAR_W);
         graphics.fill(mx - 2, barTop - 4, mx + 2, barTop + BAR_H + 4, 0xFFF5F5FF);
 
+        if (fatigued) {
+            graphics.fill(barLeft, barTop, barLeft + BAR_W, barTop + BAR_H, 0x88000000);
+        }
+
         float bonusPct = hits * BalanceConfig.BREATHING_TRAIN_REGEN_BONUS.get().floatValue() * 100f;
         graphics.drawCenteredString(
                 this.font,
@@ -219,9 +225,10 @@ public class BreathingTrainScreen extends Screen {
         if (fatigued) {
             long rem = Math.max(0L, fatigueUntilMs - System.currentTimeMillis());
             int sec = (int) Math.ceil(rem / 1000.0);
+            int regenPct = (int) (BalanceConfig.BREATHING_TRAIN_FATIGUE_REGEN_MULT.get().floatValue() * 100f);
             graphics.drawCenteredString(
                     this.font,
-                    Component.translatable("gui.effecoria.breath_train.cooldown", sec),
+                    Component.translatable("gui.effecoria.breath_train.cooldown_detail", sec, regenPct),
                     cx,
                     cy + 42,
                     0xFFCC8888);

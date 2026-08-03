@@ -33,7 +33,9 @@ public final class MentalCompulsionService {
         CLIFF,
         FRENZY,
         DEPRESS,
-        DROWN;
+        DROWN,
+        DOMINATE,
+        WHISPER;
 
         static Type fromId(String id) {
             return switch (id) {
@@ -41,6 +43,8 @@ public final class MentalCompulsionService {
                 case "frenzy" -> FRENZY;
                 case "depress" -> DEPRESS;
                 case "drown" -> DROWN;
+                case "dominate" -> DOMINATE;
+                case "whisper" -> WHISPER;
                 default -> TERROR;
             };
         }
@@ -51,6 +55,8 @@ public final class MentalCompulsionService {
                 case FRENZY -> "frenzy";
                 case DEPRESS -> "depress";
                 case DROWN -> "drown";
+                case DOMINATE -> "dominate";
+                case WHISPER -> "whisper";
                 case TERROR -> "terror";
             };
         }
@@ -176,6 +182,40 @@ public final class MentalCompulsionService {
             case FRENZY -> tickFrenzy(level, mob);
             case DEPRESS -> tickDepress(mob);
             case DROWN -> tickDrown(level, mob);
+            case DOMINATE -> tickDominate(level, mob, owner);
+            case WHISPER -> tickWhisper(level, mob, owner);
+        }
+    }
+
+    private static void tickDominate(ServerLevel level, Mob mob, LivingEntity owner) {
+        if (!(owner instanceof ServerPlayer player) || !player.isAlive()) {
+            clear(mob);
+            return;
+        }
+        mob.setTarget(null);
+        // Puppet walks where the caster looks.
+        Vec3 dest = player.getEyePosition().add(player.getLookAngle().normalize().scale(8.0));
+        if (mob.getNavigation().isDone() || level.getGameTime() % 8 == 0) {
+            mob.getNavigation().moveTo(dest.x, dest.y, dest.z, 1.15);
+        }
+        mob.getLookControl().setLookAt(dest.x, dest.y, dest.z);
+    }
+
+    private static void tickWhisper(ServerLevel level, Mob mob, LivingEntity owner) {
+        mob.setTarget(null);
+        if (owner == null || !owner.isAlive()) {
+            return;
+        }
+        // Soft "leave" impulse — drift away from the whisperer.
+        if (mob.distanceToSqr(owner) < 6 * 6) {
+            Vec3 away = mob.position().subtract(owner.position());
+            if (away.lengthSqr() < 0.01) {
+                away = new Vec3(1, 0, 0);
+            }
+            Vec3 dest = mob.position().add(away.normalize().scale(8));
+            if (mob.getNavigation().isDone() || level.getGameTime() % 15 == 0) {
+                mob.getNavigation().moveTo(dest.x, dest.y, dest.z, 1.05);
+            }
         }
     }
 

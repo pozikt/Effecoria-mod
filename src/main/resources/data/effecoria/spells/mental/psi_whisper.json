@@ -1,0 +1,18 @@
+{
+  "id": "effecoria:psi_whisper",
+  "school": "mental",
+  "frequency_hz": 8.2,
+  "base_cost": 6,
+  "power_multiplier": 0.9,
+  "side_entropy": 0.03,
+  "min_phi": 0.08,
+  "min_mastery": 0.05,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:psi_whisper",
+      "duration_ticks": 80,
+      "range": 12
+    }
+  ]
+}

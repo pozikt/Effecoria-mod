@@ -28,74 +28,43 @@ public final class SpellProgression {
         return switch (school) {
 
             case MENTAL -> List.of(
-                    id("mental_push"),
-                    id("mind_bolt"),
-                    id("mental_sting"),
+                    // I — basic
                     id("sense_phi"),
+                    id("psi_whisper"),
                     id("psychic_barrier"),
-                    id("psychic_amplify"),
-                    id("neural_lock"),
-                    id("mind_terror"),
-                    id("mind_lance"),
-                    id("thought_lance"),
-                    id("telekinetic_crush"),
-                    id("psychic_scream"),
-                    id("cliff_urge"),
-                    id("drown_urge"),
+                    // II — advanced
                     id("mind_probe"),
-                    id("locus_echo"),
-                    id("mass_confusion"),
-                    id("psychic_frenzy"),
-                    id("synaptic_overload"),
-                    id("psychic_drain"),
-                    id("psychic_focus"),
-                    id("psychic_storm"),
-                    id("mental_fortress"),
-                    id("thought_bomb"),
-                    id("mass_hysteria"),
-                    id("omega_mind"));
+                    id("mind_illusion"),
+                    id("psychic_scream"),
+                    // III — master
+                    id("mind_dominate"),
+                    id("false_memory"),
+                    id("dream_lock"),
+                    // IV — legendary
+                    id("hive_mind"),
+                    id("psi_echo"),
+                    id("total_veil"));
 
             case ELEMENTAL -> List.of(
+                    // I — four states entry
                     id("fire_burst"),
                     id("weak_breeze"),
                     id("water_stream"),
+                    id("ice_shard"),
+                    // II — form control
                     id("water_shield"),
                     id("steam_jet"),
-                    id("ice_shard"),
-                    id("ember_volley"),
                     id("wind_push"),
                     id("air_ionization"),
-                    id("steam_veil"),
-                    id("breath_bubble"),
-                    id("shockwave"),
-                    id("mirage"),
-                    id("ice_sheet"),
-                    id("air_hand"),
-                    id("sonic_lance"),
-                    id("tornado"),
-                    id("ion_storm"),
-                    id("hyper_cooling"),
-                    id("frost_bastion"),
+                    // III — shaped working
                     id("hydro_slice"),
-                    id("water_prison"),
-                    id("great_fireball"),
-                    id("vacuum_cage"),
-                    id("lightning_spear"),
-                    id("water_shroud"),
-                    id("air_shroud"),
-                    id("ice_prison"),
-                    id("atmospheric_pressure"),
-                    id("cryo_wave"),
-                    id("air_form"),
-                    id("hurricane_storm"),
+                    id("frost_bastion"),
                     id("plasma_bolt"),
-                    id("steam_flight"),
+                    id("tornado"),
+                    // IV — legendary
+                    id("lightning_spear"),
                     id("elemental_supremacy"),
-                    id("thermonuclear_pulse"),
-                    id("absolute_zero"),
-                    id("meteorological_cataclysm"),
-                    id("quasar"),
-                    id("plasma_barrage"));
+                    id("quasar"));
 
             case ORGANIC -> List.of(
                     id("diagnostic_glimpse"),
@@ -191,21 +160,19 @@ public final class SpellProgression {
                     id("subspace_voyage"));
 
             case CORRUPTION -> List.of(
+                    // I — mark / rot
                     id("corrupt_mark"),
-                    id("blight_pulse"),
                     id("rot_touch"),
-                    id("entropy_lash"),
-                    id("binding_seal"),
+                    id("blight_pulse"),
+                    // II — plague / bind
                     id("plague_bolt"),
                     id("festering_wound"),
-                    id("miasma_cloak"),
-                    id("blight_brand"),
-                    id("blight_surge"),
                     id("decay_bind"),
-                    id("pestilence_wave"),
+                    // III — field
+                    id("miasma_cloak"),
                     id("blight_field"),
-                    id("entropy_aegis"),
                     id("tainted_leech"),
+                    // IV — crown / omega
                     id("virulent_wave"),
                     id("plague_crown"),
                     id("omega_blight"));

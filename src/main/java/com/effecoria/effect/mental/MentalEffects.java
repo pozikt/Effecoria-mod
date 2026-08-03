@@ -2,12 +2,14 @@ package com.effecoria.effect.mental;
 
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.BreathDebuffs;
+import com.effecoria.core.formula.SpellCombat;
 import com.effecoria.core.magic.SpellEffectEntry;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.network.ModNetworking;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -18,6 +20,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -58,8 +61,11 @@ public final class MentalEffects {
     public static void psychicScream(ServerPlayer caster, SpellEffectEntry effect, float power) {
         ServerLevel level = caster.serverLevel();
         float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 6f;
+        float damage = effect.params().has("damage") ? effect.params().get("damage").getAsFloat() : 5f;
         int confuseTicks = scaledTicks(effect, power, "confusion_ticks", 80);
+        float scaled = damage * (power / 50f);
         AABB box = caster.getBoundingBox().inflate(radius);
+        boolean echoed = false;
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (entity == caster) {
                 continue;
@@ -70,12 +76,23 @@ public final class MentalEffects {
             if (!gateAfflict(caster, entity, confuseTicks, false)) {
                 continue;
             }
+            entity.hurt(SpellCombat.magic(caster), scaled);
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.CONFUSION, confuseTicks, 1));
             BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.WEAKNESS, confuseTicks / 2, 0));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.BLINDNESS, Math.min(40, confuseTicks / 2), 0));
             spawnSynapse(level, entity.position().add(0, 1, 0));
+            // Echo if target will is stronger (high HP humanoid).
+            if (!echoed
+                    && MentalityService.of(entity) == MentalityService.Kind.HUMANOID
+                    && entity.getMaxHealth() >= caster.getMaxHealth() * 1.25f) {
+                caster.hurt(SpellCombat.magic(caster), scaled * 0.45f);
+                BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.CONFUSION, 40, 0));
+                echoed = true;
+                caster.displayClientMessage(Component.translatable("message.effecoria.mental.echo_strike"), true);
+            }
         }
         spawnSynapse(level, caster.position().add(0, 1, 0));
-        level.playSound(null, caster.blockPosition(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 0.8f, 0.6f);
+        level.playSound(null, caster.blockPosition(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 0.55f, 1.4f);
     }
 
     public static void thoughtLance(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
@@ -151,13 +168,23 @@ public final class MentalEffects {
 
     public static void psychicBarrier(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 200;
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 1, false, true, true));
-        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, 1, false, false, true));
+        MentalityService.setShield(caster, caster.level().getGameTime() + duration);
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, true, true));
+        // Holding the shield tires the channel.
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.HUNGER, Math.min(80, duration / 2), 0, true, false, true));
+        caster.displayClientMessage(Component.translatable("message.effecoria.mental.shield_on"), true);
         spawnWard(caster.serverLevel(), caster.position().add(0, 1, 0));
     }
 
     public static void mindProbe(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         if (target == null) {
+            return;
+        }
+        long now = caster.level().getGameTime();
+        if (MentalityService.hasShield(target, now)) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.mental.shield_blocks"), true);
+            BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.CONFUSION, 40, 0));
+            spawnWard(caster.serverLevel(), target.position().add(0, 1, 0));
             return;
         }
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 160;
@@ -166,12 +193,25 @@ public final class MentalEffects {
         }
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.GLOWING, duration, 0));
         BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration / 2, 0));
+        // Trauma risk for the reader.
+        if (caster.getRandom().nextFloat() < 0.18f) {
+            BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.CONFUSION, 60, 0));
+            BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, 40, 0));
+            caster.displayClientMessage(Component.translatable("message.effecoria.mental.probe_trauma"), true);
+        }
+        String held = "—";
+        if (target instanceof net.minecraft.world.entity.player.Player p) {
+            held = p.getMainHandItem().isEmpty() ? "—" : p.getMainHandItem().getHoverName().getString();
+        } else if (target instanceof Mob) {
+            held = target.getMainHandItem().isEmpty() ? "—" : target.getMainHandItem().getHoverName().getString();
+        }
         caster.displayClientMessage(
-                net.minecraft.network.chat.Component.translatable(
-                        "message.effecoria.mental.mind_probe",
+                Component.translatable(
+                        "message.effecoria.mental.mind_probe_deep",
                         target.getDisplayName(),
                         Math.round(target.getHealth()),
-                        Math.round(target.getMaxHealth())),
+                        Math.round(target.getMaxHealth()),
+                        held),
                 true);
         finishHit(caster.serverLevel(), target.position(), HitFx.SENSE);
     }
@@ -409,6 +449,267 @@ public final class MentalEffects {
                     net.minecraft.network.chat.Component.translatable("message.effecoria.mental.compel_invalid"),
                     true);
         }
+    }
+
+    /** I.1 Empathic scan — surface emotions (not true telepathy). */
+    public static void empathicScan(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 200;
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 16f;
+        PlayerPsiData data = PsiHelper.get(caster);
+        data.setPhiSenseUntil(caster.level().getGameTime() + duration);
+        PsiHelper.set(caster, data);
+
+        ServerLevel level = caster.serverLevel();
+        AABB box = caster.getBoundingBox().inflate(radius);
+        int read = 0;
+        boolean overloaded = false;
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (entity == caster) {
+                continue;
+            }
+            if (entity.distanceToSqr(caster) > radius * radius) {
+                continue;
+            }
+            long now = level.getGameTime();
+            if (MentalityService.hasShield(entity, now)) {
+                caster.displayClientMessage(
+                        Component.translatable("message.effecoria.mental.empathy_shielded", entity.getDisplayName()),
+                        true);
+                continue;
+            }
+            Component emotion = surfaceEmotion(entity);
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.GLOWING, Math.min(80, duration / 2), 0, false, false, true));
+            caster.displayClientMessage(
+                    Component.translatable("message.effecoria.mental.empathy_read", entity.getDisplayName(), emotion),
+                    true);
+            read++;
+            if (entity.getHealth() / Math.max(1f, entity.getMaxHealth()) < 0.25f
+                    || entity.hasEffect(MobEffects.WITHER)) {
+                overloaded = true;
+            }
+        }
+        if (overloaded) {
+            BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.CONFUSION, 50, 0));
+            caster.displayClientMessage(Component.translatable("message.effecoria.mental.empathy_overload"), true);
+        } else if (read == 0) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.mental.empathy_none"), true);
+        }
+        spawnSense(level, caster.position().add(0, caster.getEyeHeight() * 0.5, 0));
+    }
+
+    private static Component surfaceEmotion(LivingEntity entity) {
+        float ratio = entity.getHealth() / Math.max(1f, entity.getMaxHealth());
+        if (ratio < 0.3f || entity.isOnFire() || entity.hasEffect(MobEffects.WITHER)) {
+            return Component.translatable("message.effecoria.mental.emotion.fear");
+        }
+        if (entity instanceof Mob mob && mob.getTarget() != null) {
+            return Component.translatable("message.effecoria.mental.emotion.anger");
+        }
+        if (entity.hasEffect(MobEffects.REGENERATION) || entity.hasEffect(MobEffects.DAMAGE_BOOST)) {
+            return Component.translatable("message.effecoria.mental.emotion.joy");
+        }
+        if (entity.isInvisible() || entity.hasEffect(MobEffects.INVISIBILITY)) {
+            return Component.translatable("message.effecoria.mental.emotion.lie");
+        }
+        return Component.translatable("message.effecoria.mental.emotion.calm");
+    }
+
+    /** I.2 Ψ-whisper — soft leave suggestion. */
+    public static void psiWhisper(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        int duration = scaledTicks(effect, power, "duration_ticks", 80);
+        // Reject if urging a player to give items — Stage-1 backlash.
+        if (target instanceof ServerPlayer) {
+            PlayerPsiData data = PsiHelper.get(caster);
+            data.setEntropyB(data.entropyB() + 0.04f);
+            PsiHelper.set(caster, data);
+            BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.CONFUSION, 30, 0));
+            caster.displayClientMessage(Component.translatable("message.effecoria.mental.whisper_reject"), true);
+            return;
+        }
+        if (!(target instanceof Mob)) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.mental.compel_invalid"), true);
+            return;
+        }
+        if (!MentalCompulsionService.apply(caster, target, MentalCompulsionService.Type.WHISPER, duration)) {
+            MentalityService.notifyFail(caster, target);
+            PlayerPsiData data = PsiHelper.get(caster);
+            data.setEntropyB(data.entropyB() + 0.03f);
+            PsiHelper.set(caster, data);
+            return;
+        }
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, Math.min(40, duration), 0));
+        caster.displayClientMessage(
+                Component.translatable("message.effecoria.mental.whisper_ok", target.getDisplayName()), true);
+        finishHit(caster.serverLevel(), target.position(), HitFx.FOG);
+    }
+
+    /** II.5 Sensory illusion — brief invis vs target + false glow decoy. */
+    public static void mindIllusion(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        int duration = scaledTicks(effect, power, "duration_ticks", 100);
+        ServerLevel level = caster.serverLevel();
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, false, true));
+        if (target != null && gateAfflict(caster, target, duration, false)) {
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.BLINDNESS, Math.min(60, duration / 2), 0));
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, duration / 2, 0));
+        }
+        // Decoy shimmer at look point.
+        Vec3 aim = caster.getEyePosition().add(caster.getLookAngle().normalize().scale(4));
+        spawnFog(level, aim);
+        spawnSense(level, caster.position().add(0, 1, 0));
+        caster.displayClientMessage(Component.translatable("message.effecoria.mental.illusion_on"), true);
+        level.playSound(null, caster.blockPosition(), SoundEvents.ILLUSIONER_PREPARE_MIRROR, SoundSource.PLAYERS, 0.7f, 1.1f);
+    }
+
+    /** III.7 Mind control — puppet. */
+    public static void mindDominate(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        applyCompulsion(caster, effect, power, target, MentalCompulsionService.Type.DOMINATE, 120);
+        int duration = scaledTicks(effect, power, "duration_ticks", 120);
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 2, false, false, true));
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, duration, 0, false, false, true));
+    }
+
+    /** III.8 False memory — forget aggro / brief amnesia. */
+    public static void falseMemory(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        int duration = scaledTicks(effect, power, "duration_ticks", 160);
+        if (!gateAfflict(caster, target, duration, true)) {
+            return;
+        }
+        if (target instanceof Mob mob) {
+            mob.setTarget(null);
+            mob.setLastHurtByMob(null);
+            mob.getNavigation().stop();
+        }
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, duration, 1));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.BLINDNESS, Math.min(40, duration / 3), 0));
+        if (caster.getRandom().nextFloat() < 0.12f) {
+            BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, duration * 2, 2));
+            caster.displayClientMessage(Component.translatable("message.effecoria.mental.memory_scar"), true);
+        }
+        caster.displayClientMessage(
+                Component.translatable("message.effecoria.mental.memory_ok", target.getDisplayName()), true);
+        finishHit(caster.serverLevel(), target.position(), HitFx.FOG);
+    }
+
+    /** III.9 Dream lock — night stronger. */
+    public static void dreamLock(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        boolean night = !caster.level().isDay();
+        int duration = scaledTicks(effect, power, "duration_ticks", night ? 140 : 70);
+        if (!gateAfflict(caster, target, duration, true)) {
+            return;
+        }
+        int amp = night ? 5 : 2;
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, amp));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.BLINDNESS, duration, 0));
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.WEAKNESS, duration, night ? 1 : 0));
+        if (target instanceof Mob mob) {
+            MentalCompulsionService.apply(caster, mob, MentalCompulsionService.Type.DEPRESS, duration);
+        }
+        PlayerPsiData data = PsiHelper.get(caster);
+        data.setEntropyB(data.entropyB() + (night ? 0.08f : 0.04f));
+        PsiHelper.set(caster, data);
+        finishHit(caster.serverLevel(), target.position(), HitFx.FEAR);
+        caster.displayClientMessage(
+                Component.translatable(night ? "message.effecoria.mental.dream_night" : "message.effecoria.mental.dream_day"),
+                true);
+    }
+
+    /** IV.10 Hive mind — link nearby living allies/mobs. */
+    public static void hiveMind(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 10f;
+        int duration = scaledTicks(effect, power, "duration_ticks", 160);
+        ServerLevel level = caster.serverLevel();
+        AABB box = caster.getBoundingBox().inflate(radius);
+        int linked = 0;
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (entity == caster) {
+                continue;
+            }
+            if (entity.distanceToSqr(caster) > radius * radius) {
+                continue;
+            }
+            if (MentalityService.of(entity) == MentalityService.Kind.CONSTRUCT) {
+                continue;
+            }
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false, true));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
+            linked++;
+        }
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false, true));
+        if (linked >= 4 && caster.getRandom().nextFloat() < 0.2f) {
+            BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.CONFUSION, 80, 1));
+            caster.displayClientMessage(Component.translatable("message.effecoria.mental.hive_blur"), true);
+        }
+        caster.displayClientMessage(Component.translatable("message.effecoria.mental.hive_ok", linked), true);
+        spawnSense(level, caster.position().add(0, 1, 0));
+        level.playSound(null, caster.blockPosition(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.6f, 1.4f);
+    }
+
+    /** IV.11 Ψ-echo — aggro decoy copy. */
+    public static void psiEcho(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        int life = scaledTicks(effect, power, "duration_ticks", 100);
+        ServerLevel level = caster.serverLevel();
+        Vec3 at = caster.position().add(caster.getLookAngle().normalize().scale(2.5));
+        ArmorStand echo = new ArmorStand(level, at.x, at.y, at.z);
+        echo.setInvisible(true);
+        echo.setNoGravity(true);
+        echo.setInvulnerable(false);
+        echo.setCustomName(Component.translatable("entity.effecoria.psi_echo", caster.getDisplayName()));
+        echo.setCustomNameVisible(true);
+        echo.setGlowingTag(true);
+        echo.getPersistentData().putLong("effecoria:psi_echo_until", level.getGameTime() + life);
+        echo.getPersistentData().putUUID("effecoria:psi_echo_owner", caster.getUUID());
+        level.addFreshEntity(echo);
+        AABB box = echo.getBoundingBox().inflate(16);
+        for (Mob mob : level.getEntitiesOfClass(Mob.class, box, LivingEntity::isAlive)) {
+            if (mob.getTarget() == caster || mob.distanceToSqr(caster) < 64) {
+                mob.setTarget(echo);
+            }
+        }
+        caster.displayClientMessage(Component.translatable("message.effecoria.mental.echo_spawn"), true);
+        spawnSense(level, at.add(0, 1, 0));
+    }
+
+    /** IV.12 Total veil — area illusion. */
+    public static void totalVeil(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 12f;
+        int duration = scaledTicks(effect, power, "duration_ticks", 120);
+        ServerLevel level = caster.serverLevel();
+        AABB box = caster.getBoundingBox().inflate(radius);
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (entity == caster) {
+                continue;
+            }
+            if (entity.distanceToSqr(caster) > radius * radius) {
+                continue;
+            }
+            if (!gateAfflict(caster, entity, duration, false)) {
+                continue;
+            }
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.BLINDNESS, duration, 0));
+            BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.CONFUSION, duration, 1));
+        }
+        BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.INVISIBILITY, duration, 0, false, false, true));
+        if (caster.getRandom().nextFloat() < 0.15f) {
+            BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.BLINDNESS, 60, 0));
+            caster.displayClientMessage(Component.translatable("message.effecoria.mental.veil_trap"), true);
+        }
+        PlayerPsiData data = PsiHelper.get(caster);
+        data.setEntropyB(data.entropyB() + 0.12f);
+        data.setCurrentPsi(Math.max(0f, data.currentPsi() * 0.5f));
+        PsiHelper.set(caster, data);
+        spawnFog(level, caster.position().add(0, 1, 0));
+        spawnSense(level, caster.position().add(0, 1.2, 0));
+        level.playSound(null, caster.blockPosition(), SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.PLAYERS, 0.5f, 0.7f);
+        caster.displayClientMessage(Component.translatable("message.effecoria.mental.veil_on"), true);
     }
 
     private static LivingEntity pickRandomFearSource(

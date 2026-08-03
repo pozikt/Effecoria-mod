@@ -2,12 +2,14 @@ package com.effecoria.client;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.client.gui.SpellHubScreen;
+import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.network.ModNetworking;
 import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -23,7 +25,20 @@ public final class ClientInputEvents {
     private static long spellBookHoldStartMs;
     private static boolean radialOpenedThisHold;
 
+    private static boolean castKeyWasDown;
+    private static long castHoldStartMs;
+    private static float castCharge;
+
     private ClientInputEvents() {}
+
+    /** 0..1 charge while holding cast; 0 when idle. */
+    public static float castChargeFraction() {
+        return castCharge;
+    }
+
+    public static boolean isCastCharging() {
+        return castKeyWasDown && castCharge > 0.001f;
+    }
 
     @SubscribeEvent
     public static void onMouseScroll(InputEvent.MouseScrollingEvent event) {
@@ -49,6 +64,7 @@ public final class ClientInputEvents {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null) {
             resetHoldState();
+            resetCastCharge();
             return;
         }
 
@@ -61,16 +77,19 @@ public final class ClientInputEvents {
             } else {
                 spellBookKeyWasDown = true;
             }
+            resetCastCharge();
             return;
         }
 
+        // Swallow press events — release-to-cast is driven by physical key state.
         while (KeyBindings.CAST_SPELL.consumeClick()) {
-            if (minecraft.screen != null) {
-                break;
-            }
-            PlayerPsiData data = minecraft.player.getData(ModAttachments.PSI.get());
-            int index = data.initiated() ? data.selectedSpellIndex() : -1;
-            PacketDistributor.sendToServer(new ModNetworking.CastSpellPayload(index));
+            // no-op
+        }
+
+        if (minecraft.screen == null) {
+            tickCastCharge(minecraft);
+        } else {
+            resetCastCharge();
         }
 
         while (KeyBindings.OPEN_SEAL_EDITOR.consumeClick()) {
@@ -123,8 +142,48 @@ public final class ClientInputEvents {
         spellBookKeyWasDown = down;
     }
 
+    private static void tickCastCharge(Minecraft minecraft) {
+        boolean castDown = isCastKeyPhysicallyDown(minecraft);
+        PlayerPsiData data = minecraft.player.getData(ModAttachments.PSI.get());
+        if (!data.initiated() || data.selectedSpell() == null) {
+            if (castKeyWasDown && !castDown) {
+                // ignore release without a spell
+            }
+            resetCastCharge();
+            castKeyWasDown = castDown;
+            return;
+        }
+
+        long chargeMs = BalanceConfig.CAST_CHARGE_MS.get();
+        if (castDown && !castKeyWasDown) {
+            castHoldStartMs = System.currentTimeMillis();
+            castCharge = 0f;
+        }
+        if (castDown) {
+            long held = System.currentTimeMillis() - castHoldStartMs;
+            castCharge = Mth.clamp(held / (float) chargeMs, 0f, 1f);
+        } else if (castKeyWasDown) {
+            float charge = castCharge;
+            int index = data.selectedSpellIndex();
+            PacketDistributor.sendToServer(new ModNetworking.CastSpellPayload(index, charge));
+            castCharge = 0f;
+            castHoldStartMs = 0L;
+        }
+        castKeyWasDown = castDown;
+    }
+
+    private static void resetCastCharge() {
+        castKeyWasDown = false;
+        castHoldStartMs = 0L;
+        castCharge = 0f;
+    }
+
     private static boolean isSpellBookKeyPhysicallyDown(Minecraft minecraft) {
         return isKeyPhysicallyDown(minecraft, KeyBindings.OPEN_SPELL_BOOK.getKey());
+    }
+
+    private static boolean isCastKeyPhysicallyDown(Minecraft minecraft) {
+        return isKeyPhysicallyDown(minecraft, KeyBindings.CAST_SPELL.getKey());
     }
 
     private static boolean isCycleModifierPhysicallyDown(Minecraft minecraft) {

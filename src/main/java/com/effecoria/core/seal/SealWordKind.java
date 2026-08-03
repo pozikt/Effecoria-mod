@@ -15,7 +15,9 @@ public enum SealWordKind {
     /** Narrows the preceding sense (player, step, hit…). */
     SPEC,
     /** Opens a duration clause ({@code time} + NUMBER). */
-    DURATION;
+    DURATION,
+    /** Program control: count / loop / if / until / else. */
+    CONTROL;
 
     public static SealWordKind fromSerialized(String raw) {
         return switch (raw.toLowerCase()) {
@@ -26,6 +28,7 @@ public enum SealWordKind {
             case "sense" -> SENSE;
             case "spec" -> SPEC;
             case "duration" -> DURATION;
+            case "control" -> CONTROL;
             default -> throw new IllegalArgumentException("Unknown seal word kind: " + raw);
         };
     }

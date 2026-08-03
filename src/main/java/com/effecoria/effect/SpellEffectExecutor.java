@@ -64,6 +64,10 @@ public final class SpellEffectExecutor {
             "cliff_urge",
             "drown_urge",
             "psychic_frenzy",
+            "psi_whisper",
+            "mind_dominate",
+            "false_memory",
+            "dream_lock",
             "death_mark",
             "death_shadow",
             "soul_shackle",
@@ -249,8 +253,8 @@ public final class SpellEffectExecutor {
             Vec3 aim) {
         switch (effect.type().getPath()) {
             case "telekinesis" -> telekinesis(caster, effect, power, target, aim);
+            case "phi_sense" -> MentalEffects.empathicScan(caster, effect, power);
             case "mind_sting" -> mindSting(caster, effect, power, target, aim);
-            case "phi_sense" -> phiSense(caster, effect);
             case "fireball" -> ElementalEffects.weakFireball(caster, effect, power);
             case "wind_charge" -> ElementalEffects.windCharge(caster, effect, power);
             case "weak_breeze" -> ElementalEffects.weakBreeze(caster, effect, power);
@@ -414,6 +418,14 @@ public final class SpellEffectExecutor {
             case "drown_urge" -> MentalEffects.drownUrge(caster, effect, power, target);
             case "psychic_frenzy" -> MentalEffects.psychicFrenzy(caster, effect, power, target);
             case "mass_hysteria" -> MentalEffects.massHysteria(caster, effect, power);
+            case "psi_whisper" -> MentalEffects.psiWhisper(caster, effect, power, target);
+            case "mind_illusion" -> MentalEffects.mindIllusion(caster, effect, power, target);
+            case "mind_dominate" -> MentalEffects.mindDominate(caster, effect, power, target);
+            case "false_memory" -> MentalEffects.falseMemory(caster, effect, power, target);
+            case "dream_lock" -> MentalEffects.dreamLock(caster, effect, power, target);
+            case "hive_mind" -> MentalEffects.hiveMind(caster, effect, power);
+            case "psi_echo" -> MentalEffects.psiEcho(caster, effect, power);
+            case "total_veil" -> MentalEffects.totalVeil(caster, effect, power);
             case "blink" -> SpatialEffects.standardBlink(caster, effect, power);
             case "rift_yank" -> riftYank(caster, effect, power, target, aim);
             case "phase_veil" -> phaseVeil(caster, effect, power);

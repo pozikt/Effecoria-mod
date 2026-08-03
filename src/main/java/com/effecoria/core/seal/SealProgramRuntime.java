@@ -7,7 +7,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -16,7 +15,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -81,6 +79,12 @@ public final class SealProgramRuntime {
         if (best <= 0f && seal.params().contains(SealProgramCompiler.HURT_DAMAGE)) {
             best = seal.params().getFloat(SealProgramCompiler.HURT_DAMAGE);
         }
+        float acies = Math.max(maxPassive(seal.params(), "acies"), maxTimed(seal.params(), "acies", gameTime));
+        if (acies > 0f && best > 0f) {
+            best *= 1f + 0.25f * acies;
+        } else if (acies > 0f) {
+            best = acies;
+        }
         return best;
     }
 
@@ -110,12 +114,37 @@ public final class SealProgramRuntime {
         return best > 0f ? Mth.clamp(0.45f * best, 0.3f, 2.5f) : 0f;
     }
 
+    public static boolean effectiveClausura(SealInstance seal, long gameTime) {
+        return maxPassiveOrTimed(seal, "clausura", gameTime) > 0f;
+    }
+
+    public static boolean effectiveUmbra(SealInstance seal, long gameTime) {
+        return maxPassiveOrTimed(seal, "umbra", gameTime) > 0f;
+    }
+
+    public static boolean effectiveServare(SealInstance seal, long gameTime) {
+        return maxPassiveOrTimed(seal, "servare", gameTime) > 0f;
+    }
+
+    public static float effectiveCalor(SealInstance seal, long gameTime) {
+        return maxPassiveOrTimed(seal, "calor", gameTime);
+    }
+
+    public static boolean effectiveAbnegatio(SealInstance seal, long gameTime) {
+        return maxPassiveOrTimed(seal, "abnegatio", gameTime) > 0f;
+    }
+
+    private static float maxPassiveOrTimed(SealInstance seal, String effect, long gameTime) {
+        if (!isProgram(seal)) {
+            return 0f;
+        }
+        migrateV1(seal.params());
+        return Math.max(maxPassive(seal.params(), effect), maxTimed(seal.params(), effect, gameTime));
+    }
+
     /**
      * Tick reactive rules near a block. {@code event} is the concrete world event (or APPROACH for proximity).
      * Returns true if a pulse fired.
-     *
-     * <p>{@link SenseEvent#STEP} re-fires on a short dwell while the entity stays on the block
-     * (traps must keep working). Other events stay rising-edge.
      */
     public static boolean pulse(
             ServerLevel level,
@@ -154,7 +183,7 @@ public final class SealProgramRuntime {
             boolean dwell =
                     event == SenseEvent.STEP && wasOn && gameTime - rt.getLong(timeKey) >= 15;
             if (rising || dwell) {
-                fireActions(level, pos, seal, rule, gameTime, rt);
+                fireRule(level, pos, seal, rule, gameTime, rt, key);
                 rt.putLong(timeKey, gameTime);
                 anyFired = true;
             }
@@ -196,7 +225,6 @@ public final class SealProgramRuntime {
             Set<String> specs = readSpecs(rule);
             if (!specs.isEmpty() && !specs.contains("approach") && !specs.contains("player") && !specs.contains("mob")
                     && (specs.contains("step") || specs.contains("hit") || specs.contains("use") || specs.contains("break"))) {
-                // Pure interaction specs — approach tick does not arm them.
                 continue;
             }
             float radius = rule.contains(SealProgramCompiler.RADIUS) ? rule.getFloat(SealProgramCompiler.RADIUS) : 6f;
@@ -219,7 +247,6 @@ public final class SealProgramRuntime {
         }
     }
 
-    /** Drop approach latches only — do not wipe STEP/HIT/USE/BREAK while someone still stands on the block. */
     private static void clearApproachSenseFlags(CompoundTag params, ListTag rules) {
         CompoundTag rt = params.contains(SealProgramCompiler.RUNTIME_TAG)
                 ? params.getCompound(SealProgramCompiler.RUNTIME_TAG)
@@ -303,42 +330,122 @@ public final class SealProgramRuntime {
         return out;
     }
 
+    private static void fireRule(
+            ServerLevel level,
+            BlockPos pos,
+            SealInstance seal,
+            CompoundTag rule,
+            long gameTime,
+            CompoundTag rt,
+            String key) {
+        int untilMax = rule.contains(SealProgramCompiler.UNTIL_MAX) ? rule.getInt(SealProgramCompiler.UNTIL_MAX) : 0;
+        int fired = rt.getInt(key + "_fc");
+        if (untilMax > 0 && fired >= untilMax) {
+            return;
+        }
+
+        int countNeed = rule.contains(SealProgramCompiler.COUNT_NEED) ? rule.getInt(SealProgramCompiler.COUNT_NEED) : 0;
+        int count = rt.getInt(key + "_cnt") + 1;
+        rt.putInt(key + "_cnt", count);
+
+        boolean ready = countNeed <= 0 || count >= countNeed;
+        if (!ready) {
+            fireActions(level, pos, seal, rule, gameTime, rt, SealProgramCompiler.ELSE_ACTIONS);
+            return;
+        }
+        if (countNeed > 0) {
+            rt.putInt(key + "_cnt", 0);
+        }
+        fireActions(level, pos, seal, rule, gameTime, rt, SealProgramCompiler.ACTIONS);
+        rt.putInt(key + "_fc", fired + 1);
+    }
+
     private static void fireActions(
-            ServerLevel level, BlockPos pos, SealInstance seal, CompoundTag rule, long gameTime, CompoundTag rt) {
-        ListTag actions = rule.getList(SealProgramCompiler.ACTIONS, Tag.TAG_COMPOUND);
+            ServerLevel level,
+            BlockPos pos,
+            SealInstance seal,
+            CompoundTag rule,
+            long gameTime,
+            CompoundTag rt,
+            String listKey) {
+        if (!rule.contains(listKey, Tag.TAG_LIST)) {
+            return;
+        }
+        ListTag actions = rule.getList(listKey, Tag.TAG_COMPOUND);
+        if (actions.isEmpty()) {
+            return;
+        }
         ListTag timed = rt.contains(RT_TIMED, Tag.TAG_LIST) ? rt.getList(RT_TIMED, Tag.TAG_COMPOUND) : new ListTag();
         for (int i = 0; i < actions.size(); i++) {
             CompoundTag action = actions.getCompound(i);
-            String effect = action.getString(SealProgramCompiler.EFFECT);
-            float mag = action.getFloat(SealProgramCompiler.MAGNITUDE);
-            int dur = action.contains(SealProgramCompiler.DURATION_TICKS)
-                    ? action.getInt(SealProgramCompiler.DURATION_TICKS)
-                    : 0;
-
-            if (dur > 0 && ("hardness".equals(effect) || "glow".equals(effect) || "light".equals(effect)
-                    || "hurt".equals(effect) || "slow".equals(effect) || "push".equals(effect))) {
-                CompoundTag overlay = action.copy();
-                overlay.putLong(RT_UNTIL, gameTime + dur);
-                timed.add(overlay);
-                continue;
-            }
-
-            switch (effect) {
-                case "sound" -> playSound(level, pos, action);
-                case "hurt" -> SealProgramEffects.hurtOnce(level, pos, seal, mag);
-                case "slow" -> SealProgramEffects.slowOnce(level, pos, seal, Math.round(mag));
-                case "push" -> SealProgramEffects.pushOnce(level, pos, seal, Mth.clamp(0.45f * mag, 0.3f, 2.5f));
-                case "hardness", "glow", "light" -> {
-                    // Instant without duration: brief pulse overlay (20 ticks).
-                    CompoundTag overlay = action.copy();
-                    overlay.putLong(RT_UNTIL, gameTime + 40);
-                    timed.add(overlay);
-                }
-                default -> {
-                }
+            int loops = action.contains(SealProgramCompiler.LOOP_REPEATS)
+                    ? Mth.clamp(action.getInt(SealProgramCompiler.LOOP_REPEATS), 1, 10)
+                    : 1;
+            for (int r = 0; r < loops; r++) {
+                dispatchAction(level, pos, seal, action, gameTime, timed);
             }
         }
         rt.put(RT_TIMED, timed);
+    }
+
+    private static void dispatchAction(
+            ServerLevel level,
+            BlockPos pos,
+            SealInstance seal,
+            CompoundTag action,
+            long gameTime,
+            ListTag timed) {
+        String effect = action.getString(SealProgramCompiler.EFFECT);
+        float mag = action.getFloat(SealProgramCompiler.MAGNITUDE);
+        int dur = action.contains(SealProgramCompiler.DURATION_TICKS)
+                ? action.getInt(SealProgramCompiler.DURATION_TICKS)
+                : 0;
+
+        if (dur > 0 && isOverlayEffect(effect)) {
+            CompoundTag overlay = action.copy();
+            overlay.putLong(RT_UNTIL, gameTime + dur);
+            timed.add(overlay);
+            return;
+        }
+
+        switch (effect) {
+            case "sound" -> playSound(level, pos, action);
+            case "hurt", "acies" -> SealProgramEffects.hurtOnce(level, pos, seal, mag);
+            case "slow" -> SealProgramEffects.slowOnce(level, pos, seal, Math.round(mag));
+            case "push" -> SealProgramEffects.pushOnce(level, pos, seal, Mth.clamp(0.45f * mag, 0.3f, 2.5f));
+            case "hardness", "glow", "light", "clausura", "umbra", "servare", "abnegatio" -> {
+                CompoundTag overlay = action.copy();
+                overlay.putLong(RT_UNTIL, gameTime + (dur > 0 ? dur : 40));
+                timed.add(overlay);
+            }
+            case "calor" -> {
+                CompoundTag overlay = action.copy();
+                overlay.putLong(RT_UNTIL, gameTime + (dur > 0 ? dur : 40));
+                timed.add(overlay);
+                SealProgramEffects.calorOnce(level, pos, seal, mag);
+            }
+            case "extrahere" -> SealProgramEffects.extrahereOnce(level, pos, seal, mag);
+            case "imprimere" -> SealProgramEffects.imprimereOnce(level, pos, seal, mag);
+            case "ordo" -> SealProgramEffects.ordoOnce(level, pos, seal, mag);
+            case "absolutum" -> SealProgramEffects.absolutumOnce(level, pos, seal, mag);
+            default -> {
+            }
+        }
+    }
+
+    private static boolean isOverlayEffect(String effect) {
+        return "hardness".equals(effect)
+                || "glow".equals(effect)
+                || "light".equals(effect)
+                || "hurt".equals(effect)
+                || "acies".equals(effect)
+                || "slow".equals(effect)
+                || "push".equals(effect)
+                || "clausura".equals(effect)
+                || "umbra".equals(effect)
+                || "servare".equals(effect)
+                || "abnegatio".equals(effect)
+                || "calor".equals(effect);
     }
 
     private static void playSound(ServerLevel level, BlockPos pos, CompoundTag action) {

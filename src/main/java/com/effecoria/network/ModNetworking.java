@@ -105,12 +105,13 @@ public final class ModNetworking {
         }
     }
 
-    public record CastSpellPayload(int spellIndex) implements CustomPacketPayload {
+    public record CastSpellPayload(int spellIndex, float charge) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<CastSpellPayload> TYPE =
                 new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "cast_spell"));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, CastSpellPayload> STREAM_CODEC = StreamCodec.composite(
                 ByteBufCodecs.VAR_INT, CastSpellPayload::spellIndex,
+                ByteBufCodecs.FLOAT, CastSpellPayload::charge,
                 CastSpellPayload::new);
 
         @Override
@@ -129,7 +130,8 @@ public final class ModNetworking {
                     PsiHelper.set(player, data);
                     player.syncData(ModAttachments.PSI.get());
                 }
-                CastPipeline.tryCastSelected(player);
+                float charge = Math.clamp(payload.charge(), 0f, 1f);
+                CastPipeline.tryCastSelected(player, charge);
             });
         }
     }

@@ -62,6 +62,68 @@ public final class SpellUnlockService {
             "void_lance",
             "rift_burst");
 
+    /** Filler dropped when mental was slimmed to 12 lore techniques. */
+    private static final Set<String> RETIRED_MENTAL_FILLER = Set.of(
+            "mental_push",
+            "mind_bolt",
+            "mental_sting",
+            "psychic_amplify",
+            "neural_lock",
+            "mind_terror",
+            "mind_lance",
+            "thought_lance",
+            "telekinetic_crush",
+            "cliff_urge",
+            "drown_urge",
+            "locus_echo",
+            "mass_confusion",
+            "psychic_frenzy",
+            "synaptic_overload",
+            "psychic_drain",
+            "psychic_focus",
+            "psychic_storm",
+            "mental_fortress",
+            "thought_bomb",
+            "mass_hysteria",
+            "omega_mind");
+
+    /** Filler dropped when elemental was slimmed to four-state pillars. */
+    private static final Set<String> RETIRED_ELEMENTAL_FILLER = Set.of(
+            "ember_volley",
+            "steam_veil",
+            "breath_bubble",
+            "shockwave",
+            "mirage",
+            "ice_sheet",
+            "air_hand",
+            "sonic_lance",
+            "ion_storm",
+            "hyper_cooling",
+            "water_prison",
+            "great_fireball",
+            "vacuum_cage",
+            "water_shroud",
+            "air_shroud",
+            "ice_prison",
+            "atmospheric_pressure",
+            "cryo_wave",
+            "air_form",
+            "hurricane_storm",
+            "steam_flight",
+            "thermonuclear_pulse",
+            "absolute_zero",
+            "meteorological_cataclysm",
+            "plasma_barrage");
+
+    /** Filler dropped when corruption was slimmed to the curse pipeline. */
+    private static final Set<String> RETIRED_CORRUPTION_FILLER = Set.of(
+            "entropy_lash",
+            "binding_seal",
+            "blight_brand",
+            "blight_surge",
+            "pestilence_wave",
+            "entropy_aegis");
+
     private SpellUnlockService() {}
 
     public static void stripRemovedSummons(PlayerPsiData data) {
@@ -71,6 +133,15 @@ public final class SpellUnlockService {
         }
         if (data.school() == MagicSchool.SPATIAL) {
             data.knownSpells().removeIf(id -> RETIRED_SPATIAL_FILLER.contains(id.getPath()));
+        }
+        if (data.school() == MagicSchool.MENTAL) {
+            data.knownSpells().removeIf(id -> RETIRED_MENTAL_FILLER.contains(id.getPath()));
+        }
+        if (data.school() == MagicSchool.ELEMENTAL) {
+            data.knownSpells().removeIf(id -> RETIRED_ELEMENTAL_FILLER.contains(id.getPath()));
+        }
+        if (data.school() == MagicSchool.CORRUPTION) {
+            data.knownSpells().removeIf(id -> RETIRED_CORRUPTION_FILLER.contains(id.getPath()));
         }
         data.setSelectedSpellIndex(data.selectedSpellIndex());
     }

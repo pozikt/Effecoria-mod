@@ -17,16 +17,14 @@ import java.util.Optional;
  * <p>Grammar (left → right):
  * <ul>
  *   <li>Passive: {@code ACTION NUMBER? MODIFIER*} — always on (e.g. Hardness Five)</li>
- *   <li>Reactive: {@code SENSE SPEC* ACTION NUMBER? MODIFIER* (TIME NUMBER)?}
- *       — sense emits a unit on event; then action fires (e.g. See Player Sound Five)</li>
- *   <li>Timed reactive: {@code See Hardness Five Time Ten} — action lasts N ticks</li>
+ *   <li>Reactive: {@code SENSE SPEC* ACTION NUMBER? MODIFIER* (TIME NUMBER)?}</li>
+ *   <li>Control: {@code COUNT|LOOP|UNTIL NUMBER}, {@code IF|WHEN} as sense opener, {@code ELSE} alt branch</li>
  * </ul>
- * Multiple passive segments and reactive rules may be chained in one program.
  */
 public final class SealProgramCompiler {
     public static final String TOKENS_TAG = "tokens";
     public static final String VERSION_TAG = "program_version";
-    public static final int PROGRAM_VERSION = 2;
+    public static final int PROGRAM_VERSION = 3;
 
     public static final String PASSIVES_TAG = "passives";
     public static final String RULES_TAG = "rules";
@@ -41,6 +39,10 @@ public final class SealProgramCompiler {
     public static final String SPECS = "specs";
     public static final String RADIUS = "radius";
     public static final String ACTIONS = "actions";
+    public static final String ELSE_ACTIONS = "else_actions";
+    public static final String COUNT_NEED = "count_need";
+    public static final String UNTIL_MAX = "until_max";
+    public static final String LOOP_REPEATS = "loop";
 
     /** @deprecated v1 flat keys — still read for migration of old inscriptions */
     @Deprecated public static final String HARDNESS_MULT = "hardness_mult";
@@ -66,7 +68,7 @@ public final class SealProgramCompiler {
     }
 
     public static int maxTokens(float breathingMasteryRatio) {
-        return Mth.clamp(4 + Math.round(breathingMasteryRatio * 6f), 4, 12);
+        return Mth.clamp(8 + Math.round(breathingMasteryRatio * 8f), 8, 16);
     }
 
     public static CompileResult compile(List<ResourceLocation> tokenIds) {
@@ -105,14 +107,56 @@ public final class SealProgramCompiler {
 
         CompoundTag openRule = null;
         CompoundTag openAction = null;
+        boolean elseBranch = false;
+        int pendingLoop = 0;
+        enum ExpectNum { NONE, LOOP, COUNT, UNTIL }
+        ExpectNum expectNum = ExpectNum.NONE;
         enum Phase { IDLE, SENSE, ACTION, TIME }
         Phase phase = Phase.IDLE;
 
         for (SealWordDefinition word : words) {
             switch (word.kind()) {
+                case CONTROL -> {
+                    String ctrl = controlKey(word);
+                    switch (ctrl) {
+                        case "loop", "repeat" -> expectNum = ExpectNum.LOOP;
+                        case "count" -> {
+                            if (openRule == null) {
+                                errors.add("count_without_sense:" + word.id());
+                            } else {
+                                expectNum = ExpectNum.COUNT;
+                            }
+                        }
+                        case "until" -> {
+                            if (openRule == null) {
+                                errors.add("until_without_sense:" + word.id());
+                            } else {
+                                expectNum = ExpectNum.UNTIL;
+                            }
+                        }
+                        case "if", "when" -> {
+                            openRule = newRule("see");
+                            openAction = null;
+                            elseBranch = false;
+                            phase = Phase.SENSE;
+                            rules.add(openRule);
+                        }
+                        case "else" -> {
+                            if (openRule == null) {
+                                errors.add("else_without_rule:" + word.id());
+                            } else {
+                                elseBranch = true;
+                                openAction = null;
+                                phase = Phase.ACTION;
+                            }
+                        }
+                        default -> errors.add("unknown_control:" + word.id());
+                    }
+                }
                 case SENSE -> {
                     openRule = newRule(word);
                     openAction = null;
+                    elseBranch = false;
                     phase = Phase.SENSE;
                     rules.add(openRule);
                 }
@@ -131,10 +175,17 @@ public final class SealProgramCompiler {
                 }
                 case PROPERTY, TRIGGER -> {
                     openAction = newAction(word);
+                    if (pendingLoop > 0) {
+                        openAction.putInt(LOOP_REPEATS, pendingLoop);
+                        pendingLoop = 0;
+                    }
                     if (openRule != null) {
-                        ListTag actions = openRule.getList(ACTIONS, Tag.TAG_COMPOUND);
+                        String listKey = elseBranch ? ELSE_ACTIONS : ACTIONS;
+                        ListTag actions = openRule.contains(listKey, Tag.TAG_LIST)
+                                ? openRule.getList(listKey, Tag.TAG_COMPOUND)
+                                : new ListTag();
                         actions.add(openAction);
-                        openRule.put(ACTIONS, actions);
+                        openRule.put(listKey, actions);
                     } else {
                         passives.add(openAction);
                     }
@@ -142,11 +193,31 @@ public final class SealProgramCompiler {
                 }
                 case NUMBER -> {
                     float value = word.numberValue() > 0f ? word.numberValue() : 1f;
+                    if (expectNum != ExpectNum.NONE) {
+                        int n = Mth.clamp(Math.round(value), 1, 20);
+                        switch (expectNum) {
+                            case LOOP -> pendingLoop = n;
+                            case COUNT -> {
+                                if (openRule != null) {
+                                    openRule.putInt(COUNT_NEED, n);
+                                }
+                            }
+                            case UNTIL -> {
+                                if (openRule != null) {
+                                    openRule.putInt(UNTIL_MAX, n);
+                                }
+                            }
+                            default -> {
+                            }
+                        }
+                        expectNum = ExpectNum.NONE;
+                        break;
+                    }
                     if (phase == Phase.TIME) {
                         if (openRule == null) {
                             errors.add("orphan_number:" + word.id());
                         } else {
-                            ListTag actions = openRule.getList(ACTIONS, Tag.TAG_COMPOUND);
+                            ListTag actions = actionListForOpen(openRule, elseBranch);
                             if (actions.isEmpty()) {
                                 errors.add("time_without_action:" + word.id());
                             } else {
@@ -154,6 +225,7 @@ public final class SealProgramCompiler {
                                 last.putInt(DURATION_TICKS, Mth.clamp(Math.round(value), 1, 200));
                                 openRule = null;
                                 openAction = null;
+                                elseBranch = false;
                                 phase = Phase.IDLE;
                             }
                         }
@@ -168,7 +240,7 @@ public final class SealProgramCompiler {
                 case DURATION -> {
                     if (openRule == null) {
                         errors.add("time_without_sense:" + word.id());
-                    } else if (openRule.getList(ACTIONS, Tag.TAG_COMPOUND).isEmpty()) {
+                    } else if (actionListForOpen(openRule, elseBranch).isEmpty()) {
                         errors.add("time_without_action:" + word.id());
                     } else {
                         phase = Phase.TIME;
@@ -184,9 +256,20 @@ public final class SealProgramCompiler {
             }
         }
 
+        if (expectNum != ExpectNum.NONE) {
+            errors.add("control_without_number");
+        }
+        if (pendingLoop > 0) {
+            errors.add("loop_without_action");
+        }
+
         for (int i = 0; i < rules.size(); i++) {
             CompoundTag rule = rules.getCompound(i);
-            if (rule.getList(ACTIONS, Tag.TAG_COMPOUND).isEmpty()) {
+            boolean hasMain = rule.contains(ACTIONS, Tag.TAG_LIST)
+                    && !rule.getList(ACTIONS, Tag.TAG_COMPOUND).isEmpty();
+            boolean hasElse = rule.contains(ELSE_ACTIONS, Tag.TAG_LIST)
+                    && !rule.getList(ELSE_ACTIONS, Tag.TAG_COMPOUND).isEmpty();
+            if (!hasMain && !hasElse) {
                 errors.add("sense_without_action");
             }
         }
@@ -212,9 +295,28 @@ public final class SealProgramCompiler {
         return out;
     }
 
+    private static String controlKey(SealWordDefinition word) {
+        if (!word.effect().isEmpty()) {
+            return word.effect();
+        }
+        return word.id().getPath();
+    }
+
+    private static ListTag actionListForOpen(CompoundTag rule, boolean elseBranch) {
+        String key = elseBranch ? ELSE_ACTIONS : ACTIONS;
+        if (!rule.contains(key, Tag.TAG_LIST)) {
+            return new ListTag();
+        }
+        return rule.getList(key, Tag.TAG_COMPOUND);
+    }
+
     private static CompoundTag newRule(SealWordDefinition sense) {
+        return newRule(sense.effect().isEmpty() ? sense.id().getPath() : sense.effect());
+    }
+
+    private static CompoundTag newRule(String sense) {
         CompoundTag rule = new CompoundTag();
-        rule.putString(SENSE, sense.effect().isEmpty() ? sense.id().getPath() : sense.effect());
+        rule.putString(SENSE, sense);
         rule.putFloat(RADIUS, 6f);
         rule.put(SPECS, new ListTag());
         rule.put(ACTIONS, new ListTag());
@@ -224,6 +326,12 @@ public final class SealProgramCompiler {
     private static CompoundTag newAction(SealWordDefinition word) {
         CompoundTag action = new CompoundTag();
         String effect = word.effect().isEmpty() ? word.id().getPath() : word.effect();
+        // Aliases into existing runtime keys where helpful.
+        effect = switch (effect) {
+            case "lux" -> "light";
+            case "firmitas" -> "hardness";
+            default -> effect;
+        };
         action.putString(EFFECT, effect);
         applyMagnitude(action, effect, defaultMagnitude(effect));
         if (word.soundEvent() != null) {
@@ -239,11 +347,18 @@ public final class SealProgramCompiler {
     private static float defaultMagnitude(String effect) {
         return switch (effect) {
             case "hardness" -> 2f;
-            case "hurt" -> 2f;
+            case "hurt", "acies" -> 2f;
             case "slow" -> 2f;
             case "push" -> 1f;
             case "glow", "light" -> 10f;
             case "sound" -> 1f;
+            case "calor" -> 2f;
+            case "clausura", "umbra", "servare" -> 1f;
+            case "extrahere" -> 8f;
+            case "imprimere" -> 1f;
+            case "ordo" -> 4f;
+            case "abnegatio" -> 1f;
+            case "absolutum" -> 8f;
             default -> 1f;
         };
     }
@@ -251,11 +366,13 @@ public final class SealProgramCompiler {
     private static void applyMagnitude(CompoundTag action, String effect, float magnitude) {
         float clamped = switch (effect) {
             case "hardness" -> Mth.clamp(magnitude, 1f, 10f);
-            case "hurt" -> Mth.clamp(magnitude, 0.5f, 12f);
+            case "hurt", "acies" -> Mth.clamp(magnitude, 0.5f, 12f);
             case "slow" -> Mth.clamp(magnitude, 1f, 5f);
             case "push" -> Mth.clamp(magnitude, 0.5f, 5f);
             case "glow", "light" -> Mth.clamp(magnitude, 6f, 15f);
             case "sound" -> Mth.clamp(magnitude, 0.5f, 10f);
+            case "calor" -> Mth.clamp(magnitude, 1f, 10f);
+            case "extrahere", "ordo", "absolutum" -> Mth.clamp(magnitude, 1f, 16f);
             default -> Mth.clamp(magnitude, 0.5f, 16f);
         };
         action.putFloat(MAGNITUDE, clamped);

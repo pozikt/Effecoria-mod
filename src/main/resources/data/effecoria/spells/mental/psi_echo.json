@@ -1,0 +1,17 @@
+{
+  "id": "effecoria:psi_echo",
+  "school": "mental",
+  "frequency_hz": 17.0,
+  "base_cost": 30,
+  "power_multiplier": 1.18,
+  "side_entropy": 0.16,
+  "min_phi": 0.72,
+  "min_mastery": 0.88,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:psi_echo",
+      "duration_ticks": 100
+    }
+  ]
+}

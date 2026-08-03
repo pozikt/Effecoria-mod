@@ -417,5 +417,13 @@ public final class BalanceConfig {
             .comment("Effective breathing mastery factor at mild overcast severity")
             .defineInRange("overcast_breath_max", 0.55, 0.0, 1.0);
 
+    public static final ModConfigSpec.IntValue CAST_CHARGE_MS = BUILDER
+            .comment("Milliseconds of holding the cast key to reach full charge")
+            .defineInRange("cast_charge_ms", 900, 200, 4000);
+
+    public static final ModConfigSpec.DoubleValue CAST_CHARGE_MIN_POWER = BUILDER
+            .comment("Power/cost multiplier at a tap (0 hold); ramps to 1.0 at full charge")
+            .defineInRange("cast_charge_min_power", 0.45, 0.15, 1.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 }
