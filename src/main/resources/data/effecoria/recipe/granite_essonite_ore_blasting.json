@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "cookingtime": 100,
+  "experience": 0.7,
+  "ingredient": { "item": "effecoria:granite_essonite_ore" },
+  "result": { "id": "effecoria:essonite_dust" }
+}

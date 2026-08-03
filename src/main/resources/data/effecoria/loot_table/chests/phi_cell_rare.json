@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.28
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "effecoria:phi_cell",
+          "functions": [
+            {
+              "function": "minecraft:set_custom_data",
+              "tag": "{PhiCharge:0.5f}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -23,6 +23,12 @@ public final class ModCreativeTabs {
                     .icon(() -> ModItems.RESONANCE_FOCUS.get().getDefaultInstance())
                     .displayItems((params, output) -> {
                         output.accept(ModItems.ESSENITE_ORE.get());
+                        output.accept(ModItems.DEEPSLATE_ESSENITE_ORE.get());
+                        output.accept(ModItems.GRANITE_ESSENITE_ORE.get());
+                        output.accept(ModItems.ANDESITE_ESSENITE_ORE.get());
+                        output.accept(ModItems.DIORITE_ESSENITE_ORE.get());
+                        output.accept(ModItems.TUFF_ESSENITE_ORE.get());
+                        output.accept(ModItems.BASALT_ESSENITE_ORE.get());
                         output.accept(ModItems.ESSENITE_DUST.get());
                         output.accept(ModItems.RESONANCE_FOCUS.get());
                         output.accept(ModItems.PHI_CELL.get());

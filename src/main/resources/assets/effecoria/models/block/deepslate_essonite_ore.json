@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "effecoria:block/essonite_ore"
+    "all": "effecoria:block/deepslate_essonite_ore"
   }
 }

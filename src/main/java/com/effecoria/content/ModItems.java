@@ -13,6 +13,18 @@ public final class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(EffecoriaMod.MOD_ID);
 
     public static final DeferredItem<BlockItem> ESSENITE_ORE = ITEMS.registerSimpleBlockItem("essonite_ore", ModBlocks.ESSENITE_ORE);
+    public static final DeferredItem<BlockItem> DEEPSLATE_ESSENITE_ORE =
+            ITEMS.registerSimpleBlockItem("deepslate_essonite_ore", ModBlocks.DEEPSLATE_ESSENITE_ORE);
+    public static final DeferredItem<BlockItem> GRANITE_ESSENITE_ORE =
+            ITEMS.registerSimpleBlockItem("granite_essonite_ore", ModBlocks.GRANITE_ESSENITE_ORE);
+    public static final DeferredItem<BlockItem> ANDESITE_ESSENITE_ORE =
+            ITEMS.registerSimpleBlockItem("andesite_essonite_ore", ModBlocks.ANDESITE_ESSENITE_ORE);
+    public static final DeferredItem<BlockItem> DIORITE_ESSENITE_ORE =
+            ITEMS.registerSimpleBlockItem("diorite_essonite_ore", ModBlocks.DIORITE_ESSENITE_ORE);
+    public static final DeferredItem<BlockItem> TUFF_ESSENITE_ORE =
+            ITEMS.registerSimpleBlockItem("tuff_essonite_ore", ModBlocks.TUFF_ESSENITE_ORE);
+    public static final DeferredItem<BlockItem> BASALT_ESSENITE_ORE =
+            ITEMS.registerSimpleBlockItem("basalt_essonite_ore", ModBlocks.BASALT_ESSENITE_ORE);
 
     /** Refined Φ-conductive dust — smelted from essonite ore. */
     public static final DeferredItem<Item> ESSENITE_DUST = ITEMS.registerSimpleItem("essonite_dust");

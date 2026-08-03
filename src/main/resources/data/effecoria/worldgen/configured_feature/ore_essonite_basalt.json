@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:ore",
+  "config": {
+    "size": 5,
+    "discard_chance_on_air_exposure": 0.35,
+    "targets": [
+      {
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "minecraft:basalt"
+        },
+        "state": {
+          "Name": "effecoria:basalt_essonite_ore"
+        }
+      },
+      {
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "minecraft:smooth_basalt"
+        },
+        "state": {
+          "Name": "effecoria:basalt_essonite_ore"
+        }
+      }
+    ]
+  }
+}
