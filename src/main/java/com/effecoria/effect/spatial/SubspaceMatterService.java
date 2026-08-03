@@ -135,8 +135,8 @@ public final class SubspaceMatterService {
     }
 
     /**
-     * Dump yard sits beside the active voyage entry when present; otherwise at the caster's
-     * personal rendezvous (same hash as {@link SubspaceVoyageService#subspaceAnchor(UUID)}).
+     * Dump yard sits beside the active voyage entry when present; otherwise at a stable
+     * personal scrap field ({@link #personalYard(UUID)}).
      */
     public static BlockPos resolveDumpOrigin(ServerPlayer caster) {
         SubspaceVoyageData voyage = SubspaceVoyageService.get(caster);
@@ -147,7 +147,7 @@ public final class SubspaceMatterService {
         return personalYard(caster.getUUID());
     }
 
-    /** Personal matter yard — shared with the host's voyage landing when entry uses player UUID. */
+    /** Stable personal scrap field (player-hash) when no voyage entry is active. */
     public static BlockPos personalYard(UUID casterId) {
         return SubspaceVoyageService.subspaceAnchor(casterId).offset(DUMP_OFFSET_X, 0, DUMP_OFFSET_Z);
     }

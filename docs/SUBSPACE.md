@@ -6,11 +6,11 @@ Living doc for `effecoria:subspace` after the voyage MVP (`subspace_voyage`, 1�
 
 - Entry/exit portals are a **two-block-tall puncture** (void oval + ragged rim), oriented to the caster's facing.
 - Opening a gate still requires the Spatial spell `subspace_voyage`.
-- When an overworld **ENTRY** opens, a twin **EXIT** is placed at the hyperspace yard (`subspaceAnchor`) and linked back to that entry so arrivals always see a return gate.
+- When an overworld **ENTRY** opens, a twin **EXIT** is placed at a **session-unique** hyperspace yard (`subspaceAnchor(sessionId)`) and linked back to that entry so arrivals always see a return gate. A new voyage never reuses the previous yard.
 - A second cast in hyperspace opens an optional **far EXIT** (1∶100 map) without removing the yard twin.
 - Entry portals stay open while passengers travel; **when the Spatial host walks through an exit, the whole gate network closes** and remaining travelers are returned to the origin.
 - Multiple Spatial mages may run **independent** sessions at once; a passenger Spatial mage can place an *additional* exit without deleting the host’s (until the host exits).
-- Party members of one session share the same hyperspace rendezvous anchor.
+- Party members of one session share the same hyperspace rendezvous (the host's session yard).
 
 ## Floor / Φ-vision (shipped)
 

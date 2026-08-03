@@ -36,7 +36,8 @@ import javax.annotation.Nullable;
  */
 public final class SubspaceVoyageService {
     public static final int SCALE = 100;
-    private static final int FLOOR_Y = 1;
+    /** Flat gen places one Φ-veil layer at {@code min_y} (0); stand / portal feet are one above. */
+    private static final int FLOOR_Y = 0;
 
     private SubspaceVoyageService() {}
 
@@ -81,8 +82,8 @@ public final class SubspaceVoyageService {
         }
 
         UUID session = UUID.randomUUID();
-        // Land at the host's personal yard so rift_excise dumps are visible beside the portal.
-        BlockPos subspaceEntry = subspaceAnchor(caster.getUUID());
+        // Each voyage gets its own hyperspace yard — never reuse the caster's permanent hash.
+        BlockPos subspaceEntry = subspaceAnchor(session);
         ResourceKey<Level> originDim = caster.level().dimension();
         BlockPos originPos = caster.blockPosition().immutable();
 
@@ -485,7 +486,10 @@ public final class SubspaceVoyageService {
         return new BlockPos(origin.getX() + dx * SCALE, origin.getY(), origin.getZ() + dz * SCALE);
     }
 
-    /** Shared hyperspace rendezvous for one voyage session (party meets here). */
+    /**
+     * Hyperspace rendezvous for one voyage session (party meets here).
+     * Seeded by {@code sessionId} so consecutive voyages do not stack on the same yard.
+     */
     public static BlockPos subspaceAnchor(UUID sessionId) {
         int hash = sessionId.hashCode();
         int x = (hash & 0xFFFF) % 4000;
@@ -600,9 +604,8 @@ public final class SubspaceVoyageService {
         fx(subspace, Vec3.atCenterOf(placed));
     }
 
-    /** Floor + clear the two-block portal volume so placePortalAt can succeed at the yard. */
+    /** Clear the two-block portal volume only — never place floor under a hyperspace gate. */
     private static void preparePortalColumn(ServerLevel level, BlockPos feet) {
-        ensureFloor(level, feet);
         for (BlockPos at : new BlockPos[] {feet, feet.above()}) {
             BlockState state = level.getBlockState(at);
             if (state.is(ModBlocks.SUBSPACE_PORTAL.get()) || state.isAir()) {
@@ -612,11 +615,6 @@ public final class SubspaceVoyageService {
             if (state.canBeReplaced() || (hardness >= 0f && hardness < 50f)) {
                 level.setBlock(at, Blocks.AIR.defaultBlockState(), 3);
             }
-        }
-        // Re-assert floor after clears.
-        BlockPos floor = feet.below();
-        if (!level.getBlockState(floor).blocksMotion() || level.getBlockState(floor).is(Blocks.END_STONE)) {
-            level.setBlock(floor, SubspaceTerrain.floorState(), 3);
         }
     }
 
@@ -683,10 +681,12 @@ public final class SubspaceVoyageService {
         if (!isPortalReplaceable(level, feet) || !isPortalReplaceable(level, head)) {
             return null;
         }
-        // Need solid-ish ground under the puncture so it doesn't float oddly.
-        BlockState below = level.getBlockState(feet.below());
-        if (!below.blocksMotion() && !below.is(ModBlocks.SUBSPACE_PORTAL.get())) {
-            return null;
+        // Overworld gates need footing; hyperspace portals may float (no veil pads under gates).
+        if (!ModDimensions.isSubspace(level)) {
+            BlockState below = level.getBlockState(feet.below());
+            if (!below.blocksMotion() && !below.is(ModBlocks.SUBSPACE_PORTAL.get())) {
+                return null;
+            }
         }
         Direction horizontal = facing.getAxis().isHorizontal() ? facing : Direction.NORTH;
         BlockState lower = ModBlocks.SUBSPACE_PORTAL
