@@ -17,7 +17,7 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 public class MirageHorrorRenderer extends GeoEntityRenderer<MirageHorrorEntity> {
     public MirageHorrorRenderer(EntityRendererProvider.Context context) {
         super(context, new MirageHorrorModel());
-        this.shadowRadius = 1.6f;
+        this.shadowRadius = 2.6f;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class MirageHorrorRenderer extends GeoEntityRenderer<MirageHorrorEntity> 
             return;
         }
         poseStack.pushPose();
-        poseStack.scale(1.25f, 1.25f, 1.25f);
+        poseStack.scale(1.15f, 1.15f, 1.15f);
         super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
         poseStack.popPose();
     }

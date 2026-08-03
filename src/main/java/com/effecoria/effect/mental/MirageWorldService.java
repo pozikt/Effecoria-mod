@@ -159,14 +159,20 @@ public final class MirageWorldService {
                             openFace.getStepZ() * 0.55);
                     Vec3 to = faceCenter.subtract(from);
                     double dist = to.length();
-                    if (dist < 1.0 || dist > reach) {
+                    if (dist < 2.2 || dist > reach) {
                         continue;
                     }
                     Vec3 toFlat = new Vec3(to.x, 0, to.z);
-                    double alignment = toFlat.lengthSqr() < 1.0e-6 ? 0 : toFlat.normalize().dot(flatDir);
+                    if (toFlat.lengthSqr() < 1.0) {
+                        continue; // ignore nearly-underfoot latches that cancel movement
+                    }
+                    double alignment = toFlat.normalize().dot(flatDir);
+                    if (alignment < 0.15) {
+                        continue; // only grab ahead — never yank sideways/back into a stall
+                    }
                     double heightBias = openFace == Direction.UP ? 0.7 : 0.35;
                     double lowBias = -Math.abs(faceCenter.y - from.y) * 0.55;
-                    double score = alignment * 2.6 - dist * 0.14 + heightBias + lowBias;
+                    double score = alignment * 2.6 - dist * 0.08 + heightBias + lowBias;
                     if (score > bestScore) {
                         bestScore = score;
                         best = faceCenter;
@@ -185,9 +191,20 @@ public final class MirageWorldService {
         }
         int ix = Mth.floor(x);
         int iz = Mth.floor(z);
-        int top = s.origin.getY() + 10;
+        // Prefer the plains floor — scanning from the top would park the horror on arch beams.
+        int groundTop = s.origin.getY() + 2;
         int bottom = s.origin.getY() - 8;
-        for (int y = top; y >= bottom; y--) {
+        OptionalDouble ground = firstStandY(s, ix, iz, bottom, groundTop);
+        if (ground.isPresent()) {
+            return ground;
+        }
+        OptionalDouble elevated = firstStandY(s, ix, iz, bottom, s.origin.getY() + 10);
+        return elevated.isPresent() ? elevated : OptionalDouble.of(s.origin.getY());
+    }
+
+    /** Lowest walkable surface in [minY, maxY] (solid block with open space above). */
+    private static OptionalDouble firstStandY(Session s, int ix, int iz, int minY, int maxY) {
+        for (int y = minY; y <= maxY; y++) {
             BlockPos pos = new BlockPos(ix, y, iz);
             BlockState state = visibleState(s, pos);
             if (state == null || state.isAir()) {
@@ -206,7 +223,7 @@ public final class MirageWorldService {
                 return OptionalDouble.of(y + 0.85);
             }
         }
-        return OptionalDouble.of(s.origin.getY());
+        return OptionalDouble.empty();
     }
 
     public static void resend(ServerPlayer player, BlockPos pos) {

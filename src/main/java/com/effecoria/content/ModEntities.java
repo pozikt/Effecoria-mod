@@ -43,7 +43,7 @@ public final class ModEntities {
             ENTITY_TYPES.register(
                     "mirage_horror",
                     () -> EntityType.Builder.<MirageHorrorEntity>of(MirageHorrorEntity::new, MobCategory.MONSTER)
-                            .sized(2.4f, 1.7f)
+                            .sized(3.4f, 4.6f)
                             .clientTrackingRange(64)
                             .updateInterval(1)
                             .fireImmune()

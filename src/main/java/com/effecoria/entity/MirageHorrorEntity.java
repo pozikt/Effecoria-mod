@@ -65,16 +65,23 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
     private static final RawAnimation LUNGE =
             RawAnimation.begin().thenPlay("animation.mirage_horror.lunge");
 
-    private static final int REACH_TICKS = 5;
-    private static final int PULL_TICKS = 8;
-    private static final double GRAB_REACH = 7.0;
-    /** Sustained chase: above walk (~0.22), near sprint (~0.28) — must run to escape. */
-    private static final double CRAWL_NEAR = 0.24;
-    private static final double CRAWL_FAR = 0.30;
-    private static final double REACH_CREEP = 0.10;
-    private static final double PULL_YANK = 0.78;
-    private static final double PULL_CHASE = 0.38;
-    private static final double LUNGE_STEP = 0.42;
+    private static final int REACH_TICKS = 12;
+    private static final int PULL_TICKS = 12;
+    /** Long limbs latch far ahead on the floor. */
+    private static final double GRAB_REACH = 10.0;
+    /**
+     * Large body covers more ground per stride. Sustained chase a bit above walk
+     * (~0.22) and near sprint (~0.28) — run to stay ahead.
+     */
+    private static final double CRAWL_NEAR = 0.27;
+    private static final double CRAWL_FAR = 0.35;
+    private static final double REACH_CREEP = 0.20;
+    private static final double PULL_YANK = 0.90;
+    private static final double PULL_CHASE = 0.40;
+    private static final double LUNGE_STEP = 0.45;
+    private static final double STRIKE_RANGE = 5.8;
+    private static final int STUCK_CHECK_TICKS = 35;
+    private static final double STUCK_MOVE_EPS = 0.45;
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private int lungeCooldown;
@@ -83,6 +90,8 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
     private int gaitTicks;
     private Vec3 grabTarget = Vec3.ZERO;
     private Vec3 pullVelocity = Vec3.ZERO;
+    private Vec3 stuckAnchor = Vec3.ZERO;
+    private int stuckTicks;
 
     public MirageHorrorEntity(EntityType<? extends MirageHorrorEntity> type, Level level) {
         super(type, level);
@@ -96,7 +105,7 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 40.0)
-                .add(Attributes.MOVEMENT_SPEED, 0.32)
+                .add(Attributes.MOVEMENT_SPEED, 0.33)
                 .add(Attributes.FOLLOW_RANGE, 48.0)
                 .add(Attributes.ATTACK_DAMAGE, 0.0)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
@@ -182,13 +191,14 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
         Vec3 toVictim = flat(victim.position().subtract(position()));
         double dist = toVictim.length();
         faceToward(toVictim);
+        unstickIfNeeded(victim, toVictim, dist);
 
         if (lungeCooldown > 0) {
             lungeCooldown--;
             if (lungeCooldown == 12 && getPoseAnim() == POSE_LUNGE) {
                 setPoseAnim(POSE_IDLE);
             }
-        } else if (dist < 4.8 && gaitPhase == 0) {
+        } else if (dist < STRIKE_RANGE && gaitPhase == 0) {
             performFearStrike(victim);
             lungeCooldown = 55;
             setPoseAnim(POSE_LUNGE);
@@ -204,12 +214,12 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
             serverLevel.sendParticles(
                     ModParticleTypes.MENTAL_FEAR.get(),
                     getX(),
-                    getY() + 1.1,
+                    getY() + 2.8,
                     getZ(),
-                    4,
-                    0.55,
-                    0.35,
+                    5,
+                    0.8,
                     0.9,
+                    1.4,
                     0.01);
         }
     }
@@ -218,12 +228,24 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
         if (gaitPhase == 1) {
             gaitTicks--;
             setPoseAnim(POSE_REACH);
-            crawlBy(victim, toVictim.normalize().scale(REACH_CREEP));
+            // Keep sliding toward the latch / victim so the wind-up does not freeze the chase.
+            Vec3 reachDir = flat(grabTarget.subtract(position()));
+            if (reachDir.lengthSqr() < 0.4) {
+                reachDir = toVictim;
+            }
+            if (toVictim.lengthSqr() > 1.0e-4) {
+                reachDir = reachDir.normalize().scale(0.65).add(toVictim.normalize().scale(0.35));
+            }
+            if (reachDir.lengthSqr() > 1.0e-6) {
+                crawlBy(victim, reachDir.normalize().scale(REACH_CREEP));
+            }
             if (gaitTicks <= 0) {
                 gaitPhase = 2;
                 gaitTicks = PULL_TICKS;
                 Vec3 pullDir = flat(grabTarget.subtract(position()));
-                if (pullDir.lengthSqr() < 0.25) {
+                Vec3 chase = toVictim.lengthSqr() > 1.0e-4 ? toVictim.normalize() : pullDir;
+                if (pullDir.lengthSqr() < 1.0
+                        || (pullDir.lengthSqr() > 1.0e-6 && pullDir.normalize().dot(chase) < 0.1)) {
                     pullDir = toVictim;
                 }
                 Vec3 yank = pullDir.normalize().scale(PULL_YANK);
@@ -269,9 +291,9 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
         }
 
         Optional<Vec3> grab =
-                MirageWorldService.findGrabSurface(victim, position().add(0, 0.6, 0), toVictim, GRAB_REACH);
+                MirageWorldService.findGrabSurface(victim, position().add(0, 1.4, 0), toVictim, GRAB_REACH);
         if (grab.isEmpty() && dist > 1.0) {
-            Vec3 ahead = position().add(toVictim.normalize().scale(3.2));
+            Vec3 ahead = position().add(toVictim.normalize().scale(5.5));
             double gy = MirageWorldService.findStandY(victim, ahead.x, ahead.z).orElse(getY());
             grab = Optional.of(new Vec3(ahead.x, gy + 0.05, ahead.z));
         }
@@ -288,10 +310,42 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
                     0.45f,
                     0.55f);
         } else {
-            setPoseAnim(POSE_IDLE);
-            setDeltaMovement(Vec3.ZERO);
-            gaitTicks = 3;
+            setPoseAnim(dist > 3.0 ? POSE_CRAWL : POSE_IDLE);
+            if (dist > 0.4 && toVictim.lengthSqr() > 1.0e-4) {
+                crawlBy(victim, toVictim.normalize().scale(CRAWL_NEAR));
+            } else {
+                setDeltaMovement(Vec3.ZERO);
+            }
+            gaitTicks = 4;
         }
+    }
+
+    private void unstickIfNeeded(ServerPlayer victim, Vec3 toVictim, double dist) {
+        if (stuckAnchor == Vec3.ZERO) {
+            stuckAnchor = position();
+            stuckTicks = 0;
+            return;
+        }
+        if (position().distanceToSqr(stuckAnchor) > STUCK_MOVE_EPS * STUCK_MOVE_EPS) {
+            stuckAnchor = position();
+            stuckTicks = 0;
+            return;
+        }
+        stuckTicks++;
+        if (stuckTicks < STUCK_CHECK_TICKS) {
+            return;
+        }
+        // Hard reset: drop arches, abort gait, shove toward the soul.
+        stuckTicks = 0;
+        stuckAnchor = position();
+        gaitPhase = 0;
+        gaitTicks = 6;
+        pullVelocity = Vec3.ZERO;
+        setPoseAnim(dist > 2.5 ? POSE_CRAWL : POSE_IDLE);
+        if (toVictim.lengthSqr() > 1.0e-4) {
+            crawlBy(victim, toVictim.normalize().scale(CRAWL_FAR));
+        }
+        MirageWorldService.findStandY(victim, getX(), getZ()).ifPresent(y -> setPos(getX(), y, getZ()));
     }
 
     /** Horizontal step only — Y is forced to mirage floor afterward. */
@@ -413,7 +467,7 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 3, state -> {
+        controllers.add(new AnimationController<>(this, "main", 2, state -> {
             return switch (getPoseAnim()) {
                 case POSE_LUNGE -> {
                     state.setAnimation(LUNGE);
