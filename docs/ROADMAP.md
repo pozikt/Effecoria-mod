@@ -4,6 +4,8 @@ Prioritizes **perfecting magic & energy** first, then world layers, technology, 
 
 Lore reference: [Effecoria encyclopedia](https://github.com/pozikt/Effecoria).
 
+Monetization / release funnel (free core, support, server, DLC): [docs/monetization/](monetization/README.md). Stage I “recommend to a friend” gate: [STAGE_I_FUNNEL.md](monetization/STAGE_I_FUNNEL.md).
+
 ---
 
 ## Stage order (locked)
@@ -18,6 +20,20 @@ Lore reference: [Effecoria encyclopedia](https://github.com/pozikt/Effecoria).
 | **VI** | Ω-space | Analog of Hell — dimension + inhabitants (after TSE) |
 
 Do not start II+ until Stage I is intentionally “finished enough.”
+
+### Magic expands with each stage (policy)
+
+Stage I ships a **complete cast loop** for all schools. Later stages do **not** freeze magic — each content pillar **widens the school that fits that pillar**. Direction of the update → direction of the spell/system expansion:
+
+| When we ship… | School / system that grows | Why |
+|---------------|----------------------------|-----|
+| **II — Environment** | **Elemental** | Weather, biomes, flora/fauna, surface Φ anomalies give fire/ice/storm/steam real anchors |
+| **III — Caves & ores** | *(as needed)* Material-tied workings, deep-Φ / low-light school hooks | New ores and underground Φ zones |
+| **IV — Technology** | **Seals** | Reactors, towers, rune wiring, seal-automata — programmable Φ on blocks |
+| **Items + accessory slot library** (Curios / Trinkets / equivalent) | **Corruption (curses)** | Wearable curse marks, blight brands, prey/bind on jewelry & relics — slots make permanent/semi-permanent curses readable |
+| **V — TSE / VI — Ω** | Spatial + necromancy endgame (and cross-school cosmology) | Singularities, other-side geography |
+
+Rule of thumb: **do not invent a huge school rewrite in Stage I “just because.”** Park deep seal automation until tech, deep curse equipment until accessory slots exist, and big elemental identity until the environment can feed it.
 
 ---
 
@@ -85,6 +101,7 @@ Surface world as Φ ecology.
 | Flora | Φ-sensitive plants, consumables (mandragora analogs) |
 | Fauna | Creatures tied to schools / Φ bands |
 | Surface anomalies | Mild Φ storms, ZNΦ patches (content, not just anti-cast) |
+| **Magic: Elemental expansion** | New spells / behaviors tied to weather, biomes, and surface Φ — school grows *because* the world can host it |
 
 Races / Orkanum baselines fit naturally here (biologyQ hooks already exist).
 
@@ -97,6 +114,7 @@ Races / Orkanum baselines fit naturally here (biologyQ hooks already exist).
 | Essonite & new ores | Real worldgen veins |
 | Cave biomes / deep Φ | Low light, high entropy pockets |
 | Underground structures | Small mage ruins, sealed chambers |
+| **Magic (light touch)** | Material / deep-Φ hooks as ores unlock (not a full school rewrite) |
 
 Materials that were “craft only” in Stage I get proper sources here.
 
@@ -110,6 +128,18 @@ Materials that were “craft only” in Stage I get proper sources here.
 | Mage towers | Regional Φ, beacons |
 | Rune circuits / wiring | `technomagicPower()` path |
 | Seal-automata | Automated wards |
+| **Magic: Seals expansion** | Deeper word grammar, networks, automation — seals scale with tech, not only with Stage I polish |
+
+### Parallel track — Items & accessories → Corruption
+
+When (or after) we add meaningful **items / relics** and integrate an **accessory-slot library** (Curios, Trinkets, or NeoForge equivalent):
+
+| Item | Notes |
+|------|-------|
+| Accessory slots | Ring / amulet / charm slots for Effecoria gear |
+| **Magic: Corruption (curses) expansion** | Curse marks, brands, prey/bind as wearable or slot-bound effects; readable persistence without stuffing the hotbar |
+
+Corruption combat spells can still grow a little in Stage I; **equipment-scale curses** wait on slots + item identity.
 
 ---
 

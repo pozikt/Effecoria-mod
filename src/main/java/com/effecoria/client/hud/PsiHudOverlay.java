@@ -10,6 +10,7 @@ import com.effecoria.core.progression.BiologyService;
 import com.effecoria.core.progression.BreathingService;
 import com.effecoria.core.progression.EntropyService;
 import com.effecoria.core.progression.ExhaustionService;
+import com.effecoria.core.progression.ProgressionService;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
@@ -136,6 +137,26 @@ public final class PsiHudOverlay {
         lineY += 10;
 
         int extraY = 10; // breathing line always present after initiation
+        float trainThreshold = BalanceConfig.TRAINING_XP_THRESHOLD.get().floatValue();
+        if (trainThreshold > 0f) {
+            boolean trainCapped = ProgressionService.isTrainingMaxPsiCapped(data);
+            float trainFill = trainCapped
+                    ? 1f
+                    : Math.min(1f, data.trainingXp() / trainThreshold);
+            int trainBarY = lineY;
+            drawBar(graphics, x, trainBarY, 90, 4, trainFill, trainCapped ? 0xFF666666 : 0xFF88AA66, 0xFF2A2818);
+            Component trainLabel = trainCapped
+                    ? Component.translatable("hud.effecoria.training_capped", (int) data.maxPsi())
+                    : Component.translatable(
+                            "hud.effecoria.training",
+                            (int) data.trainingXp(),
+                            (int) trainThreshold,
+                            (int) data.maxPsi());
+            graphics.drawString(minecraft.font, trainLabel, x, trainBarY + 6, trainCapped ? 0xFF888888 : 0xCCBBAA88);
+            lineY += 16;
+            extraY += 16;
+        }
+
         if (!godMode && !data.isLichAscensionActive(minecraft.level.getGameTime())) {
             float orkanum = BiologyService.effectiveOrkanum(minecraft.player, data);
             float body = BiologyService.bodyFactor(minecraft.player);

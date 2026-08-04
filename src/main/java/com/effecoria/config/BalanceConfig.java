@@ -158,13 +158,17 @@ public final class BalanceConfig {
             .comment("Orkanum (biologyQ) bonus per reference mastery (100%). Scales past 100% — e.g. 0.3 = +30% at 100%, +60% at 200%.")
             .defineInRange("breathing_biology_bonus_max", 0.30, 0.0, 2.0);
 
-    public static final ModConfigSpec.DoubleValue TRAINING_XP_SPRINT = BUILDER
-            .comment("Training XP gained per progression tick while sprinting on ground")
-            .defineInRange("training_xp_sprint", 0.08, 0.0, 1000.0);
+    public static final ModConfigSpec.DoubleValue TRAINING_XP_WALK_PER_BLOCK = BUILDER
+            .comment("Training XP per block walked on ground (sampled every progression tick)")
+            .defineInRange("training_xp_walk_per_block", 0.42, 0.0, 100.0);
 
-    public static final ModConfigSpec.DoubleValue TRAINING_XP_SWIM = BUILDER
-            .comment("Training XP gained per progression tick while swimming")
-            .defineInRange("training_xp_swim", 0.05, 0.0, 1000.0);
+    public static final ModConfigSpec.DoubleValue TRAINING_XP_SPRINT_PER_BLOCK = BUILDER
+            .comment("Training XP per block sprinted on ground")
+            .defineInRange("training_xp_sprint_per_block", 0.72, 0.0, 100.0);
+
+    public static final ModConfigSpec.DoubleValue TRAINING_XP_SWIM_PER_BLOCK = BUILDER
+            .comment("Training XP per block swum")
+            .defineInRange("training_xp_swim_per_block", 0.55, 0.0, 100.0);
 
     public static final ModConfigSpec.DoubleValue TRAINING_XP_MEDITATE = BUILDER
             .comment("Training XP per progression tick while meditating (standing calm, full breath)")
@@ -199,12 +203,16 @@ public final class BalanceConfig {
             .defineInRange("training_max_soul", 2.0, 1.0, 50.0);
 
     public static final ModConfigSpec.DoubleValue TRAINING_MAX_PSI_GAIN = BUILDER
-            .comment("Max Ψ increase per training milestone")
-            .defineInRange("training_max_psi_gain", 5.0, 0.0, 500.0);
+            .comment("Max Ψ (internal cast energy) added per training milestone — movement fills the bar")
+            .defineInRange("training_max_psi_gain", 1.0, 0.0, 500.0);
 
     public static final ModConfigSpec.DoubleValue TRAINING_MAX_PSI_CAP = BUILDER
-            .comment("Maximum Ψ capacity from training")
-            .defineInRange("training_max_psi_cap", 150.0, 10.0, 10000.0);
+            .comment("Maximum max Ψ reachable from training milestones (ignored if below default_max_psi + training_max_psi_bonus)")
+            .defineInRange("training_max_psi_cap", 250.0, 10.0, 10000.0);
+
+    public static final ModConfigSpec.DoubleValue TRAINING_MAX_PSI_BONUS = BUILDER
+            .comment("Minimum total max-Ψ headroom above default_max_psi from training (floor for the cap)")
+            .defineInRange("training_max_psi_bonus", 150.0, 0.0, 10000.0);
 
     public static final ModConfigSpec.DoubleValue WHIFF_COST_FRACTION = BUILDER
             .comment("Ψ spent when a targeted spell finds no valid target (fraction of full cost)")

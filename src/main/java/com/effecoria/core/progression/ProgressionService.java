@@ -7,8 +7,9 @@ import com.effecoria.magic.CastDelivery;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * Passive progression: body training, meditation, successful casts, and the breathing drill.
- * Breathing mastery itself is trained via the hub mini-game / scrolls.
+ * Passive progression: movement fills training toward +max Ψ (internal cast energy).
+ * Casts, meditation, and the breathing drill also feed the same bar. Soul strength still
+ * ticks up on milestones until its cap. Orkanum is not trained here.
  */
 public final class ProgressionService {
     private ProgressionService() {}
@@ -18,7 +19,7 @@ public final class ProgressionService {
         applyMilestones(player, data);
     }
 
-    /** Grant XP from any source and convert completed thresholds into soul / max Ψ / essence. */
+    /** Grant XP from any source and convert completed thresholds into max Ψ / soul / essence. */
     public static void grant(ServerPlayer player, PlayerPsiData data, float amount) {
         if (amount <= 0f) {
             return;
@@ -45,14 +46,36 @@ public final class ProgressionService {
         grant(player, data, BalanceConfig.TRAINING_XP_BREATH_TRAIN.get().floatValue());
     }
 
+    /** Effective max Ψ cap from training — never below default + bonus (fixes legacy config cap = 150). */
+    public static float trainingMaxPsiCap() {
+        float configured = BalanceConfig.TRAINING_MAX_PSI_CAP.get().floatValue();
+        float floor = BalanceConfig.DEFAULT_MAX_PSI.get().floatValue()
+                + BalanceConfig.TRAINING_MAX_PSI_BONUS.get().floatValue();
+        return Math.max(configured, floor);
+    }
+
     private static void tickPassiveXp(ServerPlayer player, PlayerPsiData data) {
         if (isStillMeditating(player)) {
             data.addTrainingXp(BalanceConfig.TRAINING_XP_MEDITATE.get().floatValue());
-        } else if (player.isSprinting() && player.onGround()) {
-            data.addTrainingXp(BalanceConfig.TRAINING_XP_SPRINT.get().floatValue());
-        } else if (player.isSwimming()) {
-            data.addTrainingXp(BalanceConfig.TRAINING_XP_SWIM.get().floatValue());
+            return;
         }
+
+        float blocks = data.consumeMovementSample(player);
+        if (blocks <= 0.001f) {
+            return;
+        }
+
+        float rate;
+        if (player.isSwimming()) {
+            rate = BalanceConfig.TRAINING_XP_SWIM_PER_BLOCK.get().floatValue();
+        } else if (player.onGround() && player.isSprinting()) {
+            rate = BalanceConfig.TRAINING_XP_SPRINT_PER_BLOCK.get().floatValue();
+        } else if (player.onGround() && !player.isShiftKeyDown()) {
+            rate = BalanceConfig.TRAINING_XP_WALK_PER_BLOCK.get().floatValue();
+        } else {
+            rate = BalanceConfig.TRAINING_XP_WALK_PER_BLOCK.get().floatValue() * 0.35f;
+        }
+        data.addTrainingXp(blocks * rate);
     }
 
     private static boolean isStillMeditating(ServerPlayer player) {
@@ -67,37 +90,50 @@ public final class ProgressionService {
         if (threshold <= 0f) {
             return;
         }
-        float soulBefore = data.soulStrength();
         float maxPsiBefore = data.maxPsi();
-        // Cap iterations so dumping huge XP (e.g. 70k) cannot stall the server.
+        float maxPsiCap = trainingMaxPsiCap();
+        float psiGain = BalanceConfig.TRAINING_MAX_PSI_GAIN.get().floatValue();
         int safety = 64;
         while (data.trainingXp() >= threshold && safety-- > 0) {
-            data.addTrainingXp(-threshold);
-
             float soulGain = BalanceConfig.TRAINING_SOUL_GAIN.get().floatValue();
             float maxSoul = BalanceConfig.TRAINING_MAX_SOUL.get().floatValue();
-            float psiGain = BalanceConfig.TRAINING_MAX_PSI_GAIN.get().floatValue();
-            float maxPsi = BalanceConfig.TRAINING_MAX_PSI_CAP.get().floatValue();
+            int essenceGain = BalanceConfig.ESSENCE_PER_TRAINING_MILESTONE.get();
 
-            if (data.soulStrength() < maxSoul) {
+            boolean gainPsi = data.maxPsi() + 0.001f < maxPsiCap && psiGain > 0f;
+            boolean gainSoul = data.soulStrength() + 0.001f < maxSoul && soulGain > 0f;
+            boolean gainEssence = essenceGain > 0;
+
+            if (!gainPsi && !gainSoul && !gainEssence) {
+                break;
+            }
+
+            data.addTrainingXp(-threshold);
+
+            if (gainSoul) {
                 data.setSoulStrength(Math.min(maxSoul, data.soulStrength() + soulGain));
             }
-            if (data.maxPsi() < maxPsi) {
-                data.setMaxPsi(Math.min(maxPsi, data.maxPsi() + psiGain));
+            if (gainPsi) {
+                float next = Math.min(maxPsiCap, data.maxPsi() + psiGain);
+                float delta = next - data.maxPsi();
+                data.setMaxPsi(next);
+                if (delta > 0f) {
+                    data.setCurrentPsi(data.currentPsi() + delta);
+                }
             }
-            int essenceGain = BalanceConfig.ESSENCE_PER_TRAINING_MILESTONE.get();
-            if (essenceGain > 0) {
+            if (gainEssence) {
                 data.addEssence(essenceGain);
             }
         }
 
-        if (data.soulStrength() > soulBefore || data.maxPsi() > maxPsiBefore) {
+        if (data.maxPsi() > maxPsiBefore) {
             player.displayClientMessage(
                     net.minecraft.network.chat.Component.translatable(
-                            "message.effecoria.training_milestone",
-                            String.format("%.2f", data.soulStrength()),
-                            (int) data.maxPsi()),
+                            "message.effecoria.training_psi_up", (int) data.maxPsi()),
                     true);
         }
+    }
+
+    public static boolean isTrainingMaxPsiCapped(PlayerPsiData data) {
+        return data.maxPsi() >= trainingMaxPsiCap() - 0.001f;
     }
 }

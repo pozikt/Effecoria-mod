@@ -179,6 +179,10 @@ public final class PlayerPsiData {
     private Map<ResourceLocation, Integer> spellCastCounts = new HashMap<>();
     private Map<ResourceLocation, Long> spellLastCastAt = new HashMap<>();
 
+    /** Server-only last position for movement-based training XP. */
+    private transient double trainingSampleX = Double.NaN;
+    private transient double trainingSampleZ = Double.NaN;
+
     public static PlayerPsiData createDefault() {
         PlayerPsiData data = new PlayerPsiData();
         data.maxPsi = BalanceConfig.DEFAULT_MAX_PSI.get().floatValue();
@@ -614,6 +618,26 @@ public final class PlayerPsiData {
 
     public void addTrainingXp(float amount) {
         this.trainingXp = Math.max(0f, this.trainingXp + amount);
+    }
+
+    /** Horizontal blocks moved since the last progression sample; ignores teleports. */
+    public float consumeMovementSample(net.minecraft.server.level.ServerPlayer player) {
+        double x = player.getX();
+        double z = player.getZ();
+        if (Double.isNaN(trainingSampleX)) {
+            trainingSampleX = x;
+            trainingSampleZ = z;
+            return 0f;
+        }
+        double dx = x - trainingSampleX;
+        double dz = z - trainingSampleZ;
+        trainingSampleX = x;
+        trainingSampleZ = z;
+        double dist = Math.sqrt(dx * dx + dz * dz);
+        if (dist > 32.0) {
+            return 0f;
+        }
+        return (float) dist;
     }
 
     public void setTrainingXp(float amount) {
