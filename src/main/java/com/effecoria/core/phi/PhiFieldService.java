@@ -6,8 +6,13 @@ import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.psi.PsiHelper;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -46,7 +51,7 @@ public final class PhiFieldService {
         value += weatherBonus(level);
         value += fluidBonus(level, pos, player);
 
-        if (isInsideZeroFluxZone(level, pos)) {
+        if (isInsideZeroFluxZone(level, pos) || isIronInsulated(player)) {
             return new PhiSample(0f, true, isSolarDay(level));
         }
         if (player != null) {
@@ -86,6 +91,40 @@ public final class PhiFieldService {
             }
         }
         return false;
+    }
+
+    private static boolean isIronInsulated(Player player) {
+        if (player == null) {
+            return false;
+        }
+        for (EquipmentSlot slot : new EquipmentSlot[] {
+            EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
+        }) {
+            ItemStack stack = player.getItemBySlot(slot);
+            if (isIronArmor(stack)) {
+                return true;
+            }
+        }
+        return isIronTool(player.getMainHandItem()) || isIronTool(player.getOffhandItem());
+    }
+
+    private static boolean isIronArmor(ItemStack stack) {
+        if (stack.isEmpty() || !(stack.getItem() instanceof ArmorItem)) {
+            return false;
+        }
+        return isVanillaIronItem(stack);
+    }
+
+    private static boolean isIronTool(ItemStack stack) {
+        if (stack.isEmpty() || !(stack.getItem() instanceof TieredItem)) {
+            return false;
+        }
+        return isVanillaIronItem(stack);
+    }
+
+    private static boolean isVanillaIronItem(ItemStack stack) {
+        var key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        return key != null && "minecraft".equals(key.getNamespace()) && key.getPath().startsWith("iron_");
     }
 
     private static int chebyshev(BlockPos a, BlockPos b) {
