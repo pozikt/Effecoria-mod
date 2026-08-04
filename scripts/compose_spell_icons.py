@@ -7,6 +7,8 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from elemental_icon_prompts import ELEMENTAL_PROMPTS
+from organic_icon_prompts import ORGANIC_PROMPTS
+from spatial_icon_prompts import SPATIAL_PROMPTS
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC_ASSETS = Path(r"C:\Users\2005t\.cursor\projects\c-Users-2005t-Effecoria-mod\assets")
@@ -14,13 +16,11 @@ HQ_DIR = ROOT / "tmp_icon_hq"
 OUT_DIR = ROOT / "src/main/resources/assets/effecoria/textures/gui/sprites/spells"
 OUT = 64
 
-# Non-elemental AI overlays (school frame)
+# Non-school-batch AI overlays (school frame)
 EXAMPLE_SCHOOL = {
-    "void_lance": "spatial",
     "festering_wound": "corruption",
     "cliff_urge": "mental",
     "raise_skeleton": "necromancy",
-    "root_bind": "organic",
     "psi_ward": "common",
     "psi_adrenaline": "common",
     "phi_glow": "common",
@@ -28,9 +28,13 @@ EXAMPLE_SCHOOL = {
     "psi_link": "common",
 }
 
-# All elemental AI prompts use school frame orange (hub consistency)
+# School batches: hub frame color by school
 for _sid in ELEMENTAL_PROMPTS:
     EXAMPLE_SCHOOL[_sid] = "elemental"
+for _sid in SPATIAL_PROMPTS:
+    EXAMPLE_SCHOOL[_sid] = "spatial"
+for _sid in ORGANIC_PROMPTS:
+    EXAMPLE_SCHOOL[_sid] = "organic"
 
 FRAME_RGB = {
     "spatial": (240, 240, 245),

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from elemental_icon_prompts import ELEMENTAL_PROMPTS
+from organic_icon_prompts import ORGANIC_PROMPTS
+from spatial_icon_prompts import SPATIAL_PROMPTS
 
 PREFIX = (
     "Pixel art, minecraft mod icon, 64x64 pixels, round frame. "
@@ -12,11 +14,6 @@ PREFIX = (
 
 # Exact user examples (id -> full prompt)
 EXAMPLE_PROMPTS: dict[str, str] = {
-    "void_lance": (
-        f"{PREFIX}, thin white circular border. "
-        "A cracked purple void spear pointing diagonally down, surrounded by 3 white star-like spark pixels. "
-        "Palette: dark violet, magenta, white."
-    ),
     "festering_wound": (
         f"{PREFIX}, thin dark green circular border. "
         "An open red wound with 3 green dripping drops of pus below it. "
@@ -31,11 +28,6 @@ EXAMPLE_PROMPTS: dict[str, str] = {
         f"{PREFIX}, thin white border. "
         "A stylized white skull with 2 crossbones behind it. "
         "Simple bold silhouette, flat pixel art, sharp edges. Palette: bone-white, gray, black."
-    ),
-    "root_bind": (
-        f"{PREFIX}, thin green border. "
-        "3 twisted brown roots forming a cage around a small green trapped pixel. "
-        "Simple shapes, high contrast. Palette: brown, dark green, lime."
     ),
     "psi_ward": (
         f"{PREFIX}, thin cyan circular border. "
@@ -299,6 +291,10 @@ def build_prompt(spell_id: str, school: str, scene: str | None = None) -> str:
         return EXAMPLE_PROMPTS[spell_id]
     if spell_id in ELEMENTAL_PROMPTS:
         return ELEMENTAL_PROMPTS[spell_id]
+    if spell_id in SPATIAL_PROMPTS:
+        return SPATIAL_PROMPTS[spell_id]
+    if spell_id in ORGANIC_PROMPTS:
+        return ORGANIC_PROMPTS[spell_id]
     border, palette = SCHOOL_STYLE.get(school, ("thin white circular border", "white, gray, black"))
     action = scene or VISUAL_SCENES.get(spell_id) or f"A simple iconic symbol for {spell_id.replace('_', ' ')}"
     return (
