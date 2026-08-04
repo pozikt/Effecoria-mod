@@ -2,6 +2,7 @@
 """Visual-action pixel prompts for Effecoria spell icons (64x64, round frame)."""
 from __future__ import annotations
 
+from corruption_icon_prompts import CORRUPTION_PROMPTS
 from elemental_icon_prompts import ELEMENTAL_PROMPTS
 from mental_icon_prompts import MENTAL_PROMPTS
 from necromancy_icon_prompts import NECROMANCY_PROMPTS
@@ -16,11 +17,6 @@ PREFIX = (
 
 # Exact user examples (id -> full prompt)
 EXAMPLE_PROMPTS: dict[str, str] = {
-    "festering_wound": (
-        f"{PREFIX}, thin dark green circular border. "
-        "An open red wound with 3 green dripping drops of pus below it. "
-        "Simple silhouette, flat pixel clusters. Palette: dark red, sickly green, black."
-    ),
     "psi_ward": (
         f"{PREFIX}, thin cyan circular border. "
         "A cyan shield with a glowing magical plus sign in the center. "
@@ -291,6 +287,8 @@ def build_prompt(spell_id: str, school: str, scene: str | None = None) -> str:
         return MENTAL_PROMPTS[spell_id]
     if spell_id in NECROMANCY_PROMPTS:
         return NECROMANCY_PROMPTS[spell_id]
+    if spell_id in CORRUPTION_PROMPTS:
+        return CORRUPTION_PROMPTS[spell_id]
     border, palette = SCHOOL_STYLE.get(school, ("thin white circular border", "white, gray, black"))
     action = scene or VISUAL_SCENES.get(spell_id) or f"A simple iconic symbol for {spell_id.replace('_', ' ')}"
     return (
