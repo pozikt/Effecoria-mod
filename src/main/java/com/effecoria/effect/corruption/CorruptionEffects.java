@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
@@ -47,6 +48,27 @@ public final class CorruptionEffects {
         CorruptionCurseService.apply(caster, target, curse, true);
         spawnMark(level, target.position().add(0, 1, 0));
         level.playSound(null, target.blockPosition(), SoundEvents.SCULK_CLICKING, SoundSource.PLAYERS, 0.9f, 0.7f);
+    }
+
+    /** Prey mark — hostiles in a large radius forcibly chase the marked living. */
+    public static void preyMark(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        ServerLevel level = caster.serverLevel();
+        int duration = effect.params().has("duration_ticks")
+                ? scaleTicks(effect.params().get("duration_ticks").getAsInt(), power, 0.85f)
+                : PreyMarkService.DEFAULT_DURATION_TICKS;
+        float huntRadius = effect.params().has("hunt_radius")
+                ? effect.params().get("hunt_radius").getAsFloat()
+                : PreyMarkService.DEFAULT_HUNT_RADIUS;
+
+        PreyMarkService.activate(target, caster.getUUID(), duration, huntRadius);
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, true, true));
+        PreyMarkService.forceHunt(target);
+        spawnMark(level, target.position().add(0, 1, 0));
+        spawnMiasma(level, target.position().add(0, 0.5, 0));
+        level.playSound(null, target.blockPosition(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.55f, 1.35f);
     }
 
     public static void bindingSeal(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {

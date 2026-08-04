@@ -189,6 +189,7 @@ public final class SpellProgression {
                     id("festering_wound"),
                     id("decay_bind"),
                     id("entropy_aegis"),
+                    id("prey_mark"),
                     // III — field
                     id("miasma_cloak"),
                     id("blight_field"),

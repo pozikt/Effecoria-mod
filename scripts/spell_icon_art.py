@@ -985,7 +985,7 @@ _reg(["dimensional_anchor"], m_chain)
 _reg(["spatial_surge"], m_wave)
 _reg(["rift_burst"], m_pulse)
 
-_reg(["corrupt_mark", "blight_brand"], m_corrupt)
+_reg(["corrupt_mark", "blight_brand", "prey_mark"], m_corrupt)
 _reg(["binding_seal"], m_binding)
 _reg(["blight_pulse", "blight_surge", "pestilence_wave", "virulent_wave", "omega_blight"], m_blight)
 _reg(["rot_touch"], m_rot)

@@ -109,7 +109,7 @@ public final class CastPresentation {
             id("mass_hysteria"));
 
     private static final Set<ResourceLocation> CORRUPTION_MARK =
-            Set.of(id("corrupt_mark"), id("blight_brand"));
+            Set.of(id("corrupt_mark"), id("blight_brand"), id("prey_mark"));
     private static final Set<ResourceLocation> CORRUPTION_ROT =
             Set.of(id("rot_touch"), id("festering_wound"));
     private static final Set<ResourceLocation> CORRUPTION_PLAGUE = Set.of(

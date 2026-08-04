@@ -82,6 +82,7 @@ public final class SpellEffectExecutor {
             "binding_seal",
             "festering_wound",
             "decay_bind",
+            "prey_mark",
             "psi_link");
 
     /** Prefer living ally; else apply to caster (never whiff on dirt). */
@@ -496,6 +497,7 @@ public final class SpellEffectExecutor {
             case "rift_yank" -> riftYank(caster, effect, power, target, aim);
             case "phase_veil" -> phaseVeil(caster, effect, power);
             case "corrupt_mark" -> CorruptionEffects.corruptMark(caster, effect, power, target);
+            case "prey_mark" -> CorruptionEffects.preyMark(caster, effect, power, target);
             case "binding_seal" -> CorruptionEffects.bindingSeal(caster, effect, power, target);
             case "blight_pulse" -> CorruptionEffects.blightPulse(caster, effect, power);
             case "rot_touch" -> CorruptionEffects.rotTouch(caster, effect, power, target, aim);

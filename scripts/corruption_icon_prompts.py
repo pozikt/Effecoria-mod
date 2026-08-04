@@ -23,6 +23,13 @@ CORRUPTION_PROMPTS: dict[str, str] = {
         "Simple bold silhouette, flat colors. Palette: dark purple, black, pale green, gray. "
         "Dark background, thin purple border."
     ),
+    "prey_mark": (
+        "Pixel art, minecraft mod icon, 64x64 pixels, round frame. "
+        "A glowing red curse mark above a terrified player's head, with 6 hostile eyes from surrounding mobs "
+        "all locked onto them, and 4 targeting crosshairs pointing at the victim. "
+        "Simple bold silhouette, flat pixel clusters. Palette: bright red, dark red, yellow, black, white. "
+        "Dark background, thin red circular border."
+    ),
     # Fields / auras
     "blight_field": (
         "Pixel art, minecraft mod icon, 64x64 pixels, round frame. "
