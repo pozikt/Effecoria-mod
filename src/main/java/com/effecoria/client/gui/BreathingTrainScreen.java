@@ -26,8 +26,6 @@ public class BreathingTrainScreen extends Screen {
     private int hits;
     private int misses;
     private int missLimit;
-    /** Lifetime clicks this session (hits + misses) — drives green shrink. */
-    private int clicks;
     private boolean fatigued;
     private long fatigueUntilMs;
     private String flash = "";
@@ -52,11 +50,12 @@ public class BreathingTrainScreen extends Screen {
             hits = 0;
             misses = 0;
             fatigued = false;
-            greenHalf = greenHalfWidth(clicks);
+            greenHalf = greenHalfWidth(0);
             return;
         }
         PlayerPsiData data = minecraft.player.getData(ModAttachments.PSI.get());
-        hits = Math.max(hits, data.breathTrainHits());
+        hits = data.breathTrainHits();
+        int sessionClicks = data.breathTrainSessionClicks();
         // Keep optimistic local miss count until the server catches up (or fatigue clears the streak).
         int syncedMisses = data.breathTrainSessionMisses();
         if (data.isBreathTrainFatigued()) {
@@ -67,7 +66,7 @@ public class BreathingTrainScreen extends Screen {
             misses = Math.max(misses, syncedMisses);
             fatigued = false;
         }
-        greenHalf = greenHalfWidth(clicks);
+        greenHalf = greenHalfWidth(sessionClicks);
     }
 
     /** Green half-width shrinks with every click (success or miss). */
@@ -125,13 +124,10 @@ public class BreathingTrainScreen extends Screen {
         }
         boolean success = inGreen();
         lastHitSuccess = success;
-        clicks++;
-        greenHalf = greenHalfWidth(clicks);
         if (success) {
             PacketDistributor.sendToServer(new ModNetworking.BreathTrainHitPayload());
             flash = Component.translatable("gui.effecoria.breath_train.success").getString();
             flashTicks = 30;
-            hits++;
             randomizeGreen();
         } else {
             PacketDistributor.sendToServer(new ModNetworking.BreathTrainMissPayload());

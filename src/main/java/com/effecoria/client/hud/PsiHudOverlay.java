@@ -20,7 +20,12 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffectInstance;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class PsiHudOverlay {
     /** Game-time when the primer HUD nudge first became eligible; -1 = inactive. */
@@ -52,7 +57,6 @@ public final class PsiHudOverlay {
         float usableFill = max > 0f ? usable / max : 0f;
         float reservedFill = max > 0f ? reserved / max : 0f;
 
-        // Background → reserved band (right) → usable fill (left).
         graphics.fill(x, y, x + 90, y + 8, 0xFF2E0845);
         if (reservedFill > 0.001f) {
             int reservedWidth = Math.round(90 * reservedFill);
@@ -86,15 +90,40 @@ public final class PsiHudOverlay {
         drawBar(graphics, x, y + 16, 90, 6, phiFill, phiBarColor(phi), 0xFF1B3A59);
         graphics.drawString(minecraft.font, formatPhiLabel(phi), x, y + 28, phiTextColor(phi));
 
-        ResourceLocation selected = data.selectedSpell();
-        if (selected != null) {
+        int lineY = y + 40;
+        float entropyFill = EntropyService.fillRatio(data.entropyB());
+        if (entropyFill > 0.02f) {
+            boolean critical = EntropyService.isCritical(data.entropyB());
+            int barColor = critical ? 0xFFE07030 : 0xFF8866AA;
+            int textColor = critical ? 0xFFFFAA66 : 0xCCBBAADD;
+            drawBar(graphics, x, lineY, 90, 5, entropyFill, barColor, 0xFF221828);
             graphics.drawString(
                     minecraft.font,
-                    Component.translatable("hud.effecoria.spell", Component.translatable("spell.effecoria." + selected.getPath())),
+                    Component.translatable(
+                            critical ? "hud.effecoria.entropy_warn" : "hud.effecoria.entropy",
+                            (int) (entropyFill * 100)),
                     x,
-                    y + 40,
-                    0xFFFFFF);
+                    lineY + 6,
+                    textColor);
+            lineY += 14;
         }
+
+        if (data.exhaustion() >= BalanceConfig.EXHAUSTION_WARM.get().floatValue()) {
+            float exFill = data.exhaustion() / ExhaustionService.MAX;
+            drawBar(graphics, x, lineY, 90, 5, exFill, 0xFFAA4444, 0xFF331111);
+            graphics.drawString(
+                    minecraft.font,
+                    Component.translatable(
+                            "hud.effecoria.exhaustion",
+                            formatExhaustionBand(data.exhaustion()),
+                            (int) data.exhaustion()),
+                    x,
+                    lineY + 6,
+                    0xFFCC8888);
+            lineY += 14;
+        }
+
+        lineY = renderHarmfulEffects(graphics, minecraft, x, lineY);
 
         if (data.isPhiSenseActive(minecraft.level.getGameTime())) {
             graphics.drawString(minecraft.font, Component.translatable("hud.effecoria.phi_sense"), x, y - 22, 0x55FFFF);
@@ -107,8 +136,9 @@ public final class PsiHudOverlay {
                     y - 34,
                     0xAA88FF);
         } else if ((data.primerTipsMask() & com.effecoria.core.progression.FirstHourTips.Tip.FIRST_CAST.mask())
-                == 0
-                && data.initiated()) {
+                        == 0
+                && entropyFill < 0.35f
+                && data.exhaustion() < BalanceConfig.EXHAUSTION_WARM.get().floatValue()) {
             long now = minecraft.level.getGameTime();
             if (primerNudgeSince < 0L) {
                 primerNudgeSince = now;
@@ -125,7 +155,22 @@ public final class PsiHudOverlay {
             primerNudgeSince = -1L;
         }
 
-        int lineY = y + 52;
+        ResourceLocation selected = data.selectedSpell();
+        if (selected != null && lineY < y + 58) {
+            graphics.drawString(
+                    minecraft.font,
+                    Component.translatable("hud.effecoria.spell", Component.translatable("spell.effecoria." + selected.getPath())),
+                    x,
+                    lineY,
+                    0xFFFFFF);
+            lineY += 10;
+        }
+
+        int extraY = 0;
+        float trainThreshold = BalanceConfig.TRAINING_XP_THRESHOLD.get().floatValue();
+        boolean showMovementTrain = trainThreshold > 0f
+                && !ProgressionService.isTrainingMaxPsiCapped(data)
+                && data.trainingXp() >= 1f;
         graphics.drawString(
                 minecraft.font,
                 Component.translatable(
@@ -134,33 +179,17 @@ public final class PsiHudOverlay {
                 x,
                 lineY,
                 0x88FFCC);
-        lineY += 10;
-
-        int extraY = 10; // breathing line always present after initiation
-        float trainThreshold = BalanceConfig.TRAINING_XP_THRESHOLD.get().floatValue();
-        if (trainThreshold > 0f) {
-            boolean trainCapped = ProgressionService.isTrainingMaxPsiCapped(data);
-            float trainFill = trainCapped
-                    ? 1f
-                    : Math.min(1f, data.trainingXp() / trainThreshold);
-            int trainBarY = lineY;
-            drawBar(graphics, x, trainBarY, 90, 4, trainFill, trainCapped ? 0xFF666666 : 0xFF88AA66, 0xFF2A2818);
-            Component trainLabel = trainCapped
-                    ? Component.translatable("hud.effecoria.training_capped", (int) data.maxPsi())
-                    : Component.translatable(
-                            "hud.effecoria.training",
-                            (int) data.trainingXp(),
-                            (int) trainThreshold,
-                            (int) data.maxPsi());
-            graphics.drawString(minecraft.font, trainLabel, x, trainBarY + 6, trainCapped ? 0xFF888888 : 0xCCBBAA88);
-            lineY += 16;
-            extraY += 16;
+        if (showMovementTrain) {
+            float trainFill = Math.min(1f, data.trainingXp() / trainThreshold);
+            drawBar(graphics, x + 72, lineY + 2, 28, 3, trainFill, 0xFF88AA66, 0xFF2A2818);
         }
+        lineY += 10;
+        extraY += 10;
 
         if (!godMode && !data.isLichAscensionActive(minecraft.level.getGameTime())) {
-            float orkanum = BiologyService.effectiveOrkanum(minecraft.player, data);
             float body = BiologyService.bodyFactor(minecraft.player);
             if (body < 0.995f) {
+                float orkanum = BiologyService.effectiveOrkanum(minecraft.player, data);
                 graphics.drawString(
                         minecraft.font,
                         Component.translatable("hud.effecoria.body_low", (int) (orkanum * 100f)),
@@ -169,8 +198,7 @@ public final class PsiHudOverlay {
                         0xFFCCAA66);
                 lineY += 10;
                 extraY += 10;
-            }
-            if (data.isBreathTrainFatigued()) {
+            } else if (data.isBreathTrainFatigued()) {
                 int sec = (int) Math.ceil(data.breathTrainFatigueRemainingMs() / 1000.0);
                 graphics.drawString(
                         minecraft.font,
@@ -180,17 +208,6 @@ public final class PsiHudOverlay {
                         0xFFFF8866);
                 lineY += 10;
                 extraY += 10;
-            } else if (data.breathTrainRegenBonus() > 0.001f) {
-                graphics.drawString(
-                        minecraft.font,
-                        Component.translatable(
-                                "hud.effecoria.breath_train_bonus",
-                                String.format("%.0f", data.breathTrainRegenBonus() * 100f)),
-                        x,
-                        lineY,
-                        0xAA88FFCC);
-                lineY += 10;
-                extraY += 10;
             }
         }
 
@@ -198,7 +215,7 @@ public final class PsiHudOverlay {
             float charge = ClientInputEvents.castChargeFraction();
             float min = BalanceConfig.CAST_CHARGE_MIN_POWER.get().floatValue();
             float powerPct = min + (1f - min) * charge;
-            int barY = y + 52 + extraY;
+            int barY = lineY;
             drawBar(graphics, x, barY, 90, 4, charge, 0xFFE8C060, 0xFF3A3018);
             graphics.drawString(
                     minecraft.font,
@@ -206,44 +223,41 @@ public final class PsiHudOverlay {
                     x,
                     barY + 6,
                     0xFFE8C060);
-            graphics.drawString(
-                    minecraft.font,
-                    Component.translatable("hud.effecoria.cast_charge_hint"),
-                    x,
-                    barY + 16,
-                    0xCCBBA070);
-            extraY += 26;
+            extraY += 16;
         }
+    }
 
-        if (data.exhaustion() >= BalanceConfig.EXHAUSTION_WARM.get().floatValue()) {
-            float exFill = data.exhaustion() / ExhaustionService.MAX;
-            drawBar(graphics, x, y + 64 + extraY, 90, 5, exFill, 0xFFAA4444, 0xFF331111);
-            graphics.drawString(
-                    minecraft.font,
-                    Component.translatable(
-                            "hud.effecoria.exhaustion",
-                            formatExhaustionBand(data.exhaustion()),
-                            (int) data.exhaustion()),
-                    x,
-                    y + 72 + extraY,
-                    0xFFCC8888);
+    /** Lists active harmful effects so spell debuffs stay visible above the fold. */
+    private static int renderHarmfulEffects(GuiGraphics graphics, Minecraft minecraft, int x, int y) {
+        List<MobEffectInstance> harmful = new ArrayList<>();
+        for (MobEffectInstance inst : minecraft.player.getActiveEffects()) {
+            if (!inst.getEffect().value().isBeneficial()) {
+                harmful.add(inst);
+            }
         }
-
-        float entropyFill = EntropyService.fillRatio(data.entropyB());
-        if (entropyFill > 0.02f) {
-            boolean critical = EntropyService.isCritical(data.entropyB());
-            int barColor = critical ? 0xFFE07030 : 0xFF8866AA;
-            int textColor = critical ? 0xFFFFAA66 : 0xCCBBAADD;
-            drawBar(graphics, x, y + 84 + extraY, 90, 5, entropyFill, barColor, 0xFF221828);
-            graphics.drawString(
-                    minecraft.font,
-                    Component.translatable(
-                            critical ? "hud.effecoria.entropy_warn" : "hud.effecoria.entropy",
-                            (int) (entropyFill * 100)),
-                    x,
-                    y + 92 + extraY,
-                    textColor);
+        if (harmful.isEmpty()) {
+            return y;
         }
+        harmful.sort((a, b) -> Integer.compare(b.getDuration(), a.getDuration()));
+        MutableComponent line = Component.empty();
+        int shown = 0;
+        for (MobEffectInstance inst : harmful) {
+            if (shown >= 4) {
+                line.append(Component.literal(" …"));
+                break;
+            }
+            if (shown > 0) {
+                line.append(Component.literal(" · "));
+            }
+            Component name = inst.getEffect().value().getDisplayName();
+            if (inst.getAmplifier() > 0) {
+                name = name.copy().append(Component.literal(" " + (inst.getAmplifier() + 1)));
+            }
+            line.append(name);
+            shown++;
+        }
+        graphics.drawString(minecraft.font, line, x, y, 0xFFFF9999);
+        return y + 10;
     }
 
     private static Component formatExhaustionBand(float exhaustion) {

@@ -39,6 +39,7 @@ public final class PlayerPsiData {
                 ByteBufCodecs.FLOAT.encode(buf, data.exhaustion);
                 ByteBufCodecs.VAR_INT.encode(buf, data.breathTrainHits);
                 ByteBufCodecs.VAR_INT.encode(buf, data.breathTrainSessionMisses);
+                ByteBufCodecs.VAR_INT.encode(buf, data.breathTrainSessionClicks);
                 ByteBufCodecs.VAR_LONG.encode(buf, data.breathTrainFatigueUntilMs);
                 ByteBufCodecs.BOOL.encode(buf, data.steamFlightActive);
                 ByteBufCodecs.FLOAT.encode(buf, data.steamFlightDrainPerTick);
@@ -93,6 +94,7 @@ public final class PlayerPsiData {
                 data.exhaustion = ByteBufCodecs.FLOAT.decode(buf);
                 data.breathTrainHits = ByteBufCodecs.VAR_INT.decode(buf);
                 data.breathTrainSessionMisses = ByteBufCodecs.VAR_INT.decode(buf);
+                data.breathTrainSessionClicks = ByteBufCodecs.VAR_INT.decode(buf);
                 data.breathTrainFatigueUntilMs = ByteBufCodecs.VAR_LONG.decode(buf);
                 data.steamFlightActive = ByteBufCodecs.BOOL.decode(buf);
                 data.steamFlightDrainPerTick = ByteBufCodecs.FLOAT.decode(buf);
@@ -153,6 +155,8 @@ public final class PlayerPsiData {
     private float exhaustion;
     private int breathTrainHits;
     private int breathTrainSessionMisses;
+    /** Total timing clicks this drill round (synced — closing UI does not reset). */
+    private int breathTrainSessionClicks;
     private long breathTrainFatigueUntilMs;
     /** Server-only anti-spam clock for breathing-train hits (not persisted / not synced). */
     private transient long lastBreathTrainHitMs;
@@ -281,6 +285,10 @@ public final class PlayerPsiData {
         return breathTrainSessionMisses;
     }
 
+    public int breathTrainSessionClicks() {
+        return breathTrainSessionClicks;
+    }
+
     public float breathTrainRegenBonus() {
         return breathTrainHits * BalanceConfig.BREATHING_TRAIN_REGEN_BONUS.get().floatValue();
     }
@@ -352,6 +360,7 @@ public final class PlayerPsiData {
 
     /** Successful timing hit: permanent regen bonus + mastery. No fatigue. */
     public void recordSuccessfulBreathTrain() {
+        breathTrainSessionClicks++;
         breathTrainHits++;
         float masteryGain = BalanceConfig.BREATHING_TRAIN_MASTERY_GAIN.get().floatValue();
         if (masteryGain > 0f) {
@@ -365,12 +374,14 @@ public final class PlayerPsiData {
      * @return true if fatigue was applied this miss
      */
     public boolean recordBreathTrainMiss() {
+        breathTrainSessionClicks++;
         breathTrainSessionMisses++;
         int limit = Math.max(1, BalanceConfig.BREATHING_TRAIN_MISS_LIMIT.get());
         if (breathTrainSessionMisses < limit) {
             return false;
         }
         breathTrainSessionMisses = 0;
+        breathTrainSessionClicks = 0;
         long fatigueMs = BalanceConfig.BREATHING_TRAIN_FATIGUE_MS.get();
         breathTrainFatigueUntilMs = System.currentTimeMillis() + Math.max(0L, fatigueMs);
         return true;
@@ -734,6 +745,7 @@ public final class PlayerPsiData {
         tag.putFloat("exhaustion", exhaustion);
         tag.putInt("breathTrainHits", breathTrainHits);
         tag.putInt("breathTrainSessionMisses", breathTrainSessionMisses);
+        tag.putInt("breathTrainSessionClicks", breathTrainSessionClicks);
         tag.putLong("breathTrainFatigueUntilMs", breathTrainFatigueUntilMs);
         tag.putBoolean("steamFlightActive", steamFlightActive);
         tag.putFloat("steamFlightDrainPerTick", steamFlightDrainPerTick);
@@ -807,6 +819,7 @@ public final class PlayerPsiData {
         exhaustion = tag.contains("exhaustion") ? tag.getFloat("exhaustion") : 0f;
         breathTrainHits = tag.contains("breathTrainHits") ? tag.getInt("breathTrainHits") : 0;
         breathTrainSessionMisses = tag.contains("breathTrainSessionMisses") ? tag.getInt("breathTrainSessionMisses") : 0;
+        breathTrainSessionClicks = tag.contains("breathTrainSessionClicks") ? tag.getInt("breathTrainSessionClicks") : 0;
         breathTrainFatigueUntilMs = tag.contains("breathTrainFatigueUntilMs") ? tag.getLong("breathTrainFatigueUntilMs") : 0L;
         steamFlightActive = tag.contains("steamFlightActive") && tag.getBoolean("steamFlightActive");
         steamFlightDrainPerTick = tag.contains("steamFlightDrainPerTick") ? tag.getFloat("steamFlightDrainPerTick") : 0f;
@@ -916,6 +929,7 @@ public final class PlayerPsiData {
         copy.exhaustion = exhaustion;
         copy.breathTrainHits = breathTrainHits;
         copy.breathTrainSessionMisses = breathTrainSessionMisses;
+        copy.breathTrainSessionClicks = breathTrainSessionClicks;
         copy.breathTrainFatigueUntilMs = breathTrainFatigueUntilMs;
         copy.steamFlightActive = steamFlightActive;
         copy.steamFlightDrainPerTick = steamFlightDrainPerTick;

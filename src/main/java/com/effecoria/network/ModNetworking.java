@@ -775,6 +775,10 @@ public final class ModNetworking {
                 if (!data.initiated() || data.isBreathTrainFatigued()) {
                     return;
                 }
+                long minGap = com.effecoria.config.BalanceConfig.BREATHING_TRAIN_MIN_INTERVAL_MS.get();
+                if (!data.tryAcceptBreathTrainHit(minGap)) {
+                    return;
+                }
                 boolean fatigued = data.recordBreathTrainMiss();
                 PsiHelper.set(player, data);
                 player.syncData(ModAttachments.PSI.get());
