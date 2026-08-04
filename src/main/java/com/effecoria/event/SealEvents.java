@@ -69,6 +69,13 @@ public final class SealEvents {
         if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
+        if (event.getEntity() instanceof ServerPlayer player
+                && player.isShiftKeyDown()
+                && player.getMainHandItem().isEmpty()
+                && com.effecoria.core.seal.SealProgramService.clear(player, event.getPos())) {
+            event.setCanceled(true);
+            return;
+        }
         long gameTime = level.getGameTime();
         for (SealInstance seal : SealService.getAll(level, event.getPos())) {
             if (seal.isExpired(gameTime) || !SealProgramRuntime.isProgram(seal)) {

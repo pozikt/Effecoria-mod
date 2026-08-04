@@ -23,6 +23,8 @@ import java.util.List;
 
 /** Word-programming editor for Seals school inscriptions. */
 public class SealProgramScreen extends Screen {
+    private static final int EXPRESSION_SLOTS = 4;
+
     private final BlockPos targetPos;
     private final List<ResourceLocation> program = new ArrayList<>();
     private int scroll;
@@ -52,6 +54,23 @@ public class SealProgramScreen extends Screen {
                 })
                 .bounds(left + 90, bottom, 80, 20)
                 .build());
+
+        int saveY = bottom - 24;
+        int loadY = saveY - 24;
+        for (int i = 0; i < EXPRESSION_SLOTS; i++) {
+            final int slot = i;
+            int x = right + i * 52;
+            addRenderableWidget(Button.builder(
+                            Component.translatable("gui.effecoria.seal_program.load_slot", slot + 1),
+                            b -> loadExpression(slot))
+                    .bounds(x, loadY, 50, 20)
+                    .build());
+            addRenderableWidget(Button.builder(
+                            Component.translatable("gui.effecoria.seal_program.save_slot", slot + 1),
+                            b -> saveExpression(slot))
+                    .bounds(x, saveY, 50, 20)
+                    .build());
+        }
     }
 
     private PlayerPsiData data() {
@@ -98,6 +117,27 @@ public class SealProgramScreen extends Screen {
     private void clearBlock() {
         PacketDistributor.sendToServer(new ModNetworking.ClearSealProgramPayload(targetPos));
         onClose();
+    }
+
+    private void saveExpression(int slot) {
+        PacketDistributor.sendToServer(new ModNetworking.SaveSealExpressionPayload(slot, List.copyOf(program)));
+    }
+
+    private void loadExpression(int slot) {
+        List<ResourceLocation> saved = data().savedSealExpression(slot);
+        if (saved.isEmpty()) {
+            return;
+        }
+        program.clear();
+        int max = maxTokens();
+        for (ResourceLocation token : saved) {
+            if (program.size() >= max) {
+                break;
+            }
+            if (data().knowsSealWord(token)) {
+                program.add(token);
+            }
+        }
     }
 
     @Override

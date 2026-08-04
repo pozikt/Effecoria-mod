@@ -11,7 +11,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -76,7 +75,6 @@ public final class MirageWorldService {
 
         Session session = new Session(
                 victim.getUUID(),
-                caster.getUUID(),
                 victim.level().getGameTime() + Math.max(120, durationTicks),
                 maxHp,
                 maxHp,
@@ -325,12 +323,6 @@ public final class MirageWorldService {
         PacketDistributor.sendToPlayer(victim, new ModNetworking.MirageEndPayload(collapsed));
         if (collapsed) {
             victim.displayClientMessage(Component.translatable("message.effecoria.mental.mirage_collapse"), true);
-            ServerPlayer caster = victim.server.getPlayerList().getPlayer(session.casterId);
-            if (caster != null) {
-                caster.displayClientMessage(
-                        Component.translatable("message.effecoria.mental.mirage_kill", victim.getDisplayName()),
-                        true);
-            }
         } else {
             victim.displayClientMessage(Component.translatable("message.effecoria.mental.mirage_fade"), true);
         }
@@ -915,13 +907,7 @@ public final class MirageWorldService {
         int topY = groundY + length;
         session.spears.add(new LightSpear(tx, tz, topY, length));
         victim.displayClientMessage(Component.translatable("message.effecoria.mental.mirage_spear_fall"), true);
-        victim.serverLevel().playSound(
-                null,
-                victim.blockPosition(),
-                SoundEvents.LIGHTNING_BOLT_THUNDER,
-                SoundSource.PLAYERS,
-                0.45f,
-                1.6f);
+        victim.playSound(SoundEvents.LIGHTNING_BOLT_THUNDER, 0.45f, 1.6f);
     }
 
     private static BlockState spearBlock(int indexFromTop) {
@@ -942,13 +928,7 @@ public final class MirageWorldService {
                 victim,
                 new ModNetworking.MirageHurtPayload(amount, session.illusoryHp, session.illusoryMaxHp));
         victim.displayClientMessage(Component.translatable("message.effecoria.mental.mirage_spear_hit"), true);
-        victim.serverLevel().playSound(
-                null,
-                victim.blockPosition(),
-                SoundEvents.WARDEN_SONIC_BOOM,
-                SoundSource.PLAYERS,
-                0.55f,
-                1.35f);
+        victim.playSound(SoundEvents.WARDEN_SONIC_BOOM, 0.55f, 1.35f);
     }
 
     // --- Physics -----------------------------------------------------------
@@ -1080,7 +1060,6 @@ public final class MirageWorldService {
 
     private static final class Session {
         final UUID victimId;
-        final UUID casterId;
         final long endTick;
         float illusoryHp;
         final float illusoryMaxHp;
@@ -1108,7 +1087,6 @@ public final class MirageWorldService {
 
         Session(
                 UUID victimId,
-                UUID casterId,
                 long endTick,
                 float illusoryHp,
                 float illusoryMaxHp,
@@ -1119,7 +1097,6 @@ public final class MirageWorldService {
                 float bodyXRot,
                 int seed) {
             this.victimId = victimId;
-            this.casterId = casterId;
             this.endTick = endTick;
             this.illusoryHp = illusoryHp;
             this.illusoryMaxHp = illusoryMaxHp;

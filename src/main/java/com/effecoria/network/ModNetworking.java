@@ -875,6 +875,55 @@ public final class ModNetworking {
         }
     }
 
+    /** Client → server: save current seal expression into a reusable slot. */
+    public record SaveSealExpressionPayload(int slot, List<ResourceLocation> tokens) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<SaveSealExpressionPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "save_seal_expression"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, SaveSealExpressionPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, p) -> {
+                            buf.writeVarInt(p.slot());
+                            buf.writeVarInt(p.tokens().size());
+                            for (ResourceLocation id : p.tokens()) {
+                                ResourceLocation.STREAM_CODEC.encode(buf, id);
+                            }
+                        },
+                        buf -> {
+                            int slot = buf.readVarInt();
+                            int n = buf.readVarInt();
+                            List<ResourceLocation> tokens = new ArrayList<>(n);
+                            for (int i = 0; i < n; i++) {
+                                tokens.add(ResourceLocation.STREAM_CODEC.decode(buf));
+                            }
+                            return new SaveSealExpressionPayload(slot, tokens);
+                        });
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(SaveSealExpressionPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                if (payload.slot() < 0 || payload.slot() > 7 || payload.tokens().size() > 16) {
+                    return;
+                }
+                PlayerPsiData data = PsiHelper.get(player);
+                data.saveSealExpression(payload.slot(), payload.tokens());
+                PsiHelper.set(player, data);
+                player.syncData(ModAttachments.PSI.get());
+                player.displayClientMessage(
+                        Component.translatable("message.effecoria.seal.expression_saved", payload.slot() + 1),
+                        true);
+            });
+        }
+    }
+
     /** Server → client: full spell datapack catalog (remote clients have no server reload listener). */
     public record SpellCatalogPayload(List<com.effecoria.core.magic.SpellDefinition> spells)
             implements CustomPacketPayload {

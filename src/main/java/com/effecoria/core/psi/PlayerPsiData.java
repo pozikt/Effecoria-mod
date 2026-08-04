@@ -64,6 +64,13 @@ public final class PlayerPsiData {
                 for (ResourceLocation word : data.knownSealWords) {
                     ResourceLocation.STREAM_CODEC.encode(buf, word);
                 }
+                ByteBufCodecs.INT.encode(buf, data.savedSealExpressions.size());
+                for (List<ResourceLocation> expression : data.savedSealExpressions) {
+                    ByteBufCodecs.INT.encode(buf, expression.size());
+                    for (ResourceLocation token : expression) {
+                        ResourceLocation.STREAM_CODEC.encode(buf, token);
+                    }
+                }
                 ByteBufCodecs.INT.encode(buf, data.spellCastCounts.size());
                 for (Map.Entry<ResourceLocation, Integer> entry : data.spellCastCounts.entrySet()) {
                     ResourceLocation.STREAM_CODEC.encode(buf, entry.getKey());
@@ -121,6 +128,16 @@ public final class PlayerPsiData {
                 for (int i = 0; i < wordCount; i++) {
                     data.knownSealWords.add(ResourceLocation.STREAM_CODEC.decode(buf));
                 }
+                int expressionCount = ByteBufCodecs.INT.decode(buf);
+                data.savedSealExpressions = new ArrayList<>(expressionCount);
+                for (int i = 0; i < expressionCount; i++) {
+                    int tokenCount = ByteBufCodecs.INT.decode(buf);
+                    List<ResourceLocation> expression = new ArrayList<>(tokenCount);
+                    for (int j = 0; j < tokenCount; j++) {
+                        expression.add(ResourceLocation.STREAM_CODEC.decode(buf));
+                    }
+                    data.savedSealExpressions.add(expression);
+                }
                 int castCountEntries = ByteBufCodecs.INT.decode(buf);
                 data.spellCastCounts = new HashMap<>(castCountEntries);
                 for (int i = 0; i < castCountEntries; i++) {
@@ -147,6 +164,7 @@ public final class PlayerPsiData {
     private int selectedSpellIndex;
     private List<ResourceLocation> knownSpells = new ArrayList<>();
     private List<ResourceLocation> knownSealWords = new ArrayList<>();
+    private List<List<ResourceLocation>> savedSealExpressions = new ArrayList<>();
     private long phiSenseUntil;
     private float breathingMastery;
     private float trainingXp;
@@ -237,6 +255,27 @@ public final class PlayerPsiData {
 
     public List<ResourceLocation> knownSealWords() {
         return knownSealWords;
+    }
+
+    public List<List<ResourceLocation>> savedSealExpressions() {
+        return savedSealExpressions;
+    }
+
+    public List<ResourceLocation> savedSealExpression(int slot) {
+        if (slot < 0 || slot >= savedSealExpressions.size()) {
+            return List.of();
+        }
+        return savedSealExpressions.get(slot);
+    }
+
+    public void saveSealExpression(int slot, List<ResourceLocation> tokens) {
+        if (slot < 0) {
+            return;
+        }
+        while (savedSealExpressions.size() <= slot) {
+            savedSealExpressions.add(new ArrayList<>());
+        }
+        savedSealExpressions.set(slot, new ArrayList<>(tokens));
     }
 
     public boolean knowsSealWord(ResourceLocation id) {
@@ -779,6 +818,15 @@ public final class PlayerPsiData {
             wordList.add(net.minecraft.nbt.StringTag.valueOf(word.toString()));
         }
         tag.put("knownSealWords", wordList);
+        ListTag expressionsList = new ListTag();
+        for (List<ResourceLocation> expression : savedSealExpressions) {
+            ListTag expressionTag = new ListTag();
+            for (ResourceLocation token : expression) {
+                expressionTag.add(StringTag.valueOf(token.toString()));
+            }
+            expressionsList.add(expressionTag);
+        }
+        tag.put("savedSealExpressions", expressionsList);
 
         CompoundTag castCounts = new CompoundTag();
         for (Map.Entry<ResourceLocation, Integer> entry : spellCastCounts.entrySet()) {
@@ -866,6 +914,22 @@ public final class PlayerPsiData {
                 knownSealWords.add(ResourceLocation.parse(entry.getAsString()));
             }
         }
+        savedSealExpressions = new ArrayList<>();
+        if (tag.contains("savedSealExpressions", Tag.TAG_LIST)) {
+            ListTag expressionsList = tag.getList("savedSealExpressions", Tag.TAG_LIST);
+            for (Tag expressionEntry : expressionsList) {
+                if (!(expressionEntry instanceof ListTag expressionTag)) {
+                    continue;
+                }
+                List<ResourceLocation> expression = new ArrayList<>();
+                for (Tag tokenEntry : expressionTag) {
+                    if (tokenEntry.getId() == Tag.TAG_STRING) {
+                        expression.add(ResourceLocation.parse(tokenEntry.getAsString()));
+                    }
+                }
+                savedSealExpressions.add(expression);
+            }
+        }
 
         spellCastCounts = new HashMap<>();
         spellLastCastAt = new HashMap<>();
@@ -921,6 +985,10 @@ public final class PlayerPsiData {
         copy.selectedSpellIndex = selectedSpellIndex;
         copy.knownSpells = new ArrayList<>(knownSpells);
         copy.knownSealWords = new ArrayList<>(knownSealWords);
+        copy.savedSealExpressions = new ArrayList<>();
+        for (List<ResourceLocation> expression : savedSealExpressions) {
+            copy.savedSealExpressions.add(new ArrayList<>(expression));
+        }
         copy.phiSenseUntil = phiSenseUntil;
         copy.breathingMastery = breathingMastery;
         copy.trainingXp = trainingXp;

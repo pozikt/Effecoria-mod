@@ -141,20 +141,8 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
         horror.setVictim(victim.getUUID());
         horror.setPoseAnim(POSE_EMERGE);
         level.addFreshEntity(horror);
-        level.playSound(
-                null,
-                BlockPos.containing(x, standY, z),
-                SoundEvents.WARDEN_DIG,
-                SoundSource.HOSTILE,
-                0.85f,
-                0.55f);
-        level.playSound(
-                null,
-                victim.blockPosition(),
-                SoundEvents.SCULK_SHRIEKER_SHRIEK,
-                SoundSource.HOSTILE,
-                0.35f,
-                0.45f);
+        victim.playSound(SoundEvents.WARDEN_DIG, 0.85f, 0.55f);
+        victim.playSound(SoundEvents.SCULK_SHRIEKER_SHRIEK, 0.35f, 0.45f);
         victim.displayClientMessage(
                 net.minecraft.network.chat.Component.translatable("message.effecoria.mental.mirage_horror_stir"),
                 true);
@@ -408,24 +396,12 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
                     0.01);
         }
         if (emergeTicks == EMERGE_TICKS / 2) {
-            level.playSound(
-                    null,
-                    blockPosition(),
-                    SoundEvents.WARDEN_EMERGE,
-                    SoundSource.HOSTILE,
-                    0.9f,
-                    0.65f);
+            victim.playSound(SoundEvents.WARDEN_EMERGE, 0.9f, 0.65f);
         }
         if (emergeTicks <= 0) {
             setPos(getX(), emergeTargetY, getZ());
             setPoseAnim(POSE_IDLE);
-            level.playSound(
-                    null,
-                    blockPosition(),
-                    SoundEvents.WARDEN_AGITATED,
-                    SoundSource.HOSTILE,
-                    0.75f,
-                    0.55f);
+            victim.playSound(SoundEvents.WARDEN_AGITATED, 0.75f, 0.55f);
             victim.displayClientMessage(
                     net.minecraft.network.chat.Component.translatable("message.effecoria.mental.mirage_horror_seen"),
                     true);
@@ -464,11 +440,8 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
                 }
                 pullVelocity = yank;
                 spawnGrabBurst(level, grabTarget);
-                level.playSound(
-                        null,
-                        blockPosition(),
+                victim.playSound(
                         SoundEvents.SPIDER_STEP,
-                        SoundSource.HOSTILE,
                         0.7f,
                         0.45f + random.nextFloat() * 0.2f);
             }
@@ -512,13 +485,7 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
             gaitPhase = 1;
             gaitTicks = REACH_TICKS;
             setPoseAnim(POSE_REACH);
-            level.playSound(
-                    null,
-                    blockPosition(),
-                    SoundEvents.SLIME_SQUISH_SMALL,
-                    SoundSource.HOSTILE,
-                    0.45f,
-                    0.55f);
+            victim.playSound(SoundEvents.SLIME_SQUISH_SMALL, 0.45f, 0.55f);
         } else {
             setPoseAnim(dist > 3.0 ? POSE_CRAWL : POSE_IDLE);
             if (dist > 0.4 && toVictim.lengthSqr() > 1.0e-4) {
@@ -627,13 +594,7 @@ public class MirageHorrorEntity extends Mob implements GeoEntity {
         victim.displayClientMessage(
                 net.minecraft.network.chat.Component.translatable("message.effecoria.mental.mirage_horror_strike"),
                 true);
-        level().playSound(
-                null,
-                victim.blockPosition(),
-                SoundEvents.WARDEN_ATTACK_IMPACT,
-                SoundSource.HOSTILE,
-                0.7f,
-                0.7f);
+        victim.playSound(SoundEvents.WARDEN_ATTACK_IMPACT, 0.7f, 0.7f);
     }
 
     @Override
