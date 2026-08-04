@@ -905,7 +905,7 @@
   "spell.effecoria.muscle_spasm.desc": "Вызывает болезненные спазмы.",
   "spell.effecoria.organic_necrosis.desc": "Некроз тканей цели.",
   "spell.effecoria.organism_adaptation.desc": "Адаптирует к среде: на земле ускорение, в воде дыхание, в огне защита, в воздухе мягкое падение.",
-  "spell.effecoria.pain_inhibitor.desc": "Приглушает боль и шок.",
+  "spell.effecoria.pain_inhibitor.desc": "Приглушает боль и шок: HP падает, но без откидывания и стаггера.",
   "spell.effecoria.parasitic_infection.desc": "Паразитарная инфекция.",
   "spell.effecoria.poison_thorns.desc": "Ядовитый шиповый выброс.",
   "spell.effecoria.population_control.desc": "Прореживает слабые организмы.",

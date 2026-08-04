@@ -876,7 +876,7 @@
   "spell.effecoria.muscle_spasm.desc": "Forces painful muscle spasms.",
   "spell.effecoria.organic_necrosis.desc": "Forces necrotic collapse in tissue.",
   "spell.effecoria.organism_adaptation.desc": "Adapts to where you are: ground speed, water breath, fire ward, or soft fall.",
-  "spell.effecoria.pain_inhibitor.desc": "Dulls pain and shock.",
+  "spell.effecoria.pain_inhibitor.desc": "Dulls pain and shock: you still lose HP, but without knockback or stagger.",
   "spell.effecoria.parasitic_infection.desc": "Inflicts a parasitic infection.",
   "spell.effecoria.poison_thorns.desc": "Poisoned thorn burst.",
   "spell.effecoria.population_control.desc": "Culls weak organisms in radius.",

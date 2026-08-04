@@ -262,6 +262,7 @@ public final class OrganicEffects {
     public static void painInhibitor(ServerPlayer caster, SpellEffectEntry effect, float power) {
         int duration = effect.params().has("duration_ticks") ? effect.params().get("duration_ticks").getAsInt() : 480;
         int absorb = effect.params().has("absorption_amplifier") ? effect.params().get("absorption_amplifier").getAsInt() : 1;
+        PainInhibitorService.activate(caster, duration);
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.ABSORPTION, duration, absorb, false, true, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration, 0, false, false, true));
         spawnNerve(caster.serverLevel(), caster.position().add(0, 1, 0));

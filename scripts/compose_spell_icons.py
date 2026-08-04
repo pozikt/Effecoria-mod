@@ -7,6 +7,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from elemental_icon_prompts import ELEMENTAL_PROMPTS
+from mental_icon_prompts import MENTAL_PROMPTS
 from organic_icon_prompts import ORGANIC_PROMPTS
 from spatial_icon_prompts import SPATIAL_PROMPTS
 
@@ -19,7 +20,6 @@ OUT = 64
 # Non-school-batch AI overlays (school frame)
 EXAMPLE_SCHOOL = {
     "festering_wound": "corruption",
-    "cliff_urge": "mental",
     "raise_skeleton": "necromancy",
     "psi_ward": "common",
     "psi_adrenaline": "common",
@@ -35,6 +35,8 @@ for _sid in SPATIAL_PROMPTS:
     EXAMPLE_SCHOOL[_sid] = "spatial"
 for _sid in ORGANIC_PROMPTS:
     EXAMPLE_SCHOOL[_sid] = "organic"
+for _sid in MENTAL_PROMPTS:
+    EXAMPLE_SCHOOL[_sid] = "mental"
 
 FRAME_RGB = {
     "spatial": (240, 240, 245),

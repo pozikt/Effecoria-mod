@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from elemental_icon_prompts import ELEMENTAL_PROMPTS
+from mental_icon_prompts import MENTAL_PROMPTS
 from organic_icon_prompts import ORGANIC_PROMPTS
 from spatial_icon_prompts import SPATIAL_PROMPTS
 
@@ -18,11 +19,6 @@ EXAMPLE_PROMPTS: dict[str, str] = {
         f"{PREFIX}, thin dark green circular border. "
         "An open red wound with 3 green dripping drops of pus below it. "
         "Simple silhouette, flat pixel clusters. Palette: dark red, sickly green, black."
-    ),
-    "cliff_urge": (
-        f"{PREFIX}, thin blue circular border. "
-        "A stylized yellow eye with a spiral inside, representing hypnotic pull. "
-        "Simple bold pixels, flat shading. Palette: pale yellow, dark blue, white."
     ),
     "raise_skeleton": (
         f"{PREFIX}, thin white border. "
@@ -295,6 +291,8 @@ def build_prompt(spell_id: str, school: str, scene: str | None = None) -> str:
         return SPATIAL_PROMPTS[spell_id]
     if spell_id in ORGANIC_PROMPTS:
         return ORGANIC_PROMPTS[spell_id]
+    if spell_id in MENTAL_PROMPTS:
+        return MENTAL_PROMPTS[spell_id]
     border, palette = SCHOOL_STYLE.get(school, ("thin white circular border", "white, gray, black"))
     action = scene or VISUAL_SCENES.get(spell_id) or f"A simple iconic symbol for {spell_id.replace('_', ' ')}"
     return (
