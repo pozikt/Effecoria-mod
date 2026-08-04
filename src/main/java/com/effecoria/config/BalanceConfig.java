@@ -160,15 +160,15 @@ public final class BalanceConfig {
 
     public static final ModConfigSpec.DoubleValue TRAINING_XP_WALK_PER_BLOCK = BUILDER
             .comment("Training XP per block walked on ground (sampled every progression tick)")
-            .defineInRange("training_xp_walk_per_block", 0.42, 0.0, 100.0);
+            .defineInRange("training_xp_walk_per_block", 0.28, 0.0, 100.0);
 
     public static final ModConfigSpec.DoubleValue TRAINING_XP_SPRINT_PER_BLOCK = BUILDER
             .comment("Training XP per block sprinted on ground")
-            .defineInRange("training_xp_sprint_per_block", 0.72, 0.0, 100.0);
+            .defineInRange("training_xp_sprint_per_block", 0.48, 0.0, 100.0);
 
     public static final ModConfigSpec.DoubleValue TRAINING_XP_SWIM_PER_BLOCK = BUILDER
             .comment("Training XP per block swum")
-            .defineInRange("training_xp_swim_per_block", 0.55, 0.0, 100.0);
+            .defineInRange("training_xp_swim_per_block", 0.36, 0.0, 100.0);
 
     public static final ModConfigSpec.DoubleValue TRAINING_XP_MEDITATE = BUILDER
             .comment("Training XP per progression tick while meditating (standing calm, full breath)")
