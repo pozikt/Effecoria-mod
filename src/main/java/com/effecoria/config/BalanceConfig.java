@@ -136,7 +136,7 @@ public final class BalanceConfig {
 
     public static final ModConfigSpec.DoubleValue BREATHING_TRAIN_MASTERY_GAIN = BUILDER
             .comment("Breathing mastery gained per successful mini-game hit")
-            .defineInRange("breathing_train_mastery_gain", 0.01, 0.0, 1.0);
+            .defineInRange("breathing_train_mastery_gain", 0.007, 0.0, 1.0);
 
     public static final ModConfigSpec.IntValue BREATHING_TRAIN_MISS_LIMIT = BUILDER
             .comment("Failed timing clicks before breathing-train fatigue applies")
@@ -188,7 +188,7 @@ public final class BalanceConfig {
 
     public static final ModConfigSpec.DoubleValue TRAINING_XP_BREATH_TRAIN = BUILDER
             .comment("Training XP granted on a successful breathing-train hit")
-            .defineInRange("training_xp_breath_train", 3.5, 0.0, 1000.0);
+            .defineInRange("training_xp_breath_train", 2.5, 0.0, 1000.0);
 
     public static final ModConfigSpec.DoubleValue TRAINING_XP_THRESHOLD = BUILDER
             .comment("Training XP required for one soul/psi milestone")
@@ -252,11 +252,11 @@ public final class BalanceConfig {
 
     public static final ModConfigSpec.IntValue SPELL_STARTER_COUNT = BUILDER
             .comment("First N spells in each school progression unlock without essence (mastery gates still apply)")
-            .defineInRange("spell_starter_count", 5, 1, 20);
+            .defineInRange("spell_starter_count", 3, 1, 20);
 
     public static final ModConfigSpec.IntValue SPELL_UNLOCK_ESSENCE_STEP = BUILDER
             .comment("Default essence cost grows by this amount per progression tier after starters (when JSON omits unlock_essence_cost)")
-            .defineInRange("spell_unlock_essence_step", 2, 0, 50);
+            .defineInRange("spell_unlock_essence_step", 3, 0, 50);
 
     public static final ModConfigSpec.DoubleValue NECRO_SUMMON_PSI_RESERVE = BUILDER
             .comment("Legacy flat thrall reserve (unused — Death Mark thralls reserve max health instead)")

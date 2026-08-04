@@ -5,8 +5,8 @@
   "base_cost": 32,
   "power_multiplier": 1.25,
   "side_entropy": 0.1,
-  "min_phi": 0.3,
-  "min_mastery": 0.4,
+  "min_phi": 0.35,
+  "min_mastery": 0.6,
   "min_power": 30,
   "radial_category": "combat",
   "effects": [

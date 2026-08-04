@@ -140,12 +140,13 @@ public final class SpellUnlockService {
                 continue;
             }
             SpellDefinition def = SpellRegistry.get(spellId).orElseThrow();
+            // Strict queue: the next unknown spell must be earned before later ones unlock.
             if (data.breathingMastery() < def.minMastery()) {
-                continue;
+                return false;
             }
             int cost = resolveUnlockCost(spellId, costSchool, def);
             if (cost > 0 && data.essence() < cost) {
-                continue;
+                return false;
             }
             if (cost > 0) {
                 data.addEssence(-cost);
