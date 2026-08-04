@@ -1,1 +1,1 @@
-﻿{"id":"effecoria:loud","kind":"modifier","effect":"loud","sound":"minecraft:block.anvil.land","psi_cost":1.5,"min_mastery":0.1,"starter":false}
+{"id":"effecoria:loud","kind":"modifier","effect":"loud","sound":"minecraft:block.anvil.land","psi_cost":1.5,"min_mastery":0.1,"starter":false}

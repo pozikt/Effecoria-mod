@@ -19,14 +19,27 @@ CURSOR_ASSETS = Path(r"C:\Users\2005t\.cursor\projects\c-Users-2005t-Effecoria\a
 ICON = 64
 PARTICLE = 16
 
+# Legacy rim tuples — icon art uses spell_icon_art.SCHOOL_PAL (visual-action palettes)
 SCHOOLS = {
-    "mental": ((120, 220, 255), (80, 160, 255), (40, 80, 160)),
-    "elemental": ((255, 180, 60), (255, 110, 40), (180, 60, 20)),
-    "organic": ((120, 255, 100), (60, 200, 70), (30, 120, 40)),
-    "necromancy": ((100, 255, 140), (40, 160, 80), (20, 80, 50)),
-    "spatial": ((140, 210, 255), (80, 140, 255), (50, 80, 180)),
-    "corruption": ((220, 120, 255), (140, 60, 160), (80, 30, 90)),
-    "seals": ((255, 220, 100), (220, 170, 60), (140, 100, 30)),
+    "mental": ((80, 140, 255), (255, 240, 120), (30, 50, 120)),
+    "elemental": ((255, 150, 40), (255, 230, 90), (140, 50, 15)),
+    "organic": ((70, 200, 80), (160, 255, 100), (30, 90, 35)),
+    "necromancy": ((230, 230, 220), (255, 255, 255), (90, 90, 85)),
+    "spatial": ((240, 240, 245), (255, 255, 255), (90, 70, 140)),
+    "corruption": ((50, 120, 45), (120, 200, 70), (25, 55, 22)),
+    "seals": ((255, 210, 80), (255, 245, 180), (100, 70, 20)),
+    "common": ((70, 220, 230), (200, 255, 255), (30, 90, 100)),
+}
+
+SCHOOL_CORE = {
+    "mental": (20, 28, 55),
+    "elemental": (40, 18, 10),
+    "organic": (18, 40, 18),
+    "necromancy": (22, 22, 24),
+    "spatial": (28, 16, 48),
+    "corruption": (36, 10, 12),
+    "seals": (40, 30, 12),
+    "common": (14, 28, 32),
 }
 
 SPELL_SCHOOL = {
@@ -39,7 +52,7 @@ SPELL_SCHOOL = {
     "psychic_storm": "mental", "psychic_amplify": "mental", "omega_mind": "mental",
     "mind_terror": "mental", "cliff_urge": "mental", "drown_urge": "mental", "psychic_frenzy": "mental", "mass_hysteria": "mental",
     "fire_burst": "elemental", "sear": "elemental", "ore_smelt": "elemental", "wind_push": "elemental", "water_stream": "elemental",
-    "psi_adrenaline": "mental", "phi_glow": "mental", "psi_charge": "mental", "psi_link": "mental", "psi_ward": "mental",
+    "psi_adrenaline": "common", "phi_glow": "common", "psi_charge": "common", "psi_link": "common", "psi_ward": "common",
     "steam_jet": "elemental", "steam_veil": "elemental", "ember_volley": "elemental",
     "ice_shard": "elemental", "frost_bastion": "elemental", "plasma_bolt": "elemental",
     "hydro_slice": "elemental", "great_fireball": "elemental", "steam_flight": "elemental",
@@ -130,16 +143,28 @@ def apply_circle_mask(img: Image.Image) -> Image.Image:
 
 
 def base_icon(school: str) -> Image.Image:
-    """High-contrast tile: dark fill, bright school rim, bold glyph on top."""
-    accent, _, rim = SCHOOLS[school]
-    bg = (14, 14, 22, 255)
+    """Circular LoL-style plate: school glow rim, beveled frame, tinted core."""
+    accent, highlight, rim = SCHOOLS[school]
+    core = SCHOOL_CORE[school]
     img = Image.new("RGBA", (ICON, ICON), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     cx, cy = ICON // 2, ICON // 2
-    draw_disc(d, cx, cy, 30, accent + (255,))
-    draw_disc(d, cx, cy, 26, bg)
-    draw_disc(d, cx, cy, 26, None, outline=rim + (255,), width=3)
-    draw_disc(d, cx, cy, 22, (22, 22, 32, 255))
+
+    # Soft outer halo
+    draw_disc(d, cx, cy, 31, with_alpha(accent, 90))
+    # Bright school rim
+    draw_disc(d, cx, cy, 29, accent + (255,))
+    # Deep metal under-rim
+    draw_disc(d, cx, cy, 26, rim + (255,))
+    # Inner well
+    draw_disc(d, cx, cy, 23, (10, 10, 14, 255))
+    draw_disc(d, cx, cy, 21, core + (255,))
+    # Bevel highlights (top-left light / bottom-right dark)
+    d.arc((cx - 27, cy - 27, cx + 27, cy + 27), 200, 340, fill=highlight + (230,), width=2)
+    d.arc((cx - 27, cy - 27, cx + 27, cy + 27), 20, 160, fill=with_alpha(rim, 220), width=2)
+    # Common arts: extra crimson inner ring on steel rim
+    if school == "common":
+        d.ellipse((cx - 24, cy - 24, cx + 24, cy + 24), outline=highlight + (255,), width=2)
     return img, d, cx, cy
 
 
@@ -1361,6 +1386,65 @@ def icon_beacon(d, cx, cy, color):
     d.line([(cx, cy - 14), (cx, cy + 16)], fill=(255, 255, 200, 200), width=2)
 
 
+# --- Common arts (grey-red frame; warm steel glyphs) ---
+
+def icon_psi_adrenaline(d, cx, cy, color):
+    bolt = (230, 95, 75, 255)
+    ring = (255, 185, 130, 230)
+    d.polygon([(cx, cy - 14), (cx + 7, cy - 1), (cx + 2, cy - 1), (cx + 9, cy + 14), (cx - 4, cy + 1), (cx + 1, cy + 1)], fill=bolt)
+    d.ellipse((cx - 10, cy - 10, cx + 10, cy + 10), outline=ring, width=2)
+
+
+def icon_phi_glow(d, cx, cy, color):
+    for r, a in ((12, 70), (8, 130), (5, 200)):
+        draw_disc(d, cx, cy, r, (200, 220, 255, a))
+    draw_disc(d, cx, cy, 3, (255, 255, 255, 255))
+    d.ellipse((cx - 14, cy - 14, cx + 14, cy + 14), outline=(180, 90, 90, 180), width=1)
+
+
+def icon_psi_charge(d, cx, cy, color):
+    core = (90, 255, 210, 230)
+    spark = (255, 220, 140, 255)
+    draw_disc(d, cx, cy, 7, core)
+    draw_disc(d, cx, cy, 3, (240, 255, 250, 255))
+    for ang in (20, 90, 160, 230, 300):
+        rad = math.radians(ang)
+        x2 = cx + int(math.cos(rad) * 13)
+        y2 = cy + int(math.sin(rad) * 13)
+        d.line([(cx, cy), (x2, y2)], fill=spark, width=2)
+
+
+def icon_psi_link(d, cx, cy, color):
+    left = (210, 120, 140, 255)
+    right = (160, 180, 220, 255)
+    draw_disc(d, cx - 8, cy, 6, left)
+    draw_disc(d, cx + 8, cy, 6, right)
+    d.arc((cx - 10, cy - 8, cx + 10, cy + 8), 200, 340, fill=(230, 180, 160, 230), width=2)
+    draw_disc(d, cx, cy - 2, 2, (255, 230, 210, 255))
+
+
+def icon_psi_ward(d, cx, cy, color):
+    plate = (170, 190, 195, 230)
+    rim = (200, 90, 85, 255)
+    d.polygon([(cx, cy - 14), (cx + 11, cy - 4), (cx + 8, cy + 12), (cx - 8, cy + 12), (cx - 11, cy - 4)], fill=plate)
+    d.polygon([(cx, cy - 14), (cx + 11, cy - 4), (cx + 8, cy + 12), (cx - 8, cy + 12), (cx - 11, cy - 4)], outline=rim)
+    draw_disc(d, cx, cy, 3, (230, 240, 245, 255))
+
+
+def icon_sear(d, cx, cy, color):
+    pan = (150, 150, 160, 255)
+    d.ellipse((cx - 12, cy + 2, cx + 12, cy + 14), fill=pan)
+    d.line([(cx + 10, cy + 8), (cx + 16, cy + 4)], fill=pan, width=2)
+    icon_fire(d, cx, cy - 4, color)
+
+
+def icon_ore_smelt(d, cx, cy, color):
+    ore = (90, 100, 120, 255)
+    d.polygon([(cx - 10, cy + 2), (cx - 4, cy - 8), (cx + 6, cy - 6), (cx + 10, cy + 4), (cx, cy + 10)], fill=ore)
+    draw_disc(d, cx - 2, cy, 2, (180, 190, 210, 220))
+    d.polygon([(cx + 2, cy - 12), (cx + 8, cy - 2), (cx - 2, cy - 2)], fill=(255, 160, 50, 255))
+
+
 DRAWERS = {
     "mental_push": icon_mental_force,
     "mental_sting": icon_mental_sting,
@@ -1388,7 +1472,14 @@ DRAWERS = {
     "cliff_urge": icon_cliff_urge,
     "drown_urge": icon_drown_urge,
     "psychic_frenzy": icon_psychic_frenzy,
+    "psi_adrenaline": icon_psi_adrenaline,
+    "phi_glow": icon_phi_glow,
+    "psi_charge": icon_psi_charge,
+    "psi_link": icon_psi_link,
+    "psi_ward": icon_psi_ward,
     "fire_burst": icon_fire,
+    "sear": icon_sear,
+    "ore_smelt": icon_ore_smelt,
     "wind_push": icon_wind,
     "water_stream": icon_water,
     "steam_jet": icon_steam,
@@ -1571,11 +1662,8 @@ DRAWERS = {
 
 
 def make_icon(spell: str) -> Image.Image:
-    school = SPELL_SCHOOL[spell]
-    sym = (255, 255, 255, 255)
-    img, d, cx, cy = base_icon(school)
-    DRAWERS[spell](d, cx, cy, sym)
-    return apply_circle_mask(img)
+    import spell_icon_art
+    return spell_icon_art.make_icon(spell, SPELL_SCHOOL[spell])
 
 
 def make_particle(name: str, inner, outer) -> Image.Image:
