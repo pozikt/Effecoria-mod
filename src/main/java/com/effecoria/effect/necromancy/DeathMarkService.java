@@ -88,6 +88,22 @@ public final class DeathMarkService {
         return entity.level().getGameTime() <= data.getLong(LIVING_UNTIL_TAG);
     }
 
+    public static boolean isMarkedBy(LivingEntity entity, java.util.UUID ownerId) {
+        if (!hasActiveLivingMark(entity) || ownerId == null) {
+            return false;
+        }
+        return entity.getPersistentData().getUUID(LIVING_OWNER_TAG).equals(ownerId);
+    }
+
+    /** Extend an active living mark (e.g. mark-reap pulse). */
+    public static void extendMark(LivingEntity entity, int extraTicks) {
+        if (!hasActiveLivingMark(entity) || extraTicks <= 0) {
+            return;
+        }
+        CompoundTag data = entity.getPersistentData();
+        data.putLong(LIVING_UNTIL_TAG, data.getLong(LIVING_UNTIL_TAG) + extraTicks);
+    }
+
     public static void onMarkedDeath(LivingEntity dead) {
         if (!(dead.level() instanceof ServerLevel level) || !hasActiveLivingMark(dead)) {
             return;

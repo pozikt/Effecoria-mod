@@ -754,13 +754,19 @@ public final class NecroSummonService {
     }
 
     /** Push the necromancer's current fight onto all thralls (only if visible). */
-    public static void syncCombatFocus(ServerPlayer owner, LivingEntity focus) {
+    public static int syncCombatFocus(ServerPlayer owner, LivingEntity focus) {
         if (!canEngage(owner, focus)) {
-            return;
+            return 0;
         }
+        int count = 0;
         for (Mob mob : listOwned(owner)) {
+            if (mob.getPersistentData().getBoolean(GUARD_TAG)) {
+                continue;
+            }
             assignFocus(mob, focus);
+            count++;
         }
+        return count;
     }
 
     private static void assignFocus(Mob mob, LivingEntity focus) {

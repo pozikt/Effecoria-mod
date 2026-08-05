@@ -164,6 +164,7 @@ public final class CastPresentation {
     private static final Set<ResourceLocation> NECRO_GRAVE = Set.of(
             id("death_sense"),
             id("death_mark"),
+            id("mark_reap"),
             id("grave_whisper"),
             id("grave_field"),
             id("death_gate"),
@@ -171,6 +172,7 @@ public final class CastPresentation {
             id("lich_ward"));
     private static final Set<ResourceLocation> NECRO_SHADE = Set.of(
             id("phantom_step"),
+            id("thrall_focus"),
             id("haunting_visage"),
             id("curse_of_frailty"),
             id("shade_summon"),

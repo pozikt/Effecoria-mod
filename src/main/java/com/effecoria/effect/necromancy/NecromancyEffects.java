@@ -20,6 +20,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
@@ -305,6 +306,77 @@ public final class NecromancyEffects {
                 ? effect.params().get("duration_ticks").getAsInt()
                 : DeathMarkService.LIVING_MARK_TICKS;
         DeathMarkService.applyMark(caster, target, duration);
+    }
+
+    /**
+     * Identity: command every mobile thrall onto the crosshair target (LOS + engage rules).
+     * Guards stay at their post.
+     */
+    public static void thrallFocus(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        ServerLevel level = caster.serverLevel();
+        if (target == null || target == caster) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.thrall_focus_need"), true);
+            finishHit(level, caster.getEyePosition(), HitFx.SHADE);
+            return;
+        }
+        if (target instanceof Mob mob && NecroSummonService.isOwnedBy(mob, caster.getUUID())) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.thrall_focus_ally"), true);
+            return;
+        }
+        if (NecroSummonService.countOwned(caster) == 0) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.thrall_focus_none"), true);
+            return;
+        }
+        int synced = NecroSummonService.syncCombatFocus(caster, target);
+        if (synced == 0) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.thrall_focus_blocked"), true);
+            finishHit(level, target.position(), HitFx.SHADE);
+            return;
+        }
+        caster.displayClientMessage(
+                Component.translatable("message.effecoria.necro.thrall_focus_ok", synced, target.getDisplayName()), true);
+        spawnShade(level, target.position().add(0, 1, 0));
+        level.playSound(null, target.blockPosition(), SoundEvents.WITHER_AMBIENT, SoundSource.PLAYERS, 0.45f, 1.35f);
+    }
+
+    /** Identity: reap marked prey in radius — wither hit, refresh mark, nudge thralls onto the first mark. */
+    public static void markReap(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 14f;
+        float damage = DiceDamage.fromParams(effect.params(), power, 3f);
+        int extend = effect.params().has("extend_ticks") ? effect.params().get("extend_ticks").getAsInt() : 40;
+        radius *= 0.9f + power / 150f;
+        java.util.UUID ownerId = caster.getUUID();
+        int hit = 0;
+        LivingEntity focus = null;
+        AABB box = caster.getBoundingBox().inflate(radius);
+        for (LivingEntity entity :
+                level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
+            if (entity.distanceToSqr(caster) > radius * radius) {
+                continue;
+            }
+            if (!DeathMarkService.isMarkedBy(entity, ownerId)) {
+                continue;
+            }
+            entity.hurt(SpellCombat.wither(caster), damage);
+            DeathMarkService.extendMark(entity, extend);
+            entity.hurtMarked = true;
+            spawnWither(level, entity.position().add(0, 1, 0));
+            if (focus == null) {
+                focus = entity;
+            }
+            hit++;
+        }
+        if (focus != null) {
+            NecroSummonService.syncCombatFocus(caster, focus);
+        }
+        if (hit > 0) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.mark_reap_ok", hit), true);
+        } else {
+            caster.displayClientMessage(Component.translatable("message.effecoria.necro.mark_reap_empty"), true);
+        }
+        spawnGrave(level, caster.position().add(0, 0.5, 0));
+        level.playSound(null, caster.blockPosition(), SoundEvents.SCULK_CLICKING, SoundSource.PLAYERS, 0.7f, 0.45f);
     }
 
     public static void lichWard(ServerPlayer caster, SpellEffectEntry effect, float power) {

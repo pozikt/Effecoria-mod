@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:mark_reap",
+  "school": "necromancy",
+  "frequency_hz": 0.6,
+  "base_cost": 11,
+  "power_multiplier": 1.0,
+  "side_entropy": 0.08,
+  "min_phi": 0.2,
+  "min_mastery": 0.24,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:mark_reap",
+      "radius": 14,
+      "damage_dice": "2d4",
+      "extend_ticks": 50
+    }
+  ]
+}

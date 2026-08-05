@@ -137,6 +137,8 @@ public final class SpellProgression {
                     // I — basic
                     id("death_sense"),
                     id("death_mark"),
+                    id("thrall_focus"),
+                    id("mark_reap"),
                     id("grave_whisper"),
                     id("raise_skeleton"),
                     id("death_shadow"),

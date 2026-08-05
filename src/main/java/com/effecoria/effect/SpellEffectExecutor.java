@@ -74,6 +74,7 @@ public final class SpellEffectExecutor {
             "false_memory",
             "dream_lock",
             "death_mark",
+            "thrall_focus",
             "death_shadow",
             "soul_shackle",
             "grave_bind",
@@ -418,6 +419,8 @@ public final class SpellEffectExecutor {
             case "soul_drain" -> soulDrain(caster, effect, power, target, aim);
             case "wither_touch" -> witherTouch(caster, effect, power, target, aim);
             case "death_mark" -> NecromancyEffects.deathMark(caster, effect, power, target);
+            case "thrall_focus" -> NecromancyEffects.thrallFocus(caster, effect, power, target);
+            case "mark_reap" -> NecromancyEffects.markReap(caster, effect, power);
             case "death_shadow" -> NecromancyEffects.deathShadow(caster, effect, power, target);
             case "bone_chill" -> NecromancyEffects.boneChill(caster, effect, power, target, aim);
             case "death_sense" -> NecromancyEffects.deathSense(caster, effect, power);
