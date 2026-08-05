@@ -20,9 +20,9 @@
     "water_fog_color": 4159204,
     "particle": {
       "options": {
-        "type": "minecraft:end_rod"
+        "type": "effecoria:phi_spark"
       },
-      "probability": 0.00125
+      "probability": 0.004
     }
   },
   "features": [

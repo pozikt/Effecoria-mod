@@ -25,6 +25,19 @@ Cyclic planetary cracks (`effecoria:phi_geyser`):
 - Aftermath: essonite dust drops + `essonite_crust` puddles; rim is `void_obsidian`
 - Manual trigger: right-click with Resonance Focus (initiated mage)
 
+## Φ-fog
+
+Atmospheric essonite mist (not water vapor), density 0–3:
+
+| Density | Cause | Feel |
+|---------|--------|------|
+| Haze (1) | Plateau baseline | Soft ultramarine veil, +50% Ψ regen |
+| Dense (2) | Valleys / near geysers | 12-block view, +100% regen, non-mage strain |
+| Storm (3) | Thunder on plateau | Choking fog, Ψ drain + exhaustion |
+
+Client: `ViewportEvent` fog tint + `phi_mist` / spark motes + movement wake trails.
+Ω-fog (causality rupture) is reserved for future Ω-rifts.
+
 ## Gameplay
 
 Column-aware: standing in caves under the peak still counts as plateau.

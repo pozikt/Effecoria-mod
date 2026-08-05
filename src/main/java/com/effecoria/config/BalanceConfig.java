@@ -403,6 +403,46 @@ public final class BalanceConfig {
             .comment("Maximum essonite dust dropped after eruption")
             .defineInRange("geyser_dust_max", 9, 0, 64);
 
+    public static final ModConfigSpec.IntValue PHI_FOG_BASE_DENSITY = BUILDER
+            .comment("Base Φ-fog density on Essence Plateau (0–3)")
+            .defineInRange("phi_fog_base_density", 1, 0, 3);
+    public static final ModConfigSpec.IntValue PHI_FOG_GEYSER_RADIUS = BUILDER
+            .comment("Block radius around Φ-geysers that thickens fog")
+            .defineInRange("phi_fog_geyser_radius", 12, 2, 32);
+    public static final ModConfigSpec.BooleanValue PHI_FOG_STORM_ENABLED = BUILDER
+            .comment("Thunderstorms escalate Φ-fog to storm density")
+            .define("phi_fog_storm_enabled", true);
+    public static final ModConfigSpec.DoubleValue PHI_FOG_REGEN_HAZE = BUILDER
+            .comment("Ψ regen multiplier in light Φ-haze")
+            .defineInRange("phi_fog_regen_haze", 1.5, 1.0, 4.0);
+    public static final ModConfigSpec.DoubleValue PHI_FOG_REGEN_DENSE = BUILDER
+            .comment("Ψ regen multiplier in dense Φ-fog")
+            .defineInRange("phi_fog_regen_dense", 2.0, 1.0, 5.0);
+    public static final ModConfigSpec.DoubleValue PHI_FOG_REGEN_STORM = BUILDER
+            .comment("Ψ regen multiplier in Φ-storm fog (<1 drains feel via separate drain)")
+            .defineInRange("phi_fog_regen_storm", 0.55, 0.0, 2.0);
+    public static final ModConfigSpec.DoubleValue PHI_FOG_FAR_HAZE = BUILDER
+            .comment("Client fog far plane (blocks) for haze")
+            .defineInRange("phi_fog_far_haze", 28.0, 4.0, 96.0);
+    public static final ModConfigSpec.DoubleValue PHI_FOG_FAR_DENSE = BUILDER
+            .comment("Client fog far plane (blocks) for dense fog")
+            .defineInRange("phi_fog_far_dense", 12.0, 3.0, 64.0);
+    public static final ModConfigSpec.DoubleValue PHI_FOG_FAR_STORM = BUILDER
+            .comment("Client fog far plane (blocks) for storm fog")
+            .defineInRange("phi_fog_far_storm", 6.0, 2.0, 32.0);
+    public static final ModConfigSpec.IntValue PHI_FOG_MAGE_INTOX_TICKS = BUILDER
+            .comment("Ticks in fog before mage Φ-intoxication starts")
+            .defineInRange("phi_fog_mage_intox_ticks", 6000, 200, 240000);
+    public static final ModConfigSpec.IntValue PHI_FOG_NON_MAGE_INTOX_TICKS = BUILDER
+            .comment("Ticks in fog before non-mage headache / nausea")
+            .defineInRange("phi_fog_non_mage_intox_ticks", 1200, 100, 72000);
+    public static final ModConfigSpec.DoubleValue PHI_FOG_STORM_PSI_DRAIN = BUILDER
+            .comment("Ψ drained per second during Φ-storm fog (mages)")
+            .defineInRange("phi_fog_storm_psi_drain", 2.5, 0.0, 50.0);
+    public static final ModConfigSpec.DoubleValue PHI_FOG_STORM_EXHAUSTION = BUILDER
+            .comment("Exhaustion per second during Φ-storm fog")
+            .defineInRange("phi_fog_storm_exhaustion", 1.2, 0.0, 20.0);
+
     // --- Phi environment (factors around 1.0; PhiFieldService adds (factor - 1)) ---
     public static final ModConfigSpec.DoubleValue PHI_RAIN_MULTIPLIER = BUILDER
             .comment("Rain Φ factor around 1.0 (additive as value-1)")

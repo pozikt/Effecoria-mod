@@ -77,8 +77,12 @@ public final class SchoolParticles {
             private final float alphaBase;
             private final float alphaVariance;
 
+            private final float red;
+            private final float green;
+            private final float blue;
+
             public Provider(SpriteSet sprites, float baseSize, float growRate) {
-                this(sprites, baseSize, growRate, 18, 16, 0.3F, 0.25F);
+                this(sprites, baseSize, growRate, 18, 16, 0.3F, 0.25F, 1f, 1f, 1f);
             }
 
             public Provider(
@@ -89,6 +93,20 @@ public final class SchoolParticles {
                     int lifeVariance,
                     float alphaBase,
                     float alphaVariance) {
+                this(sprites, baseSize, growRate, lifeBase, lifeVariance, alphaBase, alphaVariance, 1f, 1f, 1f);
+            }
+
+            public Provider(
+                    SpriteSet sprites,
+                    float baseSize,
+                    float growRate,
+                    int lifeBase,
+                    int lifeVariance,
+                    float alphaBase,
+                    float alphaVariance,
+                    float red,
+                    float green,
+                    float blue) {
                 this.sprites = sprites;
                 this.baseSize = baseSize;
                 this.growRate = growRate;
@@ -96,6 +114,9 @@ public final class SchoolParticles {
                 this.lifeVariance = lifeVariance;
                 this.alphaBase = alphaBase;
                 this.alphaVariance = alphaVariance;
+                this.red = red;
+                this.green = green;
+                this.blue = blue;
             }
 
             @Override
@@ -108,7 +129,7 @@ public final class SchoolParticles {
                     double xd,
                     double yd,
                     double zd) {
-                return new FogParticle(
+                FogParticle particle = new FogParticle(
                         level,
                         x,
                         y,
@@ -123,6 +144,8 @@ public final class SchoolParticles {
                         this.lifeVariance,
                         this.alphaBase,
                         this.alphaVariance);
+                particle.setColor(this.red, this.green, this.blue);
+                return particle;
             }
         }
     }

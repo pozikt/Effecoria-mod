@@ -124,9 +124,11 @@ public final class EssencePlateauService {
         if (inside) {
             applyGravity(player);
             tickExposure(player);
+            PhiFogService.tickPlayer(player);
         } else {
             clearGravity(player);
             PLATEAU_TICKS.remove(player.getUUID());
+            PhiFogService.clearPlayer(player.getUUID());
         }
     }
 

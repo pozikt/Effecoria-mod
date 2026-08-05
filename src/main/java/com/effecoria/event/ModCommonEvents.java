@@ -45,6 +45,7 @@ import com.effecoria.effect.spatial.SpatialFieldService;
 import com.effecoria.magic.SpellRegistry;
 import com.effecoria.core.seal.SealWordRegistry;
 import com.effecoria.world.EssencePlateauService;
+import com.effecoria.world.PhiFogService;
 
 import net.minecraft.server.MinecraftServer;
 
@@ -212,6 +213,7 @@ public final class ModCommonEvents {
         } else {
             regen = FormulaEngine.regenPsi(PsiHelper.toContext(player, data), phi, 10f);
             regen *= EssencePlateauService.regenMultiplier(player.level(), player.position());
+            regen *= PhiFogService.regenMultiplier(player);
         }
         if (regen > 0f) {
             data.setCurrentPsi(data.currentPsi() + regen);

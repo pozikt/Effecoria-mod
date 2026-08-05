@@ -156,4 +156,7 @@ public final class ModParticleTypes {
     // General Φ motes
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> PHI_SPARK =
             PARTICLE_TYPES.register("phi_spark", () -> new SimpleParticleType(false));
+    /** Ultramarine Φ-mist motes for Essence Plateau atmosphere. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> PHI_MIST =
+            PARTICLE_TYPES.register("phi_mist", () -> new SimpleParticleType(false));
 }
