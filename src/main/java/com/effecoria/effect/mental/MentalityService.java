@@ -61,6 +61,8 @@ public final class MentalityService {
     public static final String AFFLICT_OWNER_TAG = "effecoria:mental_afflict_owner";
     /** Mental shield — blocks empathic scan / deep probe while active. */
     public static final String SHIELD_UNTIL_TAG = "effecoria:mental_shield_until";
+    /** Mind blank — keep mob target cleared for a short window. */
+    public static final String BLANK_UNTIL_TAG = "effecoria:mental_blank_until";
 
     public enum Kind {
         BEAST,
@@ -76,6 +78,36 @@ public final class MentalityService {
 
     public static boolean hasShield(LivingEntity entity, long gameTime) {
         return entity.getPersistentData().getLong(SHIELD_UNTIL_TAG) > gameTime;
+    }
+
+    public static void applyBlank(Mob mob, int durationTicks) {
+        long until = mob.level().getGameTime() + Math.max(1, durationTicks);
+        mob.getPersistentData().putLong(BLANK_UNTIL_TAG, until);
+        mob.setTarget(null);
+        mob.getNavigation().stop();
+    }
+
+    public static boolean hasBlank(LivingEntity entity, long gameTime) {
+        return entity.getPersistentData().getLong(BLANK_UNTIL_TAG) > gameTime;
+    }
+
+    public static void clearBlank(LivingEntity entity) {
+        entity.getPersistentData().remove(BLANK_UNTIL_TAG);
+    }
+
+    public static void tickBlank(Mob mob, long gameTime) {
+        long until = mob.getPersistentData().getLong(BLANK_UNTIL_TAG);
+        if (until <= 0L) {
+            return;
+        }
+        if (gameTime > until) {
+            clearBlank(mob);
+            return;
+        }
+        if (mob.getTarget() != null) {
+            mob.setTarget(null);
+        }
+        mob.getNavigation().stop();
     }
 
     public static Kind of(LivingEntity entity) {
@@ -249,6 +281,7 @@ public final class MentalityService {
     public static void purgeMentalEffects(LivingEntity entity) {
         MentalCompulsionService.clear(entity);
         clearAfflict(entity);
+        clearBlank(entity);
         entity.removeEffect(MobEffects.CONFUSION);
         entity.removeEffect(MobEffects.BLINDNESS);
         entity.removeEffect(MobEffects.WEAKNESS);
@@ -293,11 +326,19 @@ public final class MentalityService {
 
     public static void tick(ServerLevel level) {
         long now = level.getGameTime();
+        if (now % 2 == 0) {
+            for (ServerPlayer player : level.players()) {
+                AABB box = player.getBoundingBox().inflate(48);
+                for (Mob mob : level.getEntitiesOfClass(Mob.class, box, m -> hasBlank(m, now))) {
+                    tickBlank(mob, now);
+                }
+            }
+        }
         if (now % 20 == 0) {
             for (ServerPlayer player : level.players()) {
                 AABB box = player.getBoundingBox().inflate(48);
                 for (Mob mob : level.getEntitiesOfClass(Mob.class, box, LivingEntity::isAlive)) {
-                    if (!isAfflicted(mob) && !MentalCompulsionService.hasActive(mob)) {
+                    if (!isAfflicted(mob) && !MentalCompulsionService.hasActive(mob) && !hasBlank(mob, now)) {
                         continue;
                     }
                     tryBreakout(mob);

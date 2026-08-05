@@ -1,6 +1,7 @@
 package com.effecoria.core.formula;
 
 import com.effecoria.effect.mental.MentalCompulsionService;
+import com.effecoria.effect.mental.MentalityService;
 import com.effecoria.effect.necromancy.NecroSummonService;
 
 import net.minecraft.server.level.ServerPlayer;
@@ -78,6 +79,9 @@ public final class SpellCombat {
             return;
         }
         if (MentalCompulsionService.hasActive(mob)) {
+            return;
+        }
+        if (MentalityService.hasBlank(mob, mob.level().getGameTime())) {
             return;
         }
         if (attacker instanceof ServerPlayer player && NecroSummonService.isOwnedBy(mob, player.getUUID())) {

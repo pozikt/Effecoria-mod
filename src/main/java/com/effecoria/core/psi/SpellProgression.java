@@ -26,6 +26,8 @@ public final class SpellProgression {
                     id("psychic_scream"),
                     id("neural_lock"),
                     id("mind_terror"),
+                    id("mind_depress"),
+                    id("mind_blank"),
                     id("psychic_drain"),
                     // III — master
                     id("thought_lance"),

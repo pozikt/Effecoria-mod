@@ -64,6 +64,8 @@ public final class SpellEffectExecutor {
             "mind_probe",
             "locus_echo",
             "mind_terror",
+            "mind_depress",
+            "mind_blank",
             "cliff_urge",
             "drown_urge",
             "psychic_frenzy",
@@ -481,6 +483,8 @@ public final class SpellEffectExecutor {
             case "psychic_amplify" -> MentalEffects.psychicAmplify(caster, effect, power);
             case "omega_mind" -> MentalEffects.omegaMind(caster, effect, power);
             case "mind_terror" -> MentalEffects.mindTerror(caster, effect, power, target);
+            case "mind_depress" -> MentalEffects.mindDepress(caster, effect, power, target);
+            case "mind_blank" -> MentalEffects.mindBlank(caster, effect, power, target);
             case "cliff_urge" -> MentalEffects.cliffUrge(caster, effect, power, target);
             case "drown_urge" -> MentalEffects.drownUrge(caster, effect, power, target);
             case "psychic_frenzy" -> MentalEffects.psychicFrenzy(caster, effect, power, target);

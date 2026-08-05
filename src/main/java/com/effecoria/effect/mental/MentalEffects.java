@@ -21,6 +21,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -487,6 +488,47 @@ public final class MentalEffects {
 
     public static void mindTerror(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         applyCompulsion(caster, effect, power, target, MentalCompulsionService.Type.TERROR, 140);
+    }
+
+    /** Despair freeze — dedicated DEPRESS compulsion (was only mass-hysteria / dream-lock side path). */
+    public static void mindDepress(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        applyCompulsion(caster, effect, power, target, MentalCompulsionService.Type.DEPRESS, 150);
+    }
+
+    /**
+     * Wipe short-term combat intent: clear target and hold the mind blank so the mob does not re-aggro
+     * for a few seconds. Distinct from DEPRESS (no heavy root/blind package).
+     */
+    public static void mindBlank(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        int duration = scaledTicks(effect, power, "duration_ticks", 80);
+        ServerLevel level = caster.serverLevel();
+        if (target instanceof ServerPlayer player) {
+            if (!gateAfflict(caster, player, duration, true)) {
+                return;
+            }
+            BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.CONFUSION, Math.min(duration, 60), 1));
+            BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.BLINDNESS, Math.min(40, duration / 2), 0));
+            player.displayClientMessage(Component.translatable("message.effecoria.mental.blank_victim"), true);
+            finishHit(level, player.position(), HitFx.FOG);
+            level.playSound(null, player.blockPosition(), SoundEvents.ILLUSIONER_PREPARE_BLINDNESS, SoundSource.PLAYERS, 0.55f, 1.1f);
+            return;
+        }
+        if (!(target instanceof Mob mob) || target instanceof Player) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.mental.compel_invalid"), true);
+            return;
+        }
+        if (!gateAfflict(caster, mob, duration, true)) {
+            return;
+        }
+        MentalityService.applyBlank(mob, duration);
+        BreathDebuffs.apply(mob, new MobEffectInstance(MobEffects.CONFUSION, Math.min(duration, 80), 0));
+        caster.displayClientMessage(
+                Component.translatable("message.effecoria.mental.blank_ok", mob.getDisplayName()), true);
+        finishHit(level, mob.position(), HitFx.FOG);
+        level.playSound(null, mob.blockPosition(), SoundEvents.ILLUSIONER_PREPARE_BLINDNESS, SoundSource.PLAYERS, 0.6f, 0.95f);
     }
 
     public static void cliffUrge(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {

@@ -101,7 +101,13 @@ public final class CastPresentation {
             id("psychic_amplify"),
             id("omega_mind"));
     private static final Set<ResourceLocation> MENTAL_FOG_FAMILY =
-            Set.of(id("mass_confusion"), id("psychic_storm"), id("thought_bomb"), id("mind_illusion"), id("total_veil"));
+            Set.of(
+                    id("mass_confusion"),
+                    id("psychic_storm"),
+                    id("thought_bomb"),
+                    id("mind_illusion"),
+                    id("mind_blank"),
+                    id("total_veil"));
     private static final Set<ResourceLocation> MENTAL_SYNAPSE =
             Set.of(id("neural_lock"), id("synaptic_overload"), id("psychic_scream"));
     private static final Set<ResourceLocation> MENTAL_WARD =
@@ -109,6 +115,7 @@ public final class CastPresentation {
     private static final Set<ResourceLocation> MENTAL_DRAIN = Set.of(id("psychic_drain"));
     private static final Set<ResourceLocation> MENTAL_FEAR = Set.of(
             id("mind_terror"),
+            id("mind_depress"),
             id("cliff_urge"),
             id("drown_urge"),
             id("psychic_frenzy"),

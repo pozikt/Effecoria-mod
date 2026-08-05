@@ -1,5 +1,7 @@
 package com.effecoria.effect.corruption;
 
+import com.effecoria.effect.mental.MentalityService;
+
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -51,6 +53,9 @@ public final class PreyMarkService {
                 continue;
             }
             if (mob.distanceToSqr(marked) > r2) {
+                continue;
+            }
+            if (MentalityService.hasBlank(mob, level.getGameTime())) {
                 continue;
             }
             if (mob.getTarget() != marked) {
