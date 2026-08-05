@@ -15,6 +15,10 @@ import java.util.function.Consumer;
 
 import static terrablender.api.ParameterUtils.*;
 
+/**
+ * Surface jagged-peak mountains only. Underground Φ caves are placed under those
+ * surface columns via {@code under_plateau_surface} — not as orphan cave biomes.
+ */
 public final class EssencePlateauRegion extends Region {
     public EssencePlateauRegion(ResourceLocation name, int weight) {
         super(name, RegionType.OVERWORLD, weight);
@@ -23,24 +27,23 @@ public final class EssencePlateauRegion extends Region {
     @Override
     public void addBiomes(Registry<Biome> registry, Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> mapper) {
         VanillaParameterOverlayBuilder builder = new VanillaParameterOverlayBuilder();
-        // Full vertical column on jagged / high-slice peaks: surface → caves → bedrock.
+        // Vanilla jagged-peaks niche: cold, far inland, lowest erosion, peak weirdness.
         new ParameterPointListBuilder()
                 .temperature(Temperature.span(Temperature.COOL, Temperature.FROZEN))
-                .humidity(Humidity.span(Humidity.DRY, Humidity.WET))
-                .continentalness(Continentalness.FAR_INLAND)
-                .erosion(Erosion.span(Erosion.EROSION_0, Erosion.EROSION_1))
-                .depth(Depth.span(Depth.SURFACE, Depth.UNDERGROUND))
-                .weirdness(Weirdness.span(Weirdness.HIGH_SLICE_NORMAL_ASCENDING, Weirdness.HIGH_SLICE_NORMAL_DESCENDING))
-                .build()
-                .forEach(point -> builder.add(point, ModBiomes.ESSENCE_PLATEAU));
-        // Variant peak ridge (mirrored weirdness) for taller, broken summits.
-        new ParameterPointListBuilder()
-                .temperature(Temperature.span(Temperature.COOL, Temperature.FROZEN))
-                .humidity(Humidity.span(Humidity.DRY, Humidity.WET))
+                .humidity(Humidity.span(Humidity.DRY, Humidity.NEUTRAL))
                 .continentalness(Continentalness.FAR_INLAND)
                 .erosion(Erosion.EROSION_0)
-                .depth(Depth.span(Depth.SURFACE, Depth.UNDERGROUND))
-                .weirdness(Weirdness.span(Weirdness.HIGH_SLICE_VARIANT_ASCENDING, Weirdness.HIGH_SLICE_VARIANT_DESCENDING))
+                .depth(Depth.SURFACE)
+                .weirdness(Weirdness.PEAK_NORMAL)
+                .build()
+                .forEach(point -> builder.add(point, ModBiomes.ESSENCE_PLATEAU));
+        new ParameterPointListBuilder()
+                .temperature(Temperature.span(Temperature.COOL, Temperature.FROZEN))
+                .humidity(Humidity.span(Humidity.DRY, Humidity.NEUTRAL))
+                .continentalness(Continentalness.FAR_INLAND)
+                .erosion(Erosion.EROSION_0)
+                .depth(Depth.SURFACE)
+                .weirdness(Weirdness.PEAK_VARIANT)
                 .build()
                 .forEach(point -> builder.add(point, ModBiomes.ESSENCE_PLATEAU));
         builder.build().forEach(mapper);

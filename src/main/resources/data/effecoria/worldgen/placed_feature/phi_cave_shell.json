@@ -1,14 +1,14 @@
 {
-  "feature": "effecoria:phi_crust_infusion",
+  "feature": "effecoria:phi_cave_shell",
   "placement": [
-    { "type": "minecraft:count", "count": 140 },
+    { "type": "minecraft:count", "count": 80 },
     { "type": "minecraft:in_square" },
     {
       "type": "minecraft:height_range",
       "height": {
         "type": "minecraft:trapezoid",
-        "min_inclusive": { "absolute": 64 },
-        "max_inclusive": { "absolute": 320 }
+        "min_inclusive": { "absolute": -56 },
+        "max_inclusive": { "absolute": 180 }
       }
     },
     { "type": "effecoria:under_plateau_surface" }

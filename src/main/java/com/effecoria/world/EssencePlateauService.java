@@ -19,6 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
@@ -35,8 +36,20 @@ public final class EssencePlateauService {
 
     private static final Map<UUID, Integer> PLATEAU_TICKS = new ConcurrentHashMap<>();
 
+    /**
+     * True on the mountain surface biome, or anywhere in the vertical column beneath it
+     * (caves stay “plateau” for gameplay even when 3D underground biomes differ).
+     */
     public static boolean isBiome(Level level, BlockPos pos) {
-        return level.getBiome(pos).is(ModBiomeTags.ESSENCE_PLATEAU);
+        if (level.getBiome(pos).is(ModBiomeTags.ESSENCE_PLATEAU)) {
+            return true;
+        }
+        int surfaceY = level.getHeight(Heightmap.Types.WORLD_SURFACE, pos.getX(), pos.getZ());
+        if (pos.getY() > surfaceY + 32) {
+            return false;
+        }
+        BlockPos surfacePos = new BlockPos(pos.getX(), Math.max(surfaceY, level.getMinBuildHeight()), pos.getZ());
+        return level.getBiome(surfacePos).is(ModBiomeTags.ESSENCE_PLATEAU);
     }
 
     public static boolean isIn(Level level, Vec3 position) {

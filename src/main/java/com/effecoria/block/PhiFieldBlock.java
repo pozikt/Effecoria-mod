@@ -1,8 +1,8 @@
 package com.effecoria.block;
 
-import com.effecoria.content.ModBiomeTags;
 import com.effecoria.content.ModBlocks;
 import com.effecoria.content.ModParticleTypes;
+import com.effecoria.world.EssencePlateauService;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -38,7 +38,7 @@ public class PhiFieldBlock extends Block {
 
     @Override
     public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        boolean plateau = level.getBiome(pos).is(ModBiomeTags.ESSENCE_PLATEAU);
+        boolean plateau = EssencePlateauService.isBiome(level, pos);
         int interval = plateau ? SPREAD_INTERVAL_PLATEAU : SPREAD_INTERVAL;
         if (random.nextInt(interval) != 0) {
             return;

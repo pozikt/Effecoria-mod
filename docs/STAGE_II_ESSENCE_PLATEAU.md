@@ -1,29 +1,26 @@
 # Stage II — Essence Plateau
 
-Rare high-mountain overworld biome (TerraBlender). Full vertical column (−64 → 320):
+Rare **jagged-peak mountain** (TerraBlender `PEAK_*` + `EROSION_0`, surface only).
+`/locate biome` should land on a highland summit — not an orphan cave pocket.
+
+Under that mountain, Φ generation follows the **surface column** to bedrock
+(`effecoria:under_plateau_surface`), even when 3D underground biomes differ:
 
 | Layer | Approx Y | Content |
 |-------|----------|---------|
-| **Sky** | ≥220 (islands 180–310) | Floating Φ-rock islands (`phi_sky_island`), extreme peaks |
-| **Surface** | ~193–219 (+ highland tops) | Φ-grass / Φ-dirt, mist mood |
-| **Crust** | ~129–192 (infusion 64–320) | Dense Φ-stone through the mountain mass |
-| **Crystal caverns** | 0–128 (veins to 160) | Essonite veins, crystal clusters |
-| **Φ-root** | −64–0 | Near-solid essonite, **lethal radiation** without protection |
-
-Climate: high-slice + peak ridges, erosion 0–1, **surface+underground** depth so the whole column is this biome.
+| **Sky** | ≥220 (islands 180–310) | Floating Φ-rock islands on the surface biome |
+| **Surface** | peak highland | Φ-grass / Φ-dirt / Φ-stone crust |
+| **Crust** | mid→high | Dense Φ-stone through the massif |
+| **Crystal caverns** | 0–160 | Cave shells of essonite + veins + crystal buds |
+| **Φ-root** | −64–0 | Near-solid essonite, lethal radiation |
 
 ## Gameplay
 
-- Surface: +Φ, +25% spell power, −25% cost, +regen, 80% gravity
-- Caverns: extra Φ (`plateau_cave_phi_bonus`)
-- Root (Y≤0): larger Φ + **magic DPS + wither** if unprotected
-- Φ-soil spreads; vanilla crops fail on Φ-dirt
+Column-aware: standing in caves under the peak still counts as plateau.
+Root (Y≤0): magic DPS + wither without protection.
 
 ## Dev
 
-- New chunks only. `/locate biome effecoria:essence_plateau`
-- Requires TerraBlender NeoForge 1.21.1
-
-## Art
-
-See `art/essence_plateau/` and `art/phi_earth/`.
+- **New world / new chunks** required after climate fix.
+- `/locate biome effecoria:essence_plateau` → fly to coordinates → you should be on a mountain.
+- Dig down: essonite-lined caves toward bedrock.

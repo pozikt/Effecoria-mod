@@ -1,6 +1,6 @@
 {
   "type": "neoforge:add_features",
-  "biomes": "#effecoria:is_essence_plateau",
-  "features": ["effecoria:phi_cave_crystals"],
+  "biomes": "#minecraft:is_overworld",
+  "features": ["effecoria:phi_cave_crystals", "effecoria:phi_cave_shell"],
   "step": "underground_decoration"
 }

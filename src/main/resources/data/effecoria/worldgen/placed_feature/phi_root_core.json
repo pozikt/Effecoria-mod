@@ -11,6 +11,6 @@
         "max_inclusive": { "absolute": 8 }
       }
     },
-    { "type": "minecraft:biome" }
+    { "type": "effecoria:under_plateau_surface" }
   ]
 }
