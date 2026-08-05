@@ -6,6 +6,7 @@ import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.world.DeadWastelandService;
 import com.effecoria.world.EssencePlateauService;
+import com.effecoria.world.PhiGlassPlainService;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -53,6 +54,7 @@ public final class PhiFieldService {
         value += weatherBonus(level);
         value += fluidBonus(level, pos, player);
         value += EssencePlateauService.phiEnvironmentBonus(level, pos);
+        value += PhiGlassPlainService.phiEnvironmentBonus(level, pos);
 
         if (isInsideZeroFluxZone(level, pos) || isIronInsulated(player) || DeadWastelandService.isBiome(level, pos)) {
             return new PhiSample(0f, true, isSolarDay(level));

@@ -10,6 +10,7 @@ import com.effecoria.client.render.DeathShadowRenderer;
 import com.effecoria.client.render.EidosRenderer;
 import com.effecoria.client.render.MirageHorrorRenderer;
 import com.effecoria.client.render.PhiLarvaRenderer;
+import com.effecoria.client.render.PhiScorpionRenderer;
 import com.effecoria.client.render.RootCageRenderer;
 import com.effecoria.client.render.SubspacePortalRenderer;
 import com.effecoria.content.ModBlocks;
@@ -45,6 +46,7 @@ public final class EffecoriaClient {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_BLADES.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_SAPLING.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_LEAVES.get(), RenderType.cutoutMipped());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_GLASS.get(), RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.ESSONITE_POINTED.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.BLOOD_FLUID.get(), RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_WATER.get(), RenderType.translucent());
@@ -69,6 +71,7 @@ public final class EffecoriaClient {
         event.registerEntityRenderer(ModEntities.MIRAGE_HORROR.get(), MirageHorrorRenderer::new);
         event.registerEntityRenderer(ModEntities.PHI_LARVA.get(), PhiLarvaRenderer::new);
         event.registerEntityRenderer(ModEntities.CRYSTAL_CRAB.get(), CrystalCrabRenderer::new);
+        event.registerEntityRenderer(ModEntities.PHI_SCORPION.get(), PhiScorpionRenderer::new);
         event.registerEntityRenderer(ModEntities.EIDOS.get(), EidosRenderer::new);
         event.registerBlockEntityRenderer(
                 com.effecoria.content.ModBlockEntities.SUBSPACE_PORTAL.get(), SubspacePortalRenderer::new);

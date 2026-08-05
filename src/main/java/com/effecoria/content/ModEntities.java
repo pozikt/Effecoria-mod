@@ -6,6 +6,7 @@ import com.effecoria.entity.DeathShadowEntity;
 import com.effecoria.entity.EidosEntity;
 import com.effecoria.entity.MirageHorrorEntity;
 import com.effecoria.entity.PhiLarvaEntity;
+import com.effecoria.entity.PhiScorpionEntity;
 import com.effecoria.entity.RootCageEntity;
 
 import net.minecraft.core.registries.Registries;
@@ -73,6 +74,15 @@ public final class ModEntities {
                             .clientTrackingRange(10)
                             .build(EffecoriaMod.id("crystal_crab").toString()));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<PhiScorpionEntity>> PHI_SCORPION =
+            ENTITY_TYPES.register(
+                    "phi_scorpion",
+                    () -> EntityType.Builder.<PhiScorpionEntity>of(PhiScorpionEntity::new, MobCategory.MONSTER)
+                            .sized(1.0f, 0.7f)
+                            .clientTrackingRange(12)
+                            .fireImmune()
+                            .build(EffecoriaMod.id("phi_scorpion").toString()));
+
     public static final DeferredHolder<EntityType<?>, EntityType<EidosEntity>> EIDOS =
             ENTITY_TYPES.register(
                     "eidos",
@@ -87,6 +97,7 @@ public final class ModEntities {
         event.put(MIRAGE_HORROR.get(), MirageHorrorEntity.createAttributes().build());
         event.put(PHI_LARVA.get(), PhiLarvaEntity.createAttributes().build());
         event.put(CRYSTAL_CRAB.get(), CrystalCrabEntity.createAttributes().build());
+        event.put(PHI_SCORPION.get(), PhiScorpionEntity.createAttributes().build());
         event.put(EIDOS.get(), EidosEntity.createAttributes().build());
     }
 
@@ -99,6 +110,12 @@ public final class ModEntities {
                 RegisterSpawnPlacementsEvent.Operation.REPLACE);
         event.register(
                 CRYSTAL_CRAB.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                Monster::checkMonsterSpawnRules,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(
+                PHI_SCORPION.get(),
                 SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 Monster::checkMonsterSpawnRules,

@@ -47,6 +47,7 @@ import com.effecoria.core.seal.SealWordRegistry;
 import com.effecoria.world.DeadWastelandService;
 import com.effecoria.world.EssencePlateauService;
 import com.effecoria.world.PhiFogService;
+import com.effecoria.world.PhiGlassPlainService;
 
 import net.minecraft.server.MinecraftServer;
 
@@ -157,6 +158,7 @@ public final class ModCommonEvents {
 
         EssencePlateauService.tickPlayer(player);
         DeadWastelandService.tickPlayer(player);
+        PhiGlassPlainService.tickPlayer(player);
 
         MirageWorldService.playerTick(player);
 

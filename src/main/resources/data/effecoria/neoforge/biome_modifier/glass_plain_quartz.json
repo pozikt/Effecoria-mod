@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#effecoria:is_phi_glass_plain",
+  "features": "effecoria:phi_quartz_blob",
+  "step": "underground_ores"
+}

@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#effecoria:is_phi_glass_plain",
+  "features": "effecoria:glass_plain_crystal_cave",
+  "step": "underground_decoration"
+}

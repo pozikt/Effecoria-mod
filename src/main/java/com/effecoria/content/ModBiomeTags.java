@@ -16,4 +16,8 @@ public final class ModBiomeTags {
     /** Zero Φ-flow Dead Wasteland — magic sleeps (Φ_nature ≈ 0). */
     public static final TagKey<Biome> DEAD_WASTELAND = TagKey.create(
             Registries.BIOME, EffecoriaMod.id("is_dead_wasteland"));
+
+    /** High-Φ Glass Plain (Φ-Пустыня / Стеклянная Равнина). */
+    public static final TagKey<Biome> PHI_GLASS_PLAIN = TagKey.create(
+            Registries.BIOME, EffecoriaMod.id("is_phi_glass_plain"));
 }

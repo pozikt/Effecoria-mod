@@ -2,6 +2,7 @@ package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.block.EssoniteCrustBlock;
+import com.effecoria.block.EssoniteDustBlock;
 import com.effecoria.block.EssonitePointedBlock;
 import com.effecoria.block.PhiBladesBlock;
 import com.effecoria.block.PhiFieldBlock;
@@ -85,6 +86,51 @@ public final class ModBlocks {
                     .requiresCorrectToolForDrops()
                     .strength(0.8f, 0.8f)
                     .sound(SoundType.STONE)));
+
+    /** Φ-Glass Plain — fused lightning-sand crust (glows at night). */
+    public static final DeferredBlock<Block> PHI_GLASS = BLOCKS.register(
+            "phi_glass",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.GOLD)
+                    .strength(0.4f)
+                    .sound(SoundType.GLASS)
+                    .noOcclusion()
+                    .isValidSpawn((s, l, p, t) -> false)
+                    .isRedstoneConductor((s, l, p) -> false)
+                    .isSuffocating((s, l, p) -> false)
+                    .isViewBlocking((s, l, p) -> false)
+                    .lightLevel(state -> 6)));
+
+    /** Softer dune sheet of Φ-glass grit. */
+    public static final DeferredBlock<Block> PHI_GLASS_DUNE = BLOCKS.register(
+            "phi_glass_dune",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.SAND)
+                    .strength(0.35f)
+                    .sound(SoundType.SAND)
+                    .lightLevel(state -> 4)));
+
+    /** Φ-barghan quicksand — essonite dust mass. */
+    public static final DeferredBlock<EssoniteDustBlock> ESSONITE_DUST_BLOCK = BLOCKS.register(
+            "essonite_dust_block",
+            () -> new EssoniteDustBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PURPLE)
+                    .strength(0.25f)
+                    .sound(SoundType.SAND)
+                    .dynamicShape()
+                    .lightLevel(state -> 3)));
+
+    /** Φ-quartz seam / pocket crystal ore. */
+    public static final DeferredBlock<Block> PHI_QUARTZ = BLOCKS.register(
+            "phi_quartz",
+            () -> new DropExperienceBlock(
+                    UniformInt.of(1, 3),
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                            .requiresCorrectToolForDrops()
+                            .strength(2.8f, 3.0f)
+                            .sound(SoundType.AMETHYST)
+                            .lightLevel(state -> 8)));
 
     /** Φ-saturated stone — glows and slowly converts adjacent stone. */
     public static final DeferredBlock<PhiFieldBlock> PHI_STONE = BLOCKS.register(

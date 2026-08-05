@@ -32,6 +32,7 @@ import com.effecoria.network.ModNetworking;
 
 import com.effecoria.world.DeadWastelandRegion;
 import com.effecoria.world.EssencePlateauRegion;
+import com.effecoria.world.PhiGlassPlainRegion;
 import com.effecoria.world.EssencePlateauSurfaceRules;
 
 import com.mojang.logging.LogUtils;
@@ -115,9 +116,11 @@ public class EffecoriaMod {
 
     private static void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-            LOGGER.info("Registering Essence Plateau / Dead Wasteland TerraBlender regions and surface rules");
+            LOGGER.info("Registering Essence Plateau / Dead Wasteland / Glass Plain TerraBlender regions");
             Regions.register(new EssencePlateauRegion(id("overworld"), 6));
-            Regions.register(new DeadWastelandRegion(id("dead_wasteland"), 10));
+            // ~25% each of regional lottery for the two desert replacements (weight 8 + 8).
+            Regions.register(new DeadWastelandRegion(id("dead_wasteland"), 8));
+            Regions.register(new PhiGlassPlainRegion(id("phi_glass_plain"), 8));
             SurfaceRuleManager.addSurfaceRules(
                     SurfaceRuleManager.RuleCategory.OVERWORLD,
                     MOD_ID,

@@ -373,6 +373,41 @@ public final class BalanceConfig {
             .comment("Per-second chance to destroy one essonite dust/shard/crystal in inventory")
             .defineInRange("wasteland_crystal_bleed_chance", 0.02, 0.0, 1.0);
 
+    // --- Φ-Glass Plain (Стеклянная Равнина) ---
+    public static final ModConfigSpec.DoubleValue GLASS_PLAIN_PHI_BONUS = BUILDER
+            .comment("Additive Φ bonus on the Glass Plain surface")
+            .defineInRange("glass_plain_phi_bonus", 0.55, 0.0, 3.0);
+    public static final ModConfigSpec.DoubleValue GLASS_PLAIN_STORM_PHI_BONUS = BUILDER
+            .comment("Extra Φ during Glass Plain storms")
+            .defineInRange("glass_plain_storm_phi_bonus", 0.35, 0.0, 2.0);
+    public static final ModConfigSpec.DoubleValue GLASS_PLAIN_ELEMENTAL_SPELL_MULT = BUILDER
+            .comment("Fire/lightning elemental spell power on Glass Plain")
+            .defineInRange("glass_plain_elemental_spell_mult", 1.25, 0.1, 3.0);
+    public static final ModConfigSpec.DoubleValue GLASS_PLAIN_WATER_SPELL_MULT = BUILDER
+            .comment("Water/ice/steam elemental spell power on Glass Plain")
+            .defineInRange("glass_plain_water_spell_mult", 0.6, 0.05, 2.0);
+    public static final ModConfigSpec.DoubleValue GLASS_PLAIN_SPATIAL_SPELL_MULT = BUILDER
+            .comment("Spatial spell power on Glass Plain")
+            .defineInRange("glass_plain_spatial_spell_mult", 0.85, 0.05, 2.0);
+    public static final ModConfigSpec.DoubleValue GLASS_PLAIN_SPATIAL_STORM_ENTROPY = BUILDER
+            .comment("Extra entropy added to spatial casts during Glass Plain storms")
+            .defineInRange("glass_plain_spatial_storm_entropy", 0.08, 0.0, 1.0);
+    public static final ModConfigSpec.IntValue GLASS_PLAIN_STORM_DURATION_TICKS = BUILDER
+            .comment("Glass Plain storm window length")
+            .defineInRange("glass_plain_storm_duration_ticks", 2400, 200, 48000);
+    public static final ModConfigSpec.IntValue GLASS_PLAIN_STORM_CALM_TICKS = BUILDER
+            .comment("Calm window between Glass Plain storms")
+            .defineInRange("glass_plain_storm_calm_ticks", 6000, 200, 120000);
+    public static final ModConfigSpec.DoubleValue GLASS_PLAIN_STORM_ABRASION = BUILDER
+            .comment("Magic damage per second during Glass Plain storms")
+            .defineInRange("glass_plain_storm_abrasion", 0.75, 0.0, 10.0);
+    public static final ModConfigSpec.DoubleValue GLASS_PLAIN_STORM_EXHAUSTION = BUILDER
+            .comment("Orkanum exhaustion added per second in storm for initiated mages")
+            .defineInRange("glass_plain_storm_exhaustion", 0.015, 0.0, 1.0);
+    public static final ModConfigSpec.DoubleValue GLASS_PLAIN_STORM_LIGHTNING_CHANCE = BUILDER
+            .comment("Per 2-second chance of a Φ-lightning near the player during storms")
+            .defineInRange("glass_plain_storm_lightning_chance", 0.08, 0.0, 1.0);
+
     public static final ModConfigSpec.IntValue GEYSER_DORMANT_MIN_TICKS = BUILDER
             .comment("Minimum Φ-geyser dormant phase duration")
             .defineInRange("geyser_dormant_min_ticks", 4800, 200, 240000);

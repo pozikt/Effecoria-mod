@@ -43,7 +43,6 @@ public final class EssencePlateauSurfaceRules {
                 cavernShell);
 
         // Dead Wasteland — vanilla-desert style: sand sheet, one ash underlayer, sandstone below.
-        // Avoid thick stoneDepth ash bands (they paint entire cliff faces gray on steep terrain).
         SurfaceRules.RuleSource sand = state(ModBlocks.PARCHED_SAND.get());
         SurfaceRules.RuleSource ash = state(ModBlocks.ASH_SOIL.get());
         SurfaceRules.RuleSource sandstone = state(ModBlocks.PARCHED_SANDSTONE.get());
@@ -56,12 +55,32 @@ public final class EssencePlateauSurfaceRules {
         SurfaceRules.RuleSource wastelandColumn = SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.abovePreliminarySurface(), wastelandStack));
 
+        // Φ-Glass Plain — fused glass crust / dunes over essonite dust barghans.
+        SurfaceRules.RuleSource phiGlass = state(ModBlocks.PHI_GLASS.get());
+        SurfaceRules.RuleSource dune = state(ModBlocks.PHI_GLASS_DUNE.get());
+        SurfaceRules.RuleSource dust = state(ModBlocks.ESSONITE_DUST_BLOCK.get());
+
+        SurfaceRules.RuleSource glassFloor = SurfaceRules.sequence(
+                SurfaceRules.ifTrue(SurfaceRules.noiseCondition(
+                        net.minecraft.world.level.levelgen.Noises.SURFACE, -0.15, 0.15), dune),
+                phiGlass);
+
+        SurfaceRules.RuleSource glassPlainStack = SurfaceRules.sequence(
+                SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, glassFloor),
+                SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, dust),
+                SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, 5, CaveSurface.FLOOR), dust),
+                SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, 18, CaveSurface.FLOOR), sandstone));
+
+        SurfaceRules.RuleSource glassPlainColumn = SurfaceRules.sequence(
+                SurfaceRules.ifTrue(SurfaceRules.abovePreliminarySurface(), glassPlainStack));
+
         SurfaceRules.RuleSource vanillaGrassSurface = SurfaceRules.sequence(
                 SurfaceRules.ifTrue(isAtOrAboveWaterLevel, state(Blocks.GRASS_BLOCK)), state(Blocks.DIRT));
 
         return SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.ESSENCE_PLATEAU), plateauColumn),
                 SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.DEAD_WASTELAND), wastelandColumn),
+                SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.PHI_GLASS_PLAIN), glassPlainColumn),
                 SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, vanillaGrassSurface));
     }
 

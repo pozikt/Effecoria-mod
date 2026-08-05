@@ -1,0 +1,10 @@
+{
+  "feature": "effecoria:glass_plain_crystal_cave",
+  "placement": [
+    { "type": "minecraft:count", "count": 8 },
+    { "type": "minecraft:in_square" },
+    { "type": "minecraft:height_range", "height": { "type": "minecraft:uniform", "min_inclusive": { "absolute": -20 }, "max_inclusive": { "absolute": 60 } } },
+    { "type": "minecraft:biome" },
+    { "type": "minecraft:rarity_filter", "chance": 4 }
+  ]
+}

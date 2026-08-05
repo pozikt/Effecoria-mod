@@ -35,6 +35,14 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("ash_soil", ModBlocks.ASH_SOIL);
     public static final DeferredItem<BlockItem> PARCHED_SANDSTONE =
             ITEMS.registerSimpleBlockItem("parched_sandstone", ModBlocks.PARCHED_SANDSTONE);
+    public static final DeferredItem<BlockItem> PHI_GLASS =
+            ITEMS.registerSimpleBlockItem("phi_glass", ModBlocks.PHI_GLASS);
+    public static final DeferredItem<BlockItem> PHI_GLASS_DUNE =
+            ITEMS.registerSimpleBlockItem("phi_glass_dune", ModBlocks.PHI_GLASS_DUNE);
+    public static final DeferredItem<BlockItem> ESSONITE_DUST_BLOCK =
+            ITEMS.registerSimpleBlockItem("essonite_dust_block", ModBlocks.ESSONITE_DUST_BLOCK);
+    public static final DeferredItem<BlockItem> PHI_QUARTZ =
+            ITEMS.registerSimpleBlockItem("phi_quartz", ModBlocks.PHI_QUARTZ);
     public static final DeferredItem<BlockItem> PHI_STONE =
             ITEMS.registerSimpleBlockItem("phi_stone", ModBlocks.PHI_STONE);
     public static final DeferredItem<BlockItem> PHI_DIRT =
@@ -89,6 +97,9 @@ public final class ModItems {
     /** Refined Φ-conductive dust — smelted from essonite ore. */
     public static final DeferredItem<Item> ESSENITE_DUST = ITEMS.registerSimpleItem("essonite_dust");
 
+    /** Φ-quartz shard from Glass Plain seams. */
+    public static final DeferredItem<Item> PHI_QUARTZ_SHARD = ITEMS.registerSimpleItem("phi_quartz_shard");
+
     /** Initiation focus — school select + tiered resonance bonuses. */
     public static final DeferredItem<Item> RESONANCE_FOCUS = ITEMS.register(
             "resonance_focus",
@@ -118,4 +129,7 @@ public final class ModItems {
     public static final DeferredItem<SpawnEggItem> EIDOS_SPAWN_EGG = ITEMS.register(
             "eidos_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.EIDOS, 0xf0d060, 0xfff6c8, new Item.Properties()));
+    public static final DeferredItem<SpawnEggItem> PHI_SCORPION_SPAWN_EGG = ITEMS.register(
+            "phi_scorpion_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.PHI_SCORPION, 0xc9a84c, 0x5ce0d0, new Item.Properties()));
 }
