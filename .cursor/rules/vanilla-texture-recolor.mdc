@@ -1,0 +1,13 @@
+---
+description: Prefer recoloring vanilla Minecraft textures for mod items/blocks
+alwaysApply: true
+---
+
+# Vanilla texture recolor first
+
+When creating or replacing Effecoria item/block textures:
+
+1. **Prefer recoloring** an existing vanilla texture if a close counterpart exists (bucket ← water_bucket, ore ← stone ore, leaves ← oak leaves, dripstone ← pointed_dripstone, etc.).
+2. Keep the vanilla **silhouette, alpha, and metal/structure pixels**; only remap the thematic color (liquid, gem, foliage, glow).
+3. Extract sources from the Minecraft client jar (`assets/minecraft/textures/...`) into `art/` for comparison when useful, then write the result to `src/main/resources/assets/effecoria/textures/...`.
+4. Invent a fully custom texture only when there is **no** suitable vanilla base.
