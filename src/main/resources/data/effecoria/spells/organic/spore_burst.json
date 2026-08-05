@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:spore_burst",
+  "school": "organic",
+  "frequency_hz": 0.55,
+  "base_cost": 10,
+  "power_multiplier": 1.05,
+  "side_entropy": 0.08,
+  "min_phi": 0.18,
+  "min_mastery": 0.22,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:spore_burst",
+      "radius": 12,
+      "damage_dice": "2d4",
+      "extend_ticks": 50
+    }
+  ]
+}

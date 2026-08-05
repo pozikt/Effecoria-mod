@@ -171,7 +171,8 @@ If choosing a single slice for the next implementation session:
 20. Seals **word pack** — `vigil` (remote alarm) + `haustus` (standing Ψ siphon) — ✅ shipped.
 21. Mental **identity pack** — `mind_depress` (DEPRESS) + `mind_blank` (wipe aggro) — ✅ shipped.
 22. Necromancy **identity pack** — `thrall_focus` + `mark_reap` (Death Mark + army) — ✅ shipped.
-23. **Next:** package Demo builds / known-issues on Modrinth+Discord; or intentional Stage II environment.
+23. Organic **identity pack** — `parasite_seed` + `spore_burst` (host drain + rupture) — ✅ shipped.
+24. **Next:** package Demo builds / known-issues on Modrinth+Discord; or intentional Stage II environment.
 
 ---
 

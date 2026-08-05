@@ -90,6 +90,8 @@ public final class SpellProgression {
                     id("bio_strike"),
                     id("bone_needle"),
                     id("foreign_agent"),
+                    id("parasite_seed"),
+                    id("spore_burst"),
                     id("muscle_spasm"),
                     id("thorn_lash"),
                     id("root_bind"),

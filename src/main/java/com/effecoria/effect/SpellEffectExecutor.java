@@ -106,6 +106,7 @@ public final class SpellEffectExecutor {
             "rift_yank",
             "bio_strike",
             "foreign_agent",
+            "parasite_seed",
             "muscle_spasm",
             "parasitic_infection",
             "metabolic_shock",
@@ -372,6 +373,8 @@ public final class SpellEffectExecutor {
             case "bio_strike" -> OrganicEffects.bioStrike(caster, effect, power, target, aim);
             case "bone_needle" -> OrganicEffects.boneNeedle(caster, effect, power);
             case "foreign_agent" -> OrganicEffects.foreignAgent(caster, effect, power, target, aim);
+            case "parasite_seed" -> OrganicEffects.parasiteSeed(caster, effect, power, target, aim);
+            case "spore_burst" -> OrganicEffects.sporeBurst(caster, effect, power);
             case "muscle_spasm" -> OrganicEffects.muscleSpasm(caster, effect, power, target, aim);
             case "chitin_plates" -> OrganicEffects.chitinPlates(caster, effect, power);
             case "acid_gland" -> OrganicEffects.acidGland(caster, effect, power);

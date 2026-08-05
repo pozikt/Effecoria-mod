@@ -25,6 +25,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.UUID;
+
 /** Organic / Orkanum tissue magic from the D&D doc. */
 public final class OrganicEffects {
     private OrganicEffects() {}
@@ -209,6 +211,70 @@ public final class OrganicEffects {
             target.hurtMarked = true;
         }
         spawnParasites(level, hit);
+    }
+
+    /** Identity: implant a draining parasite that spreads to the same creature type. */
+    public static void parasiteSeed(
+            ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
+        ServerLevel level = caster.serverLevel();
+        Vec3 hit = target != null ? target.position().add(0, 1, 0) : aim.add(0, 0.2, 0);
+        if (target == null || target == caster) {
+            spawnParasites(level, hit);
+            if (target == null) {
+                caster.displayClientMessage(Component.translatable("message.effecoria.organic.parasite_need"), true);
+            }
+            return;
+        }
+        JsonObject params = effect.params();
+        int duration = params.has("duration_ticks") ? params.get("duration_ticks").getAsInt() : 200;
+        duration = Math.round(duration * (0.85f + power / 120f));
+        int poisonTicks = params.has("poison_ticks") ? params.get("poison_ticks").getAsInt() : 100;
+        int spreadTicks = params.has("spread_ticks") ? params.get("spread_ticks").getAsInt() : 120;
+        float burst = DiceDamage.fromParams(params, power, 2.5f);
+        target.hurt(SpellCombat.wither(caster), burst);
+        BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, poisonTicks, 0));
+        target.hurtMarked = true;
+        ParasiteHostService.apply(caster, target, duration);
+        ParasiteHostService.spreadFrom(level, caster, target, spreadTicks);
+        caster.displayClientMessage(
+                Component.translatable("message.effecoria.organic.parasite_seed_ok", target.getDisplayName()), true);
+        spawnParasites(level, hit);
+        level.playSound(null, target.blockPosition(), SoundEvents.SPIDER_AMBIENT, SoundSource.PLAYERS, 0.55f, 1.4f);
+    }
+
+    /** Identity: rupture every parasite host you own in radius — damage, extend, spore burst. */
+    public static void sporeBurst(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        JsonObject params = effect.params();
+        float radius = params.has("radius") ? params.get("radius").getAsFloat() : 12f;
+        float damage = DiceDamage.fromParams(params, power, 3.5f);
+        int extend = params.has("extend_ticks") ? params.get("extend_ticks").getAsInt() : 50;
+        radius *= 0.9f + power / 150f;
+        long now = level.getGameTime();
+        UUID ownerId = caster.getUUID();
+        int hit = 0;
+        AABB box = caster.getBoundingBox().inflate(radius);
+        for (LivingEntity entity :
+                level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive())) {
+            if (entity.distanceToSqr(caster) > radius * radius) {
+                continue;
+            }
+            if (!ParasiteHostService.isHostedBy(entity, ownerId, now)) {
+                continue;
+            }
+            entity.hurt(SpellCombat.wither(caster), damage);
+            ParasiteHostService.extend(entity, extend);
+            entity.hurtMarked = true;
+            spawnSpores(level, entity.position().add(0, 1, 0));
+            hit++;
+        }
+        if (hit > 0) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.organic.spore_burst_ok", hit), true);
+        } else {
+            caster.displayClientMessage(Component.translatable("message.effecoria.organic.spore_burst_empty"), true);
+        }
+        spawnSpores(level, caster.position().add(0, 1, 0));
+        level.playSound(null, caster.blockPosition(), SoundEvents.GRASS_BREAK, SoundSource.PLAYERS, 0.7f, 0.6f);
     }
 
     public static void metabolicShock(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
