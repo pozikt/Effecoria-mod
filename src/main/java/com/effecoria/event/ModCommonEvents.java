@@ -44,6 +44,7 @@ import com.effecoria.effect.corruption.CorruptionFieldService;
 import com.effecoria.effect.spatial.SpatialFieldService;
 import com.effecoria.magic.SpellRegistry;
 import com.effecoria.core.seal.SealWordRegistry;
+import com.effecoria.world.EssencePlateauService;
 
 import net.minecraft.server.MinecraftServer;
 
@@ -152,6 +153,8 @@ public final class ModCommonEvents {
             return;
         }
 
+        EssencePlateauService.tickPlayer(player);
+
         MirageWorldService.playerTick(player);
 
         PlayerPsiData flightData = PsiHelper.get(player);
@@ -208,6 +211,7 @@ public final class ModCommonEvents {
                     PsiHelper.toContext(player, data), phi, data.phylacteryEfficiency(), 10f);
         } else {
             regen = FormulaEngine.regenPsi(PsiHelper.toContext(player, data), phi, 10f);
+            regen *= EssencePlateauService.regenMultiplier(player.level(), player.position());
         }
         if (regen > 0f) {
             data.setCurrentPsi(data.currentPsi() + regen);

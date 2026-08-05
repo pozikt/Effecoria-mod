@@ -295,6 +295,43 @@ public final class BalanceConfig {
             .comment("Server-side minimum real-time gap between accepted breathing-train hits (anti-spam)")
             .defineInRange("breathing_train_min_interval_ms", 280, 50, 5000);
 
+    // --- Essence Plateau biome ---
+    public static final ModConfigSpec.DoubleValue PLATEAU_PHI_BONUS = BUILDER
+            .comment("Additive Φ value bonus while standing in Essence Plateau (high-Φ field)")
+            .defineInRange("plateau_phi_bonus", 0.55, 0.0, 2.0);
+
+    public static final ModConfigSpec.DoubleValue PLATEAU_SPELL_POWER_MULT = BUILDER
+            .comment("Spell power multiplier inside Essence Plateau")
+            .defineInRange("plateau_spell_power_mult", 1.25, 1.0, 2.5);
+
+    public static final ModConfigSpec.DoubleValue PLATEAU_SPELL_COST_MULT = BUILDER
+            .comment("Spell Ψ cost multiplier inside Essence Plateau (< 1 = cheaper)")
+            .defineInRange("plateau_spell_cost_mult", 0.75, 0.1, 1.0);
+
+    public static final ModConfigSpec.DoubleValue PLATEAU_REGEN_MULT = BUILDER
+            .comment("Passive Ψ regen multiplier for initiated mages in the plateau")
+            .defineInRange("plateau_regen_mult", 1.35, 1.0, 3.0);
+
+    public static final ModConfigSpec.DoubleValue PLATEAU_GRAVITY_MULT = BUILDER
+            .comment("Gravity multiplier in plateau (0.8 = lighter jumps)")
+            .defineInRange("plateau_gravity_mult", 0.8, 0.3, 1.2);
+
+    public static final ModConfigSpec.DoubleValue PLATEAU_EXHAUSTION_SPIKE = BUILDER
+            .comment("Periodic exhaustion for unprotected mages exposed to raw Φ")
+            .defineInRange("plateau_exhaustion_spike", 8.0, 0.0, 50.0);
+
+    public static final ModConfigSpec.IntValue PLATEAU_BURN_INTERVAL_TICKS = BUILDER
+            .comment("Ticks between Φ-burn pulses when unprotected (0 = disabled)")
+            .defineInRange("plateau_burn_interval_ticks", 24000, 0, 200000);
+
+    public static final ModConfigSpec.DoubleValue PLATEAU_BURN_DAMAGE = BUILDER
+            .comment("Magic damage per Φ-burn pulse")
+            .defineInRange("plateau_burn_damage", 2.0, 0.0, 20.0);
+
+    public static final ModConfigSpec.DoubleValue PLATEAU_BURN_EXHAUSTION = BUILDER
+            .comment("Exhaustion added per Φ-burn pulse for initiated mages")
+            .defineInRange("plateau_burn_exhaustion", 12.0, 0.0, 50.0);
+
     // --- Phi environment (factors around 1.0; PhiFieldService adds (factor - 1)) ---
     public static final ModConfigSpec.DoubleValue PHI_RAIN_MULTIPLIER = BUILDER
             .comment("Rain Φ factor around 1.0 (additive as value-1)")

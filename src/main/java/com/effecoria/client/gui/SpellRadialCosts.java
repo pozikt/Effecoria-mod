@@ -8,6 +8,7 @@ import com.effecoria.core.phi.CreativeGodMode;
 import com.effecoria.core.phi.PhiFieldService;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.magic.SpellRegistry;
+import com.effecoria.world.EssencePlateauService;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -28,7 +29,8 @@ public final class SpellRadialCosts {
         }
         PsiContext ctx = PsiHelper.toContext(player, PsiHelper.get(player));
         PhiSample phi = PhiFieldService.sample(player.level(), player.position(), player);
-        return FormulaEngine.spellCost(ctx, phi, def.get());
+        return FormulaEngine.spellCost(ctx, phi, def.get())
+                * EssencePlateauService.spellCostMultiplier(player.level(), player.position());
     }
 
     public static boolean canAfford(Player player, float cost) {

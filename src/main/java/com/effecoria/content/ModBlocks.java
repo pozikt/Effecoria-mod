@@ -40,6 +40,28 @@ public final class ModBlocks {
     public static final DeferredBlock<Block> BASALT_ESSENITE_ORE =
             registerOre("basalt_essonite_ore", MapColor.COLOR_BLACK, 3.2f, 3f, SoundType.BASALT);
 
+    /** Φ-saturated stone — natural ground in Essence Plateau. */
+    public static final DeferredBlock<Block> PHI_STONE = BLOCKS.register(
+            "phi_stone",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .requiresCorrectToolForDrops()
+                    .strength(1.5f, 6f)
+                    .sound(SoundType.DEEPSLATE)
+                    .lightLevel(state -> 3)));
+
+    /** Surface Φ-crystal druse — drops essonite dust when mined. */
+    public static final DeferredBlock<Block> ESSONITE_CRYSTAL = BLOCKS.register(
+            "essonite_crystal",
+            () -> new DropExperienceBlock(
+                    UniformInt.of(1, 3),
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_BLUE)
+                            .requiresCorrectToolForDrops()
+                            .strength(2f, 3f)
+                            .sound(SoundType.AMETHYST)
+                            .lightLevel(state -> 9)));
+
     /**
      * Translucent Φ-membrane underfoot in hyperspace — replaces the old end-stone sheet so the
      * ultramarine Φ-ocean shows through.

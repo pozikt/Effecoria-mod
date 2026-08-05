@@ -102,9 +102,11 @@ public final class CastPipeline {
         }
 
         float fullCost = godMode ? 0f : FormulaEngine.spellCost(ctx, phi, spell) * chargeScale;
+        fullCost *= com.effecoria.world.EssencePlateauService.spellCostMultiplier(player.level(), player.position());
         boolean overcasting = !godMode && usablePsi + 0.001f < fullCost;
         PsiContext powerCtx = overcasting ? ctx.withCurrentPsi(Math.max(usablePsi, fullCost)) : ctx;
         float power = FormulaEngine.spellPower(powerCtx, phi, spell) * chargeScale;
+        power *= com.effecoria.world.EssencePlateauService.spellPowerMultiplier(player.level(), player.position());
         power = CreativeGodMode.clampSpellPower(player, power);
         float hardCap = BalanceConfig.SPELL_POWER_HARD_CAP.get().floatValue();
         if (hardCap > 0f) {

@@ -25,6 +25,10 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("tuff_essonite_ore", ModBlocks.TUFF_ESSENITE_ORE);
     public static final DeferredItem<BlockItem> BASALT_ESSENITE_ORE =
             ITEMS.registerSimpleBlockItem("basalt_essonite_ore", ModBlocks.BASALT_ESSENITE_ORE);
+    public static final DeferredItem<BlockItem> PHI_STONE =
+            ITEMS.registerSimpleBlockItem("phi_stone", ModBlocks.PHI_STONE);
+    public static final DeferredItem<BlockItem> ESSONITE_CRYSTAL =
+            ITEMS.registerSimpleBlockItem("essonite_crystal", ModBlocks.ESSONITE_CRYSTAL);
 
     /** Hyperspace Φ-membrane (creative / debug; worldgen places it in subspace). */
     public static final DeferredItem<BlockItem> PHI_VEIL =

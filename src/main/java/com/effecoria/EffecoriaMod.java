@@ -26,6 +26,9 @@ import com.effecoria.core.psi.ModAttachments;
 
 import com.effecoria.network.ModNetworking;
 
+import com.effecoria.world.EssencePlateauRegion;
+import com.effecoria.world.EssencePlateauSurfaceRules;
+
 import com.mojang.logging.LogUtils;
 
 
@@ -40,9 +43,14 @@ import net.neoforged.fml.common.Mod;
 
 import net.neoforged.fml.config.ModConfig;
 
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+
+import terrablender.api.Regions;
+import terrablender.api.SurfaceRuleManager;
 
 
 
@@ -80,6 +88,7 @@ public class EffecoriaMod {
 
         modEventBus.addListener(EffecoriaMod::registerPayloads);
         modEventBus.addListener(ModEntities::registerAttributes);
+        modEventBus.addListener(EffecoriaMod::commonSetup);
 
 
 
@@ -95,7 +104,16 @@ public class EffecoriaMod {
 
     }
 
-
+    private static void commonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            LOGGER.info("Registering Essence Plateau TerraBlender region and surface rules");
+            Regions.register(new EssencePlateauRegion(id("overworld"), 3));
+            SurfaceRuleManager.addSurfaceRules(
+                    SurfaceRuleManager.RuleCategory.OVERWORLD,
+                    MOD_ID,
+                    EssencePlateauSurfaceRules.makeRules());
+        });
+    }
 
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
 

@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#effecoria:is_essence_plateau",
+  "features": ["effecoria:ore_essonite"],
+  "step": "underground_ores"
+}

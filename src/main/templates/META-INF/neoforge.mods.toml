@@ -102,3 +102,11 @@ Phase 0: project skeleton, FormulaEngine, data-driven spell templates.
     ordering="NONE"
     side="BOTH"
     reason="Animated mirage horror entity"
+
+[[dependencies.${mod_id}]]
+    modId="terrablender"
+    type="required"
+    versionRange="${terrablender_version_range}"
+    ordering="AFTER"
+    side="BOTH"
+    reason="Essence Plateau overworld biome registration"
