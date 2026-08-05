@@ -44,6 +44,7 @@ import com.effecoria.effect.corruption.CorruptionFieldService;
 import com.effecoria.effect.spatial.SpatialFieldService;
 import com.effecoria.magic.SpellRegistry;
 import com.effecoria.core.seal.SealWordRegistry;
+import com.effecoria.world.DeadWastelandService;
 import com.effecoria.world.EssencePlateauService;
 import com.effecoria.world.PhiFogService;
 
@@ -155,6 +156,7 @@ public final class ModCommonEvents {
         }
 
         EssencePlateauService.tickPlayer(player);
+        DeadWastelandService.tickPlayer(player);
 
         MirageWorldService.playerTick(player);
 

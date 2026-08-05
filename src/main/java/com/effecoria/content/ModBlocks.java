@@ -61,6 +61,31 @@ public final class ModBlocks {
                     .sound(SoundType.AMETHYST)
                     .lightLevel(state -> 12)));
 
+    /** Dead Wasteland surface — bleached, Φ-starved sand. */
+    public static final DeferredBlock<Block> PARCHED_SAND = BLOCKS.register(
+            "parched_sand",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.SAND)
+                    .strength(0.5f)
+                    .sound(SoundType.SAND)));
+
+    /** Dead Wasteland soil — ash-gray cracked earth. */
+    public static final DeferredBlock<Block> ASH_SOIL = BLOCKS.register(
+            "ash_soil",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(0.55f)
+                    .sound(SoundType.GRAVEL)));
+
+    /** Bleached desert sandstone under the wasteland crust. */
+    public static final DeferredBlock<Block> PARCHED_SANDSTONE = BLOCKS.register(
+            "parched_sandstone",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.SAND)
+                    .requiresCorrectToolForDrops()
+                    .strength(0.8f, 0.8f)
+                    .sound(SoundType.STONE)));
+
     /** Φ-saturated stone — glows and slowly converts adjacent stone. */
     public static final DeferredBlock<PhiFieldBlock> PHI_STONE = BLOCKS.register(
             "phi_stone",

@@ -360,6 +360,19 @@ public final class BalanceConfig {
             .comment("Magic damage per second in Φ-core without protection (lethal without shield)")
             .defineInRange("plateau_root_radiation_damage", 4.0, 0.0, 20.0);
 
+    // --- Dead Wasteland (Zero Φ-flow) ---
+    public static final ModConfigSpec.IntValue WASTELAND_MAGE_COMA_TICKS = BUILDER
+            .comment("Ticks in Dead Wasteland before initiated mages enter Orkanum coma (default ~15 min)")
+            .defineInRange("wasteland_mage_coma_ticks", 18000, 200, 240000);
+
+    public static final ModConfigSpec.DoubleValue WASTELAND_CELL_DRAIN_PER_SECOND = BUILDER
+            .comment("Φ-cell charge drained per second while in Dead Wasteland")
+            .defineInRange("wasteland_cell_drain_per_second", 0.008, 0.0, 0.2);
+
+    public static final ModConfigSpec.DoubleValue WASTELAND_CRYSTAL_BLEED_CHANCE = BUILDER
+            .comment("Per-second chance to destroy one essonite dust/shard/crystal in inventory")
+            .defineInRange("wasteland_crystal_bleed_chance", 0.02, 0.0, 1.0);
+
     public static final ModConfigSpec.IntValue GEYSER_DORMANT_MIN_TICKS = BUILDER
             .comment("Minimum Φ-geyser dormant phase duration")
             .defineInRange("geyser_dormant_min_ticks", 4800, 200, 240000);

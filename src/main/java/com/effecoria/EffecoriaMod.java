@@ -30,6 +30,7 @@ import com.effecoria.core.psi.ModAttachments;
 
 import com.effecoria.network.ModNetworking;
 
+import com.effecoria.world.DeadWastelandRegion;
 import com.effecoria.world.EssencePlateauRegion;
 import com.effecoria.world.EssencePlateauSurfaceRules;
 
@@ -114,8 +115,9 @@ public class EffecoriaMod {
 
     private static void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-            LOGGER.info("Registering Essence Plateau TerraBlender region and surface rules");
+            LOGGER.info("Registering Essence Plateau / Dead Wasteland TerraBlender regions and surface rules");
             Regions.register(new EssencePlateauRegion(id("overworld"), 6));
+            Regions.register(new DeadWastelandRegion(id("dead_wasteland"), 10));
             SurfaceRuleManager.addSurfaceRules(
                     SurfaceRuleManager.RuleCategory.OVERWORLD,
                     MOD_ID,

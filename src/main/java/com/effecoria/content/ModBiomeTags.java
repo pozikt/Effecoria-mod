@@ -12,4 +12,8 @@ public final class ModBiomeTags {
     /** High-Φ Essence Plateau — rare mountain biome. */
     public static final TagKey<Biome> ESSENCE_PLATEAU = TagKey.create(
             Registries.BIOME, EffecoriaMod.id("is_essence_plateau"));
+
+    /** Zero Φ-flow Dead Wasteland — magic sleeps (Φ_nature ≈ 0). */
+    public static final TagKey<Biome> DEAD_WASTELAND = TagKey.create(
+            Registries.BIOME, EffecoriaMod.id("is_dead_wasteland"));
 }

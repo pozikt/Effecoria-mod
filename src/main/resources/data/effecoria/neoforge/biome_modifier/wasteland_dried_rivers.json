@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#effecoria:is_dead_wasteland",
+  "features": "effecoria:dried_riverbed",
+  "step": "vegetal_decoration"
+}

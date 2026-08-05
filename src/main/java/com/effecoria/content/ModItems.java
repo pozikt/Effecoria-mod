@@ -29,6 +29,12 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("basalt_essonite_ore", ModBlocks.BASALT_ESSENITE_ORE);
     public static final DeferredItem<BlockItem> ESSONITE_BLOCK =
             ITEMS.registerSimpleBlockItem("essonite_block", ModBlocks.ESSONITE_BLOCK);
+    public static final DeferredItem<BlockItem> PARCHED_SAND =
+            ITEMS.registerSimpleBlockItem("parched_sand", ModBlocks.PARCHED_SAND);
+    public static final DeferredItem<BlockItem> ASH_SOIL =
+            ITEMS.registerSimpleBlockItem("ash_soil", ModBlocks.ASH_SOIL);
+    public static final DeferredItem<BlockItem> PARCHED_SANDSTONE =
+            ITEMS.registerSimpleBlockItem("parched_sandstone", ModBlocks.PARCHED_SANDSTONE);
     public static final DeferredItem<BlockItem> PHI_STONE =
             ITEMS.registerSimpleBlockItem("phi_stone", ModBlocks.PHI_STONE);
     public static final DeferredItem<BlockItem> PHI_DIRT =

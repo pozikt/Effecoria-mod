@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "entries": [{ "type": "minecraft:item", "name": "effecoria:parched_sand" }],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "effecoria:blocks/parched_sand"
+}
