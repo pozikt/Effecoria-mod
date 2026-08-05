@@ -4,6 +4,7 @@ import com.effecoria.EffecoriaMod;
 import com.effecoria.world.feature.EssoniteDripstoneFeature;
 import com.effecoria.world.feature.EssoniteDruzeFeature;
 import com.effecoria.world.feature.PhiCaveShellFeature;
+import com.effecoria.world.feature.PhiCoreFeature;
 import com.effecoria.world.feature.PhiGeyserFeature;
 import com.effecoria.world.feature.PhiSkyIslandFeature;
 import com.effecoria.world.feature.PhiWaterLakeFeature;
@@ -37,4 +38,7 @@ public final class ModFeatures {
 
     public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> PHI_WATER_LAKE =
             FEATURES.register("phi_water_lake", () -> new PhiWaterLakeFeature(NoneFeatureConfiguration.CODEC));
+
+    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> PHI_CORE =
+            FEATURES.register("phi_core", () -> new PhiCoreFeature(NoneFeatureConfiguration.CODEC));
 }

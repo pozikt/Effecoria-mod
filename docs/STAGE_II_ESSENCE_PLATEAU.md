@@ -12,7 +12,7 @@ Under that mountain, Φ generation follows the **surface column** to bedrock
 | **Surface** | peak highland | Φ-grass / Φ-dirt / Φ-stone crust, **Φ-geysers** |
 | **Crust** | mid→high | Dense Φ-stone through the massif |
 | **Crystal caverns** | 0–160 | Cave shells, veins, **essonite dripstone**, **druze**, **geodes**, **Φ-water lakes** |
-| **Φ-root** | −64–0 | Near-solid essonite, lethal radiation |
+| **Φ-ядро** | −64–0 | Near-solid `essonite_block`, lethal Φ-radiation |
 
 ## Crystal caverns (ETP)
 
@@ -53,14 +53,22 @@ Client: `ViewportEvent` fog tint + `phi_mist` / spark motes + movement wake trai
 - `phi_nut`: mages regain Ψ; non-mages get Φ-poison
 - Art refs for leaf edit: `art/phi_flora/phi_leaves.png` vs `art/phi_flora/oak_leaves.png`
 
+## Φ-ядро (core)
+
+Lowest band under the plateau (`Y ≤ plateau_root_max_y`, default 0):
+
+- Worldgen (`phi_root_core` / `PhiCoreFeature`): dense blobs of glowing `essonite_block` (~88%), sparse deepslate essonite veins, rare Φ-stone seams
+- Gameplay: magic DPS + wither II / confusion / weakness every second without Φ protection (gold / focus / Φ-cell / essonite dust)
+- Extreme Φ bonus for casting; unprotected mages also take Orkanum exhaustion
+
 ## Gameplay
 
 Column-aware: standing in caves under the peak still counts as plateau.
-Root (Y≤0): magic DPS + wither without protection.
+Φ-ядро (Y≤0): lethal radiation without protection.
 
 ## Dev
 
 - **New world / new chunks** required after climate fix.
 - `/locate biome effecoria:essence_plateau` → fly to coordinates → you should be on a mountain.
-- Dig down: essonite-lined caves toward bedrock.
+- Dig to bedrock under the peak: near-solid essonite core.
 - Creative: place `phi_geyser` or wait for natural surface spawns.

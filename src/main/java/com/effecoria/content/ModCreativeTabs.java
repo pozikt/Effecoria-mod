@@ -29,6 +29,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.DIORITE_ESSENITE_ORE.get());
                         output.accept(ModItems.TUFF_ESSENITE_ORE.get());
                         output.accept(ModItems.BASALT_ESSENITE_ORE.get());
+                        output.accept(ModItems.ESSONITE_BLOCK.get());
                         output.accept(ModItems.PHI_STONE.get());
                         output.accept(ModItems.PHI_DIRT.get());
                         output.accept(ModItems.PHI_GRASS.get());

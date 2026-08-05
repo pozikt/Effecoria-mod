@@ -96,6 +96,7 @@ public final class EssoniteDruzeFeature extends Feature<NoneFeatureConfiguration
                 || state.is(ModBlocks.ESSONITE_DRIPSTONE_BLOCK.get())
                 || state.is(ModBlocks.ESSENITE_ORE.get())
                 || state.is(ModBlocks.DEEPSLATE_ESSENITE_ORE.get())
+                || state.is(ModBlocks.ESSONITE_BLOCK.get())
                 || state.is(ModBlocks.ESSONITE_CRUST.get())
                 || state.is(BlockTags.BASE_STONE_OVERWORLD)
                 || state.is(BlockTags.DEEPSLATE_ORE_REPLACEABLES);

@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [{ "item": "effecoria:essonite_block" }],
+  "result": {
+    "count": 4,
+    "id": "effecoria:pure_essonite"
+  }
+}

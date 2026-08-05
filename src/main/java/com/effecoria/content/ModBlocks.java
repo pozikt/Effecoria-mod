@@ -51,6 +51,16 @@ public final class ModBlocks {
     public static final DeferredBlock<Block> BASALT_ESSENITE_ORE =
             registerOre("basalt_essonite_ore", MapColor.COLOR_BLACK, 3.2f, 3f, SoundType.BASALT);
 
+    /** Nearly pure essonite — Φ-core mass under the plateau (Y ≤ 0). */
+    public static final DeferredBlock<Block> ESSONITE_BLOCK = BLOCKS.register(
+            "essonite_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .requiresCorrectToolForDrops()
+                    .strength(5.0f, 6.0f)
+                    .sound(SoundType.AMETHYST)
+                    .lightLevel(state -> 12)));
+
     /** Φ-saturated stone — glows and slowly converts adjacent stone. */
     public static final DeferredBlock<PhiFieldBlock> PHI_STONE = BLOCKS.register(
             "phi_stone",

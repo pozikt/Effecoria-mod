@@ -35,6 +35,7 @@ public final class EssencePlateauService {
     private static final ResourceLocation GRAVITY_ID = EffecoriaMod.id("essence_plateau_gravity");
 
     private static final Map<UUID, Integer> PLATEAU_TICKS = new ConcurrentHashMap<>();
+    private static final Map<UUID, Boolean> ROOT_WARNED = new ConcurrentHashMap<>();
 
     /**
      * True on the mountain surface biome, or anywhere in the vertical column beneath it
@@ -128,6 +129,7 @@ public final class EssencePlateauService {
         } else {
             clearGravity(player);
             PLATEAU_TICKS.remove(player.getUUID());
+            ROOT_WARNED.remove(player.getUUID());
             PhiFogService.clearPlayer(player.getUUID());
         }
     }
@@ -183,18 +185,30 @@ public final class EssencePlateauService {
             }
         }
 
-        // Φ-root: lethal radiation without protection
+        // Φ-core (Φ-ядро): lethal radiation without protection at lowest heights
         if (player.getY() <= BalanceConfig.PLATEAU_ROOT_MAX_Y.get() && !hasPhiProtection(player)) {
             float rootDmg = BalanceConfig.PLATEAU_ROOT_RADIATION_DAMAGE.get().floatValue();
             if (rootDmg > 0f) {
                 player.hurt(player.damageSources().magic(), rootDmg);
             }
             BreathDebuffs.apply(
-                    player, new MobEffectInstance(MobEffects.WITHER, 40, 0, false, false, true));
+                    player, new MobEffectInstance(MobEffects.WITHER, 60, 1, false, false, true));
+            BreathDebuffs.apply(
+                    player, new MobEffectInstance(MobEffects.CONFUSION, 80, 0, false, false, true));
+            BreathDebuffs.apply(
+                    player, new MobEffectInstance(MobEffects.WEAKNESS, 60, 0, false, false, true));
             if (data.initiated()) {
-                ExhaustionService.addExhaustion(data, 4f);
+                ExhaustionService.addExhaustion(data, 6f);
                 PsiHelper.set(player, data);
             }
+            if (player instanceof ServerPlayer serverPlayer
+                    && ROOT_WARNED.putIfAbsent(id, Boolean.TRUE) == null) {
+                serverPlayer.displayClientMessage(
+                        net.minecraft.network.chat.Component.translatable("message.effecoria.phi_core_radiation"),
+                        true);
+            }
+        } else if (player.getY() > BalanceConfig.PLATEAU_ROOT_MAX_Y.get()) {
+            ROOT_WARNED.remove(id);
         }
     }
 

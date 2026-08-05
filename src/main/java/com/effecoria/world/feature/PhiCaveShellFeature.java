@@ -32,6 +32,7 @@ public final class PhiCaveShellFeature extends Feature<NoneFeatureConfiguration>
         BlockState phiStone = ModBlocks.PHI_STONE.get().defaultBlockState();
         BlockState ore = ModBlocks.ESSENITE_ORE.get().defaultBlockState();
         BlockState deepOre = ModBlocks.DEEPSLATE_ESSENITE_ORE.get().defaultBlockState();
+        BlockState core = ModBlocks.ESSONITE_BLOCK.get().defaultBlockState();
 
         boolean placed = false;
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
@@ -51,13 +52,18 @@ public final class PhiCaveShellFeature extends Feature<NoneFeatureConfiguration>
                     if (!touchesOpen(level, cursor)) {
                         // Deep mass under the mountain — still convert, but keep Φ-stone core.
                         if (random.nextFloat() < 0.35f) {
-                            level.setBlock(cursor, pickMass(state, phiStone, ore, deepOre, random), 2);
+                            level.setBlock(cursor, pickMass(state, phiStone, ore, deepOre, core, random, cursor.getY()), 2);
                             placed = true;
                         }
                         continue;
                     }
                     // Cave shell: prefer glowing essonite veins on open faces.
-                    BlockState shell = cursor.getY() < 0 ? deepOre : (random.nextFloat() < 0.65f ? ore : phiStone);
+                    BlockState shell;
+                    if (cursor.getY() <= 0) {
+                        shell = random.nextFloat() < 0.7f ? core : deepOre;
+                    } else {
+                        shell = random.nextFloat() < 0.65f ? ore : phiStone;
+                    }
                     level.setBlock(cursor, shell, 2);
                     placed = true;
                 }
@@ -89,7 +95,16 @@ public final class PhiCaveShellFeature extends Feature<NoneFeatureConfiguration>
     }
 
     private static BlockState pickMass(
-            BlockState current, BlockState phiStone, BlockState ore, BlockState deepOre, RandomSource random) {
+            BlockState current,
+            BlockState phiStone,
+            BlockState ore,
+            BlockState deepOre,
+            BlockState core,
+            RandomSource random,
+            int y) {
+        if (y <= 0) {
+            return random.nextFloat() < 0.82f ? core : (random.nextFloat() < 0.5f ? deepOre : phiStone);
+        }
         if (current.is(BlockTags.DEEPSLATE_ORE_REPLACEABLES) || current.is(Blocks.DEEPSLATE)) {
             return random.nextFloat() < 0.55f ? deepOre : phiStone;
         }

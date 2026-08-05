@@ -186,6 +186,7 @@ public final class EssoniteDripstoneFeature extends Feature<NoneFeatureConfigura
                 || state.is(ModBlocks.ESSONITE_DRIPSTONE_BLOCK.get())
                 || state.is(ModBlocks.ESSENITE_ORE.get())
                 || state.is(ModBlocks.DEEPSLATE_ESSENITE_ORE.get())
+                || state.is(ModBlocks.ESSONITE_BLOCK.get())
                 || state.is(BlockTags.BASE_STONE_OVERWORLD)
                 || state.is(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
     }

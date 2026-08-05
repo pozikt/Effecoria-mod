@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": { "item": "effecoria:pure_essonite" }
+  },
+  "pattern": ["##", "##"],
+  "result": {
+    "count": 1,
+    "id": "effecoria:essonite_block"
+  }
+}

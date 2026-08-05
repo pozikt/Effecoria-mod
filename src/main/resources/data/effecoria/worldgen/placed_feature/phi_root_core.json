@@ -1,14 +1,14 @@
 {
   "feature": "effecoria:phi_root_core",
   "placement": [
-    { "type": "minecraft:count", "count": 220 },
+    { "type": "minecraft:count", "count": 48 },
     { "type": "minecraft:in_square" },
     {
       "type": "minecraft:height_range",
       "height": {
         "type": "minecraft:uniform",
         "min_inclusive": { "absolute": -64 },
-        "max_inclusive": { "absolute": 8 }
+        "max_inclusive": { "absolute": 0 }
       }
     },
     { "type": "effecoria:under_plateau_surface" }

@@ -337,7 +337,7 @@ public final class BalanceConfig {
             .defineInRange("plateau_cave_max_y", 128, -64, 320);
 
     public static final ModConfigSpec.IntValue PLATEAU_ROOT_MAX_Y = BUILDER
-            .comment("Top of Φ-root / core layer — extreme radiation at/below this (toward bedrock)")
+            .comment("Top of Φ-core (Φ-ядро) layer — extreme radiation at/below this (toward bedrock)")
             .defineInRange("plateau_root_max_y", 0, -64, 320);
 
     public static final ModConfigSpec.IntValue PLATEAU_CRUST_MAX_Y = BUILDER
@@ -353,12 +353,12 @@ public final class BalanceConfig {
             .defineInRange("plateau_cave_phi_bonus", 0.35, 0.0, 2.0);
 
     public static final ModConfigSpec.DoubleValue PLATEAU_ROOT_PHI_BONUS = BUILDER
-            .comment("Extra additive Φ bonus in Φ-root core (Y <= root max)")
+            .comment("Extra additive Φ bonus in Φ-core (Y <= root max)")
             .defineInRange("plateau_root_phi_bonus", 0.85, 0.0, 3.0);
 
     public static final ModConfigSpec.DoubleValue PLATEAU_ROOT_RADIATION_DAMAGE = BUILDER
-            .comment("Magic damage per second in Φ-root without protection")
-            .defineInRange("plateau_root_radiation_damage", 3.0, 0.0, 20.0);
+            .comment("Magic damage per second in Φ-core without protection (lethal without shield)")
+            .defineInRange("plateau_root_radiation_damage", 4.0, 0.0, 20.0);
 
     public static final ModConfigSpec.IntValue GEYSER_DORMANT_MIN_TICKS = BUILDER
             .comment("Minimum Φ-geyser dormant phase duration")
