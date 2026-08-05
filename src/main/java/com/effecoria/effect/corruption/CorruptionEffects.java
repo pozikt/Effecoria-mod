@@ -110,6 +110,84 @@ public final class CorruptionEffects {
         level.playSound(null, caster.blockPosition(), SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.PLAYERS, 0.6f, 1.4f);
     }
 
+    /**
+     * Mid-game contagion teacher: AoE curse package with chunk-1 spread (same EntityType peers).
+     */
+    public static void contagionBloom(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        double radius = effect.params().has("radius") ? effect.params().get("radius").getAsDouble() : 5.5;
+        float damage = effect.params().has("damage_dice")
+                ? DiceDamage.fromParams(effect.params(), power, 3.5f)
+                : (effect.params().has("damage") ? effect.params().get("damage").getAsFloat() : 3.5f) * (power / 50f);
+        int poisonTicks = scaleTicks(
+                effect.params().has("poison_ticks") ? effect.params().get("poison_ticks").getAsInt() : 80, power);
+        int hungerTicks = scaleTicks(
+                effect.params().has("hunger_ticks") ? effect.params().get("hunger_ticks").getAsInt() : 100, power);
+        float softDot = effect.params().has("soft_dot_per_second")
+                ? effect.params().get("soft_dot_per_second").getAsFloat()
+                : 0.35f;
+        int contagion = effect.params().has("contagion_chunks")
+                ? effect.params().get("contagion_chunks").getAsInt()
+                : 1;
+        boolean permanent = isPermanent(effect.params());
+        radius *= 0.9 + power / 140f;
+
+        AABB box = caster.getBoundingBox().inflate(radius);
+        for (LivingEntity entity : level.getEntitiesOfClass(
+                LivingEntity.class, box, e -> e != caster && e.isAlive() && !e.isSpectator())) {
+            if (entity.distanceToSqr(caster) > radius * radius) {
+                continue;
+            }
+            entity.hurt(SpellCombat.magic(caster), damage);
+            CorruptionCurse curse = CorruptionCurse.builder("contagion_bloom", caster.getUUID())
+                    .cureTier(CorruptionCurse.CureTier.COMMON)
+                    .contagionChunks(contagion)
+                    .softDotPerSecond(softDot * (0.85f + power / 100f))
+                    .effect(MobEffects.POISON, 0, poisonTicks, false)
+                    .effect(MobEffects.HUNGER, 1, hungerTicks, permanent)
+                    .effect(MobEffects.WEAKNESS, 0, poisonTicks / 2, permanent)
+                    .fromParams(effect.params())
+                    .build();
+            CorruptionCurseService.apply(caster, entity, curse, true);
+            spawnPlague(level, entity.position().add(0, 1, 0));
+            spawnRot(level, entity.position().add(0, 0.5, 0));
+        }
+        spawnPlaguePulse(level, caster.position().add(0, 0.2, 0), radius);
+        level.playSound(null, caster.blockPosition(), SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.PLAYERS, 0.7f, 0.95f);
+        level.playSound(null, caster.blockPosition(), SoundEvents.SCULK_CLICKING, SoundSource.PLAYERS, 0.55f, 0.6f);
+    }
+
+    /** Refresh / amplify prey marks in radius: forceHunt + small magic hit. */
+    public static void huntPulse(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        double radius = effect.params().has("radius") ? effect.params().get("radius").getAsDouble() : 16;
+        float damage = effect.params().has("damage_dice")
+                ? DiceDamage.fromParams(effect.params(), power, 2f)
+                : (effect.params().has("damage") ? effect.params().get("damage").getAsFloat() : 2f) * (power / 50f);
+        radius *= 0.9 + power / 150f;
+        int hit = 0;
+        AABB box = caster.getBoundingBox().inflate(radius);
+        for (LivingEntity entity : level.getEntitiesOfClass(
+                LivingEntity.class, box, e -> e != caster && e.isAlive() && PreyMarkService.isMarked(e))) {
+            if (entity.distanceToSqr(caster) > radius * radius) {
+                continue;
+            }
+            entity.hurt(SpellCombat.magic(caster), damage);
+            PreyMarkService.forceHunt(entity);
+            spawnMark(level, entity.position().add(0, 1, 0));
+            spawnMiasma(level, entity.position().add(0, 0.5, 0));
+            hit++;
+        }
+        spawnMiasmaPulse(level, caster.position().add(0, 0.2, 0), Math.min(radius, 8.0));
+        level.playSound(
+                null,
+                caster.blockPosition(),
+                SoundEvents.WARDEN_SONIC_CHARGE,
+                SoundSource.PLAYERS,
+                hit > 0 ? 0.65f : 0.35f,
+                hit > 0 ? 1.2f : 0.85f);
+    }
+
     public static void rotTouch(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
         if (target == null) {

@@ -27,6 +27,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.entity.projectile.windcharge.WindCharge;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -425,51 +426,147 @@ public final class ElementalEffects {
                 target.clearFire();
             }
             target.hurtMarked = true;
-            spawnWaterHit(level, target.position());
+            if (cutter) {
+                spawnHydroSliceHit(level, target.position().add(0, target.getBbHeight() * 0.5, 0));
+            } else {
+                spawnWaterHit(level, target.position());
+            }
         }
 
         if (cutter) {
-            cutBlocksAlongBeam(level, start, look, range, power);
-        } else if (extinguish) {
-            extinguishFireAlongBeam(level, start, look, range);
-        }
-
-        spawnWaterBeam(level, start, look, range);
-        level.playSound(
-                null,
-                caster.blockPosition(),
-                cutter ? SoundEvents.PLAYER_ATTACK_SWEEP : SoundEvents.PLAYER_SPLASH_HIGH_SPEED,
-                SoundSource.PLAYERS,
-                cutter ? 0.7f : 0.8f,
-                cutter ? 1.25f : 1.1f);
-    }
-
-    private static void cutBlocksAlongBeam(ServerLevel level, Vec3 start, Vec3 look, double range, float power) {
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        int steps = (int) (range * 4);
-        // Skip the first ~1 block so the operator never shears the block under their feet/face.
-        for (int i = 4; i <= steps; i++) {
-            Vec3 point = start.add(look.scale(i * 0.25));
-            pos.set(point.x, point.y, point.z);
-            BlockState state = level.getBlockState(pos);
-            if (state.isAir() || !canCut(state, power)) {
-                continue;
+            cutBlocksAlongBeam(level, caster, start, look, range, power);
+            spawnHydroSliceBeam(level, start, look, range);
+            level.playSound(null, caster.blockPosition(), SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 0.75f, 1.35f);
+            level.playSound(null, caster.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.85f, 1.15f);
+            if (!hit.isEmpty()) {
+                level.playSound(null, caster.blockPosition(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.55f, 1.3f);
             }
-            level.destroyBlock(pos, true);
-            level.sendParticles(ModParticleTypes.WATER_SPLASH.get(), point.x, point.y, point.z, 4, 0.1, 0.1, 0.1, 0.05);
+        } else {
+            if (extinguish) {
+                extinguishFireAlongBeam(level, start, look, range);
+            }
+            spawnWaterBeam(level, start, look, range);
+            level.playSound(null, caster.blockPosition(), SoundEvents.PLAYER_SPLASH_HIGH_SPEED, SoundSource.PLAYERS, 0.8f, 1.1f);
         }
     }
 
-    private static boolean canCut(BlockState state, float power) {
-        if (state.is(BlockTags.LEAVES) || state.is(BlockTags.FLOWERS) || state.is(BlockTags.REPLACEABLE)) {
+    private static void cutBlocksAlongBeam(
+            ServerLevel level, ServerPlayer caster, Vec3 start, Vec3 look, double range, float power) {
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        int steps = Math.max(12, (int) Math.ceil(range * 5.0));
+        int maxCuts = Math.min(48, 12 + Math.round(power / 3f));
+        int cuts = 0;
+        Set<BlockPos> visited = new HashSet<>();
+
+        Vec3 flatRight = new Vec3(-look.z, 0.0, look.x);
+        if (flatRight.lengthSqr() < 1.0e-6) {
+            flatRight = new Vec3(1.0, 0.0, 0.0);
+        } else {
+            flatRight = flatRight.normalize();
+        }
+        Vec3 up = look.cross(flatRight);
+        if (up.lengthSqr() < 1.0e-6) {
+            up = new Vec3(0.0, 1.0, 0.0);
+        } else {
+            up = up.normalize();
+        }
+
+        // Always try the block under the crosshair first so aimed walls feel reliable.
+        BlockHitResult aimed = level.clip(
+                new ClipContext(start, start.add(look.scale(range)), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, caster));
+        if (aimed.getType() == HitResult.Type.BLOCK) {
+            cuts += tryHydroCut(level, caster, aimed.getBlockPos(), power, visited) ? 1 : 0;
+        }
+
+        // Skip the first ~0.75 block so the caster does not shear blocks underfoot.
+        for (int i = 4; i <= steps && cuts < maxCuts; i++) {
+            double along = (i / (double) steps) * range;
+            Vec3 center = start.add(look.scale(along));
+            for (int ox = -1; ox <= 1 && cuts < maxCuts; ox++) {
+                for (int oy = -1; oy <= 1 && cuts < maxCuts; oy++) {
+                    if (Math.abs(ox) + Math.abs(oy) > 2) {
+                        continue;
+                    }
+                    Vec3 point = center.add(flatRight.scale(ox * 0.4)).add(up.scale(oy * 0.35));
+                    cursor.set(Mth.floor(point.x), Mth.floor(point.y), Mth.floor(point.z));
+                    if (tryHydroCut(level, caster, cursor.immutable(), power, visited)) {
+                        cuts++;
+                    }
+                }
+            }
+        }
+    }
+
+    private static boolean tryHydroCut(
+            ServerLevel level, ServerPlayer caster, BlockPos pos, float power, Set<BlockPos> visited) {
+        if (!visited.add(pos) || !level.mayInteract(caster, pos)) {
+            return false;
+        }
+        BlockState state = level.getBlockState(pos);
+        if (state.isAir() || !canHydroCut(level, pos, state, power)) {
+            return false;
+        }
+        boolean broke = level.destroyBlock(pos, true, caster);
+        if (broke) {
+            double x = pos.getX() + 0.5;
+            double y = pos.getY() + 0.5;
+            double z = pos.getZ() + 0.5;
+            level.sendParticles(ModParticleTypes.HYDRO_SLICE.get(), x, y, z, 2, 0.08, 0.08, 0.08, 0.0);
+            level.sendParticles(ModParticleTypes.WATER_SPLASH.get(), x, y, z, 4, 0.1, 0.1, 0.1, 0.05);
+        }
+        return broke;
+    }
+
+    /** High-pressure cutter: soft terrain always; wood/stone from min cast power; cobble at ~30+. */
+    private static boolean canHydroCut(ServerLevel level, BlockPos pos, BlockState state, float power) {
+        float hardness = state.getDestroySpeed(level, pos);
+        if (hardness < 0f) {
+            return false;
+        }
+        // Never chew through unbreakable / very hard utilities.
+        if (state.is(Blocks.BEDROCK)
+                || state.is(Blocks.BARRIER)
+                || state.is(Blocks.END_PORTAL_FRAME)
+                || state.is(Blocks.OBSIDIAN)
+                || state.is(Blocks.CRYING_OBSIDIAN)
+                || state.is(Blocks.REINFORCED_DEEPSLATE)) {
+            return false;
+        }
+        if (state.is(BlockTags.LEAVES)
+                || state.is(BlockTags.FLOWERS)
+                || state.is(BlockTags.REPLACEABLE)
+                || state.is(BlockTags.CROPS)
+                || state.is(BlockTags.SAPLINGS)
+                || state.is(BlockTags.WOOL)
+                || state.is(BlockTags.WOOL_CARPETS)) {
+            return true;
+        }
+        if (hardness <= 0.8f) {
+            // Dirt, sand, gravel, snow, soft clay — always cut when the spell fires.
+            return true;
+        }
+        if (state.is(BlockTags.LOGS)
+                || state.is(BlockTags.PLANKS)
+                || state.is(BlockTags.WOODEN_FENCES)
+                || state.is(BlockTags.WOODEN_DOORS)
+                || state.is(BlockTags.WOODEN_TRAPDOORS)
+                || state.is(BlockTags.WOODEN_STAIRS)
+                || state.is(BlockTags.WOODEN_SLABS)) {
             return power >= 20f;
         }
-        if (state.is(BlockTags.LOGS) || state.is(BlockTags.PLANKS)) {
-            return power >= 40f;
+        if (hardness <= 1.5f || state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(BlockTags.BASE_STONE_NETHER)) {
+            // Stone / deepslate / netherrack class — available at hydro_slice min_power (~30).
+            return power >= 26f;
         }
-        float hardness = state.getDestroySpeed(null, null);
-        if (hardness >= 0f && hardness <= 1.5f) {
-            return power >= 55f;
+        if (hardness <= 2.0f) {
+            // Cobble / bricks / similar — aligned with min_power 30.
+            return power >= 30f;
+        }
+        if (hardness <= 3.0f) {
+            return power >= 42f;
+        }
+        if (hardness <= 5.0f) {
+            return power >= 58f;
         }
         return false;
     }
@@ -1443,9 +1540,36 @@ public final class ElementalEffects {
         }
     }
 
+    /** Pressurized cutter trail — denser wave edge than a soft water lash. */
+    public static void spawnHydroSliceBeam(ServerLevel level, Vec3 start, Vec3 look, double range) {
+        int steps = (int) (range * 5);
+        for (int i = 0; i <= steps; i++) {
+            Vec3 p = start.add(look.scale(i * 0.2));
+            if (i % 3 == 0) {
+                level.sendParticles(ModParticleTypes.HYDRO_SLICE.get(), p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
+            }
+            level.sendParticles(ModParticleTypes.WATER_WAVE.get(), p.x, p.y, p.z, 2, 0.03, 0.03, 0.03, 0.01);
+            level.sendParticles(ModParticleTypes.WATER_DROP.get(), p.x, p.y, p.z, 1, 0.04, 0.04, 0.04, 0.02);
+            if (i % 2 == 0) {
+                level.sendParticles(ParticleTypes.BUBBLE, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
+            }
+            if (i % 4 == 0) {
+                level.sendParticles(ModParticleTypes.WATER_SPLASH.get(), p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.01);
+            }
+        }
+    }
+
     public static void spawnWaterHit(ServerLevel level, Vec3 pos) {
         level.sendParticles(ModParticleTypes.WATER_SPLASH.get(), pos.x, pos.y + 0.5, pos.z, 6, 0.2, 0.15, 0.2, 0.02);
         level.sendParticles(ModParticleTypes.WATER_DROP.get(), pos.x, pos.y + 0.4, pos.z, 5, 0.15, 0.2, 0.15, 0.03);
+    }
+
+    public static void spawnHydroSliceHit(ServerLevel level, Vec3 pos) {
+        level.sendParticles(ModParticleTypes.HYDRO_SLICE.get(), pos.x, pos.y, pos.z, 2, 0.1, 0.1, 0.1, 0.0);
+        level.sendParticles(ModParticleTypes.WATER_SPLASH.get(), pos.x, pos.y, pos.z, 14, 0.28, 0.25, 0.28, 0.04);
+        level.sendParticles(ModParticleTypes.WATER_WAVE.get(), pos.x, pos.y, pos.z, 8, 0.2, 0.15, 0.2, 0.02);
+        level.sendParticles(ParticleTypes.CRIT, pos.x, pos.y, pos.z, 10, 0.2, 0.25, 0.2, 0.15);
+        level.sendParticles(ParticleTypes.BUBBLE_POP, pos.x, pos.y, pos.z, 6, 0.15, 0.15, 0.15, 0.02);
     }
 
     public static void spawnSteamBeam(ServerLevel level, Vec3 start, Vec3 look, double range) {

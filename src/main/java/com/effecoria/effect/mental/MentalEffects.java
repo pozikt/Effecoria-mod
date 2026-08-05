@@ -639,22 +639,48 @@ public final class MentalEffects {
     public static void mindIllusion(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         int duration = scaledTicks(effect, power, "duration_ticks", 240);
         ServerLevel level = caster.serverLevel();
+        boolean landed = false;
         if (target != null && gateAfflict(caster, target, duration, false)) {
+            landed = true;
             if (target instanceof ServerPlayer victim) {
                 float pulse = effect.params().has("mirage_pulse")
                         ? effect.params().get("mirage_pulse").getAsFloat()
                         : 2.5f * (0.85f + power / 120f);
                 MirageWorldService.start(victim, caster, duration, pulse);
+                Vec3 at = victim.position().add(0, victim.getBbHeight() * 0.6, 0);
+                spawnFog(level, at);
+                spawnFear(level, at);
+                spawnSense(level, at.add(0, 0.3, 0));
             } else {
                 BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.BLINDNESS, Math.min(60, duration / 2), 0));
                 BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.CONFUSION, duration / 2, 0));
+                finishHit(level, target.position(), HitFx.FOG);
             }
         }
         Vec3 aim = caster.getEyePosition().add(caster.getLookAngle().normalize().scale(4));
         spawnFog(level, aim);
         spawnSense(level, caster.position().add(0, 1, 0));
-        caster.displayClientMessage(Component.translatable("message.effecoria.mental.illusion_on"), true);
-        level.playSound(null, caster.blockPosition(), SoundEvents.ILLUSIONER_PREPARE_MIRROR, SoundSource.PLAYERS, 0.7f, 1.1f);
+        spawnFear(level, caster.position().add(0, 1.1, 0));
+        caster.displayClientMessage(
+                Component.translatable(
+                        landed ? "message.effecoria.mental.illusion_on" : "message.effecoria.mental.illusion_miss"),
+                true);
+        level.playSound(
+                null,
+                caster.blockPosition(),
+                landed ? SoundEvents.ILLUSIONER_PREPARE_MIRROR : SoundEvents.ILLUSIONER_MIRROR_MOVE,
+                SoundSource.PLAYERS,
+                landed ? 0.85f : 0.45f,
+                landed ? 1.05f : 1.4f);
+        if (landed) {
+            level.playSound(
+                    null,
+                    caster.blockPosition(),
+                    SoundEvents.ENDERMAN_TELEPORT,
+                    SoundSource.PLAYERS,
+                    0.35f,
+                    0.7f);
+        }
     }
 
     /** III.7 Mind control — puppet. */

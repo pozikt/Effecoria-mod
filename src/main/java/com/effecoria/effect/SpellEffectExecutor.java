@@ -494,12 +494,15 @@ public final class SpellEffectExecutor {
             case "psi_echo" -> MentalEffects.psiEcho(caster, effect, power);
             case "total_veil" -> MentalEffects.totalVeil(caster, effect, power);
             case "blink" -> SpatialEffects.standardBlink(caster, effect, power);
+            case "phase_slip" -> SpatialEffects.phaseSlip(caster, effect, power);
             case "rift_yank" -> riftYank(caster, effect, power, target, aim);
             case "phase_veil" -> phaseVeil(caster, effect, power);
             case "corrupt_mark" -> CorruptionEffects.corruptMark(caster, effect, power, target);
             case "prey_mark" -> CorruptionEffects.preyMark(caster, effect, power, target);
             case "binding_seal" -> CorruptionEffects.bindingSeal(caster, effect, power, target);
             case "blight_pulse" -> CorruptionEffects.blightPulse(caster, effect, power);
+            case "contagion_bloom" -> CorruptionEffects.contagionBloom(caster, effect, power);
+            case "hunt_pulse" -> CorruptionEffects.huntPulse(caster, effect, power);
             case "rot_touch" -> CorruptionEffects.rotTouch(caster, effect, power, target, aim);
             case "entropy_lash" -> CorruptionEffects.entropyLash(caster, effect, power, target, aim);
             case "plague_bolt" -> CorruptionEffects.plagueBolt(caster, effect, power, target, aim);

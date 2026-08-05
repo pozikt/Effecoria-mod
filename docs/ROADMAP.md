@@ -68,7 +68,7 @@ Rule of thumb: **do not invent a huge school rewrite in Stage I “just because.
 | **Training** | Broader XP sources; diminishing returns |
 | **Seals** | More types, conflicts/stacking rules |
 | **Anti-magic** | Lead (ZNΦ), cold iron — tag-based, replaces stone-box hack |
-| **School depth** | Extra spells per school; necromancy endgame hooks (lich later if needed) |
+| **School depth** | Identity pack: Corruption `contagion_bloom` + `hunt_pulse`; Spatial `phase_slip` |
 | **Player-facing magic** | Teach the loop without wiki: Patchouli / in-game tips / hub clarity |
 
 Optional inside I (only if it serves magic feel): initiation ritual block.

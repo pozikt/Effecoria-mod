@@ -22,6 +22,9 @@ public final class ModParticleTypes {
             PARTICLE_TYPES.register("water_splash", () -> new SimpleParticleType(false));
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> WATER_WAVE =
             PARTICLE_TYPES.register("water_wave", () -> new SimpleParticleType(false));
+    /** Animated hydro-slice blade flash (4-frame sheet). */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> HYDRO_SLICE =
+            PARTICLE_TYPES.register("hydro_slice", () -> new SimpleParticleType(false));
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> STEAM_FOG =
             PARTICLE_TYPES.register("steam_fog", () -> new SimpleParticleType(false));
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ICE_CRYSTAL =

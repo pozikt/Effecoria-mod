@@ -316,6 +316,72 @@ public final class SpatialEffects {
         blinkAlongLook(caster, effect, power, 1.0, defaultMaxRange(effect, 24));
     }
 
+    /**
+     * Short blink that may pass through at most one solid block along the look ray
+     * (thin walls / doors), then land in clear space.
+     */
+    public static void phaseSlip(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        ServerLevel level = caster.serverLevel();
+        double range = effect.params().has("range") ? effect.params().get("range").getAsDouble() : 10;
+        double minRange = effect.params().has("min_range") ? effect.params().get("min_range").getAsDouble() : 2;
+        int maxSolids = effect.params().has("max_solids") ? effect.params().get("max_solids").getAsInt() : 1;
+        double maxCap = defaultMaxRange(effect, 18);
+        range = Math.min(maxCap, range * (0.85 + power / 120f));
+
+        Vec3 look = caster.getLookAngle().normalize();
+        Vec3 origin = caster.position();
+        Vec3 eye = caster.getEyePosition();
+        Vec3 best = null;
+        for (double dist = range; dist >= minRange; dist -= 0.5) {
+            Vec3 candidate = origin.add(look.scale(dist));
+            BlockPos feet = BlockPos.containing(candidate.x, candidate.y, candidate.z);
+            BlockPos head = feet.above();
+            if (!level.getBlockState(feet).getCollisionShape(level, feet).isEmpty()) {
+                continue;
+            }
+            if (!level.getBlockState(head).getCollisionShape(level, head).isEmpty()) {
+                continue;
+            }
+            Vec3 land = new Vec3(candidate.x, feet.getY(), candidate.z);
+            if (solidBlocksAlong(level, eye, land.add(0, 1, 0)) > maxSolids) {
+                continue;
+            }
+            best = land;
+            break;
+        }
+        if (best == null) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.phase_slip.blocked"), true);
+            return;
+        }
+        Vec3 from = origin.add(0, 1, 0);
+        Vec3 to = best.add(0, 1, 0);
+        SpatialVfx.playRipple(caster, from, power * 0.85f);
+        SpatialVfx.playLensBend(level, from.add(to.subtract(from).scale(0.5)));
+        caster.teleportTo(best.x, best.y, best.z);
+        caster.fallDistance = 0f;
+        SpatialVfx.playRipple(caster, to, power);
+        level.playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.85f, 1.35f);
+    }
+
+    private static int solidBlocksAlong(ServerLevel level, Vec3 from, Vec3 to) {
+        java.util.HashSet<BlockPos> solids = new java.util.HashSet<>();
+        Vec3 delta = to.subtract(from);
+        double length = delta.length();
+        if (length < 0.2) {
+            return 0;
+        }
+        Vec3 dir = delta.scale(1.0 / length);
+        int steps = Math.max(1, (int) Math.ceil(length * 4.0));
+        for (int i = 1; i < steps; i++) {
+            Vec3 point = from.add(dir.scale(i * 0.25));
+            BlockPos pos = BlockPos.containing(point);
+            if (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty()) {
+                solids.add(pos);
+            }
+        }
+        return solids.size();
+    }
+
     public static void riftBurst(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target, Vec3 aim) {
         ServerLevel level = caster.serverLevel();
         float radius = effect.params().has("radius") ? effect.params().get("radius").getAsFloat() : 4f;

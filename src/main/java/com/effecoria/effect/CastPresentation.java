@@ -49,7 +49,13 @@ public final class CastPresentation {
             ResourceLocation.fromNamespaceAndPath("effecoria", "biological_singularity"));
 
     private static final Set<ResourceLocation> ELEMENTAL_FIRE = Set.of(
-            id("fire_burst"), id("great_fireball"), id("ember_volley"), id("thermonuclear_pulse"));
+            id("fire_burst"),
+            id("great_fireball"),
+            id("ember_volley"),
+            id("thermonuclear_pulse"),
+            id("sear"),
+            id("ore_smelt"));
+    private static final Set<ResourceLocation> ELEMENTAL_HYDRO_CUT = Set.of(id("hydro_slice"));
     private static final Set<ResourceLocation> ELEMENTAL_PLASMA = Set.of(id("plasma_bolt"), id("plasma_barrage"));
     private static final Set<ResourceLocation> ELEMENTAL_WATER = Set.of(
             id("water_stream"),
@@ -95,7 +101,7 @@ public final class CastPresentation {
             id("psychic_amplify"),
             id("omega_mind"));
     private static final Set<ResourceLocation> MENTAL_FOG_FAMILY =
-            Set.of(id("mass_confusion"), id("psychic_storm"), id("thought_bomb"));
+            Set.of(id("mass_confusion"), id("psychic_storm"), id("thought_bomb"), id("mind_illusion"), id("total_veil"));
     private static final Set<ResourceLocation> MENTAL_SYNAPSE =
             Set.of(id("neural_lock"), id("synaptic_overload"), id("psychic_scream"));
     private static final Set<ResourceLocation> MENTAL_WARD =
@@ -109,11 +115,12 @@ public final class CastPresentation {
             id("mass_hysteria"));
 
     private static final Set<ResourceLocation> CORRUPTION_MARK =
-            Set.of(id("corrupt_mark"), id("blight_brand"), id("prey_mark"));
+            Set.of(id("corrupt_mark"), id("blight_brand"), id("prey_mark"), id("hunt_pulse"));
     private static final Set<ResourceLocation> CORRUPTION_ROT =
             Set.of(id("rot_touch"), id("festering_wound"));
     private static final Set<ResourceLocation> CORRUPTION_PLAGUE = Set.of(
             id("blight_pulse"),
+            id("contagion_bloom"),
             id("plague_bolt"),
             id("blight_surge"),
             id("pestilence_wave"),
@@ -377,6 +384,17 @@ public final class CastPresentation {
                     1.5f,
                     0.55f,
                     1.35f);
+        }
+        if (ELEMENTAL_HYDRO_CUT.contains(id)) {
+            return new SchoolTheme(
+                    ModParticleTypes.WATER_WAVE.get(),
+                    ModParticleTypes.WATER_SPLASH.get(),
+                    SoundEvents.TRIDENT_THROW.value(),
+                    SoundEvents.PLAYER_ATTACK_CRIT,
+                    0.5f,
+                    1.35f,
+                    0.65f,
+                    1.2f);
         }
         if (ELEMENTAL_WATER.contains(id)) {
             return new SchoolTheme(

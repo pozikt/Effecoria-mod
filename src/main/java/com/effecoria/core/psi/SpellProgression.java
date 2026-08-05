@@ -160,6 +160,7 @@ public final class SpellProgression {
                     // I — basic
                     id("warp_bolt"),
                     id("blink"),
+                    id("phase_slip"),
                     id("void_step"),
                     id("phase_veil"),
                     // II — advanced
@@ -184,13 +185,15 @@ public final class SpellProgression {
                     id("corrupt_mark"),
                     id("rot_touch"),
                     id("blight_pulse"),
-                    // II — plague / bind
+                    // II — plague / bind / contagion
                     id("plague_bolt"),
                     id("festering_wound"),
+                    id("contagion_bloom"),
                     id("decay_bind"),
                     id("entropy_aegis"),
                     id("prey_mark"),
-                    // III — field
+                    // III — field / hunt synergy
+                    id("hunt_pulse"),
                     id("miasma_cloak"),
                     id("blight_field"),
                     id("tainted_leech"),

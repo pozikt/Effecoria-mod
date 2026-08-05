@@ -160,6 +160,7 @@ public final class SpellUnlockService {
                             Component.translatable("spell.effecoria." + spellId.getPath()),
                             cost),
                     true);
+            FirstHourTips.tryShow(player, FirstHourTips.Tip.PROGRESSION);
             return true;
         }
         return false;

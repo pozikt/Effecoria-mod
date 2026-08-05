@@ -1,0 +1,24 @@
+{
+  "id": "effecoria:contagion_bloom",
+  "school": "corruption",
+  "frequency_hz": 0.55,
+  "base_cost": 14,
+  "power_multiplier": 1.1,
+  "side_entropy": 0.12,
+  "min_phi": 0.22,
+  "min_mastery": 0.22,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:contagion_bloom",
+      "radius": 5.5,
+      "damage": 3.5,
+      "poison_ticks": 80,
+      "hunger_ticks": 100,
+      "soft_dot_per_second": 0.35,
+      "curse": true,
+      "cure_tier": "common",
+      "contagion_chunks": 1
+    }
+  ]
+}

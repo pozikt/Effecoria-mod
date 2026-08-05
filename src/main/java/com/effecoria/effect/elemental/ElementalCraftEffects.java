@@ -131,11 +131,15 @@ public final class ElementalCraftEffects {
         }
 
         Vec3 c = Vec3.atCenterOf(target);
-        level.sendParticles(ParticleTypes.FLAME, c.x, c.y, c.z, 18, 0.25, 0.25, 0.25, 0.02);
-        level.sendParticles(ParticleTypes.LAVA, c.x, c.y, c.z, 6, 0.2, 0.2, 0.2, 0.01);
-        level.sendParticles(ParticleTypes.SMOKE, c.x, c.y + 0.3, c.z, 10, 0.2, 0.15, 0.2, 0.02);
-        level.playSound(null, target, SoundEvents.BLASTFURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, 1.0f, 1.1f);
-        level.playSound(null, target, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.7f, 0.85f);
+        level.sendParticles(ParticleTypes.FLAME, c.x, c.y, c.z, 28, 0.3, 0.3, 0.3, 0.03);
+        level.sendParticles(ParticleTypes.LAVA, c.x, c.y, c.z, 12, 0.25, 0.25, 0.25, 0.02);
+        level.sendParticles(ParticleTypes.SMOKE, c.x, c.y + 0.35, c.z, 16, 0.25, 0.2, 0.25, 0.03);
+        level.sendParticles(ModParticleTypes.ELEMENTAL_EMBER.get(), c.x, c.y, c.z, 14, 0.28, 0.28, 0.28, 0.04);
+        level.sendParticles(ModParticleTypes.PHI_FLAME.get(), c.x, c.y + 0.2, c.z, 10, 0.2, 0.2, 0.2, 0.02);
+        level.playSound(null, target, SoundEvents.BLASTFURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, 1.15f, 1.05f);
+        level.playSound(null, target, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.85f, 0.8f);
+        level.playSound(null, target, SoundEvents.GENERIC_BURN, SoundSource.BLOCKS, 0.55f, 0.9f);
+        caster.displayClientMessage(Component.translatable("message.effecoria.ore_smelt.done"), true);
         caster.giveExperiencePoints(Math.max(1, Math.round(2f + power * 0.03f)));
     }
 

@@ -1,0 +1,20 @@
+{
+  "_draft": true,
+  "_note": "School Codex — not loaded until addon jar is wired",
+  "id": "effecoria_school_codex:ember_ribbon",
+  "school": "elemental",
+  "frequency_hz": 22.3,
+  "base_cost": 7,
+  "power_multiplier": 0.75,
+  "side_entropy": 0.03,
+  "min_phi": 0.08,
+  "min_mastery": 0.15,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:fireball",
+      "speed": 1.1,
+      "damage_dice": "1d4"
+    }
+  ]
+}

@@ -167,7 +167,8 @@ If choosing a single slice for the next implementation session:
 16. Phase **E** breathing/body (air/hunger → Orkanum, soft cast scale, HUD, train rate-limit, tip) — ✅ done.
 17. Stage I **exit polish** (tip sequencing, seal tip, funnel/known-issues docs) — ✅ done.
 18. Dedicated-server smoke (`runServer` → Done) — ✅ Primer/Focus no longer pull client classes on DEDICATED_SERVER.
-19. **Next:** package Demo 1–3 builds; or intentional Stage II environment.
+19. School **identity pack** — Corruption `contagion_bloom` / `hunt_pulse` + Spatial `phase_slip` — ✅ shipped.
+20. **Next:** package Demo builds / known-issues on Modrinth+Discord; or intentional Stage II environment.
 
 ---
 

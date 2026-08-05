@@ -94,6 +94,8 @@ public final class CastPipeline {
                 player.displayClientMessage(Component.translatable(block.get().messageKey()), true);
                 if (block.get() == CastBlockReason.LOW_PHI) {
                     FirstHourTips.tryShow(player, FirstHourTips.Tip.HARNESS);
+                } else if (block.get() == CastBlockReason.ZERO_FLUX) {
+                    FirstHourTips.tryShow(player, FirstHourTips.Tip.ZNPHI);
                 }
                 return CastResult.CANNOT_CAST;
             }

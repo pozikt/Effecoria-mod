@@ -23,7 +23,9 @@ public final class FirstHourTips {
         ENTROPY(4),
         SEALS(5),
         HARNESS(6),
-        BREATHING(7);
+        BREATHING(7),
+        ZNPHI(8),
+        PROGRESSION(9);
 
         private final int bit;
 

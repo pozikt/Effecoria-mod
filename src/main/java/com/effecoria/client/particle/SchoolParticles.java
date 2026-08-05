@@ -282,6 +282,60 @@ public final class SchoolParticles {
         }
     }
 
+    /** Animated 4-frame water blade slash for hydro-slice. */
+    public static class HydroSliceParticle extends TextureSheetParticle {
+        private final SpriteSet sprites;
+
+        protected HydroSliceParticle(
+                ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
+            super(level, x, y, z, xd, yd, zd);
+            this.sprites = sprites;
+            this.hasPhysics = false;
+            this.friction = 0.86F;
+            this.quadSize = 0.55F + this.random.nextFloat() * 0.25F;
+            this.lifetime = 8;
+            this.alpha = 0.95F;
+            this.xd = xd + (this.random.nextFloat() - 0.5F) * 0.02F;
+            this.yd = yd + (this.random.nextFloat() - 0.5F) * 0.02F;
+            this.zd = zd + (this.random.nextFloat() - 0.5F) * 0.02F;
+            this.setSpriteFromAge(sprites);
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            this.setSpriteFromAge(this.sprites);
+            this.quadSize *= 1.04F;
+            this.alpha = Math.max(0f, 1f - (this.age / (float) this.lifetime));
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(
+                    SimpleParticleType type,
+                    ClientLevel level,
+                    double x,
+                    double y,
+                    double z,
+                    double xd,
+                    double yd,
+                    double zd) {
+                return new HydroSliceParticle(level, x, y, z, xd, yd, zd, this.sprites);
+            }
+        }
+    }
+
     /** Rising flame tongue with Φ rim. */
     public static class FlameParticle extends TextureSheetParticle {
         protected FlameParticle(

@@ -1,0 +1,18 @@
+{
+  "_draft": true,
+  "_note": "School Codex — not loaded until addon jar is wired",
+  "id": "effecoria_school_codex:pale_mark",
+  "school": "corruption",
+  "frequency_hz": 0.5,
+  "base_cost": 7,
+  "power_multiplier": 0.8,
+  "side_entropy": 0.08,
+  "min_phi": 0.12,
+  "min_mastery": 0.18,
+  "radial_category": "combat",
+  "effects": [
+    {
+      "type": "effecoria:corrupt_mark"
+    }
+  ]
+}

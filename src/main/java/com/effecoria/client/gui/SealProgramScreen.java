@@ -202,7 +202,7 @@ public class SealProgramScreen extends Screen {
                 this.font,
                 Component.translatable("gui.effecoria.seal_program.hint"),
                 this.width / 2 - 160,
-                this.height - 58,
+                this.height - 82,
                 0x8899AA,
                 false);
     }
