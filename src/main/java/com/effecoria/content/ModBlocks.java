@@ -1,8 +1,11 @@
 package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.block.PhiFieldBlock;
+import com.effecoria.block.PhiGrassBlock;
 import com.effecoria.block.SubspacePortalBlock;
 
+import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.LiquidBlock;
@@ -40,27 +43,94 @@ public final class ModBlocks {
     public static final DeferredBlock<Block> BASALT_ESSENITE_ORE =
             registerOre("basalt_essonite_ore", MapColor.COLOR_BLACK, 3.2f, 3f, SoundType.BASALT);
 
-    /** Φ-saturated stone — natural ground in Essence Plateau. */
-    public static final DeferredBlock<Block> PHI_STONE = BLOCKS.register(
+    /** Φ-saturated stone — glows and slowly converts adjacent stone. */
+    public static final DeferredBlock<PhiFieldBlock> PHI_STONE = BLOCKS.register(
             "phi_stone",
-            () -> new Block(BlockBehaviour.Properties.of()
+            () -> new PhiFieldBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_BLUE)
                     .requiresCorrectToolForDrops()
                     .strength(1.5f, 6f)
                     .sound(SoundType.DEEPSLATE)
-                    .lightLevel(state -> 3)));
+                    .lightLevel(state -> 7)));
 
-    /** Surface Φ-crystal druse — drops essonite dust when mined. */
-    public static final DeferredBlock<Block> ESSONITE_CRYSTAL = BLOCKS.register(
+    /** Φ-saturated earth — glows and slowly converts dirt / grass. */
+    public static final DeferredBlock<PhiFieldBlock> PHI_DIRT = BLOCKS.register(
+            "phi_dirt",
+            () -> new PhiFieldBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .strength(0.6f, 0.6f)
+                    .sound(SoundType.GRAVEL)
+                    .lightLevel(state -> 5)));
+
+    /** Φ-turf — surface layer over Φ-earth in the plateau. */
+    public static final DeferredBlock<PhiGrassBlock> PHI_GRASS = BLOCKS.register(
+            "phi_grass",
+            () -> new PhiGrassBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .strength(0.6f, 0.6f)
+                    .sound(SoundType.GRASS)
+                    .lightLevel(state -> 6)));
+
+    /** Surface Φ-crystal cluster — amethyst-shaped, drops essonite dust. */
+    public static final DeferredBlock<AmethystClusterBlock> ESSONITE_CRYSTAL = BLOCKS.register(
             "essonite_crystal",
-            () -> new DropExperienceBlock(
-                    UniformInt.of(1, 3),
+            () -> new AmethystClusterBlock(
+                    7,
+                    3,
                     BlockBehaviour.Properties.of()
                             .mapColor(MapColor.COLOR_BLUE)
-                            .requiresCorrectToolForDrops()
-                            .strength(2f, 3f)
-                            .sound(SoundType.AMETHYST)
-                            .lightLevel(state -> 9)));
+                            .forceSolidOn()
+                            .noOcclusion()
+                            .randomTicks()
+                            .strength(1.5f)
+                            .sound(SoundType.AMETHYST_CLUSTER)
+                            .lightLevel(state -> 9)
+                            .pushReaction(PushReaction.DESTROY)));
+
+    public static final DeferredBlock<AmethystClusterBlock> ESSONITE_CRYSTAL_BUD_SMALL = BLOCKS.register(
+            "essonite_crystal_bud_small",
+            () -> new AmethystClusterBlock(
+                    3,
+                    4,
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_BLUE)
+                            .forceSolidOn()
+                            .noOcclusion()
+                            .randomTicks()
+                            .strength(1.5f)
+                            .sound(SoundType.SMALL_AMETHYST_BUD)
+                            .lightLevel(state -> 3)
+                            .pushReaction(PushReaction.DESTROY)));
+
+    public static final DeferredBlock<AmethystClusterBlock> ESSONITE_CRYSTAL_BUD_MEDIUM = BLOCKS.register(
+            "essonite_crystal_bud_medium",
+            () -> new AmethystClusterBlock(
+                    4,
+                    3,
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_BLUE)
+                            .forceSolidOn()
+                            .noOcclusion()
+                            .randomTicks()
+                            .strength(1.5f)
+                            .sound(SoundType.MEDIUM_AMETHYST_BUD)
+                            .lightLevel(state -> 5)
+                            .pushReaction(PushReaction.DESTROY)));
+
+    public static final DeferredBlock<AmethystClusterBlock> ESSONITE_CRYSTAL_BUD_LARGE = BLOCKS.register(
+            "essonite_crystal_bud_large",
+            () -> new AmethystClusterBlock(
+                    5,
+                    3,
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_BLUE)
+                            .forceSolidOn()
+                            .noOcclusion()
+                            .randomTicks()
+                            .strength(1.5f)
+                            .sound(SoundType.LARGE_AMETHYST_BUD)
+                            .lightLevel(state -> 7)
+                            .pushReaction(PushReaction.DESTROY)));
 
     /**
      * Translucent Φ-membrane underfoot in hyperspace — replaces the old end-stone sheet so the

@@ -30,7 +30,12 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.TUFF_ESSENITE_ORE.get());
                         output.accept(ModItems.BASALT_ESSENITE_ORE.get());
                         output.accept(ModItems.PHI_STONE.get());
+                        output.accept(ModItems.PHI_DIRT.get());
+                        output.accept(ModItems.PHI_GRASS.get());
                         output.accept(ModItems.ESSONITE_CRYSTAL.get());
+                        output.accept(ModItems.ESSONITE_CRYSTAL_BUD_SMALL.get());
+                        output.accept(ModItems.ESSONITE_CRYSTAL_BUD_MEDIUM.get());
+                        output.accept(ModItems.ESSONITE_CRYSTAL_BUD_LARGE.get());
                         output.accept(ModItems.ESSENITE_DUST.get());
                         output.accept(ModItems.RESONANCE_FOCUS.get());
                         output.accept(ModItems.PHI_CELL.get());

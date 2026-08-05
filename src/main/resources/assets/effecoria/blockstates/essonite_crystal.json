@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
-      "model": "effecoria:block/essonite_crystal"
-    }
+    "facing=down": { "model": "effecoria:block/essonite_crystal", "x": 180 },
+    "facing=east": { "model": "effecoria:block/essonite_crystal", "x": 90, "y": 90 },
+    "facing=north": { "model": "effecoria:block/essonite_crystal", "x": 90 },
+    "facing=south": { "model": "effecoria:block/essonite_crystal", "x": 90, "y": 180 },
+    "facing=up": { "model": "effecoria:block/essonite_crystal" },
+    "facing=west": { "model": "effecoria:block/essonite_crystal", "x": 90, "y": 270 }
   }
 }

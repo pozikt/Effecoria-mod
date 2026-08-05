@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "particle": "effecoria:block/phi_grass_side",
+    "bottom": "effecoria:block/phi_grass_bottom",
+    "side": "effecoria:block/phi_grass_side",
+    "top": "effecoria:block/phi_grass_top"
+  }
+}

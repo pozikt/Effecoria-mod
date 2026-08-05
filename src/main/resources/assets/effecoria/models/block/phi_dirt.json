@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "effecoria:block/phi_stone"
+    "all": "effecoria:block/phi_dirt"
   }
 }

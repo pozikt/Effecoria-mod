@@ -1,0 +1,6 @@
+﻿{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "effecoria:block/essonite_crystal_bud_large"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:uniform",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "effecoria:phi_dirt"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "effecoria:blocks/phi_dirt"
+}

@@ -10,14 +10,19 @@ public final class EssencePlateauSurfaceRules {
     private EssencePlateauSurfaceRules() {}
 
     public static SurfaceRules.RuleSource makeRules() {
-        SurfaceRules.RuleSource phiStone = state(ModBlocks.PHI_STONE.get());
+        SurfaceRules.RuleSource phiGrass = state(ModBlocks.PHI_GRASS.get());
+        SurfaceRules.RuleSource phiDirt = state(ModBlocks.PHI_DIRT.get());
         SurfaceRules.ConditionSource isAtOrAboveWaterLevel = SurfaceRules.waterBlockCheck(-1, 0);
         SurfaceRules.RuleSource grassSurface =
                 SurfaceRules.sequence(SurfaceRules.ifTrue(isAtOrAboveWaterLevel, state(Blocks.GRASS_BLOCK)), state(Blocks.DIRT));
 
         SurfaceRules.RuleSource plateauSurface = SurfaceRules.ifTrue(
                 SurfaceRules.isBiome(ModBiomes.ESSENCE_PLATEAU),
-                SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, phiStone));
+                SurfaceRules.ifTrue(
+                        SurfaceRules.ON_FLOOR,
+                        SurfaceRules.sequence(
+                                SurfaceRules.ifTrue(isAtOrAboveWaterLevel, phiGrass),
+                                phiDirt)));
 
         return SurfaceRules.sequence(plateauSurface, SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, grassSurface));
     }

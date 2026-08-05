@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cross",
   "textures": {
-    "cross": "effecoria:block/essonite_crystal"
+    "cross": "minecraft:block/amethyst_cluster"
   }
 }

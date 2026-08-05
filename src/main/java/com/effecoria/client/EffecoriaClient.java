@@ -34,6 +34,10 @@ public final class EffecoriaClient {
         event.enqueueWork(() -> {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.SUBSPACE_PORTAL.get(), RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_VEIL.get(), RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.ESSONITE_CRYSTAL.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.ESSONITE_CRYSTAL_BUD_SMALL.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.ESSONITE_CRYSTAL_BUD_MEDIUM.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.ESSONITE_CRYSTAL_BUD_LARGE.get(), RenderType.cutout());
         });
     }
     @SubscribeEvent

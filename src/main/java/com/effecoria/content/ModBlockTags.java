@@ -15,4 +15,7 @@ public final class ModBlockTags {
 
     /** Cold iron — softer ZNΦ shell within 1 block. */
     public static final TagKey<Block> COLD_IRON = TagKey.create(Registries.BLOCK, EffecoriaMod.id("cold_iron"));
+
+    /** Φ-field blocks (stone / earth / turf) — spread and ambient glow. */
+    public static final TagKey<Block> PHI_FIELD = TagKey.create(Registries.BLOCK, EffecoriaMod.id("phi_field"));
 }

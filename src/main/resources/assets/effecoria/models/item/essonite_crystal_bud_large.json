@@ -1,0 +1,6 @@
+﻿{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "effecoria:block/essonite_crystal_bud_large"
+  }
+}

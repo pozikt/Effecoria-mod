@@ -1,3 +1,11 @@
 {
-  "parent": "effecoria:block/essonite_crystal"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "effecoria:block/essonite_crystal"
+  },
+  "display": {
+    "head": {
+      "translation": [0, 14, -5]
+    }
+  }
 }
