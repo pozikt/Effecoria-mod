@@ -38,6 +38,14 @@ Atmospheric essonite mist (not water vapor), density 0–3:
 Client: `ViewportEvent` fog tint + `phi_mist` / spark motes + movement wake trails.
 Ω-fog (causality rupture) is reserved for future Ω-rifts.
 
+## Φ-flora
+
+- **Φ-turf** (`phi_grass`) — soil surface; **Φ-blades** (`phi_blades`) — glowing shoots, mycorrhizal spread
+- **Φ-trees** — fancy trunk `phi_log` + indigo `phi_leaves`; sapling grows only on Φ-soil
+- Drops: rare `phi_nut` / sapling from leaves; felling logs flash-alarms nearby players
+- `phi_nut`: mages regain Ψ; non-mages get Φ-poison
+- Art refs for leaf edit: `art/phi_flora/phi_leaves.png` vs `art/phi_flora/oak_leaves.png`
+
 ## Gameplay
 
 Column-aware: standing in caves under the peak still counts as plateau.

@@ -2,10 +2,15 @@ package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.block.EssoniteCrustBlock;
+import com.effecoria.block.PhiBladesBlock;
 import com.effecoria.block.PhiFieldBlock;
 import com.effecoria.block.PhiGeyserBlock;
 import com.effecoria.block.PhiGrassBlock;
+import com.effecoria.block.PhiLeavesBlock;
+import com.effecoria.block.PhiLogBlock;
+import com.effecoria.block.PhiSaplingBlock;
 import com.effecoria.block.SubspacePortalBlock;
+import com.effecoria.world.ModTreeGrowers;
 
 import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.Block;
@@ -203,6 +208,57 @@ public final class ModBlocks {
                     .lightLevel(state -> 8)
                     .noOcclusion()
                     .pushReaction(PushReaction.DESTROY)));
+
+    /** Fiberoptic Φ-grass shoots — plant layer on Φ-turf. */
+    public static final DeferredBlock<PhiBladesBlock> PHI_BLADES = BLOCKS.register(
+            "phi_blades",
+            () -> new PhiBladesBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .noCollission()
+                    .instabreak()
+                    .sound(ModSoundTypes.PHI_GRASS)
+                    .offsetType(BlockBehaviour.OffsetType.XZ)
+                    .pushReaction(PushReaction.DESTROY)
+                    .lightLevel(state -> 4)
+                    .randomTicks()));
+
+    public static final DeferredBlock<PhiLogBlock> PHI_LOG = BLOCKS.register(
+            "phi_log",
+            () -> new PhiLogBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .strength(3.0f, 4.0f)
+                    .sound(SoundType.WOOD)
+                    .lightLevel(state -> 4)
+                    .ignitedByLava()));
+
+    public static final DeferredBlock<PhiLeavesBlock> PHI_LEAVES = BLOCKS.register(
+            "phi_leaves",
+            () -> new PhiLeavesBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .strength(0.2f)
+                    .randomTicks()
+                    .noOcclusion()
+                    .sound(SoundType.CHERRY_LEAVES)
+                    .isValidSpawn((state, level, pos, type) -> false)
+                    .isSuffocating((state, level, pos) -> false)
+                    .isViewBlocking((state, level, pos) -> false)
+                    .ignitedByLava()
+                    .pushReaction(PushReaction.DESTROY)
+                    .isRedstoneConductor((state, level, pos) -> false)
+                    .lightLevel(state -> 6)));
+
+    public static final DeferredBlock<PhiSaplingBlock> PHI_SAPLING = BLOCKS.register(
+            "phi_sapling",
+            () -> new PhiSaplingBlock(
+                    ModTreeGrowers.PHI,
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.PLANT)
+                            .noCollission()
+                            .randomTicks()
+                            .instabreak()
+                            .sound(SoundType.GRASS)
+                            .pushReaction(PushReaction.DESTROY)
+                            .lightLevel(state -> 3)));
 
     /** Mirage blood lake fluid — client-tinted crimson water. */
     public static final DeferredBlock<LiquidBlock> BLOOD_FLUID = BLOCKS.register(

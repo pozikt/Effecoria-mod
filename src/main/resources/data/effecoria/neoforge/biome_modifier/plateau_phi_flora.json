@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#effecoria:is_essence_plateau",
+  "features": ["effecoria:phi_tree", "effecoria:phi_blades_patch"],
+  "step": "vegetal_decoration"
+}

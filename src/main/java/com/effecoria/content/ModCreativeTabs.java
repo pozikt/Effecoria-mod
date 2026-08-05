@@ -39,6 +39,11 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PHI_GEYSER.get());
                         output.accept(ModItems.VOID_OBSIDIAN.get());
                         output.accept(ModItems.ESSONITE_CRUST.get());
+                        output.accept(ModItems.PHI_BLADES.get());
+                        output.accept(ModItems.PHI_LOG.get());
+                        output.accept(ModItems.PHI_LEAVES.get());
+                        output.accept(ModItems.PHI_SAPLING.get());
+                        output.accept(ModItems.PHI_NUT.get());
                         output.accept(ModItems.ESSENITE_DUST.get());
                         output.accept(ModItems.RESONANCE_FOCUS.get());
                         output.accept(ModItems.PHI_CELL.get());

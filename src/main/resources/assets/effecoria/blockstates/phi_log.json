@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "axis=y": { "model": "effecoria:block/phi_log" },
+    "axis=z": { "model": "effecoria:block/phi_log", "x": 90 },
+    "axis=x": { "model": "effecoria:block/phi_log", "x": 90, "y": 90 }
+  }
+}

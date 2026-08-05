@@ -47,6 +47,18 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> ESSONITE_CRUST =
             ITEMS.registerSimpleBlockItem("essonite_crust", ModBlocks.ESSONITE_CRUST);
 
+    public static final DeferredItem<BlockItem> PHI_BLADES =
+            ITEMS.registerSimpleBlockItem("phi_blades", ModBlocks.PHI_BLADES);
+    public static final DeferredItem<BlockItem> PHI_LOG =
+            ITEMS.registerSimpleBlockItem("phi_log", ModBlocks.PHI_LOG);
+    public static final DeferredItem<BlockItem> PHI_LEAVES =
+            ITEMS.registerSimpleBlockItem("phi_leaves", ModBlocks.PHI_LEAVES);
+    public static final DeferredItem<BlockItem> PHI_SAPLING =
+            ITEMS.registerSimpleBlockItem("phi_sapling", ModBlocks.PHI_SAPLING);
+
+    public static final DeferredItem<Item> PHI_NUT = ITEMS.register(
+            "phi_nut", () -> new PhiNutItem(new Item.Properties().stacksTo(16)));
+
     /** Hyperspace Φ-membrane (creative / debug; worldgen places it in subspace). */
     public static final DeferredItem<BlockItem> PHI_VEIL =
             ITEMS.registerSimpleBlockItem("phi_veil", ModBlocks.PHI_VEIL);

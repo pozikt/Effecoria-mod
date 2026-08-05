@@ -225,7 +225,7 @@ public final class ClientPhiFogEffects {
         float far = Mth.lerp(immersion, clearFar, targetFar);
         float near = Mth.lerp(immersion, 4f, density == PhiFogService.Density.STORM ? 0.2f : 0.45f);
 
-        float dayFactor = minecraft.level.getSkyDarken(1f);
+        float dayFactor = minecraft.level.getSkyDarken();
         if (dayFactor > 0.2f) {
             far *= Mth.lerp(Mth.clamp(dayFactor, 0f, 1f), 1f, 0.75f);
         }
