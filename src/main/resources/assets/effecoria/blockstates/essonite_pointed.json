@@ -1,0 +1,14 @@
+﻿{
+  "variants": {
+    "thickness=base,vertical_direction=down": { "model": "effecoria:block/essonite_pointed_down_base" },
+    "thickness=frustum,vertical_direction=down": { "model": "effecoria:block/essonite_pointed_down_frustum" },
+    "thickness=middle,vertical_direction=down": { "model": "effecoria:block/essonite_pointed_down_middle" },
+    "thickness=tip,vertical_direction=down": { "model": "effecoria:block/essonite_pointed_down_tip" },
+    "thickness=tip_merge,vertical_direction=down": { "model": "effecoria:block/essonite_pointed_down_tip_merge" },
+    "thickness=base,vertical_direction=up": { "model": "effecoria:block/essonite_pointed_up_base" },
+    "thickness=frustum,vertical_direction=up": { "model": "effecoria:block/essonite_pointed_up_frustum" },
+    "thickness=middle,vertical_direction=up": { "model": "effecoria:block/essonite_pointed_up_middle" },
+    "thickness=tip,vertical_direction=up": { "model": "effecoria:block/essonite_pointed_up_tip" },
+    "thickness=tip_merge,vertical_direction=up": { "model": "effecoria:block/essonite_pointed_up_tip_merge" }
+  }
+}

@@ -9,6 +9,9 @@
     "effecoria:tuff_essonite_ore",
     "effecoria:basalt_essonite_ore",
     "effecoria:phi_geyser",
-    "effecoria:void_obsidian"
+    "effecoria:void_obsidian",
+    "effecoria:essonite_dripstone_block",
+    "effecoria:essonite_pointed",
+    "effecoria:phi_stone"
   ]
 }

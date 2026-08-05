@@ -36,6 +36,8 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.ESSONITE_CRYSTAL_BUD_SMALL.get());
                         output.accept(ModItems.ESSONITE_CRYSTAL_BUD_MEDIUM.get());
                         output.accept(ModItems.ESSONITE_CRYSTAL_BUD_LARGE.get());
+                        output.accept(ModItems.ESSONITE_DRIPSTONE_BLOCK.get());
+                        output.accept(ModItems.ESSONITE_POINTED.get());
                         output.accept(ModItems.PHI_GEYSER.get());
                         output.accept(ModItems.VOID_OBSIDIAN.get());
                         output.accept(ModItems.ESSONITE_CRUST.get());
@@ -44,6 +46,9 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PHI_LEAVES.get());
                         output.accept(ModItems.PHI_SAPLING.get());
                         output.accept(ModItems.PHI_NUT.get());
+                        output.accept(ModItems.PHI_WATER_BUCKET.get());
+                        output.accept(ModItems.ESSONITE_SHARD.get());
+                        output.accept(ModItems.PURE_ESSONITE.get());
                         output.accept(ModItems.ESSENITE_DUST.get());
                         output.accept(ModItems.RESONANCE_FOCUS.get());
                         output.accept(ModItems.PHI_CELL.get());

@@ -47,6 +47,11 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> ESSONITE_CRUST =
             ITEMS.registerSimpleBlockItem("essonite_crust", ModBlocks.ESSONITE_CRUST);
 
+    public static final DeferredItem<BlockItem> ESSONITE_DRIPSTONE_BLOCK =
+            ITEMS.registerSimpleBlockItem("essonite_dripstone_block", ModBlocks.ESSONITE_DRIPSTONE_BLOCK);
+    public static final DeferredItem<BlockItem> ESSONITE_POINTED =
+            ITEMS.registerSimpleBlockItem("essonite_pointed", ModBlocks.ESSONITE_POINTED);
+
     public static final DeferredItem<BlockItem> PHI_BLADES =
             ITEMS.registerSimpleBlockItem("phi_blades", ModBlocks.PHI_BLADES);
     public static final DeferredItem<BlockItem> PHI_LOG =
@@ -58,6 +63,13 @@ public final class ModItems {
 
     public static final DeferredItem<Item> PHI_NUT = ITEMS.register(
             "phi_nut", () -> new PhiNutItem(new Item.Properties().stacksTo(16)));
+
+    public static final DeferredItem<Item> ESSONITE_SHARD = ITEMS.registerSimpleItem("essonite_shard");
+    public static final DeferredItem<Item> PURE_ESSONITE = ITEMS.registerSimpleItem("pure_essonite");
+
+    public static final DeferredItem<Item> PHI_WATER_BUCKET = ITEMS.register(
+            "phi_water_bucket",
+            () -> new PhiWaterBucketItem(ModFluids.PHI_WATER.get(), new Item.Properties()));
 
     /** Hyperspace Φ-membrane (creative / debug; worldgen places it in subspace). */
     public static final DeferredItem<BlockItem> PHI_VEIL =

@@ -1,9 +1,12 @@
 package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.world.feature.EssoniteDripstoneFeature;
+import com.effecoria.world.feature.EssoniteDruzeFeature;
 import com.effecoria.world.feature.PhiCaveShellFeature;
 import com.effecoria.world.feature.PhiGeyserFeature;
 import com.effecoria.world.feature.PhiSkyIslandFeature;
+import com.effecoria.world.feature.PhiWaterLakeFeature;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -25,4 +28,13 @@ public final class ModFeatures {
 
     public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> PHI_GEYSER =
             FEATURES.register("phi_geyser", () -> new PhiGeyserFeature(NoneFeatureConfiguration.CODEC));
+
+    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> ESSONITE_DRIPSTONE =
+            FEATURES.register("essonite_dripstone", () -> new EssoniteDripstoneFeature(NoneFeatureConfiguration.CODEC));
+
+    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> ESSONITE_DRUZE =
+            FEATURES.register("essonite_druze", () -> new EssoniteDruzeFeature(NoneFeatureConfiguration.CODEC));
+
+    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> PHI_WATER_LAKE =
+            FEATURES.register("phi_water_lake", () -> new PhiWaterLakeFeature(NoneFeatureConfiguration.CODEC));
 }

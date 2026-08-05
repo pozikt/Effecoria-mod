@@ -11,6 +11,7 @@ import com.effecoria.client.render.RootCageRenderer;
 import com.effecoria.client.render.SubspacePortalRenderer;
 import com.effecoria.content.ModBlocks;
 import com.effecoria.content.ModEntities;
+import com.effecoria.content.ModFluids;
 import com.effecoria.content.ModParticleTypes;
 
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -41,6 +42,13 @@ public final class EffecoriaClient {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_BLADES.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_SAPLING.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_LEAVES.get(), RenderType.cutoutMipped());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.ESSONITE_POINTED.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.BLOOD_FLUID.get(), RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_WATER.get(), RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(ModFluids.PHI_WATER.get(), RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(ModFluids.PHI_WATER_FLOWING.get(), RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(ModFluids.BLOOD.get(), RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(ModFluids.BLOOD_FLOWING.get(), RenderType.translucent());
         });
     }
     @SubscribeEvent

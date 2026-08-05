@@ -2,6 +2,7 @@ package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.block.EssoniteCrustBlock;
+import com.effecoria.block.EssonitePointedBlock;
 import com.effecoria.block.PhiBladesBlock;
 import com.effecoria.block.PhiFieldBlock;
 import com.effecoria.block.PhiGeyserBlock;
@@ -209,6 +210,36 @@ public final class ModBlocks {
                     .noOcclusion()
                     .pushReaction(PushReaction.DESTROY)));
 
+    /** Dense essonite dripstone — base for Φ-conductor spikes. */
+    public static final DeferredBlock<Block> ESSONITE_DRIPSTONE_BLOCK = BLOCKS.register(
+            "essonite_dripstone_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .requiresCorrectToolForDrops()
+                    .strength(1.5f, 1.5f)
+                    .sound(SoundType.DRIPSTONE_BLOCK)
+                    .lightLevel(state -> 5)));
+
+    /** Stalactites / stalagmites / Φ-columns — vertical Φ-conductors. */
+    public static final DeferredBlock<EssonitePointedBlock> ESSONITE_POINTED = BLOCKS.register(
+            "essonite_pointed",
+            () -> new EssonitePointedBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .noOcclusion()
+                    .sound(SoundType.POINTED_DRIPSTONE)
+                    .randomTicks()
+                    .strength(1.5f, 1.5f)
+                    .dynamicShape()
+                    .offsetType(BlockBehaviour.OffsetType.XZ)
+                    .pushReaction(PushReaction.DESTROY)
+                    .lightLevel(state -> switch (state.getValue(EssonitePointedBlock.THICKNESS)) {
+                        case TIP -> 12;
+                        case TIP_MERGE -> 10;
+                        case FRUSTUM -> 8;
+                        case MIDDLE -> 6;
+                        case BASE -> 5;
+                    })));
+
     /** Fiberoptic Φ-grass shoots — plant layer on Φ-turf. */
     public static final DeferredBlock<PhiBladesBlock> PHI_BLADES = BLOCKS.register(
             "phi_blades",
@@ -273,6 +304,22 @@ public final class ModBlocks {
                             .pushReaction(PushReaction.DESTROY)
                             .noLootTable()
                             .liquid()
+                            .sound(SoundType.EMPTY)));
+
+    /** Cave Φ-hydrolat — aquamarine essence lakes under the plateau. */
+    public static final DeferredBlock<LiquidBlock> PHI_WATER = BLOCKS.register(
+            "phi_water",
+            () -> new LiquidBlock(
+                    ModFluids.PHI_WATER.get(),
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                            .replaceable()
+                            .noCollission()
+                            .strength(100.0f)
+                            .pushReaction(PushReaction.DESTROY)
+                            .noLootTable()
+                            .liquid()
+                            .lightLevel(state -> 8)
                             .sound(SoundType.EMPTY)));
 
     private static DeferredBlock<Block> registerOre(

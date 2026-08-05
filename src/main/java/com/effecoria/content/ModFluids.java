@@ -13,7 +13,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
-/** Mirage blood — water-like fluid with a forced red client tint. */
+/** Fluids: mirage blood + cave Φ-hydrolat. */
 public final class ModFluids {
     private ModFluids() {}
 
@@ -36,17 +36,49 @@ public final class ModFluids {
                     .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY)
                     .sound(SoundActions.FLUID_VAPORIZE, SoundEvents.FIRE_EXTINGUISH)));
 
+    public static final DeferredHolder<FluidType, FluidType> PHI_WATER_TYPE = FLUID_TYPES.register(
+            "phi_water",
+            () -> new FluidType(FluidType.Properties.create()
+                    .descriptionId("fluid.effecoria.phi_water")
+                    .fallDistanceModifier(0f)
+                    .canExtinguish(true)
+                    .canHydrate(true)
+                    .supportsBoating(true)
+                    .canSwim(true)
+                    .density(1100)
+                    .viscosity(1200)
+                    .temperature(278)
+                    .lightLevel(8)
+                    .motionScale(0.012)
+                    .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL)
+                    .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY)
+                    .sound(SoundActions.FLUID_VAPORIZE, SoundEvents.FIRE_EXTINGUISH)));
+
     public static final DeferredHolder<Fluid, FlowingFluid> BLOOD =
             FLUIDS.register("blood", () -> new BaseFlowingFluid.Source(bloodProperties()));
     public static final DeferredHolder<Fluid, FlowingFluid> BLOOD_FLOWING =
             FLUIDS.register("blood_flowing", () -> new BaseFlowingFluid.Flowing(bloodProperties()));
 
+    public static final DeferredHolder<Fluid, FlowingFluid> PHI_WATER =
+            FLUIDS.register("phi_water", () -> new BaseFlowingFluid.Source(phiWaterProperties()));
+    public static final DeferredHolder<Fluid, FlowingFluid> PHI_WATER_FLOWING =
+            FLUIDS.register("phi_water_flowing", () -> new BaseFlowingFluid.Flowing(phiWaterProperties()));
+
     private static BaseFlowingFluid.Properties bloodProperties() {
         return new BaseFlowingFluid.Properties(BLOOD_TYPE, BLOOD, BLOOD_FLOWING)
                 .block(ModBlocks.BLOOD_FLUID)
                 .explosionResistance(100f)
-                // Keep blood from spreading into ordinary water on the client.
                 .slopeFindDistance(0)
                 .levelDecreasePerBlock(8);
+    }
+
+    private static BaseFlowingFluid.Properties phiWaterProperties() {
+        return new BaseFlowingFluid.Properties(PHI_WATER_TYPE, PHI_WATER, PHI_WATER_FLOWING)
+                .block(ModBlocks.PHI_WATER)
+                .bucket(ModItems.PHI_WATER_BUCKET)
+                .explosionResistance(100f)
+                // Vanilla-like fall/spread so cliff edges become waterfalls
+                .slopeFindDistance(4)
+                .levelDecreasePerBlock(1);
     }
 }

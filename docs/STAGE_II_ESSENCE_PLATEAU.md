@@ -11,8 +11,15 @@ Under that mountain, Φ generation follows the **surface column** to bedrock
 | **Sky** | ≥220 (islands 180–310) | Floating Φ-rock islands on the surface biome |
 | **Surface** | peak highland | Φ-grass / Φ-dirt / Φ-stone crust, **Φ-geysers** |
 | **Crust** | mid→high | Dense Φ-stone through the massif |
-| **Crystal caverns** | 0–160 | Cave shells of essonite + veins + crystal buds |
+| **Crystal caverns** | 0–160 | Cave shells, veins, **essonite dripstone**, **druze**, **geodes**, **Φ-water lakes** |
 | **Φ-root** | −64–0 | Near-solid essonite, lethal radiation |
+
+## Crystal caverns (ETP)
+
+- **Essonite spikes** (`essonite_pointed`) — dripstone-style stalactites/stalagmites; merged tips form Φ-columns. Drops shards; tips can yield pure essonite.
+- **Druze** — multi-facing crystal buds/clusters on walls; silk touch keeps the cluster.
+- **Essonite geodes** — rare hollow pockets lined with dripstone + crystals.
+- **Φ-water lakes** — vanilla-style ellipsoid cave lakes (`LakeFeature` logic): carved into stone, filled with still Φ-water, Φ-stone walls. No shore crust. Spawns before dripstone; skips stalagmite forests; cliff edges waterfall or seal. Bucket places/fills; sneak-drink causes Φ-poison.
 
 ## Φ-geysers
 

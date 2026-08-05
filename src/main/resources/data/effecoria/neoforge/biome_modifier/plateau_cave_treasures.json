@@ -1,0 +1,11 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#minecraft:is_overworld",
+  "features": [
+    "effecoria:phi_water_lake",
+    "effecoria:essonite_geode",
+    "effecoria:essonite_dripstone",
+    "effecoria:essonite_druze"
+  ],
+  "step": "underground_decoration"
+}

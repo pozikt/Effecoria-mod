@@ -443,6 +443,16 @@ public final class BalanceConfig {
             .comment("Exhaustion per second during Φ-storm fog")
             .defineInRange("phi_fog_storm_exhaustion", 1.2, 0.0, 20.0);
 
+    public static final ModConfigSpec.IntValue PLATEAU_DRIPSTONE_COUNT = BUILDER
+            .comment("Worldgen count attempts for essonite dripstone clusters (datapack also sets count)")
+            .defineInRange("plateau_dripstone_count", 48, 0, 256);
+    public static final ModConfigSpec.IntValue PLATEAU_DRUZE_COUNT = BUILDER
+            .comment("Worldgen count attempts for essonite druze patches")
+            .defineInRange("plateau_druze_count", 64, 0, 256);
+    public static final ModConfigSpec.IntValue PLATEAU_LAKE_COUNT = BUILDER
+            .comment("Worldgen count attempts for Φ-water cave lakes")
+            .defineInRange("plateau_lake_count", 10, 0, 64);
+
     // --- Phi environment (factors around 1.0; PhiFieldService adds (factor - 1)) ---
     public static final ModConfigSpec.DoubleValue PHI_RAIN_MULTIPLIER = BUILDER
             .comment("Rain Φ factor around 1.0 (additive as value-1)")
