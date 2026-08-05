@@ -50,10 +50,10 @@ If any step fails, Stage I is not a funnel yet.
 | Item | Done? | Notes |
 |------|-------|-------|
 | Clean client launch (NeoForge 1.21.1) | [ ] | Dev verified; needs each demo build |
-| Dedicated server starts with mod | [ ] | Required before public server |
+| Dedicated server starts with mod | [~] | `runServer` → Done (2026-08-05 smoke) |
 | Cast / school switch / seal place: no crash in 1h smoke test | [ ] | Run before Demo 4 |
-| Known issues list published (Discord + Modrinth) | [~] | Draft: [KNOWN_ISSUES.md](KNOWN_ISSUES.md) — publish with next demo |
-| Versioned builds (semver or `0.x.y`) | [x] | `0.2.2-alpha` in gradle.properties |
+| Known issues list published (Discord + Modrinth) | [~] | Ready in repo — paste with Modrinth upload |
+| Versioned builds (semver or `0.x.y`) | [x] | `0.2.4-alpha` in gradle.properties |
 
 ## Funnel gate (go / no-go)
 
@@ -73,6 +73,6 @@ If any step fails, Stage I is not a funnel yet.
 | Demo 1 | Initiation + cast loop | Ready to package |
 | Demo 2 | Breathing + training visible | Ready (Phase E) |
 | Demo 3 | Seals + Φ harness + essonite | Ready |
-| Demo 4 | Polish / bugfix; ask “would you recommend?” | After smoke + known-issues post |
+| Demo 4 | Polish / bugfix; ask “would you recommend?” | **Package** — see [RELEASE_0.2.4-alpha.md](RELEASE_0.2.4-alpha.md) |
 
 After Demo 4 positive signal → [SUPPORT_TIERS.md](SUPPORT_TIERS.md).
