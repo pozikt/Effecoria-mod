@@ -360,6 +360,49 @@ public final class BalanceConfig {
             .comment("Magic damage per second in Φ-root without protection")
             .defineInRange("plateau_root_radiation_damage", 3.0, 0.0, 20.0);
 
+    public static final ModConfigSpec.IntValue GEYSER_DORMANT_MIN_TICKS = BUILDER
+            .comment("Minimum Φ-geyser dormant phase duration")
+            .defineInRange("geyser_dormant_min_ticks", 4800, 200, 240000);
+    public static final ModConfigSpec.IntValue GEYSER_DORMANT_MAX_TICKS = BUILDER
+            .comment("Maximum Φ-geyser dormant phase duration")
+            .defineInRange("geyser_dormant_max_ticks", 16000, 400, 480000);
+    public static final ModConfigSpec.IntValue GEYSER_PRECURSOR_TICKS = BUILDER
+            .comment("Φ-geyser precursor (rumble) duration")
+            .defineInRange("geyser_precursor_ticks", 200, 40, 6000);
+    public static final ModConfigSpec.IntValue GEYSER_ERUPTION_TICKS = BUILDER
+            .comment("Φ-geyser eruption duration")
+            .defineInRange("geyser_eruption_ticks", 180, 40, 12000);
+    public static final ModConfigSpec.IntValue GEYSER_COOLDOWN_TICKS = BUILDER
+            .comment("Φ-geyser cooldown after eruption")
+            .defineInRange("geyser_cooldown_ticks", 500, 40, 24000);
+    public static final ModConfigSpec.DoubleValue GEYSER_NEAR_RADIUS = BUILDER
+            .comment("Radius for near-geyser regen / non-mage strain")
+            .defineInRange("geyser_near_radius", 8.0, 2.0, 32.0);
+    public static final ModConfigSpec.DoubleValue GEYSER_COLUMN_HEIGHT = BUILDER
+            .comment("Plasma column height in blocks")
+            .defineInRange("geyser_column_height", 48.0, 8.0, 160.0);
+    public static final ModConfigSpec.DoubleValue GEYSER_NEAR_REGEN = BUILDER
+            .comment("Relative regen intensity while near a dormant/cooling geyser (mages)")
+            .defineInRange("geyser_near_regen", 3.5, 1.0, 10.0);
+    public static final ModConfigSpec.DoubleValue GEYSER_NEAR_REGEN_ERUPT = BUILDER
+            .comment("Relative regen intensity while near an erupting geyser (mages)")
+            .defineInRange("geyser_near_regen_erupt", 5.0, 1.0, 12.0);
+    public static final ModConfigSpec.IntValue GEYSER_SAFE_COLUMN_TICKS = BUILDER
+            .comment("Ticks a mage may stand in the plasma column before Orkanum burn")
+            .defineInRange("geyser_safe_column_ticks", 60, 5, 400);
+    public static final ModConfigSpec.DoubleValue GEYSER_COLUMN_EXHAUSTION = BUILDER
+            .comment("Exhaustion per tick after safe column window")
+            .defineInRange("geyser_column_exhaustion", 2.5, 0.0, 20.0);
+    public static final ModConfigSpec.DoubleValue GEYSER_TOUCH_EXHAUSTION = BUILDER
+            .comment("Exhaustion when a mage touches the crack")
+            .defineInRange("geyser_touch_exhaustion", 18.0, 0.0, 50.0);
+    public static final ModConfigSpec.IntValue GEYSER_DUST_MIN = BUILDER
+            .comment("Minimum essonite dust dropped after eruption")
+            .defineInRange("geyser_dust_min", 3, 0, 64);
+    public static final ModConfigSpec.IntValue GEYSER_DUST_MAX = BUILDER
+            .comment("Maximum essonite dust dropped after eruption")
+            .defineInRange("geyser_dust_max", 9, 0, 64);
+
     // --- Phi environment (factors around 1.0; PhiFieldService adds (factor - 1)) ---
     public static final ModConfigSpec.DoubleValue PHI_RAIN_MULTIPLIER = BUILDER
             .comment("Rain Φ factor around 1.0 (additive as value-1)")

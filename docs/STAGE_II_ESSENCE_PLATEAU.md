@@ -9,10 +9,21 @@ Under that mountain, Φ generation follows the **surface column** to bedrock
 | Layer | Approx Y | Content |
 |-------|----------|---------|
 | **Sky** | ≥220 (islands 180–310) | Floating Φ-rock islands on the surface biome |
-| **Surface** | peak highland | Φ-grass / Φ-dirt / Φ-stone crust |
+| **Surface** | peak highland | Φ-grass / Φ-dirt / Φ-stone crust, **Φ-geysers** |
 | **Crust** | mid→high | Dense Φ-stone through the massif |
 | **Crystal caverns** | 0–160 | Cave shells of essonite + veins + crystal buds |
 | **Φ-root** | −64–0 | Near-solid essonite, lethal radiation |
+
+## Φ-geysers
+
+Cyclic planetary cracks (`effecoria:phi_geyser`):
+
+- **Dormant → precursor → eruption → cooldown** (moon-modulated dormant length)
+- Near: mages get strong Ψ regen + slow Φ-cell charge; non-mages get nausea/hunger
+- In plasma column: instant full Ψ, then Orkanum burn / exhaustion; non-mages die
+- Touch crack: soul burn for mages
+- Aftermath: essonite dust drops + `essonite_crust` puddles; rim is `void_obsidian`
+- Manual trigger: right-click with Resonance Focus (initiated mage)
 
 ## Gameplay
 
@@ -24,3 +35,4 @@ Root (Y≤0): magic DPS + wither without protection.
 - **New world / new chunks** required after climate fix.
 - `/locate biome effecoria:essence_plateau` → fly to coordinates → you should be on a mountain.
 - Dig down: essonite-lined caves toward bedrock.
+- Creative: place `phi_geyser` or wait for natural surface spawns.

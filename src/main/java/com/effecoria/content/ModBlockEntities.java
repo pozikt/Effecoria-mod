@@ -1,7 +1,7 @@
 package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
-import com.effecoria.block.SubspacePortalBlock;
+import com.effecoria.block.PhiGeyserBlockEntity;
 import com.effecoria.block.SubspacePortalBlockEntity;
 
 import net.minecraft.core.registries.Registries;
@@ -19,5 +19,11 @@ public final class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register(
                     "subspace_portal",
                     () -> BlockEntityType.Builder.of(SubspacePortalBlockEntity::new, ModBlocks.SUBSPACE_PORTAL.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiGeyserBlockEntity>> PHI_GEYSER =
+            BLOCK_ENTITY_TYPES.register(
+                    "phi_geyser",
+                    () -> BlockEntityType.Builder.of(PhiGeyserBlockEntity::new, ModBlocks.PHI_GEYSER.get())
                             .build(null));
 }

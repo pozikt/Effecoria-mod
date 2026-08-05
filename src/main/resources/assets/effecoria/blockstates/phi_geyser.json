@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north,phase=dormant": { "model": "effecoria:block/phi_geyser" },
+    "facing=south,phase=dormant": { "model": "effecoria:block/phi_geyser", "y": 180 },
+    "facing=west,phase=dormant": { "model": "effecoria:block/phi_geyser", "y": 270 },
+    "facing=east,phase=dormant": { "model": "effecoria:block/phi_geyser", "y": 90 },
+    "facing=north,phase=precursor": { "model": "effecoria:block/phi_geyser" },
+    "facing=south,phase=precursor": { "model": "effecoria:block/phi_geyser", "y": 180 },
+    "facing=west,phase=precursor": { "model": "effecoria:block/phi_geyser", "y": 270 },
+    "facing=east,phase=precursor": { "model": "effecoria:block/phi_geyser", "y": 90 },
+    "facing=north,phase=erupting": { "model": "effecoria:block/phi_geyser" },
+    "facing=south,phase=erupting": { "model": "effecoria:block/phi_geyser", "y": 180 },
+    "facing=west,phase=erupting": { "model": "effecoria:block/phi_geyser", "y": 270 },
+    "facing=east,phase=erupting": { "model": "effecoria:block/phi_geyser", "y": 90 },
+    "facing=north,phase=cooldown": { "model": "effecoria:block/phi_geyser" },
+    "facing=south,phase=cooldown": { "model": "effecoria:block/phi_geyser", "y": 180 },
+    "facing=west,phase=cooldown": { "model": "effecoria:block/phi_geyser", "y": 270 },
+    "facing=east,phase=cooldown": { "model": "effecoria:block/phi_geyser", "y": 90 }
+  }
+}

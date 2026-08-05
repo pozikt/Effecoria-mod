@@ -40,6 +40,13 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> ESSONITE_CRYSTAL_BUD_LARGE =
             ITEMS.registerSimpleBlockItem("essonite_crystal_bud_large", ModBlocks.ESSONITE_CRYSTAL_BUD_LARGE);
 
+    public static final DeferredItem<BlockItem> PHI_GEYSER =
+            ITEMS.registerSimpleBlockItem("phi_geyser", ModBlocks.PHI_GEYSER);
+    public static final DeferredItem<BlockItem> VOID_OBSIDIAN =
+            ITEMS.registerSimpleBlockItem("void_obsidian", ModBlocks.VOID_OBSIDIAN);
+    public static final DeferredItem<BlockItem> ESSONITE_CRUST =
+            ITEMS.registerSimpleBlockItem("essonite_crust", ModBlocks.ESSONITE_CRUST);
+
     /** Hyperspace Φ-membrane (creative / debug; worldgen places it in subspace). */
     public static final DeferredItem<BlockItem> PHI_VEIL =
             ITEMS.registerSimpleBlockItem("phi_veil", ModBlocks.PHI_VEIL);

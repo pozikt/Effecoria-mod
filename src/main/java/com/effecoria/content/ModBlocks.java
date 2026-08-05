@@ -1,7 +1,9 @@
 package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.block.EssoniteCrustBlock;
 import com.effecoria.block.PhiFieldBlock;
+import com.effecoria.block.PhiGeyserBlock;
 import com.effecoria.block.PhiGrassBlock;
 import com.effecoria.block.SubspacePortalBlock;
 
@@ -164,6 +166,43 @@ public final class ModBlocks {
                     .noLootTable()
                     .isViewBlocking((state, level, pos) -> false)
                     .isSuffocating((state, level, pos) -> false)));
+
+    /** Planetary Φ-crack — cyclic plasma geyser of the Essence Plateau. */
+    public static final DeferredBlock<PhiGeyserBlock> PHI_GEYSER = BLOCKS.register(
+            "phi_geyser",
+            () -> new PhiGeyserBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .strength(2.5f, 12f)
+                    .sound(ModSoundTypes.PHI_STONE)
+                    .lightLevel(state -> switch (state.getValue(PhiGeyserBlock.PHASE)) {
+                        case DORMANT -> 7;
+                        case PRECURSOR -> 11;
+                        case ERUPTING -> 15;
+                        case COOLDOWN -> 8;
+                    })
+                    .noOcclusion()
+                    .requiresCorrectToolForDrops()));
+
+    /** Glazed void-glass rim left by Φ-plasma — rare Ω-ward material. */
+    public static final DeferredBlock<Block> VOID_OBSIDIAN = BLOCKS.register(
+            "void_obsidian",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .requiresCorrectToolForDrops()
+                    .strength(50f, 1200f)
+                    .sound(SoundType.STONE)
+                    .lightLevel(state -> 2)));
+
+    /** Cooled essonite melt puddle after a geyser eruption. */
+    public static final DeferredBlock<EssoniteCrustBlock> ESSONITE_CRUST = BLOCKS.register(
+            "essonite_crust",
+            () -> new EssoniteCrustBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(0.4f, 0.4f)
+                    .sound(SoundType.AMETHYST)
+                    .lightLevel(state -> 8)
+                    .noOcclusion()
+                    .pushReaction(PushReaction.DESTROY)));
 
     /** Mirage blood lake fluid — client-tinted crimson water. */
     public static final DeferredBlock<LiquidBlock> BLOOD_FLUID = BLOCKS.register(
