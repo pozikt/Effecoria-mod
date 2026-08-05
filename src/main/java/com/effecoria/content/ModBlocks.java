@@ -50,7 +50,7 @@ public final class ModBlocks {
                     .mapColor(MapColor.COLOR_BLUE)
                     .requiresCorrectToolForDrops()
                     .strength(1.5f, 6f)
-                    .sound(SoundType.DEEPSLATE)
+                    .sound(ModSoundTypes.PHI_STONE)
                     .lightLevel(state -> 7)));
 
     /** Φ-saturated earth — glows and slowly converts dirt / grass. */
@@ -59,7 +59,7 @@ public final class ModBlocks {
             () -> new PhiFieldBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_BLUE)
                     .strength(0.6f, 0.6f)
-                    .sound(SoundType.GRAVEL)
+                    .sound(ModSoundTypes.PHI_EARTH)
                     .lightLevel(state -> 5)));
 
     /** Φ-turf — surface layer over Φ-earth in the plateau. */
@@ -68,7 +68,7 @@ public final class ModBlocks {
             () -> new PhiGrassBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_BLUE)
                     .strength(0.6f, 0.6f)
-                    .sound(SoundType.GRASS)
+                    .sound(ModSoundTypes.PHI_GRASS)
                     .lightLevel(state -> 6)));
 
     /** Surface Φ-crystal cluster — amethyst-shaped, drops essonite dust. */

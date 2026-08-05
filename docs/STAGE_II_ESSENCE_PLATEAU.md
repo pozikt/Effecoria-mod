@@ -1,29 +1,29 @@
-# Stage II — Essence Plateau (slice 1)
+# Stage II — Essence Plateau
 
-Rare high-mountain overworld biome registered via **TerraBlender** (`terrablender` required dependency).
+Rare high-mountain overworld biome (TerraBlender). Full vertical column (−64 → 320):
 
-## Shipped in slice 1
+| Layer | Approx Y | Content |
+|-------|----------|---------|
+| **Sky** | ≥220 (islands 180–310) | Floating Φ-rock islands (`phi_sky_island`), extreme peaks |
+| **Surface** | ~193–219 (+ highland tops) | Φ-grass / Φ-dirt, mist mood |
+| **Crust** | ~129–192 (infusion 64–320) | Dense Φ-stone through the mountain mass |
+| **Crystal caverns** | 0–128 (veins to 160) | Essonite veins, crystal clusters |
+| **Φ-root** | −64–0 | Near-solid essonite, **lethal radiation** without protection |
 
-- Biome `effecoria:essence_plateau` — cool peaks, indigo fog/water tint, extra essonite ore.
-- Blocks: `phi_stone` (surface), `essonite_crystal` (loot dust).
-- Global modifiers: +Φ sampling, +25% spell power, −25% Ψ cost, +35% passive regen (config keys `plateau_*`).
-- Gravity ~80% while inside the biome.
-- Non-initiated players: periodic confusion/nausea (Φ-intoxication).
-- Initiated mages without gold/focus/cell/dust: exhaustion spikes and Φ-burn (magic damage) on long exposure.
-- Protection: gold gear, resonance focus, charged phi cell, or essonite dust in inventory.
+Climate: high-slice + peak ridges, erosion 0–1, **surface+underground** depth so the whole column is this biome.
 
-## Next slices (design backlog)
+## Gameplay
 
-- Φ-geysers, floating islands, Φ-rain/storm weather hooks.
-- Mobs: Φ-larva, crystal crab, phi wyrm, distorted mage, eidos.
-- Ω-rift structure, void obsidian, Φ-wood/flora, purified water crafting.
-- Client FX: essonite dust particles, night pillar beam.
+- Surface: +Φ, +25% spell power, −25% cost, +regen, 80% gravity
+- Caverns: extra Φ (`plateau_cave_phi_bonus`)
+- Root (Y≤0): larger Φ + **magic DPS + wither** if unprotected
+- Φ-soil spreads; vanilla crops fail on Φ-dirt
 
 ## Dev
 
-- New worlds only for biome placement (TerraBlender overlays climate).
-- Locate: `/locate biome effecoria:essence_plateau` (may be far — rare peaks).
+- New chunks only. `/locate biome effecoria:essence_plateau`
+- Requires TerraBlender NeoForge 1.21.1
 
-## Player install (TLauncher / Modrinth)
+## Art
 
-Effecoria **0.2.4+** requires **TerraBlender** for NeoForge 1.21.1 in the same `mods` folder (e.g. `TerraBlender-neoforge-1.21.1-4.1.0.8.jar`). Without it the game may fail to load or hang while creating a world. Download from Modrinth/CurseForge alongside `effecoria-*.jar`.
+See `art/essence_plateau/` and `art/phi_earth/`.

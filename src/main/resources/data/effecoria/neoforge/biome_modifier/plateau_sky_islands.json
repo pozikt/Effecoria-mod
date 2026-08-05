@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#effecoria:is_essence_plateau",
+  "features": ["effecoria:phi_sky_island"],
+  "step": "local_modifications"
+}

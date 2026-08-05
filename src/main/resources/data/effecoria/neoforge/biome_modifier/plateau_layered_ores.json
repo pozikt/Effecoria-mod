@@ -1,0 +1,10 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#effecoria:is_essence_plateau",
+  "features": [
+    "effecoria:phi_crust_infusion",
+    "effecoria:phi_cave_veins",
+    "effecoria:phi_root_core"
+  ],
+  "step": "underground_ores"
+}

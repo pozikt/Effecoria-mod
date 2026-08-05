@@ -1,0 +1,51 @@
+{
+  "type": "minecraft:ore",
+  "config": {
+    "size": 64,
+    "discard_chance_on_air_exposure": 0.0,
+    "targets": [
+      {
+        "target": {
+          "predicate_type": "minecraft:tag_match",
+          "tag": "minecraft:base_stone_overworld"
+        },
+        "state": { "Name": "effecoria:essonite_ore" }
+      },
+      {
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "effecoria:phi_stone"
+        },
+        "state": { "Name": "effecoria:essonite_ore" }
+      },
+      {
+        "target": {
+          "predicate_type": "minecraft:tag_match",
+          "tag": "minecraft:deepslate_ore_replaceables"
+        },
+        "state": { "Name": "effecoria:deepslate_essonite_ore" }
+      },
+      {
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "minecraft:dirt"
+        },
+        "state": { "Name": "effecoria:phi_dirt" }
+      },
+      {
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "minecraft:deepslate"
+        },
+        "state": { "Name": "effecoria:deepslate_essonite_ore" }
+      },
+      {
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "minecraft:tuff"
+        },
+        "state": { "Name": "effecoria:essonite_ore" }
+      }
+    ]
+  }
+}

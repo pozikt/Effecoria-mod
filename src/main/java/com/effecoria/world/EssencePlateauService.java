@@ -47,7 +47,39 @@ public final class EssencePlateauService {
         if (!isBiome(level, pos)) {
             return 0f;
         }
-        return BalanceConfig.PLATEAU_PHI_BONUS.get().floatValue();
+        float bonus = BalanceConfig.PLATEAU_PHI_BONUS.get().floatValue();
+        int y = pos.getY();
+        if (y <= BalanceConfig.PLATEAU_ROOT_MAX_Y.get()) {
+            bonus += BalanceConfig.PLATEAU_ROOT_PHI_BONUS.get().floatValue();
+        } else if (y <= BalanceConfig.PLATEAU_CAVE_MAX_Y.get()) {
+            bonus += BalanceConfig.PLATEAU_CAVE_PHI_BONUS.get().floatValue();
+        }
+        return bonus;
+    }
+
+    /** Depth band across full world height (−64…320). */
+    public static PlateauLayer layerAt(int y) {
+        if (y <= BalanceConfig.PLATEAU_ROOT_MAX_Y.get()) {
+            return PlateauLayer.ROOT;
+        }
+        if (y <= BalanceConfig.PLATEAU_CAVE_MAX_Y.get()) {
+            return PlateauLayer.CAVE;
+        }
+        if (y >= BalanceConfig.PLATEAU_SKY_MIN_Y.get()) {
+            return PlateauLayer.SKY;
+        }
+        if (y <= BalanceConfig.PLATEAU_CRUST_MAX_Y.get()) {
+            return PlateauLayer.CRUST;
+        }
+        return PlateauLayer.SURFACE;
+    }
+
+    public enum PlateauLayer {
+        SKY,
+        SURFACE,
+        CRUST,
+        CAVE,
+        ROOT
     }
 
     public static float spellPowerMultiplier(Level level, Vec3 position) {
@@ -132,6 +164,20 @@ public final class EssencePlateauService {
             }
             if (data.initiated()) {
                 ExhaustionService.addExhaustion(data, BalanceConfig.PLATEAU_BURN_EXHAUSTION.get().floatValue());
+                PsiHelper.set(player, data);
+            }
+        }
+
+        // Φ-root: lethal radiation without protection
+        if (player.getY() <= BalanceConfig.PLATEAU_ROOT_MAX_Y.get() && !hasPhiProtection(player)) {
+            float rootDmg = BalanceConfig.PLATEAU_ROOT_RADIATION_DAMAGE.get().floatValue();
+            if (rootDmg > 0f) {
+                player.hurt(player.damageSources().magic(), rootDmg);
+            }
+            BreathDebuffs.apply(
+                    player, new MobEffectInstance(MobEffects.WITHER, 40, 0, false, false, true));
+            if (data.initiated()) {
+                ExhaustionService.addExhaustion(data, 4f);
                 PsiHelper.set(player, data);
             }
         }

@@ -1,0 +1,16 @@
+{
+  "feature": "effecoria:phi_crust_infusion",
+  "placement": [
+    { "type": "minecraft:count", "count": 140 },
+    { "type": "minecraft:in_square" },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:trapezoid",
+        "min_inclusive": { "absolute": 64 },
+        "max_inclusive": { "absolute": 320 }
+      }
+    },
+    { "type": "minecraft:biome" }
+  ]
+}

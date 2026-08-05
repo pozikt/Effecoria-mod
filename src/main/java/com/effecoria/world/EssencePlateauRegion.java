@@ -23,13 +23,24 @@ public final class EssencePlateauRegion extends Region {
     @Override
     public void addBiomes(Registry<Biome> registry, Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> mapper) {
         VanillaParameterOverlayBuilder builder = new VanillaParameterOverlayBuilder();
+        // Full vertical column on jagged / high-slice peaks: surface → caves → bedrock.
+        new ParameterPointListBuilder()
+                .temperature(Temperature.span(Temperature.COOL, Temperature.FROZEN))
+                .humidity(Humidity.span(Humidity.DRY, Humidity.WET))
+                .continentalness(Continentalness.FAR_INLAND)
+                .erosion(Erosion.span(Erosion.EROSION_0, Erosion.EROSION_1))
+                .depth(Depth.span(Depth.SURFACE, Depth.UNDERGROUND))
+                .weirdness(Weirdness.span(Weirdness.HIGH_SLICE_NORMAL_ASCENDING, Weirdness.HIGH_SLICE_NORMAL_DESCENDING))
+                .build()
+                .forEach(point -> builder.add(point, ModBiomes.ESSENCE_PLATEAU));
+        // Variant peak ridge (mirrored weirdness) for taller, broken summits.
         new ParameterPointListBuilder()
                 .temperature(Temperature.span(Temperature.COOL, Temperature.FROZEN))
                 .humidity(Humidity.span(Humidity.DRY, Humidity.WET))
                 .continentalness(Continentalness.FAR_INLAND)
                 .erosion(Erosion.EROSION_0)
-                .depth(Depth.SURFACE)
-                .weirdness(Weirdness.PEAK_NORMAL)
+                .depth(Depth.span(Depth.SURFACE, Depth.UNDERGROUND))
+                .weirdness(Weirdness.span(Weirdness.HIGH_SLICE_VARIANT_ASCENDING, Weirdness.HIGH_SLICE_VARIANT_DESCENDING))
                 .build()
                 .forEach(point -> builder.add(point, ModBiomes.ESSENCE_PLATEAU));
         builder.build().forEach(mapper);

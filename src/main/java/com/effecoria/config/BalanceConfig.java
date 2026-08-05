@@ -332,6 +332,34 @@ public final class BalanceConfig {
             .comment("Exhaustion added per Φ-burn pulse for initiated mages")
             .defineInRange("plateau_burn_exhaustion", 12.0, 0.0, 50.0);
 
+    public static final ModConfigSpec.IntValue PLATEAU_CAVE_MAX_Y = BUILDER
+            .comment("Top of Crystal Caverns layer (below crust / surface peaks)")
+            .defineInRange("plateau_cave_max_y", 128, -64, 320);
+
+    public static final ModConfigSpec.IntValue PLATEAU_ROOT_MAX_Y = BUILDER
+            .comment("Top of Φ-root / core layer — extreme radiation at/below this (toward bedrock)")
+            .defineInRange("plateau_root_max_y", 0, -64, 320);
+
+    public static final ModConfigSpec.IntValue PLATEAU_CRUST_MAX_Y = BUILDER
+            .comment("Top of dense Φ-crust band; between crust and sky = surface highland")
+            .defineInRange("plateau_crust_max_y", 192, -64, 320);
+
+    public static final ModConfigSpec.IntValue PLATEAU_SKY_MIN_Y = BUILDER
+            .comment("Sky-island / extreme peak air layer starts at this Y")
+            .defineInRange("plateau_sky_min_y", 220, 64, 320);
+
+    public static final ModConfigSpec.DoubleValue PLATEAU_CAVE_PHI_BONUS = BUILDER
+            .comment("Extra additive Φ bonus in Crystal Caverns (Y between root and cave max)")
+            .defineInRange("plateau_cave_phi_bonus", 0.35, 0.0, 2.0);
+
+    public static final ModConfigSpec.DoubleValue PLATEAU_ROOT_PHI_BONUS = BUILDER
+            .comment("Extra additive Φ bonus in Φ-root core (Y <= root max)")
+            .defineInRange("plateau_root_phi_bonus", 0.85, 0.0, 3.0);
+
+    public static final ModConfigSpec.DoubleValue PLATEAU_ROOT_RADIATION_DAMAGE = BUILDER
+            .comment("Magic damage per second in Φ-root without protection")
+            .defineInRange("plateau_root_radiation_damage", 3.0, 0.0, 20.0);
+
     // --- Phi environment (factors around 1.0; PhiFieldService adds (factor - 1)) ---
     public static final ModConfigSpec.DoubleValue PHI_RAIN_MULTIPLIER = BUILDER
             .comment("Rain Φ factor around 1.0 (additive as value-1)")

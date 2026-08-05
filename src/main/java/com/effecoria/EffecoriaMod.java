@@ -16,6 +16,8 @@ import com.effecoria.content.ModCreativeTabs;
 
 import com.effecoria.content.ModEntities;
 
+import com.effecoria.content.ModFeatures;
+
 import com.effecoria.content.ModFluids;
 
 import com.effecoria.content.ModItems;
@@ -72,6 +74,8 @@ public class EffecoriaMod {
         ModFluids.FLUIDS.register(modEventBus);
         ModBlocks.BLOCKS.register(modEventBus);
 
+        ModFeatures.FEATURES.register(modEventBus);
+
         ModBlockEntities.BLOCK_ENTITY_TYPES.register(modEventBus);
 
         ModItems.ITEMS.register(modEventBus);
@@ -107,7 +111,7 @@ public class EffecoriaMod {
     private static void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             LOGGER.info("Registering Essence Plateau TerraBlender region and surface rules");
-            Regions.register(new EssencePlateauRegion(id("overworld"), 3));
+            Regions.register(new EssencePlateauRegion(id("overworld"), 5));
             SurfaceRuleManager.addSurfaceRules(
                     SurfaceRuleManager.RuleCategory.OVERWORLD,
                     MOD_ID,
