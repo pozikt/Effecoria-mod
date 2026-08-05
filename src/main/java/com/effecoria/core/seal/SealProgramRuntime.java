@@ -425,6 +425,8 @@ public final class SealProgramRuntime {
                 SealProgramEffects.calorOnce(level, pos, seal, mag);
             }
             case "extrahere" -> SealProgramEffects.extrahereOnce(level, pos, seal, mag);
+            case "haustus" -> SealProgramEffects.haustusOnce(level, pos, seal, mag);
+            case "vigil" -> SealProgramEffects.vigilOnce(level, pos, seal, mag);
             case "imprimere" -> SealProgramEffects.imprimereOnce(level, pos, seal, mag);
             case "ordo" -> SealProgramEffects.ordoOnce(level, pos, seal, mag);
             case "absolutum" -> SealProgramEffects.absolutumOnce(level, pos, seal, mag);

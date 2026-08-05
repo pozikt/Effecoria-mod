@@ -204,6 +204,85 @@ public final class SealProgramEffects {
         }
     }
 
+    /**
+     * Remote sentinel: alert the seal's caster (message + chime at caster), local particles on the glyph.
+     * Distinct from {@code sound}, which only plays at the block.
+     */
+    public static void vigilOnce(ServerLevel level, BlockPos pos, SealInstance seal, float magnitude) {
+        level.sendParticles(
+                ParticleTypes.END_ROD,
+                pos.getX() + 0.5,
+                pos.getY() + 1.1,
+                pos.getZ() + 0.5,
+                10,
+                0.25,
+                0.15,
+                0.25,
+                0.02);
+        level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.45f, 1.35f);
+
+        if (seal.casterId() == null || level.getServer() == null) {
+            return;
+        }
+        ServerPlayer caster = level.getServer().getPlayerList().getPlayer(seal.casterId());
+        if (caster == null) {
+            return;
+        }
+        float vol = Math.min(1.0f, 0.45f + magnitude * 0.05f);
+        caster.displayClientMessage(
+                Component.translatable("message.effecoria.seal.vigil", pos.getX(), pos.getY(), pos.getZ()), true);
+        caster.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.PLAYERS, vol, 1.2f);
+    }
+
+    /**
+     * Standing siphon: drain Ψ from players on the seal block and return a portion to the caster.
+     * Tighter than {@code extrahere} (radius AoE) — trap-lane identity.
+     */
+    public static void haustusOnce(ServerLevel level, BlockPos pos, SealInstance seal, float magnitude) {
+        float drain = Math.max(3f, magnitude);
+        float refundRatio = 0.5f;
+        float refunded = 0f;
+        AABB box = new AABB(pos).move(0, 1, 0).inflate(0.35, 0.25, 0.35);
+        for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, box, LivingEntity::isAlive)) {
+            BlockPos standingOn = BlockPos.containing(player.getX(), player.getY() - 0.05, player.getZ());
+            if (!standingOn.equals(pos)) {
+                continue;
+            }
+            if (seal.casterId() != null && seal.casterId().equals(player.getUUID())) {
+                continue;
+            }
+            PlayerPsiData data = player.getData(ModAttachments.PSI.get());
+            float taken = Math.min(drain, data.currentPsi());
+            if (taken <= 0.05f) {
+                continue;
+            }
+            data.setCurrentPsi(Math.max(0f, data.currentPsi() - taken));
+            refunded += taken * refundRatio;
+            player.displayClientMessage(Component.translatable("message.effecoria.seal.haustus_victim"), true);
+            level.sendParticles(
+                    ParticleTypes.WITCH,
+                    player.getX(),
+                    player.getY() + 1.0,
+                    player.getZ(),
+                    8,
+                    0.2,
+                    0.25,
+                    0.2,
+                    0.02);
+        }
+        if (refunded > 0.05f && seal.casterId() != null && level.getServer() != null) {
+            ServerPlayer caster = level.getServer().getPlayerList().getPlayer(seal.casterId());
+            if (caster != null) {
+                PlayerPsiData casterData = caster.getData(ModAttachments.PSI.get());
+                float next = Math.min(casterData.maxPsi(), casterData.currentPsi() + refunded);
+                casterData.setCurrentPsi(next);
+                caster.displayClientMessage(
+                        Component.translatable("message.effecoria.seal.haustus_refund", Math.round(refunded)), true);
+            }
+        }
+        level.playSound(null, pos, SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 0.4f, 1.4f);
+    }
+
     public static void applyStandingHurt(ServerLevel level, BlockPos pos, SealInstance seal, float damage) {
         AABB box = new AABB(pos).move(0, 1, 0).inflate(0.35, 0.25, 0.35);
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {

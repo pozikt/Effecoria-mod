@@ -66,7 +66,7 @@ Rule of thumb: **do not invent a huge school rewrite in Stage I “just because.
 | **Φ harness** | Essonite dust → focus craft; **Phi Cell** (portable Φ buffer) — items first, not worldgen |
 | **Breathing** | Air/hunger coupling; optional trainer/modes |
 | **Training** | Broader XP sources; diminishing returns |
-| **Seals** | More types, conflicts/stacking rules |
+| **Seals** | Word pack: `vigil` (remote alarm) + `haustus` (standing Ψ siphon); conflicts/stacking done |
 | **Anti-magic** | Lead (ZNΦ), cold iron — tag-based, replaces stone-box hack |
 | **School depth** | Identity pack: Corruption `contagion_bloom` + `hunt_pulse`; Spatial `phase_slip` |
 | **Player-facing magic** | Teach the loop without wiki: Patchouli / in-game tips / hub clarity |

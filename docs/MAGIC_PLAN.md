@@ -168,7 +168,8 @@ If choosing a single slice for the next implementation session:
 17. Stage I **exit polish** (tip sequencing, seal tip, funnel/known-issues docs) — ✅ done.
 18. Dedicated-server smoke (`runServer` → Done) — ✅ Primer/Focus no longer pull client classes on DEDICATED_SERVER.
 19. School **identity pack** — Corruption `contagion_bloom` / `hunt_pulse` + Spatial `phase_slip` — ✅ shipped.
-20. **Next:** package Demo builds / known-issues on Modrinth+Discord; or intentional Stage II environment.
+20. Seals **word pack** — `vigil` (remote alarm) + `haustus` (standing Ψ siphon) — ✅ shipped.
+21. **Next:** package Demo builds / known-issues on Modrinth+Discord; or intentional Stage II environment.
 
 ---
 

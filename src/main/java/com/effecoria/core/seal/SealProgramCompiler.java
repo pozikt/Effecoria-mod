@@ -355,6 +355,8 @@ public final class SealProgramCompiler {
             case "calor" -> 2f;
             case "clausura", "umbra", "servare" -> 1f;
             case "extrahere" -> 8f;
+            case "haustus" -> 6f;
+            case "vigil" -> 1f;
             case "imprimere" -> 1f;
             case "ordo" -> 4f;
             case "abnegatio" -> 1f;
@@ -372,7 +374,7 @@ public final class SealProgramCompiler {
             case "glow", "light" -> Mth.clamp(magnitude, 6f, 15f);
             case "sound" -> Mth.clamp(magnitude, 0.5f, 10f);
             case "calor" -> Mth.clamp(magnitude, 1f, 10f);
-            case "extrahere", "ordo", "absolutum" -> Mth.clamp(magnitude, 1f, 16f);
+            case "extrahere", "haustus", "ordo", "absolutum" -> Mth.clamp(magnitude, 1f, 16f);
             default -> Mth.clamp(magnitude, 0.5f, 16f);
         };
         action.putFloat(MAGNITUDE, clamped);

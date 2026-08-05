@@ -30,6 +30,16 @@ After `See`, optional filters:
 
 No specs → any of these events can pulse the sense. Number right after `See` (before an action) sets sense radius.
 
+### Notable actions
+
+| Word | Effect |
+|------|--------|
+| Sound | Local note at the block |
+| **Vigil** | Alerts the seal's caster remotely (coords + chime) |
+| Hurt / Slow / Push | Standing combat |
+| Extrahere | Drain Ψ in a radius |
+| **Haustus** | Drain Ψ from players **on** the seal; refund half to caster |
+
 ## Datapack
 
 Words under `data/effecoria/seal_words/*.json` (`kind`: number, property, trigger, sense, spec, modifier, duration).
