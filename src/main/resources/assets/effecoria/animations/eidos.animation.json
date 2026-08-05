@@ -1,0 +1,160 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.eidos.idle": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "core": {
+          "position": {
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ]
+            },
+            "1.5": {
+              "vector": [
+                0,
+                2,
+                0
+              ]
+            },
+            "3.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ]
+            }
+          },
+          "rotation": {
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ]
+            },
+            "3.0": {
+              "vector": [
+                0,
+                360,
+                0
+              ]
+            }
+          }
+        },
+        "ring_a": {
+          "rotation": {
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ]
+            },
+            "3.0": {
+              "vector": [
+                0,
+                -360,
+                0
+              ]
+            }
+          }
+        },
+        "ring_b": {
+          "rotation": {
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ]
+            },
+            "3.0": {
+              "vector": [
+                0,
+                360,
+                0
+              ]
+            }
+          },
+          "scale": {
+            "0.0": {
+              "vector": [
+                1,
+                1,
+                1
+              ]
+            },
+            "1.5": {
+              "vector": [
+                1.2,
+                1.2,
+                1.2
+              ]
+            },
+            "3.0": {
+              "vector": [
+                1,
+                1,
+                1
+              ]
+            }
+          }
+        }
+      }
+    },
+    "animation.eidos.gift": {
+      "loop": false,
+      "animation_length": 1.0,
+      "bones": {
+        "core": {
+          "scale": {
+            "0.0": {
+              "vector": [
+                1,
+                1,
+                1
+              ]
+            },
+            "0.4": {
+              "vector": [
+                1.6,
+                1.6,
+                1.6
+              ]
+            },
+            "1.0": {
+              "vector": [
+                1,
+                1,
+                1
+              ]
+            }
+          }
+        },
+        "silhouette": {
+          "rotation": {
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ]
+            },
+            "1.0": {
+              "vector": [
+                0,
+                180,
+                0
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

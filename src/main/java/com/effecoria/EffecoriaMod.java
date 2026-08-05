@@ -95,6 +95,7 @@ public class EffecoriaMod {
 
         modEventBus.addListener(EffecoriaMod::registerPayloads);
         modEventBus.addListener(ModEntities::registerAttributes);
+        modEventBus.addListener(ModEntities::registerSpawnPlacements);
         modEventBus.addListener(EffecoriaMod::commonSetup);
 
 

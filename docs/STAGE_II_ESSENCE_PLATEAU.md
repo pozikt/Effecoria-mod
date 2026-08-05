@@ -53,6 +53,18 @@ Client: `ViewportEvent` fog tint + `phi_mist` / spark motes + movement wake trai
 - `phi_nut`: mages regain Ψ; non-mages get Φ-poison
 - Art refs for leaf edit: `art/phi_flora/phi_leaves.png` vs `art/phi_flora/oak_leaves.png`
 
+## Φ-fauna
+
+GeckoLib mobs native to the plateau (spawn eggs in creative):
+
+| Mob | Role | Notes |
+|-----|------|-------|
+| **Φ-larva** | Passive | Crawls near crystals; breeds on essonite dust; adults slowly restore Ψ / charge Φ-cells; drops dust |
+| **Crystal crab** | Neutral | Angers if essonite crystals/core are mined nearby; drops shards + Φ-chitin |
+| **Eidos** | Rare passive | Offer essonite crystal / pure essonite → random buff or short-range portal hop |
+
+*(Φ-wyvern and twisted mage deferred.)*
+
 ## Φ-ядро (core)
 
 Lowest band under the plateau (`Y ≤ plateau_root_max_y`, default 0):

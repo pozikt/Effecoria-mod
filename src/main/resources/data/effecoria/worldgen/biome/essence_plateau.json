@@ -107,85 +107,37 @@
     "axolotls": [],
     "creature": [
       {
-        "type": "minecraft:sheep",
-        "maxCount": 4,
-        "minCount": 4,
-        "weight": 12
-      },
-      {
-        "type": "minecraft:pig",
-        "maxCount": 4,
-        "minCount": 4,
-        "weight": 10
-      },
-      {
-        "type": "minecraft:chicken",
-        "maxCount": 4,
-        "minCount": 4,
-        "weight": 10
-      },
-      {
-        "type": "minecraft:cow",
-        "maxCount": 4,
-        "minCount": 4,
-        "weight": 8
-      },
-      {
-        "type": "minecraft:llama",
+        "type": "effecoria:phi_larva",
         "maxCount": 6,
-        "minCount": 4,
-        "weight": 5
+        "minCount": 2,
+        "weight": 40
+      },
+      {
+        "type": "effecoria:eidos",
+        "maxCount": 1,
+        "minCount": 1,
+        "weight": 2
       }
     ],
     "misc": [],
     "monster": [
       {
-        "type": "minecraft:spider",
-        "maxCount": 4,
-        "minCount": 4,
-        "weight": 100
-      },
-      {
-        "type": "minecraft:zombie",
-        "maxCount": 4,
-        "minCount": 4,
-        "weight": 95
-      },
-      {
-        "type": "minecraft:zombie_villager",
-        "maxCount": 1,
+        "type": "effecoria:crystal_crab",
+        "maxCount": 3,
         "minCount": 1,
-        "weight": 5
-      },
-      {
-        "type": "minecraft:skeleton",
-        "maxCount": 4,
-        "minCount": 4,
-        "weight": 100
-      },
-      {
-        "type": "minecraft:creeper",
-        "maxCount": 4,
-        "minCount": 4,
-        "weight": 100
-      },
-      {
-        "type": "minecraft:slime",
-        "maxCount": 4,
-        "minCount": 4,
-        "weight": 100
+        "weight": 55
       },
       {
         "type": "minecraft:enderman",
-        "maxCount": 4,
+        "maxCount": 2,
         "minCount": 1,
-        "weight": 10
+        "weight": 8
       },
       {
-        "type": "minecraft:witch",
-        "maxCount": 1,
+        "type": "minecraft:spider",
+        "maxCount": 2,
         "minCount": 1,
-        "weight": 5
+        "weight": 15
       }
     ],
     "underground_water_creature": [

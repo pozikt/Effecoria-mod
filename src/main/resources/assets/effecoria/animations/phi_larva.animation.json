@@ -1,0 +1,154 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.phi_larva.idle": {
+      "loop": true,
+      "animation_length": 2.0,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ]
+            },
+            "1.0": {
+              "vector": [
+                0,
+                8,
+                0
+              ]
+            },
+            "2.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ]
+            }
+          }
+        },
+        "glow": {
+          "scale": {
+            "0.0": {
+              "vector": [
+                1,
+                1,
+                1
+              ]
+            },
+            "1.0": {
+              "vector": [
+                1.2,
+                1.2,
+                1.2
+              ]
+            },
+            "2.0": {
+              "vector": [
+                1,
+                1,
+                1
+              ]
+            }
+          }
+        }
+      }
+    },
+    "animation.phi_larva.crawl": {
+      "loop": true,
+      "animation_length": 0.8,
+      "bones": {
+        "body": {
+          "position": {
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                0
+              ]
+            },
+            "0.2": {
+              "vector": [
+                0,
+                0.4,
+                0
+              ]
+            },
+            "0.4": {
+              "vector": [
+                0,
+                0,
+                0
+              ]
+            },
+            "0.6": {
+              "vector": [
+                0,
+                0.4,
+                0
+              ]
+            },
+            "0.8": {
+              "vector": [
+                0,
+                0,
+                0
+              ]
+            }
+          },
+          "rotation": {
+            "0.0": {
+              "vector": [
+                0,
+                0,
+                -6
+              ]
+            },
+            "0.4": {
+              "vector": [
+                0,
+                0,
+                6
+              ]
+            },
+            "0.8": {
+              "vector": [
+                0,
+                0,
+                -6
+              ]
+            }
+          }
+        },
+        "head": {
+          "rotation": {
+            "0.0": {
+              "vector": [
+                5,
+                0,
+                0
+              ]
+            },
+            "0.4": {
+              "vector": [
+                -5,
+                0,
+                0
+              ]
+            },
+            "0.8": {
+              "vector": [
+                5,
+                0,
+                0
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

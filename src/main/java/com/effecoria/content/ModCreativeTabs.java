@@ -50,11 +50,15 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PHI_WATER_BUCKET.get());
                         output.accept(ModItems.ESSONITE_SHARD.get());
                         output.accept(ModItems.PURE_ESSONITE.get());
+                        output.accept(ModItems.PHI_CHITIN.get());
                         output.accept(ModItems.ESSENITE_DUST.get());
                         output.accept(ModItems.RESONANCE_FOCUS.get());
                         output.accept(ModItems.PHI_CELL.get());
                         output.accept(ModItems.BREATHING_SCROLL.get());
                         output.accept(ModItems.MAGIC_PRIMER.get());
+                        output.accept(ModItems.PHI_LARVA_SPAWN_EGG.get());
+                        output.accept(ModItems.CRYSTAL_CRAB_SPAWN_EGG.get());
+                        output.accept(ModItems.EIDOS_SPAWN_EGG.get());
                     })
                     .build());
 }

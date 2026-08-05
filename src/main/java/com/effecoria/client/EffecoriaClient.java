@@ -5,8 +5,11 @@ import com.effecoria.client.hud.BlurredLocusHud;
 import com.effecoria.client.hud.PsiHudOverlay;
 import com.effecoria.client.hud.SealInspectHud;
 import com.effecoria.client.particle.SchoolParticles;
+import com.effecoria.client.render.CrystalCrabRenderer;
 import com.effecoria.client.render.DeathShadowRenderer;
+import com.effecoria.client.render.EidosRenderer;
 import com.effecoria.client.render.MirageHorrorRenderer;
+import com.effecoria.client.render.PhiLarvaRenderer;
 import com.effecoria.client.render.RootCageRenderer;
 import com.effecoria.client.render.SubspacePortalRenderer;
 import com.effecoria.content.ModBlocks;
@@ -64,6 +67,9 @@ public final class EffecoriaClient {
         event.registerEntityRenderer(ModEntities.ROOT_CAGE.get(), RootCageRenderer::new);
         event.registerEntityRenderer(ModEntities.DEATH_SHADOW.get(), DeathShadowRenderer::new);
         event.registerEntityRenderer(ModEntities.MIRAGE_HORROR.get(), MirageHorrorRenderer::new);
+        event.registerEntityRenderer(ModEntities.PHI_LARVA.get(), PhiLarvaRenderer::new);
+        event.registerEntityRenderer(ModEntities.CRYSTAL_CRAB.get(), CrystalCrabRenderer::new);
+        event.registerEntityRenderer(ModEntities.EIDOS.get(), EidosRenderer::new);
         event.registerBlockEntityRenderer(
                 com.effecoria.content.ModBlockEntities.SUBSPACE_PORTAL.get(), SubspacePortalRenderer::new);
     }

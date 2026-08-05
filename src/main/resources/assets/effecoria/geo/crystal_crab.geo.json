@@ -1,0 +1,342 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.crystal_crab",
+        "texture_width": 64,
+        "texture_height": 64,
+        "visible_bounds_width": 3,
+        "visible_bounds_height": 2,
+        "visible_bounds_offset": [
+          0,
+          0.75,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "body",
+          "parent": "root",
+          "pivot": [
+            0,
+            3,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -5,
+                2,
+                -4
+              ],
+              "size": [
+                10,
+                4,
+                8
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -4,
+                5,
+                -3
+              ],
+              "size": [
+                8,
+                2,
+                6
+              ],
+              "uv": [
+                0,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "name": "claw_l",
+          "parent": "body",
+          "pivot": [
+            5,
+            3,
+            4
+          ],
+          "cubes": [
+            {
+              "origin": [
+                4,
+                2,
+                3
+              ],
+              "size": [
+                3,
+                2.5,
+                4
+              ],
+              "uv": [
+                40,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "claw_r",
+          "parent": "body",
+          "pivot": [
+            -5,
+            3,
+            4
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -7,
+                2,
+                3
+              ],
+              "size": [
+                3,
+                2.5,
+                4
+              ],
+              "uv": [
+                40,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_0_f",
+          "parent": "body",
+          "pivot": [
+            -4,
+            2,
+            3
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -4.6,
+                0,
+                2.4
+              ],
+              "size": [
+                1.2,
+                2.5,
+                1.2
+              ],
+              "uv": [
+                32,
+                16
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_0_b",
+          "parent": "body",
+          "pivot": [
+            -4,
+            2,
+            -3
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -4.6,
+                0,
+                -3.6
+              ],
+              "size": [
+                1.2,
+                2.5,
+                1.2
+              ],
+              "uv": [
+                32,
+                16
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_1_f",
+          "parent": "body",
+          "pivot": [
+            -2,
+            2,
+            3
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -2.6,
+                0,
+                2.4
+              ],
+              "size": [
+                1.2,
+                2.5,
+                1.2
+              ],
+              "uv": [
+                32,
+                16
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_1_b",
+          "parent": "body",
+          "pivot": [
+            -2,
+            2,
+            -3
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -2.6,
+                0,
+                -3.6
+              ],
+              "size": [
+                1.2,
+                2.5,
+                1.2
+              ],
+              "uv": [
+                32,
+                16
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_2_f",
+          "parent": "body",
+          "pivot": [
+            2,
+            2,
+            3
+          ],
+          "cubes": [
+            {
+              "origin": [
+                1.4,
+                0,
+                2.4
+              ],
+              "size": [
+                1.2,
+                2.5,
+                1.2
+              ],
+              "uv": [
+                32,
+                16
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_2_b",
+          "parent": "body",
+          "pivot": [
+            2,
+            2,
+            -3
+          ],
+          "cubes": [
+            {
+              "origin": [
+                1.4,
+                0,
+                -3.6
+              ],
+              "size": [
+                1.2,
+                2.5,
+                1.2
+              ],
+              "uv": [
+                32,
+                16
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_3_f",
+          "parent": "body",
+          "pivot": [
+            4,
+            2,
+            3
+          ],
+          "cubes": [
+            {
+              "origin": [
+                3.4,
+                0,
+                2.4
+              ],
+              "size": [
+                1.2,
+                2.5,
+                1.2
+              ],
+              "uv": [
+                32,
+                16
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leg_3_b",
+          "parent": "body",
+          "pivot": [
+            4,
+            2,
+            -3
+          ],
+          "cubes": [
+            {
+              "origin": [
+                3.4,
+                0,
+                -3.6
+              ],
+              "size": [
+                1.2,
+                2.5,
+                1.2
+              ],
+              "uv": [
+                32,
+                16
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

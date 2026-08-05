@@ -4,6 +4,8 @@ import com.effecoria.EffecoriaMod;
 
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.SpawnEggItem;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -68,6 +70,7 @@ public final class ModItems {
 
     public static final DeferredItem<Item> ESSONITE_SHARD = ITEMS.registerSimpleItem("essonite_shard");
     public static final DeferredItem<Item> PURE_ESSONITE = ITEMS.registerSimpleItem("pure_essonite");
+    public static final DeferredItem<Item> PHI_CHITIN = ITEMS.registerSimpleItem("phi_chitin");
 
     public static final DeferredItem<Item> PHI_WATER_BUCKET = ITEMS.register(
             "phi_water_bucket",
@@ -99,4 +102,14 @@ public final class ModItems {
     public static final DeferredItem<Item> MAGIC_PRIMER = ITEMS.register(
             "magic_primer",
             () -> new MagicPrimerItem(new Item.Properties().stacksTo(1)));
+
+    public static final DeferredItem<SpawnEggItem> PHI_LARVA_SPAWN_EGG = ITEMS.register(
+            "phi_larva_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.PHI_LARVA, 0x2a6ad4, 0x9ad7ff, new Item.Properties()));
+    public static final DeferredItem<SpawnEggItem> CRYSTAL_CRAB_SPAWN_EGG = ITEMS.register(
+            "crystal_crab_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.CRYSTAL_CRAB, 0x1e3f8a, 0xc9a84c, new Item.Properties()));
+    public static final DeferredItem<SpawnEggItem> EIDOS_SPAWN_EGG = ITEMS.register(
+            "eidos_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.EIDOS, 0xf0d060, 0xfff6c8, new Item.Properties()));
 }
