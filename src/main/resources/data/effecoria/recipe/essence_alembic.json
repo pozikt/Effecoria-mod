@@ -1,0 +1,10 @@
+﻿{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": { "item": "effecoria:phi_glass" },
+    "S": { "item": "effecoria:phi_stone" }
+  },
+  "pattern": ["G G", "GGG", "SSS"],
+  "result": { "count": 1, "id": "effecoria:essence_alembic" }
+}

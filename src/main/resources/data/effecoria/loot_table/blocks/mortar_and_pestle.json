@@ -1,0 +1,10 @@
+﻿{
+  "type": "minecraft:block",
+  "pools": [{
+    "bonus_rolls": 0.0,
+    "entries": [{ "type": "minecraft:item", "name": "effecoria:mortar_and_pestle" }],
+    "rolls": 1.0,
+    "conditions": [{ "condition": "minecraft:survives_explosion" }]
+  }],
+  "random_sequence": "effecoria:blocks/mortar_and_pestle"
+}

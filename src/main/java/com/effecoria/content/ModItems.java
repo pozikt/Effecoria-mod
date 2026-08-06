@@ -105,6 +105,48 @@ public final class ModItems {
             "phi_water_bucket",
             () -> new PhiWaterBucketItem(ModFluids.PHI_WATER.get(), new Item.Properties()));
 
+    /** Gold-filtered Φ-water — drinkable Ψ tonic (does not place fluid). */
+    public static final DeferredItem<Item> PURIFIED_PHI_WATER_BUCKET = ITEMS.register(
+            "purified_phi_water_bucket",
+            () -> new PurifiedPhiWaterBucketItem(new Item.Properties()));
+
+    public static final DeferredItem<BlockItem> MORTAR_AND_PESTLE =
+            ITEMS.registerSimpleBlockItem("mortar_and_pestle", ModBlocks.MORTAR_AND_PESTLE);
+    public static final DeferredItem<BlockItem> ESSENCE_BURNER = ITEMS.register(
+            "essence_burner",
+            () -> new EssenceBurnerBlockItem(ModBlocks.ESSENCE_BURNER.get(), new Item.Properties()));
+    public static final DeferredItem<BlockItem> ESSENCE_ALEMBIC =
+            ITEMS.registerSimpleBlockItem("essence_alembic", ModBlocks.ESSENCE_ALEMBIC);
+
+    public static final DeferredItem<Item> PHI_PAPER = ITEMS.registerSimpleItem("phi_paper");
+    public static final DeferredItem<Item> PHI_FLASK = ITEMS.registerSimpleItem("phi_flask");
+    public static final DeferredItem<Item> PHI_FLASK_WATER = ITEMS.register(
+            "phi_flask_water", () -> new Item(new Item.Properties().stacksTo(16)));
+
+    public static final DeferredItem<Item> GOLD_FILTER = ITEMS.register(
+            "gold_filter", () -> new GoldFilterItem(new Item.Properties()));
+    public static final DeferredItem<Item> LEAD_FILTER = ITEMS.register(
+            "lead_filter", () -> new LeadFilterItem(new Item.Properties()));
+
+    public static final DeferredItem<Item> POTION_PHI_TONIC = ITEMS.register(
+            "potion_phi_tonic",
+            () -> new AlchemyPotionItem(
+                    new Item.Properties(), ModMobEffects::tonic, 90 * 20, "item.effecoria.potion_phi_tonic.hint"));
+    public static final DeferredItem<Item> POTION_PHI_RESONANCE = ITEMS.register(
+            "potion_phi_resonance",
+            () -> new AlchemyPotionItem(
+                    new Item.Properties(),
+                    ModMobEffects::resonance,
+                    75 * 20,
+                    "item.effecoria.potion_phi_resonance.hint"));
+    public static final DeferredItem<Item> POTION_PHI_STIMULANT = ITEMS.register(
+            "potion_phi_stimulant",
+            () -> new AlchemyPotionItem(
+                    new Item.Properties(),
+                    ModMobEffects::stimulant,
+                    45 * 20,
+                    "item.effecoria.potion_phi_stimulant.hint"));
+
     /** Hyperspace Φ-membrane (creative / debug; worldgen places it in subspace). */
     public static final DeferredItem<BlockItem> PHI_VEIL =
             ITEMS.registerSimpleBlockItem("phi_veil", ModBlocks.PHI_VEIL);

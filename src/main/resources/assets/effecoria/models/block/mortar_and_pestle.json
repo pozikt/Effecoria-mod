@@ -1,0 +1,1 @@
+﻿{ "parent": "minecraft:block/cube_all", "textures": { "all": "effecoria:block/mortar_and_pestle" } }

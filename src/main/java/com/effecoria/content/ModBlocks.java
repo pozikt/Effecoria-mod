@@ -3,6 +3,9 @@ package com.effecoria.content;
 import com.effecoria.EffecoriaMod;
 import com.effecoria.block.EssoniteCrustBlock;
 import com.effecoria.block.EssonitePointedBlock;
+import com.effecoria.block.EssenceAlembicBlock;
+import com.effecoria.block.EssenceBurnerBlock;
+import com.effecoria.block.MortarAndPestleBlock;
 import com.effecoria.block.PhiBladesBlock;
 import com.effecoria.block.PhiFieldBlock;
 import com.effecoria.block.PhiGeyserBlock;
@@ -445,6 +448,35 @@ public final class ModBlocks {
                             .liquid()
                             .lightLevel(state -> 8)
                             .sound(SoundType.EMPTY)));
+
+    /** Village mortar — grind essonite materials into dust. */
+    public static final DeferredBlock<MortarAndPestleBlock> MORTAR_AND_PESTLE = BLOCKS.register(
+            "mortar_and_pestle",
+            () -> new MortarAndPestleBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .strength(1.2f, 4f)
+                    .sound(ModSoundTypes.PHI_STONE)
+                    .noOcclusion()));
+
+    /** Flameless Φ-burner — dust fuel until Φ-oil exists. */
+    public static final DeferredBlock<EssenceBurnerBlock> ESSENCE_BURNER = BLOCKS.register(
+            "essence_burner",
+            () -> new EssenceBurnerBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .strength(1.5f, 4f)
+                    .sound(SoundType.STONE)
+                    .lightLevel(state -> state.getValue(EssenceBurnerBlock.LIT) ? 9 : 0)
+                    .noOcclusion()));
+
+    /** Essence alembic — blue cauldron for Φ-water potions. */
+    public static final DeferredBlock<EssenceAlembicBlock> ESSENCE_ALEMBIC = BLOCKS.register(
+            "essence_alembic",
+            () -> new EssenceAlembicBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(1.8f, 4f)
+                    .sound(SoundType.GLASS)
+                    .lightLevel(state -> 4)
+                    .noOcclusion()));
 
     private static DeferredBlock<Block> registerOre(
             String name, MapColor color, float hardness, float resistance, SoundType sound) {

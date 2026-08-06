@@ -1,0 +1,6 @@
+﻿{
+  "variants": {
+    "lit=false": { "model": "effecoria:block/essence_burner" },
+    "lit=true": { "model": "effecoria:block/essence_burner_on" }
+  }
+}

@@ -1,0 +1,10 @@
+﻿{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "effecoria:phi_leaves" },
+    { "item": "effecoria:phi_leaves" },
+    { "item": "effecoria:phi_leaves" }
+  ],
+  "result": { "count": 3, "id": "effecoria:phi_paper" }
+}

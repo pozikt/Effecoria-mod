@@ -15,7 +15,7 @@ import net.minecraft.world.level.Level;
 
 /**
  * Initiation focus + tiered resonance gear.
- * Sneak-use with Essonite Dust in the offhand to raise focus tier.
+ * Sneak-use with Essonite Dust (cost scales) or Pure Essonite (1) in the offhand to raise focus tier.
  * Client GUI opens via reflection so this class stays dedicated-server safe.
  */
 public class ResonanceFocusItem extends Item {
@@ -53,6 +53,29 @@ public class ResonanceFocusItem extends Item {
         }
         ItemStack other = player.getItemInHand(
                 hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
+
+        if (other.is(ModItems.PURE_ESSONITE.get())) {
+            if (!level.isClientSide()) {
+                if (!player.getAbilities().instabuild) {
+                    other.shrink(1);
+                }
+                PhiHarnessItems.setFocusTier(focus, tier + 1);
+                level.playSound(
+                        null,
+                        player.blockPosition(),
+                        SoundEvents.AMETHYST_BLOCK_CHIME,
+                        SoundSource.PLAYERS,
+                        0.8f,
+                        0.9f + tier * 0.1f);
+                player.displayClientMessage(
+                        Component.translatable(
+                                "message.effecoria.focus_upgraded_pure",
+                                PhiHarnessItems.focusTier(focus)),
+                        true);
+            }
+            return InteractionResultHolder.sidedSuccess(focus, level.isClientSide());
+        }
+
         if (!other.is(ModItems.ESSENITE_DUST.get())) {
             return InteractionResultHolder.pass(focus);
         }

@@ -32,6 +32,20 @@ public final class PhiWaterBucketItem extends BucketItem {
         super(fluid, properties.craftRemainder(Items.BUCKET).stacksTo(1));
     }
 
+    /**
+     * Empty buckets are returned by drink/place, not by crafting — so gold filtration
+     * can convert this stack into a purified bucket without duplicating the vessel.
+     */
+    @Override
+    public ItemStack getCraftingRemainingItem(ItemStack itemStack) {
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    public boolean hasCraftingRemainingItem(ItemStack stack) {
+        return false;
+    }
+
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         BlockHitResult hit = getPlayerPOVHitResult(level, player, ClipContext.Fluid.NONE);

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "effecoria:phi_water_bucket" },
+    { "item": "minecraft:gold_ingot" }
+  ],
+  "result": {
+    "count": 1,
+    "id": "effecoria:purified_phi_water_bucket"
+  }
+}

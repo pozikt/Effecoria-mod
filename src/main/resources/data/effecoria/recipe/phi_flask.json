@@ -1,0 +1,7 @@
+﻿{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": { "G": { "item": "effecoria:phi_glass" } },
+  "pattern": ["G G", " G "],
+  "result": { "count": 3, "id": "effecoria:phi_flask" }
+}

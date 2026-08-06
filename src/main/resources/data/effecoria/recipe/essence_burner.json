@@ -1,0 +1,11 @@
+﻿{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": { "item": "effecoria:phi_stone" },
+    "B": { "item": "minecraft:brick" },
+    "P": { "item": "effecoria:phi_planks" }
+  },
+  "pattern": [" P ", "SBS", "SSS"],
+  "result": { "count": 1, "id": "effecoria:essence_burner" }
+}

@@ -13,6 +13,7 @@ import com.effecoria.core.progression.EntropyService;
 import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.progression.FirstHourTips;
 import com.effecoria.core.progression.ProgressionService;
+import com.effecoria.core.alchemy.AlchemyPotionService;
 import com.effecoria.core.progression.SpellUnlockService;
 import com.effecoria.core.progression.SealWordUnlockService;
 import com.effecoria.core.phi.CreativeGodMode;
@@ -209,6 +210,10 @@ public final class ModCommonEvents {
         }
 
         PhiSample phi = PhiFieldService.sample(player.level(), player.position(), player);
+        float alchemyPhi = AlchemyPotionService.phiMultiplier(player);
+        if (alchemyPhi != 1f && !phi.zeroFlux() && !phi.isInfinite()) {
+            phi = new PhiSample(phi.value() * alchemyPhi, false, phi.solarDay());
+        }
         PhiHarness.tickRecharge(player, phi);
         float regen;
         if (data.isLichAscensionActive(gameTime)) {
@@ -218,6 +223,7 @@ public final class ModCommonEvents {
             regen = FormulaEngine.regenPsi(PsiHelper.toContext(player, data), phi, 10f);
             regen *= EssencePlateauService.regenMultiplier(player.level(), player.position());
             regen *= PhiFogService.regenMultiplier(player);
+            regen *= AlchemyPotionService.regenMultiplier(player);
         }
         if (regen > 0f) {
             data.setCurrentPsi(data.currentPsi() + regen);

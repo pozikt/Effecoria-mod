@@ -1,0 +1,7 @@
+﻿{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": { "S": { "item": "effecoria:phi_stone" } },
+  "pattern": ["S S", " S "],
+  "result": { "count": 1, "id": "effecoria:mortar_and_pestle" }
+}

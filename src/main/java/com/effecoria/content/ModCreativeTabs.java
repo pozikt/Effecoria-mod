@@ -59,6 +59,18 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PHI_SAPLING.get());
                         output.accept(ModItems.PHI_NUT.get());
                         output.accept(ModItems.PHI_WATER_BUCKET.get());
+                        output.accept(ModItems.PURIFIED_PHI_WATER_BUCKET.get());
+                        output.accept(ModItems.PHI_FLASK.get());
+                        output.accept(ModItems.PHI_FLASK_WATER.get());
+                        output.accept(ModItems.PHI_PAPER.get());
+                        output.accept(ModItems.GOLD_FILTER.get());
+                        output.accept(ModItems.LEAD_FILTER.get());
+                        output.accept(ModItems.MORTAR_AND_PESTLE.get());
+                        output.accept(ModItems.ESSENCE_BURNER.get());
+                        output.accept(ModItems.ESSENCE_ALEMBIC.get());
+                        output.accept(ModItems.POTION_PHI_TONIC.get());
+                        output.accept(ModItems.POTION_PHI_RESONANCE.get());
+                        output.accept(ModItems.POTION_PHI_STIMULANT.get());
                         output.accept(ModItems.ESSONITE_SHARD.get());
                         output.accept(ModItems.PURE_ESSONITE.get());
                         output.accept(ModItems.PHI_CHITIN.get());

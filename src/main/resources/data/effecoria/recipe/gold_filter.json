@@ -1,0 +1,9 @@
+﻿{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "minecraft:gold_ingot" },
+    { "item": "effecoria:phi_paper" }
+  ],
+  "result": { "count": 1, "id": "effecoria:gold_filter" }
+}

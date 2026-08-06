@@ -1,6 +1,8 @@
 package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.block.EssenceAlembicBlockEntity;
+import com.effecoria.block.EssenceBurnerBlockEntity;
 import com.effecoria.block.PhiGeyserBlockEntity;
 import com.effecoria.block.SubspacePortalBlockEntity;
 
@@ -25,5 +27,17 @@ public final class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register(
                     "phi_geyser",
                     () -> BlockEntityType.Builder.of(PhiGeyserBlockEntity::new, ModBlocks.PHI_GEYSER.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EssenceBurnerBlockEntity>> ESSENCE_BURNER =
+            BLOCK_ENTITY_TYPES.register(
+                    "essence_burner",
+                    () -> BlockEntityType.Builder.of(EssenceBurnerBlockEntity::new, ModBlocks.ESSENCE_BURNER.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EssenceAlembicBlockEntity>> ESSENCE_ALEMBIC =
+            BLOCK_ENTITY_TYPES.register(
+                    "essence_alembic",
+                    () -> BlockEntityType.Builder.of(EssenceAlembicBlockEntity::new, ModBlocks.ESSENCE_ALEMBIC.get())
                             .build(null));
 }
