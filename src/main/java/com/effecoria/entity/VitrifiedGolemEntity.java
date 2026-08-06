@@ -57,6 +57,8 @@ public class VitrifiedGolemEntity extends Monster implements GeoEntity {
 
     private static final EntityDataAccessor<Byte> ANIM_STATE =
             SynchedEntityData.defineId(VitrifiedGolemEntity.class, EntityDataSerializers.BYTE);
+    private static final EntityDataAccessor<Boolean> WALKING =
+            SynchedEntityData.defineId(VitrifiedGolemEntity.class, EntityDataSerializers.BOOLEAN);
 
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.vitrified_golem.idle");
     private static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.vitrified_golem.walk");
@@ -95,6 +97,7 @@ public class VitrifiedGolemEntity extends Monster implements GeoEntity {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(ANIM_STATE, ANIM_IDLE);
+        builder.define(WALKING, false);
     }
 
     @Override
@@ -125,6 +128,14 @@ public class VitrifiedGolemEntity extends Monster implements GeoEntity {
         if (level().isClientSide) {
             return;
         }
+        // Position delta this tick (xo/zo set at tick start) — reliable unlike residual velocity.
+        double dx = getX() - xo;
+        double dz = getZ() - zo;
+        boolean walking = onGround() && (dx * dx + dz * dz) > 1.0E-5;
+        if (this.entityData.get(WALKING) != walking) {
+            this.entityData.set(WALKING, walking);
+        }
+
         if (rushCooldown > 0) {
             rushCooldown--;
         }
@@ -147,6 +158,10 @@ public class VitrifiedGolemEntity extends Monster implements GeoEntity {
         } else if (target == null) {
             detectedTarget = false;
         }
+    }
+
+    public boolean isWalkingAnim() {
+        return this.entityData.get(WALKING);
     }
 
     @Override
@@ -262,7 +277,9 @@ public class VitrifiedGolemEntity extends Monster implements GeoEntity {
                     yield PlayState.CONTINUE;
                 }
                 default -> {
-                    if (state.isMoving()) {
+                    // Prefer synced walk flag; limb swing as client fallback.
+                    // Do not use only state.isMoving() — client deltaMovement is often ~0 for pathfinding mobs.
+                    if (isWalkingAnim() || state.getLimbSwingAmount() > 0.02f) {
                         state.setAnimation(WALK);
                     } else {
                         state.setAnimation(IDLE);

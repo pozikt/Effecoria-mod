@@ -3,8 +3,12 @@ package com.effecoria.client.render;
 import com.effecoria.EffecoriaMod;
 import com.effecoria.entity.VitrifiedGolemEntity;
 
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+
+import org.jetbrains.annotations.Nullable;
 
 import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
@@ -13,6 +17,22 @@ public class VitrifiedGolemRenderer extends GeoEntityRenderer<VitrifiedGolemEnti
     public VitrifiedGolemRenderer(EntityRendererProvider.Context context) {
         super(context, new Model());
         this.shadowRadius = 0.65f;
+    }
+
+    @Override
+    public RenderType getRenderType(
+            VitrifiedGolemEntity animatable,
+            ResourceLocation texture,
+            @Nullable MultiBufferSource bufferSource,
+            float partialTick) {
+        // Honor texture alpha (blade silhouettes, limb cutouts, etc.)
+        return RenderType.entityTranslucent(texture);
+    }
+
+    /** Client deltaMovement is often ~0 for pathfinding mobs; rely on limb swing instead. */
+    @Override
+    public float getMotionAnimThreshold(VitrifiedGolemEntity animatable) {
+        return 0.001f;
     }
 
     private static final class Model extends GeoModel<VitrifiedGolemEntity> {
