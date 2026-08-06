@@ -23,7 +23,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * Village mortar — instant grind of essonite materials into dust (Φ-piezo sparks).
  */
 public final class MortarAndPestleBlock extends Block {
-    private static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 8.0, 14.0);
+    private static final VoxelShape SHAPE = Block.box(5.0, 0.0, 5.0, 11.0, 8.0, 11.0);
 
     public MortarAndPestleBlock(Properties properties) {
         super(properties);

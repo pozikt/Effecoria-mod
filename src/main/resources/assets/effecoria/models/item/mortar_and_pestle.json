@@ -1,1 +1,1 @@
-﻿{ "parent": "effecoria:block/mortar_and_pestle" }
+{ "parent": "minecraft:item/generated", "textures": { "layer0": "effecoria:item/mortar_and_pestle" } }
