@@ -1,0 +1,13 @@
+﻿{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "C": { "item": "effecoria:phi_chitin" }
+  },
+  "pattern": [
+    "C C",
+    "CCC",
+    "CCC"
+  ],
+  "result": { "count": 1, "id": "effecoria:phi_chitin_chestplate" }
+}

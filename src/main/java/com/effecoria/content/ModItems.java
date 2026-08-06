@@ -2,9 +2,14 @@ package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
 
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.PickaxeItem;
+import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.item.SwordItem;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -76,8 +81,14 @@ public final class ModItems {
 
     public static final DeferredItem<BlockItem> PHI_BLADES =
             ITEMS.registerSimpleBlockItem("phi_blades", ModBlocks.PHI_BLADES);
-    public static final DeferredItem<BlockItem> PHI_LOG =
-            ITEMS.registerSimpleBlockItem("phi_log", ModBlocks.PHI_LOG);
+    public static final DeferredItem<BlockItem> PHI_LOG = ITEMS.register(
+            "phi_log",
+            () -> new FuelBlockItem(ModBlocks.PHI_LOG.get(), new Item.Properties(), 300));
+    public static final DeferredItem<BlockItem> PHI_PLANKS = ITEMS.register(
+            "phi_planks",
+            () -> new FuelBlockItem(ModBlocks.PHI_PLANKS.get(), new Item.Properties(), 300));
+    public static final DeferredItem<BlockItem> PHI_GLASS =
+            ITEMS.registerSimpleBlockItem("phi_glass", ModBlocks.PHI_GLASS);
     public static final DeferredItem<BlockItem> PHI_LEAVES =
             ITEMS.registerSimpleBlockItem("phi_leaves", ModBlocks.PHI_LEAVES);
     public static final DeferredItem<BlockItem> PHI_SAPLING =
@@ -99,7 +110,8 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("phi_veil", ModBlocks.PHI_VEIL);
 
     /** Refined Φ-conductive dust — smelted from essonite ore. */
-    public static final DeferredItem<Item> ESSENITE_DUST = ITEMS.registerSimpleItem("essonite_dust");
+    public static final DeferredItem<Item> ESSENITE_DUST = ITEMS.register(
+            "essonite_dust", () -> new EssoniteDustItem(new Item.Properties()));
 
     /** Initiation focus — school select + tiered resonance bonuses. */
     public static final DeferredItem<Item> RESONANCE_FOCUS = ITEMS.register(
@@ -132,7 +144,66 @@ public final class ModItems {
             () -> new DeferredSpawnEggItem(ModEntities.EIDOS, 0xf0d060, 0xfff6c8, new Item.Properties()));
 
     public static final DeferredItem<Item> VITRIFIED_GLASS_SHARD = ITEMS.registerSimpleItem("vitrified_glass_shard");
-    public static final DeferredItem<Item> VITRIFIED_GOLEM_CORE = ITEMS.registerSimpleItem("vitrified_golem_core");
+    public static final DeferredItem<Item> VITRIFIED_GOLEM_CORE = ITEMS.register(
+            "vitrified_golem_core",
+            () -> new VitrifiedGolemCoreItem(new Item.Properties().stacksTo(16)));
+
+    public static final DeferredItem<ArmorItem> PHI_CHITIN_HELMET = ITEMS.register(
+            "phi_chitin_helmet",
+            () -> new ArmorItem(
+                    ModMaterials.PHI_CHITIN,
+                    ArmorItem.Type.HELMET,
+                    new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(8))));
+
+    public static final DeferredItem<ArmorItem> PHI_CHITIN_CHESTPLATE = ITEMS.register(
+            "phi_chitin_chestplate",
+            () -> new ArmorItem(
+                    ModMaterials.PHI_CHITIN,
+                    ArmorItem.Type.CHESTPLATE,
+                    new Item.Properties()
+                            .durability(ArmorItem.Type.CHESTPLATE.getDurability(8))));
+
+    public static final DeferredItem<ArmorItem> PHI_CHITIN_LEGGINGS = ITEMS.register(
+            "phi_chitin_leggings",
+            () -> new ArmorItem(
+                    ModMaterials.PHI_CHITIN,
+                    ArmorItem.Type.LEGGINGS,
+                    new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(8))));
+
+    public static final DeferredItem<ArmorItem> PHI_CHITIN_BOOTS = ITEMS.register(
+            "phi_chitin_boots",
+            () -> new ArmorItem(
+                    ModMaterials.PHI_CHITIN,
+                    ArmorItem.Type.BOOTS,
+                    new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(8))));
+
+    public static final DeferredItem<SwordItem> VITRIFIED_GLASS_SWORD = ITEMS.register(
+            "vitrified_glass_sword",
+            () -> new SwordItem(
+                    ModMaterials.VITRIFIED_GLASS,
+                    new Item.Properties()
+                            .attributes(SwordItem.createAttributes(ModMaterials.VITRIFIED_GLASS, 3, -2.4f))));
+
+    public static final DeferredItem<PickaxeItem> VITRIFIED_GLASS_PICKAXE = ITEMS.register(
+            "vitrified_glass_pickaxe",
+            () -> new PickaxeItem(
+                    ModMaterials.VITRIFIED_GLASS,
+                    new Item.Properties()
+                            .attributes(PickaxeItem.createAttributes(ModMaterials.VITRIFIED_GLASS, 1.0f, -2.8f))));
+
+    public static final DeferredItem<AxeItem> VITRIFIED_GLASS_AXE = ITEMS.register(
+            "vitrified_glass_axe",
+            () -> new AxeItem(
+                    ModMaterials.VITRIFIED_GLASS,
+                    new Item.Properties()
+                            .attributes(AxeItem.createAttributes(ModMaterials.VITRIFIED_GLASS, 6.0f, -3.1f))));
+
+    public static final DeferredItem<ShovelItem> VITRIFIED_GLASS_SHOVEL = ITEMS.register(
+            "vitrified_glass_shovel",
+            () -> new ShovelItem(
+                    ModMaterials.VITRIFIED_GLASS,
+                    new Item.Properties()
+                            .attributes(ShovelItem.createAttributes(ModMaterials.VITRIFIED_GLASS, 1.5f, -3.0f))));
 
     public static final DeferredItem<SpawnEggItem> VITRIFIED_GOLEM_SPAWN_EGG = ITEMS.register(
             "vitrified_golem_spawn_egg",

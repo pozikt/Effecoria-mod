@@ -53,6 +53,8 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.ESSONITE_CRUST.get());
                         output.accept(ModItems.PHI_BLADES.get());
                         output.accept(ModItems.PHI_LOG.get());
+                        output.accept(ModItems.PHI_PLANKS.get());
+                        output.accept(ModItems.PHI_GLASS.get());
                         output.accept(ModItems.PHI_LEAVES.get());
                         output.accept(ModItems.PHI_SAPLING.get());
                         output.accept(ModItems.PHI_NUT.get());
@@ -60,8 +62,16 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.ESSONITE_SHARD.get());
                         output.accept(ModItems.PURE_ESSONITE.get());
                         output.accept(ModItems.PHI_CHITIN.get());
+                        output.accept(ModItems.PHI_CHITIN_HELMET.get());
+                        output.accept(ModItems.PHI_CHITIN_CHESTPLATE.get());
+                        output.accept(ModItems.PHI_CHITIN_LEGGINGS.get());
+                        output.accept(ModItems.PHI_CHITIN_BOOTS.get());
                         output.accept(ModItems.ESSENITE_DUST.get());
                         output.accept(ModItems.VITRIFIED_GLASS_SHARD.get());
+                        output.accept(ModItems.VITRIFIED_GLASS_SWORD.get());
+                        output.accept(ModItems.VITRIFIED_GLASS_PICKAXE.get());
+                        output.accept(ModItems.VITRIFIED_GLASS_AXE.get());
+                        output.accept(ModItems.VITRIFIED_GLASS_SHOVEL.get());
                         output.accept(ModItems.VITRIFIED_GOLEM_CORE.get());
                         output.accept(ModItems.RESONANCE_FOCUS.get());
                         output.accept(ModItems.PHI_CELL.get());

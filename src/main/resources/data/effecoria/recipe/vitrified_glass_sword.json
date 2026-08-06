@@ -1,0 +1,14 @@
+﻿{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": { "item": "effecoria:vitrified_glass_shard" },
+    "#": { "item": "minecraft:stick" }
+  },
+  "pattern": [
+    "S",
+    "S",
+    "#"
+  ],
+  "result": { "count": 1, "id": "effecoria:vitrified_glass_sword" }
+}

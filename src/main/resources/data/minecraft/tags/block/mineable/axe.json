@@ -2,6 +2,7 @@
     "replace":  false,
     "values":  [
                    "effecoria:phi_log",
+                   "effecoria:phi_planks",
                    "effecoria:phi_leaves",
                    "effecoria:vitrified_log",
                    "effecoria:vitrified_branches"

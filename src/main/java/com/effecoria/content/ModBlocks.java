@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
@@ -360,6 +361,30 @@ public final class ModBlocks {
                     .sound(SoundType.WOOD)
                     .lightLevel(state -> 4)
                     .ignitedByLava()));
+
+    /** Φ-planks — conductive wood boards. */
+    public static final DeferredBlock<Block> PHI_PLANKS = BLOCKS.register(
+            "phi_planks",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .strength(2.5f, 3.0f)
+                    .sound(SoundType.WOOD)
+                    .lightLevel(state -> 2)
+                    .ignitedByLava()));
+
+    /** Φ-glass — sand fused with essonite dust; translucent to Φ. */
+    public static final DeferredBlock<Block> PHI_GLASS = BLOCKS.register(
+            "phi_glass",
+            () -> new TransparentBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(0.4f)
+                    .sound(SoundType.GLASS)
+                    .noOcclusion()
+                    .isValidSpawn((state, level, pos, type) -> false)
+                    .isRedstoneConductor((state, level, pos) -> false)
+                    .isSuffocating((state, level, pos) -> false)
+                    .isViewBlocking((state, level, pos) -> false)
+                    .lightLevel(state -> 3)));
 
     public static final DeferredBlock<PhiLeavesBlock> PHI_LEAVES = BLOCKS.register(
             "phi_leaves",

@@ -101,6 +101,7 @@ Surface world as Φ ecology.
 | Flora | Φ-sensitive plants, consumables (mandragora analogs) |
 | Fauna | Creatures tied to schools / Φ bands |
 | Surface anomalies | Mild Φ storms, ZNΦ patches (content, not just anti-cast) |
+| **Material sinks (early)** | Dust → emergency Ψ + Φ-fertilizer; Φ-glass / Φ-planks + fuel; full chitin armor; vitrified glass tools (sword/pick/axe/shovel); golem core → full Phi Cell |
 | **Magic: Elemental expansion** | New spells / behaviors tied to weather, biomes, and surface Φ — school grows *because* the world can host it |
 
 Races / Orkanum baselines fit naturally here (biologyQ hooks already exist).

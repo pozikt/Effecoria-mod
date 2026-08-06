@@ -1,0 +1,6 @@
+﻿{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [ { "item": "effecoria:phi_log" } ],
+  "result": { "count": 4, "id": "effecoria:phi_planks" }
+}
