@@ -17,7 +17,7 @@ public final class ModBiomeTags {
     public static final TagKey<Biome> DEAD_WASTELAND = TagKey.create(
             Registries.BIOME, EffecoriaMod.id("is_dead_wasteland"));
 
-    /** High-Φ Glass Plain (Φ-Пустыня / Стеклянная Равнина). */
-    public static final TagKey<Biome> PHI_GLASS_PLAIN = TagKey.create(
-            Registries.BIOME, EffecoriaMod.id("is_phi_glass_plain"));
+    /** Vitrified Wastes — Φ-flash black-glass desert. */
+    public static final TagKey<Biome> VITRIFIED_WASTES = TagKey.create(
+            Registries.BIOME, EffecoriaMod.id("is_vitrified_wastes"));
 }

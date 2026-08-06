@@ -6,8 +6,8 @@ import com.effecoria.entity.DeathShadowEntity;
 import com.effecoria.entity.EidosEntity;
 import com.effecoria.entity.MirageHorrorEntity;
 import com.effecoria.entity.PhiLarvaEntity;
-import com.effecoria.entity.PhiScorpionEntity;
 import com.effecoria.entity.RootCageEntity;
+import com.effecoria.entity.VitrifiedGolemEntity;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
@@ -74,15 +74,6 @@ public final class ModEntities {
                             .clientTrackingRange(10)
                             .build(EffecoriaMod.id("crystal_crab").toString()));
 
-    public static final DeferredHolder<EntityType<?>, EntityType<PhiScorpionEntity>> PHI_SCORPION =
-            ENTITY_TYPES.register(
-                    "phi_scorpion",
-                    () -> EntityType.Builder.<PhiScorpionEntity>of(PhiScorpionEntity::new, MobCategory.MONSTER)
-                            .sized(1.0f, 0.7f)
-                            .clientTrackingRange(12)
-                            .fireImmune()
-                            .build(EffecoriaMod.id("phi_scorpion").toString()));
-
     public static final DeferredHolder<EntityType<?>, EntityType<EidosEntity>> EIDOS =
             ENTITY_TYPES.register(
                     "eidos",
@@ -92,13 +83,22 @@ public final class ModEntities {
                             .fireImmune()
                             .build(EffecoriaMod.id("eidos").toString()));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<VitrifiedGolemEntity>> VITRIFIED_GOLEM =
+            ENTITY_TYPES.register(
+                    "vitrified_golem",
+                    () -> EntityType.Builder.<VitrifiedGolemEntity>of(VitrifiedGolemEntity::new, MobCategory.MONSTER)
+                            .sized(0.9f, 2.5f)
+                            .clientTrackingRange(12)
+                            .fireImmune()
+                            .build(EffecoriaMod.id("vitrified_golem").toString()));
+
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(DEATH_SHADOW.get(), LivingEntity.createLivingAttributes().build());
         event.put(MIRAGE_HORROR.get(), MirageHorrorEntity.createAttributes().build());
         event.put(PHI_LARVA.get(), PhiLarvaEntity.createAttributes().build());
         event.put(CRYSTAL_CRAB.get(), CrystalCrabEntity.createAttributes().build());
-        event.put(PHI_SCORPION.get(), PhiScorpionEntity.createAttributes().build());
         event.put(EIDOS.get(), EidosEntity.createAttributes().build());
+        event.put(VITRIFIED_GOLEM.get(), VitrifiedGolemEntity.createAttributes().build());
     }
 
     public static void registerSpawnPlacements(RegisterSpawnPlacementsEvent event) {
@@ -115,16 +115,16 @@ public final class ModEntities {
                 Monster::checkMonsterSpawnRules,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE);
         event.register(
-                PHI_SCORPION.get(),
-                SpawnPlacementTypes.ON_GROUND,
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                Monster::checkMonsterSpawnRules,
-                RegisterSpawnPlacementsEvent.Operation.REPLACE);
-        event.register(
                 EIDOS.get(),
                 SpawnPlacementTypes.NO_RESTRICTIONS,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 (type, level, reason, pos, random) -> level.getRawBrightness(pos, 0) > 7,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(
+                VITRIFIED_GOLEM.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                Monster::checkMonsterSpawnRules,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 }

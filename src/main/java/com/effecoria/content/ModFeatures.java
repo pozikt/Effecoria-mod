@@ -1,19 +1,21 @@
 package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
-import com.effecoria.world.feature.BarghanMoundFeature;
 import com.effecoria.world.feature.DeadAshTreeFeature;
 import com.effecoria.world.feature.DriedRiverbedFeature;
 import com.effecoria.world.feature.EssoniteDripstoneFeature;
 import com.effecoria.world.feature.EssoniteDruzeFeature;
-import com.effecoria.world.feature.GlassPlainCrystalCaveFeature;
 import com.effecoria.world.feature.PhiCaveShellFeature;
 import com.effecoria.world.feature.PhiCoreFeature;
 import com.effecoria.world.feature.PhiGeyserFeature;
-import com.effecoria.world.feature.PhiQuartzBlobFeature;
 import com.effecoria.world.feature.PhiSkyIslandFeature;
 import com.effecoria.world.feature.PhiWaterLakeFeature;
 import com.effecoria.world.feature.StripWastelandWaterFeature;
+import com.effecoria.world.feature.VitrifiedCraterFeature;
+import com.effecoria.world.feature.VitrifiedFrozenVillageFeature;
+import com.effecoria.world.feature.VitrifiedGroveFeature;
+import com.effecoria.world.feature.VitrifiedMageTowerFeature;
+import com.effecoria.world.feature.VitrifiedTreeFeature;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -58,14 +60,21 @@ public final class ModFeatures {
             FEATURES.register(
                     "strip_wasteland_water", () -> new StripWastelandWaterFeature(NoneFeatureConfiguration.CODEC));
 
-    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> BARGHAN_MOUND =
-            FEATURES.register("barghan_mound", () -> new BarghanMoundFeature(NoneFeatureConfiguration.CODEC));
+    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> VITRIFIED_TREE =
+            FEATURES.register("vitrified_tree", () -> new VitrifiedTreeFeature(NoneFeatureConfiguration.CODEC));
 
-    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> GLASS_PLAIN_CRYSTAL_CAVE =
+    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> VITRIFIED_GROVE =
+            FEATURES.register("vitrified_grove", () -> new VitrifiedGroveFeature(NoneFeatureConfiguration.CODEC));
+
+    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> VITRIFIED_CRATER =
+            FEATURES.register("vitrified_crater", () -> new VitrifiedCraterFeature(NoneFeatureConfiguration.CODEC));
+
+    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> VITRIFIED_MAGE_TOWER =
             FEATURES.register(
-                    "glass_plain_crystal_cave",
-                    () -> new GlassPlainCrystalCaveFeature(NoneFeatureConfiguration.CODEC));
+                    "vitrified_mage_tower", () -> new VitrifiedMageTowerFeature(NoneFeatureConfiguration.CODEC));
 
-    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> PHI_QUARTZ_BLOB =
-            FEATURES.register("phi_quartz_blob", () -> new PhiQuartzBlobFeature(NoneFeatureConfiguration.CODEC));
+    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> VITRIFIED_FROZEN_VILLAGE =
+            FEATURES.register(
+                    "vitrified_frozen_village",
+                    () -> new VitrifiedFrozenVillageFeature(NoneFeatureConfiguration.CODEC));
 }

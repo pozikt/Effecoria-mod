@@ -16,7 +16,7 @@ public final class ModBiomes {
     public static final ResourceKey<Biome> DEAD_WASTELAND =
             ResourceKey.create(Registries.BIOME, EffecoriaMod.id("dead_wasteland"));
 
-    /** High-Φ Glass Plain — fused-sand dunes (Φ-Пустыня). */
-    public static final ResourceKey<Biome> PHI_GLASS_PLAIN =
-            ResourceKey.create(Registries.BIOME, EffecoriaMod.id("phi_glass_plain"));
+    /** Φ-flash vitrified desert — black glass wastes. */
+    public static final ResourceKey<Biome> VITRIFIED_WASTES =
+            ResourceKey.create(Registries.BIOME, EffecoriaMod.id("vitrified_wastes"));
 }

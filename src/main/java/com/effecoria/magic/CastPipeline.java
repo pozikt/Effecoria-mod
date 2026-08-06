@@ -113,8 +113,6 @@ public final class CastPipeline {
         PsiContext powerCtx = overcasting ? ctx.withCurrentPsi(Math.max(usablePsi, fullCost)) : ctx;
         float power = FormulaEngine.spellPower(powerCtx, phi, spell) * chargeScale;
         power *= com.effecoria.world.EssencePlateauService.spellPowerMultiplier(player.level(), player.position());
-        power *= com.effecoria.world.PhiGlassPlainService.spellPowerMultiplier(
-                player.level(), player.position(), spell);
         power = CreativeGodMode.clampSpellPower(player, power);
         float hardCap = BalanceConfig.SPELL_POWER_HARD_CAP.get().floatValue();
         if (hardCap > 0f) {
@@ -147,15 +145,6 @@ public final class CastPipeline {
 
             float entropyPower = delivery == CastDelivery.FULL ? power : actualCost;
             float newEntropy = FormulaEngine.accumulateEntropy(data.entropyB(), entropyPower, spell.sideEntropyRatio());
-            newEntropy += com.effecoria.world.PhiGlassPlainService.spatialStormEntropyBonus(
-                    player.level(), player.position(), spell.requiredSchool());
-            // Spatial storm glitch — brief random look jitter
-            if (spell.requiredSchool() == com.effecoria.core.magic.MagicSchool.SPATIAL
-                    && com.effecoria.world.PhiGlassStormService.isStorming(
-                            player.level(), player.blockPosition())
-                    && player.getRandom().nextFloat() < 0.25f) {
-                player.setYRot(player.getYRot() + (player.getRandom().nextFloat() - 0.5f) * 24f);
-            }
             data.setEntropyB(newEntropy);
             EntropyService.maybeWarnRising(player, data);
 

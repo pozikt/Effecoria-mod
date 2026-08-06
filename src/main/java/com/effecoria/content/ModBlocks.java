@@ -2,7 +2,6 @@ package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.block.EssoniteCrustBlock;
-import com.effecoria.block.EssoniteDustBlock;
 import com.effecoria.block.EssonitePointedBlock;
 import com.effecoria.block.PhiBladesBlock;
 import com.effecoria.block.PhiFieldBlock;
@@ -12,6 +11,10 @@ import com.effecoria.block.PhiLeavesBlock;
 import com.effecoria.block.PhiLogBlock;
 import com.effecoria.block.PhiSaplingBlock;
 import com.effecoria.block.SubspacePortalBlock;
+import com.effecoria.block.VitrifiedBranchesBlock;
+import com.effecoria.block.VitrifiedGeyserCrackBlock;
+import com.effecoria.block.VitrifiedLogBlock;
+import com.effecoria.block.VitrifiedSandBlock;
 import com.effecoria.world.ModTreeGrowers;
 
 import net.minecraft.world.level.block.AmethystClusterBlock;
@@ -87,50 +90,65 @@ public final class ModBlocks {
                     .strength(0.8f, 0.8f)
                     .sound(SoundType.STONE)));
 
-    /** Φ-Glass Plain — fused lightning-sand crust (glows at night). */
-    public static final DeferredBlock<Block> PHI_GLASS = BLOCKS.register(
-            "phi_glass",
+    /** Vitrified Wastes — fused Φ-flash dirt (black glass soil). */
+    public static final DeferredBlock<Block> VITRIFIED_DIRT = BLOCKS.register(
+            "vitrified_dirt",
             () -> new Block(BlockBehaviour.Properties.of()
-                    .mapColor(MapColor.GOLD)
-                    .strength(0.4f)
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .requiresCorrectToolForDrops()
+                    .strength(1.4f, 4.0f)
                     .sound(SoundType.GLASS)
-                    .noOcclusion()
-                    .isValidSpawn((s, l, p, t) -> false)
-                    .isRedstoneConductor((s, l, p) -> false)
-                    .isSuffocating((s, l, p) -> false)
-                    .isViewBlocking((s, l, p) -> false)
-                    .lightLevel(state -> 6)));
+                    .lightLevel(state -> 2)));
 
-    /** Softer dune sheet of Φ-glass grit. */
-    public static final DeferredBlock<Block> PHI_GLASS_DUNE = BLOCKS.register(
-            "phi_glass_dune",
+    /** Obsidian-like fused stone with gold Φ-veins. */
+    public static final DeferredBlock<Block> VITRIFIED_STONE = BLOCKS.register(
+            "vitrified_stone",
             () -> new Block(BlockBehaviour.Properties.of()
-                    .mapColor(MapColor.SAND)
-                    .strength(0.35f)
-                    .sound(SoundType.SAND)
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .requiresCorrectToolForDrops()
+                    .strength(50.0f, 1200.0f)
+                    .sound(SoundType.GLASS)
                     .lightLevel(state -> 4)));
 
-    /** Φ-barghan quicksand — essonite dust mass. */
-    public static final DeferredBlock<EssoniteDustBlock> ESSONITE_DUST_BLOCK = BLOCKS.register(
-            "essonite_dust_block",
-            () -> new EssoniteDustBlock(BlockBehaviour.Properties.of()
-                    .mapColor(MapColor.COLOR_PURPLE)
-                    .strength(0.25f)
+    /** Slow-falling black glass grit / Φ-barghan. */
+    public static final DeferredBlock<VitrifiedSandBlock> VITRIFIED_SAND = BLOCKS.register(
+            "vitrified_sand",
+            () -> new VitrifiedSandBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .strength(0.4f)
                     .sound(SoundType.SAND)
-                    .dynamicShape()
+                    .lightLevel(state -> 1)));
+
+    /** Petrified glassy trunk. */
+    public static final DeferredBlock<VitrifiedLogBlock> VITRIFIED_LOG = BLOCKS.register(
+            "vitrified_log",
+            () -> new VitrifiedLogBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .requiresCorrectToolForDrops()
+                    .strength(2.5f, 6.0f)
+                    .sound(SoundType.GLASS)
                     .lightLevel(state -> 3)));
 
-    /** Φ-quartz seam / pocket crystal ore. */
-    public static final DeferredBlock<Block> PHI_QUARTZ = BLOCKS.register(
-            "phi_quartz",
-            () -> new DropExperienceBlock(
-                    UniformInt.of(1, 3),
-                    BlockBehaviour.Properties.of()
-                            .mapColor(MapColor.COLOR_LIGHT_BLUE)
-                            .requiresCorrectToolForDrops()
-                            .strength(2.8f, 3.0f)
-                            .sound(SoundType.AMETHYST)
-                            .lightLevel(state -> 8)));
+    /** Sharp leafless branches. */
+    public static final DeferredBlock<VitrifiedBranchesBlock> VITRIFIED_BRANCHES = BLOCKS.register(
+            "vitrified_branches",
+            () -> new VitrifiedBranchesBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .strength(0.8f)
+                    .sound(SoundType.GLASS)
+                    .noOcclusion()
+                    .lightLevel(state -> 5)));
+
+    /** Small residual Φ-crack / mini-geyser. */
+    public static final DeferredBlock<VitrifiedGeyserCrackBlock> VITRIFIED_GEYSER_CRACK = BLOCKS.register(
+            "vitrified_geyser_crack",
+            () -> new VitrifiedGeyserCrackBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .requiresCorrectToolForDrops()
+                    .strength(3.0f, 6.0f)
+                    .sound(SoundType.GLASS)
+                    .lightLevel(state -> 10)
+                    .randomTicks()));
 
     /** Φ-saturated stone — glows and slowly converts adjacent stone. */
     public static final DeferredBlock<PhiFieldBlock> PHI_STONE = BLOCKS.register(

@@ -1,21 +1,22 @@
-{
-  "replace": false,
-  "values": [
-    "effecoria:essonite_ore",
-    "effecoria:deepslate_essonite_ore",
-    "effecoria:granite_essonite_ore",
-    "effecoria:andesite_essonite_ore",
-    "effecoria:diorite_essonite_ore",
-    "effecoria:tuff_essonite_ore",
-    "effecoria:basalt_essonite_ore",
-    "effecoria:essonite_block",
-    "effecoria:phi_geyser",
-    "effecoria:void_obsidian",
-    "effecoria:essonite_dripstone_block",
-    "effecoria:essonite_pointed",
-    "effecoria:phi_stone",
-    "effecoria:parched_sandstone",
-    "effecoria:phi_glass",
-    "effecoria:phi_quartz"
-  ]
+﻿{
+    "replace":  false,
+    "values":  [
+                   "effecoria:essonite_ore",
+                   "effecoria:deepslate_essonite_ore",
+                   "effecoria:granite_essonite_ore",
+                   "effecoria:andesite_essonite_ore",
+                   "effecoria:diorite_essonite_ore",
+                   "effecoria:tuff_essonite_ore",
+                   "effecoria:basalt_essonite_ore",
+                   "effecoria:essonite_block",
+                   "effecoria:phi_geyser",
+                   "effecoria:void_obsidian",
+                   "effecoria:essonite_dripstone_block",
+                   "effecoria:essonite_pointed",
+                   "effecoria:phi_stone",
+                   "effecoria:parched_sandstone",
+                   "effecoria:vitrified_dirt",
+                   "effecoria:vitrified_stone",
+                   "effecoria:vitrified_geyser_crack"
+               ]
 }

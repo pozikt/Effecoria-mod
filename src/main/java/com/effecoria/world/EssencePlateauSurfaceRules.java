@@ -55,24 +55,24 @@ public final class EssencePlateauSurfaceRules {
         SurfaceRules.RuleSource wastelandColumn = SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.abovePreliminarySurface(), wastelandStack));
 
-        // Φ-Glass Plain — fused glass crust / dunes over essonite dust barghans.
-        SurfaceRules.RuleSource phiGlass = state(ModBlocks.PHI_GLASS.get());
-        SurfaceRules.RuleSource dune = state(ModBlocks.PHI_GLASS_DUNE.get());
-        SurfaceRules.RuleSource dust = state(ModBlocks.ESSONITE_DUST_BLOCK.get());
+        // Vitrified Wastes — black glass sand / dirt crust over fused stone.
+        SurfaceRules.RuleSource vSand = state(ModBlocks.VITRIFIED_SAND.get());
+        SurfaceRules.RuleSource vDirt = state(ModBlocks.VITRIFIED_DIRT.get());
+        SurfaceRules.RuleSource vStone = state(ModBlocks.VITRIFIED_STONE.get());
 
-        SurfaceRules.RuleSource glassFloor = SurfaceRules.sequence(
+        SurfaceRules.RuleSource vitrifiedFloor = SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.noiseCondition(
-                        net.minecraft.world.level.levelgen.Noises.SURFACE, -0.15, 0.15), dune),
-                phiGlass);
+                        net.minecraft.world.level.levelgen.Noises.SURFACE, -0.2, 0.05), vSand),
+                vDirt);
 
-        SurfaceRules.RuleSource glassPlainStack = SurfaceRules.sequence(
-                SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, glassFloor),
-                SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, dust),
-                SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, 5, CaveSurface.FLOOR), dust),
-                SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, 18, CaveSurface.FLOOR), sandstone));
+        SurfaceRules.RuleSource vitrifiedStack = SurfaceRules.sequence(
+                SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, vitrifiedFloor),
+                SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, vDirt),
+                SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, 6, CaveSurface.FLOOR), vDirt),
+                SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, 24, CaveSurface.FLOOR), vStone));
 
-        SurfaceRules.RuleSource glassPlainColumn = SurfaceRules.sequence(
-                SurfaceRules.ifTrue(SurfaceRules.abovePreliminarySurface(), glassPlainStack));
+        SurfaceRules.RuleSource vitrifiedColumn = SurfaceRules.sequence(
+                SurfaceRules.ifTrue(SurfaceRules.abovePreliminarySurface(), vitrifiedStack));
 
         SurfaceRules.RuleSource vanillaGrassSurface = SurfaceRules.sequence(
                 SurfaceRules.ifTrue(isAtOrAboveWaterLevel, state(Blocks.GRASS_BLOCK)), state(Blocks.DIRT));
@@ -80,7 +80,7 @@ public final class EssencePlateauSurfaceRules {
         return SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.ESSENCE_PLATEAU), plateauColumn),
                 SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.DEAD_WASTELAND), wastelandColumn),
-                SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.PHI_GLASS_PLAIN), glassPlainColumn),
+                SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.VITRIFIED_WASTES), vitrifiedColumn),
                 SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, vanillaGrassSurface));
     }
 

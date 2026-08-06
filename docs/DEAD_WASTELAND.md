@@ -4,10 +4,12 @@
 
 ## Placement
 
-TerraBlender region (weight **8**, ~**25%** of the regional lottery) replaces vanilla
-**`minecraft:desert`** in that slice. Paired with Φ-Glass Plain (also weight 8). Exact
-desert climate points, not a hand-rolled niche. Remaining deserts stay vanilla.
-Needs a **new world**.
+TerraBlender region (weight **8**) replaces vanilla **`minecraft:desert`** in that
+region slice — exact desert climate points, not a hand-rolled niche. That keeps
+`/locate biome` on real sand flats (no under-bedrock phantoms) and leaves eroded
+badlands alone. Shares desert replacement with **Vitrified Wastes** (also weight **8**),
+so arid land splits between ash flats and flash-glass. Needs a **new world**.
+See `docs/VITRIFIED_WASTES.md`.
 
 `/locate biome effecoria:dead_wasteland` → then fly / `/tp` to **X Z** at surface
 (ignore a low Y if chat shows one). Or explore arid inland until the bleached crust appears.

@@ -1,7 +1,8 @@
-{
-  "replace": false,
-  "values": [
-    "effecoria:void_obsidian",
-    "effecoria:phi_geyser"
-  ]
+﻿{
+    "replace":  false,
+    "values":  [
+                   "effecoria:void_obsidian",
+                   "effecoria:phi_geyser",
+                   "effecoria:vitrified_stone"
+               ]
 }

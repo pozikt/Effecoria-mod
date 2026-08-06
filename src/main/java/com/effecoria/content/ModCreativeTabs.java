@@ -33,10 +33,12 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PARCHED_SAND.get());
                         output.accept(ModItems.ASH_SOIL.get());
                         output.accept(ModItems.PARCHED_SANDSTONE.get());
-                        output.accept(ModItems.PHI_GLASS.get());
-                        output.accept(ModItems.PHI_GLASS_DUNE.get());
-                        output.accept(ModItems.ESSONITE_DUST_BLOCK.get());
-                        output.accept(ModItems.PHI_QUARTZ.get());
+                        output.accept(ModItems.VITRIFIED_DIRT.get());
+                        output.accept(ModItems.VITRIFIED_STONE.get());
+                        output.accept(ModItems.VITRIFIED_SAND.get());
+                        output.accept(ModItems.VITRIFIED_LOG.get());
+                        output.accept(ModItems.VITRIFIED_BRANCHES.get());
+                        output.accept(ModItems.VITRIFIED_GEYSER_CRACK.get());
                         output.accept(ModItems.PHI_STONE.get());
                         output.accept(ModItems.PHI_DIRT.get());
                         output.accept(ModItems.PHI_GRASS.get());
@@ -59,7 +61,8 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PURE_ESSONITE.get());
                         output.accept(ModItems.PHI_CHITIN.get());
                         output.accept(ModItems.ESSENITE_DUST.get());
-                        output.accept(ModItems.PHI_QUARTZ_SHARD.get());
+                        output.accept(ModItems.VITRIFIED_GLASS_SHARD.get());
+                        output.accept(ModItems.VITRIFIED_GOLEM_CORE.get());
                         output.accept(ModItems.RESONANCE_FOCUS.get());
                         output.accept(ModItems.PHI_CELL.get());
                         output.accept(ModItems.BREATHING_SCROLL.get());
@@ -67,7 +70,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PHI_LARVA_SPAWN_EGG.get());
                         output.accept(ModItems.CRYSTAL_CRAB_SPAWN_EGG.get());
                         output.accept(ModItems.EIDOS_SPAWN_EGG.get());
-                        output.accept(ModItems.PHI_SCORPION_SPAWN_EGG.get());
+                        output.accept(ModItems.VITRIFIED_GOLEM_SPAWN_EGG.get());
                     })
                     .build());
 }
