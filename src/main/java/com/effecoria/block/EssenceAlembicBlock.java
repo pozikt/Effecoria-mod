@@ -1,19 +1,17 @@
 package com.effecoria.block;
 
 import com.effecoria.content.ModBlockEntities;
-import com.effecoria.content.ModItems;
+import com.effecoria.core.alchemy.PhiHeat;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -32,7 +30,7 @@ import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 
-/** Blue cauldron / essence alembic — campfire-style brew without GUI. */
+/** Blue cauldron / essence alembic — GUI brew with neighbor Φ-heat. */
 public final class EssenceAlembicBlock extends BaseEntityBlock {
     public static final MapCodec<EssenceAlembicBlock> CODEC = simpleCodec(EssenceAlembicBlock::new);
     public static final int COOK_TIME = 200;
@@ -76,6 +74,13 @@ public final class EssenceAlembicBlock extends BaseEntityBlock {
     }
 
     @Override
+    protected InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        open(level, pos, player);
+        return InteractionResult.sidedSuccess(level.isClientSide());
+    }
+
+    @Override
     protected ItemInteractionResult useItemOn(
             ItemStack stack,
             BlockState state,
@@ -84,73 +89,16 @@ public final class EssenceAlembicBlock extends BaseEntityBlock {
             Player player,
             InteractionHand hand,
             BlockHitResult hit) {
-        if (!(level.getBlockEntity(pos) instanceof EssenceAlembicBlockEntity alembic)) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        }
-
-        // Take finished potion
-        if (stack.isEmpty() && !alembic.getResult().isEmpty()) {
-            if (!level.isClientSide()) {
-                ItemStack out = alembic.takeResult();
-                if (!player.getInventory().add(out)) {
-                    player.drop(out, false);
-                }
-                level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 0.7f, 1.2f);
-            }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide());
-        }
-
-        // Insert base flask
-        if (stack.is(ModItems.PHI_FLASK_WATER.get()) && alembic.getBase().isEmpty() && alembic.getResult().isEmpty()) {
-            if (!level.isClientSide()) {
-                alembic.setBase(new ItemStack(ModItems.PHI_FLASK_WATER.get()));
-                if (!player.getAbilities().instabuild) {
-                    stack.shrink(1);
-                }
-                level.playSound(null, pos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 0.6f, 1.0f);
-            }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide());
-        }
-
-        // Start brew with reagent
-        Item potion = potionForReagent(stack);
-        if (potion != null
-                && !alembic.getBase().isEmpty()
-                && alembic.getResult().isEmpty()
-                && !alembic.isCooking()) {
-            if (!EssenceBurnerBlock.hasNeighborHeat(level, pos)) {
-                if (!level.isClientSide()) {
-                    player.displayClientMessage(
-                            net.minecraft.network.chat.Component.translatable("message.effecoria.alembic_no_heat"),
-                            true);
-                }
-                return ItemInteractionResult.FAIL;
-            }
-            if (!level.isClientSide()) {
-                alembic.startCook(potion);
-                if (!player.getAbilities().instabuild) {
-                    stack.shrink(1);
-                }
-                level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.5f, 1.3f);
-            }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide());
-        }
-
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        open(level, pos, player);
+        return ItemInteractionResult.sidedSuccess(level.isClientSide());
     }
 
-    @Nullable
-    static Item potionForReagent(ItemStack stack) {
-        if (stack.is(ModItems.ESSENITE_DUST.get())) {
-            return ModItems.POTION_PHI_TONIC.get();
+    private static void open(Level level, BlockPos pos, Player player) {
+        if (!level.isClientSide()
+                && player instanceof ServerPlayer serverPlayer
+                && level.getBlockEntity(pos) instanceof EssenceAlembicBlockEntity alembic) {
+            serverPlayer.openMenu(alembic, buf -> buf.writeBlockPos(pos));
         }
-        if (stack.is(ModItems.ESSONITE_SHARD.get())) {
-            return ModItems.POTION_PHI_RESONANCE.get();
-        }
-        if (stack.is(ModItems.PURE_ESSONITE.get())) {
-            return ModItems.POTION_PHI_STIMULANT.get();
-        }
-        return null;
     }
 
     @Override
@@ -164,6 +112,10 @@ public final class EssenceAlembicBlock extends BaseEntityBlock {
         level.addParticle(CYAN, x + (random.nextDouble() - 0.5) * 0.3, y, z + (random.nextDouble() - 0.5) * 0.3, 0, 0.02, 0);
         if (random.nextBoolean()) {
             level.addParticle(GOLD, x, y + 0.1, z, 0, 0.01, 0);
+        }
+        if (!PhiHeat.hasNeighborHeat(level, pos) && random.nextFloat() < 0.1f) {
+            level.addParticle(
+                    net.minecraft.core.particles.ParticleTypes.SMOKE, x, y + 0.2, z, 0, 0.01, 0);
         }
     }
 

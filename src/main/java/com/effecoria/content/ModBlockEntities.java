@@ -3,8 +3,10 @@ package com.effecoria.content;
 import com.effecoria.EffecoriaMod;
 import com.effecoria.block.EssenceAlembicBlockEntity;
 import com.effecoria.block.EssenceBurnerBlockEntity;
+import com.effecoria.block.MortarBlockEntity;
 import com.effecoria.block.PhiGeyserBlockEntity;
 import com.effecoria.block.SubspacePortalBlockEntity;
+import com.effecoria.block.WhisperingSpireVentBlockEntity;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -39,5 +41,18 @@ public final class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register(
                     "essence_alembic",
                     () -> BlockEntityType.Builder.of(EssenceAlembicBlockEntity::new, ModBlocks.ESSENCE_ALEMBIC.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MortarBlockEntity>> MORTAR_AND_PESTLE =
+            BLOCK_ENTITY_TYPES.register(
+                    "mortar_and_pestle",
+                    () -> BlockEntityType.Builder.of(MortarBlockEntity::new, ModBlocks.MORTAR_AND_PESTLE.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WhisperingSpireVentBlockEntity>>
+            WHISPERING_SPIRE_VENT = BLOCK_ENTITY_TYPES.register(
+                    "whispering_spire_vent",
+                    () -> BlockEntityType.Builder.of(
+                                    WhisperingSpireVentBlockEntity::new, ModBlocks.WHISPERING_SPIRE_VENT.get())
                             .build(null));
 }

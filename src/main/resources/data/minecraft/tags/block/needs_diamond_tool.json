@@ -1,8 +1,10 @@
 ﻿{
-    "replace":  false,
-    "values":  [
-                   "effecoria:void_obsidian",
-                   "effecoria:phi_geyser",
-                   "effecoria:vitrified_stone"
-               ]
+    "replace": false,
+    "values": [
+        "effecoria:void_obsidian",
+        "effecoria:phi_geyser",
+        "effecoria:vitrified_stone",
+        "effecoria:star_essonite_block",
+        "effecoria:whispering_spire_vent"
+    ]
 }

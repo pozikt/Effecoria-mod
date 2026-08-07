@@ -1,28 +1,33 @@
 package com.effecoria.block;
 
-import com.effecoria.content.ModBlocks;
-import com.effecoria.content.ModItems;
+import com.effecoria.content.ModBlockEntities;
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-/**
- * Village mortar — instant grind of essonite materials into dust (Φ-piezo sparks).
- */
-public final class MortarAndPestleBlock extends Block {
+import javax.annotation.Nullable;
+
+/** Village mortar — GUI grind of essonite materials into dust. */
+public final class MortarAndPestleBlock extends BaseEntityBlock {
+    public static final MapCodec<MortarAndPestleBlock> CODEC = simpleCodec(MortarAndPestleBlock::new);
     private static final VoxelShape SHAPE = Block.box(5.0, 0.0, 5.0, 11.0, 8.0, 11.0);
 
     public MortarAndPestleBlock(Properties properties) {
@@ -30,8 +35,39 @@ public final class MortarAndPestleBlock extends Block {
     }
 
     @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
+
+    @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
+    }
+
+    @Override
+    protected RenderShape getRenderShape(BlockState state) {
+        return RenderShape.MODEL;
+    }
+
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new MortarBlockEntity(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
+            Level level, BlockState state, BlockEntityType<T> type) {
+        return level.isClientSide()
+                ? null
+                : createTickerHelper(type, ModBlockEntities.MORTAR_AND_PESTLE.get(), MortarBlockEntity::serverTick);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        open(level, pos, player);
+        return InteractionResult.sidedSuccess(level.isClientSide());
     }
 
     @Override
@@ -43,53 +79,23 @@ public final class MortarAndPestleBlock extends Block {
             Player player,
             InteractionHand hand,
             BlockHitResult hit) {
-        int dustCount = dustFrom(stack);
-        if (dustCount <= 0) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        }
-        if (!level.isClientSide()) {
-            if (!player.getAbilities().instabuild) {
-                stack.shrink(1);
-            }
-            ItemStack dust = new ItemStack(ModItems.ESSENITE_DUST.get(), dustCount);
-            if (!player.getInventory().add(dust)) {
-                player.drop(dust, false);
-            }
-            level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.55f, 1.35f);
-            if (level.random.nextFloat() < 0.45f) {
-                for (int i = 0; i < 4; i++) {
-                    level.addParticle(
-                            ParticleTypes.END_ROD,
-                            pos.getX() + 0.5 + (level.random.nextDouble() - 0.5) * 0.3,
-                            pos.getY() + 0.55,
-                            pos.getZ() + 0.5 + (level.random.nextDouble() - 0.5) * 0.3,
-                            0,
-                            0.02,
-                            0);
-                }
-            }
-        }
+        open(level, pos, player);
         return ItemInteractionResult.sidedSuccess(level.isClientSide());
     }
 
-    private static int dustFrom(ItemStack stack) {
-        if (stack.is(ModItems.ESSONITE_SHARD.get())) {
-            return 2;
+    private static void open(Level level, BlockPos pos, Player player) {
+        if (!level.isClientSide()
+                && player instanceof ServerPlayer serverPlayer
+                && level.getBlockEntity(pos) instanceof MortarBlockEntity mortar) {
+            serverPlayer.openMenu(mortar, buf -> buf.writeBlockPos(pos));
         }
-        if (stack.is(ModItems.PURE_ESSONITE.get())) {
-            return 4;
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof MortarBlockEntity mortar) {
+            net.minecraft.world.Containers.dropContents(level, pos, mortar);
         }
-        if (stack.is(ModBlocks.ESSENITE_ORE.get().asItem())
-                || stack.is(ModBlocks.DEEPSLATE_ESSENITE_ORE.get().asItem())
-                || stack.is(ModBlocks.GRANITE_ESSENITE_ORE.get().asItem())
-                || stack.is(ModBlocks.ANDESITE_ESSENITE_ORE.get().asItem())
-                || stack.is(ModBlocks.DIORITE_ESSENITE_ORE.get().asItem())
-                || stack.is(ModBlocks.TUFF_ESSENITE_ORE.get().asItem())
-                || stack.is(ModBlocks.BASALT_ESSENITE_ORE.get().asItem())
-                || stack.is(ModBlocks.ESSONITE_CRYSTAL.get().asItem())
-                || stack.is(ModBlocks.ESSONITE_BLOCK.get().asItem())) {
-            return 2;
-        }
-        return 0;
+        super.onRemove(state, level, pos, newState, moved);
     }
 }

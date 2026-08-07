@@ -18,6 +18,7 @@ import com.effecoria.block.VitrifiedBranchesBlock;
 import com.effecoria.block.VitrifiedGeyserCrackBlock;
 import com.effecoria.block.VitrifiedLogBlock;
 import com.effecoria.block.VitrifiedSandBlock;
+import com.effecoria.block.WhisperingSpireVentBlock;
 import com.effecoria.world.ModTreeGrowers;
 
 import net.minecraft.world.level.block.AmethystClusterBlock;
@@ -68,6 +69,27 @@ public final class ModBlocks {
                     .strength(5.0f, 6.0f)
                     .sound(SoundType.AMETHYST)
                     .lightLevel(state -> 12)));
+
+    /** Ultra-pure condensed essonite from Whispering Spire calderas (99.9% fiction). */
+    public static final DeferredBlock<Block> STAR_ESSONITE_BLOCK = BLOCKS.register(
+            "star_essonite_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.GOLD)
+                    .requiresCorrectToolForDrops()
+                    .strength(6.0f, 8.0f)
+                    .sound(SoundType.AMETHYST)
+                    .lightLevel(state -> 15)));
+
+    /** Caldera vent — Φ-plasma column of a Whispering Spire. */
+    public static final DeferredBlock<WhisperingSpireVentBlock> WHISPERING_SPIRE_VENT = BLOCKS.register(
+            "whispering_spire_vent",
+            () -> new WhisperingSpireVentBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(50f, 1200f)
+                    .sound(SoundType.AMETHYST)
+                    .lightLevel(state -> 15)
+                    .noOcclusion()
+                    .requiresCorrectToolForDrops()));
 
     /** Dead Wasteland surface — bleached, Φ-starved sand. */
     public static final DeferredBlock<Block> PARCHED_SAND = BLOCKS.register(

@@ -73,6 +73,10 @@ Lowest band under the plateau (`Y ≤ plateau_root_max_y`, default 0):
 - Gameplay: magic DPS + wither II / confusion / weakness every second without Φ protection (gold / focus / Φ-cell / essonite dust)
 - Extreme Φ bonus for casting; unprotected mages also take Orkanum exhaustion
 
+## Whispering Spire
+
+Rare natural Φ-reactor peak (see `docs/WHISPERING_SPIRE.md`): essonite/void-obsidian cone, star-essonite caldera, vent plasma column, scaled Green/Yellow/Red/Black hazard zones. No fauna/temples yet.
+
 ## Gameplay
 
 Column-aware: standing in caves under the peak still counts as plateau.
@@ -84,3 +88,4 @@ Column-aware: standing in caves under the peak still counts as plateau.
 - `/locate biome effecoria:essence_plateau` → fly to coordinates → you should be on a mountain.
 - Dig to bedrock under the peak: near-solid essonite core.
 - Creative: place `phi_geyser` or wait for natural surface spawns.
+- Creative: place `whispering_spire_vent` to test zones/column without hunting a rare feature.

@@ -24,6 +24,8 @@ import com.effecoria.content.ModItems;
 
 import com.effecoria.content.ModMaterials;
 
+import com.effecoria.content.ModMenus;
+
 import com.effecoria.content.ModMobEffects;
 
 import com.effecoria.content.ModParticleTypes;
@@ -86,6 +88,8 @@ public class EffecoriaMod {
         ModPlacementModifiers.PLACEMENT_MODIFIERS.register(modEventBus);
 
         ModBlockEntities.BLOCK_ENTITY_TYPES.register(modEventBus);
+
+        ModMenus.MENUS.register(modEventBus);
 
         ModMaterials.ARMOR_MATERIALS.register(modEventBus);
         ModMobEffects.MOB_EFFECTS.register(modEventBus);

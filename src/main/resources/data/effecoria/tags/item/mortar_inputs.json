@@ -1,0 +1,15 @@
+{
+  "values": [
+    "effecoria:essonite_shard",
+    "effecoria:pure_essonite",
+    "effecoria:essonite_ore",
+    "effecoria:deepslate_essonite_ore",
+    "effecoria:granite_essonite_ore",
+    "effecoria:andesite_essonite_ore",
+    "effecoria:diorite_essonite_ore",
+    "effecoria:tuff_essonite_ore",
+    "effecoria:basalt_essonite_ore",
+    "effecoria:essonite_crystal",
+    "effecoria:essonite_block"
+  ]
+}

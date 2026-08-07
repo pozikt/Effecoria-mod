@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#effecoria:is_essence_plateau",
+  "features": "effecoria:whispering_spire",
+  "step": "surface_structures"
+}

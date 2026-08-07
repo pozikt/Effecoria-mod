@@ -653,5 +653,43 @@ public final class BalanceConfig {
             .comment("Power/cost multiplier at a tap (0 hold); ramps to 1.0 at full charge")
             .defineInRange("cast_charge_min_power", 0.45, 0.15, 1.0);
 
+    // --- Whispering Spire (Minecraft-scaled zones) ---
+    public static final ModConfigSpec.IntValue SPIRE_ZONE_BLACK = BUILDER
+            .comment("Horizontal radius of Black (vent) zone")
+            .defineInRange("spire_zone_black", 8, 2, 32);
+    public static final ModConfigSpec.IntValue SPIRE_ZONE_RED = BUILDER
+            .comment("Horizontal radius of Red (caldera) zone")
+            .defineInRange("spire_zone_red", 24, 8, 64);
+    public static final ModConfigSpec.IntValue SPIRE_ZONE_YELLOW = BUILDER
+            .comment("Horizontal radius of Yellow (slopes) zone")
+            .defineInRange("spire_zone_yellow", 48, 16, 128);
+    public static final ModConfigSpec.IntValue SPIRE_ZONE_GREEN = BUILDER
+            .comment("Horizontal radius of Green (foothills) zone")
+            .defineInRange("spire_zone_green", 96, 32, 256);
+    public static final ModConfigSpec.DoubleValue SPIRE_COLUMN_HEIGHT = BUILDER
+            .comment("Φ-plasma column particle height above vent")
+            .defineInRange("spire_column_height", 48.0, 8.0, 128.0);
+    public static final ModConfigSpec.DoubleValue SPIRE_PHI_GREEN = BUILDER
+            .comment("Φ environment bonus in Green zone")
+            .defineInRange("spire_phi_green", 1.5, 0.0, 20.0);
+    public static final ModConfigSpec.DoubleValue SPIRE_PHI_YELLOW = BUILDER
+            .comment("Φ environment bonus in Yellow zone")
+            .defineInRange("spire_phi_yellow", 4.0, 0.0, 40.0);
+    public static final ModConfigSpec.DoubleValue SPIRE_PHI_RED = BUILDER
+            .comment("Φ environment bonus in Red zone")
+            .defineInRange("spire_phi_red", 12.0, 0.0, 80.0);
+    public static final ModConfigSpec.DoubleValue SPIRE_PHI_BLACK = BUILDER
+            .comment("Φ environment bonus in Black zone")
+            .defineInRange("spire_phi_black", 40.0, 0.0, 200.0);
+    public static final ModConfigSpec.DoubleValue SPIRE_DMG_YELLOW = BUILDER
+            .comment("Magic DPS tick damage in Yellow (unprotected)")
+            .defineInRange("spire_dmg_yellow", 1.0, 0.0, 20.0);
+    public static final ModConfigSpec.DoubleValue SPIRE_DMG_RED = BUILDER
+            .comment("Magic DPS tick damage in Red (unprotected)")
+            .defineInRange("spire_dmg_red", 4.0, 0.0, 40.0);
+    public static final ModConfigSpec.DoubleValue SPIRE_DMG_BLACK = BUILDER
+            .comment("Magic DPS tick damage in Black zone")
+            .defineInRange("spire_dmg_black", 12.0, 0.0, 80.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 }

@@ -2,15 +2,19 @@ package com.effecoria.block;
 
 import com.effecoria.content.ModBlockEntities;
 import com.effecoria.content.ModItems;
+import com.effecoria.core.alchemy.HeatLevel;
+import com.effecoria.core.alchemy.PhiHeat;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -34,13 +38,15 @@ import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 
-/** Flameless Φ-burner — fueled by essonite dust until Φ-oil exists. */
+/** Flameless Φ-burner — GUI fuel/catalyst/temp; radiates {@link HeatLevel} to neighbors. */
 public final class EssenceBurnerBlock extends BaseEntityBlock {
     public static final MapCodec<EssenceBurnerBlock> CODEC = simpleCodec(EssenceBurnerBlock::new);
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
     private static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 6.0, 14.0);
     private static final DustParticleOptions BLUE =
             new DustParticleOptions(new Vector3f(0.25f, 0.65f, 1.0f), 0.9f);
+    private static final DustParticleOptions GOLD =
+            new DustParticleOptions(new Vector3f(1.0f, 0.85f, 0.35f), 1.0f);
 
     public EssenceBurnerBlock(Properties properties) {
         super(properties);
@@ -82,6 +88,13 @@ public final class EssenceBurnerBlock extends BaseEntityBlock {
     }
 
     @Override
+    protected InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        open(level, pos, player);
+        return InteractionResult.sidedSuccess(level.isClientSide());
+    }
+
+    @Override
     protected ItemInteractionResult useItemOn(
             ItemStack stack,
             BlockState state,
@@ -93,18 +106,39 @@ public final class EssenceBurnerBlock extends BaseEntityBlock {
         if (!(level.getBlockEntity(pos) instanceof EssenceBurnerBlockEntity burner)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        if (!stack.is(ModItems.ESSENITE_DUST.get())) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        }
-        if (!level.isClientSide()) {
-            if (!player.getAbilities().instabuild) {
-                stack.shrink(1);
+        // Quick-feed dust into fuel slot without opening
+        if (stack.is(ModItems.ESSENITE_DUST.get()) && player.isShiftKeyDown()) {
+            if (!level.isClientSide()) {
+                ItemStack fuel = burner.getItem(EssenceBurnerBlockEntity.SLOT_FUEL);
+                if (fuel.isEmpty()) {
+                    burner.setItem(EssenceBurnerBlockEntity.SLOT_FUEL, stack.split(1));
+                } else if (ItemStack.isSameItemSameComponents(fuel, stack)
+                        && fuel.getCount() < fuel.getMaxStackSize()) {
+                    fuel.grow(1);
+                    stack.shrink(1);
+                } else {
+                    burner.addFuel(EssenceBurnerBlockEntity.DUST_FUEL_TICKS);
+                    if (!player.getAbilities().instabuild) {
+                        stack.shrink(1);
+                    }
+                }
+                if (burner.fuelTicks() > 0) {
+                    level.setBlock(pos, state.setValue(LIT, true), Block.UPDATE_ALL);
+                }
+                level.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.35f, 1.6f);
             }
-            burner.addFuel(EssenceBurnerBlockEntity.DUST_FUEL_TICKS);
-            level.setBlock(pos, state.setValue(LIT, true), Block.UPDATE_ALL);
-            level.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.35f, 1.6f);
+            return ItemInteractionResult.sidedSuccess(level.isClientSide());
         }
+        open(level, pos, player);
         return ItemInteractionResult.sidedSuccess(level.isClientSide());
+    }
+
+    private static void open(Level level, BlockPos pos, Player player) {
+        if (!level.isClientSide()
+                && player instanceof ServerPlayer serverPlayer
+                && level.getBlockEntity(pos) instanceof EssenceBurnerBlockEntity burner) {
+            serverPlayer.openMenu(burner, buf -> buf.writeBlockPos(pos));
+        }
     }
 
     @Override
@@ -115,36 +149,32 @@ public final class EssenceBurnerBlock extends BaseEntityBlock {
         double x = pos.getX() + 0.5;
         double y = pos.getY() + 0.35;
         double z = pos.getZ() + 0.5;
-        level.addParticle(BLUE, x + (random.nextDouble() - 0.5) * 0.25, y, z + (random.nextDouble() - 0.5) * 0.25, 0, 0.01, 0);
+        DustParticleOptions particle = BLUE;
+        if (level.getBlockEntity(pos) instanceof EssenceBurnerBlockEntity burner
+                && burner.heatLevel() == HeatLevel.HIGH) {
+            particle = GOLD;
+        }
+        level.addParticle(
+                particle, x + (random.nextDouble() - 0.5) * 0.25, y, z + (random.nextDouble() - 0.5) * 0.25, 0, 0.01, 0);
     }
 
-    /** Drain one tick of heat from a neighboring burner; returns true if heat was available. */
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof EssenceBurnerBlockEntity burner) {
+            net.minecraft.world.Containers.dropContents(level, pos, burner);
+        }
+        super.onRemove(state, level, pos, newState, moved);
+    }
+
+    /** @deprecated use {@link PhiHeat#consumeNeighborHeat} */
+    @Deprecated
     public static boolean consumeNeighborHeat(ServerLevel level, BlockPos alembicPos) {
-        for (BlockPos check : new BlockPos[] {
-            alembicPos.below(), alembicPos.north(), alembicPos.south(), alembicPos.east(), alembicPos.west()
-        }) {
-            if (level.getBlockEntity(check) instanceof EssenceBurnerBlockEntity burner && burner.consumeFuelTick()) {
-                BlockState st = level.getBlockState(check);
-                if (st.getBlock() instanceof EssenceBurnerBlock) {
-                    boolean lit = burner.fuelTicks() > 0;
-                    if (st.getValue(LIT) != lit) {
-                        level.setBlock(check, st.setValue(LIT, lit), Block.UPDATE_CLIENTS);
-                    }
-                }
-                return true;
-            }
-        }
-        return false;
+        return PhiHeat.consumeNeighborHeat(level, alembicPos);
     }
 
+    /** @deprecated use {@link PhiHeat#hasNeighborHeat} */
+    @Deprecated
     public static boolean hasNeighborHeat(Level level, BlockPos alembicPos) {
-        for (BlockPos check : new BlockPos[] {
-            alembicPos.below(), alembicPos.north(), alembicPos.south(), alembicPos.east(), alembicPos.west()
-        }) {
-            if (level.getBlockEntity(check) instanceof EssenceBurnerBlockEntity burner && burner.fuelTicks() > 0) {
-                return true;
-            }
-        }
-        return false;
+        return PhiHeat.hasNeighborHeat(level, alembicPos);
     }
 }

@@ -7,6 +7,7 @@ import com.effecoria.core.psi.PsiHelper;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.Holder;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -54,7 +55,8 @@ public final class AlchemyPotionItem extends Item {
             CriteriaTriggers.CONSUME_ITEM.trigger(player, stack);
             player.awardStat(Stats.ITEM_USED.get(this));
             if (PsiHelper.get(player).initiated()) {
-                player.addEffect(new MobEffectInstance(buffEffect.get(), durationTicks, 0, false, true, true));
+                int duration = scaledDuration(stack);
+                player.addEffect(new MobEffectInstance(buffEffect.get(), duration, 0, false, true, true));
                 level.playSound(
                         null,
                         player.blockPosition(),
@@ -95,5 +97,25 @@ public final class AlchemyPotionItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable(hintKey));
         tooltip.add(Component.translatable("item.effecoria.alchemy_potion.crash_hint"));
+        float factor = durationFactor(stack);
+        if (Math.abs(factor - 1f) > 0.01f) {
+            tooltip.add(Component.translatable("item.effecoria.alchemy_potion.heat_factor", Math.round(factor * 100f)));
+        }
+    }
+
+    private int scaledDuration(ItemStack stack) {
+        return Math.max(1, Math.round(durationTicks * durationFactor(stack)));
+    }
+
+    private static float durationFactor(ItemStack stack) {
+        var custom = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+        if (custom == null) {
+            return 1f;
+        }
+        CompoundTag tag = custom.copyTag();
+        if (tag.contains(com.effecoria.block.EssenceAlembicBlockEntity.NBT_DURATION_FACTOR)) {
+            return tag.getFloat(com.effecoria.block.EssenceAlembicBlockEntity.NBT_DURATION_FACTOR);
+        }
+        return 1f;
     }
 }

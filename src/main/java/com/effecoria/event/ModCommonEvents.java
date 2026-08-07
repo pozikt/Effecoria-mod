@@ -49,6 +49,7 @@ import com.effecoria.world.DeadWastelandService;
 import com.effecoria.world.EssencePlateauService;
 import com.effecoria.world.PhiFogService;
 import com.effecoria.world.VitrifiedWastesService;
+import com.effecoria.world.WhisperingSpireService;
 
 import net.minecraft.server.MinecraftServer;
 
@@ -160,6 +161,7 @@ public final class ModCommonEvents {
         EssencePlateauService.tickPlayer(player);
         DeadWastelandService.tickPlayer(player);
         VitrifiedWastesService.tickPlayer(player);
+        WhisperingSpireService.tickPlayer(player);
 
         MirageWorldService.playerTick(player);
 

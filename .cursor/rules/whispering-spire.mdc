@@ -1,0 +1,12 @@
+---
+description: Whispering Spire landmark, zones, and star essonite
+globs: src/main/java/com/effecoria/world/**/Whispering*.java,src/main/java/com/effecoria/block/Whispering*.java,src/main/java/com/effecoria/world/feature/Whispering*.java
+alwaysApply: false
+---
+
+# Whispering Spire
+
+- Place only via `WhisperingSpireFeature` + biome modifier on Essence Plateau; vent BE must call `WhisperingSpireService.register`.
+- Hazard/Φ bonus go through `WhisperingSpireService` (not duplicated in plateau tick).
+- Zones are Minecraft-scaled config radii — do not hardcode lore kilometers.
+- No fauna/temples in MVP; see `docs/WHISPERING_SPIRE.md`.

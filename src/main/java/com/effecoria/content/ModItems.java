@@ -34,6 +34,10 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("basalt_essonite_ore", ModBlocks.BASALT_ESSENITE_ORE);
     public static final DeferredItem<BlockItem> ESSONITE_BLOCK =
             ITEMS.registerSimpleBlockItem("essonite_block", ModBlocks.ESSONITE_BLOCK);
+    public static final DeferredItem<BlockItem> STAR_ESSONITE_BLOCK =
+            ITEMS.registerSimpleBlockItem("star_essonite_block", ModBlocks.STAR_ESSONITE_BLOCK);
+    public static final DeferredItem<BlockItem> WHISPERING_SPIRE_VENT =
+            ITEMS.registerSimpleBlockItem("whispering_spire_vent", ModBlocks.WHISPERING_SPIRE_VENT);
     public static final DeferredItem<BlockItem> PARCHED_SAND =
             ITEMS.registerSimpleBlockItem("parched_sand", ModBlocks.PARCHED_SAND);
     public static final DeferredItem<BlockItem> ASH_SOIL =
@@ -99,6 +103,7 @@ public final class ModItems {
 
     public static final DeferredItem<Item> ESSONITE_SHARD = ITEMS.registerSimpleItem("essonite_shard");
     public static final DeferredItem<Item> PURE_ESSONITE = ITEMS.registerSimpleItem("pure_essonite");
+    public static final DeferredItem<Item> STAR_ESSONITE = ITEMS.registerSimpleItem("star_essonite");
     public static final DeferredItem<Item> PHI_CHITIN = ITEMS.registerSimpleItem("phi_chitin");
 
     public static final DeferredItem<Item> PHI_WATER_BUCKET = ITEMS.register(

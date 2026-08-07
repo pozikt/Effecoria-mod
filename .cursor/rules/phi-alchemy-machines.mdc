@@ -1,0 +1,12 @@
+---
+description: Φ-alchemy machine tags, heat API, and GUI patterns
+globs: src/main/java/com/effecoria/alchemy/**/*.java,src/main/java/com/effecoria/block/*Mortar*.java,src/main/java/com/effecoria/block/Essence*.java,src/main/java/com/effecoria/core/alchemy/**/*.java,src/main/resources/data/effecoria/tags/item/*.json
+alwaysApply: false
+---
+
+# Φ-alchemy machines
+
+- Heat: use `PhiHeat` / `PhiHeatSource` / `HeatLevel` — do not hardcode burner neighbor loops in new consumers.
+- Recipes: prefer datapack tags (`pestles`, `mortar_inputs`, `burner_catalysts`, `alembic_*`); keep MVP potion matrix in `AlembicRecipes` until JEI/datapack recipes exist.
+- Menus: register in `ModMenus`, screens via `RegisterMenuScreensEvent`; open with `ServerPlayer.openMenu(be, buf -> buf.writeBlockPos(pos))`.
+- See `docs/ALCHEMY_MACHINES.md` for player-facing flow and deferred content.

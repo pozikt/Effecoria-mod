@@ -16,6 +16,7 @@ import com.effecoria.world.feature.VitrifiedFrozenVillageFeature;
 import com.effecoria.world.feature.VitrifiedGroveFeature;
 import com.effecoria.world.feature.VitrifiedMageTowerFeature;
 import com.effecoria.world.feature.VitrifiedTreeFeature;
+import com.effecoria.world.feature.WhisperingSpireFeature;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -77,4 +78,7 @@ public final class ModFeatures {
             FEATURES.register(
                     "vitrified_frozen_village",
                     () -> new VitrifiedFrozenVillageFeature(NoneFeatureConfiguration.CODEC));
+
+    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> WHISPERING_SPIRE =
+            FEATURES.register("whispering_spire", () -> new WhisperingSpireFeature(NoneFeatureConfiguration.CODEC));
 }

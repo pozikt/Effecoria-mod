@@ -13,9 +13,13 @@ import com.effecoria.client.render.PhiLarvaRenderer;
 import com.effecoria.client.render.RootCageRenderer;
 import com.effecoria.client.render.SubspacePortalRenderer;
 import com.effecoria.client.render.VitrifiedGolemRenderer;
+import com.effecoria.client.gui.alchemy.AlembicScreen;
+import com.effecoria.client.gui.alchemy.BurnerScreen;
+import com.effecoria.client.gui.alchemy.MortarScreen;
 import com.effecoria.content.ModBlocks;
 import com.effecoria.content.ModEntities;
 import com.effecoria.content.ModFluids;
+import com.effecoria.content.ModMenus;
 import com.effecoria.content.ModParticleTypes;
 
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -27,12 +31,20 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 @EventBusSubscriber(modid = EffecoriaMod.MOD_ID, value = Dist.CLIENT)
 public final class EffecoriaClient {
     private EffecoriaClient() {}
+
+    @SubscribeEvent
+    public static void registerMenuScreens(RegisterMenuScreensEvent event) {
+        event.register(ModMenus.MORTAR.get(), MortarScreen::new);
+        event.register(ModMenus.BURNER.get(), BurnerScreen::new);
+        event.register(ModMenus.ALEMBIC.get(), AlembicScreen::new);
+    }
 
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {

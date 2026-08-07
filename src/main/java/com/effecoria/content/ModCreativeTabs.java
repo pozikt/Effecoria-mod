@@ -30,6 +30,8 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.TUFF_ESSENITE_ORE.get());
                         output.accept(ModItems.BASALT_ESSENITE_ORE.get());
                         output.accept(ModItems.ESSONITE_BLOCK.get());
+                        output.accept(ModItems.STAR_ESSONITE_BLOCK.get());
+                        output.accept(ModItems.WHISPERING_SPIRE_VENT.get());
                         output.accept(ModItems.PARCHED_SAND.get());
                         output.accept(ModItems.ASH_SOIL.get());
                         output.accept(ModItems.PARCHED_SANDSTONE.get());
@@ -73,6 +75,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.POTION_PHI_STIMULANT.get());
                         output.accept(ModItems.ESSONITE_SHARD.get());
                         output.accept(ModItems.PURE_ESSONITE.get());
+                        output.accept(ModItems.STAR_ESSONITE.get());
                         output.accept(ModItems.PHI_CHITIN.get());
                         output.accept(ModItems.PHI_CHITIN_HELMET.get());
                         output.accept(ModItems.PHI_CHITIN_CHESTPLATE.get());
