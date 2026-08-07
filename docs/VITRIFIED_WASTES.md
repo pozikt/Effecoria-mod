@@ -52,7 +52,7 @@ Config keys under `BalanceConfig`: `vitrified_*`.
 
 | Mob | Status |
 |-----|--------|
-| Vitrified Golem (`effecoria:vitrified_golem`) | Hostile — melee, rush, Φ-flash. Placeholder geo/texture (64×64); swap artist assets under `geo/`, `animations/`, `textures/entity/`. |
+| Vitrified Golem (`effecoria:vitrified_golem`) | Hostile — melee, rush, Φ-flash. From-scratch compact biped (~2.15 tall), opaque 128 atlas, iron-style anims (`scripts/build_vitrified_golem_from_scratch.py`). |
 
 Spawn egg: creative tab. Natural spawn in biome (light rules via monster placement).
 

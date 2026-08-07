@@ -87,7 +87,7 @@ public final class ModEntities {
             ENTITY_TYPES.register(
                     "vitrified_golem",
                     () -> EntityType.Builder.<VitrifiedGolemEntity>of(VitrifiedGolemEntity::new, MobCategory.MONSTER)
-                            .sized(0.9f, 2.5f)
+                            .sized(0.9f, 2.15f)
                             .clientTrackingRange(12)
                             .fireImmune()
                             .build(EffecoriaMod.id("vitrified_golem").toString()));

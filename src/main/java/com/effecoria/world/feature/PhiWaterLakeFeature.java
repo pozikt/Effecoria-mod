@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -28,6 +29,8 @@ public final class PhiWaterLakeFeature extends Feature<NoneFeatureConfiguration>
     private static final int MASK_X = 16;
     private static final int MASK_Y = 8;
     private static final int MASK_Z = 16;
+    /** Lake volume must stay this far below the plateau surface (WG heightmap). */
+    private static final int MIN_DEPTH_BELOW_SURFACE = 12;
 
     public PhiWaterLakeFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
@@ -48,6 +51,18 @@ public final class PhiWaterLakeFeature extends Feature<NoneFeatureConfiguration>
         }
         origin = origin.above(random.nextInt(3) + 2);
         if (origin.getY() > 96 || origin.getY() < 16) {
+            return false;
+        }
+
+        int surfaceY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, origin.getX(), origin.getZ());
+        int lakeTopY = origin.getY() + MASK_Y - 1;
+        if (lakeTopY >= surfaceY - MIN_DEPTH_BELOW_SURFACE) {
+            return false;
+        }
+        if (level.canSeeSky(origin)) {
+            return false;
+        }
+        if (!hasUndergroundCeiling(level, origin, surfaceY)) {
             return false;
         }
 
@@ -359,6 +374,29 @@ public final class PhiWaterLakeFeature extends Feature<NoneFeatureConfiguration>
             }
         }
         return air >= 40;
+    }
+
+    /** Reject open sky columns / surface bowls — need stone or soil cap above the pocket. */
+    private static boolean hasUndergroundCeiling(WorldGenLevel level, BlockPos origin, int surfaceY) {
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        int samples = 0;
+        int solid = 0;
+        for (int dx = 4; dx < MASK_X - 4; dx += 4) {
+            for (int dz = 4; dz < MASK_Z - 4; dz += 4) {
+                int x = origin.getX() + dx;
+                int z = origin.getZ() + dz;
+                for (int y = origin.getY() + MASK_Y; y < Math.min(surfaceY, origin.getY() + MASK_Y + 10); y++) {
+                    m.set(x, y, z);
+                    samples++;
+                    BlockState state = level.getBlockState(m);
+                    if (!state.isAir() && !state.canBeReplaced() && !isDecoration(state)) {
+                        solid++;
+                        break;
+                    }
+                }
+            }
+        }
+        return samples > 0 && solid >= samples / 2;
     }
 
     private static boolean isDecoration(BlockState state) {

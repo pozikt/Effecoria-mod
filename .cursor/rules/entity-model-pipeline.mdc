@@ -1,0 +1,20 @@
+---
+description: Entity/mob art pipeline — lore → concept → vanilla UV template → game atlas; alpha cutout rules
+globs:
+  - art/**/*
+  - scripts/pack_*_texture.py
+  - src/main/resources/assets/effecoria/geo/**
+  - src/main/resources/assets/effecoria/textures/entity/**
+  - src/main/java/**/render/**
+  - src/main/java/**/entity/**
+---
+
+# Entity model pipeline
+
+When creating or fixing **mob models/textures**, read and follow:
+
+`.cursor/skills/effecoria-entity-models/SKILL.md`
+
+Critical for **translucent GeckoLib mobs**: solid limbs use **opaque alpha (255)**; holes are usually wrong UV or accidental transparency, not “glass”. Only designated parts use cutout alpha (see `SILHOUETTE_PARTS` in golem pack script).
+
+Lore first: `docs/lore/`, feature docs — if no description, ask the user before generating concept art.

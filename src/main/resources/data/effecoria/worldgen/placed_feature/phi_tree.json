@@ -6,9 +6,8 @@
       "count": {
         "type": "minecraft:weighted_list",
         "distribution": [
-          { "data": 1, "weight": 4 },
-          { "data": 2, "weight": 2 },
-          { "data": 0, "weight": 3 }
+          { "data": 1, "weight": 6 },
+          { "data": 0, "weight": 4 }
         ]
       }
     },
@@ -19,7 +18,35 @@
     },
     {
       "type": "minecraft:heightmap",
-      "heightmap": "MOTION_BLOCKING"
+      "heightmap": "MOTION_BLOCKING_NO_LEAVES"
+    },
+    {
+      "type": "minecraft:block_predicate_filter",
+      "predicate": {
+        "type": "minecraft:matching_blocks",
+        "offset": [0, -1, 0],
+        "blocks": ["effecoria:phi_grass", "effecoria:phi_dirt"]
+      }
+    },
+    {
+      "type": "minecraft:block_predicate_filter",
+      "predicate": {
+        "type": "minecraft:not",
+        "predicate": {
+          "type": "minecraft:any_of",
+          "predicates": [
+            {
+              "type": "minecraft:matching_blocks",
+              "offset": [0, -1, 0],
+              "blocks": ["effecoria:phi_log", "effecoria:phi_leaves"]
+            },
+            {
+              "type": "minecraft:matching_blocks",
+              "blocks": ["effecoria:phi_log", "effecoria:phi_leaves"]
+            }
+          ]
+        }
+      }
     },
     { "type": "minecraft:biome" }
   ]

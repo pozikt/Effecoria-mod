@@ -23,12 +23,18 @@ public final class UnderPlateauSurfacePlacement extends PlacementModifier {
     public static final UnderPlateauSurfacePlacement INSTANCE = new UnderPlateauSurfacePlacement();
     public static final MapCodec<UnderPlateauSurfacePlacement> CODEC = MapCodec.unit(() -> INSTANCE);
 
+    /** Minimum depth below WG surface for cave-only features (Φ-water lakes, etc.). */
+    private static final int MIN_DEPTH_BELOW_SURFACE = 12;
+
     private UnderPlateauSurfacePlacement() {}
 
     @Override
     public Stream<BlockPos> getPositions(PlacementContext context, RandomSource random, BlockPos pos) {
         WorldGenLevel level = context.getLevel();
         int surfaceY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, pos.getX(), pos.getZ());
+        if (pos.getY() > surfaceY - MIN_DEPTH_BELOW_SURFACE) {
+            return Stream.empty();
+        }
         if (pos.getY() > surfaceY + 24) {
             return Stream.empty();
         }

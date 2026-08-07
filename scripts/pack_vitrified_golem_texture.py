@@ -302,6 +302,68 @@ def clean_face_alpha(im: Image.Image, *, silhouette: bool) -> Image.Image:
     return im
 
 
+def solidify_plate_face(im: Image.Image, base: tuple[int, int, int]) -> Image.Image:
+    """Fill interior holes on limb/torso plates — opaque glass, not see-through texels."""
+    im = im.convert("RGBA")
+    px = im.load()
+    w, h = im.size
+    for _ in range(w * h + 4):
+        changed = False
+        for y in range(h):
+            for x in range(w):
+                if px[x, y][3] > 0:
+                    continue
+                rs = gs = bs = n = 0
+                for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < w and 0 <= ny < h and px[nx, ny][3] > 0:
+                        r, g, b, _a = px[nx, ny]
+                        rs += r
+                        gs += g
+                        bs += b
+                        n += 1
+                if n:
+                    px[x, y] = (rs // n, gs // n, bs // n, 255)
+                    changed = True
+        if not changed:
+            break
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if a == 0:
+                px[x, y] = (*base, 255)
+            elif a < 255:
+                px[x, y] = (r, g, b, 255)
+    return im
+
+
+def repair_atlas_plates(atlas: Image.Image) -> Image.Image:
+    """Solidify every non-silhouette part face in a packed 128×128 atlas."""
+    atlas = atlas.convert("RGBA").copy()
+    for part, meta in PARTS.items():
+        if part in SILHOUETTE_PARTS:
+            continue
+        u, v = meta["uv"]
+        w, h, d = meta["size"]
+        base = meta["base"]
+        for _face, (fu, fv, fw, fh) in box_faces(u, v, w, h, d).items():
+            crop = atlas.crop((fu, fv, fu + fw, fv + fh))
+            fixed = solidify_plate_face(crop, base)
+            atlas.paste(fixed, (fu, fv), fixed)
+    return atlas
+
+
+def extract_faces_from_atlas(atlas: Image.Image) -> None:
+    """Write faces/* from a packed atlas (for re-edit after repair)."""
+    FACES.mkdir(parents=True, exist_ok=True)
+    for part, meta in PARTS.items():
+        u, v = meta["uv"]
+        w, h, d = meta["size"]
+        for face, (fu, fv, fw, fh) in box_faces(u, v, w, h, d).items():
+            crop = atlas.crop((fu, fv, fu + fw, fv + fh))
+            crop.save(face_path(part, face, edit=False))
+
+
 def unpack_nets_to_faces(*, backup: bool = True) -> int:
     """Extract native faces from artist-edited nets/ into faces/."""
     import shutil
@@ -442,6 +504,8 @@ def pack_atlas() -> Image.Image:
                 continue
             if im.size != (fw, fh):
                 im = im.resize((fw, fh), Image.NEAREST)
+            if part not in SILHOUETTE_PARTS:
+                im = solidify_plate_face(im, meta["base"])
             atlas.paste(im, (fu, fv), im)
     if missing:
         print("MISSING faces:", ", ".join(missing))
@@ -610,6 +674,11 @@ def main() -> None:
         help="Unpack artist nets/ into faces/, clean alpha, then pack atlas",
     )
     ap.add_argument(
+        "--repair-atlas",
+        action="store_true",
+        help="Fill holes on solid body faces in the current game atlas, re-export faces/",
+    )
+    ap.add_argument(
         "--only",
         type=str,
         default="",
@@ -620,6 +689,16 @@ def main() -> None:
 
     FACES.mkdir(parents=True, exist_ok=True)
     update_geo_uv()
+    if args.repair_atlas:
+        if not GAME_TEX.exists():
+            raise SystemExit(f"Missing game atlas: {GAME_TEX}")
+        atlas = repair_atlas_plates(Image.open(GAME_TEX))
+        atlas.save(GAME_TEX)
+        atlas.save(ART / "vitrified_golem.png")
+        extract_faces_from_atlas(atlas)
+        write_labeled_guide(atlas)
+        print("Repaired solid faces ->", GAME_TEX)
+        return
     if args.from_nets:
         unpack_nets_to_faces(backup=True)
     elif args.init:

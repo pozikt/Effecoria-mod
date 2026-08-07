@@ -16,7 +16,7 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 public class VitrifiedGolemRenderer extends GeoEntityRenderer<VitrifiedGolemEntity> {
     public VitrifiedGolemRenderer(EntityRendererProvider.Context context) {
         super(context, new Model());
-        this.shadowRadius = 0.65f;
+        this.shadowRadius = 0.55f;
     }
 
     @Override
@@ -25,8 +25,8 @@ public class VitrifiedGolemRenderer extends GeoEntityRenderer<VitrifiedGolemEnti
             ResourceLocation texture,
             @Nullable MultiBufferSource bufferSource,
             float partialTick) {
-        // Honor texture alpha (blade silhouettes, limb cutouts, etc.)
-        return RenderType.entityTranslucent(texture);
+        // Iron-golem-style cutout atlas (128×128), fully opaque body texels
+        return RenderType.entityCutoutNoCull(texture);
     }
 
     /** Client deltaMovement is often ~0 for pathfinding mobs; rely on limb swing instead. */
