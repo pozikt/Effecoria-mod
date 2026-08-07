@@ -60,7 +60,7 @@ src/test/java/                              Unit tests (optional, WIP)
 | [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Guide for collaborators |
 | [docs/BALANCE.md](docs/BALANCE.md) | Starting balance numbers |
 | [docs/ART_BRIEF.md](docs/ART_BRIEF.md) | Texture/particle brief |
-| [docs/monetization/](docs/monetization/README.md) | Free core + Boosty/Patreon + server + DLC playbook |
+| [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) | Current known issues |
 
 ## Tests
 
