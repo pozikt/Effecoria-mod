@@ -96,6 +96,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.CRYSTAL_CRAB_SPAWN_EGG.get());
                         output.accept(ModItems.EIDOS_SPAWN_EGG.get());
                         output.accept(ModItems.VITRIFIED_GOLEM_SPAWN_EGG.get());
+                        output.accept(ModItems.ESSENCE_WYVERN_SPAWN_EGG.get());
                     })
                     .build());
 }

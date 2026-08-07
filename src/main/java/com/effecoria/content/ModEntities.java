@@ -7,6 +7,7 @@ import com.effecoria.entity.EidosEntity;
 import com.effecoria.entity.MirageHorrorEntity;
 import com.effecoria.entity.PhiLarvaEntity;
 import com.effecoria.entity.RootCageEntity;
+import com.effecoria.entity.EssenceWyvernEntity;
 import com.effecoria.entity.VitrifiedGolemEntity;
 
 import net.minecraft.core.registries.Registries;
@@ -92,6 +93,16 @@ public final class ModEntities {
                             .fireImmune()
                             .build(EffecoriaMod.id("vitrified_golem").toString()));
 
+    /** Classical wyvern: no forelegs. Adult MVP hitbox (visual wingspan ~8–10 blocks). */
+    public static final DeferredHolder<EntityType<?>, EntityType<EssenceWyvernEntity>> ESSENCE_WYVERN =
+            ENTITY_TYPES.register(
+                    "essence_wyvern",
+                    () -> EntityType.Builder.<EssenceWyvernEntity>of(EssenceWyvernEntity::new, MobCategory.MONSTER)
+                            .sized(3.2f, 3.4f)
+                            .clientTrackingRange(64)
+                            .fireImmune()
+                            .build(EffecoriaMod.id("essence_wyvern").toString()));
+
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(DEATH_SHADOW.get(), LivingEntity.createLivingAttributes().build());
         event.put(MIRAGE_HORROR.get(), MirageHorrorEntity.createAttributes().build());
@@ -99,6 +110,7 @@ public final class ModEntities {
         event.put(CRYSTAL_CRAB.get(), CrystalCrabEntity.createAttributes().build());
         event.put(EIDOS.get(), EidosEntity.createAttributes().build());
         event.put(VITRIFIED_GOLEM.get(), VitrifiedGolemEntity.createAttributes().build());
+        event.put(ESSENCE_WYVERN.get(), EssenceWyvernEntity.createAttributes().build());
     }
 
     public static void registerSpawnPlacements(RegisterSpawnPlacementsEvent event) {
@@ -123,6 +135,12 @@ public final class ModEntities {
         event.register(
                 VITRIFIED_GOLEM.get(),
                 SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                Monster::checkMonsterSpawnRules,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(
+                ESSENCE_WYVERN.get(),
+                SpawnPlacementTypes.NO_RESTRICTIONS,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 Monster::checkMonsterSpawnRules,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE);

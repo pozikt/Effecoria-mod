@@ -255,4 +255,8 @@ public final class ModItems {
     public static final DeferredItem<SpawnEggItem> VITRIFIED_GOLEM_SPAWN_EGG = ITEMS.register(
             "vitrified_golem_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.VITRIFIED_GOLEM, 0x1a1a2e, 0x00d2ff, new Item.Properties()));
+
+    public static final DeferredItem<SpawnEggItem> ESSENCE_WYVERN_SPAWN_EGG = ITEMS.register(
+            "essence_wyvern_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.ESSENCE_WYVERN, 0x5a5a58, 0xd4a017, new Item.Properties()));
 }

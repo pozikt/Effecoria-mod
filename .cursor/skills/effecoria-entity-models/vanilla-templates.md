@@ -24,7 +24,8 @@ Use as **UV layout and proportion** references. Extract textures from the Minecr
 
 | Creature | Template basis | Notes |
 |----------|----------------|-------|
-| **Vitrified Golem** | Iron golem–like biped + extra weapon cubes | 128 atlas, GeckoLib, translucent **cutout** blades only |
+| **Vitrified Golem** | Iron golem–like biped + extra weapon cubes | 128 atlas, GeckoLib, opaque body + cutout blades |
+| **Essence Wyvern** | Phantom wings + custom neck/tail/hind legs | **No front legs**; 128 atlas; `scripts/build_essence_wyvern.py` |
 | *(future bestiary)* | Pick from table above | Document in `art/.../DESIGN.md` |
 
 ## Unusual silhouettes

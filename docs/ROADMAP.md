@@ -109,7 +109,7 @@ Surface world as Φ ecology. **Also owns early material sinks** (README phases *
 |------|-------|
 | Fauna | Creatures tied to schools / Φ bands (beyond current mobs) |
 | Surface anomalies | Mild Φ storms, ZNΦ patches (content, not just anti-cast) |
-| **Magic: Elemental expansion** | New spells / behaviors tied to weather, biomes, and surface Φ — school grows *because* the world can host it |
+| **Magic: Elemental expansion** | Environment-sourced simple forms + key combos — see [MAGIC_PLAN.md § Environmental matter casting](MAGIC_PLAN.md#environmental-matter-casting-future--elemental-pro) |
 
 Races / Orkanum baselines fit naturally here (biologyQ hooks already exist).
 

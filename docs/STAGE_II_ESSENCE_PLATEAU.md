@@ -62,8 +62,9 @@ GeckoLib mobs native to the plateau (spawn eggs in creative):
 | **Φ-larva** | Passive | Crawls near crystals; breeds on essonite dust; adults slowly restore Ψ / charge Φ-cells; drops dust |
 | **Crystal crab** | Neutral | Angers if essonite crystals/core are mined nearby; drops shards + Φ-chitin |
 | **Eidos** | Rare passive | Offer essonite crystal / pure essonite → random buff or short-range portal hop |
+| **Essence Wyvern** | Rare hostile apex | Classical wyvern (**no front legs**); flight + melee + plasma-breath stub; see `docs/ESSENCE_WYVERN.md` |
 
-*(Φ-wyvern and twisted mage deferred.)*
+*(Twisted mage deferred; wyvern life-stages / dedicated drops later.)*
 
 ## Φ-ядро (core)
 

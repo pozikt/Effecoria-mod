@@ -12,6 +12,7 @@ import com.effecoria.client.render.MirageHorrorRenderer;
 import com.effecoria.client.render.PhiLarvaRenderer;
 import com.effecoria.client.render.RootCageRenderer;
 import com.effecoria.client.render.SubspacePortalRenderer;
+import com.effecoria.client.render.EssenceWyvernRenderer;
 import com.effecoria.client.render.VitrifiedGolemRenderer;
 import com.effecoria.client.gui.alchemy.AlembicScreen;
 import com.effecoria.client.gui.alchemy.BurnerScreen;
@@ -86,6 +87,7 @@ public final class EffecoriaClient {
         event.registerEntityRenderer(ModEntities.CRYSTAL_CRAB.get(), CrystalCrabRenderer::new);
         event.registerEntityRenderer(ModEntities.EIDOS.get(), EidosRenderer::new);
         event.registerEntityRenderer(ModEntities.VITRIFIED_GOLEM.get(), VitrifiedGolemRenderer::new);
+        event.registerEntityRenderer(ModEntities.ESSENCE_WYVERN.get(), EssenceWyvernRenderer::new);
         event.registerBlockEntityRenderer(
                 com.effecoria.content.ModBlockEntities.SUBSPACE_PORTAL.get(), SubspacePortalRenderer::new);
     }

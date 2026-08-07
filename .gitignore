@@ -39,3 +39,8 @@ logs/
 **/src/generated/**/.cache/
 repo/
 !**/src/**/repo/
+
+### Education materials (do not ship extracts)
+education-materials/_extracted/
+education-materials/_decompiled/
+
