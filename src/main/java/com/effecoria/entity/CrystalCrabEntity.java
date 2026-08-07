@@ -3,10 +3,12 @@ package com.effecoria.entity;
 import com.effecoria.content.ModBlocks;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -35,6 +37,11 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 /** Crystal crab — neutral golem-crab; angered when nearby essonite crystals are mined. */
 public class CrystalCrabEntity extends Monster implements GeoEntity, NeutralMob {
+    private static final EntityDataAccessor<Boolean> WALKING =
+            SynchedEntityData.defineId(CrystalCrabEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> ATTACKING =
+            SynchedEntityData.defineId(CrystalCrabEntity.class, EntityDataSerializers.BOOLEAN);
+
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.crystal_crab.idle");
     private static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.crystal_crab.walk");
     private static final RawAnimation ATTACK = RawAnimation.begin().thenPlay("animation.crystal_crab.attack");
@@ -56,6 +63,13 @@ public class CrystalCrabEntity extends Monster implements GeoEntity, NeutralMob 
                 .add(Attributes.ARMOR, 6.0)
                 .add(Attributes.FOLLOW_RANGE, 18.0)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.35);
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(WALKING, false);
+        builder.define(ATTACKING, false);
     }
 
     @Override
@@ -94,19 +108,41 @@ public class CrystalCrabEntity extends Monster implements GeoEntity, NeutralMob 
 
     @Override
     public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
-        attackAnimTicks = 10;
+        attackAnimTicks = 12;
+        this.entityData.set(ATTACKING, true);
         return super.doHurtTarget(target);
     }
 
     @Override
     public void aiStep() {
         super.aiStep();
-        if (!level().isClientSide) {
-            updatePersistentAnger((net.minecraft.server.level.ServerLevel) level(), true);
-            if (attackAnimTicks > 0) {
-                attackAnimTicks--;
+        if (level().isClientSide) {
+            return;
+        }
+        updatePersistentAnger((net.minecraft.server.level.ServerLevel) level(), true);
+
+        double dx = getX() - xo;
+        double dz = getZ() - zo;
+        boolean navigating = getNavigation().isInProgress();
+        boolean walking = navigating || (onGround() && (dx * dx + dz * dz) > 2.5E-5);
+        if (this.entityData.get(WALKING) != walking) {
+            this.entityData.set(WALKING, walking);
+        }
+
+        if (attackAnimTicks > 0) {
+            attackAnimTicks--;
+            if (attackAnimTicks == 0) {
+                this.entityData.set(ATTACKING, false);
             }
         }
+    }
+
+    public boolean isWalkingAnim() {
+        return this.entityData.get(WALKING);
+    }
+
+    public boolean isAttackingAnim() {
+        return this.entityData.get(ATTACKING);
     }
 
     @Override
@@ -152,9 +188,9 @@ public class CrystalCrabEntity extends Monster implements GeoEntity, NeutralMob 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "main", 3, state -> {
-            if (attackAnimTicks > 0) {
+            if (isAttackingAnim()) {
                 state.setAnimation(ATTACK);
-            } else if (state.isMoving()) {
+            } else if (isWalkingAnim() || state.getLimbSwingAmount() > 0.02f || state.isMoving()) {
                 state.setAnimation(WALK);
             } else {
                 state.setAnimation(IDLE);
