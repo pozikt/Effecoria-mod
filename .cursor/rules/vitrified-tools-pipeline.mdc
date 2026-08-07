@@ -1,0 +1,25 @@
+---
+description: Vitrified glass tools — solid icons, iron mask, no chip-off parts
+globs: art/items/tool_icons/**,scripts/pack_vitrified_tools.py,**/textures/item/vitrified_glass_*.png
+alwaysApply: false
+---
+
+# Vitrified glass tools pipeline
+
+## Cycle (same review loop as armor, 2D icons)
+1. Generate solid orthographic item sketch (vanilla diagonal: handle bottom-left).
+2. Pack with **iron silhouette mask** (`scripts/pack_vitrified_tools.py`).
+3. User reviews in-game → next tool.
+
+Order: sword → pickaxe → axe → shovel.
+
+## No chip-off parts
+- Do **not** invent jagged glass shards, 1px teeth, floating flecks, or 3D handheld extra cubes.
+- Final alpha **must equal** vanilla iron tool alpha.
+- Stick = iron wood pixels; head = fused dark glass + cyan/gold accents inside the mask.
+
+## Paths
+- Sketches / staged 16×16: `art/items/tool_icons/`
+- Pack script: `scripts/pack_vitrified_tools.py`
+- Human note: `art/items/tool_icons/README.md`
+- Palette: deep near-black glass, cyan edge, optional gold bind (same family as `PAL["vitrified"]`)

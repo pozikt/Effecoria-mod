@@ -1,0 +1,34 @@
+---
+description: Misc item icons (filters, focus, cell, gadgets) — generate tilted, clean, pack — NO vanilla mask
+globs: art/items/harness_icons/**,scripts/pack_harness_items.py,**/textures/item/{gold_filter,lead_filter,resonance_focus,phi_cell,essonite_dust,phi_paper,phi_chitin,breathing_scroll,magic_primer}.png
+alwaysApply: false
+---
+
+# Misc / harness item icons (NOT tools, NOT armor)
+
+Category: filters, resonance focus, phi cell, and similar gadgets.  
+**Do not** force vanilla hopper / ender_eye / iron silhouettes. Own silhouette after cleanup.
+
+## Cycle (teach this)
+1. **Generate** one item icon with **strict orthographic item camera**, but the object must sit at the usual Minecraft **~45° inventory tilt** (readable diagonal / slight 3/4, still flat pixel art — not a free perspective render).
+2. **Inspect** the generated image yourself (Read tool). Note bg, checkerboards, gold/magenta grids, soft halos.
+3. **Clean**: punch flat/checker/grid backgrounds to alpha; remove near-white fluff and “transparent placeholder” grids (gold mesh, magenta, grey checker).
+4. **Scale**: crop content → nearest-neighbor **16×16**; hard alpha (opaque or clear — no soft edges).
+5. **Write** game texture + `for_artist/*_16x_8x.png` preview and **show the user** the 8× preview for review.
+6. Tweak only after user feedback.
+
+## Generation constraints
+- Single centered object, flat transparent (or punchable) background.
+- Solid readable shape — no chip-off shards unless lore demands a shard item.
+- Palette must match item role (gold filter = gold accents; lead = dull metal; focus = indigo + cyan pupil; cell = cyan core).
+- Prompt must say: inventory tilt / Minecraft item angle, pixel-crisp at 16×16.
+
+## Pack
+- Script: `scripts/pack_harness_items.py` (clean + nearest16, **no** vanilla mask AND).
+- Staging: `art/items/harness_icons/`
+- Contrast with tools (`pack_vitrified_tools.py`) which **do** use iron masks.
+
+## Do not
+- Recolor-only from hopper/ender_eye as the final art for this category
+- Leave checkerboard / gold transparency grids in the 16×16
+- Skip showing the user the cleaned preview

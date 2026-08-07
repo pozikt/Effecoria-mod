@@ -313,19 +313,14 @@ def main() -> None:
     bake_bucket("phi_water_bucket", fills["raw_phi"])
     bake_bucket("purified_phi_water_bucket", fills["purified"])
 
-    recolor_template("phi_paper", "paper.png", "essonite")
-    recolor_template("essonite_dust", "glowstone_dust.png", "essonite")
-    recolor_template("phi_chitin", "netherite_scrap.png", "chitin")
-    recolor_template("resonance_focus", "ender_eye.png", "resonance")
-    recolor_template("phi_cell", "heart_of_the_sea.png", "tonic")
-    recolor_template("gold_filter", "hopper.png", "essonite")
-    recolor_template("lead_filter", "hopper.png", "vitrified")
+    # Misc icons (filters, focus, cell, dust, paper, chitin, scrolls): harness pack
+    import runpy
 
-    recolor_tool("vitrified_glass_sword", "iron_sword.png")
-    recolor_tool("vitrified_glass_pickaxe", "iron_pickaxe.png")
-    recolor_tool("vitrified_glass_axe", "iron_axe.png")
-    recolor_tool("vitrified_glass_shovel", "iron_shovel.png")
+    runpy.run_path(str(Path(__file__).resolve().parent / "pack_harness_items.py"), run_name="__main__")
+    # Tools: iron silhouette mask
+    runpy.run_path(str(Path(__file__).resolve().parent / "pack_vitrified_tools.py"), run_name="__main__")
 
+    # Armor item icons still vanilla-masked until dedicated pass
     for piece, tmpl in [
         ("phi_chitin_helmet", "iron_helmet.png"),
         ("phi_chitin_chestplate", "iron_chestplate.png"),
