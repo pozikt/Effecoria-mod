@@ -6,9 +6,10 @@
 
 ## Critical shape lock
 - **WYVERN, not dragon:** **no front legs**. Forelimbs = wing arms only.
-- Bones: `root`, `body`, `neck`, `head`, wing chain ×2, **leg chain** `left_leg`→`shin`→`foot` ×2, `tail`
-- Crest spines are body/tail cubes (no separate crest bone in MVP)
-- Two powerful **hind legs only** (digitigrade, Tiny Dragons-style 3-bone); long neck/tail; **3-bone wing chain**
+- Segment source: `concept_turnaround_contur.png` → `SEGMENT_LOCK.md`
+- Bones: `body_0/1/2`, `neck_0..5`, `head`+`jaw`+`horn_0..4`, wing×3×2, leg `thigh→knee→shin→foot`(+4 claws)×2, `tail_0..9`
+- Crest = cube on each neck/body/tail ring (gold tip)
+- Two **hind legs only** (digitigrade 4-bone); long multi-ring neck/tail; **3-bone wing chain**
 
 ## Silhouette (Minecraft scale — adult MVP)
 - Lore size 15–30 m wingspan → **game adult ~ wingspan 8–10 blocks open, body ~2 blocks long torso + long neck/tail, standing ~3.4 blocks**
@@ -18,10 +19,9 @@
 - Matte corundum scales; gold Φ-lines; gold eyes
 
 ## Materials / palette
-- Base: matte stone-grey / mountain rock (opaque α=255)
-- Accent calm: subtle ultramarine undertone
-- Accent combat: gold Φ-veins, cyan-white plasma in mouth
-- Crest spines: brightest gold/cyan
+- Base: matte stone-grey / beige rock (opaque α=255) — **no purple/ultramarine fill**
+- Accent: gold Φ-veins on wings, gold crest tips; yellow eyes with black slit pupils
+- Belly: beige rib plates on neck/torso rings
 
 ## Behavior stubs (MVP)
 - Hostile territorial flyer on Essence Plateau (rare)
@@ -31,7 +31,7 @@
 ## Template
 - Topology: **phantom** (winged body, no forelegs) + **custom** neck/tail/hind legs
 - Path: **GeckoLib**
-- Atlas: **256×256** (large wing islands)
+- Atlas: **512×512** (many ring cubes from contour bake)
 
 ## Life stages (later)
 - Hatchling / young / adult / ancient / Peak Dragon — **adult only** in this MVP

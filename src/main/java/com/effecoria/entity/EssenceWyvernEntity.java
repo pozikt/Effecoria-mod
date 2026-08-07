@@ -67,6 +67,9 @@ public class EssenceWyvernEntity extends Monster implements GeoEntity {
             SynchedEntityData.defineId(EssenceWyvernEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> SITTING =
             SynchedEntityData.defineId(EssenceWyvernEntity.class, EntityDataSerializers.BOOLEAN);
+    /** Server-synced ground locomotion — client delta/limbSwing is unreliable for pathfinding mobs. */
+    private static final EntityDataAccessor<Boolean> WALKING =
+            SynchedEntityData.defineId(EssenceWyvernEntity.class, EntityDataSerializers.BOOLEAN);
 
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.essence_wyvern.idle");
     private static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.essence_wyvern.walk");
@@ -133,6 +136,7 @@ public class EssenceWyvernEntity extends Monster implements GeoEntity {
         builder.define(ANIM_STATE, ANIM_IDLE);
         builder.define(FLYING, false);
         builder.define(SITTING, false);
+        builder.define(WALKING, false);
     }
 
     @Override
@@ -175,6 +179,7 @@ public class EssenceWyvernEntity extends Monster implements GeoEntity {
         getNavigation().stop();
         if (flying) {
             setSitting(false);
+            this.entityData.set(WALKING, false);
             this.moveControl = new FlyingMoveControl(this, 14, true);
             if (this.flyingNavigation != null) {
                 this.navigation = this.flyingNavigation;
@@ -200,6 +205,7 @@ public class EssenceWyvernEntity extends Monster implements GeoEntity {
         this.entityData.set(SITTING, sitting);
         if (sitting) {
             getNavigation().stop();
+            this.entityData.set(WALKING, false);
             playAnim(ANIM_SIT, -1);
         } else if (animState() == ANIM_SIT) {
             this.entityData.set(ANIM_STATE, ANIM_IDLE);
@@ -209,6 +215,10 @@ public class EssenceWyvernEntity extends Monster implements GeoEntity {
 
     public boolean isSitting() {
         return this.entityData.get(SITTING);
+    }
+
+    public boolean isWalkingAnim() {
+        return this.entityData.get(WALKING);
     }
 
     private void playAnim(byte state, int ticks) {
@@ -230,6 +240,17 @@ public class EssenceWyvernEntity extends Monster implements GeoEntity {
         super.aiStep();
         if (level().isClientSide) {
             return;
+        }
+
+        // Position delta this tick (xo/zo) — same trick as VitrifiedGolem.
+        double dx = getX() - xo;
+        double dz = getZ() - zo;
+        boolean navigating = !isFlyingMode() && !isSitting() && getNavigation().isInProgress();
+        boolean walking = !isFlyingMode()
+                && !isSitting()
+                && (navigating || (onGround() && (dx * dx + dz * dz) > 2.5E-5));
+        if (this.entityData.get(WALKING) != walking) {
+            this.entityData.set(WALKING, walking);
         }
 
         if (isFlyingMode()) {
@@ -382,7 +403,8 @@ public class EssenceWyvernEntity extends Monster implements GeoEntity {
                         state.setAnimation(SIT);
                     } else if (isFlyingAnim()) {
                         state.setAnimation(FLY);
-                    } else if (state.getLimbSwingAmount() > 0.04f) {
+                    } else if (isWalkingAnim() || state.getLimbSwingAmount() > 0.02f || state.isMoving()) {
+                        // Prefer synced WALKING; limbSwing/isMoving are flaky client fallbacks.
                         state.setAnimation(WALK);
                     } else {
                         state.setAnimation(IDLE);

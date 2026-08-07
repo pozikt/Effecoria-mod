@@ -13,8 +13,9 @@ description: >-
 ## Pipeline (author workflow)
 
 1. Take a creature from the **bestiary / lore** (project docs). If there is a description, generate the creature from **strict orthographic views** (all sides and standard angles). If there is **no** description, **ask the user** before generating.
-2. After generating concept art, **read the images** and decide which **vanilla mob UV/layout templates** can be used as a base. If the creature is unusual, design **custom box layouts** (still document UV like vanilla).
-3. **Downscale and bake** into game textures: 1 block unit = 1 texel per face on that cube (GeckoLib/Effecoria convention). Use nearest-neighbor. Run pack scripts when they exist.
+2. After generating (or receiving) concept art, **read the images** — then run **Step 1b segment bake** before inventing boxes.
+3. Decide which **vanilla mob UV/layout templates** can be used as a base. If unusual, custom box layouts (still document UV like vanilla).
+4. **Downscale and bake** into game textures: 1 model unit = 1 texel per face on that cube. Nearest-neighbor. Pack scripts when they exist.
 
 Always prefer **recolor/adapt vanilla silhouettes** for items/blocks; for entities, prefer **vanilla humanoid/quadruped UV math** before inventing new atlases.
 
@@ -43,7 +44,23 @@ Generate a **single reference sheet** or a small set with **fixed camera rules**
 
 Save under `art/<feature>/<creature>/` with names like `concept_turnaround.png`, `concept_sheet.png`.
 
-After generation, **open/read the image** and write a 5–10 line **design lock** (proportions, what is opaque vs cutout, emissive zones).
+After generation, **open/read the image** and write a short **design lock** (proportions, opaque vs cutout, emissive zones).
+
+### Step 1b — Segment / pixel bake (mandatory before geo)
+
+Turn the 2D turnaround into a **segment inventory**, then into Minecraft boxes. Do not invent a chicken stub and “paint later.”
+
+1. **Read the image** (tool read). Prefer a user **contour overlay** (`*_contur.png` / `*_contour.png`) when present — colored pens mark seams the way a human slices the silhouette. Sample dominant RGB if color is contested — match concept, not a default fantasy purple.
+2. **Trace seams** on each view (or follow the user’s pens): where head ends / neck starts; each neck ring; torso plates; wing folds; thigh → knee → shin → foot; claw count. Rebuild geo from that inventory, not from a chicken stub.
+3. Write `art/<creature>/SEGMENT_LOCK.md` with:
+   - Palette table (roles → RGB)
+   - Bone list with approximate box sizes (W×H×D in model units)
+   - Crest / spines / claws counts and which parent bone owns them
+   - Notes on bent joints (digitigrade, S-neck, etc.)
+4. **Only then** build `geo` bones (one bone or cube per locked segment) and bake the atlas from that map.
+5. Hand off to the user for **in-game testing** before polish pass.
+
+Example (Essence Wyvern): neck is stacked rings with belly ribs; spine gold-tipped spikes on every segment; hind leg = thigh + knee + shin + foot + **4** talons — see `art/essence_wyvern/SEGMENT_LOCK.md`.
 
 ## Step 2 — Pick vanilla templates
 
@@ -53,9 +70,9 @@ See [vanilla-templates.md](vanilla-templates.md). Match **topology**, not theme:
 - Biped + weapon cube → iron golem + extra cubes (Effecoria: vitrified golem)
 - Quadruped → wolf / cow / spider segments
 - Flying small → allay / bee / phantom
-- Amorphous / boss → warden / guardian custom atlases
+- Winged biped / wyvern → phantom wing idea + **custom** multi-bone neck/legs (never glue wings as one cube forever)
 
-Record choice in `art/<creature>/DESIGN.md`: template mob, atlas size (64 vs 128), GeckoLib vs Java model.
+Record choice in `art/<creature>/DESIGN.md`: template mob, atlas size (64 vs 128/256), GeckoLib vs Java model.
 
 ## Step 3 — Implementation path in this repo
 
@@ -64,14 +81,15 @@ Record choice in `art/<creature>/DESIGN.md`: template mob, atlas size (64 vs 128
 | **GeckoLib** (preferred for animated bosses) | Multi-bone attacks, custom anims | `geo/*.geo.json`, `animations/*.animation.json`, `textures/entity/*.png` |
 | **Java `Model` + `LayerDefinition`** | Simple mobs, one texture | `client/model/*Model.java`, `textures/entity/*.png` |
 
-**Existing gold standard:** vitrified golem — `art/vitrified_wastes/golem/`, `scripts/pack_vitrified_golem_texture.py`, `VitrifiedGolemRenderer` uses `RenderType.entityTranslucent`.
+**Existing gold standard:** vitrified golem — `art/vitrified_wastes/golem/`, `scripts/pack_vitrified_golem_texture.py`, cutout renderer for solid atlas.
 
 Workflow for new GeckoLib mob:
 
-1. Blockout `*.geo.json` (bones + cube sizes). Sync `description.texture_width/height` with atlas.
-2. `--init` face templates → paint `faces/*` OR paint `nets/*` → `--from-nets`.
-3. `python scripts/pack_vitrified_golem_texture.py` (copy/adapt script for new `PARTS` map).
-4. Register entity, `GeoEntityRenderer`, animation names in code.
+1. `SEGMENT_LOCK.md` from Step 1b.
+2. Blockout `*.geo.json` (bones + cube sizes). Sync `description.texture_width/height` with atlas.
+3. Paint/bake atlas from locked palette (script or nets). **Opaque α=255** on solid parts.
+4. Anim stubs matching bone names.
+5. Register entity, `GeoEntityRenderer`, animation names in code → **user tests in-game**.
 
 ## Step 4 — Alpha and “holes” (mandatory read)
 
@@ -79,40 +97,38 @@ Before marking a mob done, apply [reference.md — Transparency and holes](refer
 
 Summary:
 
-- **Holes in the mesh** ≠ **holes in the texture**. Translucent render + accidental alpha on “solid” limbs shows **empty interior** and **back faces** → looks pierced.
-- **Every texel on a cube face** that should look solid must be **alpha 255**. Reserve alpha 0 for intentional cutouts only (blade edges, cracks), and flood from edges in pack script.
-- **Never** leave UV rectangles empty in the atlas (alpha 0) for cubes that still exist in geo — game samples “nothing” there.
-- Semi-transparent pixels (1–127 alpha) → **binarize** to 0 or 255 for Minecraft entities.
+- **Holes in the mesh** ≠ **holes in the texture**. Translucent render + accidental alpha on “solid” limbs shows **empty interior**.
+- **Every texel on a cube face** that should look solid must be **alpha 255**.
+- **Never** leave UV rectangles empty for cubes that exist in geo.
+- Semi-transparent pixels → **binarize** to 0 or 255.
 
-When user reports “дырки”, inspect: renderer `RenderType`, atlas paste gaps, `clean_face_alpha` silhouette flags, geo cube sizes vs UV sizes.
+When user reports “дырки”, inspect: renderer `RenderType`, atlas paste gaps, geo cube sizes vs UV sizes.
 
 ## Step 5 — Validation checklist
 
 ```
 - [ ] Lore/design lock written
-- [ ] Concept sheet matches locked proportions
+- [ ] SEGMENT_LOCK matches concept seams (counts, palette)
+- [ ] Concept sheet matches locked proportions / colors
 - [ ] Template + atlas size documented
 - [ ] geo UV matches pack script PARTS (or documented map)
-- [ ] pack script run; no MISSING faces in log
-- [ ] In-game: no random holes at rest pose; cutouts only where designed
+- [ ] pack/build script run; no MISSING faces in log
+- [ ] In-game: no random holes; colors match concept (not default purple)
 - [ ] Animations don’t pull cubes apart exposing unstitched UV
+- [ ] User playtest feedback incorporated
 ```
 
 ## Utility commands
 
 ```bash
-# Golem (adapt PARTS for other mobs)
 python scripts/pack_vitrified_golem_texture.py --init
 python scripts/pack_vitrified_golem_texture.py --from-nets
 python scripts/pack_vitrified_golem_texture.py
+python scripts/build_essence_wyvern.py
 ```
-
-Extract vanilla entity UV reference from client jar when needed:
-
-`assets/minecraft/textures/entity/<mob>.png` → compare in `art/reference/vanilla/`.
 
 ## Additional resources
 
 - [reference.md](reference.md) — UV layout, alpha rules, file paths
 - [vanilla-templates.md](vanilla-templates.md) — mob → template mapping
-- `art/vitrified_wastes/golem/TEXTURE_EDIT.md` — face naming (RU)
+- `art/essence_wyvern/SEGMENT_LOCK.md` — segment-bake example

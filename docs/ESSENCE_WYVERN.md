@@ -14,8 +14,9 @@ Adult MVP only (hatchling → Peak Dragon later).
 
 ## Anatomy lock
 
-- Bones: `root`, `body`, `neck`, `head`, `left_wing`→`mid`→`tip` (×2), `left_leg`, `right_leg`, `tail`
-- Crest = body/tail cubes (essonite spines), not separate limbs
+- Contour bake: `art/essence_wyvern/concept_turnaround_contur.png` → `SEGMENT_LOCK.md`
+- Bones: `body_0/1/2`, `neck_0..5`, `head`+`jaw`+horns, wing chain ×2, leg `→knee→shin→foot`(+4 claws)×2, `tail_0..9`
+- Crest = ring cubes with gold tips; atlas 512×512; gray-beige + gold (no purple)
 - Hitbox MVP: **3.2 × 3.4**; visual wingspan open ~10 blocks; 3-bone wing flap (ref: Tiny Dragons / Antarchy)
 
 ## Pipeline assets
