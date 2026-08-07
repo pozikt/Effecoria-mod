@@ -2,7 +2,7 @@
 
 NeoForge mod for **Minecraft 1.21.1**, based on the [Effecoria universe](https://github.com/pozikt/Effecoria) (ЕТЭВ / Φ-field theory).
 
-**Status:** Stage I — magic loop playable (7 schools, breathing/Orkanum, Φ harness, seals, primer). Funnel polish toward “recommend to a friend.”
+**Status:** Stage II in progress — **worldgen / flora / structures** plus **materials** (Φ-chitin armor, essonite sinks, alchemy gear). Stage I magic loop remains playable (7 schools, breathing/Orkanum, Φ harness, seals, primer).
 
 ## Requirements
 
@@ -68,20 +68,20 @@ Unit tests are optional for now — use `build -x test` (see Quick start).
 
 ## Roadmap
 
-**Priority:** complete magic & essence systems before worldgen and races.
+**Current focus:** world content (**phase 7**) and **materials** in parallel. Stage I magic loop is shipped and stays playable; polish continues opportunistically.
 
-| Phase | Focus |
-|-------|-------|
-| **0** ✅ | MDK, FormulaEngine, placeholders, docs |
-| **1** ✅ | Ψ/Φ, initiation, 6 spells, HUD, creative god mode |
-| **2** (now) | **Magic core** — school UI, spell book, breathing, training |
-| **3** | Materials (lead ZNΦ, cold iron, essonite mechanics) |
-| **4** | Races & Orkanum |
-| **5** | Necromancy & liches |
-| **6** | Technomagic & multiblocks |
-| **7** | Worldgen, flora, structures |
+| Phase | Focus | Status |
+|-------|-------|--------|
+| **0** | MDK, FormulaEngine, placeholders, docs | ✅ |
+| **1** | Ψ/Φ, initiation, starter spells, HUD, creative god mode | ✅ |
+| **2** | Magic core — school UI, spell book, breathing, training | ✅ (loop done; VFX/guide polish ongoing) |
+| **3** | Materials (essonite sinks, Φ-chitin, vitrified glass, alchemy gear) | 🔄 **now** (with 7) |
+| **4** | Races & Orkanum | planned |
+| **5** | Necromancy depth & liches | baseline Death Mark ✅; depth later |
+| **6** | Technomagic & multiblocks | planned |
+| **7** | Worldgen, flora, structures | 🔄 **now** (Vitrified Wastes, Essence Plateau, …) |
 
-Full breakdown: [docs/ROADMAP.md](docs/ROADMAP.md)
+Full breakdown: [docs/ROADMAP.md](docs/ROADMAP.md) (Stage **II — Environment** is the active pillar).
 
 ## License
 

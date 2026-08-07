@@ -19,7 +19,7 @@ Monetization / release funnel (free core, support, server, DLC): [docs/monetizat
 | **V** | TSE | Topological singularities as content & risk |
 | **VI** | Ω-space | Analog of Hell — dimension + inhabitants (after TSE) |
 
-Do not start II+ until Stage I is intentionally “finished enough.”
+Do not treat Stage I polish as a hard gate anymore: **Stage II (environment + materials) is active** while the magic loop stays playable. Deep school rewrites still wait on the pillars below.
 
 ### Magic expands with each stage (policy)
 
@@ -37,9 +37,9 @@ Rule of thumb: **do not invent a huge school rewrite in Stage I “just because.
 
 ---
 
-## Stage I — Magic & energy (current)
+## Stage I — Magic & energy (shipped loop)
 
-**Goal:** Full player magic loop — school → progression → cast → entropy — before heavy world content.
+**Goal:** Full player magic loop — school → progression → cast → entropy. **Loop is playable;** remaining rows are polish, not a blocker for Stage II.
 
 ### Done
 
@@ -63,11 +63,11 @@ Rule of thumb: **do not invent a huge school rewrite in Stage I “just because.
 |------|-------|
 | **Feel** | Spell VFX/SFX; `sense_phi` world highlight; Patchouli stubs |
 | **Progression** | Essence / research unlocks beyond starter trio; entropy tutorial |
-| **Φ harness** | Essonite dust → focus craft; **Phi Cell** (portable Φ buffer) — items first, not worldgen |
+| **Φ harness** | Essonite dust → focus / **Phi Cell** — craft loop shipped; world sources expand under Stage II materials |
 | **Breathing** | Air/hunger coupling; optional trainer/modes |
 | **Training** | Broader XP sources; diminishing returns |
 | **Seals** | Word pack: `vigil` (remote alarm) + `haustus` (standing Ψ siphon); conflicts/stacking done |
-| **Anti-magic** | Lead (ZNΦ), cold iron — tag-based, replaces stone-box hack |
+| **Anti-magic** | Lead (ZNΦ), cold iron — tag-based; deeper world presence with II/III |
 | **School depth** | Identity packs: Corruption, Spatial, Mental, Necromancy, Organic parasite |
 | **Player-facing magic** | Teach the loop without wiki: Patchouli / in-game tips / hub clarity |
 
@@ -91,17 +91,26 @@ Track under Stage I polish only as **docs**; code when magic presentation + cont
 
 ---
 
-## Stage II — Environment
+## Stage II — Environment (**current**)
 
-Surface world as Φ ecology.
+Surface world as Φ ecology. **Also owns early material sinks** (README phases **3 + 7** run together here).
+
+### In progress / shipping now
 
 | Item | Notes |
 |------|-------|
-| Biomes / biome modifiers | Φ density, day-night character |
-| Flora | Φ-sensitive plants, consumables (mandragora analogs) |
-| Fauna | Creatures tied to schools / Φ bands |
+| Biomes / biome modifiers | Vitrified Wastes, Essence Plateau (and related Φ biomes) |
+| Flora | Φ logs/leaves/saplings, blades, plateau & wastes plants |
+| Structures / encounters | Golem & biome structures; more ruins as content settles |
+| **Materials (early sinks)** | Essonite dust/shards/pure → focus; Φ-chitin set (item icons + chest pauldrons on player); vitrified glass tools; alchemy (mortar, burner, alembic, potions); Φ-water filtration |
+| Texture / armor pipeline | Cube-face → atlas → entity layers (`art/items/armor_cubes/`) |
+
+### Still planned in II
+
+| Item | Notes |
+|------|-------|
+| Fauna | Creatures tied to schools / Φ bands (beyond current mobs) |
 | Surface anomalies | Mild Φ storms, ZNΦ patches (content, not just anti-cast) |
-| **Material sinks (early)** | Dust → emergency Ψ + Φ-fertilizer; Φ-glass / Φ-planks + fuel; full chitin armor; vitrified glass tools; golem core → Phi Cell; gold-filtered Φ-water; shard→dust; pure→focus; village alchemy (mortar, burner, alembic, tonic/resonance/stimulant + crash) |
 | **Magic: Elemental expansion** | New spells / behaviors tied to weather, biomes, and surface Φ — school grows *because* the world can host it |
 
 Races / Orkanum baselines fit naturally here (biologyQ hooks already exist).
