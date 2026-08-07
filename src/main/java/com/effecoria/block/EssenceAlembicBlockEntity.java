@@ -31,6 +31,8 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 
+import java.util.UUID;
+
 /** Essence alembic — water + reagents + heat-gated brew into output slot. */
 public final class EssenceAlembicBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer {
     public static final int SLOT_WATER = 0;
@@ -48,6 +50,8 @@ public final class EssenceAlembicBlockEntity extends BaseContainerBlockEntity im
     public static final int COOK_TIME = EssenceAlembicBlock.COOK_TIME;
     public static final String NBT_BREW_HEAT = "PhiBrewHeat";
     public static final String NBT_DURATION_FACTOR = "PhiDurationFactor";
+    public static final String NBT_BLOOD_DONOR = "BloodDonor";
+    public static final String NBT_BLOOD_ANCHORED = "BloodAnchored";
 
     private static final int[] INPUT_SLOTS = {SLOT_WATER, SLOT_REAGENT1, SLOT_REAGENT2, SLOT_REAGENT3};
     private static final int[] OUTPUT_SLOTS = {SLOT_OUTPUT};
@@ -58,6 +62,8 @@ public final class EssenceAlembicBlockEntity extends BaseContainerBlockEntity im
     private Item cookingResultItem;
     private float cookingDurationFactor = 1f;
     private int cookingHeatOrdinal;
+    @Nullable
+    private UUID cookingBloodDonor;
 
     private final ContainerData data = new ContainerData() {
         @Override
@@ -163,7 +169,8 @@ public final class EssenceAlembicBlockEntity extends BaseContainerBlockEntity im
             return;
         }
         cookingResultItem = potion;
-        cookingDurationFactor = AlembicRecipes.durationFactor(heat);
+        cookingDurationFactor = AlembicRecipes.durationFactor(heat)
+                * AlembicRecipes.bloodDurationMultiplier(items.get(SLOT_REAGENT2), items.get(SLOT_REAGENT3));
         cookingHeatOrdinal = heat.ordinal();
         cookProgress = 0;
         cookTotal = COOK_TIME;
@@ -171,10 +178,11 @@ public final class EssenceAlembicBlockEntity extends BaseContainerBlockEntity im
         water.shrink(1);
         r1.shrink(1);
         ItemStack r2 = items.get(SLOT_REAGENT2);
+        ItemStack r3 = items.get(SLOT_REAGENT3);
+        cookingBloodDonor = AlembicRecipes.bloodDonorUuid(r2, r3);
         if (!r2.isEmpty()) {
             r2.shrink(1);
         }
-        ItemStack r3 = items.get(SLOT_REAGENT3);
         if (!r3.isEmpty()) {
             r3.shrink(1);
         }
@@ -188,11 +196,16 @@ public final class EssenceAlembicBlockEntity extends BaseContainerBlockEntity im
         CompoundTag tag = new CompoundTag();
         tag.putInt(NBT_BREW_HEAT, cookingHeatOrdinal);
         tag.putFloat(NBT_DURATION_FACTOR, cookingDurationFactor);
+        if (cookingBloodDonor != null) {
+            tag.putUUID(NBT_BLOOD_DONOR, cookingBloodDonor);
+            tag.putBoolean(NBT_BLOOD_ANCHORED, true);
+        }
         potion.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
         items.set(SLOT_OUTPUT, potion);
         cookingResultItem = null;
         cookProgress = 0;
         cookingDurationFactor = 1f;
+        cookingBloodDonor = null;
         level.playSound(null, worldPosition, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.8f, 0.9f);
         setChanged();
         sync();

@@ -128,6 +128,19 @@ public final class ModItems {
     public static final DeferredItem<Item> PHI_FLASK_WATER = ITEMS.register(
             "phi_flask_water", () -> new Item(new Item.Properties().stacksTo(16)));
 
+    public static final DeferredItem<Item> BLOOD_VIAL_EMPTY = ITEMS.register(
+            "blood_vial_empty",
+            () -> new BloodVialEmptyItem(new Item.Properties().stacksTo(16)));
+    public static final DeferredItem<Item> BLOOD_VIAL = ITEMS.register(
+            "blood_vial", () -> new Item(new Item.Properties().stacksTo(16)));
+    public static final DeferredItem<Item> MAGE_BLOOD_VIAL = ITEMS.register(
+            "mage_blood_vial", () -> new Item(new Item.Properties().stacksTo(16)));
+    public static final DeferredItem<Item> WYVERN_BLOOD_VIAL = ITEMS.register(
+            "wyvern_blood_vial", () -> new Item(new Item.Properties().stacksTo(16)));
+    /** Stub for forbidden Ω-rituals — not used in alembic MVP. */
+    public static final DeferredItem<Item> OMEGA_BLOOD_VIAL = ITEMS.register(
+            "omega_blood_vial", () -> new Item(new Item.Properties().stacksTo(16)));
+
     public static final DeferredItem<Item> GOLD_FILTER = ITEMS.register(
             "gold_filter", () -> new GoldFilterItem(new Item.Properties()));
     public static final DeferredItem<Item> LEAD_FILTER = ITEMS.register(

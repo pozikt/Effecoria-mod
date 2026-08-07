@@ -113,9 +113,9 @@ Ship only after Stage I magic **presentation** and thrall budget feel solid.
 
 ---
 
-## Environmental matter casting (future — Elemental pro)
+## Environmental matter casting (Elemental — MVP shipped)
 
-**Status:** design lock only — do not implement until Stage II elemental expansion.  
+**Status:** MVP shipped — water + ice/snow sources.  
 **Fantasy:** “крутейшая прокачка” стихийной школы — магия из **окружения**, не из пустого воздуха. Форма берётся из ближайшего источника вещества; без источника — слабый/недоступный каст.
 
 ### Fantasy examples
@@ -132,28 +132,18 @@ Power and duration scale with **source size / proximity / Φ**, not only Ψ spen
 
 ### Input loop (simple forms)
 
-Three-beat control scheme (bindings TBD; keep orthogonal to radial R-cast):
+Keys (defaults): **V** link / double-tap throw, **B** hold barrier — orthogonal to R-cast:
 
-1. **Link combo** — key chord (or short sequence) while looking at / standing near a valid matter source → creates a **matter bond** (client outline + short HUD cue). Bond breaks if you leave range or source is destroyed/emptied.
-2. **Hold** — while bonded and in range: channel a **defensive wall / barrier** shaped from that matter (water sheet, dust screen, ice pane…). Drain source and Ψ while held; release ends wall.
-3. **Double-tap (throw)** — while bonded: “кидает” the prepared form at the look-target / enemy (projectile or short lob). Consumes a chunk of the source.
-
-Optional later: release-to-place vs double-tap-throw as overcast variants.
+1. **Link** — look at / near water or ice → **matter bond** (sync cue). Bond breaks if you leave range or source is destroyed/emptied.
+2. **Hold (B)** — while bonded: channel a **defensive ice sheet** from that matter. Drain source and Ψ while held.
+3. **Double-tap V (throw)** — while bonded: throws a water/ice form at the look direction. Consumes bond strength.
 
 ### Design constraints
 
-- Requires **Elemental** (or school tag `matter_source`) mastery gate — not day-one.
-- Sources are **world blocks/fluids**, not inventory bottles (bottles may be a weak fallback).
-- Anti-magic / ZNΦ can sever the bond.
-- Readable: other players see the wall/stream originate from the pool, not from the caster’s hands alone.
-- Balance: empty a small puddle fast; ocean / Φ-lake sustains longer.
-
-### Implementation sketch (when greenlit)
-
-- `MatterSource` capability / scan (fluid tags, block tags per school).
-- `MatterBond` player sync data (source pos, school, strength).
-- Client input: combo → hold → double-tap on top of existing cast charge if needed.
-- Server: drain fluid/block progress, spawn wall entities or block placeholders, throw projectile entity.
+- Requires **Elemental** + breathing mastery gate (`matter_cast_min_mastery`).
+- Sources are **world blocks/fluids** (water, ice, snow).
+- Readable: wall/stream originates from the pool.
+- Wave 2: lava, dust, sand after water/ice playtest.
 
 Wire under Stage II **Magic: Elemental expansion** in [ROADMAP.md](ROADMAP.md).
 
@@ -169,9 +159,9 @@ Wire under Stage II **Magic: Elemental expansion** in [ROADMAP.md](ROADMAP.md).
 
 ## Backlog / UX (noted)
 
-### First join — school selection (TODO) → ✅ shipped
+### First join — school selection → ✅ shipped (opt-out)
 
-When a player **first appears in the world** and is not initiated, client opens **`SchoolSelectScreen(mandatory)`** (`ClientFirstJoinSchoolPrompt`). ESC cannot dismiss until a school is chosen.
+When a player **first appears in the world** and is not initiated and has not deferred, client opens **`SchoolSelectScreen(mandatory)`** (`ClientFirstJoinSchoolPrompt`). ESC cannot dismiss until a school is chosen **or** the player picks **No school — for now** (`schoolChoiceDeferred`). Deferred players reopen select later via Resonance Focus (non-mandatory screen).
 
 ### Magic presentation (after schools feel solid)
 

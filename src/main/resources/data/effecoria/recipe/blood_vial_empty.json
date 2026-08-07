@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "effecoria:phi_flask" },
+    { "item": "minecraft:glass_bottle" }
+  ],
+  "result": {
+    "count": 1,
+    "id": "effecoria:blood_vial_empty"
+  }
+}

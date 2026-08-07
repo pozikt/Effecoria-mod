@@ -6,6 +6,7 @@ import com.effecoria.EffecoriaMod;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.effect.elemental.ElementalEffects;
 import com.effecoria.effect.elemental.ElementalTags;
+import com.effecoria.effect.elemental.MatterBondService;
 
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -76,6 +77,10 @@ public final class ElementalProjectileEvents {
                                 caster, target, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, slowAmp));
                         ElementalEffects.spawnIceParticles(level, target.position().add(0, 1, 0));
                     }
+                    case ElementalTags.KIND_MATTER_WATER -> MatterBondService.applyMatterHit(
+                            new MatterBondService.LivingHit(level, target, source, damage, false));
+                    case ElementalTags.KIND_MATTER_ICE -> MatterBondService.applyMatterHit(
+                            new MatterBondService.LivingHit(level, target, source, damage, true));
                     case ElementalTags.KIND_PLASMA -> {
                         target.hurt(source, damage);
                         target.hurt(level.damageSources().onFire(), damage * 0.4f);

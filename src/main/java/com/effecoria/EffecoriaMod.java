@@ -146,6 +146,26 @@ public class EffecoriaMod {
                 ModNetworking.InitiateSchoolPayload.STREAM_CODEC,
                 ModNetworking.InitiateSchoolPayload::handle);
         registrar.playToServer(
+                ModNetworking.DeferSchoolPayload.TYPE,
+                ModNetworking.DeferSchoolPayload.STREAM_CODEC,
+                ModNetworking.DeferSchoolPayload::handle);
+        registrar.playToServer(
+                ModNetworking.MatterLinkPayload.TYPE,
+                ModNetworking.MatterLinkPayload.STREAM_CODEC,
+                ModNetworking.MatterLinkPayload::handle);
+        registrar.playToServer(
+                ModNetworking.MatterChannelPayload.TYPE,
+                ModNetworking.MatterChannelPayload.STREAM_CODEC,
+                ModNetworking.MatterChannelPayload::handle);
+        registrar.playToServer(
+                ModNetworking.MatterThrowPayload.TYPE,
+                ModNetworking.MatterThrowPayload.STREAM_CODEC,
+                ModNetworking.MatterThrowPayload::handle);
+        registrar.playToClient(
+                ModNetworking.MatterBondSyncPayload.TYPE,
+                ModNetworking.MatterBondSyncPayload.STREAM_CODEC,
+                ModNetworking.MatterBondSyncPayload::handle);
+        registrar.playToServer(
                 ModNetworking.SelectSpellPayload.TYPE,
                 ModNetworking.SelectSpellPayload.STREAM_CODEC,
                 ModNetworking.SelectSpellPayload::handle);

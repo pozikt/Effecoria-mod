@@ -1,13 +1,19 @@
 package com.effecoria.alchemy.recipe;
 
+import java.util.UUID;
+
 import javax.annotation.Nullable;
 
+import com.effecoria.content.BloodVialEmptyItem;
 import com.effecoria.content.ModItemTags;
 import com.effecoria.content.ModItems;
 import com.effecoria.core.alchemy.HeatLevel;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 
 /** Baseline alembic matrix: water + power reagent (+ optional tags) → potion; heat tweaks duration. */
 public final class AlembicRecipes {
@@ -43,6 +49,52 @@ public final class AlembicRecipes {
             case MEDIUM -> 1.0f;
             default -> 1.0f;
         };
+    }
+
+    /** Blood optional reagents extend brew duration (Φ-capacity of the sample). */
+    public static float bloodDurationMultiplier(ItemStack r2, ItemStack r3) {
+        float mult = 1f;
+        for (ItemStack stack : new ItemStack[] {r2, r3}) {
+            if (stack.isEmpty()) {
+                continue;
+            }
+            if (stack.is(ModItems.WYVERN_BLOOD_VIAL.get())) {
+                mult = Math.max(mult, 1.5f);
+            } else if (stack.is(ModItems.MAGE_BLOOD_VIAL.get())) {
+                mult = Math.max(mult, 1.35f);
+            } else if (stack.is(ModItems.BLOOD_VIAL.get()) || stack.is(ModItemTags.ALEMBIC_REAGENT_BLOOD)) {
+                mult = Math.max(mult, 1.1f);
+            }
+        }
+        return mult;
+    }
+
+    /** Prefer mage / wyvern donor UUID for Ψ-anchor potions. */
+    @Nullable
+    public static UUID bloodDonorUuid(ItemStack r2, ItemStack r3) {
+        UUID donor = null;
+        float best = 0f;
+        for (ItemStack stack : new ItemStack[] {r2, r3}) {
+            if (stack.isEmpty() || !stack.is(ModItemTags.ALEMBIC_REAGENT_BLOOD)) {
+                continue;
+            }
+            float rank = stack.is(ModItems.WYVERN_BLOOD_VIAL.get())
+                    ? 3f
+                    : stack.is(ModItems.MAGE_BLOOD_VIAL.get()) ? 2f : 1f;
+            if (rank < best) {
+                continue;
+            }
+            CustomData custom = stack.get(DataComponents.CUSTOM_DATA);
+            if (custom == null) {
+                continue;
+            }
+            CompoundTag tag = custom.copyTag();
+            if (tag.hasUUID(BloodVialEmptyItem.NBT_DONOR)) {
+                donor = tag.getUUID(BloodVialEmptyItem.NBT_DONOR);
+                best = rank;
+            }
+        }
+        return donor;
     }
 
     /** Optional reagents are ignored in MVP but reserved for future flora / distillate. */

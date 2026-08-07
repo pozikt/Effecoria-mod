@@ -39,4 +39,20 @@ public final class KeyBindings {
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_G,
             "key.categories.effecoria");
+
+    /** Link / double-tap throw for environmental matter casting (Elemental). */
+    public static final KeyMapping MATTER_LINK = new KeyMapping(
+            "key.effecoria.matter_link",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_V,
+            "key.categories.effecoria");
+
+    /** Hold to channel a bonded matter barrier. */
+    public static final KeyMapping MATTER_CHANNEL = new KeyMapping(
+            "key.effecoria.matter_channel",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_B,
+            "key.categories.effecoria");
 }

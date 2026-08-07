@@ -30,6 +30,7 @@ public final class PlayerPsiData {
                 ByteBufCodecs.FLOAT.encode(buf, data.frequencyHz);
                 ByteBufCodecs.FLOAT.encode(buf, data.entropyB);
                 ByteBufCodecs.BOOL.encode(buf, data.initiated);
+                ByteBufCodecs.BOOL.encode(buf, data.schoolChoiceDeferred);
                 ByteBufCodecs.INT.encode(buf, data.selectedSpellIndex);
                 ByteBufCodecs.VAR_LONG.encode(buf, data.phiSenseUntil);
                 ByteBufCodecs.FLOAT.encode(buf, data.breathingMastery);
@@ -92,6 +93,7 @@ public final class PlayerPsiData {
                 data.frequencyHz = ByteBufCodecs.FLOAT.decode(buf);
                 data.entropyB = ByteBufCodecs.FLOAT.decode(buf);
                 data.initiated = ByteBufCodecs.BOOL.decode(buf);
+                data.schoolChoiceDeferred = ByteBufCodecs.BOOL.decode(buf);
                 data.selectedSpellIndex = ByteBufCodecs.INT.decode(buf);
                 data.phiSenseUntil = ByteBufCodecs.VAR_LONG.decode(buf);
                 data.breathingMastery = ByteBufCodecs.FLOAT.decode(buf);
@@ -161,6 +163,8 @@ public final class PlayerPsiData {
     private float frequencyHz;
     private float entropyB;
     private boolean initiated;
+    /** Player closed first-join school select without initiating; may choose later via Resonance Focus. */
+    private boolean schoolChoiceDeferred;
     private int selectedSpellIndex;
     private List<ResourceLocation> knownSpells = new ArrayList<>();
     private List<ResourceLocation> knownSealWords = new ArrayList<>();
@@ -243,6 +247,14 @@ public final class PlayerPsiData {
 
     public boolean initiated() {
         return initiated;
+    }
+
+    public boolean schoolChoiceDeferred() {
+        return schoolChoiceDeferred;
+    }
+
+    public void setSchoolChoiceDeferred(boolean deferred) {
+        this.schoolChoiceDeferred = deferred;
     }
 
     public int selectedSpellIndex() {
@@ -742,6 +754,7 @@ public final class PlayerPsiData {
         this.school = chosenSchool;
         this.frequencyHz = chosenSchool.nominalFrequencyHz();
         this.initiated = true;
+        this.schoolChoiceDeferred = false;
         this.knownSpells = new ArrayList<>(spells);
         this.selectedSpellIndex = 0;
         this.entropyB = 0f;
@@ -775,6 +788,7 @@ public final class PlayerPsiData {
         tag.putFloat("frequencyHz", frequencyHz);
         tag.putFloat("entropyB", entropyB);
         tag.putBoolean("initiated", initiated);
+        tag.putBoolean("schoolChoiceDeferred", schoolChoiceDeferred);
         tag.putInt("selectedSpellIndex", selectedSpellIndex);
         tag.putLong("phiSenseUntil", phiSenseUntil);
         tag.putFloat("breathingMastery", breathingMastery);
@@ -851,6 +865,7 @@ public final class PlayerPsiData {
         frequencyHz = tag.getFloat("frequencyHz");
         entropyB = tag.getFloat("entropyB");
         initiated = tag.getBoolean("initiated");
+        schoolChoiceDeferred = tag.contains("schoolChoiceDeferred") && tag.getBoolean("schoolChoiceDeferred");
         selectedSpellIndex = tag.getInt("selectedSpellIndex");
         phiSenseUntil = tag.getLong("phiSenseUntil");
         if (tag.contains("breathingMastery")) {
@@ -982,6 +997,7 @@ public final class PlayerPsiData {
         copy.frequencyHz = frequencyHz;
         copy.entropyB = entropyB;
         copy.initiated = initiated;
+        copy.schoolChoiceDeferred = schoolChoiceDeferred;
         copy.selectedSpellIndex = selectedSpellIndex;
         copy.knownSpells = new ArrayList<>(knownSpells);
         copy.knownSealWords = new ArrayList<>(knownSealWords);

@@ -68,6 +68,118 @@ public final class ModNetworking {
         }
     }
 
+    public record DeferSchoolPayload() implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<DeferSchoolPayload> TYPE =
+                new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "defer_school"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, DeferSchoolPayload> STREAM_CODEC =
+                StreamCodec.unit(new DeferSchoolPayload());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(DeferSchoolPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                PlayerPsiData data = PsiHelper.get(player);
+                if (data.initiated()) {
+                    return;
+                }
+                data.setSchoolChoiceDeferred(true);
+                player.syncData(ModAttachments.PSI.get());
+                player.sendSystemMessage(Component.translatable("message.effecoria.school_deferred"));
+            });
+        }
+    }
+
+    public record MatterLinkPayload() implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<MatterLinkPayload> TYPE =
+                new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "matter_link"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, MatterLinkPayload> STREAM_CODEC =
+                StreamCodec.unit(new MatterLinkPayload());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(MatterLinkPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    com.effecoria.effect.elemental.MatterBondService.tryLink(player);
+                }
+            });
+        }
+    }
+
+    public record MatterChannelPayload(boolean active) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<MatterChannelPayload> TYPE =
+                new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "matter_channel"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, MatterChannelPayload> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.BOOL, MatterChannelPayload::active,
+                MatterChannelPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(MatterChannelPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    com.effecoria.effect.elemental.MatterBondService.setChanneling(player, payload.active());
+                }
+            });
+        }
+    }
+
+    public record MatterThrowPayload() implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<MatterThrowPayload> TYPE =
+                new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "matter_throw"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, MatterThrowPayload> STREAM_CODEC =
+                StreamCodec.unit(new MatterThrowPayload());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(MatterThrowPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    com.effecoria.effect.elemental.MatterBondService.tryThrow(player);
+                }
+            });
+        }
+    }
+
+    public record MatterBondSyncPayload(
+            boolean active, int x, int y, int z, String kind, float strength) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<MatterBondSyncPayload> TYPE =
+                new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "matter_bond_sync"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, MatterBondSyncPayload> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.BOOL, MatterBondSyncPayload::active,
+                ByteBufCodecs.VAR_INT, MatterBondSyncPayload::x,
+                ByteBufCodecs.VAR_INT, MatterBondSyncPayload::y,
+                ByteBufCodecs.VAR_INT, MatterBondSyncPayload::z,
+                ByteBufCodecs.STRING_UTF8, MatterBondSyncPayload::kind,
+                ByteBufCodecs.FLOAT, MatterBondSyncPayload::strength,
+                MatterBondSyncPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(MatterBondSyncPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> com.effecoria.client.ClientMatterBondState.apply(payload));
+        }
+    }
+
     public record SelectSpellPayload(int spellIndex) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<SelectSpellPayload> TYPE =
                 new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "select_spell"));

@@ -55,8 +55,13 @@ public final class AlchemyPotionItem extends Item {
             CriteriaTriggers.CONSUME_ITEM.trigger(player, stack);
             player.awardStat(Stats.ITEM_USED.get(this));
             if (PsiHelper.get(player).initiated()) {
-                int duration = scaledDuration(stack);
+                int duration = scaledDuration(stack, player);
                 player.addEffect(new MobEffectInstance(buffEffect.get(), duration, 0, false, true, true));
+                if (isBloodAnchoredTo(stack, player.getUUID())) {
+                    player.displayClientMessage(Component.translatable("message.effecoria.alchemy_blood_anchor"), true);
+                } else {
+                    player.displayClientMessage(Component.translatable("message.effecoria.alchemy_potion_ok"), true);
+                }
                 level.playSound(
                         null,
                         player.blockPosition(),
@@ -64,7 +69,6 @@ public final class AlchemyPotionItem extends Item {
                         SoundSource.PLAYERS,
                         0.7f,
                         1.2f);
-                player.displayClientMessage(Component.translatable("message.effecoria.alchemy_potion_ok"), true);
             } else {
                 player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 120, 0));
                 player.displayClientMessage(Component.translatable("message.effecoria.alchemy_potion_uneasy"), true);
@@ -103,8 +107,25 @@ public final class AlchemyPotionItem extends Item {
         }
     }
 
-    private int scaledDuration(ItemStack stack) {
-        return Math.max(1, Math.round(durationTicks * durationFactor(stack)));
+    private int scaledDuration(ItemStack stack, ServerPlayer player) {
+        float factor = durationFactor(stack);
+        if (isBloodAnchoredTo(stack, player.getUUID())) {
+            factor *= 1.25f;
+        }
+        return Math.max(1, Math.round(durationTicks * factor));
+    }
+
+    private static boolean isBloodAnchoredTo(ItemStack stack, java.util.UUID uuid) {
+        var custom = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+        if (custom == null) {
+            return false;
+        }
+        CompoundTag tag = custom.copyTag();
+        if (!tag.getBoolean(com.effecoria.block.EssenceAlembicBlockEntity.NBT_BLOOD_ANCHORED)
+                || !tag.hasUUID(com.effecoria.block.EssenceAlembicBlockEntity.NBT_BLOOD_DONOR)) {
+            return false;
+        }
+        return tag.getUUID(com.effecoria.block.EssenceAlembicBlockEntity.NBT_BLOOD_DONOR).equals(uuid);
     }
 
     private static float durationFactor(ItemStack stack) {

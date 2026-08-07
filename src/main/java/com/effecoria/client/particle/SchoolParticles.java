@@ -1806,7 +1806,7 @@ public final class SchoolParticles {
         }
     }
 
-    /** Brief bright spark — seal glow, Φ motes. */
+    /** Brief bright spark — seal glow, Φ motes (beige / amber). */
     public static class SparkParticle extends TextureSheetParticle {
         protected SparkParticle(
                 ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites) {
@@ -1815,6 +1815,11 @@ public final class SchoolParticles {
             this.quadSize = 0.06F + this.random.nextFloat() * 0.04F;
             this.lifetime = 6 + this.random.nextInt(4);
             this.sprite = sprites.get(this.random);
+            // Φ beige–amber, not purple/portal
+            float tint = 0.85f + this.random.nextFloat() * 0.15f;
+            this.rCol = tint;
+            this.gCol = 0.72f * tint + 0.1f;
+            this.bCol = 0.35f * tint;
         }
 
         @Override

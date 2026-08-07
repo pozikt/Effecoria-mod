@@ -29,6 +29,7 @@ import com.effecoria.effect.elemental.ElementalBlockService;
 import com.effecoria.effect.elemental.ElementalCageService;
 import com.effecoria.effect.elemental.ElementalFieldService;
 import com.effecoria.effect.elemental.ElementalShroudService;
+import com.effecoria.effect.elemental.MatterBondService;
 import com.effecoria.effect.elemental.SteamCloudService;
 import com.effecoria.effect.elemental.SteamFlightService;
 import com.effecoria.effect.mental.MentalCompulsionService;
@@ -174,6 +175,7 @@ public final class ModCommonEvents {
             AirHandService.tick(player);
             ElementalShroudService.tick(player);
             NecroSummonService.tick(player);
+            MatterBondService.tickPlayer(player);
             PsiHelper.set(player, flightData);
         }
 
@@ -264,6 +266,7 @@ public final class ModCommonEvents {
         data.clearIonCharge();
         data.clearLichAscension();
         ElementalFieldService.clearFor(player.getUUID());
+        MatterBondService.clear(player.getUUID());
         OrganicFieldService.clearFor(player.getUUID());
         NecroFieldService.clearFor(player.getUUID());
         SpatialFieldService.clearFor(player.getUUID());

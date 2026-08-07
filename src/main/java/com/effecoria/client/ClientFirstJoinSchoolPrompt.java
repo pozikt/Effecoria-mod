@@ -12,7 +12,7 @@ import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 /**
- * Opens school selection when joining a world while not yet initiated.
+ * Opens school selection when joining a world while not yet initiated and not deferred.
  * See docs/MAGIC_PLAN.md — first-join UX.
  */
 @EventBusSubscriber(modid = EffecoriaMod.MOD_ID, value = Dist.CLIENT)
@@ -40,7 +40,8 @@ public final class ClientFirstJoinSchoolPrompt {
         if (minecraft.player == null || minecraft.level == null) {
             return;
         }
-        if (PsiHelper.get(minecraft.player).initiated()) {
+        var data = PsiHelper.get(minecraft.player);
+        if (data.initiated() || data.schoolChoiceDeferred()) {
             pendingPrompt = false;
             return;
         }

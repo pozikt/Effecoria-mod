@@ -57,6 +57,26 @@ public class SchoolSelectScreen extends Screen {
         onClose();
     }
 
+    private void deferSchool() {
+        if (minecraft != null) {
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1f));
+        }
+        PacketDistributor.sendToServer(new ModNetworking.DeferSchoolPayload());
+        onClose();
+    }
+
+    private int deferButtonY() {
+        return height - 42;
+    }
+
+    private boolean hitDeferButton(int mouseX, int mouseY) {
+        int bw = 160;
+        int bh = 18;
+        int bx = (width - bw) / 2;
+        int by = deferButtonY();
+        return mouseX >= bx && mouseX < bx + bw && mouseY >= by && mouseY < by + bh;
+    }
+
     private int columns() {
         if (width >= CARD_W * 2 + CARD_GAP + 48) {
             return 2;
@@ -82,7 +102,7 @@ public class SchoolSelectScreen extends Screen {
     }
 
     private int maxScroll() {
-        int viewH = height - layoutTop() - 36;
+        int viewH = height - layoutTop() - 56;
         return Math.max(0, contentHeight - viewH);
     }
 
@@ -147,6 +167,10 @@ public class SchoolSelectScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0) {
+            if (hitDeferButton((int) mouseX, (int) mouseY)) {
+                deferSchool();
+                return true;
+            }
             MagicSchool hit = schoolAt((int) mouseX, (int) mouseY);
             if (hit != null) {
                 choose(hit);
@@ -175,7 +199,7 @@ public class SchoolSelectScreen extends Screen {
                 font, Component.translatable("gui.effecoria.school_select.pick_hint"), width / 2, 40, 0x888888);
 
         int clipTop = layoutTop();
-        int clipBottom = height - 28;
+        int clipBottom = height - 48;
         graphics.enableScissor(0, clipTop, width, clipBottom);
 
         int[] pos = new int[2];
@@ -192,6 +216,21 @@ public class SchoolSelectScreen extends Screen {
 
         graphics.disableScissor();
 
+        int deferBw = 160;
+        int deferBh = 18;
+        int deferBx = (width - deferBw) / 2;
+        int deferBy = deferButtonY();
+        boolean deferHover = hitDeferButton(mouseX, mouseY);
+        graphics.fill(deferBx - 1, deferBy - 1, deferBx + deferBw + 1, deferBy + deferBh + 1,
+                deferHover ? 0xFFE8C060 : 0xFF1A1A1A);
+        graphics.fill(deferBx, deferBy, deferBx + deferBw, deferBy + deferBh, 0xFF2B2B2B);
+        graphics.drawCenteredString(
+                font,
+                Component.translatable("gui.effecoria.school_select.defer"),
+                width / 2,
+                deferBy + 5,
+                deferHover ? 0xFFE8C060 : 0xCCCCCC);
+
         if (hoveredSchool != null) {
             graphics.drawCenteredString(
                     font,
@@ -202,7 +241,7 @@ public class SchoolSelectScreen extends Screen {
         } else {
             graphics.drawCenteredString(
                     font,
-                    Component.translatable("gui.effecoria.school_select.scroll_hint"),
+                    Component.translatable("gui.effecoria.school_select.defer_hint"),
                     width / 2,
                     height - 18,
                     0x666666);

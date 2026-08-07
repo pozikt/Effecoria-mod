@@ -31,6 +31,9 @@ public final class ClientInputEvents {
     private static long castHoldStartMs;
     private static float castCharge;
 
+    private static long lastMatterLinkMs;
+    private static boolean matterChannelWasDown;
+
     private ClientInputEvents() {}
 
     /**
@@ -161,6 +164,10 @@ public final class ClientInputEvents {
             minecraft.setScreen(new com.effecoria.client.gui.SealProgramScreen(blockHit.getBlockPos()));
         }
 
+        if (minecraft.screen == null) {
+            tickMatterInput(minecraft);
+        }
+
         if (minecraft.screen != null) {
             resetHoldState();
             return;
@@ -217,6 +224,37 @@ public final class ClientInputEvents {
             castHoldStartMs = 0L;
         }
         castKeyWasDown = castDown;
+    }
+
+    private static void tickMatterInput(Minecraft minecraft) {
+        PlayerPsiData data = minecraft.player.getData(ModAttachments.PSI.get());
+        if (!data.initiated() || data.school() != com.effecoria.core.magic.MagicSchool.ELEMENTAL) {
+            if (matterChannelWasDown) {
+                PacketDistributor.sendToServer(new ModNetworking.MatterChannelPayload(false));
+                matterChannelWasDown = false;
+            }
+            while (KeyBindings.MATTER_LINK.consumeClick()) {
+                // swallow
+            }
+            return;
+        }
+
+        while (KeyBindings.MATTER_LINK.consumeClick()) {
+            long now = System.currentTimeMillis();
+            if (now - lastMatterLinkMs <= 280L && ClientMatterBondState.active()) {
+                PacketDistributor.sendToServer(new ModNetworking.MatterThrowPayload());
+                lastMatterLinkMs = 0L;
+            } else {
+                PacketDistributor.sendToServer(new ModNetworking.MatterLinkPayload());
+                lastMatterLinkMs = now;
+            }
+        }
+
+        boolean channelDown = isKeyPhysicallyDown(minecraft, KeyBindings.MATTER_CHANNEL.getKey());
+        if (channelDown != matterChannelWasDown) {
+            PacketDistributor.sendToServer(new ModNetworking.MatterChannelPayload(channelDown));
+            matterChannelWasDown = channelDown;
+        }
     }
 
     private static void resetCastCharge() {

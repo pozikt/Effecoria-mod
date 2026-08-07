@@ -8,11 +8,11 @@ import com.effecoria.client.particle.SchoolParticles;
 import com.effecoria.client.render.CrystalCrabRenderer;
 import com.effecoria.client.render.DeathShadowRenderer;
 import com.effecoria.client.render.EidosRenderer;
+import com.effecoria.client.render.EssenceWyvernRenderer;
 import com.effecoria.client.render.MirageHorrorRenderer;
 import com.effecoria.client.render.PhiLarvaRenderer;
 import com.effecoria.client.render.RootCageRenderer;
 import com.effecoria.client.render.SubspacePortalRenderer;
-import com.effecoria.client.render.EssenceWyvernRenderer;
 import com.effecoria.client.render.VitrifiedGolemRenderer;
 import com.effecoria.client.gui.alchemy.AlembicScreen;
 import com.effecoria.client.gui.alchemy.BurnerScreen;
@@ -76,6 +76,8 @@ public final class EffecoriaClient {
         event.register(KeyBindings.OPEN_SPELL_BOOK);
         event.register(KeyBindings.CYCLE_SPELL_MODIFIER);
         event.register(KeyBindings.OPEN_SEAL_EDITOR);
+        event.register(KeyBindings.MATTER_LINK);
+        event.register(KeyBindings.MATTER_CHANNEL);
     }
 
     @SubscribeEvent

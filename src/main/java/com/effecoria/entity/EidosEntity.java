@@ -163,15 +163,25 @@ public class EidosEntity extends PathfinderMob implements GeoEntity {
             if (!server.getBlockState(dest).isAir() && server.getBlockState(dest.above()).isAir()) {
                 serverPlayer.teleportTo(server, x + 0.5, y + 1.0, z + 0.5, serverPlayer.getYRot(), serverPlayer.getXRot());
                 server.sendParticles(
-                        net.minecraft.core.particles.ParticleTypes.PORTAL,
+                        ModParticleTypes.PHI_SPARK.get(),
                         x + 0.5,
                         y + 1.5,
                         z + 0.5,
-                        40,
-                        0.4,
-                        0.6,
-                        0.4,
-                        0.2);
+                        28,
+                        0.35,
+                        0.5,
+                        0.35,
+                        0.04);
+                server.sendParticles(
+                        ModParticleTypes.ELEMENTAL_SPARK.get(),
+                        x + 0.5,
+                        y + 1.2,
+                        z + 0.5,
+                        12,
+                        0.25,
+                        0.35,
+                        0.25,
+                        0.02);
                 serverPlayer.displayClientMessage(Component.translatable("message.effecoria.eidos_portal"), true);
                 playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0f, 1.2f);
                 return;

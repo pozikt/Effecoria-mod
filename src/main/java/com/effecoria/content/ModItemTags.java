@@ -19,4 +19,6 @@ public final class ModItemTags {
             TagKey.create(Registries.ITEM, EffecoriaMod.id("alembic_reagent_power"));
     public static final TagKey<Item> ALEMBIC_REAGENT_OPTIONAL =
             TagKey.create(Registries.ITEM, EffecoriaMod.id("alembic_reagent_optional"));
+    public static final TagKey<Item> ALEMBIC_REAGENT_BLOOD =
+            TagKey.create(Registries.ITEM, EffecoriaMod.id("alembic_reagent_blood"));
 }

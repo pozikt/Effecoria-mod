@@ -25,6 +25,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Shared cast readability: school wind-up at the caster, impact burst, and a horizontal AoE ring.
  * Spell-specific FX still run in school effect classes; this layer makes every cast identifiable.
+ * Visual language: school tint + Φ beige/amber {@link ModParticleTypes#PHI_SPARK} accents (no portal purple).
  * Spatial school is sound + Veil distortion only (no particles).
  */
 public final class CastPresentation {
@@ -222,10 +223,18 @@ public final class CastPresentation {
 
     private static void playWindUp(ServerPlayer caster, SchoolTheme theme) {
         ServerLevel level = caster.serverLevel();
-        Vec3 hand = caster.getEyePosition().add(caster.getLookAngle().scale(0.55)).add(0, -0.25, 0);
+        Vec3 eye = caster.getEyePosition();
+        Vec3 look = caster.getLookAngle();
+        Vec3 hand = eye.add(look.scale(0.55)).add(0, -0.25, 0);
         if (theme.usesParticles()) {
-            level.sendParticles(theme.primary(), hand.x, hand.y, hand.z, 10, 0.18, 0.18, 0.18, 0.02);
-            level.sendParticles(theme.secondary(), hand.x, hand.y, hand.z, 6, 0.12, 0.14, 0.12, 0.01);
+            level.sendParticles(theme.primary(), hand.x, hand.y, hand.z, 8, 0.12, 0.12, 0.12, 0.015);
+            level.sendParticles(theme.secondary(), hand.x, hand.y, hand.z, 5, 0.1, 0.1, 0.1, 0.008);
+            // Φ amber accent cone toward the cast direction
+            for (int i = 0; i < 6; i++) {
+                double t = 0.15 + i * 0.12;
+                Vec3 p = eye.add(look.scale(t)).add(0, -0.2, 0);
+                level.sendParticles(ModParticleTypes.PHI_SPARK.get(), p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
+            }
         }
         level.playSound(
                 null,
@@ -240,7 +249,8 @@ public final class CastPresentation {
         ServerLevel level = caster.serverLevel();
         Vec3 hand = caster.getEyePosition().add(caster.getLookAngle().scale(0.4));
         if (theme.usesParticles()) {
-            level.sendParticles(theme.secondary(), hand.x, hand.y, hand.z, 4, 0.1, 0.1, 0.1, 0.005);
+            level.sendParticles(theme.secondary(), hand.x, hand.y, hand.z, 3, 0.08, 0.08, 0.08, 0.004);
+            level.sendParticles(ModParticleTypes.PHI_SPARK.get(), hand.x, hand.y, hand.z, 2, 0.05, 0.05, 0.05, 0.0);
         }
         level.playSound(
                 null,
@@ -252,20 +262,24 @@ public final class CastPresentation {
     }
 
     private static void playImpact(ServerLevel level, Vec3 focus, SchoolTheme theme, float power) {
-        int burst = 10 + Mth.clamp(Math.round(power / 8f), 0, 18);
-        level.sendParticles(theme.primary(), focus.x, focus.y, focus.z, burst, 0.28, 0.35, 0.28, 0.04);
-        level.sendParticles(theme.secondary(), focus.x, focus.y + 0.15, focus.z, burst / 2, 0.2, 0.25, 0.2, 0.02);
+        int burst = 12 + Mth.clamp(Math.round(power / 7f), 0, 20);
+        level.sendParticles(theme.primary(), focus.x, focus.y, focus.z, burst, 0.32, 0.38, 0.32, 0.045);
+        level.sendParticles(theme.secondary(), focus.x, focus.y + 0.15, focus.z, Math.max(4, burst / 2), 0.22, 0.28, 0.22, 0.025);
+        level.sendParticles(ModParticleTypes.PHI_SPARK.get(), focus.x, focus.y + 0.2, focus.z, 6 + burst / 4, 0.18, 0.22, 0.18, 0.01);
     }
 
     private static void playRing(ServerLevel level, Vec3 center, SchoolTheme theme, float radius) {
-        int segments = 18;
+        int segments = 24;
         for (int i = 0; i < segments; i++) {
             double angle = (Math.PI * 2.0 * i) / segments;
             double x = center.x + Math.cos(angle) * radius;
             double z = center.z + Math.sin(angle) * radius;
-            level.sendParticles(theme.primary(), x, center.y, z, 1, 0.02, 0.04, 0.02, 0.0);
+            level.sendParticles(theme.primary(), x, center.y, z, 1, 0.02, 0.05, 0.02, 0.0);
+            if (i % 2 == 0) {
+                level.sendParticles(ModParticleTypes.PHI_SPARK.get(), x, center.y + 0.1, z, 1, 0.01, 0.04, 0.01, 0.0);
+            }
             if (i % 3 == 0) {
-                level.sendParticles(theme.secondary(), x, center.y + 0.12, z, 1, 0.02, 0.06, 0.02, 0.0);
+                level.sendParticles(theme.secondary(), x, center.y + 0.14, z, 1, 0.02, 0.06, 0.02, 0.0);
             }
         }
     }
@@ -490,7 +504,7 @@ public final class CastPresentation {
                     ModParticleTypes.MENTAL_FORCE.get(),
                     ModParticleTypes.MENTAL_FOG.get(),
                     SoundEvents.AMETHYST_BLOCK_CHIME,
-                    SoundEvents.ILLUSIONER_CAST_SPELL,
+                    SoundEvents.ENCHANTMENT_TABLE_USE,
                     0.45f,
                     1.4f,
                     0.55f,
@@ -501,7 +515,7 @@ public final class CastPresentation {
                     ModParticleTypes.MENTAL_SHARD.get(),
                     ModParticleTypes.PHI_SPARK.get(),
                     SoundEvents.AMETHYST_BLOCK_CHIME,
-                    SoundEvents.ILLUSIONER_CAST_SPELL,
+                    SoundEvents.ENCHANTMENT_TABLE_USE,
                     0.4f,
                     1.5f,
                     0.55f,
@@ -545,7 +559,7 @@ public final class CastPresentation {
                     ModParticleTypes.MENTAL_FORCE.get(),
                     ModParticleTypes.MENTAL_FEAR.get(),
                     SoundEvents.AMETHYST_BLOCK_CHIME,
-                    SoundEvents.ILLUSIONER_CAST_SPELL,
+                    SoundEvents.ENCHANTMENT_TABLE_USE,
                     0.4f,
                     0.95f,
                     0.55f,
@@ -567,7 +581,7 @@ public final class CastPresentation {
                     ModParticleTypes.MENTAL_FOG.get(),
                     ModParticleTypes.MENTAL_SHARD.get(),
                     SoundEvents.AMETHYST_BLOCK_CHIME,
-                    SoundEvents.ILLUSIONER_CAST_SPELL,
+                    SoundEvents.ENCHANTMENT_TABLE_USE,
                     0.45f,
                     1.25f,
                     0.55f,
@@ -577,7 +591,7 @@ public final class CastPresentation {
                 ModParticleTypes.MENTAL_FOG.get(),
                 ModParticleTypes.PHI_SPARK.get(),
                 SoundEvents.AMETHYST_BLOCK_CHIME,
-                SoundEvents.ILLUSIONER_CAST_SPELL,
+                SoundEvents.ENCHANTMENT_TABLE_USE,
                 0.45f,
                 1.35f,
                 0.55f,

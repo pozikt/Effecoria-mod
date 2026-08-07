@@ -691,5 +691,21 @@ public final class BalanceConfig {
             .comment("Magic DPS tick damage in Black zone")
             .defineInRange("spire_dmg_black", 12.0, 0.0, 80.0);
 
+    public static final ModConfigSpec.DoubleValue MATTER_CAST_MIN_MASTERY = BUILDER
+            .comment("Minimum breathing mastery to use environmental matter casting (Elemental)")
+            .defineInRange("matter_cast_min_mastery", 0.15, 0.0, 10.0);
+    public static final ModConfigSpec.DoubleValue MATTER_BOND_RANGE = BUILDER
+            .comment("Max distance to maintain a matter bond")
+            .defineInRange("matter_bond_range", 8.0, 2.0, 32.0);
+    public static final ModConfigSpec.DoubleValue MATTER_THROW_PSI = BUILDER
+            .comment("Ψ cost to throw a bonded matter form")
+            .defineInRange("matter_throw_psi", 8.0, 0.0, 100.0);
+    public static final ModConfigSpec.DoubleValue MATTER_THROW_SOURCE_DRAIN = BUILDER
+            .comment("Bond strength drained per throw")
+            .defineInRange("matter_throw_source_drain", 1.25, 0.0, 20.0);
+    public static final ModConfigSpec.DoubleValue MATTER_CHANNEL_PSI_PER_TICK = BUILDER
+            .comment("Ψ drained each tick while holding a matter barrier")
+            .defineInRange("matter_channel_psi_per_tick", 0.15, 0.0, 10.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 }
