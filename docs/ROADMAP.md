@@ -4,8 +4,6 @@ Prioritizes **perfecting magic & energy** first, then world layers, technology, 
 
 Lore reference: [Effecoria encyclopedia](https://github.com/pozikt/Effecoria).
 
-Monetization / release funnel (free core, support, server, DLC): [docs/monetization/](monetization/README.md). Stage I “recommend to a friend” gate: [STAGE_I_FUNNEL.md](monetization/STAGE_I_FUNNEL.md).
-
 ---
 
 ## Stage order (locked)

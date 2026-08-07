@@ -32,7 +32,7 @@ First launch downloads NeoForge and Minecraft — expect several minutes.
 8. Testers: `/effecoria debug`, `/effecoria reschool <school>`, `/effecoria max [school]`
 9. Creative: Φ ∞ / free casts when `creative_god_mode` is on (config)
 
-Known issues: [docs/monetization/KNOWN_ISSUES.md](docs/monetization/KNOWN_ISSUES.md) · Funnel gate: [STAGE_I_FUNNEL.md](docs/monetization/STAGE_I_FUNNEL.md)
+Known issues: [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)
 
 ## Project layout
 
@@ -45,7 +45,7 @@ src/main/java/com/effecoria/
 
 src/main/resources/data/effecoria/spells/   MVP spell JSON (phase 1 loader)
 addons/school-codex/                        Paid DLC scaffold (drafts only)
-docs/                                       Design, architecture, monetization
+docs/                                       Design, architecture, balance
 src/test/java/                              Unit tests (optional, WIP)
 ```
 

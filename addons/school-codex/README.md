@@ -1,7 +1,7 @@
 # Effecoria School Codex (addon scaffold)
 
-Paid content pack for the free [Effecoria](../../README.md) core.  
-**Status:** scaffold / drafts only — do not sell until gates in [docs/monetization/DLC_SCHOOL_CODEX.md](../../docs/monetization/DLC_SCHOOL_CODEX.md) pass.
+Optional content pack for the [Effecoria](../../README.md) core.  
+**Status:** scaffold / drafts only — not wired into the game yet.
 
 ## Planned mod id
 
@@ -18,7 +18,6 @@ Paid content pack for the free [Effecoria](../../README.md) core.
 |------|---------|
 | `content-draft/spells/` | Extra spell JSON per school |
 | `content-draft/seals/` | Extra seal words |
-| `STORE_PAGE.md` | Boosty/Gumroad copy |
 
 Drafts are **not** loaded by the game until a real NeoForge subproject is wired.
 
@@ -28,8 +27,7 @@ Drafts are **not** loaded by the game until a real NeoForge subproject is wired.
 2. Copy approved drafts into `src/main/resources/data/effecoria_school_codex/...` (or merge into `effecoria` namespace if the loader expects one pack — prefer separate namespace + core registry scan if supported).
 3. Add lang keys RU/EN.
 4. Smoke-test: core alone works; core+codex loads extras; codex alone fails gracefully.
-5. Distribute paid jar via Boosty shop; keep core on Modrinth.
 
 ## License
 
-All Rights Reserved (same as core until stated otherwise). Paid distribution does not transfer copyright to buyers — license grant for personal use only (state on store page).
+All Rights Reserved (same as core until stated otherwise).
