@@ -1,0 +1,44 @@
+---
+description: Phi-chitin player armor — cube→atlas pipeline, layers, 64×64 models
+globs: art/items/armor_cubes/**,scripts/pack_*armor*.py,**/PhiChitin*Armor*.java,**/ClientArmorExtensions.java,**/textures/models/armor/**
+alwaysApply: false
+---
+
+# Phi-chitin armor pipeline (canonical)
+
+## Cycle (every piece)
+1. Generate a **strict orthographic cube-face grid** (axis-aligned only; no 3/4). One row (or N×6) of Front, Back, Left, Right, Top, Bottom.
+2. **Atlas analysis**: vanilla UV island vs extra `ModelPart` cubes for protrusions (pauldrons, etc.).
+3. Pack faces → game texture with a `scripts/pack_*_cube_armor.py` script → **user reviews in-game**.
+4. Polish (eyes, gold from item icon, cutouts) only after the user okays silhouette.
+
+## Layers
+| Piece | Texture | Notes |
+|-------|---------|--------|
+| Helmet, chest, boots | `phi_chitin_layer_1.png` **64×64** | Rows 0–31 = vanilla UV; rows 32+ = extra cube nets (pauldrons) |
+| Leggings | `phi_chitin_layer_2.png` **64×32** | Right leg + waist belt; left leg mirrors |
+
+Mask to **iron** silhouette for that piece so boots/leggings don’t fight each other.
+
+## Critical: texSize 64×64
+Once `layer_1` is 64×64, **every** piece that uses it needs a custom `HumanoidArmorModel` with `LayerDefinition.create(mesh, 64, 64)` registered in `ClientArmorExtensions`. Default 64×32 models sample the **lower half** (pauldrons) → boots looked like a waist plate.
+
+Reference models: `PhiChitinHelmetArmorModel`, `PhiChitinChestArmorModel`, `PhiChitinBootsArmorModel`.
+
+## UV cheatsheet (right side; left mirrors)
+- **Head**: Top `(8,0)`, Bottom `(16,0)`, Right/Front/Left/Back `(0/8/16/24,8)` — each 8×8
+- **Body (chest)**: Front `(20,20) 8×12`, sides 4×12; cutouts for neck + waist hem
+- **Leg (leggings layer_2)**: Top `(4,16) 4×4`; sides `(0/4/8/12,20) 4×12`; bottom open for boots
+- **Waist (leggings)**: iron only keeps ~`y=27..31` — stamp **top** of belt art into that strip
+- **Boots (layer_1)**: sole `(8,16) 4×4`; sides only `y=26..31` — stamp **lower** ankle/toe art
+
+## Art / scripts
+- Grids + crops: `art/items/armor_cubes/`
+- Pack scripts: `scripts/pack_{chest,helmet,leggings,boots}_cube_armor.py`
+- Human write-up: `art/items/armor_cubes/README.md`
+- Palette: soft indigo/violet plates, cyan glow, optional gold Φ lines from item icons when cube art lacks them
+
+## Do not
+- Invent organic/smooth armor meshes — Minecraft is cubes only
+- Expand `layer_1` height without updating **all** consumers’ texSize
+- Commit golem concept spam / `dist/` / `tmp/` with armor work
