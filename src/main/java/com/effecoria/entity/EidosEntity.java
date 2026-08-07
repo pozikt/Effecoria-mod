@@ -5,6 +5,9 @@ import com.effecoria.content.ModParticleTypes;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -47,6 +50,9 @@ import software.bernie.geckolib.util.GeckoLibUtil;
  * Eidos — rare pure Φ-field being. Passive; offering an essonite crystal yields a buff or a short portal hop.
  */
 public class EidosEntity extends PathfinderMob implements GeoEntity {
+    private static final EntityDataAccessor<Boolean> GIFTING =
+            SynchedEntityData.defineId(EidosEntity.class, EntityDataSerializers.BOOLEAN);
+
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.eidos.idle");
     private static final RawAnimation GIFT = RawAnimation.begin().thenPlay("animation.eidos.gift");
 
@@ -66,6 +72,12 @@ public class EidosEntity extends PathfinderMob implements GeoEntity {
                 .add(Attributes.MOVEMENT_SPEED, 0.2)
                 .add(Attributes.FLYING_SPEED, 0.35)
                 .add(Attributes.FOLLOW_RANGE, 16.0);
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(GIFTING, false);
     }
 
     @Override
@@ -101,6 +113,7 @@ public class EidosEntity extends PathfinderMob implements GeoEntity {
             stack.shrink(1);
         }
         giftAnimTicks = 20;
+        this.entityData.set(GIFTING, true);
         giftCooldown = 20 * 30;
         playSound(SoundEvents.AMETHYST_BLOCK_CHIME, 1.2f, 1.4f);
         if (level() instanceof ServerLevel server) {
@@ -170,11 +183,16 @@ public class EidosEntity extends PathfinderMob implements GeoEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (giftAnimTicks > 0) {
-            giftAnimTicks--;
-        }
-        if (giftCooldown > 0) {
-            giftCooldown--;
+        if (!level().isClientSide) {
+            if (giftAnimTicks > 0) {
+                giftAnimTicks--;
+                if (giftAnimTicks == 0) {
+                    this.entityData.set(GIFTING, false);
+                }
+            }
+            if (giftCooldown > 0) {
+                giftCooldown--;
+            }
         }
         if (level().isClientSide && tickCount % 8 == 0) {
             level().addParticle(
@@ -188,9 +206,12 @@ public class EidosEntity extends PathfinderMob implements GeoEntity {
         }
     }
 
+    public boolean isGiftingAnim() {
+        return this.entityData.get(GIFTING);
+    }
+
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        // Soft — flees rather than fights; still killable but resistant.
         return super.hurt(source, amount * 0.5f);
     }
 
@@ -225,7 +246,7 @@ public class EidosEntity extends PathfinderMob implements GeoEntity {
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "main", 3, state -> {
-            if (giftAnimTicks > 0) {
+            if (isGiftingAnim()) {
                 state.setAnimation(GIFT);
             } else {
                 state.setAnimation(IDLE);

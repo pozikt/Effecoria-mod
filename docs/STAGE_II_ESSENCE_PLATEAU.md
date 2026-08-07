@@ -61,7 +61,7 @@ GeckoLib mobs native to the plateau (spawn eggs in creative):
 |-----|------|-------|
 | **Φ-larva** | Passive | Segmented glowing grub (GeckoLib); breeds on essonite dust; adults restore Ψ / charge Φ-cells; drops dust. Art: `art/phi_larva/` |
 | **Crystal crab** | Neutral | Stone-beige golem-crab with amber crystals; angers if essonite mined nearby; drops shards + Φ-chitin. Art: `art/crystal_crab/` |
-| **Eidos** | Rare passive | Offer essonite crystal / pure essonite → random buff or short-range portal hop |
+| **Eidos** | Rare passive | Beige Φ-field spirit with amber orbital rings; offer essonite crystal / pure essonite → buff or short portal hop. Art: `art/eidos/` |
 | **Essence Wyvern** | Rare hostile apex | Classical wyvern (**no front legs**); flight + melee + plasma-breath stub; see `docs/ESSENCE_WYVERN.md` |
 
 *(Twisted mage deferred; wyvern life-stages / dedicated drops later.)*

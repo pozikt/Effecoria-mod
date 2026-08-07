@@ -2,50 +2,30 @@ package com.effecoria.client.render;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.entity.EidosEntity;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
-import software.bernie.geckolib.cache.object.BakedGeoModel;
+import org.jetbrains.annotations.Nullable;
+
 import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
 public class EidosRenderer extends GeoEntityRenderer<EidosEntity> {
     public EidosRenderer(EntityRendererProvider.Context context) {
         super(context, new Model());
-        this.shadowRadius = 0.4f;
+        this.shadowRadius = 0.35f;
     }
 
     @Override
-    public void actuallyRender(
-            PoseStack poseStack,
+    public RenderType getRenderType(
             EidosEntity animatable,
-            BakedGeoModel model,
-            net.minecraft.client.renderer.RenderType renderType,
-            MultiBufferSource bufferSource,
-            VertexConsumer buffer,
-            boolean isReRender,
-            float partialTick,
-            int packedLight,
-            int packedOverlay,
-            int colour) {
-        int tinted = (Math.round(0.85f * 255) << 24) | (colour & 0x00FFFFFF);
-        super.actuallyRender(
-                poseStack,
-                animatable,
-                model,
-                renderType,
-                bufferSource,
-                buffer,
-                isReRender,
-                partialTick,
-                packedLight,
-                OverlayTexture.NO_OVERLAY,
-                tinted);
+            ResourceLocation texture,
+            @Nullable MultiBufferSource bufferSource,
+            float partialTick) {
+        return RenderType.entityCutoutNoCull(texture);
     }
 
     private static final class Model extends GeoModel<EidosEntity> {
