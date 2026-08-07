@@ -5,6 +5,9 @@ import com.effecoria.content.ModItems;
 import com.effecoria.content.PhiHarnessItems;
 import com.effecoria.core.psi.PsiHelper;
 
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -36,10 +39,13 @@ import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 /**
- * Φ-larva — glowing worm that crawls near essonite. Breedable “magic battery”:
+ * Φ-larva — glowing segmented grub that crawls near essonite. Breedable “magic battery”:
  * adults near a player slowly restore Ψ / charge Φ-cells.
  */
 public class PhiLarvaEntity extends Animal implements GeoEntity {
+    private static final EntityDataAccessor<Boolean> CRAWLING =
+            SynchedEntityData.defineId(PhiLarvaEntity.class, EntityDataSerializers.BOOLEAN);
+
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.phi_larva.idle");
     private static final RawAnimation CRAWL = RawAnimation.begin().thenLoop("animation.phi_larva.crawl");
 
@@ -57,6 +63,12 @@ public class PhiLarvaEntity extends Animal implements GeoEntity {
     }
 
     @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(CRAWLING, false);
+    }
+
+    @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.35));
@@ -71,6 +83,15 @@ public class PhiLarvaEntity extends Animal implements GeoEntity {
     @Override
     public void aiStep() {
         super.aiStep();
+        if (!level().isClientSide) {
+            double dx = getX() - xo;
+            double dz = getZ() - zo;
+            boolean navigating = getNavigation().isInProgress();
+            boolean crawling = navigating || (onGround() && (dx * dx + dz * dz) > 2.5E-5);
+            if (this.entityData.get(CRAWLING) != crawling) {
+                this.entityData.set(CRAWLING, crawling);
+            }
+        }
         if (level().isClientSide || isBaby() || tickCount % 40 != 0) {
             return;
         }
@@ -90,6 +111,10 @@ public class PhiLarvaEntity extends Animal implements GeoEntity {
                 PhiHarnessItems.setCellCharge(cell, Math.min(1f, charge + 0.04f));
             }
         }
+    }
+
+    public boolean isCrawlingAnim() {
+        return this.entityData.get(CRAWLING);
     }
 
     @Override
@@ -120,7 +145,8 @@ public class PhiLarvaEntity extends Animal implements GeoEntity {
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "main", 3, state -> {
-            if (state.isMoving()) {
+            // Prefer synced CRAWLING — client isMoving/limbSwing is flaky for pathfinding mobs.
+            if (isCrawlingAnim() || state.getLimbSwingAmount() > 0.02f || state.isMoving()) {
                 state.setAnimation(CRAWL);
             } else {
                 state.setAnimation(IDLE);
