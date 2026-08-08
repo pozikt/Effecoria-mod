@@ -4,6 +4,7 @@ import com.effecoria.entity.MirageHorrorEntity;
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.magic.MagicSchool;
+import com.effecoria.core.magic.MobMagicService;
 import com.effecoria.core.phi.PhiFieldService;
 import com.effecoria.core.progression.BiologyService;
 import com.effecoria.core.progression.BreathingService;
@@ -29,13 +30,20 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.phys.AABB;
 
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 public final class EffecoriaCommands {
     private static final SuggestionProvider<CommandSourceStack> STAT_SUGGESTIONS = (ctx, builder) ->
@@ -82,11 +90,28 @@ public final class EffecoriaCommands {
                                                 ctx.getSource(),
                                                 ResourceLocationArgument.getId(ctx, "spell"),
                                                 ctx.getSource().getPlayerOrException())))
+                                .then(Commands.literal("nearest")
+                                        .executes(ctx -> castAtNearby(
+                                                ctx.getSource(),
+                                                ResourceLocationArgument.getId(ctx, "spell"),
+                                                false)))
+                                .then(Commands.literal("random")
+                                        .executes(ctx -> castAtNearby(
+                                                ctx.getSource(),
+                                                ResourceLocationArgument.getId(ctx, "spell"),
+                                                true)))
                                 .then(Commands.argument("target", EntityArgument.entity())
                                         .executes(ctx -> cast(
                                                 ctx.getSource(),
                                                 ResourceLocationArgument.getId(ctx, "spell"),
                                                 EntityArgument.getEntity(ctx, "target"))))))
+                .then(Commands.literal("initiateMob")
+                        .requires(source -> source.hasPermission(2))
+                        .executes(ctx -> initiateMob(ctx.getSource(), null))
+                        .then(Commands.argument("school", StringArgumentType.word())
+                                .suggests(SCHOOL_SUGGESTIONS)
+                                .executes(ctx -> initiateMob(
+                                        ctx.getSource(), StringArgumentType.getString(ctx, "school")))))
                 .then(Commands.literal("spells")
                         .executes(ctx -> listSpells(ctx.getSource())))
                 .then(Commands.literal("set")
@@ -117,7 +142,7 @@ public final class EffecoriaCommands {
 
     private static int help(CommandSourceStack source) {
         source.sendSuccess(() -> Component.literal(
-                "Effecoria: help | version | debug | initiate <school> | reschool <school> | cast <id> [self|@e] | spells | max [school] | set <stat> <value> | horror | subspaceSpeed [0-4096]"),
+                "Effecoria: help | version | debug | initiate <school> | reschool <school> | initiateMob [school] | cast <id> [self|nearest|random|@e] | spells | max [school] | set <stat> <value> | horror | subspaceSpeed [0-4096]"),
                 false);
         return 1;
     }
@@ -346,6 +371,75 @@ public final class EffecoriaCommands {
             return null;
         }
         return school;
+    }
+
+    private static final double NEARBY_MOB_RADIUS = 24.0;
+
+    /**
+     * Op test: initiate a random nearby mob with a random (or chosen) school so they cast in combat.
+     */
+    private static int initiateMob(CommandSourceStack source, @Nullable String schoolName)
+            throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        LivingEntity found = findNearbyMob(player, true);
+        if (!(found instanceof Mob mob)) {
+            source.sendFailure(Component.translatable("message.effecoria.cast_command_no_mob"));
+            return 0;
+        }
+
+        MagicSchool school;
+        if (schoolName == null || schoolName.equalsIgnoreCase("random")) {
+            school = MobMagicService.randomSchool(mob.getRandom());
+        } else {
+            school = resolveSchool(source, schoolName);
+            if (school == null) {
+                return 0;
+            }
+        }
+
+        MobMagicService.initiate(mob, school);
+        // Immediate demo cast at the operator so FX is visible without waiting for AI.
+        MobMagicService.castAt(mob, player);
+        if (mob.getTarget() == null) {
+            mob.setTarget(player);
+        }
+
+        MagicSchool applied = MobMagicService.schoolOf(mob);
+        source.sendSuccess(
+                () -> Component.translatable(
+                        "message.effecoria.mob_magic.initiated",
+                        mob.getDisplayName(),
+                        Component.translatable("school.effecoria." + applied.getSerializedName())),
+                true);
+        return 1;
+    }
+
+    private static int castAtNearby(CommandSourceStack source, ResourceLocation spellId, boolean random)
+            throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        LivingEntity target = findNearbyMob(player, random);
+        if (target == null) {
+            source.sendFailure(Component.translatable("message.effecoria.cast_command_no_mob"));
+            return 0;
+        }
+        return cast(source, spellId, target);
+    }
+
+    @Nullable
+    private static LivingEntity findNearbyMob(ServerPlayer player, boolean random) {
+        ServerLevel level = player.serverLevel();
+        AABB box = player.getBoundingBox().inflate(NEARBY_MOB_RADIUS);
+        List<Mob> mobs = level.getEntitiesOfClass(Mob.class, box, Mob::isAlive);
+        if (mobs.isEmpty()) {
+            return null;
+        }
+        if (random) {
+            // Bias toward nearer mobs: pick among the closest half (min 1).
+            mobs.sort(Comparator.comparingDouble(m -> m.distanceToSqr(player)));
+            int pool = Math.max(1, (mobs.size() + 1) / 2);
+            return mobs.get(level.random.nextInt(pool));
+        }
+        return mobs.stream().min(Comparator.comparingDouble(m -> m.distanceToSqr(player))).orElse(null);
     }
 
     private static int cast(CommandSourceStack source, ResourceLocation spellId, Entity targetEntity)
