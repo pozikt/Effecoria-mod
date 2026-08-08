@@ -161,6 +161,14 @@ public class EffecoriaMod {
                 ModNetworking.MatterThrowPayload.TYPE,
                 ModNetworking.MatterThrowPayload.STREAM_CODEC,
                 ModNetworking.MatterThrowPayload::handle);
+        registrar.playToServer(
+                ModNetworking.ArmorAbilityPayload.TYPE,
+                ModNetworking.ArmorAbilityPayload.STREAM_CODEC,
+                ModNetworking.ArmorAbilityPayload::handle);
+        registrar.playToServer(
+                ModNetworking.ArmorAbilityCyclePayload.TYPE,
+                ModNetworking.ArmorAbilityCyclePayload.STREAM_CODEC,
+                ModNetworking.ArmorAbilityCyclePayload::handle);
         registrar.playToClient(
                 ModNetworking.MatterBondSyncPayload.TYPE,
                 ModNetworking.MatterBondSyncPayload.STREAM_CODEC,

@@ -131,8 +131,10 @@ public final class CastPipeline {
                     ? BalanceConfig.WHIFF_COST_FRACTION.get().floatValue()
                     : 1f;
             float actualCost = fullCost * costFraction;
-            float paid = Math.min(usablePsi, actualCost);
-            float deficit = Math.max(0f, actualCost - usablePsi);
+            float subsidized = com.effecoria.armor.EssoniteArmorService.subsidizeCast(player, actualCost);
+            float fromPsi = Math.max(0f, actualCost - subsidized);
+            float paid = Math.min(usablePsi, fromPsi);
+            float deficit = Math.max(0f, fromPsi - usablePsi);
             data.setCurrentPsi(Math.max(0f, data.currentPsi() - paid));
 
             if (deficit > 0.05f && delivery == CastDelivery.FULL) {

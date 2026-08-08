@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "E": { "item": "effecoria:pure_essonite" },
+    "L": { "item": "minecraft:leather" }
+  },
+  "pattern": ["ELE", "EEE", "EEE"],
+  "result": { "count": 1, "id": "effecoria:crystal_essonite_chestplate" }
+}

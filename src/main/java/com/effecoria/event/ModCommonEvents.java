@@ -43,6 +43,7 @@ import com.effecoria.effect.organic.OrganicFieldService;
 import com.effecoria.effect.organic.OrganicSpikeWaveService;
 import com.effecoria.effect.organic.ParasiteHostService;
 import com.effecoria.effect.corruption.CorruptionFieldService;
+import com.effecoria.armor.EssoniteArmorService;
 import com.effecoria.effect.spatial.SpatialFieldService;
 import com.effecoria.magic.SpellRegistry;
 import com.effecoria.core.seal.SealWordRegistry;
@@ -176,6 +177,7 @@ public final class ModCommonEvents {
             ElementalShroudService.tick(player);
             NecroSummonService.tick(player);
             MatterBondService.tickPlayer(player);
+            EssoniteArmorService.tickPlayer(player);
             PsiHelper.set(player, flightData);
         }
 

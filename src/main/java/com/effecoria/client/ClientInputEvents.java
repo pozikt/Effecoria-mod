@@ -166,6 +166,7 @@ public final class ClientInputEvents {
 
         if (minecraft.screen == null) {
             tickMatterInput(minecraft);
+            tickArmorInput(minecraft);
         }
 
         if (minecraft.screen != null) {
@@ -254,6 +255,16 @@ public final class ClientInputEvents {
         if (channelDown != matterChannelWasDown) {
             PacketDistributor.sendToServer(new ModNetworking.MatterChannelPayload(channelDown));
             matterChannelWasDown = channelDown;
+        }
+    }
+
+    private static void tickArmorInput(Minecraft minecraft) {
+        while (KeyBindings.ARMOR_ABILITY.consumeClick()) {
+            PacketDistributor.sendToServer(new ModNetworking.ArmorAbilityPayload());
+        }
+        while (KeyBindings.ARMOR_ABILITY_CYCLE.consumeClick()) {
+            ClientArmorAbilityState.cycleLocal();
+            PacketDistributor.sendToServer(new ModNetworking.ArmorAbilityCyclePayload());
         }
     }
 

@@ -1,6 +1,9 @@
 package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.armor.EssoniteArmorItem;
+import com.effecoria.armor.EssoniteArmorTier;
+import com.effecoria.armor.EssonitePhoneme;
 
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.AxeItem;
@@ -210,32 +213,118 @@ public final class ModItems {
 
     public static final DeferredItem<ArmorItem> PHI_CHITIN_HELMET = ITEMS.register(
             "phi_chitin_helmet",
-            () -> new ArmorItem(
+            () -> new EssoniteArmorItem(
                     ModMaterials.PHI_CHITIN,
                     ArmorItem.Type.HELMET,
-                    new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(8))));
+                    new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(15)),
+                    EssoniteArmorTier.BASIC));
 
     public static final DeferredItem<ArmorItem> PHI_CHITIN_CHESTPLATE = ITEMS.register(
             "phi_chitin_chestplate",
-            () -> new ArmorItem(
+            () -> new EssoniteArmorItem(
                     ModMaterials.PHI_CHITIN,
                     ArmorItem.Type.CHESTPLATE,
-                    new Item.Properties()
-                            .durability(ArmorItem.Type.CHESTPLATE.getDurability(8))));
+                    new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(15)),
+                    EssoniteArmorTier.BASIC));
 
     public static final DeferredItem<ArmorItem> PHI_CHITIN_LEGGINGS = ITEMS.register(
             "phi_chitin_leggings",
-            () -> new ArmorItem(
+            () -> new EssoniteArmorItem(
                     ModMaterials.PHI_CHITIN,
                     ArmorItem.Type.LEGGINGS,
-                    new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(8))));
+                    new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(15)),
+                    EssoniteArmorTier.BASIC));
 
     public static final DeferredItem<ArmorItem> PHI_CHITIN_BOOTS = ITEMS.register(
             "phi_chitin_boots",
-            () -> new ArmorItem(
+            () -> new EssoniteArmorItem(
                     ModMaterials.PHI_CHITIN,
                     ArmorItem.Type.BOOTS,
-                    new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(8))));
+                    new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(15)),
+                    EssoniteArmorTier.BASIC));
+
+    public static final DeferredItem<ArmorItem> CRYSTAL_ESSONITE_HELMET = ITEMS.register(
+            "crystal_essonite_helmet",
+            () -> new EssoniteArmorItem(
+                    ModMaterials.CRYSTAL_ESSONITE,
+                    ArmorItem.Type.HELMET,
+                    new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(25)),
+                    EssoniteArmorTier.CRYSTAL));
+
+    public static final DeferredItem<ArmorItem> CRYSTAL_ESSONITE_CHESTPLATE = ITEMS.register(
+            "crystal_essonite_chestplate",
+            () -> new EssoniteArmorItem(
+                    ModMaterials.CRYSTAL_ESSONITE,
+                    ArmorItem.Type.CHESTPLATE,
+                    new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(25)),
+                    EssoniteArmorTier.CRYSTAL));
+
+    public static final DeferredItem<ArmorItem> CRYSTAL_ESSONITE_LEGGINGS = ITEMS.register(
+            "crystal_essonite_leggings",
+            () -> new EssoniteArmorItem(
+                    ModMaterials.CRYSTAL_ESSONITE,
+                    ArmorItem.Type.LEGGINGS,
+                    new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(25)),
+                    EssoniteArmorTier.CRYSTAL));
+
+    public static final DeferredItem<ArmorItem> CRYSTAL_ESSONITE_BOOTS = ITEMS.register(
+            "crystal_essonite_boots",
+            () -> new EssoniteArmorItem(
+                    ModMaterials.CRYSTAL_ESSONITE,
+                    ArmorItem.Type.BOOTS,
+                    new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(25)),
+                    EssoniteArmorTier.CRYSTAL));
+
+    public static final DeferredItem<ArmorItem> STAR_ESSONITE_HELMET = ITEMS.register(
+            "star_essonite_helmet",
+            () -> new EssoniteArmorItem(
+                    ModMaterials.STAR_ESSONITE,
+                    ArmorItem.Type.HELMET,
+                    new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(37)),
+                    EssoniteArmorTier.STAR));
+
+    public static final DeferredItem<ArmorItem> STAR_ESSONITE_CHESTPLATE = ITEMS.register(
+            "star_essonite_chestplate",
+            () -> new EssoniteArmorItem(
+                    ModMaterials.STAR_ESSONITE,
+                    ArmorItem.Type.CHESTPLATE,
+                    new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(37)),
+                    EssoniteArmorTier.STAR));
+
+    public static final DeferredItem<ArmorItem> STAR_ESSONITE_LEGGINGS = ITEMS.register(
+            "star_essonite_leggings",
+            () -> new EssoniteArmorItem(
+                    ModMaterials.STAR_ESSONITE,
+                    ArmorItem.Type.LEGGINGS,
+                    new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(37)),
+                    EssoniteArmorTier.STAR));
+
+    public static final DeferredItem<ArmorItem> STAR_ESSONITE_BOOTS = ITEMS.register(
+            "star_essonite_boots",
+            () -> new EssoniteArmorItem(
+                    ModMaterials.STAR_ESSONITE,
+                    ArmorItem.Type.BOOTS,
+                    new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(37)),
+                    EssoniteArmorTier.STAR));
+
+    public static final DeferredItem<Item> VOID_OBSIDIAN_INSERT = ITEMS.registerSimpleItem("void_obsidian_insert");
+    public static final DeferredItem<Item> PSI_KEY = ITEMS.registerSimpleItem("psi_key");
+
+    public static final DeferredItem<Item> PHI_PHONEME_FIRMITAS = ITEMS.register(
+            "phi_phoneme_firmitas",
+            () -> new PhiPhonemeScrollItem(new Item.Properties().stacksTo(16), EssonitePhoneme.FIRMITAS));
+    public static final DeferredItem<Item> PHI_PHONEME_UMBRA = ITEMS.register(
+            "phi_phoneme_umbra",
+            () -> new PhiPhonemeScrollItem(new Item.Properties().stacksTo(16), EssonitePhoneme.UMBRA));
+    public static final DeferredItem<Item> PHI_PHONEME_ABNEGATIO = ITEMS.register(
+            "phi_phoneme_abnegatio",
+            () -> new PhiPhonemeScrollItem(new Item.Properties().stacksTo(16), EssonitePhoneme.ABNEGATIO));
+    public static final DeferredItem<Item> PHI_PHONEME_SERVARE = ITEMS.register(
+            "phi_phoneme_servare",
+            () -> new PhiPhonemeScrollItem(new Item.Properties().stacksTo(16), EssonitePhoneme.SERVARE));
+    public static final DeferredItem<Item> PHI_PHONEME_CLAUSURA = ITEMS.register(
+            "phi_phoneme_clausura",
+            () -> new PhiPhonemeScrollItem(new Item.Properties().stacksTo(16), EssonitePhoneme.CLAUSURA));
 
     public static final DeferredItem<SwordItem> VITRIFIED_GLASS_SWORD = ITEMS.register(
             "vitrified_glass_sword",

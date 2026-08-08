@@ -26,16 +26,16 @@ public final class ModMaterials {
     public static final DeferredRegister<ArmorMaterial> ARMOR_MATERIALS =
             DeferredRegister.create(Registries.ARMOR_MATERIAL, EffecoriaMod.MOD_ID);
 
-    /** Leather+ defense; durability factor 8 (~leather 5). */
+    /** Basic essonite contour (Φ-chitin) — iron-ish defense. */
     public static final Holder<ArmorMaterial> PHI_CHITIN = ARMOR_MATERIALS.register(
             "phi_chitin",
             () -> new ArmorMaterial(
                     Util.make(new EnumMap<>(ArmorItem.Type.class), map -> {
-                        map.put(ArmorItem.Type.BOOTS, 1);
-                        map.put(ArmorItem.Type.LEGGINGS, 3);
-                        map.put(ArmorItem.Type.CHESTPLATE, 4);
-                        map.put(ArmorItem.Type.HELMET, 1);
-                        map.put(ArmorItem.Type.BODY, 4);
+                        map.put(ArmorItem.Type.BOOTS, 2);
+                        map.put(ArmorItem.Type.LEGGINGS, 5);
+                        map.put(ArmorItem.Type.CHESTPLATE, 6);
+                        map.put(ArmorItem.Type.HELMET, 2);
+                        map.put(ArmorItem.Type.BODY, 5);
                     }),
                     12,
                     SoundEvents.ARMOR_EQUIP_TURTLE,
@@ -43,6 +43,42 @@ public final class ModMaterials {
                     List.of(new ArmorMaterial.Layer(EffecoriaMod.id("phi_chitin"))),
                     0.0f,
                     0.0f));
+
+    /** Crystal essonite plates — diamond-ish. */
+    public static final Holder<ArmorMaterial> CRYSTAL_ESSONITE = ARMOR_MATERIALS.register(
+            "crystal_essonite",
+            () -> new ArmorMaterial(
+                    Util.make(new EnumMap<>(ArmorItem.Type.class), map -> {
+                        map.put(ArmorItem.Type.BOOTS, 3);
+                        map.put(ArmorItem.Type.LEGGINGS, 6);
+                        map.put(ArmorItem.Type.CHESTPLATE, 8);
+                        map.put(ArmorItem.Type.HELMET, 3);
+                        map.put(ArmorItem.Type.BODY, 11);
+                    }),
+                    18,
+                    SoundEvents.ARMOR_EQUIP_DIAMOND,
+                    () -> Ingredient.of(ModItems.PURE_ESSONITE.get()),
+                    List.of(new ArmorMaterial.Layer(EffecoriaMod.id("crystal_essonite"))),
+                    2.0f,
+                    0.0f));
+
+    /** Star essonite — netherite-ish, focus-grade contour. */
+    public static final Holder<ArmorMaterial> STAR_ESSONITE = ARMOR_MATERIALS.register(
+            "star_essonite",
+            () -> new ArmorMaterial(
+                    Util.make(new EnumMap<>(ArmorItem.Type.class), map -> {
+                        map.put(ArmorItem.Type.BOOTS, 3);
+                        map.put(ArmorItem.Type.LEGGINGS, 6);
+                        map.put(ArmorItem.Type.CHESTPLATE, 8);
+                        map.put(ArmorItem.Type.HELMET, 3);
+                        map.put(ArmorItem.Type.BODY, 11);
+                    }),
+                    22,
+                    SoundEvents.ARMOR_EQUIP_NETHERITE,
+                    () -> Ingredient.of(ModItems.STAR_ESSONITE.get()),
+                    List.of(new ArmorMaterial.Layer(EffecoriaMod.id("star_essonite"))),
+                    3.0f,
+                    0.1f));
 
     /** Iron-ish damage, stone durability (131). */
     public static final Tier VITRIFIED_GLASS = new Tier() {

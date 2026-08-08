@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": { "item": "effecoria:essonite_shard" },
+    "G": { "item": "minecraft:gold_ingot" },
+    "P": { "item": "effecoria:phi_paper" }
+  },
+  "pattern": [" G ", "EPE", " G "],
+  "result": { "count": 1, "id": "effecoria:psi_key" }
+}

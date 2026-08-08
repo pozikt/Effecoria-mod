@@ -21,4 +21,8 @@ public final class ModItemTags {
             TagKey.create(Registries.ITEM, EffecoriaMod.id("alembic_reagent_optional"));
     public static final TagKey<Item> ALEMBIC_REAGENT_BLOOD =
             TagKey.create(Registries.ITEM, EffecoriaMod.id("alembic_reagent_blood"));
+
+    /** All essonite contour armor (chitin / crystal / star). */
+    public static final TagKey<Item> ESSONITE_ARMOR =
+            TagKey.create(Registries.ITEM, EffecoriaMod.id("essonite_armor"));
 }

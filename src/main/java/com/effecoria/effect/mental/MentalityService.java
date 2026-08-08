@@ -194,7 +194,8 @@ public final class MentalityService {
         }
         float will = willStrength(target);
         float mastery = BreathingService.referenceRatio(casterMastery);
-        return Mth.clamp(0.08f + will * 0.10f - mastery * 0.45f, 0.02f, 0.72f);
+        float armor = com.effecoria.armor.EssoniteArmorService.mentalResistBonus(target);
+        return Mth.clamp(0.08f + will * 0.10f - mastery * 0.45f + armor, 0.02f, 0.85f);
     }
 
     /** Per-second-ish breakout chance while afflicted (checked every 20 ticks). */

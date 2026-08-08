@@ -78,6 +78,8 @@ public final class EffecoriaClient {
         event.register(KeyBindings.OPEN_SEAL_EDITOR);
         event.register(KeyBindings.MATTER_LINK);
         event.register(KeyBindings.MATTER_CHANNEL);
+        event.register(KeyBindings.ARMOR_ABILITY);
+        event.register(KeyBindings.ARMOR_ABILITY_CYCLE);
     }
 
     @SubscribeEvent

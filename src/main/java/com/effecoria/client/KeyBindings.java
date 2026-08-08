@@ -55,4 +55,20 @@ public final class KeyBindings {
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_B,
             "key.categories.effecoria");
+
+    /** Activate selected essonite armor ability. */
+    public static final KeyMapping ARMOR_ABILITY = new KeyMapping(
+            "key.effecoria.armor_ability",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_Z,
+            "key.categories.effecoria");
+
+    /** Cycle selected essonite armor ability. */
+    public static final KeyMapping ARMOR_ABILITY_CYCLE = new KeyMapping(
+            "key.effecoria.armor_ability_cycle",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_C,
+            "key.categories.effecoria");
 }

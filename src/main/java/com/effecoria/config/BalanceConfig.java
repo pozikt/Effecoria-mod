@@ -707,5 +707,64 @@ public final class BalanceConfig {
             .comment("Ψ drained each tick while holding a matter barrier")
             .defineInRange("matter_channel_psi_per_tick", 0.15, 0.0, 10.0);
 
+    // --- Essonite armor contour ---
+    public static final ModConfigSpec.DoubleValue ESSONITE_ARMOR_REGEN_SCALE = BUILDER
+            .comment("Global scale for armor Φ-charge regen from ambient Φ")
+            .defineInRange("essonite_armor_regen_scale", 1.0, 0.0, 10.0);
+    public static final ModConfigSpec.DoubleValue ESSONITE_ARMOR_PIEZO_SCALE = BUILDER
+            .comment("Charge gained per point of damage taken (piezo-Φ)")
+            .defineInRange("essonite_armor_piezo_scale", 0.04, 0.0, 1.0);
+    public static final ModConfigSpec.DoubleValue ESSONITE_ARMOR_SUBSIDY_SCALE = BUILDER
+            .comment("Multiplier on tier cast-subsidy fraction")
+            .defineInRange("essonite_armor_subsidy_scale", 1.0, 0.0, 3.0);
+    public static final ModConfigSpec.DoubleValue ESSONITE_ARMOR_POOL_PSI = BUILDER
+            .comment("How many Ψ a full armor charge pool is worth for cast subsidy")
+            .defineInRange("essonite_armor_pool_psi", 40.0, 1.0, 500.0);
+    public static final ModConfigSpec.DoubleValue ESSONITE_ARMOR_REPAIR_MIN_CHARGE = BUILDER
+            .comment("Minimum pool charge required for self-repair")
+            .defineInRange("essonite_armor_repair_min_charge", 0.25, 0.0, 1.0);
+    public static final ModConfigSpec.IntValue ESSONITE_ARMOR_REPAIR_PER_SECOND = BUILDER
+            .comment("Durability points mended per second while charged")
+            .defineInRange("essonite_armor_repair_per_second", 1, 0, 20);
+    public static final ModConfigSpec.DoubleValue ESSONITE_ARMOR_SERVARE_HEAL = BUILDER
+            .comment("Hearts healed per second from Servare phoneme")
+            .defineInRange("essonite_armor_servare_heal", 0.25, 0.0, 10.0);
+    public static final ModConfigSpec.DoubleValue ESSONITE_ARMOR_VISION_RANGE = BUILDER
+            .comment("Helmet Φ-vision glow radius")
+            .defineInRange("essonite_armor_vision_range", 24.0, 4.0, 64.0);
+    public static final ModConfigSpec.DoubleValue ESSONITE_ARMOR_FLASH_RADIUS = BUILDER
+            .comment("Φ-flash knockback radius")
+            .defineInRange("essonite_armor_flash_radius", 6.0, 1.0, 24.0);
+    public static final ModConfigSpec.DoubleValue ESSONITE_ARMOR_FLASH_KNOCKBACK = BUILDER
+            .comment("Φ-flash knockback strength")
+            .defineInRange("essonite_armor_flash_knockback", 1.35, 0.1, 5.0);
+    public static final ModConfigSpec.IntValue ESSONITE_ARMOR_SKIN_TICKS = BUILDER
+            .comment("Crystal Skin duration in ticks")
+            .defineInRange("essonite_armor_skin_ticks", 80, 20, 400);
+    public static final ModConfigSpec.IntValue ESSONITE_ARMOR_WINGS_TICKS = BUILDER
+            .comment("Essence Wings duration in ticks")
+            .defineInRange("essonite_armor_wings_ticks", 100, 20, 600);
+    public static final ModConfigSpec.DoubleValue ESSONITE_ARMOR_WINGS_DRAIN = BUILDER
+            .comment("Ψ drain per tick while Essence Wings flight is active")
+            .defineInRange("essonite_armor_wings_drain", 0.08, 0.0, 5.0);
+    public static final ModConfigSpec.DoubleValue ESSONITE_ARMOR_WINGS_BOOST = BUILDER
+            .comment("Initial boost strength for Essence Wings")
+            .defineInRange("essonite_armor_wings_boost", 1.1, 0.2, 4.0);
+    public static final ModConfigSpec.IntValue ESSONITE_ARMOR_OMEGA_TICKS = BUILDER
+            .comment("Ω-block duration in ticks")
+            .defineInRange("essonite_armor_omega_ticks", 160, 20, 600);
+    public static final ModConfigSpec.IntValue ESSONITE_ARMOR_OMEGA_INSERTS_CRYSTAL = BUILDER
+            .comment("Void obsidian inserts consumed for Ω-block on crystal chest")
+            .defineInRange("essonite_armor_omega_inserts_crystal", 3, 1, 16);
+    public static final ModConfigSpec.IntValue ESSONITE_ARMOR_OMEGA_INSERTS_STAR = BUILDER
+            .comment("Void obsidian inserts consumed for Ω-block on star chest")
+            .defineInRange("essonite_armor_omega_inserts_star", 1, 1, 16);
+    public static final ModConfigSpec.IntValue ESSONITE_ARMOR_ABILITY_COOLDOWN_TICKS = BUILDER
+            .comment("Shared cooldown after any armor ability")
+            .defineInRange("essonite_armor_ability_cooldown_ticks", 60, 0, 600);
+    public static final ModConfigSpec.DoubleValue ESSONITE_ARMOR_FIRE_REDUCTION = BUILDER
+            .comment("Fraction of fire damage negated while armor is charged")
+            .defineInRange("essonite_armor_fire_reduction", 0.35, 0.0, 1.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 }

@@ -157,6 +157,48 @@ public final class ModNetworking {
         }
     }
 
+    public record ArmorAbilityPayload() implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<ArmorAbilityPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "armor_ability"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, ArmorAbilityPayload> STREAM_CODEC =
+                StreamCodec.unit(new ArmorAbilityPayload());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(ArmorAbilityPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    com.effecoria.armor.EssoniteArmorService.activateSelected(player);
+                }
+            });
+        }
+    }
+
+    public record ArmorAbilityCyclePayload() implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<ArmorAbilityCyclePayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "armor_ability_cycle"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, ArmorAbilityCyclePayload> STREAM_CODEC =
+                StreamCodec.unit(new ArmorAbilityCyclePayload());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(ArmorAbilityCyclePayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    com.effecoria.armor.EssoniteArmorService.cycleAbility(player);
+                }
+            });
+        }
+    }
+
     public record MatterBondSyncPayload(
             boolean active, int x, int y, int z, String kind, float strength) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<MatterBondSyncPayload> TYPE =

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "O": { "item": "effecoria:void_obsidian" },
+    "D": { "item": "effecoria:essonite_dust" }
+  },
+  "pattern": [" D ", "DOD", " D "],
+  "result": { "count": 2, "id": "effecoria:void_obsidian_insert" }
+}

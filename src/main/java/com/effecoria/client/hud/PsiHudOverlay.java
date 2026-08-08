@@ -91,6 +91,22 @@ public final class PsiHudOverlay {
         graphics.drawString(minecraft.font, formatPhiLabel(phi), x, y + 28, phiTextColor(phi));
 
         int lineY = y + 40;
+        float armorCharge = com.effecoria.armor.EssoniteArmorData.poolCharge(minecraft.player);
+        if (com.effecoria.armor.EssoniteArmorService.hasAny(minecraft.player)) {
+            drawBar(graphics, x, lineY, 90, 5, armorCharge, 0xFFD4A84B, 0xFF3A2A14);
+            var ability = com.effecoria.client.ClientArmorAbilityState.selected();
+            graphics.drawString(
+                    minecraft.font,
+                    Component.translatable(
+                            "hud.effecoria.armor_charge",
+                            Math.round(armorCharge * 100f),
+                            Component.translatable("armor.effecoria.ability." + ability.id())),
+                    x,
+                    lineY + 7,
+                    0xE8C878);
+            lineY += 20;
+        }
+
         float entropyFill = EntropyService.fillRatio(data.entropyB());
         if (entropyFill > 0.02f) {
             boolean critical = EntropyService.isCritical(data.entropyB());

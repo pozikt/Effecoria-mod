@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": { "item": "effecoria:phi_paper" },
+    "D": { "item": "effecoria:essonite_dust" },
+    "M": { "item": "minecraft:iron_ingot" }
+  },
+  "pattern": [" D ", "DPM", " D "],
+  "result": { "count": 1, "id": "effecoria:phi_phoneme_firmitas" }
+}

@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "effecoria:phi_chitin_helmet",
+    "effecoria:phi_chitin_chestplate",
+    "effecoria:phi_chitin_leggings",
+    "effecoria:phi_chitin_boots",
+    "effecoria:crystal_essonite_helmet",
+    "effecoria:crystal_essonite_chestplate",
+    "effecoria:crystal_essonite_leggings",
+    "effecoria:crystal_essonite_boots",
+    "effecoria:star_essonite_helmet",
+    "effecoria:star_essonite_chestplate",
+    "effecoria:star_essonite_leggings",
+    "effecoria:star_essonite_boots"
+  ]
+}

@@ -83,6 +83,13 @@ public final class CorruptionCurseService {
             }
             return 0;
         }
+        if (com.effecoria.armor.EssoniteArmorService.blocksCorruption(target)) {
+            if (caster != null) {
+                caster.displayClientMessage(
+                        Component.translatable("message.effecoria.armor_blocks_corruption"), true);
+            }
+            return 0;
+        }
         // Players also carry curse metadata so they must seek cure blocks/items (no seek AI).
         writeCurse(target, curse, caster);
         applyEffects(caster, target, curse);
