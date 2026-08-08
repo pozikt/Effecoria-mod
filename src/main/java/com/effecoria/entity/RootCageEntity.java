@@ -29,6 +29,7 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -55,10 +56,14 @@ public class RootCageEntity extends Entity implements GeoEntity {
     private static final EntityDataAccessor<Boolean> DATA_GRABBING =
             SynchedEntityData.defineId(RootCageEntity.class, EntityDataSerializers.BOOLEAN);
 
+    private static final EntityDataAccessor<Boolean> DATA_EMPOWERED =
+            SynchedEntityData.defineId(RootCageEntity.class, EntityDataSerializers.BOOLEAN);
+
     private static final RawAnimation GRAB = RawAnimation.begin().thenPlay("animation.root_cage.grab");
     private static final RawAnimation CONSTRICT =
             RawAnimation.begin().thenLoop("animation.root_cage.constrict");
     private static final int GRAB_TICKS = 17;
+    private static final float THORN_REFLECT = 1.5f;
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
@@ -193,6 +198,89 @@ public class RootCageEntity extends Entity implements GeoEntity {
         return entityData.get(DATA_GRABBING);
     }
 
+    public boolean isEmpowered() {
+        return entityData.get(DATA_EMPOWERED);
+    }
+
+    @Nullable
+    public UUID getOwnerId() {
+        return ownerId;
+    }
+
+    /**
+     * Venom + thorns upgrade from form mutate. Extends life and reinforces integrity.
+     *
+     * @return true if empower applied (including refresh)
+     */
+    public boolean empower(int bonusLifeTicks) {
+        if (level().isClientSide || isRemoved()) {
+            return false;
+        }
+        entityData.set(DATA_EMPOWERED, true);
+        lifeTicks += Math.max(20, bonusLifeTicks);
+        maxIntegrity = Math.min(56f, maxIntegrity + 6f);
+        integrity = Math.min(maxIntegrity, integrity + 8f);
+        entityData.set(DATA_INTEGRITY, Mth.clamp(integrity / maxIntegrity, 0f, 1f));
+        level().playSound(null, blockPosition(), SoundEvents.SPORE_BLOSSOM_BREAK, SoundSource.PLAYERS, 0.9f, 0.7f);
+        level().playSound(null, blockPosition(), SoundEvents.ROOTED_DIRT_PLACE, SoundSource.PLAYERS, 0.7f, 0.55f);
+        LivingEntity captive = resolveCaptive();
+        if (captive != null) {
+            applyVenom(captive, 60);
+        }
+        return true;
+    }
+
+    /** Nearest owned live cage within range of {@code from}, preferring look-ray captive match. */
+    @Nullable
+    public static RootCageEntity findOwnedNear(
+            ServerLevel level, UUID owner, Vec3 from, double range, @Nullable LivingEntity lookTarget) {
+        double rangeSq = range * range;
+        RootCageEntity best = null;
+        double bestDist = Double.MAX_VALUE;
+        AABB box = new AABB(from, from).inflate(range);
+        for (RootCageEntity cage : level.getEntitiesOfClass(RootCageEntity.class, box, c -> !c.isRemoved())) {
+            if (cage.ownerId == null || !cage.ownerId.equals(owner)) {
+                continue;
+            }
+            if (lookTarget != null
+                    && cage.captiveId != null
+                    && cage.captiveId.equals(lookTarget.getUUID())) {
+                return cage;
+            }
+            double d = from.distanceToSqr(cage.position());
+            if (d <= rangeSq && d < bestDist) {
+                bestDist = d;
+                best = cage;
+            }
+        }
+        return best;
+    }
+
+    public static boolean hasOwnedNear(ServerLevel level, UUID owner, Vec3 from, double searchRange) {
+        AABB box = new AABB(from, from).inflate(searchRange);
+        for (RootCageEntity cage : level.getEntitiesOfClass(RootCageEntity.class, box, c -> !c.isRemoved())) {
+            if (cage.ownerId != null && cage.ownerId.equals(owner)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void applyVenom(LivingEntity captive, int ticks) {
+        ServerPlayer caster = resolveOwner();
+        BreathDebuffs.apply(
+                level() instanceof ServerLevel sl ? sl : null,
+                ownerId,
+                captive,
+                new MobEffectInstance(
+                        MobEffects.POISON,
+                        ticks,
+                        BreathDebuffs.scaleAmplifier(caster, 0),
+                        false,
+                        true,
+                        true));
+    }
+
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(DATA_WIDTH, 1.0f);
@@ -200,6 +288,7 @@ public class RootCageEntity extends Entity implements GeoEntity {
         builder.define(DATA_INTEGRITY, 1.0f);
         builder.define(DATA_CAPTIVE, Optional.empty());
         builder.define(DATA_GRABBING, true);
+        builder.define(DATA_EMPOWERED, false);
     }
 
     @Override
@@ -231,6 +320,21 @@ public class RootCageEntity extends Entity implements GeoEntity {
         // Refresh short stun so it cannot be milked off easily mid-bind.
         if (tickCount % 20 == 0) {
             pinEffects(captive, Math.max(25, lifeTicks));
+            if (isEmpowered()) {
+                applyVenom(captive, 40);
+                if (level() instanceof ServerLevel server) {
+                    server.sendParticles(
+                            net.minecraft.core.particles.ParticleTypes.ITEM_SLIME,
+                            getX(),
+                            getY() + getCageHeight() * 0.5,
+                            getZ(),
+                            4,
+                            getCageWidth() * 0.25,
+                            getCageHeight() * 0.2,
+                            getCageWidth() * 0.25,
+                            0.02);
+                }
+            }
         }
 
         entityData.set(DATA_INTEGRITY, Mth.clamp(integrity / maxIntegrity, 0f, 1f));
@@ -290,6 +394,12 @@ public class RootCageEntity extends Entity implements GeoEntity {
     private void weaken(float amount) {
         integrity = Math.max(0f, integrity - amount);
         entityData.set(DATA_INTEGRITY, Mth.clamp(integrity / maxIntegrity, 0f, 1f));
+        if (isEmpowered()) {
+            LivingEntity captive = resolveCaptive();
+            if (captive != null) {
+                captive.hurt(level().damageSources().magic(), THORN_REFLECT);
+            }
+        }
     }
 
     private void breakFree(LivingEntity captive) {
@@ -331,6 +441,12 @@ public class RootCageEntity extends Entity implements GeoEntity {
             weaken(amount * 1.8f);
         } else {
             weaken(amount * 1.15f);
+            if (isEmpowered()
+                    && attacker instanceof LivingEntity living
+                    && living.isAlive()
+                    && (ownerId == null || !ownerId.equals(living.getUUID()))) {
+                living.hurt(level().damageSources().magic(), Math.min(2.5f, amount * 0.4f + 0.75f));
+            }
         }
         level().playSound(null, blockPosition(), SoundEvents.ROOTED_DIRT_HIT, SoundSource.PLAYERS, 0.5f, 1.0f);
         if (integrity <= 0f) {
@@ -380,6 +496,7 @@ public class RootCageEntity extends Entity implements GeoEntity {
         entityData.set(DATA_HEIGHT, Math.max(0.8f, tag.getFloat("CageH")));
         entityData.set(DATA_INTEGRITY, Mth.clamp(integrity / maxIntegrity, 0f, 1f));
         entityData.set(DATA_GRABBING, tag.contains("Grabbing") ? tag.getBoolean("Grabbing") : tickCount < GRAB_TICKS);
+        entityData.set(DATA_EMPOWERED, tag.getBoolean("Empowered"));
         savedNoAi = tag.getBoolean("SavedNoAi");
         hadNoAi = tag.getBoolean("HadNoAi");
         refreshDimensions();
@@ -401,6 +518,7 @@ public class RootCageEntity extends Entity implements GeoEntity {
         tag.putBoolean("SavedNoAi", savedNoAi);
         tag.putBoolean("HadNoAi", hadNoAi);
         tag.putBoolean("Grabbing", isGrabbing());
+        tag.putBoolean("Empowered", isEmpowered());
     }
 
     @Override

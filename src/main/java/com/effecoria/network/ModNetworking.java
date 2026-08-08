@@ -328,6 +328,7 @@ public final class ModNetworking {
                         ByteBufCodecs.DOUBLE, SteamCloudService.CloudSnapshot::z,
                         ByteBufCodecs.FLOAT, SteamCloudService.CloudSnapshot::radius,
                         ByteBufCodecs.VAR_LONG, SteamCloudService.CloudSnapshot::expireAt,
+                        ByteBufCodecs.VAR_INT, SteamCloudService.CloudSnapshot::modeId,
                         SteamCloudService.CloudSnapshot::new);
 
         public static final StreamCodec<RegistryFriendlyByteBuf, SteamCloudsPayload> STREAM_CODEC =

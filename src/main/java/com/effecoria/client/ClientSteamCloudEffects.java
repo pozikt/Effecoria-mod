@@ -53,15 +53,16 @@ public final class ClientSteamCloudEffects {
         double y = inside.y();
         double z = inside.z();
         float r = inside.radius();
+        var mode = inside.mode();
         for (int i = 0; i < 5; i++) {
-            minecraft.level.addParticle(
-                    ModParticleTypes.STEAM_FOG.get(),
-                    x + (minecraft.level.random.nextDouble() - 0.5) * r * 1.4,
-                    y + (minecraft.level.random.nextDouble() - 0.35) * r,
-                    z + (minecraft.level.random.nextDouble() - 0.5) * r * 1.4,
-                    0,
-                    0.015,
-                    0);
+            double px = x + (minecraft.level.random.nextDouble() - 0.5) * r * 1.4;
+            double py = y + (minecraft.level.random.nextDouble() - 0.35) * r;
+            double pz = z + (minecraft.level.random.nextDouble() - 0.5) * r * 1.4;
+            if (mode == SteamCloudService.Mode.FROST && i % 2 == 0) {
+                minecraft.level.addParticle(net.minecraft.core.particles.ParticleTypes.SNOWFLAKE, px, py, pz, 0, 0.01, 0);
+            } else {
+                minecraft.level.addParticle(ModParticleTypes.STEAM_FOG.get(), px, py, pz, 0, 0.015, 0);
+            }
         }
     }
 
@@ -97,12 +98,27 @@ public final class ClientSteamCloudEffects {
         }
         long now = minecraft.level.getGameTime();
         Vec3 eye = minecraft.player.getEyePosition((float) event.getPartialTick());
-        if (findContaining(eye, now) == null) {
+        SteamCloudService.CloudSnapshot inside = findContaining(eye, now);
+        if (inside == null) {
             return;
         }
-        event.setRed(0.78f);
-        event.setGreen(0.82f);
-        event.setBlue(0.86f);
+        switch (inside.mode()) {
+            case SCALDING -> {
+                event.setRed(0.82f);
+                event.setGreen(0.72f);
+                event.setBlue(0.68f);
+            }
+            case FROST -> {
+                event.setRed(0.62f);
+                event.setGreen(0.78f);
+                event.setBlue(0.92f);
+            }
+            default -> {
+                event.setRed(0.78f);
+                event.setGreen(0.82f);
+                event.setBlue(0.86f);
+            }
+        }
     }
 
     private static SteamCloudService.CloudSnapshot findContaining(Vec3 pos, long now) {

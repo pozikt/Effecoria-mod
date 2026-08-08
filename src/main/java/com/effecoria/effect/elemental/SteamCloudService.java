@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.annotation.Nullable;
+
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.network.ModNetworking;
 
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -25,7 +28,33 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class SteamCloudService {
     private static final List<SteamCloud> CLOUDS = new CopyOnWriteArrayList<>();
     private static final int PARTICLE_INTERVAL = 2;
-    private static final int SCALD_INTERVAL = 20;
+    private static final int DAMAGE_INTERVAL = 20;
+    /** Extra reach beyond cloud radius for form mutate. */
+    public static final float MUTATE_EXTRA_REACH = 4f;
+
+    public enum Mode {
+        VEIL(0),
+        SCALDING(1),
+        FROST(2);
+
+        private final int id;
+
+        Mode(int id) {
+            this.id = id;
+        }
+
+        public int id() {
+            return id;
+        }
+
+        public static Mode fromId(int id) {
+            return switch (id) {
+                case 1 -> SCALDING;
+                case 2 -> FROST;
+                default -> VEIL;
+            };
+        }
+    }
 
     private SteamCloudService() {}
 
@@ -35,7 +64,7 @@ public final class SteamCloudService {
             float radius,
             long expireAt,
             UUID owner,
-            boolean scalding) {
+            Mode mode) {
         public boolean contains(Vec3 pos) {
             return pos.distanceToSqr(center) <= (double) radius * radius;
         }
@@ -49,17 +78,86 @@ public final class SteamCloudService {
                     center.y + radius * 0.9,
                     center.z + radius);
         }
+
+        public boolean scalding() {
+            return mode == Mode.SCALDING;
+        }
+
+        public boolean frost() {
+            return mode == Mode.FROST;
+        }
     }
 
     /** Client-safe snapshot for fog rendering. */
-    public record CloudSnapshot(double x, double y, double z, float radius, long expireAt) {}
+    public record CloudSnapshot(double x, double y, double z, float radius, long expireAt, int modeId) {
+        public Mode mode() {
+            return Mode.fromId(modeId);
+        }
+    }
 
     public static void spawn(
             ServerLevel level, Vec3 center, float radius, int durationTicks, UUID owner, boolean scalding) {
+        spawn(level, center, radius, durationTicks, owner, scalding ? Mode.SCALDING : Mode.VEIL);
+    }
+
+    public static void spawn(
+            ServerLevel level, Vec3 center, float radius, int durationTicks, UUID owner, Mode mode) {
         long expireAt = level.getGameTime() + Math.max(1, durationTicks);
-        CLOUDS.add(new SteamCloud(level, center, Math.max(0.5f, radius), expireAt, owner, scalding));
+        CLOUDS.add(new SteamCloud(level, center, Math.max(0.5f, radius), expireAt, owner, mode));
         syncToTracking(level);
-        spawnBurst(level, center, radius);
+        spawnBurst(level, center, radius, mode);
+    }
+
+    /** True if owner has any live cloud in this level. */
+    public static boolean hasOwned(ServerLevel level, UUID owner) {
+        long now = level.getGameTime();
+        for (SteamCloud cloud : CLOUDS) {
+            if (cloud.level() == level && now < cloud.expireAt() && owner.equals(cloud.owner())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Nullable
+    public static SteamCloud findNearestOwned(ServerLevel level, UUID owner, Vec3 from) {
+        long now = level.getGameTime();
+        SteamCloud best = null;
+        double bestDist = Double.MAX_VALUE;
+        for (SteamCloud cloud : CLOUDS) {
+            if (cloud.level() != level || now >= cloud.expireAt() || !owner.equals(cloud.owner())) {
+                continue;
+            }
+            double d = from.distanceToSqr(cloud.center());
+            if (d < bestDist) {
+                bestDist = d;
+                best = cloud;
+            }
+        }
+        return best;
+    }
+
+    public static boolean isInMutateRange(SteamCloud cloud, Vec3 from) {
+        double reach = cloud.radius() + MUTATE_EXTRA_REACH;
+        return from.distanceToSqr(cloud.center()) <= reach * reach;
+    }
+
+    /**
+     * Mutate nearest owned cloud to {@code mode}, optionally extending lifetime.
+     *
+     * @return true if a cloud was mutated
+     */
+    public static boolean mutateOwned(ServerLevel level, UUID owner, Vec3 from, Mode mode, int refreshTicks) {
+        SteamCloud cloud = findNearestOwned(level, owner, from);
+        if (cloud == null || !isInMutateRange(cloud, from)) {
+            return false;
+        }
+        long newExpire = Math.max(cloud.expireAt(), level.getGameTime() + Math.max(1, refreshTicks));
+        CLOUDS.remove(cloud);
+        CLOUDS.add(new SteamCloud(level, cloud.center(), cloud.radius(), newExpire, owner, mode));
+        syncToTracking(level);
+        spawnBurst(level, cloud.center(), cloud.radius(), mode);
+        return true;
     }
 
     public static void tick(ServerLevel level) {
@@ -93,7 +191,12 @@ public final class SteamCloudService {
                 continue;
             }
             out.add(new CloudSnapshot(
-                    cloud.center().x, cloud.center().y, cloud.center().z, cloud.radius(), cloud.expireAt()));
+                    cloud.center().x,
+                    cloud.center().y,
+                    cloud.center().z,
+                    cloud.radius(),
+                    cloud.expireAt(),
+                    cloud.mode().id()));
         }
         return out;
     }
@@ -209,19 +312,25 @@ public final class SteamCloudService {
                 BreathDebuffs.apply(entity, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 25, 0, false, false, true));
                 continue;
             }
+            int slowAmp = cloud.frost() ? 1 : 0;
             BreathDebuffs.apply(
                     level,
                     cloud.owner(),
                     entity,
-                    new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 0, false, false, true));
+                    new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, slowAmp, false, false, true));
             if (cloud.scalding()) {
                 BreathDebuffs.apply(
                         level,
                         cloud.owner(),
                         entity,
                         new MobEffectInstance(MobEffects.DARKNESS, 40, 0, false, false, true));
-                if (now % SCALD_INTERVAL == 0) {
+                if (now % DAMAGE_INTERVAL == 0) {
                     entity.hurt(source, 1.0f);
+                }
+            } else if (cloud.frost()) {
+                if (now % DAMAGE_INTERVAL == 0) {
+                    entity.hurt(source, 1.0f);
+                    entity.setTicksFrozen(Math.min(entity.getTicksRequiredToFreeze() + 40, entity.getTicksFrozen() + 30));
                 }
             }
         }
@@ -230,6 +339,41 @@ public final class SteamCloudService {
     private static void spawnVolumeParticles(ServerLevel level, SteamCloud cloud) {
         float r = cloud.radius();
         int count = Math.max(6, Math.round(r * r * 1.8f));
+        if (cloud.frost()) {
+            level.sendParticles(
+                    ParticleTypes.SNOWFLAKE,
+                    cloud.center().x,
+                    cloud.center().y + 0.4,
+                    cloud.center().z,
+                    Math.max(4, count / 2),
+                    r * 0.5,
+                    r * 0.3,
+                    r * 0.5,
+                    0.01);
+            level.sendParticles(
+                    ModParticleTypes.STEAM_FOG.get(),
+                    cloud.center().x,
+                    cloud.center().y + 0.3,
+                    cloud.center().z,
+                    count / 2,
+                    r * 0.55,
+                    r * 0.3,
+                    r * 0.55,
+                    0.008);
+            return;
+        }
+        if (cloud.scalding()) {
+            level.sendParticles(
+                    ParticleTypes.CLOUD,
+                    cloud.center().x,
+                    cloud.center().y + 0.5,
+                    cloud.center().z,
+                    Math.max(3, count / 3),
+                    r * 0.4,
+                    r * 0.25,
+                    r * 0.4,
+                    0.02);
+        }
         level.sendParticles(
                 ModParticleTypes.STEAM_FOG.get(),
                 cloud.center().x,
@@ -242,7 +386,19 @@ public final class SteamCloudService {
                 0.012);
     }
 
-    private static void spawnBurst(ServerLevel level, Vec3 center, float radius) {
+    private static void spawnBurst(ServerLevel level, Vec3 center, float radius, Mode mode) {
+        if (mode == Mode.FROST) {
+            level.sendParticles(
+                    ParticleTypes.SNOWFLAKE,
+                    center.x,
+                    center.y + 0.5,
+                    center.z,
+                    Math.max(16, Math.round(radius * 10)),
+                    radius * 0.45,
+                    radius * 0.3,
+                    radius * 0.45,
+                    0.02);
+        }
         level.sendParticles(
                 ModParticleTypes.STEAM_FOG.get(),
                 center.x,

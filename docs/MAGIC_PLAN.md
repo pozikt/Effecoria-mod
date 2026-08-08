@@ -208,7 +208,21 @@ If choosing a single slice for the next implementation session:
 21. Mental **identity pack** — `mind_depress` (DEPRESS) + `mind_blank` (wipe aggro) — ✅ shipped.
 22. Necromancy **identity pack** — `thrall_focus` + `mark_reap` (Death Mark + army) — ✅ shipped.
 23. Organic **identity pack** — `parasite_seed` + `spore_burst` (host drain + rupture) — ✅ shipped.
-24. **Next:** Stage II environment / materials slice; keep [KNOWN_ISSUES.md](KNOWN_ISSUES.md) current when cutting jars.
+24. **Form mutate (recast)** — reshape living forms: `steam_veil` → scald / frost (sneak); `root_bind` → venom+thorns. ✅ `FormMutateService` (~50% Ψ).
+25. **Next:** Stage II environment / materials slice; keep [KNOWN_ISSUES.md](KNOWN_ISSUES.md) current when cutting jars.
+
+---
+
+## Form mutate (v1)
+
+While your form is alive, **recast the same spell** nearby:
+
+| Spell | Mutate |
+|-------|--------|
+| `steam_veil` | Recast → scalding steam; **sneak+recast** → cold crystallize (zone only, no ice blocks) |
+| `root_bind` | Recast → poison DoT + thorns on struggle/attacks |
+
+Cost ≈ half spell cost. Hook: `FormMutateService` in `CastPipeline` before `SpellEffectExecutor`.
 
 ---
 

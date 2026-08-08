@@ -119,6 +119,42 @@ public final class CastPipeline {
             power = Math.min(power, hardCap);
         }
 
+        FormMutateService.Result mutate = FormMutateService.tryMutate(player, spell, chargeScale);
+        if (mutate == FormMutateService.Result.FAILED) {
+            return CastResult.CANNOT_CAST;
+        }
+        if (mutate == FormMutateService.Result.HANDLED) {
+            float mutateCost = fullCost * FormMutateService.MUTATE_COST_FACTOR;
+            CastPresentation.playResolve(player, spell, power * 0.65f, CastDelivery.FULL);
+            data.recordSpellCast(spellId, player.level().getGameTime());
+            ProgressionService.onCastResolved(player, data, CastDelivery.FULL);
+            if (!godMode) {
+                float subsidized = com.effecoria.armor.EssoniteArmorService.subsidizeCast(player, mutateCost);
+                float fromPsi = Math.max(0f, mutateCost - subsidized);
+                float paid = Math.min(usablePsi, fromPsi);
+                float deficit = Math.max(0f, fromPsi - usablePsi);
+                data.setCurrentPsi(Math.max(0f, data.currentPsi() - paid));
+                if (deficit > 0.05f) {
+                    OvercastService.apply(player, data, deficit, mutateCost);
+                } else {
+                    ExhaustionService.onHealthyCast(player, data);
+                }
+                float newEntropy = FormulaEngine.accumulateEntropy(
+                        data.entropyB(),
+                        power * FormMutateService.MUTATE_ENTROPY_FACTOR,
+                        spell.sideEntropyRatio());
+                data.setEntropyB(newEntropy);
+                EntropyService.maybeWarnRising(player, data);
+                if (FormulaEngine.isBacklashTriggered(newEntropy)) {
+                    applyBacklash(player, data);
+                    data.setEntropyB(0f);
+                }
+            }
+            PsiHelper.set(player, data);
+            player.syncData(ModAttachments.PSI.get());
+            return CastResult.SUCCESS;
+        }
+
         CastPresentation.playWindUp(player, spell);
         CastDelivery delivery = SpellEffectExecutor.applyAll(player, spell, power, forcedTarget);
         CastPresentation.playResolve(player, spell, power, delivery);
