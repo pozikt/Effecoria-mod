@@ -71,8 +71,25 @@ GeckoLib mobs native to the plateau (spawn eggs in creative):
 Lowest band under the plateau (`Y ≤ plateau_root_max_y`, default 0):
 
 - Worldgen (`phi_root_core` / `PhiCoreFeature`): dense blobs of glowing `essonite_block` (~88%), sparse deepslate essonite veins, rare Φ-stone seams
-- Gameplay: magic DPS + wither II / confusion / weakness every second without Φ protection (gold / focus / Φ-cell / essonite dust)
+- Gameplay: magic DPS + wither / confusion / weakness scale with **remaining** Φ-radiation after shielding
 - Extreme Φ bonus for casting; unprotected mages also take Orkanum exhaustion
+
+### Φ-radiation protection (`PhiRadiationService`)
+
+Attenuation stacks by strongest relevant source (0–1). Absolute: creative / Space Cocoon.
+
+| Source | Approx shield | Notes |
+|--------|---------------|-------|
+| Lead cloak / lead filter | 0.72 / 0.45 | Cloak craft from iron + lead filter |
+| Gold armor / gold amulet | up to 0.95 / 0.55 | Vanilla `gold_*` pieces + amulet |
+| Void obsidian / insert | 0.65 + Ω | Blocks core wither bleed-through |
+| Essonite armor + charged Φ-cell | ~0.82 | Φ-suit stand-in |
+| Charged Φ-cell alone / focus | 0.35 / 0.30 | |
+| Essence parasol (held) | 0.50 | Overhead shade |
+| Resistance potion / clay salve / lead pill | 0.50 / 0.30 / 0.60 | Pill poisons |
+| Near `#effecoria:zero_flux` / void obsidian | 0.40 | Lead-chamber shelter |
+
+Craft recipes live under `data/effecoria/recipe/` (`lead_cloak`, `gold_amulet`, `essence_parasol`, `potion_phi_resistance`, `essence_clay_salve`, `lead_pill`). Alembic: gold nugget + Φ-water → resistance draught.
 
 ## Whispering Spire
 

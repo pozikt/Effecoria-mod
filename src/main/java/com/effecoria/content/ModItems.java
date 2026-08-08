@@ -149,6 +149,41 @@ public final class ModItems {
     public static final DeferredItem<Item> LEAD_FILTER = ITEMS.register(
             "lead_filter", () -> new LeadFilterItem(new Item.Properties()));
 
+    /** Heavy Φ-insulating cloak (lead mesh stand-in). */
+    public static final DeferredItem<Item> LEAD_CLOAK = ITEMS.register(
+            "lead_cloak", () -> new Item(new Item.Properties().stacksTo(1)));
+    /** Light gold Φ-reflector worn as jewelry. */
+    public static final DeferredItem<Item> GOLD_AMULET = ITEMS.register(
+            "gold_amulet", () -> new Item(new Item.Properties().stacksTo(1)));
+    /** Hand-held Φ shade — gold foil on a frame. */
+    public static final DeferredItem<Item> ESSENCE_PARASOL = ITEMS.register(
+            "essence_parasol", () -> new Item(new Item.Properties().stacksTo(1)));
+
+    public static final DeferredItem<Item> POTION_PHI_RESISTANCE = ITEMS.register(
+            "potion_phi_resistance",
+            () -> new PhiShieldConsumableItem(
+                    new Item.Properties(),
+                    ModMobEffects::phiResistance,
+                    90 * 20,
+                    "item.effecoria.potion_phi_resistance.hint",
+                    false));
+    public static final DeferredItem<Item> ESSENCE_CLAY_SALVE = ITEMS.register(
+            "essence_clay_salve",
+            () -> new PhiShieldConsumableItem(
+                    new Item.Properties(),
+                    ModMobEffects::claySalve,
+                    45 * 20,
+                    "item.effecoria.essence_clay_salve.hint",
+                    false));
+    public static final DeferredItem<Item> LEAD_PILL = ITEMS.register(
+            "lead_pill",
+            () -> new PhiShieldConsumableItem(
+                    new Item.Properties(),
+                    ModMobEffects::leadSaturation,
+                    60 * 20,
+                    "item.effecoria.lead_pill.hint",
+                    true));
+
     public static final DeferredItem<Item> POTION_PHI_TONIC = ITEMS.register(
             "potion_phi_tonic",
             () -> new AlchemyPotionItem(

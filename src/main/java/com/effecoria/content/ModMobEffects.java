@@ -34,6 +34,21 @@ public final class ModMobEffects {
             "alchemy_crash",
             () -> new AlchemyCrashEffect(MobEffectCategory.HARMFUL, 0x4A3A55));
 
+    /** Temporary Φ-radiation resistance (potion / draught). */
+    public static final DeferredHolder<MobEffect, MobEffect> PHI_RESISTANCE = MOB_EFFECTS.register(
+            "phi_resistance",
+            () -> new MobEffect(MobEffectCategory.BENEFICIAL, 0xC9A84C) {});
+
+    /** Skin clay crust — short weak Φ insulation. */
+    public static final DeferredHolder<MobEffect, MobEffect> PHI_CLAY_SALVE = MOB_EFFECTS.register(
+            "phi_clay_salve",
+            () -> new MobEffect(MobEffectCategory.BENEFICIAL, 0x6B8CAE) {});
+
+    /** Internal lead screening — strong but toxic. */
+    public static final DeferredHolder<MobEffect, MobEffect> LEAD_SATURATION = MOB_EFFECTS.register(
+            "lead_saturation",
+            () -> new MobEffect(MobEffectCategory.BENEFICIAL, 0x5A5A62) {});
+
     public static Holder<MobEffect> tonic() {
         return PHI_TONIC;
     }
@@ -48,5 +63,17 @@ public final class ModMobEffects {
 
     public static Holder<MobEffect> crash() {
         return ALCHEMY_CRASH;
+    }
+
+    public static Holder<MobEffect> phiResistance() {
+        return PHI_RESISTANCE;
+    }
+
+    public static Holder<MobEffect> claySalve() {
+        return PHI_CLAY_SALVE;
+    }
+
+    public static Holder<MobEffect> leadSaturation() {
+        return LEAD_SATURATION;
     }
 }

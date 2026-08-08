@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["GGG", " S ", " S "],
+  "key": {
+    "G": { "item": "minecraft:gold_nugget" },
+    "S": { "item": "minecraft:stick" }
+  },
+  "result": { "count": 1, "id": "effecoria:essence_parasol" }
+}

@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["III", "ILI", "I I"],
+  "key": {
+    "I": { "item": "minecraft:iron_ingot" },
+    "L": { "item": "effecoria:lead_filter" }
+  },
+  "result": { "count": 1, "id": "effecoria:lead_cloak" }
+}

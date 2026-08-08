@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "effecoria:essonite_crust" },
+    { "item": "effecoria:essonite_dust" },
+    { "item": "minecraft:clay_ball" }
+  ],
+  "result": { "count": 2, "id": "effecoria:essence_clay_salve" }
+}

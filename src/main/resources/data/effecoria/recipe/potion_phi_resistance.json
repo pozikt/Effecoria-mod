@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "effecoria:purified_phi_water_bucket" },
+    { "item": "minecraft:gold_nugget" },
+    { "item": "effecoria:phi_blades" }
+  ],
+  "result": { "count": 1, "id": "effecoria:potion_phi_resistance" }
+}

@@ -5,7 +5,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.effecoria.EffecoriaMod;
-import com.effecoria.armor.EssoniteArmorService;
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.content.ModBlocks;
 import com.effecoria.content.ModFluids;
@@ -113,7 +112,7 @@ public final class SubspacePhysicsService {
             if (player.getAbilities().instabuild || player.isSpectator()) {
                 return true;
             }
-            if (EssoniteArmorService.hasAny(player)) {
+            if (com.effecoria.world.PhiRadiationService.hasPhiProtection(player)) {
                 return true;
             }
         }

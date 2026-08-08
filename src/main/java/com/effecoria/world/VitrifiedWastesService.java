@@ -3,7 +3,6 @@ package com.effecoria.world;
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.content.ModBiomeTags;
 import com.effecoria.content.ModParticleTypes;
-import com.effecoria.content.PhiHarnessItems;
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.core.psi.PsiHelper;
 
@@ -14,7 +13,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.phys.Vec3;
@@ -112,8 +110,9 @@ public final class VitrifiedWastesService {
         if (stayTicks % 20 != 0) {
             return;
         }
-        if (hasPhiProtection(player)) {
-            // Mild mana refresh for protected mages
+        PhiRadiationService.Shield shield = PhiRadiationService.evaluate(player);
+        float remain = shield.remaining();
+        if (remain <= 0.001f) {
             var data = PsiHelper.get(player);
             if (data.initiated() && data.currentPsi() < data.maxPsi()) {
                 float regen = BalanceConfig.VITRIFIED_PROTECTED_PSI_REGEN.get().floatValue();
@@ -122,15 +121,25 @@ public final class VitrifiedWastesService {
             }
             return;
         }
-        float dmg = BalanceConfig.VITRIFIED_RADIATION_DAMAGE.get().floatValue();
+        if (shield.adequate()) {
+            var data = PsiHelper.get(player);
+            if (data.initiated() && data.currentPsi() < data.maxPsi()) {
+                float regen = BalanceConfig.VITRIFIED_PROTECTED_PSI_REGEN.get().floatValue() * (1f - remain);
+                data.setCurrentPsi(Math.min(data.maxPsi(), data.currentPsi() + regen));
+                PsiHelper.set(player, data);
+            }
+        }
+        float dmg = BalanceConfig.VITRIFIED_RADIATION_DAMAGE.get().floatValue() * remain;
         if (dmg > 0f) {
             player.hurt(player.damageSources().magic(), dmg);
         }
-        BreathDebuffs.apply(
-                player, new MobEffectInstance(MobEffects.WEAKNESS, 40, 0, false, false, true));
-        if (!PsiHelper.get(player).initiated()) {
+        if (remain > 0.4f) {
             BreathDebuffs.apply(
-                    player, new MobEffectInstance(MobEffects.HUNGER, 40, 0, false, false, true));
+                    player, new MobEffectInstance(MobEffects.WEAKNESS, 40, 0, false, false, true));
+            if (!PsiHelper.get(player).initiated()) {
+                BreathDebuffs.apply(
+                        player, new MobEffectInstance(MobEffects.HUNGER, 40, 0, false, false, true));
+            }
         }
     }
 
@@ -150,26 +159,22 @@ public final class VitrifiedWastesService {
                     0.8,
                     0.02);
         }
-        if (hasPhiProtection(player)) {
+        float remain = PhiRadiationService.evaluate(player).remaining();
+        if (remain <= 0.001f) {
             return;
         }
-        float stormDmg = BalanceConfig.VITRIFIED_STORM_DAMAGE.get().floatValue();
+        float stormDmg = BalanceConfig.VITRIFIED_STORM_DAMAGE.get().floatValue() * remain;
         if (stormDmg > 0f) {
             player.hurt(player.damageSources().magic(), stormDmg);
         }
-        BreathDebuffs.apply(
-                player, new MobEffectInstance(MobEffects.BLINDNESS, 40, 0, false, false, true));
+        if (remain > 0.35f) {
+            BreathDebuffs.apply(
+                    player, new MobEffectInstance(MobEffects.BLINDNESS, 40, 0, false, false, true));
+        }
     }
 
-    /** Charged Φ-cell or creative = protected from residual flash radiation. */
+    /** Delegates to catalogued Φ-radiation shield. */
     public static boolean hasPhiProtection(Player player) {
-        if (player.getAbilities().instabuild) {
-            return true;
-        }
-        ItemStack cell = PhiHarnessItems.findPhiCell(player);
-        if (cell.isEmpty()) {
-            return false;
-        }
-        return PhiHarnessItems.cellCharge(cell) > 0.05f;
+        return PhiRadiationService.hasPhiProtection(player);
     }
 }

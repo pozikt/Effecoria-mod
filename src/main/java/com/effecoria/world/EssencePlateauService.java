@@ -3,8 +3,6 @@ package com.effecoria.world;
 import com.effecoria.EffecoriaMod;
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.content.ModBiomeTags;
-import com.effecoria.content.ModItems;
-import com.effecoria.content.PhiHarnessItems;
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.psi.PsiHelper;
@@ -161,44 +159,54 @@ public final class EssencePlateauService {
         int ticks = PLATEAU_TICKS.getOrDefault(id, 0) + 20;
         PLATEAU_TICKS.put(id, ticks);
 
+        PhiRadiationService.Shield shield = PhiRadiationService.evaluate(player);
+        float remain = shield.remaining();
         var data = PsiHelper.get(player);
+
         if (data.initiated()) {
-            if (ticks % 600 == 0 && !hasPhiProtection(player)) {
-                ExhaustionService.addExhaustion(data, BalanceConfig.PLATEAU_EXHAUSTION_SPIKE.get().floatValue());
+            if (ticks % 600 == 0 && remain > 0.5f) {
+                ExhaustionService.addExhaustion(
+                        data, BalanceConfig.PLATEAU_EXHAUSTION_SPIKE.get().floatValue() * remain);
                 PsiHelper.set(player, data);
             }
-        } else if (ticks % 400 == 0) {
+        } else if (ticks % 400 == 0 && remain > 0.35f) {
             BreathDebuffs.apply(
                     player, new MobEffectInstance(MobEffects.CONFUSION, 120, 0, false, false, true));
             BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.CONFUSION, 100, 1, false, false, true));
         }
 
         int burnInterval = BalanceConfig.PLATEAU_BURN_INTERVAL_TICKS.get();
-        if (burnInterval > 0 && ticks >= burnInterval && ticks % burnInterval == 0 && !hasPhiProtection(player)) {
-            float damage = BalanceConfig.PLATEAU_BURN_DAMAGE.get().floatValue();
+        if (burnInterval > 0 && ticks >= burnInterval && ticks % burnInterval == 0 && remain > 0.001f) {
+            float damage = BalanceConfig.PLATEAU_BURN_DAMAGE.get().floatValue() * remain;
             if (damage > 0f) {
                 player.hurt(player.damageSources().magic(), damage);
             }
             if (data.initiated()) {
-                ExhaustionService.addExhaustion(data, BalanceConfig.PLATEAU_BURN_EXHAUSTION.get().floatValue());
+                ExhaustionService.addExhaustion(
+                        data, BalanceConfig.PLATEAU_BURN_EXHAUSTION.get().floatValue() * remain);
                 PsiHelper.set(player, data);
             }
         }
 
         // Φ-core (Φ-ядро): lethal radiation without protection at lowest heights
-        if (player.getY() <= BalanceConfig.PLATEAU_ROOT_MAX_Y.get() && !hasPhiProtection(player)) {
-            float rootDmg = BalanceConfig.PLATEAU_ROOT_RADIATION_DAMAGE.get().floatValue();
+        if (player.getY() <= BalanceConfig.PLATEAU_ROOT_MAX_Y.get() && remain > 0.001f) {
+            float rootDmg = BalanceConfig.PLATEAU_ROOT_RADIATION_DAMAGE.get().floatValue() * remain;
             if (rootDmg > 0f) {
                 player.hurt(player.damageSources().magic(), rootDmg);
             }
-            BreathDebuffs.apply(
-                    player, new MobEffectInstance(MobEffects.WITHER, 60, 1, false, false, true));
-            BreathDebuffs.apply(
-                    player, new MobEffectInstance(MobEffects.CONFUSION, 80, 0, false, false, true));
-            BreathDebuffs.apply(
-                    player, new MobEffectInstance(MobEffects.WEAKNESS, 60, 0, false, false, true));
+            // Ω-tainted wither bleeds through weak shields unless void-obsidian / absolute.
+            if (!shield.omega() && remain > 0.25f) {
+                BreathDebuffs.apply(
+                        player, new MobEffectInstance(MobEffects.WITHER, 60, 1, false, false, true));
+            }
+            if (remain > 0.35f) {
+                BreathDebuffs.apply(
+                        player, new MobEffectInstance(MobEffects.CONFUSION, 80, 0, false, false, true));
+                BreathDebuffs.apply(
+                        player, new MobEffectInstance(MobEffects.WEAKNESS, 60, 0, false, false, true));
+            }
             if (data.initiated()) {
-                ExhaustionService.addExhaustion(data, 6f);
+                ExhaustionService.addExhaustion(data, 6f * remain);
                 PsiHelper.set(player, data);
             }
             if (player instanceof ServerPlayer serverPlayer
@@ -212,32 +220,8 @@ public final class EssencePlateauService {
         }
     }
 
-    /** Gold / charged Φ-cell / resonance focus — partial Φ shielding from overexposure. */
+    /** Delegates to {@link PhiRadiationService} (lead / gold / void / suit / cocoon / potions…). */
     public static boolean hasPhiProtection(Player player) {
-        if (PhiHarnessItems.bestFocusTier(player) > 0) {
-            return true;
-        }
-        if (!PhiHarnessItems.findPhiCell(player).isEmpty()) {
-            return true;
-        }
-        for (var stack : player.getInventory().items) {
-            if (stack.is(ModItems.ESSENITE_DUST.get())) {
-                return true;
-            }
-        }
-        for (var slot : player.getArmorSlots()) {
-            if (isGoldIsolation(slot)) {
-                return true;
-            }
-        }
-        return isGoldIsolation(player.getMainHandItem()) || isGoldIsolation(player.getOffhandItem());
-    }
-
-    private static boolean isGoldIsolation(net.minecraft.world.item.ItemStack stack) {
-        if (stack.isEmpty()) {
-            return false;
-        }
-        var key = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
-        return key != null && "minecraft".equals(key.getNamespace()) && key.getPath().startsWith("gold_");
+        return PhiRadiationService.hasPhiProtection(player);
     }
 }

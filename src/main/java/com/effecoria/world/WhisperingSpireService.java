@@ -139,7 +139,9 @@ public final class WhisperingSpireService {
             return;
         }
 
-        boolean protected_ = EssencePlateauService.hasPhiProtection(player);
+        PhiRadiationService.Shield shield = PhiRadiationService.evaluate(player);
+        float remain = shield.remaining();
+        boolean protected_ = shield.adequate();
         var data = PsiHelper.get(player);
 
         switch (zone) {
@@ -152,25 +154,37 @@ public final class WhisperingSpireService {
                 }
             }
             case YELLOW -> {
-                if (!protected_) {
+                if (remain > 0.001f) {
                     if (!data.initiated()) {
-                        player.hurt(player.damageSources().magic(), BalanceConfig.SPIRE_DMG_YELLOW.get().floatValue());
-                        player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 100, 0, false, false, true));
+                        player.hurt(
+                                player.damageSources().magic(),
+                                BalanceConfig.SPIRE_DMG_YELLOW.get().floatValue() * remain);
+                        if (remain > 0.4f) {
+                            player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 100, 0, false, false, true));
+                        }
                     } else if (player.tickCount % 40 == 0) {
-                        ExhaustionService.addExhaustion(data, 2.5f);
+                        ExhaustionService.addExhaustion(data, 2.5f * remain);
                         PsiHelper.set(player, data);
-                        player.hurt(player.damageSources().magic(), BalanceConfig.SPIRE_DMG_YELLOW.get().floatValue() * 0.5f);
+                        player.hurt(
+                                player.damageSources().magic(),
+                                BalanceConfig.SPIRE_DMG_YELLOW.get().floatValue() * 0.5f * remain);
                     }
                 }
                 maybeWhisper(player, zone);
             }
             case RED -> {
-                if (!protected_) {
-                    player.hurt(player.damageSources().magic(), BalanceConfig.SPIRE_DMG_RED.get().floatValue());
-                    player.addEffect(new MobEffectInstance(MobEffects.WITHER, 40, 0, false, false, true));
-                    player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0, false, false, true));
+                if (remain > 0.001f) {
+                    player.hurt(
+                            player.damageSources().magic(),
+                            BalanceConfig.SPIRE_DMG_RED.get().floatValue() * remain);
+                    if (!shield.omega() && remain > 0.25f) {
+                        player.addEffect(new MobEffectInstance(MobEffects.WITHER, 40, 0, false, false, true));
+                    }
+                    if (remain > 0.35f) {
+                        player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0, false, false, true));
+                    }
                     if (data.initiated()) {
-                        ExhaustionService.addExhaustion(data, 8f);
+                        ExhaustionService.addExhaustion(data, 8f * remain);
                         PsiHelper.set(player, data);
                     }
                 } else if (data.initiated() && player.tickCount % 20 == 0) {
@@ -181,17 +195,19 @@ public final class WhisperingSpireService {
             }
             case BLACK -> {
                 // Soul-burn: protection only softens; still lethal without creative
-                float dmg = BalanceConfig.SPIRE_DMG_BLACK.get().floatValue();
+                float dmg = BalanceConfig.SPIRE_DMG_BLACK.get().floatValue() * Math.max(0.2f, remain);
                 if (protected_) {
-                    dmg *= 0.35f;
+                    dmg *= 0.5f;
                 }
                 if (!player.getAbilities().invulnerable) {
                     player.hurt(player.damageSources().magic(), dmg);
-                    player.addEffect(new MobEffectInstance(MobEffects.WITHER, 60, 2, false, false, true));
+                    if (!shield.omega()) {
+                        player.addEffect(new MobEffectInstance(MobEffects.WITHER, 60, 2, false, false, true));
+                    }
                     player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 60, 0, false, false, true));
                     if (data.initiated()) {
-                        ExhaustionService.addExhaustion(data, 14f);
-                        data.setCurrentPsi(Math.max(0f, data.currentPsi() - 4f));
+                        ExhaustionService.addExhaustion(data, 14f * Math.max(0.35f, remain));
+                        data.setCurrentPsi(Math.max(0f, data.currentPsi() - 4f * Math.max(0.35f, remain)));
                         PsiHelper.set(player, data);
                     }
                 }

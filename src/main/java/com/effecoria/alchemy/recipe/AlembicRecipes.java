@@ -38,6 +38,9 @@ public final class AlembicRecipes {
         if (stack.is(ModItems.PURE_ESSONITE.get())) {
             return ModItems.POTION_PHI_STIMULANT.get();
         }
+        if (stack.is(net.minecraft.world.item.Items.GOLD_NUGGET)) {
+            return ModItems.POTION_PHI_RESISTANCE.get();
+        }
         return null;
     }
 
