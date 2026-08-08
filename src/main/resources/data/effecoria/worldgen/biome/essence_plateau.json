@@ -108,42 +108,42 @@
     "creature": [
       {
         "type": "effecoria:phi_larva",
-        "maxCount": 6,
-        "minCount": 2,
-        "weight": 40
+        "maxCount": 8,
+        "minCount": 3,
+        "weight": 70
       },
       {
         "type": "effecoria:eidos",
         "maxCount": 1,
         "minCount": 1,
-        "weight": 2
+        "weight": 6
       }
     ],
     "misc": [],
     "monster": [
       {
         "type": "effecoria:crystal_crab",
-        "maxCount": 3,
+        "maxCount": 4,
         "minCount": 1,
-        "weight": 55
+        "weight": 80
       },
       {
         "type": "effecoria:essence_wyvern",
         "maxCount": 1,
         "minCount": 1,
-        "weight": 2
+        "weight": 4
       },
       {
         "type": "minecraft:enderman",
         "maxCount": 2,
         "minCount": 1,
-        "weight": 8
+        "weight": 6
       },
       {
         "type": "minecraft:spider",
         "maxCount": 2,
         "minCount": 1,
-        "weight": 15
+        "weight": 10
       }
     ],
     "underground_water_creature": [

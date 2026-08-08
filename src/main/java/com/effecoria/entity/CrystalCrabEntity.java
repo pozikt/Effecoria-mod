@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -23,6 +24,7 @@ import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.UUID;
@@ -53,6 +55,12 @@ public class CrystalCrabEntity extends Monster implements GeoEntity, NeutralMob 
 
     public CrystalCrabEntity(EntityType<? extends CrystalCrabEntity> type, Level level) {
         super(type, level);
+    }
+
+    /** Plateau blocks glow — skip vanilla monster darkness gate. */
+    @Override
+    public boolean checkSpawnRules(LevelAccessor level, MobSpawnType spawnType) {
+        return true;
     }
 
     public static AttributeSupplier.Builder createAttributes() {

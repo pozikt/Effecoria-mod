@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "effecoria:phi_grass",
+    "effecoria:phi_dirt",
+    "effecoria:phi_stone",
+    "effecoria:essonite_crust",
+    "effecoria:vitrified_dirt",
+    "effecoria:vitrified_sand",
+    "effecoria:vitrified_stone"
+  ]
+}

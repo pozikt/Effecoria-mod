@@ -15,8 +15,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacementTypes;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
@@ -118,31 +116,31 @@ public final class ModEntities {
                 PHI_LARVA.get(),
                 SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                Animal::checkAnimalSpawnRules,
+                EffecoriaMobSpawns::phiLarva,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE);
         event.register(
                 CRYSTAL_CRAB.get(),
                 SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                Monster::checkMonsterSpawnRules,
+                EffecoriaMobSpawns::crystalCrab,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE);
         event.register(
                 EIDOS.get(),
-                SpawnPlacementTypes.NO_RESTRICTIONS,
+                SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                (type, level, reason, pos, random) -> level.getRawBrightness(pos, 0) > 7,
+                EffecoriaMobSpawns::eidos,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE);
         event.register(
                 VITRIFIED_GOLEM.get(),
                 SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                Monster::checkMonsterSpawnRules,
+                EffecoriaMobSpawns::vitrifiedGolem,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE);
         event.register(
                 ESSENCE_WYVERN.get(),
                 SpawnPlacementTypes.NO_RESTRICTIONS,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                Monster::checkMonsterSpawnRules,
+                EffecoriaMobSpawns::essenceWyvern,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 }

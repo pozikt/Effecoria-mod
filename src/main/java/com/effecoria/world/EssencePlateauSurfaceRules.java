@@ -3,7 +3,6 @@ package com.effecoria.world;
 import com.effecoria.content.ModBlocks;
 
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import net.minecraft.world.level.levelgen.placement.CaveSurface;
 
@@ -74,14 +73,11 @@ public final class EssencePlateauSurfaceRules {
         SurfaceRules.RuleSource vitrifiedColumn = SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.abovePreliminarySurface(), vitrifiedStack));
 
-        SurfaceRules.RuleSource vanillaGrassSurface = SurfaceRules.sequence(
-                SurfaceRules.ifTrue(isAtOrAboveWaterLevel, state(Blocks.GRASS_BLOCK)), state(Blocks.DIRT));
-
+        // Only paint Effecoria biomes — no catch-all grass (that creates border pillars / wrong deserts).
         return SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.ESSENCE_PLATEAU), plateauColumn),
                 SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.DEAD_WASTELAND), wastelandColumn),
-                SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.VITRIFIED_WASTES), vitrifiedColumn),
-                SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, vanillaGrassSurface));
+                SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.VITRIFIED_WASTES), vitrifiedColumn));
     }
 
     private static SurfaceRules.RuleSource state(Block block) {

@@ -55,14 +55,16 @@ Client: `ViewportEvent` fog tint + `phi_mist` / spark motes + movement wake trai
 
 ## Φ-fauna
 
-GeckoLib mobs native to the plateau (spawn eggs in creative):
+GeckoLib mobs native to the plateau (natural spawn + creative eggs):
 
 | Mob | Role | Notes |
 |-----|------|-------|
-| **Φ-larva** | Passive | Segmented glowing grub (GeckoLib); breeds on essonite dust; adults restore Ψ / charge Φ-cells; drops dust. Art: `art/phi_larva/` |
-| **Crystal crab** | Neutral | Stone-beige golem-crab with amber crystals; angers if essonite mined nearby; drops shards + Φ-chitin. Art: `art/crystal_crab/` |
-| **Eidos** | Rare passive | Beige Φ-field spirit with amber orbital rings; offer essonite crystal / pure essonite → buff or short portal hop. Art: `art/eidos/` |
-| **Essence Wyvern** | Rare hostile apex | Classical wyvern (**no front legs**); flight + melee + plasma-breath stub; see `docs/ESSENCE_WYVERN.md` |
+| **Φ-larva** | Passive | Spawns on Φ-grass/dirt/stone; breeds on essonite dust; adults restore Ψ / charge Φ-cells |
+| **Crystal crab** | Neutral | Day/night on plateau; angers if essonite mined nearby; drops shards + Φ-chitin |
+| **Eidos** | Rare passive | Plateau daylight; offer essonite crystal / pure essonite → buff or short portal hop |
+| **Essence Wyvern** | Rare hostile apex | Prefers high peaks; flight + melee; see [ESSENCE_WYVERN.md](ESSENCE_WYVERN.md) |
+
+Spawn rules: `EffecoriaMobSpawns` + biome `spawners` (no restrictive `spawn_costs`). Φ-surface blocks glow, so monsters override darkness checks and spawn day/night. `phi_grass` / `phi_dirt` are in `#minecraft:animals_spawnable_on`.
 
 *(Twisted mage deferred; wyvern life-stages / dedicated drops later.)*
 

@@ -1,7 +1,7 @@
 # Vitrified Wastes — Residual Φ Flash Zone
 
 **Стеклянная Пустошь** (`effecoria:vitrified_wastes`): пустыня, оплавленная Φ-вспышкой.
-Чёрное стекло, ультрамариновые/золотые кристаллы, окаменевшие деревья. **Без мобов** (пока).
+Чёрное стекло, ультрамариновые/золотые кристаллы, окаменевшие деревья. Фауна: **стеклянные големы**.
 
 ## Placement
 
@@ -31,7 +31,7 @@ Sky/fog: near-black indigo with blue-gold particle haze.
 | `vitrified_tree` | common | Single petrified trunk |
 | `vitrified_grove` | uncommon | 10–30 trees + crystal floor |
 | `vitrified_crater` | uncommon | Glass bowl + central crack |
-| `vitrified_mage_tower` | rare | Stone tower, essonite statue, chest |
+| `vitrified_mage_tower` | very rare | Short ruined tower (not blank pillars); chest + statue |
 | `vitrified_frozen_village` | very rare | Flash village husk + geyser plaza |
 
 ## Gameplay
@@ -54,7 +54,7 @@ Config keys under `BalanceConfig`: `vitrified_*`.
 |-----|--------|
 | Vitrified Golem (`effecoria:vitrified_golem`) | Hostile — melee, rush, Φ-flash. From-scratch compact biped (~2.15 tall), opaque 128 atlas, iron-style anims (`scripts/build_vitrified_golem_from_scratch.py`). |
 
-Spawn egg: creative tab. Natural spawn in biome (light rules via monster placement).
+Spawn egg: creative tab. Natural spawn **day or night** on vitrified sand/dirt/stone (custom spawn rules — glowing glass blocks would otherwise fail vanilla monster darkness checks).
 
 ## Contrast with Dead Wasteland
 

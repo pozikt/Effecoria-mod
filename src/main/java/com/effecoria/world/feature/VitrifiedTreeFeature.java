@@ -75,15 +75,9 @@ public final class VitrifiedTreeFeature extends Feature<NoneFeatureConfiguration
                 level.setBlock(tip, log.setValue(RotatedPillarBlock.AXIS, dir.getAxis()), 2);
             }
         }
-        if (giant) {
-            BlockPos hollow = origin.above(1);
-            level.setBlock(hollow, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
-            if (random.nextFloat() < 0.6f) {
-                level.setBlock(
-                        hollow,
-                        net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState(),
-                        2);
-            }
+        // Rare hollow knot in giant trunks — no chests (loot stays in towers / villages).
+        if (giant && random.nextFloat() < 0.35f) {
+            level.setBlock(origin.above(1), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
         }
         return true;
     }
