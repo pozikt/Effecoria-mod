@@ -114,6 +114,7 @@ public final class SubspaceMatterService {
                     ensureSupport(subspace, dest);
                 }
                 subspace.setBlock(dest, state, 3);
+                SubspaceEssentializationService.watch(subspace, dest, subspace.getGameTime());
                 placed = true;
             }
         }

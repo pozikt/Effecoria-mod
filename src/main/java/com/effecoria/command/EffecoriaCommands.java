@@ -17,6 +17,7 @@ import com.effecoria.magic.CastPipeline;
 import com.effecoria.magic.SpellRegistry;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
@@ -105,12 +106,18 @@ public final class EffecoriaCommands {
                                         ctx.getSource(), StringArgumentType.getString(ctx, "school")))))
                 .then(Commands.literal("horror")
                         .requires(source -> source.hasPermission(2))
-                        .executes(ctx -> spawnHorrorPreview(ctx.getSource()))));
+                        .executes(ctx -> spawnHorrorPreview(ctx.getSource())))
+                .then(Commands.literal("subspaceSpeed")
+                        .requires(source -> source.hasPermission(2))
+                        .executes(ctx -> subspaceSpeedGet(ctx.getSource()))
+                        .then(Commands.argument("speed", IntegerArgumentType.integer(0, 4096))
+                                .executes(ctx -> subspaceSpeedSet(
+                                        ctx.getSource(), IntegerArgumentType.getInteger(ctx, "speed"))))));
     }
 
     private static int help(CommandSourceStack source) {
         source.sendSuccess(() -> Component.literal(
-                "Effecoria: help | version | debug | initiate <school> | reschool <school> | cast <id> [self|@e] | spells | max [school] | set <stat> <value> | horror"),
+                "Effecoria: help | version | debug | initiate <school> | reschool <school> | cast <id> [self|@e] | spells | max [school] | set <stat> <value> | horror | subspaceSpeed [0-4096]"),
                 false);
         return 1;
     }
@@ -400,5 +407,24 @@ public final class EffecoriaCommands {
         }
         source.sendSuccess(() -> Component.translatable("message.effecoria.horror_preview"), true);
         return 1;
+    }
+
+    private static int subspaceSpeedGet(CommandSourceStack source) {
+        int speed = source.getLevel()
+                .getGameRules()
+                .getInt(com.effecoria.world.ModGameRules.SUBSPACE_ESSENTIALIZE_SPEED);
+        source.sendSuccess(
+                () -> Component.translatable("message.effecoria.subspace.speed_get", speed), false);
+        return speed;
+    }
+
+    private static int subspaceSpeedSet(CommandSourceStack source, int speed) {
+        source.getServer()
+                .getGameRules()
+                .getRule(com.effecoria.world.ModGameRules.SUBSPACE_ESSENTIALIZE_SPEED)
+                .set(speed, source.getServer());
+        source.sendSuccess(
+                () -> Component.translatable("message.effecoria.subspace.speed_set", speed), true);
+        return speed;
     }
 }

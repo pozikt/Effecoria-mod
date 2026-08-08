@@ -45,6 +45,7 @@ import com.effecoria.effect.organic.ParasiteHostService;
 import com.effecoria.effect.corruption.CorruptionFieldService;
 import com.effecoria.armor.EssoniteArmorService;
 import com.effecoria.effect.spatial.SpatialFieldService;
+import com.effecoria.effect.spatial.SubspaceEssentializationService;
 import com.effecoria.magic.SpellRegistry;
 import com.effecoria.core.seal.SealWordRegistry;
 import com.effecoria.world.DeadWastelandService;
@@ -106,6 +107,7 @@ public final class ModCommonEvents {
             MentalCompulsionService.tick(serverLevel);
             MentalityService.tick(serverLevel);
             MirageWorldService.tick(serverLevel);
+            SubspaceEssentializationService.tick(serverLevel);
         }
     }
 

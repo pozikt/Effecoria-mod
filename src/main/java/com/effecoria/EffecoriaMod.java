@@ -101,7 +101,7 @@ public class EffecoriaMod {
 
         ModCreativeTabs.CREATIVE_TABS.register(modEventBus);
 
-
+        com.effecoria.world.ModGameRules.bootstrap();
 
         modContainer.registerConfig(ModConfig.Type.COMMON, BalanceConfig.SPEC);
 

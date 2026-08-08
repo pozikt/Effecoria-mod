@@ -34,9 +34,34 @@ Tie spatial risk (long blink / portals / voyage distance) into Stage V TSE when 
 
 ## Matter fate when left in the Φ-sublayer
 
-Scaffolding: `SubspaceMatterService` (exile classification + physical dump yard next to `subspaceAnchor(host)` / active voyage entry). Full simulation of reefs / ghosts / spit-back comes later.
+Scaffolding: `SubspaceMatterService` (exile classification + physical dump yard) + **`SubspaceEssentializationService`** (slow block convert in hyperspace, persisted ages).
 
-### Organic (limbs, grass, trees)
+### Shipped essentialization (playable rates)
+
+Recast/exile dumps and nearby watched cells age in `effecoria:subspace`. Defaults (config `subspace_*_ticks`):
+
+| Source | Becomes | Default age |
+|--------|---------|-------------|
+| Dirt / grass / soft organics | `phi_dirt` / `phi_grass` / `phi_blades` | ~2 min |
+| Logs / planks / leaves | `phi_log` / `phi_planks` / `phi_leaves` | ~4 min |
+| Stone family | `phi_stone` → `essonite_ore` | ~10 min → ~20 min |
+| Sand / quartz | `essonite_crust` → ore | ~5 min → ore stage |
+| Glass | `phi_glass` | ~5 min |
+| Water / ice | `phi_water` → blue ice (Φ-hydrate stand-in) | ~3 min → ×2 |
+| Obsidian | `void_obsidian` | ~7.5 min |
+| Amethyst buds/cluster | essonite buds/crystal | organic-ish |
+| Gold | spit back to overworld (“falling gold”) | ~5 min |
+| Iron | stable for now (no Φ-iron block yet) | — |
+| Essonite family | slow bud growth / ore→block→star | chance pulse |
+
+Tune via `BalanceConfig` / `effecoria-server.toml`. Lore timescales (months–millennia) remain the fiction; config compresses them.
+
+**Speed control:** `randomTickSpeed` does **not** affect this (aging uses game time, not block random ticks). Use:
+
+- `/gamerule subspaceEssentializeSpeed <n>` — `0` pause, `1` default, `100` ≈ 100× faster
+- `/effecoria subspaceSpeed [n]` — same rule (op)
+
+### Organic (limbs, grass, trees) — lore stages
 
 1. **Φ-conservation** (hours–days) — sterilized, no rot; looks fresh/green.
 2. **Essentialization** (months–years) — tissue → essento-ceramic (glass-gold-blue), veins/bones visible.
@@ -45,9 +70,9 @@ Scaffolding: `SubspaceMatterService` (exile classification + physical dump yard 
 ### Inorganic
 
 - **Φ-conductors** (silver, mythril…): stable forever.
-- **Φ-insulators** (gold, lead…): Φ-bubble → eventual spit-back to realspace (“falling gold”).
-- **Iron/steel**: essentialize ~100× slower than organics.
-- **Silicates**: low-grade essonite over millennia → mineable “star essonite” on reefs (deadly trade).
+- **Φ-insulators** (gold, lead…): Φ-bubble → eventual spit-back to realspace (“falling gold”) — **gold spit shipped**.
+- **Iron/steel**: essentialize ~100× slower than organics (no dedicated Φ-iron block yet).
+- **Silicates**: low-grade essonite over millennia → mineable “star essonite” on reefs (deadly trade) — **ore / star path started**.
 - **Artifacts with Φ-phonemes**: mutated / dangerous variants.
 
 ### Culture / economy (later hooks)

@@ -766,5 +766,40 @@ public final class BalanceConfig {
             .comment("Fraction of fire damage negated while armor is charged")
             .defineInRange("essonite_armor_fire_reduction", 0.35, 0.0, 1.0);
 
+    // --- Hyperspace essentialization (playable compressions of lore timescales) ---
+    public static final ModConfigSpec.IntValue SUBSPACE_ESSENTIALIZE_INTERVAL_TICKS = BUILDER
+            .comment("How often subspace essentialization scans (ticks)")
+            .defineInRange("subspace_essentialize_interval_ticks", 40, 5, 1200);
+    public static final ModConfigSpec.IntValue SUBSPACE_ORGANIC_TICKS = BUILDER
+            .comment("Age before dirt/flesh-like organics glass into Φ analogues")
+            .defineInRange("subspace_organic_ticks", 2400, 100, 720000);
+    public static final ModConfigSpec.IntValue SUBSPACE_WOOD_TICKS = BUILDER
+            .comment("Age before wood/leaves become Φ-wood / Φ-leaves")
+            .defineInRange("subspace_wood_ticks", 4800, 200, 720000);
+    public static final ModConfigSpec.IntValue SUBSPACE_STONE_TICKS = BUILDER
+            .comment("Age before stone becomes Φ-stone")
+            .defineInRange("subspace_stone_ticks", 12000, 400, 1440000);
+    public static final ModConfigSpec.IntValue SUBSPACE_STONE_ORE_TICKS = BUILDER
+            .comment("Extra age for Φ-stone / crust → essonite ore")
+            .defineInRange("subspace_stone_ore_ticks", 24000, 800, 2880000);
+    public static final ModConfigSpec.IntValue SUBSPACE_QUARTZ_TICKS = BUILDER
+            .comment("Age before sand/quartz/glass become crust / Φ-glass")
+            .defineInRange("subspace_quartz_ticks", 6000, 200, 720000);
+    public static final ModConfigSpec.IntValue SUBSPACE_WATER_TICKS = BUILDER
+            .comment("Age before water becomes Φ-water (then blue-ice Φ-hydrate)")
+            .defineInRange("subspace_water_ticks", 3600, 100, 720000);
+    public static final ModConfigSpec.IntValue SUBSPACE_IRON_TICKS = BUILDER
+            .comment("Reserved age for future Φ-iron (iron currently stable)")
+            .defineInRange("subspace_iron_ticks", 48000, 1000, 2880000);
+    public static final ModConfigSpec.IntValue SUBSPACE_GOLD_SPIT_TICKS = BUILDER
+            .comment("Age before gold is spit back to the overworld")
+            .defineInRange("subspace_gold_spit_ticks", 6000, 200, 720000);
+    public static final ModConfigSpec.IntValue SUBSPACE_OBSIDIAN_TICKS = BUILDER
+            .comment("Age before obsidian becomes void obsidian")
+            .defineInRange("subspace_obsidian_ticks", 9000, 200, 720000);
+    public static final ModConfigSpec.DoubleValue SUBSPACE_ESSONITE_GROW_CHANCE = BUILDER
+            .comment("Per growth pulse chance to sprout/upgrade essonite near a voyager")
+            .defineInRange("subspace_essonite_grow_chance", 0.35, 0.0, 1.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 }
