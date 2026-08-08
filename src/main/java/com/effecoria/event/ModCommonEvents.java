@@ -46,6 +46,7 @@ import com.effecoria.effect.corruption.CorruptionFieldService;
 import com.effecoria.armor.EssoniteArmorService;
 import com.effecoria.effect.spatial.SpatialFieldService;
 import com.effecoria.effect.spatial.SubspaceEssentializationService;
+import com.effecoria.effect.spatial.SubspacePhysicsService;
 import com.effecoria.magic.SpellRegistry;
 import com.effecoria.core.seal.SealWordRegistry;
 import com.effecoria.world.DeadWastelandService;
@@ -161,6 +162,9 @@ public final class ModCommonEvents {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
+
+        // Hyperspace physics runs for everyone (mages and mundanes) before school ticks.
+        SubspacePhysicsService.tickPlayer(player);
 
         EssencePlateauService.tickPlayer(player);
         DeadWastelandService.tickPlayer(player);

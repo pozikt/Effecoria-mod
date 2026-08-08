@@ -17,6 +17,20 @@ Living doc for `effecoria:subspace` after the voyage MVP (`subspace_voyage`, 1�
 - Hyperspace stands on translucent **`phi_veil`** (not End stone). Leftover End stone under landings is migrated on entry.
 - Client Φ-landscape: ultramarine fog ocean, star-hills, planet motes, black-hole spirals, TSE knots, Ω glitch snow (`SubspacePhiLandscapeClient`).
 
+## Survival physics (shipped)
+
+`SubspacePhysicsService` — weightlessness + liquid lock + unprotected essentialization.
+
+| Rule | Behavior |
+|------|----------|
+| **Gravity** | Living gravity attribute ×0; items `noGravity`; fall damage cancelled |
+| **Water** | Vanilla **source** water → **`phi_water` instantly**; flowing cells deleted (never promoted to sources) |
+| **Liquid spread** | Φ-water slope/drop locked in subspace; non-source placements → air |
+| **Unprotected** | No Space Cocoon and no essonite Φ-armor → escalating magic damage / glassing (config `subspace_*`) |
+| **Protected** | Cocoon **or** any worn essonite armor → safe from lethal exposure; mild Orkanum pressure |
+
+Creative / spectator are always protected. Lore floating spheres are **not** simulated.
+
 ## Must-add later: cosmological anomalies & hazards
 
 Hyperspace is **not** an empty corridor. Add navigation and survival threats:
@@ -47,7 +61,7 @@ Recast/exile dumps and nearby watched cells age in `effecoria:subspace`. Default
 | Stone family | `phi_stone` → `essonite_ore` | ~10 min → ~20 min |
 | Sand / quartz | `essonite_crust` → ore | ~5 min → ore stage |
 | Glass | `phi_glass` | ~5 min |
-| Water / ice | `phi_water` → blue ice (Φ-hydrate stand-in) | ~3 min → ×2 |
+| Water / ice | `phi_water` **instantly** → blue ice (Φ-hydrate) | 0 → ~6 min |
 | Obsidian | `void_obsidian` | ~7.5 min |
 | Amethyst buds/cluster | essonite buds/crystal | organic-ish |
 | Gold | spit back to overworld (“falling gold”) | ~5 min |

@@ -60,9 +60,9 @@ public final class ModFluids {
             FLUIDS.register("blood_flowing", () -> new BaseFlowingFluid.Flowing(bloodProperties()));
 
     public static final DeferredHolder<Fluid, FlowingFluid> PHI_WATER =
-            FLUIDS.register("phi_water", () -> new BaseFlowingFluid.Source(phiWaterProperties()));
+            FLUIDS.register("phi_water", () -> new PhiWaterFluid.Source(phiWaterProperties()));
     public static final DeferredHolder<Fluid, FlowingFluid> PHI_WATER_FLOWING =
-            FLUIDS.register("phi_water_flowing", () -> new BaseFlowingFluid.Flowing(phiWaterProperties()));
+            FLUIDS.register("phi_water_flowing", () -> new PhiWaterFluid.Flowing(phiWaterProperties()));
 
     private static BaseFlowingFluid.Properties bloodProperties() {
         return new BaseFlowingFluid.Properties(BLOOD_TYPE, BLOOD, BLOOD_FLOWING)

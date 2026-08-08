@@ -222,6 +222,7 @@ public final class SpellProgression {
      */
     public static List<ResourceLocation> commonSpells() {
         return List.of(
+                id("phi_thrust"),
                 id("psi_adrenaline"),
                 id("phi_glow"),
                 id("psi_charge"),

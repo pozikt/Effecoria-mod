@@ -324,6 +324,7 @@ public final class SpellEffectExecutor {
             case "sear" -> ElementalCraftEffects.sear(caster, effect, power);
             case "ore_smelt" -> ElementalCraftEffects.oreSmelt(caster, effect, power, blockTarget);
             case "psi_adrenaline" -> CommonEffects.psiAdrenaline(caster, effect, power);
+            case "phi_thrust" -> CommonEffects.phiThrust(caster, effect, power);
             case "phi_glow" -> CommonEffects.phiGlow(caster, effect, power);
             case "psi_charge" -> CommonEffects.psiCharge(caster, effect, power);
             case "psi_link" -> CommonEffects.psiLink(caster, effect, power, target);

@@ -11,6 +11,7 @@ import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.effect.mental.MentalityService;
+import com.effecoria.world.ModDimensions;
 
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -50,6 +51,46 @@ public final class CommonEffects {
         level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 10, 0.3, 0.35, 0.3, 0.15);
         level.playSound(null, caster.blockPosition(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.55f, 1.6f);
         caster.displayClientMessage(Component.translatable("message.effecoria.common.adrenaline"), true);
+    }
+
+    /**
+     * Φ-thrust — shove yourself along look by pushing against the Φ-field.
+     * Primary locomotion in hyperspace weightlessness; short hop elsewhere.
+     */
+    public static void phiThrust(ServerPlayer caster, SpellEffectEntry effect, float power) {
+        float strength = effect.params().has("strength") ? effect.params().get("strength").getAsFloat() : 1.35f;
+        strength *= 0.9f + power / 140f;
+        if (ModDimensions.isSubspace(caster.level())) {
+            strength *= 1.45f;
+        }
+
+        Vec3 look = caster.getLookAngle().normalize();
+        Vec3 impulse = look.scale(strength);
+        // Slight upward bias in realspace so the cast reads as a hop, not a floor scrape.
+        if (!ModDimensions.isSubspace(caster.level()) && look.y < 0.15) {
+            impulse = impulse.add(0, 0.22, 0);
+        }
+        caster.setDeltaMovement(caster.getDeltaMovement().add(impulse));
+        caster.hurtMarked = true;
+        caster.hasImpulse = true;
+        caster.fallDistance = 0f;
+
+        ServerLevel level = caster.serverLevel();
+        Vec3 at = caster.position().add(0, 1.0, 0);
+        Vec3 wake = look.scale(-0.55);
+        level.sendParticles(
+                ModParticleTypes.PHI_SPARK.get(),
+                at.x + wake.x,
+                at.y + wake.y,
+                at.z + wake.z,
+                16,
+                0.15,
+                0.2,
+                0.15,
+                0.04);
+        level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 6, 0.12, 0.15, 0.12, 0.02);
+        level.playSound(null, caster.blockPosition(), SoundEvents.WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 0.55f, 1.55f);
+        caster.displayClientMessage(Component.translatable("message.effecoria.common.thrust"), true);
     }
 
     /** §2.3 Φ-illumination — cold Cherenkov glow. */

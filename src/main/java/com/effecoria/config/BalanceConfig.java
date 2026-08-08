@@ -786,8 +786,20 @@ public final class BalanceConfig {
             .comment("Age before sand/quartz/glass become crust / Φ-glass")
             .defineInRange("subspace_quartz_ticks", 6000, 200, 720000);
     public static final ModConfigSpec.IntValue SUBSPACE_WATER_TICKS = BUILDER
-            .comment("Age before water becomes Φ-water (then blue-ice Φ-hydrate)")
-            .defineInRange("subspace_water_ticks", 3600, 100, 720000);
+            .comment("Age before Φ-water crystallizes to blue-ice Φ-hydrate (vanilla water activates instantly)")
+            .defineInRange("subspace_water_ticks", 7200, 100, 720000);
+    public static final ModConfigSpec.DoubleValue SUBSPACE_EXPOSURE_DAMAGE = BUILDER
+            .comment("Magic damage per second to unprotected entities in hyperspace")
+            .defineInRange("subspace_exposure_damage", 1.0, 0.0, 40.0);
+    public static final ModConfigSpec.DoubleValue SUBSPACE_EXPOSURE_EXHAUSTION = BUILDER
+            .comment("Orkanum exhaustion per second while unprotected in hyperspace")
+            .defineInRange("subspace_exposure_exhaustion", 4.0, 0.0, 50.0);
+    public static final ModConfigSpec.IntValue SUBSPACE_PETRIFY_TICKS = BUILDER
+            .comment("Unprotected exposure before glassing/petrify escalation (ticks)")
+            .defineInRange("subspace_petrify_ticks", 2400, 100, 720000);
+    public static final ModConfigSpec.DoubleValue SUBSPACE_PRESSURE_EXHAUSTION = BUILDER
+            .comment("Mild Orkanum pressure every 30s while protected in hyperspace")
+            .defineInRange("subspace_pressure_exhaustion", 1.5, 0.0, 30.0);
     public static final ModConfigSpec.IntValue SUBSPACE_IRON_TICKS = BUILDER
             .comment("Reserved age for future Φ-iron (iron currently stable)")
             .defineInRange("subspace_iron_ticks", 48000, 1000, 2880000);

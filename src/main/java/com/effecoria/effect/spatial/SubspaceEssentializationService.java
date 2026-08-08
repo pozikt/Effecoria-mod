@@ -215,10 +215,12 @@ public final class SubspaceEssentializationService {
         if (state.is(BlockTags.LOGS) || state.is(BlockTags.PLANKS) || state.is(BlockTags.LEAVES)) {
             return BalanceConfig.SUBSPACE_WOOD_TICKS.get();
         }
-        if (isWater(state) || isPhiWater(state)) {
-            return stage == 0
-                    ? BalanceConfig.SUBSPACE_WATER_TICKS.get()
-                    : BalanceConfig.SUBSPACE_WATER_TICKS.get() * 2L;
+        if (isWater(state)) {
+            // Vanilla water Φ-activates instantly via SubspacePhysicsService; keep 0 as safety net.
+            return 0L;
+        }
+        if (isPhiWater(state)) {
+            return BalanceConfig.SUBSPACE_WATER_TICKS.get();
         }
         if (isQuartzish(state) || state.is(Blocks.SAND) || state.is(Blocks.RED_SAND) || state.is(Blocks.SANDSTONE)
                 || state.is(Blocks.RED_SANDSTONE) || state.is(Blocks.GLASS) || state.is(Blocks.GLASS_PANE)
