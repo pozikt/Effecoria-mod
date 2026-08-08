@@ -73,3 +73,13 @@ Preview: `phi_chitin_leggings_uv_v1_8x.png`.
 - Must use `PhiChitinBootsArmorModel` (64×64)
 
 Preview: `phi_chitin_boots_uv_v1_10x.png`.
+
+---
+
+## Crystal / Star Essonite
+
+**Simple path:** recolor Φ-chitin → `scripts/recolor_essonite_armor_from_chitin.py`  
+(outputs `crystal_essonite_*` / `star_essonite_*` layers + padded item icons). Φ-chitin untouched.
+
+
+

@@ -111,6 +111,63 @@ public final class ClientArmorExtensions {
                         return bootsModel;
                     }
                 },
-                ModItems.PHI_CHITIN_BOOTS.get());
+                ModItems.PHI_CHITIN_BOOTS.get(),
+                ModItems.CRYSTAL_ESSONITE_BOOTS.get(),
+                ModItems.STAR_ESSONITE_BOOTS.get());
+
+        event.registerItem(
+                new IClientItemExtensions() {
+                    private PhiChitinChestArmorModel chestModel;
+
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public HumanoidModel<?> getHumanoidArmorModel(
+                            LivingEntity entity,
+                            ItemStack stack,
+                            EquipmentSlot slot,
+                            HumanoidModel<?> original) {
+                        if (chestModel == null) {
+                            chestModel = new PhiChitinChestArmorModel(
+                                    Minecraft.getInstance()
+                                            .getEntityModels()
+                                            .bakeLayer(PhiChitinChestArmorModel.LAYER));
+                        }
+                        ((HumanoidModel<LivingEntity>) original).copyPropertiesTo(chestModel);
+                        chestModel.setAllVisible(false);
+                        chestModel.body.visible = true;
+                        chestModel.leftArm.visible = false;
+                        chestModel.rightArm.visible = false;
+                        return chestModel;
+                    }
+                },
+                ModItems.CRYSTAL_ESSONITE_CHESTPLATE.get(),
+                ModItems.STAR_ESSONITE_CHESTPLATE.get());
+
+        event.registerItem(
+                new IClientItemExtensions() {
+                    private PhiChitinHelmetArmorModel helmetModel;
+
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public HumanoidModel<?> getHumanoidArmorModel(
+                            LivingEntity entity,
+                            ItemStack stack,
+                            EquipmentSlot slot,
+                            HumanoidModel<?> original) {
+                        if (helmetModel == null) {
+                            helmetModel = new PhiChitinHelmetArmorModel(
+                                    Minecraft.getInstance()
+                                            .getEntityModels()
+                                            .bakeLayer(PhiChitinHelmetArmorModel.LAYER));
+                        }
+                        ((HumanoidModel<LivingEntity>) original).copyPropertiesTo(helmetModel);
+                        helmetModel.setAllVisible(false);
+                        helmetModel.head.visible = true;
+                        helmetModel.hat.visible = false;
+                        return helmetModel;
+                    }
+                },
+                ModItems.CRYSTAL_ESSONITE_HELMET.get(),
+                ModItems.STAR_ESSONITE_HELMET.get());
     }
 }
