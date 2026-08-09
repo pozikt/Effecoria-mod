@@ -66,9 +66,14 @@ public final class MentalServitudeService {
     public static final String DIG_DIR_TAG = "effecoria:mental_dig_dir";
     public static final String DIG_INDEX_TAG = "effecoria:mental_dig_index";
     public static final String DIG_COOLDOWN_TAG = "effecoria:mental_dig_cd";
+    public static final String DIG_STUCK_TAG = "effecoria:mental_dig_stuck";
     public static final String WARN_CD_TAG = "effecoria:mental_servant_warn_cd";
     /** Backup of the equipped dig tool (mainhand is unreliable on some humanoids). */
     public static final String TOOL_TAG = "effecoria:mental_servant_tool";
+    /** Active walk target (reapplied every tick — MoveControl clears delta under setNoAi). */
+    private static final String WALK_X_TAG = "effecoria:mental_walk_x";
+    private static final String WALK_Y_TAG = "effecoria:mental_walk_y";
+    private static final String WALK_Z_TAG = "effecoria:mental_walk_z";
 
     private static final int MAX_CARGO_STACKS = 12;
     private static final float MAX_DIG_HARDNESS = 50f;
@@ -77,6 +82,7 @@ public final class MentalServitudeService {
     private static final double INTERACT_RANGE = 4.25;
     /** MoveControl speed — setNoAi blocks reliable PathNavigation follow. */
     private static final double WALK_SPEED = 0.85;
+    private static final double WALK_STEP = 0.28;
 
     public enum Mode {
         IDLE,
@@ -261,8 +267,16 @@ public final class MentalServitudeService {
         data.remove(DIG_DIR_TAG);
         data.remove(DIG_INDEX_TAG);
         data.remove(DIG_COOLDOWN_TAG);
+        data.remove(DIG_STUCK_TAG);
         // Legacy length-limited digs
         data.remove("effecoria:mental_dig_total");
+        clearWalk(data);
+    }
+
+    private static void clearWalk(CompoundTag data) {
+        data.remove(WALK_X_TAG);
+        data.remove(WALK_Y_TAG);
+        data.remove(WALK_Z_TAG);
     }
 
     public static List<Mob> listOwned(Player owner) {
@@ -397,6 +411,8 @@ public final class MentalServitudeService {
         data.putByte(DIG_DIR_TAG, (byte) dir.get3DDataValue());
         data.putInt(DIG_INDEX_TAG, 0);
         data.putInt(DIG_COOLDOWN_TAG, 0);
+        data.putInt(DIG_STUCK_TAG, 0);
+        clearWalk(data);
 
         // Immediately pull a tool from the bound chest (no walk required).
         if (!hasWorkTool(servant)
@@ -521,12 +537,16 @@ public final class MentalServitudeService {
         BlockPos chest = data.contains(CHEST_TAG) ? BlockPos.of(data.getLong(CHEST_TAG)) : null;
 
         switch (mode) {
-            case IDLE -> mob.getNavigation().stop();
+            case IDLE -> {
+                mob.getNavigation().stop();
+                clearWalk(data);
+            }
             case FOLLOW -> {
                 if (mob.distanceToSqr(owner) > 3.5 * 3.5) {
                     walkTo(mob, owner.getX(), owner.getY(), owner.getZ());
                 } else {
                     mob.getNavigation().stop();
+                    clearWalk(data);
                 }
             }
             case DIG -> tickDigOrder(level, mob, owner, chest);
@@ -539,6 +559,8 @@ public final class MentalServitudeService {
         mob.getMoveControl().tick();
         mob.getLookControl().tick();
         mob.getJumpControl().tick();
+        // MoveControl often zeros delta under setNoAi — reassert the walk impulse every tick.
+        applyStoredWalk(mob);
     }
 
     private static void tickDigOrder(ServerLevel level, Mob mob, ServerPlayer owner, @Nullable BlockPos chest) {
@@ -553,7 +575,7 @@ public final class MentalServitudeService {
             return;
         }
 
-        // Need a tool before any mining — walk to chest and pull one out.
+        // Need a tool before any mining — pull one from the bound chest.
         if (!hasWorkTool(mob)) {
             if (!tryFetchTool(level, mob, chest, container, owner)) {
                 return;
@@ -578,7 +600,6 @@ public final class MentalServitudeService {
             return;
         }
 
-        // Dig only as many column-breaks as free cargo slots can absorb this trip.
         if (freeCargoSlots(mob) <= 0) {
             return;
         }
@@ -589,12 +610,13 @@ public final class MentalServitudeService {
         clearDig(mob.getPersistentData());
         mob.getPersistentData().putString(MODE_TAG, Mode.IDLE.id());
         mob.getNavigation().stop();
+        clearWalk(mob.getPersistentData());
         owner.displayClientMessage(Component.translatable(messageKey), true);
     }
 
     private static void tickDigMine(ServerLevel level, Mob mob, ServerPlayer owner) {
         CompoundTag data = mob.getPersistentData();
-        if (!data.contains(DIG_ORIGIN_TAG) || !data.contains(DIG_DIR_TAG)) {
+        if (!data.contains(DIG_DIR_TAG) || !data.contains(DIG_ORIGIN_TAG)) {
             commandIdle(mob);
             return;
         }
@@ -604,44 +626,102 @@ public final class MentalServitudeService {
             return;
         }
 
+        Direction dir = Direction.from3DDataValue(data.getByte(DIG_DIR_TAG));
+        BlockPos origin = BlockPos.of(data.getLong(DIG_ORIGIN_TAG));
+        int index = Math.max(0, data.getInt(DIG_INDEX_TAG));
+        // Progress is tracked on the tunnel axis — never depends on flaky villager pathing.
+        BlockPos standCell = index == 0 ? origin : origin.relative(dir, index);
+        BlockPos column = origin.relative(dir, index + 1);
+        lookAtDigFace(mob, column);
+
         int cd = data.getInt(DIG_COOLDOWN_TAG);
         if (cd > 0) {
             data.putInt(DIG_COOLDOWN_TAG, cd - 1);
-            // Keep walking toward the face while waiting between swings.
+            // Stay planted at the dig face while swinging.
+            snapIntoTunnelCell(level, mob, standCell);
             return;
         }
 
-        int index = data.getInt(DIG_INDEX_TAG);
-        Direction dir = Direction.from3DDataValue(data.getByte(DIG_DIR_TAG));
-        BlockPos origin = BlockPos.of(data.getLong(DIG_ORIGIN_TAG));
-        BlockPos column = origin.relative(dir, index + 1);
-
-        if (mob.distanceToSqr(Vec3.atCenterOf(column)) > 2.8 * 2.8) {
-            walkTo(mob, column.getX() + 0.5, column.getY(), column.getZ() + 0.5);
-            return;
-        }
+        // Puppet-warp to the current face so reach never stalls after 2–3 blocks.
+        snapIntoTunnelCell(level, mob, standCell);
 
         boolean broke = false;
-        int swingTicks = 12;
+        boolean solidLeft = false;
+        int swingTicks = 8;
         for (int dy = 0; dy <= 1; dy++) {
             BlockPos dig = column.above(dy);
+            BlockState state = level.getBlockState(dig);
+            if (isPassableForTunnel(level, dig, state)) {
+                continue;
+            }
             int took = tryBreakForCargo(level, mob, dig, tool);
             if (took > 0) {
                 broke = true;
                 swingTicks = Math.max(swingTicks, took);
+            } else if (!isPassableForTunnel(level, dig, level.getBlockState(dig))) {
+                solidLeft = true;
             }
             tool = workTool(mob);
             if (tool.isEmpty()) {
-                // Tool broke mid-column — fetch another next tick.
                 data.putInt(DIG_COOLDOWN_TAG, 4);
                 return;
             }
         }
+
+        if (solidLeft) {
+            data.putInt(DIG_STUCK_TAG, data.getInt(DIG_STUCK_TAG) + 1);
+            if (data.getInt(DIG_STUCK_TAG) >= 8) {
+                warn(owner, mob, "message.effecoria.mental.servitude_dig_blocked");
+                data.putInt(DIG_STUCK_TAG, 0);
+            }
+            data.putInt(DIG_COOLDOWN_TAG, 8);
+            lookAtDigFace(mob, column);
+            return;
+        }
+
+        // Face clear (dug or already open) — advance the tunnel head and warp into it.
         data.putInt(DIG_INDEX_TAG, index + 1);
-        data.putInt(DIG_COOLDOWN_TAG, broke ? swingTicks : 8);
-        mob.getLookControl().setLookAt(column.getX() + 0.5, column.getY() + 0.5, column.getZ() + 0.5);
+        data.putInt(DIG_STUCK_TAG, 0);
+        data.putInt(DIG_COOLDOWN_TAG, broke ? swingTicks : 1);
+        snapIntoTunnelCell(level, mob, column);
+        lookAtDigFace(mob, column.relative(dir));
         if (broke) {
             level.playSound(null, column, SoundEvents.STONE_BREAK, SoundSource.BLOCKS, 0.45f, 1.0f);
+        }
+    }
+
+    private static void lookAtDigFace(Mob mob, BlockPos column) {
+        // Eye-height aim — foot-center look made them stare at the floor.
+        mob.getLookControl().setLookAt(column.getX() + 0.5, column.getY() + 1.0, column.getZ() + 0.5);
+    }
+
+    private static boolean isPassableForTunnel(ServerLevel level, BlockPos pos, BlockState state) {
+        if (state.isAir()) {
+            return true;
+        }
+        return state.getCollisionShape(level, pos).isEmpty();
+    }
+
+    /**
+     * Mentally drag the puppet into the tunnel cell. Villager + setNoAi cannot be trusted
+     * to path into a 1-block hole, which caused the "dig 2 blocks then freeze" bug.
+     */
+    private static void snapIntoTunnelCell(ServerLevel level, Mob mob, BlockPos cell) {
+        clearWalk(mob.getPersistentData());
+        double x = cell.getX() + 0.5;
+        double z = cell.getZ() + 0.5;
+        double y = cell.getY();
+        BlockPos floor = cell.below();
+        BlockState floorState = level.getBlockState(floor);
+        if (isPassableForTunnel(level, floor, floorState)) {
+            // Keep current Y if the floor dropped out (open cave ahead).
+            y = mob.getY();
+        }
+        // Only snap when meaningfully out of cell — avoids jitter.
+        if (mob.distanceToSqr(x, mob.getY(), z) > 0.04 || Math.abs(mob.getY() - y) > 0.6) {
+            mob.moveTo(x, y, z, mob.getYRot(), mob.getXRot());
+            mob.setDeltaMovement(Vec3.ZERO);
+            mob.hasImpulse = true;
         }
     }
 
@@ -690,21 +770,48 @@ public final class MentalServitudeService {
     }
 
     private static void walkTo(Mob mob, double x, double y, double z) {
+        CompoundTag data = mob.getPersistentData();
+        data.putDouble(WALK_X_TAG, x);
+        data.putDouble(WALK_Y_TAG, y);
+        data.putDouble(WALK_Z_TAG, z);
+        mob.getLookControl().setLookAt(x, y + 1.0, z);
+        mob.getMoveControl().setWantedPosition(x, y, z, WALK_SPEED);
+        applyWalkImpulse(mob, x, y, z);
+    }
+
+    private static void applyStoredWalk(Mob mob) {
+        CompoundTag data = mob.getPersistentData();
+        if (!data.contains(WALK_X_TAG)) {
+            return;
+        }
+        double x = data.getDouble(WALK_X_TAG);
+        double y = data.getDouble(WALK_Y_TAG);
+        double z = data.getDouble(WALK_Z_TAG);
+        Vec3 pos = mob.position();
+        double horiz = Math.sqrt((x - pos.x) * (x - pos.x) + (z - pos.z) * (z - pos.z));
+        if (horiz < 0.18 && Math.abs(y - pos.y) < 1.2) {
+            clearWalk(data);
+            return;
+        }
+        mob.getMoveControl().setWantedPosition(x, y, z, WALK_SPEED);
+        applyWalkImpulse(mob, x, y, z);
+    }
+
+    private static void applyWalkImpulse(Mob mob, double x, double y, double z) {
         // Direct locomotion: LevelTick Post + setNoAi make MoveControl/Navigation flaky.
         Vec3 pos = mob.position();
         double dx = x - pos.x;
         double dz = z - pos.z;
         double horiz = Math.sqrt(dx * dx + dz * dz);
-        mob.getLookControl().setLookAt(x, y + 0.5, z);
-        if (horiz < 0.2) {
+        mob.getLookControl().setLookAt(x, y + 1.0, z);
+        if (horiz < 0.12) {
             return;
         }
-        double step = Math.min(0.2, horiz);
+        double step = Math.min(WALK_STEP, horiz);
         double nx = dx / horiz * step;
         double nz = dz / horiz * step;
         mob.setDeltaMovement(nx, mob.getDeltaMovement().y, nz);
         mob.hasImpulse = true;
-        // Small hop if stuck against a step-up.
         if (mob.horizontalCollision && mob.onGround()) {
             mob.setDeltaMovement(mob.getDeltaMovement().x, 0.42, mob.getDeltaMovement().z);
         }
@@ -887,7 +994,7 @@ public final class MentalServitudeService {
      */
     private static int tryBreakForCargo(ServerLevel level, Mob mob, BlockPos pos, ItemStack tool) {
         BlockState state = level.getBlockState(pos);
-        if (state.isAir()) {
+        if (isPassableForTunnel(level, pos, state)) {
             return 0;
         }
         float hardness = state.getDestroySpeed(level, pos);
@@ -904,18 +1011,14 @@ public final class MentalServitudeService {
         if (freeCargoSlots(mob) <= 0) {
             return 0;
         }
-        if (state.requiresCorrectToolForDrops() && !tool.isCorrectToolForDrops(state)) {
-            return 0;
-        }
-        float destroySpeed = tool.getDestroySpeed(state);
-        if (destroySpeed <= 1.0f && hardness > 0.5f) {
-            // Wrong / useless tool on this block — skip.
-            return 0;
-        }
+
+        // Servants dig through anything their tool can scratch — do not soft-skip stone/deepslate.
+        float destroySpeed = Math.max(1.0f, tool.getDestroySpeed(state));
+        ItemStack digTool = tool.copy();
 
         List<ItemStack> drops = state.getDrops(new LootParams.Builder(level)
                 .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
-                .withParameter(LootContextParams.TOOL, tool.copy())
+                .withParameter(LootContextParams.TOOL, digTool)
                 .withOptionalParameter(LootContextParams.THIS_ENTITY, mob));
         level.removeBlock(pos, false);
         level.levelEvent(2001, pos, Block.getId(state));
@@ -925,16 +1028,35 @@ public final class MentalServitudeService {
                 Block.popResource(level, pos, left);
             }
         }
-        tool.hurtAndBreak(1, mob, EquipmentSlot.MAINHAND);
-        // Keep NBT tool mirror in sync (broken tools become empty).
+
+        // Damage the NBT-backed tool directly — villager MAINHAND is unreliable.
+        hurtWorkTool(mob, 1);
+        int swing = Mth.clamp(Math.round(hardness * 16f / destroySpeed), 4, 18);
+        return swing;
+    }
+
+    private static void hurtWorkTool(Mob mob, int amount) {
+        ItemStack hand = mob.getMainHandItem();
+        ItemStack tool = workTool(mob);
+        if (tool.isEmpty()) {
+            return;
+        }
+        // Prefer mutating the live hand stack when it is the digger.
+        ItemStack target = isWorkTool(hand) ? hand : tool;
+        target.hurtAndBreak(amount, mob, EquipmentSlot.MAINHAND);
         ItemStack after = mob.getMainHandItem();
         if (isWorkTool(after)) {
             mob.getPersistentData().put(TOOL_TAG, after.save(mob.level().registryAccess()));
-        } else {
-            mob.getPersistentData().remove(TOOL_TAG);
+            return;
         }
-        int swing = Mth.clamp(Math.round(hardness * 24f / Math.max(0.5f, destroySpeed)), 10, 50);
-        return swing;
+        if (!target.isEmpty() && isWorkTool(target)) {
+            equipWorkTool(mob, target);
+            return;
+        }
+        mob.getPersistentData().remove(TOOL_TAG);
+        if (isWorkTool(mob.getMainHandItem())) {
+            mob.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+        }
     }
 
     private static boolean tryDeposit(ServerLevel level, Mob mob, BlockPos chestPos) {

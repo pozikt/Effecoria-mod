@@ -778,6 +778,7 @@
   "message.effecoria.mental.servitude_need_tool": "No tool — put a pickaxe/shovel/axe in the bound chest.",
   "message.effecoria.mental.servitude_need_tool_detail": "No digger in bound chest (%s/%s slots used).",
   "message.effecoria.mental.servitude_tool_taken": "Servant took: %s",
+  "message.effecoria.mental.servitude_dig_blocked": "Tunnel blocked — need a better tool or softer rock.",
   "message.effecoria.mental.servitude_end": "Mental servitude fades.",
   "message.effecoria.mental.immune": "%s has no mind that can be seized.",
   "message.effecoria.mental.resisted": "%s resists the intrusive thoughts.",
