@@ -35,6 +35,8 @@ public final class ClientInputEvents {
     private static boolean matterChannelWasDown;
 
     private static boolean harpyJumpWasDown;
+    private static boolean varanagiJumpWasDown;
+    private static boolean varanagiJumpSent;
 
     private ClientInputEvents() {}
 
@@ -141,9 +143,12 @@ public final class ClientInputEvents {
         if (minecraft.screen == null) {
             tickCastCharge(minecraft);
             tickHarpyFlap(minecraft);
+            tickVaranagiClimb(minecraft);
         } else {
             resetCastCharge();
             harpyJumpWasDown = false;
+            varanagiJumpWasDown = false;
+            varanagiJumpSent = false;
         }
 
         while (KeyBindings.OPEN_SEAL_EDITOR.consumeClick()) {
@@ -285,6 +290,53 @@ public final class ClientInputEvents {
             PacketDistributor.sendToServer(new ModNetworking.HarpyFlapPayload());
         }
         harpyJumpWasDown = jumpDown;
+    }
+
+    private static void tickVaranagiClimb(Minecraft minecraft) {
+        LocalPlayer player = minecraft.player;
+        if (player == null) {
+            varanagiJumpWasDown = false;
+            varanagiJumpSent = false;
+            return;
+        }
+        PlayerPsiData data = player.getData(ModAttachments.PSI.get());
+        boolean varanagi = data.race().orElse(null) == com.effecoria.core.progression.PlayerRace.VARANAGI;
+        if (!varanagi) {
+            if (varanagiJumpSent) {
+                PacketDistributor.sendToServer(new ModNetworking.VaranagiClimbJumpPayload(false));
+                varanagiJumpSent = false;
+            }
+            varanagiJumpWasDown = false;
+            return;
+        }
+
+        boolean jumpDown = isKeyPhysicallyDown(minecraft, minecraft.options.keyJump.getKey());
+        com.effecoria.core.progression.VaranagiClimbService.setJumpHeld(player, jumpDown);
+
+        boolean nearWall = player.onClimbable()
+                || com.effecoria.core.progression.VaranagiClimbService.isAgainstClimbSurface(player)
+                || com.effecoria.core.progression.VaranagiClimbService.isNearClimbSurface(player, 0.35);
+        if (!nearWall) {
+            if (varanagiJumpSent) {
+                PacketDistributor.sendToServer(new ModNetworking.VaranagiClimbJumpPayload(false));
+                varanagiJumpSent = false;
+            }
+        } else if (jumpDown != varanagiJumpSent) {
+            PacketDistributor.sendToServer(new ModNetworking.VaranagiClimbJumpPayload(jumpDown));
+            varanagiJumpSent = jumpDown;
+        }
+
+        // Client prediction for vine-like wall cling.
+        com.effecoria.core.progression.VaranagiClimbService.tick(player);
+
+        if (nearWall
+                && player.isSprinting()
+                && jumpDown
+                && !varanagiJumpWasDown
+                && !player.onGround()) {
+            PacketDistributor.sendToServer(new ModNetworking.VaranagiClimbDashPayload());
+        }
+        varanagiJumpWasDown = jumpDown;
     }
 
     private static void resetCastCharge() {

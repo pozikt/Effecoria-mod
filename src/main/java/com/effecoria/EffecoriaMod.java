@@ -163,6 +163,14 @@ public class EffecoriaMod {
                 ModNetworking.HarpyFlapPayload.STREAM_CODEC,
                 ModNetworking.HarpyFlapPayload::handle);
         registrar.playToServer(
+                ModNetworking.VaranagiClimbDashPayload.TYPE,
+                ModNetworking.VaranagiClimbDashPayload.STREAM_CODEC,
+                ModNetworking.VaranagiClimbDashPayload::handle);
+        registrar.playToServer(
+                ModNetworking.VaranagiClimbJumpPayload.TYPE,
+                ModNetworking.VaranagiClimbJumpPayload.STREAM_CODEC,
+                ModNetworking.VaranagiClimbJumpPayload::handle);
+        registrar.playToServer(
                 ModNetworking.DeferSchoolPayload.TYPE,
                 ModNetworking.DeferSchoolPayload.STREAM_CODEC,
                 ModNetworking.DeferSchoolPayload::handle);

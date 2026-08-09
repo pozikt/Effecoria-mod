@@ -18,7 +18,7 @@ Source lore: [Effecoria encyclopedia races](https://github.com/pozikt/Effecoria/
 | Orc | 0.85 | +10% max HP; −10% cast entropy & exhaustion |
 | Elf | 0.75 | −8% spell cost; longer Φ-sense |
 | Dwarf | 0.70 | mining / toughness; Seals −10% cost |
-| Varanagi | 0.90 | less hunger on cast; heal while still |
+| Varanagi | 0.90 | less hunger on cast; heal while still; vine-like wall/tree climb + sprint scramble dashes |
 | Dryad | 0.95 | Organic +12% / other −5%; forest hunger ease |
 | Lonver | 1.05 | +15 max Ψ; better low-Φ regen; slower exhaustion decay |
 | Harpy | 0.70 | Sprint + 3 jumps → elytra glide; space flaps; claws ≈ iron spear + speed/dive damage; −50% fall |

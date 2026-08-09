@@ -376,6 +376,29 @@ public final class BalanceConfig {
             .comment("Minimum dive hit damage once speed threshold is met")
             .defineInRange("harpy_claw_dive_floor", 3.0, 0.0, 20.0);
 
+    // --- Varanagi climb (vine-like walls/trees + scramble dash) ---
+    public static final ModConfigSpec.DoubleValue VARANAGI_CLIMB_SPEED = BUILDER
+            .comment("Vertical speed while holding jump on a wall/tree (vine-like)")
+            .defineInRange("varanagi_climb_speed", 0.18, 0.05, 0.6);
+    public static final ModConfigSpec.DoubleValue VARANAGI_CLIMB_SLIDE = BUILDER
+            .comment("Max downward slip while hanging on a wall without jump")
+            .defineInRange("varanagi_climb_slide", 0.12, 0.0, 0.5);
+    public static final ModConfigSpec.DoubleValue VARANAGI_CLIMB_DASH_UP = BUILDER
+            .comment("Upward impulse for sprint+jump scramble dash on walls")
+            .defineInRange("varanagi_climb_dash_up", 0.72, 0.2, 2.0);
+    public static final ModConfigSpec.DoubleValue VARANAGI_CLIMB_DASH_ALONG = BUILDER
+            .comment("Forward (look) impulse for scramble dash")
+            .defineInRange("varanagi_climb_dash_along", 0.28, 0.0, 1.5);
+    public static final ModConfigSpec.IntValue VARANAGI_CLIMB_DASH_COOLDOWN_TICKS = BUILDER
+            .comment("Minimum ticks between scramble dashes")
+            .defineInRange("varanagi_climb_dash_cooldown_ticks", 12, 4, 40);
+    public static final ModConfigSpec.DoubleValue VARANAGI_CLIMB_DASH_EXHAUSTION = BUILDER
+            .comment("Hunger exhaustion per scramble dash")
+            .defineInRange("varanagi_climb_dash_exhaustion", 0.45, 0.0, 5.0);
+    public static final ModConfigSpec.IntValue VARANAGI_CLIMB_FALL_GRACE_TICKS = BUILDER
+            .comment("Ticks after leaving a wall that still cancel fall distance")
+            .defineInRange("varanagi_climb_fall_grace_ticks", 8, 0, 40);
+
     public static final ModConfigSpec.IntValue BREATHING_TRAIN_MIN_INTERVAL_MS = BUILDER
             .comment("Server-side minimum real-time gap between accepted breathing-train hits (anti-spam)")
             .defineInRange("breathing_train_min_interval_ms", 280, 50, 5000);

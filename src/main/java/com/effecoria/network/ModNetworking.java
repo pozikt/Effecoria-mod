@@ -153,6 +153,55 @@ public final class ModNetworking {
         }
     }
 
+    /** Varanagi sprint+jump scramble dash on walls/trees. */
+    public record VaranagiClimbDashPayload() implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<VaranagiClimbDashPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "varanagi_climb_dash"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, VaranagiClimbDashPayload> STREAM_CODEC =
+                StreamCodec.unit(new VaranagiClimbDashPayload());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(VaranagiClimbDashPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    com.effecoria.core.progression.VaranagiClimbService.tryDash(player);
+                }
+            });
+        }
+    }
+
+    /** Varanagi jump-held sync for vine-like wall climb (server cannot read protected jumping). */
+    public record VaranagiClimbJumpPayload(boolean jumpHeld) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<VaranagiClimbJumpPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "varanagi_climb_jump"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, VaranagiClimbJumpPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.BOOL,
+                        VaranagiClimbJumpPayload::jumpHeld,
+                        VaranagiClimbJumpPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(VaranagiClimbJumpPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    com.effecoria.core.progression.VaranagiClimbService.setJumpHeld(player, payload.jumpHeld());
+                }
+            });
+        }
+    }
+
     public record DeferSchoolPayload() implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<DeferSchoolPayload> TYPE =
                 new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "defer_school"));

@@ -5,6 +5,7 @@ import com.effecoria.core.progression.HarpyClawService;
 import com.effecoria.core.progression.HarpyFlightService;
 import com.effecoria.core.progression.RaceService;
 import com.effecoria.core.progression.RaceTraitsService;
+import com.effecoria.core.progression.VaranagiClimbService;
 import com.effecoria.core.psi.PsiHelper;
 
 import net.minecraft.server.level.ServerPlayer;
@@ -38,6 +39,7 @@ public final class RaceEvents {
         }
         HarpyFlightService.clear(player);
         HarpyClawService.clear(player);
+        VaranagiClimbService.clear(player);
         if (event.isWasDeath() && RaceService.hasRace(PsiHelper.get(player))) {
             RaceTraitsService.reapplyAttributes(player);
         }
@@ -48,6 +50,7 @@ public final class RaceEvents {
         if (event.getEntity() instanceof ServerPlayer player) {
             HarpyFlightService.clear(player);
             HarpyClawService.clear(player);
+            VaranagiClimbService.clear(player);
         }
     }
 
@@ -57,6 +60,7 @@ public final class RaceEvents {
             RaceTraitsService.tick(player);
             HarpyFlightService.tick(player);
             HarpyClawService.tickDive(player);
+            VaranagiClimbService.tick(player);
         }
     }
 
@@ -71,6 +75,7 @@ public final class RaceEvents {
             }
         });
         HarpyFlightService.onFallLanding(player, event);
+        VaranagiClimbService.onFall(player, event);
     }
 
     /** Melee swings: add iron-spear-style speed charge on top of claw base attribute. */
