@@ -813,5 +813,10 @@ public final class BalanceConfig {
             .comment("Per growth pulse chance to sprout/upgrade essonite near a voyager")
             .defineInRange("subspace_essonite_grow_chance", 0.35, 0.0, 1.0);
 
+    // --- Wild mob mages ---
+    public static final ModConfigSpec.DoubleValue MOB_MAGIC_SPAWN_CHANCE = BUILDER
+            .comment("Chance for a newly spawned hostile mob to initiate with a random magic school (0.10–0.15 recommended)")
+            .defineInRange("mob_magic_spawn_chance", 0.12, 0.0, 1.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 }

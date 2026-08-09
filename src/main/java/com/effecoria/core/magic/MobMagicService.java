@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.effecoria.config.BalanceConfig;
 import com.effecoria.content.ModParticleTypes;
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.core.formula.SpellCombat;
@@ -24,15 +25,19 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.phys.Vec3;
 
 /**
  * Lightweight initiation for vanilla/mod mobs — store a school and let them fire demo casts in combat.
+ * Natural spawns roll {@link com.effecoria.config.BalanceConfig#MOB_MAGIC_SPAWN_CHANCE}.
  * For QA: {@code /effecoria initiateMob}.
  */
 public final class MobMagicService {
     public static final String TAG = "effecoria:mob_magic";
     public static final String GOAL_TAG = "effecoria:mob_magic_goal";
+    /** Set after the natural-spawn magic roll so we never re-roll the same mob. */
+    public static final String ROLLED_TAG = "effecoria:mob_magic_rolled";
 
     private static final List<MagicSchool> MOB_SCHOOLS = Arrays.stream(MagicSchool.values())
             .filter(s -> s.isPlayable() && s != MagicSchool.SEALS)
@@ -55,7 +60,33 @@ public final class MobMagicService {
         return MOB_SCHOOLS.get(random.nextInt(MOB_SCHOOLS.size()));
     }
 
+    /**
+     * One-shot roll for natural hostile spawns. Marks the mob as rolled whether or not it initiates.
+     *
+     * @return true if the mob became a mage
+     */
+    public static boolean tryNaturalInitiate(Mob mob) {
+        CompoundTag data = mob.getPersistentData();
+        if (data.getBoolean(ROLLED_TAG) || isInitiated(mob)) {
+            return false;
+        }
+        data.putBoolean(ROLLED_TAG, true);
+        if (!(mob instanceof Enemy)) {
+            return false;
+        }
+        float chance = BalanceConfig.MOB_MAGIC_SPAWN_CHANCE.get().floatValue();
+        if (chance <= 0f || mob.getRandom().nextFloat() >= chance) {
+            return false;
+        }
+        initiate(mob, randomSchool(mob.getRandom()), false);
+        return true;
+    }
+
     public static void initiate(Mob mob, MagicSchool school) {
+        initiate(mob, school, true);
+    }
+
+    public static void initiate(Mob mob, MagicSchool school, boolean dramatic) {
         if (school == null || school == MagicSchool.NONE || school == MagicSchool.COMMON) {
             school = randomSchool(mob.getRandom());
         }
@@ -67,8 +98,11 @@ public final class MobMagicService {
         tag.putString("School", school.getSerializedName());
         tag.putLong("InitiatedAt", mob.level().getGameTime());
         mob.getPersistentData().put(TAG, tag);
+        mob.getPersistentData().putBoolean(ROLLED_TAG, true);
 
-        BreathDebuffs.apply(mob, new MobEffectInstance(MobEffects.GLOWING, 20 * 60 * 10, 0, false, true, true));
+        if (dramatic) {
+            BreathDebuffs.apply(mob, new MobEffectInstance(MobEffects.GLOWING, 20 * 60 * 10, 0, false, true, true));
+        }
         mob.setCustomName(Component.translatable(
                 "message.effecoria.mob_magic.name",
                 mob.getType().getDescription(),
