@@ -23,7 +23,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Φ-fog density and exposure for Essence Plateau — atmospheric essonite mist, not water vapor.
+ * Φ-fog density and exposure for Essence Plateau / Crystal Forest — atmospheric essonite mist, not water vapor.
  */
 public final class PhiFogService {
     private PhiFogService() {}
@@ -67,18 +67,24 @@ public final class PhiFogService {
     }
 
     private static Density computeDensity(Level level, BlockPos pos) {
-        if (!EssencePlateauService.isBiome(level, pos)) {
+        boolean plateau = EssencePlateauService.isBiome(level, pos);
+        boolean crystalForest = CrystalForestService.isBiome(level, pos);
+        if (!plateau && !crystalForest) {
             return Density.NONE;
         }
 
         int surfaceY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
         int y = pos.getY();
-        // Deep underground / far above sky islands: no atmospheric mist
+        // Deep underground / far above canopy or sky islands: no atmospheric mist
         if (y < surfaceY - 48 || y > surfaceY + 40) {
             return Density.NONE;
         }
 
         int density = BalanceConfig.PHI_FOG_BASE_DENSITY.get();
+        // Crystal Forest lore: humid canopy holds dense Φ-mist almost always.
+        if (crystalForest) {
+            density = Math.max(density, Density.DENSE.level());
+        }
 
         if (isValleyHollow(level, pos, surfaceY)) {
             density += 1;
@@ -88,7 +94,8 @@ public final class PhiFogService {
         }
         boolean storm = (level.isThundering() && BalanceConfig.PHI_FOG_STORM_ENABLED.get())
                 || com.effecoria.world.weather.PhiWeatherService.isStormActive(level, pos);
-        if (storm) {
+        // Tree screen — Crystal Forest never escalates fog to storm density.
+        if (storm && !crystalForest) {
             density = Math.max(density, Density.STORM.level());
         } else {
             density = Math.min(density, Density.DENSE.level());

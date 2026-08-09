@@ -18,13 +18,18 @@ import net.minecraft.world.level.block.state.BlockState;
 public final class EffecoriaMobSpawns {
     private EffecoriaMobSpawns() {}
 
+    private static boolean isPhiSurfaceBiome(ServerLevelAccessor level, BlockPos pos) {
+        return level.getBiome(pos).is(ModBiomeTags.ESSENCE_PLATEAU)
+                || level.getBiome(pos).is(ModBiomeTags.CRYSTAL_FOREST);
+    }
+
     public static boolean phiLarva(
             EntityType<? extends Mob> type,
             ServerLevelAccessor level,
             MobSpawnType reason,
             BlockPos pos,
             RandomSource random) {
-        if (!level.getBiome(pos).is(ModBiomeTags.ESSENCE_PLATEAU)) {
+        if (!isPhiSurfaceBiome(level, pos)) {
             return false;
         }
         if (!MobSpawnType.ignoresLightRequirements(reason) && level.getRawBrightness(pos, 0) < 7) {
@@ -39,7 +44,7 @@ public final class EffecoriaMobSpawns {
             MobSpawnType reason,
             BlockPos pos,
             RandomSource random) {
-        if (!level.getBiome(pos).is(ModBiomeTags.ESSENCE_PLATEAU)) {
+        if (!isPhiSurfaceBiome(level, pos)) {
             return false;
         }
         if (level.getBlockState(pos).is(Blocks.WATER)) {
@@ -48,27 +53,27 @@ public final class EffecoriaMobSpawns {
         return solidEnough(level, pos.below()) && spaceClear(level, pos);
     }
 
-    /** Neutral cave/surface crab — day or night on the plateau. */
+    /** Neutral cave/surface crab — day or night on Φ surfaces. */
     public static boolean crystalCrab(
             EntityType<? extends Mob> type,
             ServerLevelAccessor level,
             MobSpawnType reason,
             BlockPos pos,
             RandomSource random) {
-        if (!level.getBiome(pos).is(ModBiomeTags.ESSENCE_PLATEAU)) {
+        if (!isPhiSurfaceBiome(level, pos)) {
             return false;
         }
         return solidEnough(level, pos.below()) && spaceClear(level, pos);
     }
 
-    /** Apex flyer — rare, any light, plateau peaks preferred. */
+    /** Apex flyer — rare, any light; plateau peaks preferred, crystal canopy allowed. */
     public static boolean essenceWyvern(
             EntityType<? extends Mob> type,
             ServerLevelAccessor level,
             MobSpawnType reason,
             BlockPos pos,
             RandomSource random) {
-        if (!level.getBiome(pos).is(ModBiomeTags.ESSENCE_PLATEAU)) {
+        if (!isPhiSurfaceBiome(level, pos)) {
             return false;
         }
         if (pos.getY() < level.getSeaLevel() + 20 && random.nextFloat() < 0.75f) {

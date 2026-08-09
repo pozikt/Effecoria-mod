@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#effecoria:is_omega_scar",
+  "features": ["effecoria:dead_ash_tree"],
+  "step": "vegetal_decoration"
+}

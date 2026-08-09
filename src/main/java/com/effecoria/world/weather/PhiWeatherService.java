@@ -18,8 +18,10 @@ import com.effecoria.core.progression.ExhaustionService;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.network.ModNetworking;
+import com.effecoria.world.CrystalForestService;
 import com.effecoria.world.DeadWastelandService;
 import com.effecoria.world.EssencePlateauService;
+import com.effecoria.world.OmegaScarService;
 import com.effecoria.world.PhiFogService;
 import com.effecoria.world.PhiRadiationService;
 import com.effecoria.world.VitrifiedWastesService;
@@ -144,16 +146,22 @@ public final class PhiWeatherService {
 
         // Ambient overlays (do not outrank timed severe events already chosen).
         WhisperingSpireService.Zone zone = WhisperingSpireService.zoneAt(level, pos);
-        boolean omegaZone = zone == WhisperingSpireService.Zone.BLACK || zone == WhisperingSpireService.Zone.RED;
+        boolean inOmegaScar = OmegaScarService.isBiome(level, pos);
+        boolean omegaZone = inOmegaScar
+                || zone == WhisperingSpireService.Zone.BLACK
+                || zone == WhisperingSpireService.Zone.RED;
         boolean raining = level.isRaining() && level.canSeeSky(pos);
-        boolean inPhiBiome = EssencePlateauService.isBiome(level, pos) || VitrifiedWastesService.isBiome(level, pos);
+        boolean inPhiBiome = EssencePlateauService.isBiome(level, pos)
+                || VitrifiedWastesService.isBiome(level, pos)
+                || CrystalForestService.isBiome(level, pos);
 
         if (best.priority() < PhiWeatherKind.OMEGA_RAIN.priority() && omegaZone && raining) {
             best = PhiWeatherKind.OMEGA_RAIN;
             intensity = Math.max(intensity, 0.85f);
         } else if (best.priority() < PhiWeatherKind.OMEGA_FOG.priority() && omegaZone) {
+            float omegaIntensity = inOmegaScar || zone == WhisperingSpireService.Zone.BLACK ? 1f : 0.7f;
             best = PhiWeatherKind.OMEGA_FOG;
-            intensity = Math.max(intensity, zone == WhisperingSpireService.Zone.BLACK ? 1f : 0.7f);
+            intensity = Math.max(intensity, omegaIntensity);
         }
 
         if (best.priority() < PhiWeatherKind.ESSENCE_STORM.priority() && isStormActive(level, pos)) {
@@ -164,14 +172,16 @@ public final class PhiWeatherService {
 
         if (best.priority() < PhiWeatherKind.ESSENCE_RAIN.priority() && raining && inPhiBiome && !omegaZone) {
             best = PhiWeatherKind.ESSENCE_RAIN;
-            intensity = Math.max(intensity, 0.65f);
+            intensity = Math.max(intensity, CrystalForestService.isBiome(level, pos) ? 0.8f : 0.65f);
         }
 
         PhiFogService.Density fog = PhiFogService.densityAt(level, pos);
         if (best.priority() < PhiWeatherKind.ESSENCE_MIST.priority()
                 && fog != PhiFogService.Density.NONE
-                && EssencePlateauService.isBiome(level, pos)) {
-            best = fog == PhiFogService.Density.STORM ? PhiWeatherKind.ESSENCE_STORM : PhiWeatherKind.ESSENCE_MIST;
+                && (EssencePlateauService.isBiome(level, pos) || CrystalForestService.isBiome(level, pos))) {
+            // Crystal canopy screens storms — mist never upgrades to storm here.
+            boolean stormMist = fog == PhiFogService.Density.STORM && !CrystalForestService.isBiome(level, pos);
+            best = stormMist ? PhiWeatherKind.ESSENCE_STORM : PhiWeatherKind.ESSENCE_MIST;
             intensity = Math.max(intensity, fog.level() / 3f);
         }
 
@@ -179,7 +189,7 @@ public final class PhiWeatherService {
         boolean dewWindow = dayTime >= 0 && dayTime < BalanceConfig.PHI_WEATHER_DEW_WINDOW_TICKS.get();
         if (best == PhiWeatherKind.CLEAR
                 && dewWindow
-                && EssencePlateauService.isBiome(level, pos)
+                && (EssencePlateauService.isBiome(level, pos) || CrystalForestService.isBiome(level, pos))
                 && level.canSeeSky(pos)) {
             best = PhiWeatherKind.ESSENCE_DEW;
             intensity = 0.4f;
@@ -349,7 +359,8 @@ public final class PhiWeatherService {
         for (ServerPlayer player : level.players()) {
             BlockPos pos = player.blockPosition();
             WhisperingSpireService.Zone zone = WhisperingSpireService.zoneAt(level, pos);
-            if (zone != WhisperingSpireService.Zone.BLACK && zone != WhisperingSpireService.Zone.RED) {
+            boolean inScar = OmegaScarService.isBiome(level, pos);
+            if (!inScar && zone != WhisperingSpireService.Zone.BLACK && zone != WhisperingSpireService.Zone.RED) {
                 continue;
             }
             if (hasEvent(level, PhiWeatherKind.BLOOD_RAIN)) {
@@ -366,17 +377,18 @@ public final class PhiWeatherService {
             }
             long until = now + BalanceConfig.PHI_WEATHER_BLOOD_DURATION.get();
             BlockPos vent = WhisperingSpireService.nearestVent(level, pos);
+            BlockPos origin = vent != null ? vent : pos;
             addEvent(
                     level,
                     new ActiveEvent(
                             PhiWeatherKind.BLOOD_RAIN,
                             until,
-                            vent != null ? vent : pos,
+                            origin,
                             BalanceConfig.PHI_WEATHER_BLOOD_RADIUS.get(),
                             1f));
             announceNear(
                     level,
-                    vent != null ? vent : pos,
+                    origin,
                     BalanceConfig.PHI_WEATHER_BLOOD_RADIUS.get(),
                     "message.effecoria.weather.blood_rain_start");
             return;
@@ -398,6 +410,7 @@ public final class PhiWeatherService {
             }
             if (EssencePlateauService.isBiome(level, pos)
                     || VitrifiedWastesService.isBiome(level, pos)
+                    || OmegaScarService.isBiome(level, pos)
                     || WhisperingSpireService.zoneAt(level, pos) != WhisperingSpireService.Zone.NONE) {
                 candidates.add(p);
             }
@@ -627,6 +640,8 @@ public final class PhiWeatherService {
             if (origin == null || radius <= 0) {
                 if (EssencePlateauService.isBiome(level, player.blockPosition())
                         || VitrifiedWastesService.isBiome(level, player.blockPosition())
+                        || CrystalForestService.isBiome(level, player.blockPosition())
+                        || OmegaScarService.isBiome(level, player.blockPosition())
                         || WhisperingSpireService.zoneAt(level, player.blockPosition())
                                 != WhisperingSpireService.Zone.NONE) {
                     player.displayClientMessage(Component.translatable(messageKey), true);

@@ -7,6 +7,7 @@ import com.effecoria.EffecoriaMod;
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.content.ModBlocks;
 import com.effecoria.content.ModItems;
+import com.effecoria.world.CrystalForestService;
 import com.effecoria.world.EssencePlateauService;
 import com.effecoria.world.weather.PhiWeatherKind;
 import com.effecoria.world.weather.PhiWeatherService;
@@ -24,7 +25,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-/** Morning harvest of Essence Dew from Φ foliage on the plateau. */
+/** Morning harvest of Essence Dew from Φ foliage on plateau / crystal forest. */
 @EventBusSubscriber(modid = EffecoriaMod.MOD_ID)
 public final class EssenceDewEvents {
     private static final Map<Long, Long> BLOCK_COOLDOWN = new ConcurrentHashMap<>();
@@ -41,7 +42,7 @@ public final class EssenceDewEvents {
             return;
         }
         BlockPos pos = event.getPos();
-        if (!EssencePlateauService.isBiome(level, pos)) {
+        if (!EssencePlateauService.isBiome(level, pos) && !CrystalForestService.isBiome(level, pos)) {
             return;
         }
         PhiWeatherKind kind = PhiWeatherService.dominantKind(level, pos);

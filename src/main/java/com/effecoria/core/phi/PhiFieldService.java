@@ -4,8 +4,10 @@ import com.effecoria.config.BalanceConfig;
 import com.effecoria.content.ModBlockTags;
 import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.psi.PsiHelper;
+import com.effecoria.world.CrystalForestService;
 import com.effecoria.world.DeadWastelandService;
 import com.effecoria.world.EssencePlateauService;
+import com.effecoria.world.OmegaScarService;
 import com.effecoria.world.VitrifiedWastesService;
 import com.effecoria.world.WhisperingSpireService;
 
@@ -56,6 +58,8 @@ public final class PhiFieldService {
         value += fluidBonus(level, pos, player);
         value += EssencePlateauService.phiEnvironmentBonus(level, pos);
         value += VitrifiedWastesService.phiEnvironmentBonus(level, pos);
+        value += CrystalForestService.phiEnvironmentBonus(level, pos);
+        value += OmegaScarService.phiEnvironmentBonus(level, pos);
         value += WhisperingSpireService.phiBonus(level, pos);
         value += com.effecoria.world.weather.PhiWeatherService.phiEnvironmentBonus(level, pos);
 

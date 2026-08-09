@@ -1,0 +1,10 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#effecoria:is_crystal_forest",
+  "features": [
+    "effecoria:crystal_forest_phi_tree",
+    "effecoria:phi_blades_patch",
+    "effecoria:crystal_forest_surface_crystals"
+  ],
+  "step": "vegetal_decoration"
+}

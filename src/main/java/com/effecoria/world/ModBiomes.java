@@ -19,4 +19,12 @@ public final class ModBiomes {
     /** Φ-flash vitrified desert — black glass wastes. */
     public static final ResourceKey<Biome> VITRIFIED_WASTES =
             ResourceKey.create(Registries.BIOME, EffecoriaMod.id("vitrified_wastes"));
+
+    /** Humid Φ-grove — dense mist, frequent essence rain. */
+    public static final ResourceKey<Biome> CRYSTAL_FOREST =
+            ResourceKey.create(Registries.BIOME, EffecoriaMod.id("crystal_forest"));
+
+    /** Ω causality rupture — fog/rain and Blood Rain eligibility. */
+    public static final ResourceKey<Biome> OMEGA_SCAR =
+            ResourceKey.create(Registries.BIOME, EffecoriaMod.id("omega_scar"));
 }

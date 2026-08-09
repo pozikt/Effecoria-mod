@@ -20,4 +20,12 @@ public final class ModBiomeTags {
     /** Vitrified Wastes — Φ-flash black-glass desert. */
     public static final TagKey<Biome> VITRIFIED_WASTES = TagKey.create(
             Registries.BIOME, EffecoriaMod.id("is_vitrified_wastes"));
+
+    /** Crystal Forest — humid Φ woodland. */
+    public static final TagKey<Biome> CRYSTAL_FOREST = TagKey.create(
+            Registries.BIOME, EffecoriaMod.id("is_crystal_forest"));
+
+    /** Ω-Scar — causality rupture biome. */
+    public static final TagKey<Biome> OMEGA_SCAR = TagKey.create(
+            Registries.BIOME, EffecoriaMod.id("is_omega_scar"));
 }

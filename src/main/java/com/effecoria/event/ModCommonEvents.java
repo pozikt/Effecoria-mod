@@ -50,8 +50,10 @@ import com.effecoria.effect.spatial.SubspaceEssentializationService;
 import com.effecoria.effect.spatial.SubspacePhysicsService;
 import com.effecoria.magic.SpellRegistry;
 import com.effecoria.core.seal.SealWordRegistry;
+import com.effecoria.world.CrystalForestService;
 import com.effecoria.world.DeadWastelandService;
 import com.effecoria.world.EssencePlateauService;
+import com.effecoria.world.OmegaScarService;
 import com.effecoria.world.PhiFogService;
 import com.effecoria.world.VitrifiedWastesService;
 import com.effecoria.world.WhisperingSpireService;
@@ -171,6 +173,8 @@ public final class ModCommonEvents {
         EssencePlateauService.tickPlayer(player);
         DeadWastelandService.tickPlayer(player);
         VitrifiedWastesService.tickPlayer(player);
+        CrystalForestService.tickPlayer(player);
+        OmegaScarService.tickPlayer(player);
         WhisperingSpireService.tickPlayer(player);
 
         MirageWorldService.playerTick(player);

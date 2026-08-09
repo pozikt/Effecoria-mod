@@ -73,11 +73,39 @@ public final class EssencePlateauSurfaceRules {
         SurfaceRules.RuleSource vitrifiedColumn = SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.abovePreliminarySurface(), vitrifiedStack));
 
+        // Crystal Forest — Φ grass/dirt sheet over shallow Φ-stone (grove, not mountain mass).
+        SurfaceRules.RuleSource forestStack = SurfaceRules.sequence(
+                SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, plateauTop),
+                SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, phiDirt),
+                SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, 12, CaveSurface.FLOOR), phiDirt),
+                SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, 48, CaveSurface.FLOOR), phiStone));
+
+        SurfaceRules.RuleSource forestColumn = SurfaceRules.sequence(
+                SurfaceRules.ifTrue(SurfaceRules.abovePreliminarySurface(), forestStack));
+
+        // Ω-Scar — ash crust with void-obsidian scars over fused ash depth.
+        SurfaceRules.RuleSource voidObs = state(ModBlocks.VOID_OBSIDIAN.get());
+        SurfaceRules.RuleSource scarFloor = SurfaceRules.sequence(
+                SurfaceRules.ifTrue(SurfaceRules.noiseCondition(
+                        net.minecraft.world.level.levelgen.Noises.SURFACE, -0.15, 0.12), voidObs),
+                ash);
+
+        SurfaceRules.RuleSource scarStack = SurfaceRules.sequence(
+                SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, scarFloor),
+                SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, ash),
+                SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, 8, CaveSurface.FLOOR), ash),
+                SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, 28, CaveSurface.FLOOR), voidObs));
+
+        SurfaceRules.RuleSource scarColumn = SurfaceRules.sequence(
+                SurfaceRules.ifTrue(SurfaceRules.abovePreliminarySurface(), scarStack));
+
         // Only paint Effecoria biomes — no catch-all grass (that creates border pillars / wrong deserts).
         return SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.ESSENCE_PLATEAU), plateauColumn),
                 SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.DEAD_WASTELAND), wastelandColumn),
-                SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.VITRIFIED_WASTES), vitrifiedColumn));
+                SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.VITRIFIED_WASTES), vitrifiedColumn),
+                SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.CRYSTAL_FOREST), forestColumn),
+                SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.OMEGA_SCAR), scarColumn));
     }
 
     private static SurfaceRules.RuleSource state(Block block) {

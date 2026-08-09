@@ -36,7 +36,9 @@ import com.effecoria.core.psi.ModAttachments;
 
 import com.effecoria.network.ModNetworking;
 
+import com.effecoria.world.CrystalForestRegion;
 import com.effecoria.world.DeadWastelandRegion;
+import com.effecoria.world.OmegaScarRegion;
 import com.effecoria.world.EssencePlateauRegion;
 import com.effecoria.world.VitrifiedWastesRegion;
 import com.effecoria.world.EssencePlateauSurfaceRules;
@@ -126,10 +128,13 @@ public class EffecoriaMod {
 
     private static void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-            LOGGER.info("Registering Essence Plateau / Dead Wasteland / Vitrified Wastes TerraBlender regions");
+            LOGGER.info(
+                    "Registering Essence Plateau / Dead Wasteland / Vitrified Wastes / Crystal Forest / Ω-Scar TerraBlender regions");
             Regions.register(new EssencePlateauRegion(id("overworld"), 6));
             Regions.register(new DeadWastelandRegion(id("dead_wasteland"), 8));
             Regions.register(new VitrifiedWastesRegion(id("vitrified_wastes"), 8));
+            Regions.register(new CrystalForestRegion(id("crystal_forest"), 6));
+            Regions.register(new OmegaScarRegion(id("omega_scar"), 4));
             SurfaceRuleManager.addSurfaceRules(
                     SurfaceRuleManager.RuleCategory.OVERWORLD,
                     MOD_ID,

@@ -402,6 +402,20 @@ public final class BalanceConfig {
             .comment("Ψ restored per second for protected initiated mages in Vitrified Wastes")
             .defineInRange("vitrified_protected_psi_regen", 0.4, 0.0, 10.0);
 
+    // --- Crystal Forest ---
+    public static final ModConfigSpec.DoubleValue CRYSTAL_FOREST_PHI_BONUS = BUILDER
+            .comment("Additive Φ bonus while in Crystal Forest")
+            .defineInRange("crystal_forest_phi_bonus", 0.4, 0.0, 3.0);
+
+    // --- Ω-Scar ---
+    public static final ModConfigSpec.DoubleValue OMEGA_SCAR_PHI_BONUS = BUILDER
+            .comment("Additive Φ bonus while in Ω-Scar (distorted residual field)")
+            .defineInRange("omega_scar_phi_bonus", 0.25, -2.0, 3.0);
+
+    public static final ModConfigSpec.DoubleValue OMEGA_SCAR_ENTROPY_PULSE = BUILDER
+            .comment("Entropy (b) added to initiated mages every ~5s after prolonged Scar exposure")
+            .defineInRange("omega_scar_entropy_pulse", 0.04, 0.0, 1.0);
+
     public static final ModConfigSpec.IntValue GEYSER_DORMANT_MIN_TICKS = BUILDER
             .comment("Minimum Φ-geyser dormant phase duration")
             .defineInRange("geyser_dormant_min_ticks", 4800, 200, 240000);
