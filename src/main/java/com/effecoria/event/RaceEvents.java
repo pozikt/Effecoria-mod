@@ -1,6 +1,7 @@
 package com.effecoria.event;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.core.progression.HarpyFlightService;
 import com.effecoria.core.progression.RaceService;
 import com.effecoria.core.progression.RaceTraitsService;
 import com.effecoria.core.psi.PsiHelper;
@@ -28,11 +29,19 @@ public final class RaceEvents {
 
     @SubscribeEvent
     public static void onClone(PlayerEvent.Clone event) {
-        if (!event.isWasDeath() || !(event.getEntity() instanceof ServerPlayer player)) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        if (RaceService.hasRace(PsiHelper.get(player))) {
+        HarpyFlightService.clear(player);
+        if (event.isWasDeath() && RaceService.hasRace(PsiHelper.get(player))) {
             RaceTraitsService.reapplyAttributes(player);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            HarpyFlightService.clear(player);
         }
     }
 
@@ -40,6 +49,7 @@ public final class RaceEvents {
     public static void onTick(PlayerTickEvent.Post event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             RaceTraitsService.tick(player);
+            HarpyFlightService.tick(player);
         }
     }
 
@@ -53,6 +63,7 @@ public final class RaceEvents {
                 event.setDistance(event.getDistance() * 0.5f);
             }
         });
+        HarpyFlightService.onFallLanding(player, event);
     }
 
     @SubscribeEvent

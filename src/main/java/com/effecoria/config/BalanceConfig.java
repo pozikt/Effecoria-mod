@@ -324,6 +324,32 @@ public final class BalanceConfig {
             .comment("Extra max Ψ granted to Lonvers on race assign")
             .defineInRange("race_lonver_max_psi_bonus", 15.0, 0.0, 100.0);
 
+    // --- Harpy flight ---
+    public static final ModConfigSpec.DoubleValue HARPY_MIN_SPEED = BUILDER
+            .comment("Min horizontal speed (blocks/tick) while sprinting to count wind-up jumps")
+            .defineInRange("harpy_min_speed", 0.18, 0.05, 1.0);
+    public static final ModConfigSpec.IntValue HARPY_JUMP_WINDOW_TICKS = BUILDER
+            .comment("Max ticks between wind-up jumps before streak resets")
+            .defineInRange("harpy_jump_window_ticks", 35, 10, 100);
+    public static final ModConfigSpec.DoubleValue HARPY_LAUNCH_FORWARD = BUILDER
+            .comment("Forward launch speed on 3rd jump")
+            .defineInRange("harpy_launch_forward", 0.95, 0.2, 2.5);
+    public static final ModConfigSpec.DoubleValue HARPY_LAUNCH_UP = BUILDER
+            .comment("Upward launch speed on 3rd jump")
+            .defineInRange("harpy_launch_up", 0.62, 0.2, 2.0);
+    public static final ModConfigSpec.DoubleValue HARPY_FLAP_STRENGTH = BUILDER
+            .comment("Firework-style boost strength when flapping (space) in glide")
+            .defineInRange("harpy_flap_strength", 1.0, 0.3, 2.5);
+    public static final ModConfigSpec.DoubleValue HARPY_GLIDE_EXHAUSTION = BUILDER
+            .comment("Hunger exhaustion per tick while harpy-gliding")
+            .defineInRange("harpy_glide_exhaustion", 0.005, 0.0, 0.1);
+    public static final ModConfigSpec.DoubleValue HARPY_FLAP_EXHAUSTION = BUILDER
+            .comment("Hunger exhaustion per space flap")
+            .defineInRange("harpy_flap_exhaustion", 0.8, 0.0, 5.0);
+    public static final ModConfigSpec.IntValue HARPY_FLAP_COOLDOWN_TICKS = BUILDER
+            .comment("Minimum ticks between flaps")
+            .defineInRange("harpy_flap_cooldown_ticks", 10, 2, 40);
+
     public static final ModConfigSpec.IntValue BREATHING_TRAIN_MIN_INTERVAL_MS = BUILDER
             .comment("Server-side minimum real-time gap between accepted breathing-train hits (anti-spam)")
             .defineInRange("breathing_train_min_interval_ms", 280, 50, 5000);

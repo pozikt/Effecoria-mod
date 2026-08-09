@@ -34,6 +34,8 @@ public final class ClientInputEvents {
     private static long lastMatterLinkMs;
     private static boolean matterChannelWasDown;
 
+    private static boolean harpyJumpWasDown;
+
     private ClientInputEvents() {}
 
     /**
@@ -138,8 +140,10 @@ public final class ClientInputEvents {
 
         if (minecraft.screen == null) {
             tickCastCharge(minecraft);
+            tickHarpyFlap(minecraft);
         } else {
             resetCastCharge();
+            harpyJumpWasDown = false;
         }
 
         while (KeyBindings.OPEN_SEAL_EDITOR.consumeClick()) {
@@ -266,6 +270,21 @@ public final class ClientInputEvents {
             ClientArmorAbilityState.cycleLocal();
             PacketDistributor.sendToServer(new ModNetworking.ArmorAbilityCyclePayload());
         }
+    }
+
+    private static void tickHarpyFlap(Minecraft minecraft) {
+        LocalPlayer player = minecraft.player;
+        if (player == null) {
+            harpyJumpWasDown = false;
+            return;
+        }
+        PlayerPsiData data = player.getData(ModAttachments.PSI.get());
+        boolean harpy = data.race().orElse(null) == com.effecoria.core.progression.PlayerRace.HARPY;
+        boolean jumpDown = isKeyPhysicallyDown(minecraft, minecraft.options.keyJump.getKey());
+        if (harpy && player.isFallFlying() && jumpDown && !harpyJumpWasDown && !player.onGround()) {
+            PacketDistributor.sendToServer(new ModNetworking.HarpyFlapPayload());
+        }
+        harpyJumpWasDown = jumpDown;
     }
 
     private static void resetCastCharge() {

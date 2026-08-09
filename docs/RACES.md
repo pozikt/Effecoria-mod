@@ -21,7 +21,7 @@ Source lore: [Effecoria encyclopedia races](https://github.com/pozikt/Effecoria/
 | Varanagi | 0.90 | less hunger on cast; heal while still |
 | Dryad | 0.95 | Organic +12% / other −5%; forest hunger ease |
 | Lonver | 1.05 | +15 max Ψ; better low-Φ regen; slower exhaustion decay |
-| Harpy | 0.70 | −50% fall damage; sneak slow-fall in air |
+| Harpy | 0.70 | Sprint + 3 jumps → elytra glide; space flaps climb (hunger); −50% fall damage |
 | Vampire | 0.35 | ×0.5 Ψ regen; drink blood vials; sun burn without helmet |
 
 Baselines are tunable in `effecoria-common.toml` (`race_baseline_*`).

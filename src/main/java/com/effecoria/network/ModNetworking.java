@@ -131,6 +131,28 @@ public final class ModNetworking {
         }
     }
 
+    /** Harpy space-flap while fall-flying. */
+    public record HarpyFlapPayload() implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<HarpyFlapPayload> TYPE =
+                new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "harpy_flap"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, HarpyFlapPayload> STREAM_CODEC =
+                StreamCodec.unit(new HarpyFlapPayload());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(HarpyFlapPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    com.effecoria.core.progression.HarpyFlightService.tryFlap(player);
+                }
+            });
+        }
+    }
+
     public record DeferSchoolPayload() implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<DeferSchoolPayload> TYPE =
                 new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "defer_school"));

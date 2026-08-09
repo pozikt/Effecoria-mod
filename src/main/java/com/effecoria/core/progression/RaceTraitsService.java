@@ -14,8 +14,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BiomeTags;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -186,11 +184,6 @@ public final class RaceTraitsService {
             case DRYAD -> {
                 if (inForest(player) && player.tickCount % 80 == 0) {
                     player.getFoodData().addExhaustion(-0.15f);
-                }
-            }
-            case HARPY -> {
-                if (!player.onGround() && player.isShiftKeyDown() && player.getDeltaMovement().y < 0) {
-                    player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 12, 0, true, false, false));
                 }
             }
             case VAMPIRE -> tickVampireSun(player);
