@@ -1427,4 +1427,36 @@ public final class ModNetworking {
             });
         }
     }
+
+    /** Sync dominant Φ/Ω weather to the client for particles / HUD. */
+    public record PhiWeatherSyncPayload(String kind, float intensity, long untilTick)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<PhiWeatherSyncPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "phi_weather_sync"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, PhiWeatherSyncPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.STRING_UTF8,
+                        PhiWeatherSyncPayload::kind,
+                        ByteBufCodecs.FLOAT,
+                        PhiWeatherSyncPayload::intensity,
+                        ByteBufCodecs.VAR_LONG,
+                        PhiWeatherSyncPayload::untilTick,
+                        PhiWeatherSyncPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(PhiWeatherSyncPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                var kind = com.effecoria.world.weather.PhiWeatherKind.fromId(payload.kind());
+                com.effecoria.world.weather.PhiWeatherService.setClientSnapshot(
+                        new com.effecoria.world.weather.PhiWeatherService.Snapshot(
+                                kind, payload.intensity(), payload.untilTick()));
+            });
+        }
+    }
 }

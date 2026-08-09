@@ -63,6 +63,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PHI_WATER_BUCKET.get());
                         output.accept(ModItems.PURIFIED_PHI_WATER_BUCKET.get());
                         output.accept(ModItems.PHI_FLASK.get());
+                        output.accept(ModItems.ESSENCE_DEW.get());
                         output.accept(ModItems.PHI_FLASK_WATER.get());
                         output.accept(ModItems.BLOOD_VIAL_EMPTY.get());
                         output.accept(ModItems.BLOOD_VIAL.get());

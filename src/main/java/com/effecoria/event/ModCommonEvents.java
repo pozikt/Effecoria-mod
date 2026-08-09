@@ -238,6 +238,7 @@ public final class ModCommonEvents {
             regen *= EssencePlateauService.regenMultiplier(player.level(), player.position());
             regen *= PhiFogService.regenMultiplier(player);
             regen *= AlchemyPotionService.regenMultiplier(player);
+            regen += com.effecoria.world.weather.PhiWeatherService.psiRegenBonus(player);
         }
         if (regen > 0f) {
             data.setCurrentPsi(data.currentPsi() + regen);

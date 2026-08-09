@@ -90,7 +90,17 @@ public final class PsiHudOverlay {
         drawBar(graphics, x, y + 16, 90, 6, phiFill, phiBarColor(phi), 0xFF1B3A59);
         graphics.drawString(minecraft.font, formatPhiLabel(phi), x, y + 28, phiTextColor(phi));
 
-        int lineY = y + 40;
+        var weather = com.effecoria.world.weather.PhiWeatherService.clientSnapshot();
+        if (weather.kind() != com.effecoria.world.weather.PhiWeatherKind.CLEAR) {
+            graphics.drawString(
+                    minecraft.font,
+                    Component.translatable("hud.effecoria.weather." + weather.kind().id()),
+                    x,
+                    y + 38,
+                    weather.kind().isOmega() ? 0xFFAA66CC : 0xFF88CCFF);
+        }
+
+        int lineY = y + (weather.kind() != com.effecoria.world.weather.PhiWeatherKind.CLEAR ? 50 : 40);
         float armorCharge = com.effecoria.armor.EssoniteArmorData.poolCharge(minecraft.player);
         if (com.effecoria.armor.EssoniteArmorService.hasAny(minecraft.player)) {
             drawBar(graphics, x, lineY, 90, 5, armorCharge, 0xFFD4A84B, 0xFF3A2A14);

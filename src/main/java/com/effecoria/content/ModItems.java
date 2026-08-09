@@ -128,6 +128,7 @@ public final class ModItems {
 
     public static final DeferredItem<Item> PHI_PAPER = ITEMS.registerSimpleItem("phi_paper");
     public static final DeferredItem<Item> PHI_FLASK = ITEMS.registerSimpleItem("phi_flask");
+    public static final DeferredItem<Item> ESSENCE_DEW = ITEMS.registerSimpleItem("essence_dew");
     public static final DeferredItem<Item> PHI_FLASK_WATER = ITEMS.register(
             "phi_flask_water", () -> new Item(new Item.Properties().stacksTo(16)));
 

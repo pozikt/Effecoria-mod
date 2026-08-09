@@ -86,7 +86,8 @@ public final class PhiFogService {
         if (nearGeyser(level, pos, BalanceConfig.PHI_FOG_GEYSER_RADIUS.get())) {
             density += 1;
         }
-        boolean storm = level.isThundering() && BalanceConfig.PHI_FOG_STORM_ENABLED.get();
+        boolean storm = (level.isThundering() && BalanceConfig.PHI_FOG_STORM_ENABLED.get())
+                || com.effecoria.world.weather.PhiWeatherService.isStormActive(level, pos);
         if (storm) {
             density = Math.max(density, Density.STORM.level());
         } else {

@@ -818,5 +818,88 @@ public final class BalanceConfig {
             .comment("Chance for a newly spawned hostile mob to initiate with a random magic school (0.10–0.15 recommended)")
             .defineInRange("mob_magic_spawn_chance", 0.12, 0.0, 1.0);
 
+    // --- Φ/Ω weather ---
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_RAIN_PSI_REGEN = BUILDER
+            .comment("Ψ restored per second for initiated mages under Essence Rain")
+            .defineInRange("phi_weather_rain_psi_regen", 2.0, 0.0, 50.0);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_MIST_PSI_REGEN = BUILDER
+            .comment("Extra Ψ/s for initiated mages in Essence Mist (on top of fog regen mult)")
+            .defineInRange("phi_weather_mist_psi_regen", 0.75, 0.0, 20.0);
+    public static final ModConfigSpec.IntValue PHI_WEATHER_RAIN_INTOX_TICKS = BUILDER
+            .comment("Non-mage exposure ticks under Essence Rain before intoxication")
+            .defineInRange("phi_weather_rain_intox_ticks", 1200, 100, 72000);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_STORM_CAST_CHAOS = BUILDER
+            .comment("Chance that casts fail / backlash during Essence Storm")
+            .defineInRange("phi_weather_storm_cast_chaos", 0.5, 0.0, 1.0);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_STORM_PHI_BONUS = BUILDER
+            .comment("Ambient Φ bonus while an Essence Storm is active")
+            .defineInRange("phi_weather_storm_phi_bonus", 0.35, 0.0, 5.0);
+    public static final ModConfigSpec.IntValue PHI_WEATHER_POST_STORM_TICKS = BUILDER
+            .comment("Ritual window after Essence Storm ends")
+            .defineInRange("phi_weather_post_storm_ticks", 6000, 200, 72000);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_POST_STORM_PHI = BUILDER
+            .comment("Φ bonus during the post-storm ritual window")
+            .defineInRange("phi_weather_post_storm_phi", 0.55, 0.0, 5.0);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_PLATEAU_STORM_CHANCE = BUILDER
+            .comment("Per-second chance to start a plateau Essence Storm while thundering")
+            .defineInRange("phi_weather_plateau_storm_chance", 0.002, 0.0, 1.0);
+    public static final ModConfigSpec.IntValue PHI_WEATHER_PLATEAU_STORM_DURATION = BUILDER
+            .comment("Plateau Essence Storm duration in ticks")
+            .defineInRange("phi_weather_plateau_storm_duration", 2400, 200, 72000);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_LIGHTNING_CHANCE = BUILDER
+            .comment("Per-second chance of an Essence Lightning strike during storm/thunder")
+            .defineInRange("phi_weather_lightning_chance", 0.08, 0.0, 1.0);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_LIGHTNING_DAMAGE = BUILDER
+            .comment("Magic damage from Essence Lightning to unprotected entities")
+            .defineInRange("phi_weather_lightning_damage", 8.0, 0.0, 40.0);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_LIGHTNING_VITRIFY_CHANCE = BUILDER
+            .comment("Chance lightning vitrifies sand into Φ-glass")
+            .defineInRange("phi_weather_lightning_vitrify_chance", 0.35, 0.0, 1.0);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_LIGHTNING_ORE_CHANCE = BUILDER
+            .comment("Chance lightning turns stone into essonite ore")
+            .defineInRange("phi_weather_lightning_ore_chance", 0.08, 0.0, 1.0);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_TORNADO_CHANCE = BUILDER
+            .comment("Per-second chance to spawn a local Essence Tornado during storm")
+            .defineInRange("phi_weather_tornado_chance", 0.015, 0.0, 1.0);
+    public static final ModConfigSpec.IntValue PHI_WEATHER_TORNADO_DURATION = BUILDER
+            .comment("Essence Tornado duration in ticks")
+            .defineInRange("phi_weather_tornado_duration", 200, 40, 6000);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_TORNADO_RADIUS = BUILDER
+            .comment("Essence Tornado radius")
+            .defineInRange("phi_weather_tornado_radius", 10.0, 2.0, 48.0);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_TORNADO_PULL = BUILDER
+            .comment("Horizontal pull strength toward tornado core each tick")
+            .defineInRange("phi_weather_tornado_pull", 0.12, 0.0, 1.0);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_OMEGA_ENTROPY = BUILDER
+            .comment("Entropy added while exposed to Omega Fog (per 2s pulse)")
+            .defineInRange("phi_weather_omega_entropy", 0.06, 0.0, 2.0);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_OMEGA_RAIN_DAMAGE = BUILDER
+            .comment("Magic damage per second under Omega Rain when unprotected")
+            .defineInRange("phi_weather_omega_rain_damage", 2.5, 0.0, 40.0);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_BLOOD_CHANCE = BUILDER
+            .comment("Chance to start Blood Rain when necro/high-entropy mages stand in Spire RED/BLACK at night")
+            .defineInRange("phi_weather_blood_chance", 0.04, 0.0, 1.0);
+    public static final ModConfigSpec.IntValue PHI_WEATHER_BLOOD_DURATION = BUILDER
+            .comment("Blood Rain duration in ticks")
+            .defineInRange("phi_weather_blood_duration", 1800, 200, 72000);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_BLOOD_RADIUS = BUILDER
+            .comment("Blood Rain radius around Spire vent / player")
+            .defineInRange("phi_weather_blood_radius", 48.0, 8.0, 128.0);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_BLOOD_ENTROPY_MIN = BUILDER
+            .comment("Minimum entropyB to qualify for Blood Rain without necro school")
+            .defineInRange("phi_weather_blood_entropy_min", 0.45, 0.0, 10.0);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_BLOOD_NECRO_POWER = BUILDER
+            .comment("Necromancy spell power multiplier under Blood Rain")
+            .defineInRange("phi_weather_blood_necro_power", 1.35, 1.0, 3.0);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_BLOOD_NECRO_COST = BUILDER
+            .comment("Necromancy spell cost factor under Blood Rain")
+            .defineInRange("phi_weather_blood_necro_cost", 0.75, 0.1, 1.0);
+    public static final ModConfigSpec.IntValue PHI_WEATHER_DEW_WINDOW_TICKS = BUILDER
+            .comment("Morning dayTime window (0..N) when Essence Dew is ambient on the plateau")
+            .defineInRange("phi_weather_dew_window_ticks", 1000, 100, 6000);
+    public static final ModConfigSpec.DoubleValue PHI_WEATHER_DEW_HARVEST_CHANCE = BUILDER
+            .comment("Chance to harvest Essence Dew from Φ foliage in the morning")
+            .defineInRange("phi_weather_dew_harvest_chance", 0.55, 0.0, 1.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 }

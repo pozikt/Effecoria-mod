@@ -109,14 +109,41 @@ public final class CastPipeline {
 
         float fullCost = godMode ? 0f : FormulaEngine.spellCost(ctx, phi, spell) * chargeScale;
         fullCost *= com.effecoria.world.EssencePlateauService.spellCostMultiplier(player.level(), player.position());
+        if (!godMode && data.school() == com.effecoria.core.magic.MagicSchool.NECROMANCY) {
+            fullCost *= com.effecoria.world.weather.PhiWeatherService.necroCostFactor(player);
+        }
         boolean overcasting = !godMode && usablePsi + 0.001f < fullCost;
         PsiContext powerCtx = overcasting ? ctx.withCurrentPsi(Math.max(usablePsi, fullCost)) : ctx;
         float power = FormulaEngine.spellPower(powerCtx, phi, spell) * chargeScale;
         power *= com.effecoria.world.EssencePlateauService.spellPowerMultiplier(player.level(), player.position());
+        if (data.school() == com.effecoria.core.magic.MagicSchool.NECROMANCY) {
+            power *= com.effecoria.world.weather.PhiWeatherService.necroPowerBonus(player);
+        }
         power = CreativeGodMode.clampSpellPower(player, power);
         float hardCap = BalanceConfig.SPELL_POWER_HARD_CAP.get().floatValue();
         if (hardCap > 0f) {
             power = Math.min(power, hardCap);
+        }
+
+        if (!godMode && com.effecoria.world.weather.PhiWeatherService.blocksMagic(player)) {
+            player.displayClientMessage(Component.translatable("message.effecoria.weather.tornado_block"), true);
+            return CastResult.CANNOT_CAST;
+        }
+        if (!godMode) {
+            float chaos = com.effecoria.world.weather.PhiWeatherService.castChaosChance(player);
+            if (chaos > 0f && player.getRandom().nextFloat() < chaos) {
+                player.displayClientMessage(Component.translatable("message.effecoria.weather.storm_chaos"), true);
+                float bump = Math.max(0.15f, data.entropyB() + 0.2f);
+                data.setEntropyB(bump);
+                ExhaustionService.addExhaustion(data, 2.5f);
+                if (FormulaEngine.isBacklashTriggered(bump) || player.getRandom().nextBoolean()) {
+                    applyBacklash(player, data);
+                    data.setEntropyB(0f);
+                }
+                PsiHelper.set(player, data);
+                player.syncData(ModAttachments.PSI.get());
+                return CastResult.CANNOT_CAST;
+            }
         }
 
         FormMutateService.Result mutate = FormMutateService.tryMutate(player, spell, chargeScale);

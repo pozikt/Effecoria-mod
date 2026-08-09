@@ -13,7 +13,6 @@ import com.effecoria.core.formula.SpellCombat;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -103,11 +102,7 @@ public final class MobMagicService {
         if (dramatic) {
             BreathDebuffs.apply(mob, new MobEffectInstance(MobEffects.GLOWING, 20 * 60 * 10, 0, false, true, true));
         }
-        mob.setCustomName(Component.translatable(
-                "message.effecoria.mob_magic.name",
-                mob.getType().getDescription(),
-                Component.translatable("school.effecoria." + school.getSerializedName())));
-        mob.setCustomNameVisible(true);
+        // No nametag — school is internal; HUD/combat FX carry the tell.
 
         ensureCastGoal(mob);
     }
@@ -115,6 +110,11 @@ public final class MobMagicService {
     public static void ensureCastGoal(LivingEntity entity) {
         if (!(entity instanceof PathfinderMob pathMob)) {
             return;
+        }
+        // Strip leftover school nametags from older builds.
+        if (isInitiated(pathMob) && pathMob.hasCustomName()) {
+            pathMob.setCustomName(null);
+            pathMob.setCustomNameVisible(false);
         }
         CompoundTag root = pathMob.getPersistentData();
         if (root.getBoolean(GOAL_TAG)) {

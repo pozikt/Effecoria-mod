@@ -57,6 +57,7 @@ public final class PhiFieldService {
         value += EssencePlateauService.phiEnvironmentBonus(level, pos);
         value += VitrifiedWastesService.phiEnvironmentBonus(level, pos);
         value += WhisperingSpireService.phiBonus(level, pos);
+        value += com.effecoria.world.weather.PhiWeatherService.phiEnvironmentBonus(level, pos);
 
         if (isInsideZeroFluxZone(level, pos) || isIronInsulated(player) || DeadWastelandService.isBiome(level, pos)) {
             return new PhiSample(0f, true, isSolarDay(level));
