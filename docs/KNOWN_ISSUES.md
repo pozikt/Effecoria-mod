@@ -1,26 +1,19 @@
-# Known issues — Effecoria (Stage I)
+# Known issues — Effecoria (Stage II)
 
-Honest list for Discord / Modrinth release notes. Update when shipping a demo build.
+Honest list for Discord / GitHub release notes. Update when shipping a demo build.
 
-## Current (`0.2.4-alpha`)
+## Current (`0.2.5-alpha`)
 
 | Issue | Severity | Notes |
 |-------|----------|-------|
-| Essonite / Phi Cell loot only in **new** chunks & **new** structure chests | Low | Old worlds need exploration beyond already-generated regions |
+| New biomes / structures need **new chunks** (or a new world) | Medium | Already-explored regions stay old terrain |
+| Ω-Scar / Crystal Forest fauna use **placeholder** skins (vanilla templates) | Low | Custom GeckoLib art later |
 | Magic Primer uses vanilla writable-book look | Low | Content is custom; cover art optional |
-| Overcast has cast feedback but no dedicated first-hour tip | Low | Primer Orkanum chapter covers it |
-| Race Orkanum baselines not content yet | Low | Hook `BiologyService.applyRaceBaseline` ready for Stage II |
+| Identity / school spell icons — some placeholders | Low | Art pass later |
+| Race Orkanum baselines not content yet | Low | Hook ready for later Stage II |
 | Lich ascension / dragon thrall intentionally disabled | Info | Stage IV+ |
-| Identity spell icons — some reuse placeholders (e.g. organic/necro clones) | Low | Art pass later |
-| Full 1h cast/seal/school smoke not automated | Info | Run before calling Demo 4 “final” |
-
-## Recent fixes (0.2.3–0.2.4)
-
-- **Mind Blank** — mobs stay de-aggroed (retarget block + spell combat)
-- **Hydro slice** — cutting blocks along slash
+| Full automated cast/biome smoke not in CI | Info | Manual locate + walk recommended |
 
 ## How to report
 
-Prefer a short repro: school, spell id, world type, log snippet from `run/logs/latest.log`.
-
-Template: [DISCORD_BUG_TEMPLATE.md](DISCORD_BUG_TEMPLATE.md) when publishing community channels.
+Prefer a short repro: school, spell id, biome, world type, log snippet from `logs/latest.log`.
