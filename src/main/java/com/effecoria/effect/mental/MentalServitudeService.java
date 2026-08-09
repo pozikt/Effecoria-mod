@@ -17,6 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
@@ -27,15 +28,20 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.PickaxeItem;
+import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.ItemAbilities;
 
 import javax.annotation.Nullable;
 
@@ -61,12 +67,16 @@ public final class MentalServitudeService {
     public static final String DIG_INDEX_TAG = "effecoria:mental_dig_index";
     public static final String DIG_COOLDOWN_TAG = "effecoria:mental_dig_cd";
     public static final String WARN_CD_TAG = "effecoria:mental_servant_warn_cd";
+    /** Backup of the equipped dig tool (mainhand is unreliable on some humanoids). */
+    public static final String TOOL_TAG = "effecoria:mental_servant_tool";
 
     private static final int MAX_CARGO_STACKS = 12;
     private static final float MAX_DIG_HARDNESS = 50f;
     private static final double CONTROL_RANGE = 48.0;
-    /** Navigation speed multiplier — roughly a normal walk, not a sprint. */
-    private static final double WALK_SPEED = 0.9;
+    /** Reach for chest tool grab / deposit — generous so stuck pathing still works. */
+    private static final double INTERACT_RANGE = 4.25;
+    /** MoveControl speed — setNoAi blocks reliable PathNavigation follow. */
+    private static final double WALK_SPEED = 0.85;
 
     public enum Mode {
         IDLE,
@@ -135,11 +145,8 @@ public final class MentalServitudeService {
         if (owner.level().isClientSide()) {
             return 0f;
         }
-        float total = 0f;
-        for (Mob mob : listOwned(owner)) {
-            total += reserveOf(mob);
-        }
-        return total;
+        // Ledger map on the player — never depends on entity lookup.
+        return PsiHelper.get(owner).mentalReservedPsi();
     }
 
     public static boolean canAfford(ServerPlayer owner, float reserveCost) {
@@ -182,7 +189,7 @@ public final class MentalServitudeService {
         mob.setPersistenceRequired();
         stripToPuppet(mob);
 
-        casterData.trackMentalServant(mob.getUUID());
+        casterData.trackMentalServant(mob.getUUID(), reserve);
         PsiHelper.set(caster, casterData);
         DeathMarkService.syncReservedPsi(caster);
         return true;
@@ -202,6 +209,7 @@ public final class MentalServitudeService {
         data.remove(CHEST_TAG);
         data.remove(CARGO_TAG);
         data.remove(WARN_CD_TAG);
+        data.remove(TOOL_TAG);
         clearDig(data);
         data.remove("effecoria:mental_servant_until");
         restoreAutonomy(mob);
@@ -265,13 +273,20 @@ public final class MentalServitudeService {
         if (server == null) {
             return List.of();
         }
+        // Keep ledger populated for nearby tagged servants.
+        seedNearby(serverOwner);
+
         PlayerPsiData data = PsiHelper.get(serverOwner);
         List<UUID> ledger = data.mentalServantIds();
         List<Mob> owned = new ArrayList<>();
         List<UUID> stale = new ArrayList<>();
         for (UUID id : new ArrayList<>(ledger)) {
             Mob found = findServant(server, id);
-            if (found == null || !found.isAlive() || !isOwnedBy(found, serverOwner.getUUID())) {
+            if (found == null) {
+                // Unloaded / not in lookup yet — keep reserving, do not prune.
+                continue;
+            }
+            if (!found.isAlive() || !isOwnedBy(found, serverOwner.getUUID())) {
                 stale.add(id);
                 continue;
             }
@@ -315,11 +330,39 @@ public final class MentalServitudeService {
                 best = mob;
             }
         }
+        if (best != null) {
+            return best;
+        }
+        // Fallback: OWNER_TAG nearby even if ledger lagged.
+        AABB box = owner.getBoundingBox().inflate(CONTROL_RANGE);
+        for (Mob mob : owner.level().getEntitiesOfClass(Mob.class, box, LivingEntity::isAlive)) {
+            if (!isOwnedBy(mob, owner.getUUID())) {
+                continue;
+            }
+            double d = mob.distanceToSqr(owner);
+            if (d < bestDist) {
+                bestDist = d;
+                best = mob;
+            }
+        }
+        if (best != null) {
+            PlayerPsiData data = PsiHelper.get(owner);
+            data.trackMentalServant(best.getUUID(), reserveOf(best));
+            PsiHelper.set(owner, data);
+            DeathMarkService.syncReservedPsi(owner);
+        }
         return best;
     }
 
     public static void bindChest(Mob servant, BlockPos chestPos) {
         servant.getPersistentData().putLong(CHEST_TAG, chestPos.asLong());
+        // Prefetch a dig tool immediately on bind.
+        if (servant.level() instanceof ServerLevel level) {
+            Container container = resolveContainer(level, chestPos);
+            if (container != null && !hasWorkTool(servant)) {
+                tryFetchTool(level, servant, chestPos, container, null);
+            }
+        }
     }
 
     public static void commandIdle(Mob servant) {
@@ -354,15 +397,58 @@ public final class MentalServitudeService {
         data.putByte(DIG_DIR_TAG, (byte) dir.get3DDataValue());
         data.putInt(DIG_INDEX_TAG, 0);
         data.putInt(DIG_COOLDOWN_TAG, 0);
+
+        // Immediately pull a tool from the bound chest (no walk required).
+        if (!hasWorkTool(servant)
+                && servant.level() instanceof ServerLevel level
+                && data.contains(CHEST_TAG)) {
+            BlockPos chest = BlockPos.of(data.getLong(CHEST_TAG));
+            Container container = resolveContainer(level, chest);
+            if (container != null) {
+                tryFetchTool(level, servant, chest, container, null);
+            }
+        }
     }
 
     public static boolean isDepositContainer(ServerLevel level, BlockPos pos) {
+        return resolveContainer(level, pos) != null;
+    }
+
+    /**
+     * Resolves the full inventory for the bound block (double chests included).
+     */
+    @Nullable
+    private static Container resolveContainer(ServerLevel level, BlockPos pos) {
         BlockEntity be = level.getBlockEntity(pos);
-        return be instanceof Container;
+        BlockState state = level.getBlockState(pos);
+        if (state.getBlock() instanceof ChestBlock chestBlock) {
+            Container combined = ChestBlock.getContainer(chestBlock, state, level, pos, true);
+            if (combined != null) {
+                return combined;
+            }
+        }
+        // Barrel / hopper / single chest BE / shulker / etc.
+        return be instanceof Container container ? container : null;
+    }
+
+    private static boolean inInteractRange(Mob mob, BlockPos pos) {
+        return mob.distanceToSqr(Vec3.atCenterOf(pos)) <= INTERACT_RANGE * INTERACT_RANGE;
+    }
+
+    /** Same-dimension bound chest within control leash. */
+    private static boolean canReachChestInv(Mob mob, BlockPos chest) {
+        if (!(mob.level() instanceof ServerLevel)) {
+            return false;
+        }
+        return mob.distanceToSqr(Vec3.atCenterOf(chest)) <= CONTROL_RANGE * CONTROL_RANGE;
     }
 
     public static int freeCargoSlots(Mob mob) {
         return Math.max(0, MAX_CARGO_STACKS - cargoStackCount(mob));
+    }
+
+    public static boolean servantHasTool(Mob mob) {
+        return hasWorkTool(mob);
     }
 
     public static void tick(ServerLevel level) {
@@ -384,6 +470,9 @@ public final class MentalServitudeService {
                 // setNoAi skips serverAiStep — pathfinding must be driven every tick.
                 tickPuppetMovement(mob);
             }
+            if (level.getGameTime() % 10 == 0) {
+                DeathMarkService.syncReservedPsi(player);
+            }
             if (level.getGameTime() % 40 == 0) {
                 seedNearby(player);
             }
@@ -396,7 +485,7 @@ public final class MentalServitudeService {
         AABB box = owner.getBoundingBox().inflate(CONTROL_RANGE);
         for (Mob mob : owner.level().getEntitiesOfClass(Mob.class, box, LivingEntity::isAlive)) {
             if (isOwnedBy(mob, owner.getUUID()) && !data.mentalServantIds().contains(mob.getUUID())) {
-                data.trackMentalServant(mob.getUUID());
+                data.trackMentalServant(mob.getUUID(), reserveOf(mob));
                 changed = true;
             }
         }
@@ -453,19 +542,18 @@ public final class MentalServitudeService {
     }
 
     private static void tickDigOrder(ServerLevel level, Mob mob, ServerPlayer owner, @Nullable BlockPos chest) {
-        CompoundTag data = mob.getPersistentData();
         if (chest == null || !isDepositContainer(level, chest)) {
             warn(owner, mob, "message.effecoria.mental.servitude_need_chest");
             commandIdle(mob);
             return;
         }
-        Container container = (Container) level.getBlockEntity(chest);
+        Container container = resolveContainer(level, chest);
         if (container == null) {
             commandIdle(mob);
             return;
         }
 
-        // Need a tool before any mining.
+        // Need a tool before any mining — walk to chest and pull one out.
         if (!hasWorkTool(mob)) {
             if (!tryFetchTool(level, mob, chest, container, owner)) {
                 return;
@@ -602,8 +690,23 @@ public final class MentalServitudeService {
     }
 
     private static void walkTo(Mob mob, double x, double y, double z) {
-        if (mob.getNavigation().isDone() || mob.tickCount % 20 == 0) {
-            mob.getNavigation().moveTo(x, y, z, WALK_SPEED);
+        // Direct locomotion: LevelTick Post + setNoAi make MoveControl/Navigation flaky.
+        Vec3 pos = mob.position();
+        double dx = x - pos.x;
+        double dz = z - pos.z;
+        double horiz = Math.sqrt(dx * dx + dz * dz);
+        mob.getLookControl().setLookAt(x, y + 0.5, z);
+        if (horiz < 0.2) {
+            return;
+        }
+        double step = Math.min(0.2, horiz);
+        double nx = dx / horiz * step;
+        double nz = dz / horiz * step;
+        mob.setDeltaMovement(nx, mob.getDeltaMovement().y, nz);
+        mob.hasImpulse = true;
+        // Small hop if stuck against a step-up.
+        if (mob.horizontalCollision && mob.onGround()) {
+            mob.setDeltaMovement(mob.getDeltaMovement().x, 0.42, mob.getDeltaMovement().z);
         }
     }
 
@@ -612,36 +715,111 @@ public final class MentalServitudeService {
     }
 
     private static ItemStack workTool(Mob mob) {
+        // NBT is source of truth — mainhand is display only and flaky on villagers.
+        CompoundTag data = mob.getPersistentData();
+        if (data.contains(TOOL_TAG, Tag.TAG_COMPOUND)) {
+            ItemStack stored = ItemStack.parse(mob.level().registryAccess(), data.getCompound(TOOL_TAG))
+                    .orElse(ItemStack.EMPTY);
+            if (isWorkTool(stored)) {
+                ItemStack hand = mob.getMainHandItem();
+                if (!isWorkTool(hand) || !ItemStack.isSameItemSameComponents(hand, stored)) {
+                    mob.setItemSlot(EquipmentSlot.MAINHAND, stored.copy());
+                    mob.setDropChance(EquipmentSlot.MAINHAND, 1.0f);
+                    hand = mob.getMainHandItem();
+                }
+                // Prefer the live hand stack so hurtAndBreak mutates the real item.
+                return isWorkTool(hand) ? hand : stored;
+            }
+            data.remove(TOOL_TAG);
+        }
         ItemStack hand = mob.getMainHandItem();
         if (isWorkTool(hand)) {
+            data.put(TOOL_TAG, hand.save(mob.level().registryAccess()));
             return hand;
         }
         return ItemStack.EMPTY;
     }
 
+    private static void equipWorkTool(Mob mob, ItemStack tool) {
+        ItemStack copy = tool.isEmpty() ? ItemStack.EMPTY : tool.copy();
+        mob.setItemSlot(EquipmentSlot.MAINHAND, copy);
+        mob.setDropChance(EquipmentSlot.MAINHAND, 1.0f);
+        CompoundTag data = mob.getPersistentData();
+        if (copy.isEmpty()) {
+            data.remove(TOOL_TAG);
+        } else {
+            data.put(TOOL_TAG, copy.save(mob.level().registryAccess()));
+        }
+    }
+
     private static boolean isWorkTool(ItemStack stack) {
-        return !stack.isEmpty() && stack.getItem() instanceof DiggerItem;
+        if (stack.isEmpty()) {
+            return false;
+        }
+        if (stack.getItem() instanceof DiggerItem) {
+            return true;
+        }
+        if (stack.is(ItemTags.PICKAXES)
+                || stack.is(ItemTags.SHOVELS)
+                || stack.is(ItemTags.AXES)
+                || stack.is(ItemTags.HOES)) {
+            return true;
+        }
+        return stack.canPerformAction(ItemAbilities.PICKAXE_DIG)
+                || stack.canPerformAction(ItemAbilities.SHOVEL_DIG)
+                || stack.canPerformAction(ItemAbilities.AXE_DIG);
     }
 
     /**
-     * Walk to the bound chest and equip a digger. Returns true once a tool is in hand.
-     * Returns false while pathing / if no tool exists (also idles the dig order).
+     * Pull a digger from the bound chest into the servant's hand.
+     * Does not require walking — mental reach to the bound inventory.
+     * {@code owner} may be null (silent) when called from commandDig.
      */
     private static boolean tryFetchTool(
-            ServerLevel level, Mob mob, BlockPos chest, Container container, ServerPlayer owner) {
-        if (mob.distanceToSqr(Vec3.atCenterOf(chest)) > 2.4 * 2.4) {
-            walkTo(mob, chest.getX() + 0.5, chest.getY(), chest.getZ() + 0.5);
+            ServerLevel level,
+            Mob mob,
+            BlockPos chest,
+            Container container,
+            @Nullable ServerPlayer owner) {
+        if (!canReachChestInv(mob, chest)) {
+            if (owner != null) {
+                warn(owner, mob, "message.effecoria.mental.servitude_need_chest");
+            }
             return false;
         }
         int slot = findToolSlot(container);
         if (slot < 0) {
-            finishDig(owner, mob, "message.effecoria.mental.servitude_need_tool");
+            if (owner != null) {
+                int filled = 0;
+                for (int i = 0; i < container.getContainerSize(); i++) {
+                    if (!container.getItem(i).isEmpty()) {
+                        filled++;
+                    }
+                }
+                owner.displayClientMessage(
+                        Component.translatable(
+                                "message.effecoria.mental.servitude_need_tool_detail",
+                                filled,
+                                container.getContainerSize()),
+                        true);
+                finishDig(owner, mob, "message.effecoria.mental.servitude_need_tool");
+            }
             return false;
         }
-        ItemStack tool = container.removeItem(slot, 1);
-        // Stash whatever is currently held into cargo / back into the chest.
+        ItemStack inSlot = container.getItem(slot);
+        if (!isWorkTool(inSlot)) {
+            return false;
+        }
+        ItemStack tool = inSlot.split(1);
+        container.setItem(slot, inSlot.isEmpty() ? ItemStack.EMPTY : inSlot);
+        if (!isWorkTool(tool)) {
+            insertStack(container, tool);
+            container.setChanged();
+            return false;
+        }
+        // Stash non-tool held item into cargo / chest.
         ItemStack previous = mob.getMainHandItem();
-        if (!previous.isEmpty()) {
+        if (!previous.isEmpty() && !isWorkTool(previous)) {
             ItemStack left = addCargo(mob, previous);
             if (!left.isEmpty()) {
                 left = insertStack(container, left);
@@ -650,11 +828,17 @@ public final class MentalServitudeService {
                             level, chest.getX() + 0.5, chest.getY() + 0.5, chest.getZ() + 0.5, left);
                 }
             }
+            mob.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
         }
-        mob.setItemSlot(EquipmentSlot.MAINHAND, tool);
-        mob.setDropChance(EquipmentSlot.MAINHAND, 1.0f);
+        equipWorkTool(mob, tool.copy());
         container.setChanged();
-        level.playSound(null, chest, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.45f, 0.9f);
+        level.playSound(null, mob.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.55f, 0.95f);
+        if (owner != null) {
+            owner.displayClientMessage(
+                    Component.translatable(
+                            "message.effecoria.mental.servitude_tool_taken", tool.getHoverName()),
+                    true);
+        }
         return true;
     }
 
@@ -668,12 +852,12 @@ public final class MentalServitudeService {
                 continue;
             }
             // Prefer pickaxes for tunnel work.
-            if (stack.getItem() instanceof net.minecraft.world.item.PickaxeItem) {
+            if (stack.getItem() instanceof PickaxeItem || stack.is(ItemTags.PICKAXES)) {
                 return i;
             }
-            if (stack.getItem() instanceof net.minecraft.world.item.ShovelItem && shovel < 0) {
+            if ((stack.getItem() instanceof ShovelItem || stack.is(ItemTags.SHOVELS)) && shovel < 0) {
                 shovel = i;
-            } else if (stack.getItem() instanceof net.minecraft.world.item.AxeItem && axe < 0) {
+            } else if ((stack.getItem() instanceof AxeItem || stack.is(ItemTags.AXES)) && axe < 0) {
                 axe = i;
             } else if (other < 0) {
                 other = i;
@@ -742,17 +926,24 @@ public final class MentalServitudeService {
             }
         }
         tool.hurtAndBreak(1, mob, EquipmentSlot.MAINHAND);
+        // Keep NBT tool mirror in sync (broken tools become empty).
+        ItemStack after = mob.getMainHandItem();
+        if (isWorkTool(after)) {
+            mob.getPersistentData().put(TOOL_TAG, after.save(mob.level().registryAccess()));
+        } else {
+            mob.getPersistentData().remove(TOOL_TAG);
+        }
         int swing = Mth.clamp(Math.round(hardness * 24f / Math.max(0.5f, destroySpeed)), 10, 50);
         return swing;
     }
 
     private static boolean tryDeposit(ServerLevel level, Mob mob, BlockPos chestPos) {
-        if (mob.distanceToSqr(Vec3.atCenterOf(chestPos)) > 2.4 * 2.4) {
+        if (!inInteractRange(mob, chestPos)) {
             walkTo(mob, chestPos.getX() + 0.5, chestPos.getY(), chestPos.getZ() + 0.5);
             return true;
         }
-        BlockEntity be = level.getBlockEntity(chestPos);
-        if (!(be instanceof Container container)) {
+        Container container = resolveContainer(level, chestPos);
+        if (container == null) {
             mob.getPersistentData().remove(CHEST_TAG);
             return false;
         }

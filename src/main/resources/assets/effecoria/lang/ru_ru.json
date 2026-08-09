@@ -776,6 +776,8 @@
   "message.effecoria.mental.servitude_chest_full": "Сундук полон — копать некуда.",
   "message.effecoria.mental.servitude_need_chest": "Сначала привяжи сундук (каст по сундуку).",
   "message.effecoria.mental.servitude_need_tool": "Нет инструмента — положи кирку/лопату/топор в привязанный сундук.",
+  "message.effecoria.mental.servitude_need_tool_detail": "В привязанном сундуке нет кирки/лопаты/топора (занято %s/%s).",
+  "message.effecoria.mental.servitude_tool_taken": "Слуга взял: %s",
   "message.effecoria.mental.servitude_end": "Ментальное подчинение гаснет.",
   "message.effecoria.mental.immune": "%s не имеет разума, который можно захватить.",
   "message.effecoria.mental.resisted": "%s сопротивляется навязчивым мыслям.",

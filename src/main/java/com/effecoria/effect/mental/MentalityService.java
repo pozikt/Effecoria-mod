@@ -297,29 +297,41 @@ public final class MentalityService {
     }
 
     public static boolean tryBreakout(LivingEntity entity) {
-        boolean servant = MentalServitudeService.isServant(entity);
-        if (!isAfflicted(entity) && !MentalCompulsionService.hasActive(entity) && !servant) {
+        // Permanent mental servants are Ψ-bound like necro thralls — only release via spell/death.
+        if (MentalServitudeService.isServant(entity)) {
+            return false;
+        }
+        if (!isAfflicted(entity) && !MentalCompulsionService.hasActive(entity)) {
             return false;
         }
         if (of(entity) != Kind.HUMANOID) {
             return false;
         }
-        float mastery = entity.getPersistentData().contains(MentalServitudeService.MASTERY_TAG)
-                ? entity.getPersistentData().getFloat(MentalServitudeService.MASTERY_TAG)
-                : (entity.getPersistentData().contains(AFFLICT_MASTERY_TAG)
-                        ? entity.getPersistentData().getFloat(AFFLICT_MASTERY_TAG)
-                        : 0f);
+        float mastery = entity.getPersistentData().contains(AFFLICT_MASTERY_TAG)
+                ? entity.getPersistentData().getFloat(AFFLICT_MASTERY_TAG)
+                : 0f;
         if (entity.getRandom().nextFloat() >= breakoutChance(entity, mastery)) {
             return false;
         }
-        java.util.UUID ownerId = entity.getPersistentData().hasUUID(MentalServitudeService.OWNER_TAG)
-                ? entity.getPersistentData().getUUID(MentalServitudeService.OWNER_TAG)
-                : (entity.getPersistentData().hasUUID(AFFLICT_OWNER_TAG)
-                        ? entity.getPersistentData().getUUID(AFFLICT_OWNER_TAG)
-                        : (entity.getPersistentData().hasUUID(MentalCompulsionService.OWNER_TAG)
-                                ? entity.getPersistentData().getUUID(MentalCompulsionService.OWNER_TAG)
-                                : null));
-        purgeMentalEffects(entity);
+        java.util.UUID ownerId = entity.getPersistentData().hasUUID(AFFLICT_OWNER_TAG)
+                ? entity.getPersistentData().getUUID(AFFLICT_OWNER_TAG)
+                : (entity.getPersistentData().hasUUID(MentalCompulsionService.OWNER_TAG)
+                        ? entity.getPersistentData().getUUID(MentalCompulsionService.OWNER_TAG)
+                        : null);
+        // Do not clearQuiet servants here — purgeMentalEffects still used by explicit dispels.
+        MentalCompulsionService.clear(entity);
+        clearAfflict(entity);
+        clearBlank(entity);
+        entity.removeEffect(MobEffects.CONFUSION);
+        entity.removeEffect(MobEffects.BLINDNESS);
+        entity.removeEffect(MobEffects.WEAKNESS);
+        entity.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+        entity.removeEffect(MobEffects.DIG_SLOWDOWN);
+        entity.removeEffect(MobEffects.LEVITATION);
+        if (entity instanceof Mob mob) {
+            mob.setTarget(null);
+            mob.getNavigation().stop();
+        }
         if (ownerId != null && entity.level() instanceof ServerLevel level) {
             if (level.getPlayerByUUID(ownerId) instanceof ServerPlayer caster) {
                 caster.displayClientMessage(
@@ -345,10 +357,10 @@ public final class MentalityService {
             for (ServerPlayer player : level.players()) {
                 AABB box = player.getBoundingBox().inflate(48);
                 for (Mob mob : level.getEntitiesOfClass(Mob.class, box, LivingEntity::isAlive)) {
-                    if (!isAfflicted(mob)
-                            && !MentalCompulsionService.hasActive(mob)
-                            && !MentalServitudeService.isServant(mob)
-                            && !hasBlank(mob, now)) {
+                    if (MentalServitudeService.isServant(mob)) {
+                        continue;
+                    }
+                    if (!isAfflicted(mob) && !MentalCompulsionService.hasActive(mob) && !hasBlank(mob, now)) {
                         continue;
                     }
                     tryBreakout(mob);

@@ -202,6 +202,8 @@ public final class PlayerPsiData {
     private List<UUID> necroThrallIds = new ArrayList<>();
     /** Server-only mental servant UUID ledger (not synced via STREAM_CODEC). */
     private List<UUID> mentalServantIds = new ArrayList<>();
+    /** Server-only Ψ reserve per mental servant UUID (source of truth for HUD sync). */
+    private Map<UUID, Float> mentalServantReserves = new HashMap<>();
     private long overcastUntil;
     private float overcastSeverity;
     private Map<ResourceLocation, Integer> spellCastCounts = new HashMap<>();
@@ -620,12 +622,17 @@ public final class PlayerPsiData {
     }
 
     public void trackMentalServant(UUID servantId) {
+        trackMentalServant(servantId, 1f);
+    }
+
+    public void trackMentalServant(UUID servantId, float reserveCost) {
         if (servantId == null) {
             return;
         }
         if (!mentalServantIds.contains(servantId)) {
             mentalServantIds.add(servantId);
         }
+        mentalServantReserves.put(servantId, Math.max(1f, reserveCost));
     }
 
     public void untrackMentalServant(UUID servantId) {
@@ -633,6 +640,16 @@ public final class PlayerPsiData {
             return;
         }
         mentalServantIds.remove(servantId);
+        mentalServantReserves.remove(servantId);
+    }
+
+    /** Sum of Ψ reserved by mental servants (server ledger; independent of entity lookup). */
+    public float mentalReservedPsi() {
+        float total = 0f;
+        for (float value : mentalServantReserves.values()) {
+            total += Math.max(0f, value);
+        }
+        return total;
     }
 
     public boolean hasOvercastTrauma(long gameTime) {
@@ -835,6 +852,7 @@ public final class PlayerPsiData {
         tag.putInt("primerTipsMask", primerTipsMask);
         tag.putInt("primerSeenMask", primerSeenMask);
         tag.putInt("castSuccessStreak", castSuccessStreak);
+        tag.putFloat("necroReservedPsi", necroReservedPsi);
         tag.putLong("overcastUntil", overcastUntil);
         tag.putFloat("overcastSeverity", overcastSeverity);
 
@@ -849,6 +867,12 @@ public final class PlayerPsiData {
             servantList.add(StringTag.valueOf(servantId.toString()));
         }
         tag.put("mentalServantIds", servantList);
+
+        CompoundTag servantReserves = new CompoundTag();
+        for (Map.Entry<UUID, Float> entry : mentalServantReserves.entrySet()) {
+            servantReserves.putFloat(entry.getKey().toString(), entry.getValue());
+        }
+        tag.put("mentalServantReserves", servantReserves);
 
         ListTag spellList = new ListTag();
         for (ResourceLocation spell : knownSpells) {
@@ -928,6 +952,7 @@ public final class PlayerPsiData {
         castSuccessStreak = tag.contains("castSuccessStreak") ? tag.getInt("castSuccessStreak") : 0;
         overcastUntil = tag.contains("overcastUntil") ? tag.getLong("overcastUntil") : 0L;
         overcastSeverity = tag.contains("overcastSeverity") ? tag.getFloat("overcastSeverity") : 0f;
+        necroReservedPsi = tag.contains("necroReservedPsi") ? tag.getFloat("necroReservedPsi") : 0f;
 
         necroThrallIds = new ArrayList<>();
         if (tag.contains("necroThrallIds", Tag.TAG_LIST)) {
@@ -950,6 +975,21 @@ public final class PlayerPsiData {
                     // Skip corrupt entries from older/broken saves.
                 }
             }
+        }
+        mentalServantReserves = new HashMap<>();
+        if (tag.contains("mentalServantReserves", Tag.TAG_COMPOUND)) {
+            CompoundTag reserves = tag.getCompound("mentalServantReserves");
+            for (String key : reserves.getAllKeys()) {
+                try {
+                    mentalServantReserves.put(UUID.fromString(key), Math.max(1f, reserves.getFloat(key)));
+                } catch (IllegalArgumentException ignored) {
+                    // Skip corrupt keys.
+                }
+            }
+        }
+        // Backfill reserve map for older saves that only had UUID lists.
+        for (UUID id : mentalServantIds) {
+            mentalServantReserves.putIfAbsent(id, 1f);
         }
 
         knownSpells = new ArrayList<>();
@@ -1070,6 +1110,7 @@ public final class PlayerPsiData {
         copy.necroReservedPsi = necroReservedPsi;
         copy.necroThrallIds = new ArrayList<>(necroThrallIds);
         copy.mentalServantIds = new ArrayList<>(mentalServantIds);
+        copy.mentalServantReserves = new HashMap<>(mentalServantReserves);
         copy.overcastUntil = overcastUntil;
         copy.overcastSeverity = overcastSeverity;
         copy.spellCastCounts = new HashMap<>(spellCastCounts);

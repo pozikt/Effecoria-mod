@@ -305,10 +305,8 @@ public final class DeathMarkService {
         PlayerPsiData data = PsiHelper.get(owner);
         float reserved = NecroSummonService.reservedPsi(owner)
                 + com.effecoria.effect.mental.MentalServitudeService.reservedPsi(owner);
-        if (Math.abs(data.necroReservedPsi() - reserved) > 0.05f) {
-            data.setNecroReservedPsi(reserved);
-            PsiHelper.set(owner, data);
-        }
+        data.setNecroReservedPsi(reserved);
+        PsiHelper.set(owner, data);
     }
 
     /** Vanilla HandItems / ArmorItems style — reliable across 1.21 item components. */

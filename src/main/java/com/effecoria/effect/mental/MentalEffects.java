@@ -797,10 +797,15 @@ public final class MentalEffects {
         // 2) Bind deposit chest / barrel
         if (block != null && MentalServitudeService.isDepositContainer(level, block)) {
             MentalServitudeService.bindChest(servant, block);
-            caster.displayClientMessage(
-                    Component.translatable("message.effecoria.mental.servitude_chest", Component.literal(
-                            block.getX() + " " + block.getY() + " " + block.getZ())),
-                    true);
+            if (MentalServitudeService.servantHasTool(servant)) {
+                caster.displayClientMessage(
+                        Component.translatable("message.effecoria.mental.servitude_chest", Component.literal(
+                                block.getX() + " " + block.getY() + " " + block.getZ())),
+                        true);
+            } else {
+                caster.displayClientMessage(
+                        Component.translatable("message.effecoria.mental.servitude_need_tool"), true);
+            }
             finishHit(level, Vec3.atCenterOf(block), HitFx.WARD);
             level.playSound(null, block, SoundEvents.CHEST_CLOSE, SoundSource.BLOCKS, 0.55f, 1.3f);
             return;
@@ -814,11 +819,16 @@ public final class MentalEffects {
                 return;
             }
             MentalServitudeService.commandDig(servant, block);
-            caster.displayClientMessage(
-                    Component.translatable(
-                            "message.effecoria.mental.servitude_dig",
-                            MentalServitudeService.freeCargoSlots(servant)),
-                    true);
+            if (!MentalServitudeService.servantHasTool(servant)) {
+                caster.displayClientMessage(
+                        Component.translatable("message.effecoria.mental.servitude_need_tool"), true);
+            } else {
+                caster.displayClientMessage(
+                        Component.translatable(
+                                "message.effecoria.mental.servitude_dig",
+                                MentalServitudeService.freeCargoSlots(servant)),
+                        true);
+            }
             finishHit(level, servant.position(), HitFx.SYNAPSE);
             return;
         }

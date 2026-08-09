@@ -17,6 +17,10 @@ public final class PsiHelper {
 
     public static void set(Player player, PlayerPsiData data) {
         player.setData(ModAttachments.PSI.get(), data);
+        // NeoForge may not push STREAM_CODEC unless sync is requested explicitly.
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+            serverPlayer.syncData(ModAttachments.PSI.get());
+        }
     }
 
     public static PsiContext toContext(Player player, PlayerPsiData data) {
