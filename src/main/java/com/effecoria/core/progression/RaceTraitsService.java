@@ -32,6 +32,7 @@ public final class RaceTraitsService {
     private static final ResourceLocation DWARF_MINING = EffecoriaMod.id("race_dwarf_mining");
     private static final ResourceLocation HARPY_FALL = EffecoriaMod.id("race_harpy_fall");
     private static final ResourceLocation HARPY_SAFE_FALL = EffecoriaMod.id("race_harpy_safe_fall");
+    private static final ResourceLocation HARPY_CLAW = EffecoriaMod.id("race_harpy_claw");
 
     private RaceTraitsService() {}
 
@@ -59,6 +60,13 @@ public final class RaceTraitsService {
                         AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
                 addOrReplace(
                         player, Attributes.SAFE_FALL_DISTANCE, HARPY_SAFE_FALL, 4.0, AttributeModifier.Operation.ADD_VALUE);
+                // Iron-spear jab baseline: empty hand ~1 → ~3 with +2 claws.
+                addOrReplace(
+                        player,
+                        Attributes.ATTACK_DAMAGE,
+                        HARPY_CLAW,
+                        BalanceConfig.HARPY_CLAW_BASE_DAMAGE.get(),
+                        AttributeModifier.Operation.ADD_VALUE);
             }
             case LONVER -> {
                 float bonus = BalanceConfig.RACE_LONVER_MAX_PSI_BONUS.get().floatValue();
@@ -103,6 +111,7 @@ public final class RaceTraitsService {
         remove(player, Attributes.BLOCK_BREAK_SPEED, DWARF_MINING);
         remove(player, Attributes.FALL_DAMAGE_MULTIPLIER, HARPY_FALL);
         remove(player, Attributes.SAFE_FALL_DISTANCE, HARPY_SAFE_FALL);
+        remove(player, Attributes.ATTACK_DAMAGE, HARPY_CLAW);
     }
 
     public static float spellCostMultiplier(Player player, MagicSchool school) {

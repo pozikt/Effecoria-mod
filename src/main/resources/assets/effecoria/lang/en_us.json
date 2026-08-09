@@ -514,7 +514,7 @@
   "race.effecoria.lonver.traits": "+15 max magic. Recover better in weak-magic places; fatigue fades slower.",
   "race.effecoria.harpy": "Harpy",
   "race.effecoria.harpy.overview": "Air people. Cliffs and falls scare them less than anyone else.",
-  "race.effecoria.harpy.traits": "Sprint and jump three times to take off (glides like elytra). Space flaps climb. Costs hunger. Half fall damage.",
+  "race.effecoria.harpy.traits": "Sprint + 3 jumps to take off (elytra glide). Space climbs (hunger). Claws hit like an iron spear and hit harder the faster you move — dive into foes. Half fall damage.",
   "message.effecoria.harpy.windup": "Keep sprinting — jump again to build takeoff",
   "message.effecoria.harpy.jump_count": "Takeoff jump %s/3",
   "message.effecoria.harpy.launch": "Wings catch — glide like an elytra. Space to climb.",

@@ -350,6 +350,32 @@ public final class BalanceConfig {
             .comment("Minimum ticks between flaps")
             .defineInRange("harpy_flap_cooldown_ticks", 10, 2, 40);
 
+    // --- Harpy claws (iron-spear-like) ---
+    public static final ModConfigSpec.DoubleValue HARPY_CLAW_BASE_DAMAGE = BUILDER
+            .comment("Innate ATTACK_DAMAGE add (fist ~1 + 2 ≈ iron spear jab 3)")
+            .defineInRange("harpy_claw_base_damage", 2.0, 0.0, 10.0);
+    public static final ModConfigSpec.DoubleValue HARPY_CLAW_SPEED_FACTOR = BUILDER
+            .comment("Charge bonus = relative speed (blocks/s) × this (iron spear ≈ 0.95)")
+            .defineInRange("harpy_claw_speed_factor", 0.95, 0.0, 3.0);
+    public static final ModConfigSpec.DoubleValue HARPY_CLAW_MIN_SPEED_BPS = BUILDER
+            .comment("Min relative speed (blocks/s) before speed bonus applies")
+            .defineInRange("harpy_claw_min_speed_bps", 3.0, 0.0, 20.0);
+    public static final ModConfigSpec.DoubleValue HARPY_CLAW_SPEED_BONUS_CAP = BUILDER
+            .comment("Cap on speed bonus damage (0 = uncapped)")
+            .defineInRange("harpy_claw_speed_bonus_cap", 40.0, 0.0, 100.0);
+    public static final ModConfigSpec.DoubleValue HARPY_DIVE_MIN_SPEED = BUILDER
+            .comment("Min player speed (blocks/tick) to deal glide dive claw hits")
+            .defineInRange("harpy_dive_min_speed", 0.22, 0.05, 2.0);
+    public static final ModConfigSpec.DoubleValue HARPY_DIVE_REACH = BUILDER
+            .comment("Dive claw hit reach in front of the player")
+            .defineInRange("harpy_dive_reach", 1.35, 0.5, 4.0);
+    public static final ModConfigSpec.IntValue HARPY_DIVE_HIT_COOLDOWN_TICKS = BUILDER
+            .comment("Per-target cooldown between dive claw hits")
+            .defineInRange("harpy_dive_hit_cooldown_ticks", 10, 2, 40);
+    public static final ModConfigSpec.DoubleValue HARPY_CLAW_DIVE_FLOOR = BUILDER
+            .comment("Minimum dive hit damage once speed threshold is met")
+            .defineInRange("harpy_claw_dive_floor", 3.0, 0.0, 20.0);
+
     public static final ModConfigSpec.IntValue BREATHING_TRAIN_MIN_INTERVAL_MS = BUILDER
             .comment("Server-side minimum real-time gap between accepted breathing-train hits (anti-spam)")
             .defineInRange("breathing_train_min_interval_ms", 280, 50, 5000);
