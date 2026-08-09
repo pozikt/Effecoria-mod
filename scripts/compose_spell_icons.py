@@ -26,6 +26,7 @@ EXAMPLE_SCHOOL = {
     "phi_glow": "common",
     "psi_charge": "common",
     "psi_link": "common",
+    "phi_thrust": "common",
 }
 
 # School batches: hub frame color by school

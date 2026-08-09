@@ -11,9 +11,7 @@
   "effects": [
     {
       "type": "effecoria:mind_servitude",
-      "duration_ticks": 600,
-      "range": 14,
-      "tunnel_length": 10
+      "range": 14
     }
   ]
 }

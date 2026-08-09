@@ -41,6 +41,12 @@ NECROMANCY_PROMPTS: dict[str, str] = {
         "Simple flat pixel art, sharp edges. Palette: bone white, dark green, black, gray. "
         "Dark background, thin white border."
     ),
+    "thrall_focus": (
+        "Pixel art, minecraft mod icon, 64x64 pixels, round frame. "
+        "One pale undead thrall with a bone-white targeting reticle over its head and a command arrow. "
+        "Simple bold silhouette, flat pixel clusters. Palette: bone white, olive gray, black, pale green. "
+        "Dark background, thin white border."
+    ),
     "dark_pact": (
         "Pixel art, minecraft mod icon, 64x64 pixels, round frame. "
         "A demonic contract written in blood, with 3 glowing Ω symbols, a soul payment icon, and a dark handshake. "
@@ -175,6 +181,12 @@ NECROMANCY_PROMPTS: dict[str, str] = {
         "A glowing skull mark on a target's chest, with 3 countdown lines and a death timer pixel. "
         "Simple bold shapes, flat pixel art. Palette: dark red, black, white, pale yellow. "
         "Dark background, thin red border."
+    ),
+    "mark_reap": (
+        "Pixel art, minecraft mod icon, 64x64 pixels, round frame. "
+        "A curved bone scythe cutting through a marked pale skull with a red death-rune and cream soul sparks. "
+        "Simple flat pixel art, sharp edges. Palette: bone white, cream, dark red, black. "
+        "Dark background, thin white border."
     ),
     "death_gate": (
         "Pixel art, minecraft mod icon, 64x64 pixels, round frame. "

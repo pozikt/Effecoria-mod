@@ -297,23 +297,28 @@ public final class MentalityService {
     }
 
     public static boolean tryBreakout(LivingEntity entity) {
-        if (!isAfflicted(entity) && !MentalCompulsionService.hasActive(entity)) {
+        boolean servant = MentalServitudeService.isServant(entity);
+        if (!isAfflicted(entity) && !MentalCompulsionService.hasActive(entity) && !servant) {
             return false;
         }
         if (of(entity) != Kind.HUMANOID) {
             return false;
         }
-        float mastery = entity.getPersistentData().contains(AFFLICT_MASTERY_TAG)
-                ? entity.getPersistentData().getFloat(AFFLICT_MASTERY_TAG)
-                : 0f;
+        float mastery = entity.getPersistentData().contains(MentalServitudeService.MASTERY_TAG)
+                ? entity.getPersistentData().getFloat(MentalServitudeService.MASTERY_TAG)
+                : (entity.getPersistentData().contains(AFFLICT_MASTERY_TAG)
+                        ? entity.getPersistentData().getFloat(AFFLICT_MASTERY_TAG)
+                        : 0f);
         if (entity.getRandom().nextFloat() >= breakoutChance(entity, mastery)) {
             return false;
         }
-        java.util.UUID ownerId = entity.getPersistentData().hasUUID(AFFLICT_OWNER_TAG)
-                ? entity.getPersistentData().getUUID(AFFLICT_OWNER_TAG)
-                : (entity.getPersistentData().hasUUID(MentalCompulsionService.OWNER_TAG)
-                        ? entity.getPersistentData().getUUID(MentalCompulsionService.OWNER_TAG)
-                        : null);
+        java.util.UUID ownerId = entity.getPersistentData().hasUUID(MentalServitudeService.OWNER_TAG)
+                ? entity.getPersistentData().getUUID(MentalServitudeService.OWNER_TAG)
+                : (entity.getPersistentData().hasUUID(AFFLICT_OWNER_TAG)
+                        ? entity.getPersistentData().getUUID(AFFLICT_OWNER_TAG)
+                        : (entity.getPersistentData().hasUUID(MentalCompulsionService.OWNER_TAG)
+                                ? entity.getPersistentData().getUUID(MentalCompulsionService.OWNER_TAG)
+                                : null));
         purgeMentalEffects(entity);
         if (ownerId != null && entity.level() instanceof ServerLevel level) {
             if (level.getPlayerByUUID(ownerId) instanceof ServerPlayer caster) {
@@ -340,7 +345,10 @@ public final class MentalityService {
             for (ServerPlayer player : level.players()) {
                 AABB box = player.getBoundingBox().inflate(48);
                 for (Mob mob : level.getEntitiesOfClass(Mob.class, box, LivingEntity::isAlive)) {
-                    if (!isAfflicted(mob) && !MentalCompulsionService.hasActive(mob) && !hasBlank(mob, now)) {
+                    if (!isAfflicted(mob)
+                            && !MentalCompulsionService.hasActive(mob)
+                            && !MentalServitudeService.isServant(mob)
+                            && !hasBlank(mob, now)) {
                         continue;
                     }
                     tryBreakout(mob);

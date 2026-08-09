@@ -183,6 +183,12 @@ MENTAL_PROMPTS: dict[str, str] = {
         "Simple flat pixel art, sharp edges. Palette: purple, pink, white, dark blue. "
         "Dark background, thin purple border."
     ),
+    "mind_servitude": (
+        "Pixel art, minecraft mod icon, 64x64 pixels, round frame. "
+        "A small purple servant with a pickaxe digging a short tunnel, magenta psychic leash ring around its head. "
+        "Simple flat pixel art, sharp edges. Palette: purple, magenta, white, cyan, gray. "
+        "Dark background, thin blue border."
+    ),
     "hive_mind": (
         "Pixel art, minecraft mod icon, 64x64 pixels, round frame. "
         "6 small heads connected by glowing blue psychic lines to a central hive brain, forming a network. "

@@ -3,6 +3,7 @@ package com.effecoria.event;
 import com.effecoria.EffecoriaMod;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
+import com.effecoria.effect.mental.MentalServitudeService;
 import com.effecoria.effect.necromancy.DeathMarkService;
 import com.effecoria.effect.necromancy.NecroSummonService;
 
@@ -41,6 +42,9 @@ public final class DeathMarkEvents {
                     DeathMarkService.syncReservedPsi(owner);
                 }
             }
+        }
+        if (event.getEntity() instanceof Mob servant && MentalServitudeService.isServant(servant)) {
+            MentalServitudeService.release(servant);
         }
         DeathMarkService.onMarkedDeath(event.getEntity());
     }

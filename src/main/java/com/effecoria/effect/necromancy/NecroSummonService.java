@@ -3,6 +3,7 @@ package com.effecoria.effect.necromancy;
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
+import com.effecoria.effect.mental.MentalServitudeService;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -210,7 +211,8 @@ public final class NecroSummonService {
     }
 
     public static float usablePsi(Player owner, PlayerPsiData data) {
-        return Math.max(0f, data.currentPsi() - reservedPsi(owner));
+        float reserved = reservedPsi(owner) + MentalServitudeService.reservedPsi(owner);
+        return Math.max(0f, data.currentPsi() - reserved);
     }
 
     public static int countOwned(Player owner) {
@@ -248,12 +250,8 @@ public final class NecroSummonService {
             for (UUID id : stale) {
                 data.untrackThrall(id);
             }
-            float total = 0f;
-            for (Mob mob : owned) {
-                total += reserveOf(mob);
-            }
-            data.setNecroReservedPsi(total);
             PsiHelper.set(serverOwner, data);
+            DeathMarkService.syncReservedPsi(serverOwner);
         }
         return owned;
     }

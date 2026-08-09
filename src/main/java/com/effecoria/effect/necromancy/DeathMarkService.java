@@ -303,7 +303,8 @@ public final class DeathMarkService {
 
     public static void syncReservedPsi(ServerPlayer owner) {
         PlayerPsiData data = PsiHelper.get(owner);
-        float reserved = NecroSummonService.reservedPsi(owner);
+        float reserved = NecroSummonService.reservedPsi(owner)
+                + com.effecoria.effect.mental.MentalServitudeService.reservedPsi(owner);
         if (Math.abs(data.necroReservedPsi() - reserved) > 0.05f) {
             data.setNecroReservedPsi(reserved);
             PsiHelper.set(owner, data);

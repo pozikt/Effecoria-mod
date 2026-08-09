@@ -743,18 +743,13 @@ public final class MentalEffects {
     public static void mindServitude(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
         ServerLevel level = caster.serverLevel();
         float range = effect.params().has("range") ? effect.params().get("range").getAsFloat() : 14f;
-        int duration = scaledTicks(effect, power, "duration_ticks", 600);
-        int digLen = effect.params().has("tunnel_length")
-                ? effect.params().get("tunnel_length").getAsInt()
-                : 8 + Math.round(power / 20f);
-        digLen = Math.max(4, Math.min(24, digLen));
 
         CastAim.Result aim = CastAim.resolve(caster, range);
         LivingEntity living = target != null ? target : aim.living();
         BlockPos block = aim.block();
         Mob servant = MentalServitudeService.findOwned(caster);
 
-        // 1) Seize / release humanoid
+        // 1) Seize / release humanoid (permanent, reserves Ψ = max HP)
         if (living instanceof Mob mob && living != caster) {
             if (NecroSummonService.isNecroThrall(mob)) {
                 caster.displayClientMessage(
@@ -774,17 +769,21 @@ public final class MentalEffects {
                         Component.translatable("message.effecoria.mental.servitude_not_humanoid"), true);
                 return;
             }
-            // One servant at a time — free the previous.
-            if (servant != null && servant != mob) {
-                MentalServitudeService.release(servant);
-            }
-            if (!MentalServitudeService.seize(caster, mob, duration)) {
-                MentalityService.notifyFail(caster, mob);
+            float reserve = MentalServitudeService.reserveCostOf(mob);
+            if (!MentalServitudeService.seize(caster, mob)) {
+                // seize already messages Ψ failure; otherwise resist
+                if (MentalServitudeService.canAfford(caster, reserve)) {
+                    MentalityService.notifyFail(caster, mob);
+                }
                 return;
             }
             BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0, false, false, true));
             caster.displayClientMessage(
-                    Component.translatable("message.effecoria.mental.servitude_seize", mob.getDisplayName()), true);
+                    Component.translatable(
+                            "message.effecoria.mental.servitude_seize",
+                            mob.getDisplayName(),
+                            (int) Math.ceil(reserve)),
+                    true);
             finishHit(level, mob.position(), HitFx.FORCE);
             level.playSound(null, mob.blockPosition(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.5f, 1.6f);
             return;
@@ -807,11 +806,19 @@ public final class MentalEffects {
             return;
         }
 
-        // 3) Dig tunnel toward aimed block
+        // 3) Dig tunnel toward aimed block (until bound chest is full; needs tools in chest)
         if (block != null) {
-            MentalServitudeService.commandDig(servant, block, digLen);
+            if (!servant.getPersistentData().contains(MentalServitudeService.CHEST_TAG)) {
+                caster.displayClientMessage(
+                        Component.translatable("message.effecoria.mental.servitude_need_chest"), true);
+                return;
+            }
+            MentalServitudeService.commandDig(servant, block);
             caster.displayClientMessage(
-                    Component.translatable("message.effecoria.mental.servitude_dig", digLen), true);
+                    Component.translatable(
+                            "message.effecoria.mental.servitude_dig",
+                            MentalServitudeService.freeCargoSlots(servant)),
+                    true);
             finishHit(level, servant.position(), HitFx.SYNAPSE);
             return;
         }

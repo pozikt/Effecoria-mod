@@ -78,6 +78,12 @@ ORGANIC_PROMPTS: dict[str, str] = {
         "Simple flat pixel art, sharp edges. Palette: pale green, yellow, brown, dark green. "
         "Dark background, thin yellow border."
     ),
+    "spore_burst": (
+        "Pixel art, minecraft mod icon, 64x64 pixels, round frame. "
+        "A single mushroom popping with a radial burst of green-yellow spores outward in all directions. "
+        "Simple bold silhouette, flat pixel clusters. Palette: forest green, lime, yellow-tan, brown. "
+        "Dark background, thin lime border."
+    ),
     "verdant_bloom": (
         "Pixel art, minecraft mod icon, 64x64 pixels, round frame. "
         "A large glowing flower with 5 petals opening, emitting healing green sparkle pixels. "
@@ -267,6 +273,12 @@ ORGANIC_PROMPTS: dict[str, str] = {
         "A host figure with 3 parasitic worms burrowing out, and a small parasite egg cluster nearby. "
         "Simple silhouette, flat pixel clusters. Palette: dark red, pale pink, green, black. "
         "Dark background, thin red border."
+    ),
+    "parasite_seed": (
+        "Pixel art, minecraft mod icon, 64x64 pixels, round frame. "
+        "A cracked green-brown seed/egg with a small pink parasite larva emerging and tiny red infection dots. "
+        "Simple bold silhouette, flat colors. Palette: olive, brown, pink, red, lime. "
+        "Dark background, thin lime border."
     ),
     "immune_suppression": (
         "Pixel art, minecraft mod icon, 64x64 pixels, round frame. "

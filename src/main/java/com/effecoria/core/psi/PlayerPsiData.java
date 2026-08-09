@@ -196,10 +196,12 @@ public final class PlayerPsiData {
     /** Bitmask of Magic Primer chapters the player has opened ({@link com.effecoria.core.progression.PrimerChapters}). */
     private int primerSeenMask;
     private int castSuccessStreak;
-    /** Synced thrall Ψ reserve for client HUD (server recalculates each tick). */
+    /** Synced thrall/servant Ψ reserve for client HUD (server recalculates each tick). */
     private float necroReservedPsi;
     /** Server-only thrall UUID ledger (not synced via STREAM_CODEC). */
     private List<UUID> necroThrallIds = new ArrayList<>();
+    /** Server-only mental servant UUID ledger (not synced via STREAM_CODEC). */
+    private List<UUID> mentalServantIds = new ArrayList<>();
     private long overcastUntil;
     private float overcastSeverity;
     private Map<ResourceLocation, Integer> spellCastCounts = new HashMap<>();
@@ -612,6 +614,27 @@ public final class PlayerPsiData {
         necroThrallIds.remove(thrallId);
     }
 
+    /** Server-only mental servant ledger; not included in STREAM_CODEC. */
+    public List<UUID> mentalServantIds() {
+        return mentalServantIds;
+    }
+
+    public void trackMentalServant(UUID servantId) {
+        if (servantId == null) {
+            return;
+        }
+        if (!mentalServantIds.contains(servantId)) {
+            mentalServantIds.add(servantId);
+        }
+    }
+
+    public void untrackMentalServant(UUID servantId) {
+        if (servantId == null) {
+            return;
+        }
+        mentalServantIds.remove(servantId);
+    }
+
     public boolean hasOvercastTrauma(long gameTime) {
         return overcastSeverity > 0f && gameTime < overcastUntil;
     }
@@ -821,6 +844,12 @@ public final class PlayerPsiData {
         }
         tag.put("necroThrallIds", thrallList);
 
+        ListTag servantList = new ListTag();
+        for (UUID servantId : mentalServantIds) {
+            servantList.add(StringTag.valueOf(servantId.toString()));
+        }
+        tag.put("mentalServantIds", servantList);
+
         ListTag spellList = new ListTag();
         for (ResourceLocation spell : knownSpells) {
             spellList.add(net.minecraft.nbt.StringTag.valueOf(spell.toString()));
@@ -906,6 +935,17 @@ public final class PlayerPsiData {
             for (Tag entry : thrallList) {
                 try {
                     necroThrallIds.add(UUID.fromString(entry.getAsString()));
+                } catch (IllegalArgumentException ignored) {
+                    // Skip corrupt entries from older/broken saves.
+                }
+            }
+        }
+        mentalServantIds = new ArrayList<>();
+        if (tag.contains("mentalServantIds", Tag.TAG_LIST)) {
+            ListTag servantList = tag.getList("mentalServantIds", Tag.TAG_STRING);
+            for (Tag entry : servantList) {
+                try {
+                    mentalServantIds.add(UUID.fromString(entry.getAsString()));
                 } catch (IllegalArgumentException ignored) {
                     // Skip corrupt entries from older/broken saves.
                 }
@@ -1029,6 +1069,7 @@ public final class PlayerPsiData {
         copy.castSuccessStreak = castSuccessStreak;
         copy.necroReservedPsi = necroReservedPsi;
         copy.necroThrallIds = new ArrayList<>(necroThrallIds);
+        copy.mentalServantIds = new ArrayList<>(mentalServantIds);
         copy.overcastUntil = overcastUntil;
         copy.overcastSeverity = overcastSeverity;
         copy.spellCastCounts = new HashMap<>(spellCastCounts);

@@ -250,6 +250,69 @@ def m_force(d, cx, cy, p: Pal):
     d.line([(cx + 14, cy + 2), (cx + 18, cy + 6)], fill=rgba(p.secondary), width=2)
 
 
+def m_phi_thrust(d, cx, cy, p: Pal):
+    # Open palm thrusting right + Φ burst chevrons
+    d.polygon([
+        (cx - 10, cy - 2), (cx - 2, cy - 10), (cx + 4, cy - 8),
+        (cx + 2, cy - 2), (cx + 8, cy - 1), (cx + 8, cy + 3),
+        (cx + 2, cy + 4), (cx + 4, cy + 10), (cx - 2, cy + 8), (cx - 10, cy + 2),
+    ], fill=rgba(p.primary))
+    disc(d, cx + 1, cy + 1, 3, rgba(p.glow))
+    for i, ox in enumerate((10, 15, 20)):
+        d.polygon([
+            (cx + ox, cy - 5 + i), (cx + ox + 6, cy), (cx + ox, cy + 5 - i),
+            (cx + ox + 2, cy),
+        ], fill=rgba(p.spark if i == 0 else p.secondary))
+
+
+def m_servitude(d, cx, cy, p: Pal):
+    # Small digger + psychic leash ring (distinct from puppet-string dominate)
+    d.rectangle((cx - 10, cy - 2, cx - 4, cy + 12), fill=rgba(p.secondary))
+    disc(d, cx - 7, cy - 6, 4, rgba(p.primary))
+    d.line([(cx - 4, cy + 2), (cx + 6, cy - 6)], fill=rgba(p.glow), width=2)
+    d.polygon([(cx + 4, cy - 10), (cx + 12, cy - 4), (cx + 6, cy - 2)], fill=rgba(p.spark))
+    disc(d, cx - 7, cy - 6, 7, None, outline=rgba(p.glow), width=2)
+
+
+def m_thrall_focus(d, cx, cy, p: Pal):
+    # Single thrall + focus reticle
+    d.polygon([(cx, cy - 12), (cx + 8, cy + 12), (cx - 8, cy + 12)], fill=rgba(p.secondary))
+    disc(d, cx, cy - 14, 4, rgba(p.primary))
+    disc(d, cx, cy - 14, 8, None, outline=rgba(p.glow), width=2)
+    d.line([(cx - 10, cy - 14), (cx - 6, cy - 14)], fill=rgba(p.spark), width=2)
+    d.line([(cx + 6, cy - 14), (cx + 10, cy - 14)], fill=rgba(p.spark), width=2)
+    d.line([(cx, cy - 20), (cx, cy - 16)], fill=rgba(p.spark), width=2)
+
+
+def m_mark_reap(d, cx, cy, p: Pal):
+    # Scythe + marked skull
+    disc(d, cx - 4, cy + 2, 7, rgba(p.primary))
+    disc(d, cx - 6, cy, 2, rgba(p.ink))
+    disc(d, cx - 2, cy, 2, rgba(p.ink))
+    d.line([(cx + 2, cy + 4), (cx + 14, cy - 12)], fill=rgba(p.secondary), width=3)
+    d.arc((cx + 2, cy - 16, cx + 18, cy + 2), 200, 20, fill=rgba(p.glow), width=3)
+    disc(d, cx + 10, cy - 10, 2, rgba(180, 40, 40))
+
+
+def m_parasite_seed(d, cx, cy, p: Pal):
+    disc(d, cx - 2, cy + 2, 10, rgba(p.primary))
+    d.polygon([(cx - 8, cy - 4), (cx + 2, cy - 12), (cx + 6, cy - 2)], fill=rgba(p.secondary))
+    d.arc((cx + 2, cy - 8, cx + 16, cy + 8), 200, 40, fill=rgba(200, 140, 90), width=4)
+    disc(d, cx + 12, cy - 2, 3, rgba(p.glow))
+    for ox, oy in ((-10, 8), (4, 12), (10, 6)):
+        disc(d, cx + ox, cy + oy, 1, rgba(180, 40, 40))
+
+
+def m_spore_burst(d, cx, cy, p: Pal):
+    # Mushroom + radial burst (not a tall storm funnel)
+    d.ellipse((cx - 10, cy - 10, cx + 10, cy + 2), fill=rgba(p.primary))
+    d.rectangle((cx - 3, cy, cx + 3, cy + 12), fill=rgba(p.secondary))
+    for ang in range(0, 360, 45):
+        rad = math.radians(ang)
+        disc(d, cx + int(math.cos(rad) * 16), cy + int(math.sin(rad) * 16), 2, rgba(p.glow))
+        disc(d, cx + int(math.cos(rad) * 11), cy + int(math.sin(rad) * 11), 1, rgba(p.spark))
+
+
 def m_shard(d, cx, cy, p: Pal):
     d.polygon([(cx + 14, cy - 14), (cx - 2, cy - 2), (cx + 2, cy + 4), (cx - 12, cy + 14), (cx - 4, cy + 2), (cx + 4, cy - 4)], fill=rgba(p.primary))
     d.line([(cx - 6, cy + 6), (cx + 10, cy - 10)], fill=rgba(p.spark), width=1)
@@ -874,6 +937,8 @@ def _reg(names: list[str], fn: Callable):
 
 
 _reg(["mental_push"], m_force)
+_reg(["phi_thrust"], m_phi_thrust)
+_reg(["mind_servitude"], m_servitude)
 _reg(["mental_sting"], m_shard)
 _reg(["sense_phi"], m_eye)
 _reg(["mind_probe"], m_probe)
@@ -940,15 +1005,19 @@ _reg(["foreign_agent", "immune_suppression", "population_control"], m_virus)
 _reg(["chitin_plates", "living_armor"], m_chitin)
 _reg(["acid_gland", "organic_necrosis"], m_sap)
 _reg(["parasitic_infection"], m_parasite)
+_reg(["parasite_seed"], m_parasite_seed)
 _reg(["poison_thorns"], m_thorns)
 _reg(["bio_mimicry"], m_veil)
 _reg(["organism_adaptation", "full_restructuring", "bio_fission", "cellular_dominion",
       "evolutionary_leap", "genetic_lock", "full_transformation", "biological_singularity"], m_dna)
 _reg(["biological_plague", "spore_storm"], m_spore)
+_reg(["spore_burst"], m_spore_burst)
 _reg(["bio_cataclysm"], m_cataclysm)
 
 _reg(["soul_drain", "life_tap"], m_soul)
 _reg(["wither_touch", "death_mark"], m_wither)
+_reg(["mark_reap"], m_mark_reap)
+_reg(["thrall_focus"], m_thrall_focus)
 _reg(["shade_summon", "death_shadow", "phantom_step"], m_shade)
 _reg(["grave_leech", "siphon_pulse", "tainted_leech"], m_siphon)
 _reg(["shade_swarm", "shade_brood", "army_of_dead"], m_shades)
