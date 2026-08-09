@@ -38,6 +38,7 @@ import com.effecoria.network.ModNetworking;
 
 import com.effecoria.world.CrystalForestRegion;
 import com.effecoria.world.DeadWastelandRegion;
+import com.effecoria.world.EmeraldCanopyRegion;
 import com.effecoria.world.OmegaScarRegion;
 import com.effecoria.world.EssencePlateauRegion;
 import com.effecoria.world.VitrifiedWastesRegion;
@@ -129,11 +130,13 @@ public class EffecoriaMod {
     private static void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             LOGGER.info(
-                    "Registering Essence Plateau / Dead Wasteland / Vitrified Wastes / Crystal Forest / Ω-Scar TerraBlender regions");
+                    "Registering Essence Plateau / Dead Wasteland / Vitrified Wastes / Crystal Forest / Emerald Canopy / Ω-Scar TerraBlender regions");
             Regions.register(new EssencePlateauRegion(id("overworld"), 6));
             Regions.register(new DeadWastelandRegion(id("dead_wasteland"), 8));
             Regions.register(new VitrifiedWastesRegion(id("vitrified_wastes"), 8));
             Regions.register(new CrystalForestRegion(id("crystal_forest"), 6));
+            // Higher weight than Crystal Forest — canopy needs wide contiguous jungle climates.
+            Regions.register(new EmeraldCanopyRegion(id("emerald_canopy"), 12));
             Regions.register(new OmegaScarRegion(id("omega_scar"), 4));
             SurfaceRuleManager.addSurfaceRules(
                     SurfaceRuleManager.RuleCategory.OVERWORLD,

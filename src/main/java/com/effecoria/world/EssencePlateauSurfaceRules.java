@@ -108,6 +108,7 @@ public final class EssencePlateauSurfaceRules {
                 SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.DEAD_WASTELAND), wastelandColumn),
                 SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.VITRIFIED_WASTES), vitrifiedColumn),
                 SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.CRYSTAL_FOREST), forestColumn),
+                SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.EMERALD_CANOPY), forestColumn),
                 SurfaceRules.ifTrue(SurfaceRules.isBiome(ModBiomes.OMEGA_SCAR), scarColumn));
     }
 

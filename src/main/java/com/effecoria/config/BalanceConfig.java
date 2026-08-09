@@ -515,6 +515,35 @@ public final class BalanceConfig {
             .comment("Additive Φ bonus while in Crystal Forest")
             .defineInRange("crystal_forest_phi_bonus", 0.4, 0.0, 3.0);
 
+    // --- Emerald Canopy ---
+    public static final ModConfigSpec.DoubleValue EMERALD_CANOPY_PHI_BONUS = BUILDER
+            .comment("Additive Φ bonus while in Emerald Canopy")
+            .defineInRange("emerald_canopy_phi_bonus", 0.65, 0.0, 3.0);
+    public static final ModConfigSpec.DoubleValue EMERALD_CANOPY_GRAVITY_MULT = BUILDER
+            .comment("Gravity multiplier in Emerald Canopy (0.8 = 80% of normal)")
+            .defineInRange("emerald_canopy_gravity_mult", 0.8, 0.2, 1.5);
+    public static final ModConfigSpec.IntValue EMERALD_CANOPY_TREE_MIN_HEIGHT = BUILDER
+            .comment("Minimum giant canopy trunk height")
+            .defineInRange("emerald_canopy_tree_min_height", 40, 20, 100);
+    public static final ModConfigSpec.IntValue EMERALD_CANOPY_TREE_MAX_HEIGHT = BUILDER
+            .comment("Maximum typical canopy trunk height")
+            .defineInRange("emerald_canopy_tree_max_height", 64, 30, 120);
+    public static final ModConfigSpec.IntValue EMERALD_CANOPY_EMERGENT_MAX_HEIGHT = BUILDER
+            .comment("Rare emergent tree max height")
+            .defineInRange("emerald_canopy_emergent_max_height", 88, 50, 160);
+    public static final ModConfigSpec.DoubleValue EMERALD_CANOPY_EMERGENT_CHANCE = BUILDER
+            .comment("Chance a giant tree is an emergent")
+            .defineInRange("emerald_canopy_emergent_chance", 0.12, 0.0, 1.0);
+    public static final ModConfigSpec.DoubleValue EMERALD_CANOPY_MIND_ANGER_DECAY = BUILDER
+            .comment("Forest Mind anger lost per second while idle")
+            .defineInRange("emerald_canopy_mind_anger_decay", 0.35, 0.0, 10.0);
+    public static final ModConfigSpec.DoubleValue EMERALD_CANOPY_MIND_WARN_THRESHOLD = BUILDER
+            .comment("Anger before mental noise / warnings")
+            .defineInRange("emerald_canopy_mind_warn_threshold", 8.0, 1.0, 100.0);
+    public static final ModConfigSpec.DoubleValue EMERALD_CANOPY_MIND_HOSTILE_THRESHOLD = BUILDER
+            .comment("Anger before predator bias / ent aggro")
+            .defineInRange("emerald_canopy_mind_hostile_threshold", 22.0, 5.0, 200.0);
+
     // --- Ω-Scar ---
     public static final ModConfigSpec.DoubleValue OMEGA_SCAR_PHI_BONUS = BUILDER
             .comment("Additive Φ bonus while in Ω-Scar (distorted residual field; keep low)")

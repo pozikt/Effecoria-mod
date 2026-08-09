@@ -24,6 +24,10 @@ public final class ModBiomes {
     public static final ResourceKey<Biome> CRYSTAL_FOREST =
             ResourceKey.create(Registries.BIOME, EffecoriaMod.id("crystal_forest"));
 
+    /** Giant Φ-canopy — Emerald Canopy / Sea of Crowns. */
+    public static final ResourceKey<Biome> EMERALD_CANOPY =
+            ResourceKey.create(Registries.BIOME, EffecoriaMod.id("emerald_canopy"));
+
     /** Ω causality rupture — fog/rain and Blood Rain eligibility. */
     public static final ResourceKey<Biome> OMEGA_SCAR =
             ResourceKey.create(Registries.BIOME, EffecoriaMod.id("omega_scar"));

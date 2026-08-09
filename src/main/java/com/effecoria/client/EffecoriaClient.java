@@ -8,6 +8,10 @@ import com.effecoria.client.particle.SchoolParticles;
 import com.effecoria.client.render.CrystalCrabRenderer;
 import com.effecoria.client.render.DeathShadowRenderer;
 import com.effecoria.client.render.EidosRenderer;
+import com.effecoria.client.render.GlassWormRenderer;
+import com.effecoria.client.render.PhiEntRenderer;
+import com.effecoria.client.render.PhiLemurRenderer;
+import com.effecoria.client.render.WailerBatRenderer;
 import com.effecoria.client.render.EssenceWyvernRenderer;
 import com.effecoria.client.render.MirageHorrorRenderer;
 import com.effecoria.client.render.OmegaShadeRenderer;
@@ -70,6 +74,7 @@ public final class EffecoriaClient {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_SAPLING.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.VITRIFIED_BRANCHES.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_LEAVES.get(), RenderType.cutoutMipped());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_SNARE_VINE.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_GLASS.get(), RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.ESSONITE_POINTED.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.BLOOD_FLUID.get(), RenderType.translucent());
@@ -105,6 +110,10 @@ public final class EffecoriaClient {
         event.registerEntityRenderer(ModEntities.ROTFANG_MINK.get(), RotfangMinkRenderer::new);
         event.registerEntityRenderer(ModEntities.OMEGA_SHADE.get(), OmegaShadeRenderer::new);
         event.registerEntityRenderer(ModEntities.OMEGA_WORM.get(), OmegaWormRenderer::new);
+        event.registerEntityRenderer(ModEntities.PHI_ENT.get(), PhiEntRenderer::new);
+        event.registerEntityRenderer(ModEntities.PHI_LEMUR.get(), PhiLemurRenderer::new);
+        event.registerEntityRenderer(ModEntities.WAILER_BAT.get(), WailerBatRenderer::new);
+        event.registerEntityRenderer(ModEntities.GLASS_WORM.get(), GlassWormRenderer::new);
         event.registerBlockEntityRenderer(
                 com.effecoria.content.ModBlockEntities.SUBSPACE_PORTAL.get(), SubspacePortalRenderer::new);
     }

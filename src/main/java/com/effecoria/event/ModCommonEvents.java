@@ -52,6 +52,7 @@ import com.effecoria.magic.SpellRegistry;
 import com.effecoria.core.seal.SealWordRegistry;
 import com.effecoria.world.CrystalForestService;
 import com.effecoria.world.DeadWastelandService;
+import com.effecoria.world.EmeraldCanopyService;
 import com.effecoria.world.EssencePlateauService;
 import com.effecoria.world.OmegaScarService;
 import com.effecoria.world.PhiFogService;
@@ -174,6 +175,7 @@ public final class ModCommonEvents {
         DeadWastelandService.tickPlayer(player);
         VitrifiedWastesService.tickPlayer(player);
         CrystalForestService.tickPlayer(player);
+        EmeraldCanopyService.tickPlayer(player);
         OmegaScarService.tickPlayer(player);
         WhisperingSpireService.tickPlayer(player);
 

@@ -8,6 +8,7 @@ import com.effecoria.config.BalanceConfig;
 import com.effecoria.content.ModBlocks;
 import com.effecoria.content.ModItems;
 import com.effecoria.world.CrystalForestService;
+import com.effecoria.world.EmeraldCanopyService;
 import com.effecoria.world.EssencePlateauService;
 import com.effecoria.world.weather.PhiWeatherKind;
 import com.effecoria.world.weather.PhiWeatherService;
@@ -42,7 +43,9 @@ public final class EssenceDewEvents {
             return;
         }
         BlockPos pos = event.getPos();
-        if (!EssencePlateauService.isBiome(level, pos) && !CrystalForestService.isBiome(level, pos)) {
+        if (!EssencePlateauService.isBiome(level, pos)
+                && !CrystalForestService.isBiome(level, pos)
+                && !EmeraldCanopyService.isBiome(level, pos)) {
             return;
         }
         PhiWeatherKind kind = PhiWeatherService.dominantKind(level, pos);
@@ -61,7 +64,8 @@ public final class EssenceDewEvents {
         if (until != null && until > now) {
             return;
         }
-        if (player.getRandom().nextFloat() >= BalanceConfig.PHI_WEATHER_DEW_HARVEST_CHANCE.get().floatValue()) {
+        if (player.getRandom().nextFloat() >= BalanceConfig.PHI_WEATHER_DEW_HARVEST_CHANCE.get().floatValue()
+                * (EmeraldCanopyService.isBiome(level, pos) ? 1.75f : 1f)) {
             BLOCK_COOLDOWN.put(key, now + 40);
             return;
         }

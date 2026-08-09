@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "axis=y": { "model": "effecoria:block/golden_bark" },
+    "axis=z": { "model": "effecoria:block/golden_bark", "x": 90 },
+    "axis=x": { "model": "effecoria:block/golden_bark", "x": 90, "y": 90 }
+  }
+}

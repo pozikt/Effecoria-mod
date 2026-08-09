@@ -20,7 +20,67 @@ public final class EffecoriaMobSpawns {
 
     private static boolean isPhiSurfaceBiome(ServerLevelAccessor level, BlockPos pos) {
         return level.getBiome(pos).is(ModBiomeTags.ESSENCE_PLATEAU)
-                || level.getBiome(pos).is(ModBiomeTags.CRYSTAL_FOREST);
+                || level.getBiome(pos).is(ModBiomeTags.CRYSTAL_FOREST)
+                || level.getBiome(pos).is(ModBiomeTags.EMERALD_CANOPY);
+    }
+
+    private static boolean isEmeraldCanopyBiome(ServerLevelAccessor level, BlockPos pos) {
+        return level.getBiome(pos).is(ModBiomeTags.EMERALD_CANOPY);
+    }
+
+    public static boolean phiEnt(
+            EntityType<? extends Mob> type,
+            ServerLevelAccessor level,
+            MobSpawnType reason,
+            BlockPos pos,
+            RandomSource random) {
+        if (!isEmeraldCanopyBiome(level, pos)) {
+            return false;
+        }
+        return isPlateauGround(level.getBlockState(pos.below())) && spaceClear(level, pos);
+    }
+
+    public static boolean phiLemur(
+            EntityType<? extends Mob> type,
+            ServerLevelAccessor level,
+            MobSpawnType reason,
+            BlockPos pos,
+            RandomSource random) {
+        if (!isEmeraldCanopyBiome(level, pos)) {
+            return false;
+        }
+        return isPlateauGround(level.getBlockState(pos.below())) && spaceClear(level, pos);
+    }
+
+    public static boolean wailerBat(
+            EntityType<? extends Mob> type,
+            ServerLevelAccessor level,
+            MobSpawnType reason,
+            BlockPos pos,
+            RandomSource random) {
+        if (!isEmeraldCanopyBiome(level, pos)) {
+            return false;
+        }
+        if (pos.getY() < level.getSeaLevel() + 28 && random.nextFloat() < 0.82f) {
+            return false;
+        }
+        return spaceClear(level, pos);
+    }
+
+    public static boolean glassWorm(
+            EntityType<? extends Mob> type,
+            ServerLevelAccessor level,
+            MobSpawnType reason,
+            BlockPos pos,
+            RandomSource random) {
+        if (!isEmeraldCanopyBiome(level, pos)) {
+            return false;
+        }
+        BlockState below = level.getBlockState(pos.below());
+        boolean litter = below.is(ModBlocks.PHI_DIRT.get())
+                || below.is(ModBlocks.PHI_GRASS.get())
+                || below.is(ModBlocks.PHI_LEAVES.get());
+        return litter && spaceClear(level, pos);
     }
 
     public static boolean phiLarva(

@@ -6,6 +6,10 @@ import com.effecoria.entity.DeathShadowEntity;
 import com.effecoria.entity.EidosEntity;
 import com.effecoria.entity.MirageHorrorEntity;
 import com.effecoria.entity.OmegaShadeEntity;
+import com.effecoria.entity.GlassWormEntity;
+import com.effecoria.entity.PhiEntEntity;
+import com.effecoria.entity.PhiLemurEntity;
+import com.effecoria.entity.WailerBatEntity;
 import com.effecoria.entity.OmegaWormEntity;
 import com.effecoria.entity.PhiLarvaEntity;
 import com.effecoria.entity.RootCageEntity;
@@ -129,6 +133,38 @@ public final class ModEntities {
                             .clientTrackingRange(8)
                             .build(EffecoriaMod.id("omega_worm").toString()));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<PhiEntEntity>> PHI_ENT =
+            ENTITY_TYPES.register(
+                    "phi_ent",
+                    () -> EntityType.Builder.<PhiEntEntity>of(PhiEntEntity::new, MobCategory.CREATURE)
+                            .sized(1.35f, 2.55f)
+                            .clientTrackingRange(12)
+                            .build(EffecoriaMod.id("phi_ent").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<PhiLemurEntity>> PHI_LEMUR =
+            ENTITY_TYPES.register(
+                    "phi_lemur",
+                    () -> EntityType.Builder.<PhiLemurEntity>of(PhiLemurEntity::new, MobCategory.CREATURE)
+                            .sized(0.5f, 0.55f)
+                            .clientTrackingRange(10)
+                            .build(EffecoriaMod.id("phi_lemur").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<WailerBatEntity>> WAILER_BAT =
+            ENTITY_TYPES.register(
+                    "wailer_bat",
+                    () -> EntityType.Builder.<WailerBatEntity>of(WailerBatEntity::new, MobCategory.AMBIENT)
+                            .sized(0.5f, 0.9f)
+                            .clientTrackingRange(6)
+                            .build(EffecoriaMod.id("wailer_bat").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<GlassWormEntity>> GLASS_WORM =
+            ENTITY_TYPES.register(
+                    "glass_worm",
+                    () -> EntityType.Builder.<GlassWormEntity>of(GlassWormEntity::new, MobCategory.MONSTER)
+                            .sized(0.42f, 0.32f)
+                            .clientTrackingRange(8)
+                            .build(EffecoriaMod.id("glass_worm").toString()));
+
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(DEATH_SHADOW.get(), LivingEntity.createLivingAttributes().build());
         event.put(MIRAGE_HORROR.get(), MirageHorrorEntity.createAttributes().build());
@@ -140,6 +176,10 @@ public final class ModEntities {
         event.put(ROTFANG_MINK.get(), RotfangMinkEntity.createAttributes().build());
         event.put(OMEGA_SHADE.get(), OmegaShadeEntity.createAttributes().build());
         event.put(OMEGA_WORM.get(), OmegaWormEntity.createAttributes().build());
+        event.put(PHI_ENT.get(), PhiEntEntity.createAttributes().build());
+        event.put(PHI_LEMUR.get(), PhiLemurEntity.createAttributes().build());
+        event.put(WAILER_BAT.get(), WailerBatEntity.createAttributes().build());
+        event.put(GLASS_WORM.get(), GlassWormEntity.createAttributes().build());
     }
 
     public static void registerSpawnPlacements(RegisterSpawnPlacementsEvent event) {
@@ -190,6 +230,30 @@ public final class ModEntities {
                 SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 EffecoriaMobSpawns::omegaWorm,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(
+                PHI_ENT.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                EffecoriaMobSpawns::phiEnt,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(
+                PHI_LEMUR.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                EffecoriaMobSpawns::phiLemur,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(
+                WAILER_BAT.get(),
+                SpawnPlacementTypes.NO_RESTRICTIONS,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                EffecoriaMobSpawns::wailerBat,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(
+                GLASS_WORM.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                EffecoriaMobSpawns::glassWorm,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 }

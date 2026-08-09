@@ -1,6 +1,8 @@
 package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.world.feature.EmeraldCanopyTreeFeature;
+import com.effecoria.world.feature.EmeraldCanopyUnderstoryFeature;
 import com.effecoria.world.feature.DeadAshTreeFeature;
 import com.effecoria.world.feature.DriedRiverbedFeature;
 import com.effecoria.world.feature.EssoniteDripstoneFeature;
@@ -58,6 +60,15 @@ public final class ModFeatures {
 
     public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> OMEGA_SCAR_TREE =
             FEATURES.register("omega_scar_tree", () -> new OmegaScarTreeFeature(NoneFeatureConfiguration.CODEC));
+
+    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> EMERALD_CANOPY_TREE =
+            FEATURES.register(
+                    "emerald_canopy_tree", () -> new EmeraldCanopyTreeFeature(NoneFeatureConfiguration.CODEC));
+
+    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> EMERALD_CANOPY_UNDERSTORY =
+            FEATURES.register(
+                    "emerald_canopy_understory",
+                    () -> new EmeraldCanopyUnderstoryFeature(NoneFeatureConfiguration.CODEC));
 
     public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> OMEGA_SCAR_CRACK =
             FEATURES.register("omega_scar_crack", () -> new OmegaScarCrackFeature(NoneFeatureConfiguration.CODEC));

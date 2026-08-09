@@ -1,6 +1,7 @@
 package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.block.AncientEssenceWoodBlock;
 import com.effecoria.block.EldritchBloodPuddleBlock;
 import com.effecoria.block.EssoniteCrustBlock;
 import com.effecoria.block.EssonitePointedBlock;
@@ -15,6 +16,7 @@ import com.effecoria.block.PhiGrassBlock;
 import com.effecoria.block.PhiLeavesBlock;
 import com.effecoria.block.PhiLogBlock;
 import com.effecoria.block.PhiSaplingBlock;
+import com.effecoria.block.PhiSnareVineBlock;
 import com.effecoria.block.RottenMossBlock;
 import com.effecoria.block.SubspacePortalBlock;
 import com.effecoria.block.VitrifiedBranchesBlock;
@@ -24,6 +26,7 @@ import com.effecoria.block.VitrifiedSandBlock;
 import com.effecoria.block.WhisperingSpireVentBlock;
 import com.effecoria.world.ModTreeGrowers;
 
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DropExperienceBlock;
@@ -538,6 +541,39 @@ public final class ModBlocks {
                             .sound(SoundType.GRASS)
                             .pushReaction(PushReaction.DESTROY)
                             .lightLevel(state -> 3)));
+
+    /** Ancient canopy timber — steel-hard Φ wood. */
+    public static final DeferredBlock<AncientEssenceWoodBlock> ANCIENT_ESSENCE_WOOD = BLOCKS.register(
+            "ancient_essence_wood",
+            () -> new AncientEssenceWoodBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .strength(8.0f, 12.0f)
+                    .sound(SoundType.WOOD)
+                    .lightLevel(state -> 7)
+                    .requiresCorrectToolForDrops()
+                    .ignitedByLava()));
+
+    /** Concentrated Φ bark — alchemical concentrate. */
+    public static final DeferredBlock<RotatedPillarBlock> GOLDEN_BARK = BLOCKS.register(
+            "golden_bark",
+            () -> new RotatedPillarBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.GOLD)
+                    .strength(3.5f, 5.0f)
+                    .sound(SoundType.WOOD)
+                    .lightLevel(state -> 9)
+                    .ignitedByLava()));
+
+    /** Carnivorous Φ-vine trap. */
+    public static final DeferredBlock<PhiSnareVineBlock> PHI_SNARE_VINE = BLOCKS.register(
+            "phi_snare_vine",
+            () -> new PhiSnareVineBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GREEN)
+                    .noCollission()
+                    .strength(0.4f)
+                    .sound(SoundType.WEEPING_VINES)
+                    .lightLevel(state -> 5)
+                    .randomTicks()
+                    .pushReaction(PushReaction.DESTROY)));
 
     /** Mirage blood lake fluid — client-tinted crimson water. */
     public static final DeferredBlock<LiquidBlock> BLOOD_FLUID = BLOCKS.register(

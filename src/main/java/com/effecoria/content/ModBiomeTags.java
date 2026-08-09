@@ -25,6 +25,10 @@ public final class ModBiomeTags {
     public static final TagKey<Biome> CRYSTAL_FOREST = TagKey.create(
             Registries.BIOME, EffecoriaMod.id("is_crystal_forest"));
 
+    /** Emerald Canopy — giant Φ canopy / Sea of Crowns. */
+    public static final TagKey<Biome> EMERALD_CANOPY = TagKey.create(
+            Registries.BIOME, EffecoriaMod.id("is_emerald_canopy"));
+
     /** Ω-Scar — causality rupture biome. */
     public static final TagKey<Biome> OMEGA_SCAR = TagKey.create(
             Registries.BIOME, EffecoriaMod.id("is_omega_scar"));

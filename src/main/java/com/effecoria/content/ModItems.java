@@ -121,9 +121,20 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("phi_leaves", ModBlocks.PHI_LEAVES);
     public static final DeferredItem<BlockItem> PHI_SAPLING =
             ITEMS.registerSimpleBlockItem("phi_sapling", ModBlocks.PHI_SAPLING);
+    public static final DeferredItem<BlockItem> ANCIENT_ESSENCE_WOOD = ITEMS.register(
+            "ancient_essence_wood",
+            () -> new FuelBlockItem(ModBlocks.ANCIENT_ESSENCE_WOOD.get(), new Item.Properties(), 400));
+    public static final DeferredItem<BlockItem> GOLDEN_BARK =
+            ITEMS.registerSimpleBlockItem("golden_bark", ModBlocks.GOLDEN_BARK);
+    public static final DeferredItem<BlockItem> PHI_SNARE_VINE =
+            ITEMS.registerSimpleBlockItem("phi_snare_vine", ModBlocks.PHI_SNARE_VINE);
 
     public static final DeferredItem<Item> PHI_NUT = ITEMS.register(
             "phi_nut", () -> new PhiNutItem(new Item.Properties().stacksTo(16)));
+    public static final DeferredItem<Item> GIANT_PHI_NUT = ITEMS.register(
+            "giant_phi_nut", () -> new GiantPhiNutItem(new Item.Properties().stacksTo(8)));
+    public static final DeferredItem<Item> ANCIENT_HEARTWOOD = ITEMS.register(
+            "ancient_heartwood", () -> new AncientHeartwoodItem(new Item.Properties()));
 
     public static final DeferredItem<Item> ESSONITE_SHARD = ITEMS.registerSimpleItem("essonite_shard");
     public static final DeferredItem<Item> PURE_ESSONITE = ITEMS.registerSimpleItem("pure_essonite");
@@ -430,4 +441,17 @@ public final class ModItems {
     public static final DeferredItem<SpawnEggItem> OMEGA_WORM_SPAWN_EGG = ITEMS.register(
             "omega_worm_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.OMEGA_WORM, 0x18101c, 0x5c2878, new Item.Properties()));
+
+    public static final DeferredItem<SpawnEggItem> PHI_ENT_SPAWN_EGG = ITEMS.register(
+            "phi_ent_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.PHI_ENT, 0x2d1b69, 0xd4af37, new Item.Properties()));
+    public static final DeferredItem<SpawnEggItem> PHI_LEMUR_SPAWN_EGG = ITEMS.register(
+            "phi_lemur_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.PHI_LEMUR, 0x3a2876, 0xf0c850, new Item.Properties()));
+    public static final DeferredItem<SpawnEggItem> WAILER_BAT_SPAWN_EGG = ITEMS.register(
+            "wailer_bat_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.WAILER_BAT, 0x1a1438, 0x6b5cae, new Item.Properties()));
+    public static final DeferredItem<SpawnEggItem> GLASS_WORM_SPAWN_EGG = ITEMS.register(
+            "glass_worm_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.GLASS_WORM, 0x4a4080, 0xc9e8ff, new Item.Properties()));
 }

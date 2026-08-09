@@ -20,6 +20,7 @@ import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.network.ModNetworking;
 import com.effecoria.world.CrystalForestService;
 import com.effecoria.world.DeadWastelandService;
+import com.effecoria.world.EmeraldCanopyService;
 import com.effecoria.world.EssencePlateauService;
 import com.effecoria.world.OmegaScarService;
 import com.effecoria.world.PhiFogService;
@@ -152,7 +153,8 @@ public final class PhiWeatherService {
         boolean raining = level.isRaining() && level.canSeeSky(pos);
         boolean inPhiBiome = EssencePlateauService.isBiome(level, pos)
                 || VitrifiedWastesService.isBiome(level, pos)
-                || CrystalForestService.isBiome(level, pos);
+                || CrystalForestService.isBiome(level, pos)
+                || EmeraldCanopyService.isBiome(level, pos);
 
         if (best.priority() < PhiWeatherKind.OMEGA_RAIN.priority() && omegaZone && raining) {
             best = PhiWeatherKind.OMEGA_RAIN;
@@ -171,15 +173,23 @@ public final class PhiWeatherService {
 
         if (best.priority() < PhiWeatherKind.ESSENCE_RAIN.priority() && raining && inPhiBiome && !omegaZone) {
             best = PhiWeatherKind.ESSENCE_RAIN;
-            intensity = Math.max(intensity, CrystalForestService.isBiome(level, pos) ? 0.8f : 0.65f);
+            intensity = Math.max(
+                    intensity,
+                    EmeraldCanopyService.isBiome(level, pos)
+                            ? 0.9f
+                            : (CrystalForestService.isBiome(level, pos) ? 0.8f : 0.65f));
         }
 
         PhiFogService.Density fog = PhiFogService.densityAt(level, pos);
         if (best.priority() < PhiWeatherKind.ESSENCE_MIST.priority()
                 && fog != PhiFogService.Density.NONE
-                && (EssencePlateauService.isBiome(level, pos) || CrystalForestService.isBiome(level, pos))) {
-            // Crystal canopy screens storms — mist never upgrades to storm here.
-            boolean stormMist = fog == PhiFogService.Density.STORM && !CrystalForestService.isBiome(level, pos);
+                && (EssencePlateauService.isBiome(level, pos)
+                        || CrystalForestService.isBiome(level, pos)
+                        || EmeraldCanopyService.isBiome(level, pos))) {
+            // Dense canopies screen storms — mist never upgrades to storm here.
+            boolean stormMist = fog == PhiFogService.Density.STORM
+                    && !CrystalForestService.isBiome(level, pos)
+                    && !EmeraldCanopyService.isBiome(level, pos);
             best = stormMist ? PhiWeatherKind.ESSENCE_STORM : PhiWeatherKind.ESSENCE_MIST;
             intensity = Math.max(intensity, fog.level() / 3f);
         }
@@ -188,7 +198,9 @@ public final class PhiWeatherService {
         boolean dewWindow = dayTime >= 0 && dayTime < BalanceConfig.PHI_WEATHER_DEW_WINDOW_TICKS.get();
         if (best == PhiWeatherKind.CLEAR
                 && dewWindow
-                && (EssencePlateauService.isBiome(level, pos) || CrystalForestService.isBiome(level, pos))
+                && (EssencePlateauService.isBiome(level, pos)
+                        || CrystalForestService.isBiome(level, pos)
+                        || EmeraldCanopyService.isBiome(level, pos))
                 && level.canSeeSky(pos)) {
             best = PhiWeatherKind.ESSENCE_DEW;
             intensity = 0.4f;
@@ -625,6 +637,7 @@ public final class PhiWeatherService {
                 if (EssencePlateauService.isBiome(level, player.blockPosition())
                         || VitrifiedWastesService.isBiome(level, player.blockPosition())
                         || CrystalForestService.isBiome(level, player.blockPosition())
+                        || EmeraldCanopyService.isBiome(level, player.blockPosition())
                         || OmegaScarService.isBiome(level, player.blockPosition())
                         || WhisperingSpireService.zoneAt(level, player.blockPosition())
                                 != WhisperingSpireService.Zone.NONE) {

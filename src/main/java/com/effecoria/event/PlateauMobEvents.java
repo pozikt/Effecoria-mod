@@ -2,6 +2,7 @@ package com.effecoria.event;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.entity.CrystalCrabEntity;
+import com.effecoria.world.EmeraldCanopyService;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -32,5 +33,13 @@ public final class PlateauMobEvents {
         for (CrystalCrabEntity crab : crabs) {
             crab.onCrystalDisturbed(player, event.getPos());
         }
+    }
+
+    @SubscribeEvent
+    public static void onEmeraldCanopyBreak(BlockEvent.BreakEvent event) {
+        if (!(event.getLevel() instanceof Level level) || level.isClientSide()) {
+            return;
+        }
+        EmeraldCanopyService.onBlockBroken(level, event.getPos(), event.getState(), event.getPlayer());
     }
 }

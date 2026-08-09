@@ -69,7 +69,8 @@ public final class PhiFogService {
     private static Density computeDensity(Level level, BlockPos pos) {
         boolean plateau = EssencePlateauService.isBiome(level, pos);
         boolean crystalForest = CrystalForestService.isBiome(level, pos);
-        if (!plateau && !crystalForest) {
+        boolean emeraldCanopy = EmeraldCanopyService.isBiome(level, pos);
+        if (!plateau && !crystalForest && !emeraldCanopy) {
             return Density.NONE;
         }
 
@@ -81,8 +82,11 @@ public final class PhiFogService {
         }
 
         int density = BalanceConfig.PHI_FOG_BASE_DENSITY.get();
-        // Crystal Forest lore: humid canopy holds dense Φ-mist almost always.
-        if (crystalForest) {
+        // Crystal Forest / Emerald Canopy: humid canopy holds dense Φ-mist almost always.
+        if (crystalForest || emeraldCanopy) {
+            density = Math.max(density, Density.DENSE.level());
+        }
+        if (emeraldCanopy) {
             density = Math.max(density, Density.DENSE.level());
         }
 
@@ -94,8 +98,8 @@ public final class PhiFogService {
         }
         boolean storm = (level.isThundering() && BalanceConfig.PHI_FOG_STORM_ENABLED.get())
                 || com.effecoria.world.weather.PhiWeatherService.isStormActive(level, pos);
-        // Tree screen — Crystal Forest never escalates fog to storm density.
-        if (storm && !crystalForest) {
+        // Tree screen — canopies never escalate fog to storm density.
+        if (storm && !crystalForest && !emeraldCanopy) {
             density = Math.max(density, Density.STORM.level());
         } else {
             density = Math.min(density, Density.DENSE.level());

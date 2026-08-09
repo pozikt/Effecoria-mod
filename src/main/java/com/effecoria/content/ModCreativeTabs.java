@@ -68,7 +68,12 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PHI_GLASS.get());
                         output.accept(ModItems.PHI_LEAVES.get());
                         output.accept(ModItems.PHI_SAPLING.get());
+                        output.accept(ModItems.ANCIENT_ESSENCE_WOOD.get());
+                        output.accept(ModItems.GOLDEN_BARK.get());
+                        output.accept(ModItems.PHI_SNARE_VINE.get());
                         output.accept(ModItems.PHI_NUT.get());
+                        output.accept(ModItems.GIANT_PHI_NUT.get());
+                        output.accept(ModItems.ANCIENT_HEARTWOOD.get());
                         output.accept(ModItems.PHI_WATER_BUCKET.get());
                         output.accept(ModItems.PURIFIED_PHI_WATER_BUCKET.get());
                         output.accept(ModItems.PHI_FLASK.get());
@@ -136,6 +141,10 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.ROTFANG_MINK_SPAWN_EGG.get());
                         output.accept(ModItems.OMEGA_SHADE_SPAWN_EGG.get());
                         output.accept(ModItems.OMEGA_WORM_SPAWN_EGG.get());
+                        output.accept(ModItems.PHI_ENT_SPAWN_EGG.get());
+                        output.accept(ModItems.PHI_LEMUR_SPAWN_EGG.get());
+                        output.accept(ModItems.WAILER_BAT_SPAWN_EGG.get());
+                        output.accept(ModItems.GLASS_WORM_SPAWN_EGG.get());
                     })
                     .build());
 }

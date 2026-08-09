@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "axis=y": { "model": "effecoria:block/ancient_essence_wood" },
+    "axis=z": { "model": "effecoria:block/ancient_essence_wood", "x": 90 },
+    "axis=x": { "model": "effecoria:block/ancient_essence_wood", "x": 90, "y": 90 }
+  }
+}
