@@ -60,6 +60,13 @@ public final class EffecoriaCommands {
                             .collect(Collectors.toList()),
                     builder);
 
+    private static final SuggestionProvider<CommandSourceStack> RACE_SUGGESTIONS = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(
+                    Arrays.stream(com.effecoria.core.progression.PlayerRace.values())
+                            .map(com.effecoria.core.progression.PlayerRace::getSerializedName)
+                            .collect(Collectors.toList()),
+                    builder);
+
     private EffecoriaCommands() {}
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -71,6 +78,23 @@ public final class EffecoriaCommands {
                         .executes(ctx -> version(ctx.getSource())))
                 .then(Commands.literal("debug")
                         .executes(ctx -> debug(ctx.getSource())))
+                .then(Commands.literal("race")
+                        .executes(ctx -> showRace(ctx.getSource()))
+                        .then(Commands.argument("race", StringArgumentType.word())
+                                .requires(source -> source.hasPermission(2))
+                                .suggests(RACE_SUGGESTIONS)
+                                .executes(ctx -> setRace(
+                                        ctx.getSource(),
+                                        StringArgumentType.getString(ctx, "race"),
+                                        false))))
+                .then(Commands.literal("rerace")
+                        .requires(source -> source.hasPermission(2))
+                        .then(Commands.argument("race", StringArgumentType.word())
+                                .suggests(RACE_SUGGESTIONS)
+                                .executes(ctx -> setRace(
+                                        ctx.getSource(),
+                                        StringArgumentType.getString(ctx, "race"),
+                                        true))))
                 .then(Commands.literal("initiate")
                         .then(Commands.argument("school", StringArgumentType.word())
                                 .suggests(SCHOOL_SUGGESTIONS)
@@ -142,7 +166,7 @@ public final class EffecoriaCommands {
 
     private static int help(CommandSourceStack source) {
         source.sendSuccess(() -> Component.literal(
-                "Effecoria: help | version | debug | initiate <school> | reschool <school> | initiateMob [school] | cast <id> [self|nearest|random|@e] | spells | max [school] | set <stat> <value> | horror | subspaceSpeed [0-4096]"),
+                "Effecoria: help | version | debug | race [id] | rerace <id> | initiate <school> | reschool <school> | initiateMob [school] | cast <id> [self|nearest|random|@e] | spells | max [school] | set <stat> <value> | horror | subspaceSpeed [0-4096]"),
                 false);
         return 1;
     }
@@ -182,11 +206,47 @@ public final class EffecoriaCommands {
         source.sendSuccess(() -> Component.translatable(
                 "message.effecoria.debug_mult",
                 String.format("%.2f", data.phiMultiplier())), false);
+        source.sendSuccess(() -> Component.translatable(
+                "message.effecoria.debug_race",
+                data.race().map(r -> r.getSerializedName()).orElse("none"),
+                String.format("%.2f", data.biologyQ())), false);
         String ver = net.neoforged.fml.ModList.get()
                 .getModContainerById(com.effecoria.EffecoriaMod.MOD_ID)
                 .map(c -> c.getModInfo().getVersion().toString())
                 .orElse("unknown");
         source.sendSuccess(() -> Component.literal("Effecoria build " + ver), false);
+        return 1;
+    }
+
+    private static int showRace(CommandSourceStack source) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        PlayerPsiData data = PsiHelper.get(player);
+        if (data.race().isEmpty()) {
+            source.sendSuccess(() -> Component.translatable("message.effecoria.race_none"), false);
+            return 1;
+        }
+        var race = data.race().get();
+        source.sendSuccess(() -> Component.translatable(
+                "message.effecoria.race_current",
+                race.title(),
+                String.format("%.2f", BiologyService.baselineFor(race))), false);
+        return 1;
+    }
+
+    private static int setRace(CommandSourceStack source, String raceName, boolean force) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        var raceOpt = com.effecoria.core.progression.PlayerRace.byId(raceName);
+        if (raceOpt.isEmpty()) {
+            source.sendFailure(Component.translatable("message.effecoria.invalid_race"));
+            return 0;
+        }
+        boolean ok = com.effecoria.core.progression.RaceService.assign(player, raceOpt.get(), force);
+        if (!ok) {
+            source.sendFailure(Component.translatable("message.effecoria.race_already_chosen"));
+            return 0;
+        }
+        com.effecoria.core.progression.RaceService.notifyAssigned(player, raceOpt.get());
+        source.sendSuccess(() -> Component.translatable("message.effecoria.race_set", raceOpt.get().title()), true);
         return 1;
     }
 
@@ -264,6 +324,10 @@ public final class EffecoriaCommands {
             if (school == null) {
                 return 0;
             }
+            if (data.race().isEmpty()) {
+                source.sendFailure(Component.translatable("message.effecoria.race_required"));
+                return 0;
+            }
             if (data.initiated()) {
                 PsiHelper.reschool(player, school);
             } else {
@@ -333,6 +397,10 @@ public final class EffecoriaCommands {
         PlayerPsiData data = PsiHelper.get(player);
         MagicSchool school = resolveSchool(source, schoolName);
         if (school == null) {
+            return 0;
+        }
+        if (data.race().isEmpty()) {
+            source.sendFailure(Component.translatable("message.effecoria.race_required"));
             return 0;
         }
         if (data.initiated()) {

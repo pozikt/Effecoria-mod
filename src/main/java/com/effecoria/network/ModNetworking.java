@@ -22,6 +22,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public final class ModNetworking {
@@ -49,6 +50,10 @@ public final class ModNetworking {
                 if (data.initiated()) {
                     return;
                 }
+                if (data.race().isEmpty()) {
+                    player.sendSystemMessage(Component.translatable("message.effecoria.race_required"));
+                    return;
+                }
                 MagicSchool school = MagicSchool.fromSerializedName(payload.school());
                 if (!school.isPlayable()) {
                     player.sendSystemMessage(Component.translatable("message.effecoria.invalid_school"));
@@ -65,6 +70,64 @@ public final class ModNetworking {
                         "message.effecoria.initiated",
                         Component.translatable("school.effecoria." + school.getSerializedName())));
             });
+        }
+    }
+
+    public record SelectRacePayload(String race, boolean force, boolean continueInitiation) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<SelectRacePayload> TYPE =
+                new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "select_race"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, SelectRacePayload> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.STRING_UTF8, SelectRacePayload::race,
+                ByteBufCodecs.BOOL, SelectRacePayload::force,
+                ByteBufCodecs.BOOL, SelectRacePayload::continueInitiation,
+                SelectRacePayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(SelectRacePayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                var raceOpt = com.effecoria.core.progression.PlayerRace.byId(payload.race());
+                if (raceOpt.isEmpty()) {
+                    player.sendSystemMessage(Component.translatable("message.effecoria.invalid_race"));
+                    return;
+                }
+                boolean force = payload.force() && player.hasPermissions(2);
+                boolean ok = com.effecoria.core.progression.RaceService.assign(player, raceOpt.get(), force);
+                if (!ok) {
+                    player.sendSystemMessage(Component.translatable("message.effecoria.race_already_chosen"));
+                    return;
+                }
+                com.effecoria.core.progression.RaceService.notifyAssigned(player, raceOpt.get());
+                PlayerPsiData data = PsiHelper.get(player);
+                if (payload.continueInitiation() && !data.initiated() && !data.schoolChoiceDeferred()) {
+                    PacketDistributor.sendToPlayer(player, new OpenSchoolSelectPayload(true));
+                }
+            });
+        }
+    }
+
+    public record OpenSchoolSelectPayload(boolean mandatory) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<OpenSchoolSelectPayload> TYPE =
+                new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "open_school_select"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, OpenSchoolSelectPayload> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.BOOL, OpenSchoolSelectPayload::mandatory,
+                OpenSchoolSelectPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(OpenSchoolSelectPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> com.effecoria.client.ClientGuiHooks.openSchoolSelect(payload.mandatory()));
         }
     }
 

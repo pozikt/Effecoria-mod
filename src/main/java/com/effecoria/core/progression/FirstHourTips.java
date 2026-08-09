@@ -25,7 +25,8 @@ public final class FirstHourTips {
         HARNESS(6),
         BREATHING(7),
         ZNPHI(8),
-        PROGRESSION(9);
+        PROGRESSION(9),
+        RACE(10);
 
         private final int bit;
 

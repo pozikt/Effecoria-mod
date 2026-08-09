@@ -110,6 +110,7 @@ public final class CastPipeline {
         float fullCost = godMode ? 0f : FormulaEngine.spellCost(ctx, phi, spell) * chargeScale;
         fullCost *= com.effecoria.world.EssencePlateauService.spellCostMultiplier(player.level(), player.position());
         fullCost *= com.effecoria.world.OmegaScarService.spellCostMultiplier(player);
+        fullCost *= com.effecoria.core.progression.RaceTraitsService.spellCostMultiplier(player, data.school());
         if (!godMode && data.school() == com.effecoria.core.magic.MagicSchool.NECROMANCY) {
             fullCost *= com.effecoria.world.weather.PhiWeatherService.necroCostFactor(player);
         }
@@ -118,6 +119,7 @@ public final class CastPipeline {
         float power = FormulaEngine.spellPower(powerCtx, phi, spell) * chargeScale;
         power *= com.effecoria.world.EssencePlateauService.spellPowerMultiplier(player.level(), player.position());
         power *= com.effecoria.world.OmegaScarService.spellPowerMultiplier(player);
+        power *= com.effecoria.core.progression.RaceTraitsService.spellPowerMultiplier(player, data.school());
         if (data.school() == com.effecoria.core.magic.MagicSchool.NECROMANCY) {
             power *= com.effecoria.world.weather.PhiWeatherService.necroPowerBonus(player);
         }
@@ -179,7 +181,8 @@ public final class CastPipeline {
                 float newEntropy = FormulaEngine.accumulateEntropy(
                         data.entropyB(),
                         power * FormMutateService.MUTATE_ENTROPY_FACTOR,
-                        spell.sideEntropyRatio());
+                        spell.sideEntropyRatio()
+                                * com.effecoria.core.progression.RaceTraitsService.entropyGainMultiplier(player));
                 data.setEntropyB(newEntropy);
                 EntropyService.maybeWarnRising(player, data);
                 if (FormulaEngine.isBacklashTriggered(newEntropy)) {
@@ -193,6 +196,7 @@ public final class CastPipeline {
         }
 
         CastPresentation.playWindUp(player, spell);
+        com.effecoria.core.progression.RaceTraitsService.onSpellCastStarted(player);
         CastDelivery delivery = SpellEffectExecutor.applyAll(player, spell, power, forcedTarget);
         CastPresentation.playResolve(player, spell, power, delivery);
 
@@ -219,7 +223,9 @@ public final class CastPipeline {
             }
 
             float entropyPower = delivery == CastDelivery.FULL ? power : actualCost;
-            float newEntropy = FormulaEngine.accumulateEntropy(data.entropyB(), entropyPower, spell.sideEntropyRatio());
+            float sideEntropy = spell.sideEntropyRatio()
+                    * com.effecoria.core.progression.RaceTraitsService.entropyGainMultiplier(player);
+            float newEntropy = FormulaEngine.accumulateEntropy(data.entropyB(), entropyPower, sideEntropy);
             data.setEntropyB(newEntropy);
             EntropyService.maybeWarnRising(player, data);
 

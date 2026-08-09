@@ -1,6 +1,7 @@
 package com.effecoria.client;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.client.gui.RaceSelectScreen;
 import com.effecoria.client.gui.SchoolSelectScreen;
 import com.effecoria.core.psi.PsiHelper;
 
@@ -12,8 +13,8 @@ import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 /**
- * Opens school selection when joining a world while not yet initiated and not deferred.
- * See docs/MAGIC_PLAN.md — first-join UX.
+ * First-join UX: race (mandatory) → school (deferrable).
+ * Also prompts race for legacy saves that already initiated without a race.
  */
 @EventBusSubscriber(modid = EffecoriaMod.MOD_ID, value = Dist.CLIENT)
 public final class ClientFirstJoinSchoolPrompt {
@@ -41,7 +42,9 @@ public final class ClientFirstJoinSchoolPrompt {
             return;
         }
         var data = PsiHelper.get(minecraft.player);
-        if (data.initiated() || data.schoolChoiceDeferred()) {
+        boolean needsRace = data.race().isEmpty();
+        boolean needsSchool = !data.initiated() && !data.schoolChoiceDeferred();
+        if (!needsRace && !needsSchool) {
             pendingPrompt = false;
             return;
         }
@@ -51,12 +54,17 @@ public final class ClientFirstJoinSchoolPrompt {
         if (++delayTicks < 25) {
             return;
         }
-        if (minecraft.screen instanceof SchoolSelectScreen) {
+        if (minecraft.screen instanceof RaceSelectScreen || minecraft.screen instanceof SchoolSelectScreen) {
             return;
         }
         if (minecraft.screen != null) {
             return;
         }
-        minecraft.setScreen(new SchoolSelectScreen(true));
+        if (needsRace) {
+            // Open school after race only if school is still needed.
+            minecraft.setScreen(new RaceSelectScreen(true, needsSchool));
+        } else {
+            minecraft.setScreen(new SchoolSelectScreen(true));
+        }
     }
 }

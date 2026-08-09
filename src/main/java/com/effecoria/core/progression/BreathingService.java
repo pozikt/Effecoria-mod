@@ -57,6 +57,9 @@ public final class BreathingService {
             return 0f;
         }
         float scaled = amount * gainScale(before);
+        if (data.race().orElse(null) == PlayerRace.HUMAN) {
+            scaled *= 1.05f;
+        }
         float after = before + scaled;
         if (hard > 0f) {
             after = Math.min(hard, after);

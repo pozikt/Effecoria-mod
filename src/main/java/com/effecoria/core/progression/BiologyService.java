@@ -41,8 +41,8 @@ public final class BiologyService {
     }
 
     /**
-     * Stage II race hook — sets the stored Orkanum baseline without wiping other progression.
-     * Call on race assignment / initiation when races ship.
+     * Sets the stored Orkanum baseline without wiping other progression.
+     * Call on race assignment.
      */
     public static void applyRaceBaseline(PlayerPsiData data, float baseline) {
         data.setBiologyQ(Math.max(0.05f, baseline));
@@ -51,6 +51,24 @@ public final class BiologyService {
     /** Default human baseline from config. */
     public static float defaultBaseline() {
         return BalanceConfig.BIOLOGY_DEFAULT_BASELINE.get().floatValue();
+    }
+
+    /** Race baseline — config overrides per race when present, else enum lore default. */
+    public static float baselineFor(PlayerRace race) {
+        if (race == null) {
+            return defaultBaseline();
+        }
+        return switch (race) {
+            case HUMAN -> BalanceConfig.RACE_BASELINE_HUMAN.get().floatValue();
+            case ORC -> BalanceConfig.RACE_BASELINE_ORC.get().floatValue();
+            case ELF -> BalanceConfig.RACE_BASELINE_ELF.get().floatValue();
+            case DWARF -> BalanceConfig.RACE_BASELINE_DWARF.get().floatValue();
+            case VARANAGI -> BalanceConfig.RACE_BASELINE_VARANAGI.get().floatValue();
+            case DRYAD -> BalanceConfig.RACE_BASELINE_DRYAD.get().floatValue();
+            case LONVER -> BalanceConfig.RACE_BASELINE_LONVER.get().floatValue();
+            case HARPY -> BalanceConfig.RACE_BASELINE_HARPY.get().floatValue();
+            case VAMPIRE -> BalanceConfig.RACE_BASELINE_VAMPIRE.get().floatValue();
+        };
     }
 
     private static float hungerFactor(Player player) {

@@ -291,6 +291,39 @@ public final class BalanceConfig {
             .comment("Ceiling for Orkanum spell-power multiplier")
             .defineInRange("biology_spell_power_max", 1.12, 1.0, 1.5);
 
+    // --- Race Orkanum baselines ---
+    public static final ModConfigSpec.DoubleValue RACE_BASELINE_HUMAN = BUILDER
+            .comment("Orkanum baseline — Human")
+            .defineInRange("race_baseline_human", 0.60, 0.05, 2.0);
+    public static final ModConfigSpec.DoubleValue RACE_BASELINE_ORC = BUILDER
+            .comment("Orkanum baseline — Orc")
+            .defineInRange("race_baseline_orc", 0.85, 0.05, 2.0);
+    public static final ModConfigSpec.DoubleValue RACE_BASELINE_ELF = BUILDER
+            .comment("Orkanum baseline — Elf")
+            .defineInRange("race_baseline_elf", 0.75, 0.05, 2.0);
+    public static final ModConfigSpec.DoubleValue RACE_BASELINE_DWARF = BUILDER
+            .comment("Orkanum baseline — Dwarf")
+            .defineInRange("race_baseline_dwarf", 0.70, 0.05, 2.0);
+    public static final ModConfigSpec.DoubleValue RACE_BASELINE_VARANAGI = BUILDER
+            .comment("Orkanum baseline — Varanagi")
+            .defineInRange("race_baseline_varanagi", 0.90, 0.05, 2.0);
+    public static final ModConfigSpec.DoubleValue RACE_BASELINE_DRYAD = BUILDER
+            .comment("Orkanum baseline — Dryad")
+            .defineInRange("race_baseline_dryad", 0.95, 0.05, 2.0);
+    public static final ModConfigSpec.DoubleValue RACE_BASELINE_LONVER = BUILDER
+            .comment("Orkanum baseline — Lonver")
+            .defineInRange("race_baseline_lonver", 1.05, 0.05, 2.0);
+    public static final ModConfigSpec.DoubleValue RACE_BASELINE_HARPY = BUILDER
+            .comment("Orkanum baseline — Harpy")
+            .defineInRange("race_baseline_harpy", 0.70, 0.05, 2.0);
+    public static final ModConfigSpec.DoubleValue RACE_BASELINE_VAMPIRE = BUILDER
+            .comment("Orkanum baseline — Vampire")
+            .defineInRange("race_baseline_vampire", 0.35, 0.05, 2.0);
+
+    public static final ModConfigSpec.DoubleValue RACE_LONVER_MAX_PSI_BONUS = BUILDER
+            .comment("Extra max Ψ granted to Lonvers on race assign")
+            .defineInRange("race_lonver_max_psi_bonus", 15.0, 0.0, 100.0);
+
     public static final ModConfigSpec.IntValue BREATHING_TRAIN_MIN_INTERVAL_MS = BUILDER
             .comment("Server-side minimum real-time gap between accepted breathing-train hits (anti-spam)")
             .defineInRange("breathing_train_min_interval_ms", 280, 50, 5000);

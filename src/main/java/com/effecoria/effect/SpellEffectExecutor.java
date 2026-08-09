@@ -668,7 +668,8 @@ public final class SpellEffectExecutor {
     private static void phiSense(ServerPlayer caster, SpellEffectEntry effect) {
         int duration = effect.params().get("duration_ticks").getAsInt();
         PlayerPsiData data = PsiHelper.get(caster);
-        data.setPhiSenseUntil(caster.level().getGameTime() + duration);
+        long bonus = com.effecoria.core.progression.RaceTraitsService.phiSenseDurationBonusTicks(caster);
+        data.setPhiSenseUntil(caster.level().getGameTime() + duration + bonus);
         PsiHelper.set(caster, data);
         caster.displayClientMessage(
                 net.minecraft.network.chat.Component.translatable("message.effecoria.phi_sense_active"), true);

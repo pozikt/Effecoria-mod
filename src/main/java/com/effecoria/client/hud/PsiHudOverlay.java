@@ -212,6 +212,17 @@ public final class PsiHudOverlay {
         lineY += 10;
         extraY += 10;
 
+        if (data.race().isPresent()) {
+            graphics.drawString(
+                    minecraft.font,
+                    Component.translatable("hud.effecoria.race", data.race().get().title()),
+                    x,
+                    lineY,
+                    0xC0C0D8);
+            lineY += 10;
+            extraY += 10;
+        }
+
         if (!godMode && !data.isLichAscensionActive(minecraft.level.getGameTime())) {
             float body = BiologyService.bodyFactor(minecraft.player);
             if (body < 0.995f) {

@@ -2,6 +2,7 @@ package com.effecoria.client;
 
 import com.effecoria.client.gui.GeneEditorScreen;
 import com.effecoria.client.gui.MagicGuideScreen;
+import com.effecoria.client.gui.RaceSelectScreen;
 import com.effecoria.client.gui.SchoolSelectScreen;
 import com.effecoria.client.gui.SpellHubScreen;
 import com.effecoria.core.progression.PrimerChapters;
@@ -18,11 +19,18 @@ public final class ClientGuiHooks {
     private ClientGuiHooks() {}
 
     public static void openResonanceFocusScreen(Player player) {
-        if (!PsiHelper.get(player).initiated()) {
+        var data = PsiHelper.get(player);
+        if (data.race().isEmpty()) {
+            Minecraft.getInstance().setScreen(new RaceSelectScreen(false, !data.initiated()));
+        } else if (!data.initiated()) {
             Minecraft.getInstance().setScreen(new SchoolSelectScreen());
         } else {
             Minecraft.getInstance().setScreen(new SpellHubScreen());
         }
+    }
+
+    public static void openSchoolSelect(boolean mandatory) {
+        Minecraft.getInstance().setScreen(new SchoolSelectScreen(mandatory));
     }
 
     public static void openMagicGuide(Screen parent) {

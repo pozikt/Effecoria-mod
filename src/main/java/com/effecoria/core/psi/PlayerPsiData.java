@@ -31,6 +31,8 @@ public final class PlayerPsiData {
                 ByteBufCodecs.FLOAT.encode(buf, data.entropyB);
                 ByteBufCodecs.BOOL.encode(buf, data.initiated);
                 ByteBufCodecs.BOOL.encode(buf, data.schoolChoiceDeferred);
+                ByteBufCodecs.STRING_UTF8.encode(buf, data.raceId);
+                ByteBufCodecs.FLOAT.encode(buf, data.raceMaxPsiBonus);
                 ByteBufCodecs.INT.encode(buf, data.selectedSpellIndex);
                 ByteBufCodecs.VAR_LONG.encode(buf, data.phiSenseUntil);
                 ByteBufCodecs.FLOAT.encode(buf, data.breathingMastery);
@@ -94,6 +96,8 @@ public final class PlayerPsiData {
                 data.entropyB = ByteBufCodecs.FLOAT.decode(buf);
                 data.initiated = ByteBufCodecs.BOOL.decode(buf);
                 data.schoolChoiceDeferred = ByteBufCodecs.BOOL.decode(buf);
+                data.raceId = ByteBufCodecs.STRING_UTF8.decode(buf);
+                data.raceMaxPsiBonus = ByteBufCodecs.FLOAT.decode(buf);
                 data.selectedSpellIndex = ByteBufCodecs.INT.decode(buf);
                 data.phiSenseUntil = ByteBufCodecs.VAR_LONG.decode(buf);
                 data.breathingMastery = ByteBufCodecs.FLOAT.decode(buf);
@@ -165,6 +169,10 @@ public final class PlayerPsiData {
     private boolean initiated;
     /** Player closed first-join school select without initiating; may choose later via Resonance Focus. */
     private boolean schoolChoiceDeferred;
+    /** Serialized {@link com.effecoria.core.progression.PlayerRace} id; empty = unset. */
+    private String raceId = "";
+    /** Max-Ψ bonus already applied from race (Lonver); cleared on rerace. */
+    private float raceMaxPsiBonus;
     private int selectedSpellIndex;
     private List<ResourceLocation> knownSpells = new ArrayList<>();
     private List<ResourceLocation> knownSealWords = new ArrayList<>();
@@ -259,6 +267,26 @@ public final class PlayerPsiData {
 
     public void setSchoolChoiceDeferred(boolean deferred) {
         this.schoolChoiceDeferred = deferred;
+    }
+
+    public String raceId() {
+        return raceId == null ? "" : raceId;
+    }
+
+    public void setRaceId(String raceId) {
+        this.raceId = raceId == null ? "" : raceId;
+    }
+
+    public java.util.Optional<com.effecoria.core.progression.PlayerRace> race() {
+        return com.effecoria.core.progression.PlayerRace.byId(raceId());
+    }
+
+    public float raceMaxPsiBonus() {
+        return raceMaxPsiBonus;
+    }
+
+    public void setRaceMaxPsiBonus(float raceMaxPsiBonus) {
+        this.raceMaxPsiBonus = Math.max(0f, raceMaxPsiBonus);
     }
 
     public int selectedSpellIndex() {
@@ -829,6 +857,8 @@ public final class PlayerPsiData {
         tag.putFloat("entropyB", entropyB);
         tag.putBoolean("initiated", initiated);
         tag.putBoolean("schoolChoiceDeferred", schoolChoiceDeferred);
+        tag.putString("raceId", raceId == null ? "" : raceId);
+        tag.putFloat("raceMaxPsiBonus", raceMaxPsiBonus);
         tag.putInt("selectedSpellIndex", selectedSpellIndex);
         tag.putLong("phiSenseUntil", phiSenseUntil);
         tag.putFloat("breathingMastery", breathingMastery);
@@ -919,6 +949,8 @@ public final class PlayerPsiData {
         entropyB = tag.getFloat("entropyB");
         initiated = tag.getBoolean("initiated");
         schoolChoiceDeferred = tag.contains("schoolChoiceDeferred") && tag.getBoolean("schoolChoiceDeferred");
+        raceId = tag.contains("raceId") ? tag.getString("raceId") : "";
+        raceMaxPsiBonus = tag.contains("raceMaxPsiBonus") ? tag.getFloat("raceMaxPsiBonus") : 0f;
         selectedSpellIndex = tag.getInt("selectedSpellIndex");
         phiSenseUntil = tag.getLong("phiSenseUntil");
         if (tag.contains("breathingMastery")) {
@@ -1078,6 +1110,8 @@ public final class PlayerPsiData {
         copy.entropyB = entropyB;
         copy.initiated = initiated;
         copy.schoolChoiceDeferred = schoolChoiceDeferred;
+        copy.raceId = raceId;
+        copy.raceMaxPsiBonus = raceMaxPsiBonus;
         copy.selectedSpellIndex = selectedSpellIndex;
         copy.knownSpells = new ArrayList<>(knownSpells);
         copy.knownSealWords = new ArrayList<>(knownSealWords);

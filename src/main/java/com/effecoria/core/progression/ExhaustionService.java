@@ -81,6 +81,7 @@ public final class ExhaustionService {
             decay *= 0.45f;
         }
         if (decay > 0f && data.exhaustion() > 0f) {
+            decay *= RaceTraitsService.exhaustionDecayMultiplier(player);
             data.setExhaustion(Math.max(0f, data.exhaustion() - decay));
         }
         applyMobEffects(player, data, now);
@@ -108,7 +109,11 @@ public final class ExhaustionService {
         if (amount <= 0f) {
             return;
         }
-        data.setExhaustion(Math.min(MAX, data.exhaustion() + amount));
+        float scaled = amount;
+        if (data.race().orElse(null) == PlayerRace.ORC) {
+            scaled *= 0.90f;
+        }
+        data.setExhaustion(Math.min(MAX, data.exhaustion() + scaled));
     }
 
     public static void applyCollapseCastDamage(ServerPlayer player, PlayerPsiData data) {

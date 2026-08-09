@@ -151,6 +151,14 @@ public class EffecoriaMod {
                 ModNetworking.InitiateSchoolPayload.STREAM_CODEC,
                 ModNetworking.InitiateSchoolPayload::handle);
         registrar.playToServer(
+                ModNetworking.SelectRacePayload.TYPE,
+                ModNetworking.SelectRacePayload.STREAM_CODEC,
+                ModNetworking.SelectRacePayload::handle);
+        registrar.playToClient(
+                ModNetworking.OpenSchoolSelectPayload.TYPE,
+                ModNetworking.OpenSchoolSelectPayload.STREAM_CODEC,
+                ModNetworking.OpenSchoolSelectPayload::handle);
+        registrar.playToServer(
                 ModNetworking.DeferSchoolPayload.TYPE,
                 ModNetworking.DeferSchoolPayload.STREAM_CODEC,
                 ModNetworking.DeferSchoolPayload::handle);
