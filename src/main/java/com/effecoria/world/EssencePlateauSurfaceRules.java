@@ -83,18 +83,21 @@ public final class EssencePlateauSurfaceRules {
         SurfaceRules.RuleSource forestColumn = SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.abovePreliminarySurface(), forestStack));
 
-        // Ω-Scar — ash crust with void-obsidian scars over fused ash depth.
+        // Ω-Scar — baked ash crust with dense void-obsidian crack scars.
         SurfaceRules.RuleSource voidObs = state(ModBlocks.VOID_OBSIDIAN.get());
         SurfaceRules.RuleSource scarFloor = SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.noiseCondition(
-                        net.minecraft.world.level.levelgen.Noises.SURFACE, -0.15, 0.12), voidObs),
+                        net.minecraft.world.level.levelgen.Noises.SURFACE, -0.35, 0.22), voidObs),
+                SurfaceRules.ifTrue(SurfaceRules.noiseCondition(
+                        net.minecraft.world.level.levelgen.Noises.SURFACE, 0.45, 0.75), voidObs),
                 ash);
 
         SurfaceRules.RuleSource scarStack = SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, scarFloor),
                 SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, ash),
-                SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, 8, CaveSurface.FLOOR), ash),
-                SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, 28, CaveSurface.FLOOR), voidObs));
+                SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, 6, CaveSurface.FLOOR), ash),
+                SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, 20, CaveSurface.FLOOR), voidObs),
+                SurfaceRules.ifTrue(SurfaceRules.stoneDepthCheck(0, true, 48, CaveSurface.FLOOR), voidObs));
 
         SurfaceRules.RuleSource scarColumn = SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.abovePreliminarySurface(), scarStack));

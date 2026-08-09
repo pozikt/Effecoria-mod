@@ -1,0 +1,22 @@
+{
+  "feature": "effecoria:omega_scar_tree",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": {
+        "type": "minecraft:weighted_list",
+        "distribution": [
+          { "data": 2, "weight": 4 },
+          { "data": 1, "weight": 4 },
+          { "data": 0, "weight": 2 }
+        ]
+      }
+    },
+    { "type": "minecraft:in_square" },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING_NO_LEAVES"
+    },
+    { "type": "minecraft:biome" }
+  ]
+}

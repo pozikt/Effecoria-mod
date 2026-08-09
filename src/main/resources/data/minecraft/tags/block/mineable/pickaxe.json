@@ -19,6 +19,10 @@
                    "effecoria:parched_sandstone",
                    "effecoria:vitrified_dirt",
                    "effecoria:vitrified_stone",
-                   "effecoria:vitrified_geyser_crack"
+                   "effecoria:vitrified_geyser_crack",
+                   "effecoria:omega_crystal",
+                   "effecoria:omega_crystal_bud_small",
+                   "effecoria:omega_crystal_bud_medium",
+                   "effecoria:omega_crystal_bud_large"
                ]
 }

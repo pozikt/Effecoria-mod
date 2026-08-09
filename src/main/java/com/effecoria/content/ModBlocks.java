@@ -1,11 +1,13 @@
 package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.block.EldritchBloodPuddleBlock;
 import com.effecoria.block.EssoniteCrustBlock;
 import com.effecoria.block.EssonitePointedBlock;
 import com.effecoria.block.EssenceAlembicBlock;
 import com.effecoria.block.EssenceBurnerBlock;
 import com.effecoria.block.MortarAndPestleBlock;
+import com.effecoria.block.OmegaBladesBlock;
 import com.effecoria.block.PhiBladesBlock;
 import com.effecoria.block.PhiFieldBlock;
 import com.effecoria.block.PhiGeyserBlock;
@@ -13,6 +15,7 @@ import com.effecoria.block.PhiGrassBlock;
 import com.effecoria.block.PhiLeavesBlock;
 import com.effecoria.block.PhiLogBlock;
 import com.effecoria.block.PhiSaplingBlock;
+import com.effecoria.block.RottenMossBlock;
 import com.effecoria.block.SubspacePortalBlock;
 import com.effecoria.block.VitrifiedBranchesBlock;
 import com.effecoria.block.VitrifiedGeyserCrackBlock;
@@ -264,6 +267,102 @@ public final class ModBlocks {
                             .sound(SoundType.LARGE_AMETHYST_BUD)
                             .lightLevel(state -> 7)
                             .pushReaction(PushReaction.DESTROY)));
+
+    /** Ω-crystal cluster — concentrated b-component lattice in Scar cracks. */
+    public static final DeferredBlock<AmethystClusterBlock> OMEGA_CRYSTAL = BLOCKS.register(
+            "omega_crystal",
+            () -> new AmethystClusterBlock(
+                    7,
+                    3,
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_PURPLE)
+                            .forceSolidOn()
+                            .noOcclusion()
+                            .randomTicks()
+                            .strength(1.6f)
+                            .sound(SoundType.AMETHYST_CLUSTER)
+                            .lightLevel(state -> 8)
+                            .pushReaction(PushReaction.DESTROY)));
+
+    public static final DeferredBlock<AmethystClusterBlock> OMEGA_CRYSTAL_BUD_SMALL = BLOCKS.register(
+            "omega_crystal_bud_small",
+            () -> new AmethystClusterBlock(
+                    3,
+                    4,
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_PURPLE)
+                            .forceSolidOn()
+                            .noOcclusion()
+                            .randomTicks()
+                            .strength(1.4f)
+                            .sound(SoundType.SMALL_AMETHYST_BUD)
+                            .lightLevel(state -> 3)
+                            .pushReaction(PushReaction.DESTROY)));
+
+    public static final DeferredBlock<AmethystClusterBlock> OMEGA_CRYSTAL_BUD_MEDIUM = BLOCKS.register(
+            "omega_crystal_bud_medium",
+            () -> new AmethystClusterBlock(
+                    4,
+                    3,
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_PURPLE)
+                            .forceSolidOn()
+                            .noOcclusion()
+                            .randomTicks()
+                            .strength(1.5f)
+                            .sound(SoundType.MEDIUM_AMETHYST_BUD)
+                            .lightLevel(state -> 5)
+                            .pushReaction(PushReaction.DESTROY)));
+
+    public static final DeferredBlock<AmethystClusterBlock> OMEGA_CRYSTAL_BUD_LARGE = BLOCKS.register(
+            "omega_crystal_bud_large",
+            () -> new AmethystClusterBlock(
+                    5,
+                    3,
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_PURPLE)
+                            .forceSolidOn()
+                            .noOcclusion()
+                            .randomTicks()
+                            .strength(1.5f)
+                            .sound(SoundType.LARGE_AMETHYST_BUD)
+                            .lightLevel(state -> 7)
+                            .pushReaction(PushReaction.DESTROY)));
+
+    /** Razor Ω-grass on Scar ash / void-obsidian. */
+    public static final DeferredBlock<OmegaBladesBlock> OMEGA_BLADES = BLOCKS.register(
+            "omega_blades",
+            () -> new OmegaBladesBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .noCollission()
+                    .instabreak()
+                    .sound(SoundType.GRASS)
+                    .offsetType(BlockBehaviour.OffsetType.XZ)
+                    .pushReaction(PushReaction.DESTROY)
+                    .lightLevel(state -> 2)
+                    .randomTicks()));
+
+    /** Glowing purple moss — Ω-background indicator. */
+    public static final DeferredBlock<RottenMossBlock> ROTTEN_MOSS = BLOCKS.register(
+            "rotten_moss",
+            () -> new RottenMossBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PURPLE)
+                    .strength(0.2f)
+                    .sound(SoundType.MOSS_CARPET)
+                    .lightLevel(state -> 5)
+                    .noOcclusion()
+                    .pushReaction(PushReaction.DESTROY)));
+
+    /** Oily Eldritch Blood puddle near active Scar cracks. */
+    public static final DeferredBlock<EldritchBloodPuddleBlock> ELDRITCH_BLOOD_PUDDLE = BLOCKS.register(
+            "eldritch_blood_puddle",
+            () -> new EldritchBloodPuddleBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PURPLE)
+                    .strength(0.35f, 0.2f)
+                    .sound(SoundType.SLIME_BLOCK)
+                    .lightLevel(state -> 4)
+                    .noOcclusion()
+                    .pushReaction(PushReaction.DESTROY)));
 
     /**
      * Translucent Φ-membrane underfoot in hyperspace — replaces the old end-stone sheet so the

@@ -102,6 +102,51 @@ public final class EffecoriaMobSpawns {
         return ground && spaceClear(level, pos);
     }
 
+    public static boolean rotfangMink(
+            EntityType<? extends Mob> type,
+            ServerLevelAccessor level,
+            MobSpawnType reason,
+            BlockPos pos,
+            RandomSource random) {
+        return isOmegaScarSurface(level, pos) && spaceClear(level, pos);
+    }
+
+    public static boolean omegaShade(
+            EntityType<? extends Mob> type,
+            ServerLevelAccessor level,
+            MobSpawnType reason,
+            BlockPos pos,
+            RandomSource random) {
+        return level.getBiome(pos).is(ModBiomeTags.OMEGA_SCAR) && spaceClear(level, pos);
+    }
+
+    public static boolean omegaWorm(
+            EntityType<? extends Mob> type,
+            ServerLevelAccessor level,
+            MobSpawnType reason,
+            BlockPos pos,
+            RandomSource random) {
+        if (!level.getBiome(pos).is(ModBiomeTags.OMEGA_SCAR)) {
+            return false;
+        }
+        BlockState below = level.getBlockState(pos.below());
+        boolean ground = below.is(ModBlocks.ASH_SOIL.get())
+                || below.is(ModBlocks.VOID_OBSIDIAN.get())
+                || solidEnough(level, pos.below());
+        return ground && spaceClear(level, pos);
+    }
+
+    private static boolean isOmegaScarSurface(ServerLevelAccessor level, BlockPos pos) {
+        if (!level.getBiome(pos).is(ModBiomeTags.OMEGA_SCAR)) {
+            return false;
+        }
+        BlockState below = level.getBlockState(pos.below());
+        return below.is(ModBlocks.ASH_SOIL.get())
+                || below.is(ModBlocks.VOID_OBSIDIAN.get())
+                || below.is(BlockTags.VALID_SPAWN)
+                || solidEnough(level, pos.below());
+    }
+
     private static boolean isPlateauGround(BlockState below) {
         return below.is(BlockTags.ANIMALS_SPAWNABLE_ON)
                 || below.is(ModBlocks.PHI_GRASS.get())

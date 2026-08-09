@@ -109,6 +109,7 @@ public final class CastPipeline {
 
         float fullCost = godMode ? 0f : FormulaEngine.spellCost(ctx, phi, spell) * chargeScale;
         fullCost *= com.effecoria.world.EssencePlateauService.spellCostMultiplier(player.level(), player.position());
+        fullCost *= com.effecoria.world.OmegaScarService.spellCostMultiplier(player);
         if (!godMode && data.school() == com.effecoria.core.magic.MagicSchool.NECROMANCY) {
             fullCost *= com.effecoria.world.weather.PhiWeatherService.necroCostFactor(player);
         }
@@ -116,6 +117,7 @@ public final class CastPipeline {
         PsiContext powerCtx = overcasting ? ctx.withCurrentPsi(Math.max(usablePsi, fullCost)) : ctx;
         float power = FormulaEngine.spellPower(powerCtx, phi, spell) * chargeScale;
         power *= com.effecoria.world.EssencePlateauService.spellPowerMultiplier(player.level(), player.position());
+        power *= com.effecoria.world.OmegaScarService.spellPowerMultiplier(player);
         if (data.school() == com.effecoria.core.magic.MagicSchool.NECROMANCY) {
             power *= com.effecoria.world.weather.PhiWeatherService.necroPowerBonus(player);
         }
@@ -130,9 +132,17 @@ public final class CastPipeline {
             return CastResult.CANNOT_CAST;
         }
         if (!godMode) {
-            float chaos = com.effecoria.world.weather.PhiWeatherService.castChaosChance(player);
+            float weatherChaos = com.effecoria.world.weather.PhiWeatherService.castChaosChance(player);
+            float scarChaosChance = com.effecoria.world.OmegaScarService.castChaosChance(player);
+            float chaos = Math.max(weatherChaos, scarChaosChance);
             if (chaos > 0f && player.getRandom().nextFloat() < chaos) {
-                player.displayClientMessage(Component.translatable("message.effecoria.weather.storm_chaos"), true);
+                boolean fromScar = scarChaosChance >= weatherChaos && scarChaosChance > 0f;
+                player.displayClientMessage(
+                        Component.translatable(
+                                fromScar
+                                        ? "message.effecoria.omega_scar.cast_chaos"
+                                        : "message.effecoria.weather.storm_chaos"),
+                        true);
                 float bump = Math.max(0.15f, data.entropyB() + 0.2f);
                 data.setEntropyB(bump);
                 ExhaustionService.addExhaustion(data, 2.5f);

@@ -409,12 +409,44 @@ public final class BalanceConfig {
 
     // --- Ω-Scar ---
     public static final ModConfigSpec.DoubleValue OMEGA_SCAR_PHI_BONUS = BUILDER
-            .comment("Additive Φ bonus while in Ω-Scar (distorted residual field)")
-            .defineInRange("omega_scar_phi_bonus", 0.25, -2.0, 3.0);
+            .comment("Additive Φ bonus while in Ω-Scar (distorted residual field; keep low)")
+            .defineInRange("omega_scar_phi_bonus", 0.12, -2.0, 3.0);
 
     public static final ModConfigSpec.DoubleValue OMEGA_SCAR_ENTROPY_PULSE = BUILDER
-            .comment("Entropy (b) added to initiated mages every ~5s after prolonged Scar exposure")
-            .defineInRange("omega_scar_entropy_pulse", 0.04, 0.0, 1.0);
+            .comment("Base entropy (b) pulse while exposed in Ω-Scar (favored schools take less)")
+            .defineInRange("omega_scar_entropy_pulse", 0.055, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue OMEGA_SCAR_FAVORED_POWER = BUILDER
+            .comment("Spell power multiplier for Necromancy/Corruption inside Ω-Scar")
+            .defineInRange("omega_scar_favored_power", 1.4, 1.0, 3.0);
+
+    public static final ModConfigSpec.DoubleValue OMEGA_SCAR_FAVORED_COST = BUILDER
+            .comment("Spell Ψ cost multiplier for Necromancy/Corruption inside Ω-Scar")
+            .defineInRange("omega_scar_favored_cost", 0.8, 0.1, 1.0);
+
+    public static final ModConfigSpec.DoubleValue OMEGA_SCAR_OTHER_POWER = BUILDER
+            .comment("Spell power multiplier for other schools inside Ω-Scar")
+            .defineInRange("omega_scar_other_power", 0.82, 0.2, 1.0);
+
+    public static final ModConfigSpec.DoubleValue OMEGA_SCAR_CAST_CHAOS = BUILDER
+            .comment("Chance per cast that Ω-noise corrupts a non-favored school spell")
+            .defineInRange("omega_scar_cast_chaos", 0.14, 0.0, 1.0);
+
+    public static final ModConfigSpec.IntValue OMEGA_SCAR_GRAVITY_PERIOD = BUILDER
+            .comment("Ticks between gravity flips in Ω-Scar")
+            .defineInRange("omega_scar_gravity_period", 80, 20, 600);
+
+    public static final ModConfigSpec.DoubleValue OMEGA_SCAR_GRAVITY_LIGHT = BUILDER
+            .comment("Light gravity multiplier during Scar instability")
+            .defineInRange("omega_scar_gravity_light", 0.55, 0.2, 1.0);
+
+    public static final ModConfigSpec.DoubleValue OMEGA_SCAR_GRAVITY_HEAVY = BUILDER
+            .comment("Heavy gravity multiplier during Scar instability")
+            .defineInRange("omega_scar_gravity_heavy", 1.45, 1.0, 2.5);
+
+    public static final ModConfigSpec.DoubleValue OMEGA_SCAR_LOOP_CHANCE = BUILDER
+            .comment("Chance every 5s (after long exposure) to snag a micro time-loop")
+            .defineInRange("omega_scar_loop_chance", 0.04, 0.0, 0.5);
 
     public static final ModConfigSpec.IntValue GEYSER_DORMANT_MIN_TICKS = BUILDER
             .comment("Minimum Φ-geyser dormant phase duration")

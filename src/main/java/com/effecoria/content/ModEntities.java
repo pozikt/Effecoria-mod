@@ -5,8 +5,11 @@ import com.effecoria.entity.CrystalCrabEntity;
 import com.effecoria.entity.DeathShadowEntity;
 import com.effecoria.entity.EidosEntity;
 import com.effecoria.entity.MirageHorrorEntity;
+import com.effecoria.entity.OmegaShadeEntity;
+import com.effecoria.entity.OmegaWormEntity;
 import com.effecoria.entity.PhiLarvaEntity;
 import com.effecoria.entity.RootCageEntity;
+import com.effecoria.entity.RotfangMinkEntity;
 import com.effecoria.entity.EssenceWyvernEntity;
 import com.effecoria.entity.VitrifiedGolemEntity;
 
@@ -101,6 +104,31 @@ public final class ModEntities {
                             .fireImmune()
                             .build(EffecoriaMod.id("essence_wyvern").toString()));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<RotfangMinkEntity>> ROTFANG_MINK =
+            ENTITY_TYPES.register(
+                    "rotfang_mink",
+                    () -> EntityType.Builder.<RotfangMinkEntity>of(RotfangMinkEntity::new, MobCategory.MONSTER)
+                            .sized(0.7f, 0.6f)
+                            .clientTrackingRange(10)
+                            .build(EffecoriaMod.id("rotfang_mink").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<OmegaShadeEntity>> OMEGA_SHADE =
+            ENTITY_TYPES.register(
+                    "omega_shade",
+                    () -> EntityType.Builder.<OmegaShadeEntity>of(OmegaShadeEntity::new, MobCategory.MONSTER)
+                            .sized(0.5f, 0.9f)
+                            .clientTrackingRange(16)
+                            .fireImmune()
+                            .build(EffecoriaMod.id("omega_shade").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<OmegaWormEntity>> OMEGA_WORM =
+            ENTITY_TYPES.register(
+                    "omega_worm",
+                    () -> EntityType.Builder.<OmegaWormEntity>of(OmegaWormEntity::new, MobCategory.MONSTER)
+                            .sized(0.7f, 0.45f)
+                            .clientTrackingRange(8)
+                            .build(EffecoriaMod.id("omega_worm").toString()));
+
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(DEATH_SHADOW.get(), LivingEntity.createLivingAttributes().build());
         event.put(MIRAGE_HORROR.get(), MirageHorrorEntity.createAttributes().build());
@@ -109,6 +137,9 @@ public final class ModEntities {
         event.put(EIDOS.get(), EidosEntity.createAttributes().build());
         event.put(VITRIFIED_GOLEM.get(), VitrifiedGolemEntity.createAttributes().build());
         event.put(ESSENCE_WYVERN.get(), EssenceWyvernEntity.createAttributes().build());
+        event.put(ROTFANG_MINK.get(), RotfangMinkEntity.createAttributes().build());
+        event.put(OMEGA_SHADE.get(), OmegaShadeEntity.createAttributes().build());
+        event.put(OMEGA_WORM.get(), OmegaWormEntity.createAttributes().build());
     }
 
     public static void registerSpawnPlacements(RegisterSpawnPlacementsEvent event) {
@@ -141,6 +172,24 @@ public final class ModEntities {
                 SpawnPlacementTypes.NO_RESTRICTIONS,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 EffecoriaMobSpawns::essenceWyvern,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(
+                ROTFANG_MINK.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                EffecoriaMobSpawns::rotfangMink,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(
+                OMEGA_SHADE.get(),
+                SpawnPlacementTypes.NO_RESTRICTIONS,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                EffecoriaMobSpawns::omegaShade,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(
+                OMEGA_WORM.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                EffecoriaMobSpawns::omegaWorm,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 }

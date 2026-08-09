@@ -6,23 +6,25 @@
       "minecraft:canyon"
     ]
   },
-  "downfall": 0.6,
+  "downfall": 0.7,
   "effects": {
-    "fog_color": 1973790,
+    "fog_color": 1313542,
     "mood_sound": {
       "block_search_extent": 8,
       "offset": 2.0,
       "sound": "minecraft:ambient.soul_sand_valley.mood",
-      "tick_delay": 4000
+      "tick_delay": 2800
     },
-    "sky_color": 1315860,
-    "water_color": 3342387,
-    "water_fog_color": 1118481,
+    "sky_color": 986895,
+    "water_color": 1579294,
+    "water_fog_color": 657930,
+    "grass_color": 1973790,
+    "foliage_color": 1315860,
     "particle": {
       "options": {
-        "type": "minecraft:ash"
+        "type": "effecoria:corruption_miasma"
       },
-      "probability": 0.014
+      "probability": 0.028
     }
   },
   "features": [
@@ -81,30 +83,48 @@
         "type": "minecraft:enderman",
         "maxCount": 2,
         "minCount": 1,
+        "weight": 30
+      },
+      {
+        "type": "effecoria:omega_shade",
+        "maxCount": 2,
+        "minCount": 1,
         "weight": 40
       },
       {
-        "type": "minecraft:phantom",
+        "type": "effecoria:rotfang_mink",
+        "maxCount": 3,
+        "minCount": 1,
+        "weight": 45
+      },
+      {
+        "type": "effecoria:omega_worm",
         "maxCount": 2,
         "minCount": 1,
-        "weight": 25
+        "weight": 35
+      },
+      {
+        "type": "minecraft:wither_skeleton",
+        "maxCount": 2,
+        "minCount": 1,
+        "weight": 20
       },
       {
         "type": "minecraft:skeleton",
-        "maxCount": 3,
+        "maxCount": 2,
         "minCount": 1,
-        "weight": 30
+        "weight": 12
       },
       {
         "type": "minecraft:spider",
         "maxCount": 2,
         "minCount": 1,
-        "weight": 20
+        "weight": 10
       }
     ],
     "underground_water_creature": [],
     "water_ambient": [],
     "water_creature": []
   },
-  "temperature": 0.55
+  "temperature": 0.4
 }

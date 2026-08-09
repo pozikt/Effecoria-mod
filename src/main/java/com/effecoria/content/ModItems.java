@@ -74,6 +74,27 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> ESSONITE_CRYSTAL_BUD_LARGE =
             ITEMS.registerSimpleBlockItem("essonite_crystal_bud_large", ModBlocks.ESSONITE_CRYSTAL_BUD_LARGE);
 
+    public static final DeferredItem<BlockItem> OMEGA_CRYSTAL =
+            ITEMS.registerSimpleBlockItem("omega_crystal", ModBlocks.OMEGA_CRYSTAL);
+    public static final DeferredItem<BlockItem> OMEGA_CRYSTAL_BUD_SMALL =
+            ITEMS.registerSimpleBlockItem("omega_crystal_bud_small", ModBlocks.OMEGA_CRYSTAL_BUD_SMALL);
+    public static final DeferredItem<BlockItem> OMEGA_CRYSTAL_BUD_MEDIUM =
+            ITEMS.registerSimpleBlockItem("omega_crystal_bud_medium", ModBlocks.OMEGA_CRYSTAL_BUD_MEDIUM);
+    public static final DeferredItem<BlockItem> OMEGA_CRYSTAL_BUD_LARGE =
+            ITEMS.registerSimpleBlockItem("omega_crystal_bud_large", ModBlocks.OMEGA_CRYSTAL_BUD_LARGE);
+    public static final DeferredItem<BlockItem> OMEGA_BLADES =
+            ITEMS.registerSimpleBlockItem("omega_blades", ModBlocks.OMEGA_BLADES);
+    public static final DeferredItem<BlockItem> ROTTEN_MOSS =
+            ITEMS.registerSimpleBlockItem("rotten_moss", ModBlocks.ROTTEN_MOSS);
+    public static final DeferredItem<BlockItem> ELDRITCH_BLOOD_PUDDLE =
+            ITEMS.registerSimpleBlockItem("eldritch_blood_puddle", ModBlocks.ELDRITCH_BLOOD_PUDDLE);
+
+    /** Concentrated Ω (b) crystal fragment — forbidden craft / ritual fuel. */
+    public static final DeferredItem<Item> OMEGA_CRYSTAL_SHARD = ITEMS.registerSimpleItem("omega_crystal_shard");
+
+    /** Ω-stained bone from Scar fauna — material for later Ω gear. */
+    public static final DeferredItem<Item> DISTORTED_BONE = ITEMS.registerSimpleItem("distorted_bone");
+
     public static final DeferredItem<BlockItem> PHI_GEYSER =
             ITEMS.registerSimpleBlockItem("phi_geyser", ModBlocks.PHI_GEYSER);
     public static final DeferredItem<BlockItem> VOID_OBSIDIAN =
@@ -141,7 +162,7 @@ public final class ModItems {
             "mage_blood_vial", () -> new Item(new Item.Properties().stacksTo(16)));
     public static final DeferredItem<Item> WYVERN_BLOOD_VIAL = ITEMS.register(
             "wyvern_blood_vial", () -> new Item(new Item.Properties().stacksTo(16)));
-    /** Stub for forbidden Ω-rituals — not used in alembic MVP. */
+    /** Forbidden Ω-reagent — scooped from Eldritch Blood puddles in the Scar. */
     public static final DeferredItem<Item> OMEGA_BLOOD_VIAL = ITEMS.register(
             "omega_blood_vial", () -> new Item(new Item.Properties().stacksTo(16)));
 
@@ -397,4 +418,16 @@ public final class ModItems {
     public static final DeferredItem<SpawnEggItem> ESSENCE_WYVERN_SPAWN_EGG = ITEMS.register(
             "essence_wyvern_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.ESSENCE_WYVERN, 0x5a5a58, 0xd4a017, new Item.Properties()));
+
+    public static final DeferredItem<SpawnEggItem> ROTFANG_MINK_SPAWN_EGG = ITEMS.register(
+            "rotfang_mink_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.ROTFANG_MINK, 0x1a1220, 0x8a2be2, new Item.Properties()));
+
+    public static final DeferredItem<SpawnEggItem> OMEGA_SHADE_SPAWN_EGG = ITEMS.register(
+            "omega_shade_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.OMEGA_SHADE, 0x0a0610, 0x6b1f9a, new Item.Properties()));
+
+    public static final DeferredItem<SpawnEggItem> OMEGA_WORM_SPAWN_EGG = ITEMS.register(
+            "omega_worm_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.OMEGA_WORM, 0x18101c, 0x5c2878, new Item.Properties()));
 }

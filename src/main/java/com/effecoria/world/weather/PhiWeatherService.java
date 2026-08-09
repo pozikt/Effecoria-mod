@@ -76,7 +76,6 @@ public final class PhiWeatherService {
     private static final Map<ResourceKey<Level>, List<ActiveEvent>> EVENTS = new ConcurrentHashMap<>();
     private static final Map<ResourceKey<Level>, Long> POST_STORM_PHI_UNTIL = new ConcurrentHashMap<>();
     private static final Map<UUID, Integer> RAIN_EXPOSURE = new ConcurrentHashMap<>();
-    private static final Map<UUID, Integer> OMEGA_WHISPER_CD = new ConcurrentHashMap<>();
 
     public static void tick(ServerLevel level) {
         long now = level.getGameTime();
@@ -546,7 +545,6 @@ public final class PhiWeatherService {
             PsiHelper.set(player, data);
             BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.DARKNESS, 60, 0, false, false, true));
             BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.CONFUSION, 80, 0, false, false, true));
-            maybeOmegaWhisper(player);
         }
 
         if (kind == PhiWeatherKind.OMEGA_RAIN && openSky && player.tickCount % 20 == 0 && remain > 0.001f) {
@@ -618,20 +616,6 @@ public final class PhiWeatherService {
         Vec3 pull = delta.normalize().scale(BalanceConfig.PHI_WEATHER_TORNADO_PULL.get());
         player.setDeltaMovement(player.getDeltaMovement().add(pull.x, 0.05, pull.z));
         player.hasImpulse = true;
-    }
-
-    private static void maybeOmegaWhisper(ServerPlayer player) {
-        int cd = OMEGA_WHISPER_CD.getOrDefault(player.getUUID(), 0);
-        if (cd > 0) {
-            OMEGA_WHISPER_CD.put(player.getUUID(), cd - 1);
-            return;
-        }
-        if (player.getRandom().nextFloat() > 0.2f) {
-            return;
-        }
-        OMEGA_WHISPER_CD.put(player.getUUID(), 8);
-        int i = 1 + player.getRandom().nextInt(5);
-        player.displayClientMessage(Component.translatable("message.effecoria.weather.omega_whisper." + i), true);
     }
 
     private static void announceNear(

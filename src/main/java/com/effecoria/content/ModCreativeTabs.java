@@ -48,6 +48,15 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.ESSONITE_CRYSTAL_BUD_SMALL.get());
                         output.accept(ModItems.ESSONITE_CRYSTAL_BUD_MEDIUM.get());
                         output.accept(ModItems.ESSONITE_CRYSTAL_BUD_LARGE.get());
+                        output.accept(ModItems.OMEGA_CRYSTAL.get());
+                        output.accept(ModItems.OMEGA_CRYSTAL_BUD_SMALL.get());
+                        output.accept(ModItems.OMEGA_CRYSTAL_BUD_MEDIUM.get());
+                        output.accept(ModItems.OMEGA_CRYSTAL_BUD_LARGE.get());
+                        output.accept(ModItems.OMEGA_CRYSTAL_SHARD.get());
+                        output.accept(ModItems.OMEGA_BLADES.get());
+                        output.accept(ModItems.ROTTEN_MOSS.get());
+                        output.accept(ModItems.ELDRITCH_BLOOD_PUDDLE.get());
+                        output.accept(ModItems.DISTORTED_BONE.get());
                         output.accept(ModItems.ESSONITE_DRIPSTONE_BLOCK.get());
                         output.accept(ModItems.ESSONITE_POINTED.get());
                         output.accept(ModItems.PHI_GEYSER.get());
@@ -124,6 +133,9 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.EIDOS_SPAWN_EGG.get());
                         output.accept(ModItems.VITRIFIED_GOLEM_SPAWN_EGG.get());
                         output.accept(ModItems.ESSENCE_WYVERN_SPAWN_EGG.get());
+                        output.accept(ModItems.ROTFANG_MINK_SPAWN_EGG.get());
+                        output.accept(ModItems.OMEGA_SHADE_SPAWN_EGG.get());
+                        output.accept(ModItems.OMEGA_WORM_SPAWN_EGG.get());
                     })
                     .build());
 }

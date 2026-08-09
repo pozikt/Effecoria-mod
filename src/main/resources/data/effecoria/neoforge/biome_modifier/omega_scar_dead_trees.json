@@ -1,6 +1,14 @@
 {
   "type": "neoforge:add_features",
   "biomes": "#effecoria:is_omega_scar",
-  "features": ["effecoria:dead_ash_tree"],
+  "features": [
+    "effecoria:omega_scar_tree",
+    "effecoria:omega_scar_crack",
+    "effecoria:dead_ash_tree",
+    "effecoria:omega_blades_patch",
+    "effecoria:rotten_moss_patch",
+    "effecoria:omega_scar_surface_crystals",
+    "effecoria:eldritch_blood_puddles"
+  ],
   "step": "vegetal_decoration"
 }

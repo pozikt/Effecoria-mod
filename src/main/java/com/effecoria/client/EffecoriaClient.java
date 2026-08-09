@@ -10,8 +10,11 @@ import com.effecoria.client.render.DeathShadowRenderer;
 import com.effecoria.client.render.EidosRenderer;
 import com.effecoria.client.render.EssenceWyvernRenderer;
 import com.effecoria.client.render.MirageHorrorRenderer;
+import com.effecoria.client.render.OmegaShadeRenderer;
+import com.effecoria.client.render.OmegaWormRenderer;
 import com.effecoria.client.render.PhiLarvaRenderer;
 import com.effecoria.client.render.RootCageRenderer;
+import com.effecoria.client.render.RotfangMinkRenderer;
 import com.effecoria.client.render.SubspacePortalRenderer;
 import com.effecoria.client.render.VitrifiedGolemRenderer;
 import com.effecoria.client.gui.alchemy.AlembicScreen;
@@ -56,6 +59,13 @@ public final class EffecoriaClient {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.ESSONITE_CRYSTAL_BUD_SMALL.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.ESSONITE_CRYSTAL_BUD_MEDIUM.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.ESSONITE_CRYSTAL_BUD_LARGE.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.OMEGA_CRYSTAL.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.OMEGA_CRYSTAL_BUD_SMALL.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.OMEGA_CRYSTAL_BUD_MEDIUM.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.OMEGA_CRYSTAL_BUD_LARGE.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.OMEGA_BLADES.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.ROTTEN_MOSS.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.ELDRITCH_BLOOD_PUDDLE.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_BLADES.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_SAPLING.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.VITRIFIED_BRANCHES.get(), RenderType.cutout());
@@ -92,6 +102,9 @@ public final class EffecoriaClient {
         event.registerEntityRenderer(ModEntities.EIDOS.get(), EidosRenderer::new);
         event.registerEntityRenderer(ModEntities.VITRIFIED_GOLEM.get(), VitrifiedGolemRenderer::new);
         event.registerEntityRenderer(ModEntities.ESSENCE_WYVERN.get(), EssenceWyvernRenderer::new);
+        event.registerEntityRenderer(ModEntities.ROTFANG_MINK.get(), RotfangMinkRenderer::new);
+        event.registerEntityRenderer(ModEntities.OMEGA_SHADE.get(), OmegaShadeRenderer::new);
+        event.registerEntityRenderer(ModEntities.OMEGA_WORM.get(), OmegaWormRenderer::new);
         event.registerBlockEntityRenderer(
                 com.effecoria.content.ModBlockEntities.SUBSPACE_PORTAL.get(), SubspacePortalRenderer::new);
     }

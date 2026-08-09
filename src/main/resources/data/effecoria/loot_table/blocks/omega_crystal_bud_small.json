@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [{ "condition": "minecraft:survives_explosion" }],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "effecoria:omega_crystal_shard",
+          "functions": [
+            { "function": "minecraft:set_count", "count": 1.0, "add": false }
+          ]
+        }
+      ],
+      "rolls": 1.0
+    }
+  ]
+}

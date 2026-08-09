@@ -4,6 +4,7 @@ import com.effecoria.EffecoriaMod;
 import com.effecoria.core.alchemy.AlchemyBuffEffect;
 import com.effecoria.core.alchemy.AlchemyCrashEffect;
 import com.effecoria.core.alchemy.AlchemyCrashKind;
+import com.effecoria.effect.OmegaWoundEffect;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -49,6 +50,10 @@ public final class ModMobEffects {
             "lead_saturation",
             () -> new MobEffect(MobEffectCategory.BENEFICIAL, 0x5A5A62) {});
 
+    /** Rotfang Ω-bite — wounds refuse to close. */
+    public static final DeferredHolder<MobEffect, MobEffect> OMEGA_WOUND = MOB_EFFECTS.register(
+            "omega_wound", OmegaWoundEffect::new);
+
     public static Holder<MobEffect> tonic() {
         return PHI_TONIC;
     }
@@ -75,5 +80,9 @@ public final class ModMobEffects {
 
     public static Holder<MobEffect> leadSaturation() {
         return LEAD_SATURATION;
+    }
+
+    public static Holder<MobEffect> omegaWound() {
+        return OMEGA_WOUND;
     }
 }

@@ -5,6 +5,8 @@ import com.effecoria.world.feature.DeadAshTreeFeature;
 import com.effecoria.world.feature.DriedRiverbedFeature;
 import com.effecoria.world.feature.EssoniteDripstoneFeature;
 import com.effecoria.world.feature.EssoniteDruzeFeature;
+import com.effecoria.world.feature.OmegaScarCrackFeature;
+import com.effecoria.world.feature.OmegaScarTreeFeature;
 import com.effecoria.world.feature.PhiCaveShellFeature;
 import com.effecoria.world.feature.PhiCoreFeature;
 import com.effecoria.world.feature.PhiGeyserFeature;
@@ -53,6 +55,12 @@ public final class ModFeatures {
 
     public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> DEAD_ASH_TREE =
             FEATURES.register("dead_ash_tree", () -> new DeadAshTreeFeature(NoneFeatureConfiguration.CODEC));
+
+    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> OMEGA_SCAR_TREE =
+            FEATURES.register("omega_scar_tree", () -> new OmegaScarTreeFeature(NoneFeatureConfiguration.CODEC));
+
+    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> OMEGA_SCAR_CRACK =
+            FEATURES.register("omega_scar_crack", () -> new OmegaScarCrackFeature(NoneFeatureConfiguration.CODEC));
 
     public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> DRIED_RIVERBED =
             FEATURES.register("dried_riverbed", () -> new DriedRiverbedFeature(NoneFeatureConfiguration.CODEC));
