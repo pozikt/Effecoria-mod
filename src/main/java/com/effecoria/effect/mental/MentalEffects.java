@@ -6,6 +6,8 @@ import com.effecoria.core.formula.SpellCombat;
 import com.effecoria.core.magic.SpellEffectEntry;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
+import com.effecoria.effect.necromancy.NecroSummonService;
+import com.effecoria.magic.CastAim;
 import com.effecoria.network.ModNetworking;
 
 import net.minecraft.core.BlockPos;
@@ -21,6 +23,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.phys.AABB;
@@ -731,6 +734,105 @@ public final class MentalEffects {
         int duration = scaledTicks(effect, power, "duration_ticks", 120);
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 2, false, false, true));
         BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.WEAKNESS, duration, 0, false, false, true));
+    }
+
+    /**
+     * III.7b Mental servitude — seize a humanoid servant and issue work orders
+     * (follow / dig tunnel → bound chest / haul items). Necromancer thralls are immune.
+     */
+    public static void mindServitude(ServerPlayer caster, SpellEffectEntry effect, float power, LivingEntity target) {
+        ServerLevel level = caster.serverLevel();
+        float range = effect.params().has("range") ? effect.params().get("range").getAsFloat() : 14f;
+        int duration = scaledTicks(effect, power, "duration_ticks", 600);
+        int digLen = effect.params().has("tunnel_length")
+                ? effect.params().get("tunnel_length").getAsInt()
+                : 8 + Math.round(power / 20f);
+        digLen = Math.max(4, Math.min(24, digLen));
+
+        CastAim.Result aim = CastAim.resolve(caster, range);
+        LivingEntity living = target != null ? target : aim.living();
+        BlockPos block = aim.block();
+        Mob servant = MentalServitudeService.findOwned(caster);
+
+        // 1) Seize / release humanoid
+        if (living instanceof Mob mob && living != caster) {
+            if (NecroSummonService.isNecroThrall(mob)) {
+                caster.displayClientMessage(
+                        Component.translatable("message.effecoria.mental.servitude_necro_thrall"), true);
+                return;
+            }
+            if (MentalServitudeService.isOwnedBy(mob, caster.getUUID())) {
+                MentalServitudeService.release(mob);
+                caster.displayClientMessage(
+                        Component.translatable("message.effecoria.mental.servitude_release", mob.getDisplayName()),
+                        true);
+                finishHit(level, mob.position(), HitFx.FOG);
+                return;
+            }
+            if (!MentalServitudeService.canSeize(mob)) {
+                caster.displayClientMessage(
+                        Component.translatable("message.effecoria.mental.servitude_not_humanoid"), true);
+                return;
+            }
+            // One servant at a time — free the previous.
+            if (servant != null && servant != mob) {
+                MentalServitudeService.release(servant);
+            }
+            if (!MentalServitudeService.seize(caster, mob, duration)) {
+                MentalityService.notifyFail(caster, mob);
+                return;
+            }
+            BreathDebuffs.apply(caster, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0, false, false, true));
+            caster.displayClientMessage(
+                    Component.translatable("message.effecoria.mental.servitude_seize", mob.getDisplayName()), true);
+            finishHit(level, mob.position(), HitFx.FORCE);
+            level.playSound(null, mob.blockPosition(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.5f, 1.6f);
+            return;
+        }
+
+        if (servant == null) {
+            caster.displayClientMessage(Component.translatable("message.effecoria.mental.servitude_need_target"), true);
+            return;
+        }
+
+        // 2) Bind deposit chest / barrel
+        if (block != null && MentalServitudeService.isDepositContainer(level, block)) {
+            MentalServitudeService.bindChest(servant, block);
+            caster.displayClientMessage(
+                    Component.translatable("message.effecoria.mental.servitude_chest", Component.literal(
+                            block.getX() + " " + block.getY() + " " + block.getZ())),
+                    true);
+            finishHit(level, Vec3.atCenterOf(block), HitFx.WARD);
+            level.playSound(null, block, SoundEvents.CHEST_CLOSE, SoundSource.BLOCKS, 0.55f, 1.3f);
+            return;
+        }
+
+        // 3) Dig tunnel toward aimed block
+        if (block != null) {
+            MentalServitudeService.commandDig(servant, block, digLen);
+            caster.displayClientMessage(
+                    Component.translatable("message.effecoria.mental.servitude_dig", digLen), true);
+            finishHit(level, servant.position(), HitFx.SYNAPSE);
+            return;
+        }
+
+        // 4) Haul nearby items (shift or item under aim cone)
+        boolean wantHaul = caster.isShiftKeyDown();
+        if (!wantHaul) {
+            AABB itemBox = new AABB(aim.point(), aim.point()).inflate(1.5);
+            wantHaul = !level.getEntitiesOfClass(ItemEntity.class, itemBox, e -> !e.getItem().isEmpty()).isEmpty();
+        }
+        if (wantHaul) {
+            MentalServitudeService.commandHaul(servant);
+            caster.displayClientMessage(Component.translatable("message.effecoria.mental.servitude_haul"), true);
+            finishHit(level, servant.position(), HitFx.SENSE);
+            return;
+        }
+
+        // 5) Default — follow
+        MentalServitudeService.commandFollow(servant);
+        caster.displayClientMessage(Component.translatable("message.effecoria.mental.servitude_follow"), true);
+        finishHit(level, servant.position(), HitFx.FOG);
     }
 
     /** III.8 False memory — forget aggro / brief amnesia. */

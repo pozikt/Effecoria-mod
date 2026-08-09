@@ -1,0 +1,19 @@
+{
+  "id": "effecoria:mind_servitude",
+  "school": "mental",
+  "frequency_hz": 12.8,
+  "base_cost": 26,
+  "power_multiplier": 1.08,
+  "side_entropy": 0.1,
+  "min_phi": 0.4,
+  "min_mastery": 0.5,
+  "radial_category": "utility",
+  "effects": [
+    {
+      "type": "effecoria:mind_servitude",
+      "duration_ticks": 600,
+      "range": 14,
+      "tunnel_length": 10
+    }
+  ]
+}

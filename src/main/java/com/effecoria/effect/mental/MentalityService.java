@@ -281,6 +281,7 @@ public final class MentalityService {
     /** Strip mental control + typical mental potion clutter. */
     public static void purgeMentalEffects(LivingEntity entity) {
         MentalCompulsionService.clear(entity);
+        MentalServitudeService.clearQuiet(entity);
         clearAfflict(entity);
         clearBlank(entity);
         entity.removeEffect(MobEffects.CONFUSION);

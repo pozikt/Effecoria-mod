@@ -135,6 +135,7 @@ public final class SpellEffectExecutor {
             "synaptic_overload",
             "psychic_drain",
             "thought_bomb",
+            "mind_servitude",
             "rot_touch",
             "entropy_lash",
             "plague_bolt",
@@ -499,6 +500,7 @@ public final class SpellEffectExecutor {
             case "psi_whisper" -> MentalEffects.psiWhisper(caster, effect, power, target);
             case "mind_illusion" -> MentalEffects.mindIllusion(caster, effect, power, target);
             case "mind_dominate" -> MentalEffects.mindDominate(caster, effect, power, target);
+            case "mind_servitude" -> MentalEffects.mindServitude(caster, effect, power, target);
             case "false_memory" -> MentalEffects.falseMemory(caster, effect, power, target);
             case "dream_lock" -> MentalEffects.dreamLock(caster, effect, power, target);
             case "hive_mind" -> MentalEffects.hiveMind(caster, effect, power);

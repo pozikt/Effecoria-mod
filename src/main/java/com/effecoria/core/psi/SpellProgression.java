@@ -32,6 +32,7 @@ public final class SpellProgression {
                     // III — master
                     id("thought_lance"),
                     id("mind_dominate"),
+                    id("mind_servitude"),
                     id("cliff_urge"),
                     id("drown_urge"),
                     id("psychic_frenzy"),
