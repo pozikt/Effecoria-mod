@@ -42,7 +42,7 @@ import javax.annotation.Nullable;
 public final class EssenceBurnerBlock extends BaseEntityBlock {
     public static final MapCodec<EssenceBurnerBlock> CODEC = simpleCodec(EssenceBurnerBlock::new);
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
-    private static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 6.0, 14.0);
+    private static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 8.0, 14.0);
     private static final DustParticleOptions BLUE =
             new DustParticleOptions(new Vector3f(0.25f, 0.65f, 1.0f), 0.9f);
     private static final DustParticleOptions GOLD =
@@ -65,6 +65,17 @@ public final class EssenceBurnerBlock extends BaseEntityBlock {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return SHAPE;
+    }
+
+    @Override
+    protected VoxelShape getCollisionShape(
+            BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return SHAPE;
+    }
+
+    @Override
+    protected VoxelShape getOcclusionShape(BlockState state, BlockGetter level, BlockPos pos) {
         return SHAPE;
     }
 
@@ -147,7 +158,7 @@ public final class EssenceBurnerBlock extends BaseEntityBlock {
             return;
         }
         double x = pos.getX() + 0.5;
-        double y = pos.getY() + 0.35;
+        double y = pos.getY() + 0.55;
         double z = pos.getZ() + 0.5;
         DustParticleOptions particle = BLUE;
         if (level.getBlockEntity(pos) instanceof EssenceBurnerBlockEntity burner

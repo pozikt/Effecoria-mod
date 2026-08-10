@@ -1,7 +1,8 @@
 {
   "variants": {
-    "": {
-      "model": "effecoria:block/shaft_lathe"
-    }
+    "facing=east": { "model": "effecoria:block/shaft_lathe", "y": 90 },
+    "facing=north": { "model": "effecoria:block/shaft_lathe" },
+    "facing=south": { "model": "effecoria:block/shaft_lathe", "y": 180 },
+    "facing=west": { "model": "effecoria:block/shaft_lathe", "y": 270 }
   }
 }

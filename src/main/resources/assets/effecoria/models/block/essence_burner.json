@@ -1,1 +1,72 @@
-﻿{ "parent": "minecraft:block/cube_all", "textures": { "all": "effecoria:block/essence_burner" } }
+﻿{
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "effecoria:block/essence_burner",
+    "side": "effecoria:block/essence_burner",
+    "top": "effecoria:block/essence_burner",
+    "bottom": "effecoria:block/phi_stone",
+    "rim": "effecoria:block/essence_burner"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 2],
+      "to": [14, 1, 14],
+      "faces": {
+        "north": { "uv": [2, 15, 14, 16], "texture": "#bottom" },
+        "south": { "uv": [2, 15, 14, 16], "texture": "#bottom" },
+        "west": { "uv": [2, 15, 14, 16], "texture": "#bottom" },
+        "east": { "uv": [2, 15, 14, 16], "texture": "#bottom" },
+        "up": { "uv": [2, 2, 14, 14], "texture": "#bottom" },
+        "down": { "uv": [2, 2, 14, 14], "texture": "#bottom", "cullface": "down" }
+      }
+    },
+    {
+      "from": [2, 1, 2],
+      "to": [3, 8, 14],
+      "faces": {
+        "north": { "uv": [2, 8, 3, 15], "texture": "#side" },
+        "south": { "uv": [13, 8, 14, 15], "texture": "#side" },
+        "west": { "uv": [2, 8, 14, 15], "texture": "#side" },
+        "east": { "uv": [2, 8, 14, 15], "texture": "#side" },
+        "up": { "uv": [2, 2, 3, 14], "texture": "#rim" }
+      }
+    },
+    {
+      "from": [13, 1, 2],
+      "to": [14, 8, 14],
+      "faces": {
+        "north": { "uv": [13, 8, 14, 15], "texture": "#side" },
+        "south": { "uv": [2, 8, 3, 15], "texture": "#side" },
+        "west": { "uv": [2, 8, 14, 15], "texture": "#side" },
+        "east": { "uv": [2, 8, 14, 15], "texture": "#side" },
+        "up": { "uv": [13, 2, 14, 14], "texture": "#rim" }
+      }
+    },
+    {
+      "from": [3, 1, 2],
+      "to": [13, 8, 3],
+      "faces": {
+        "north": { "uv": [3, 8, 13, 15], "texture": "#side" },
+        "south": { "uv": [3, 8, 13, 15], "texture": "#side" },
+        "up": { "uv": [3, 2, 13, 3], "texture": "#rim" }
+      }
+    },
+    {
+      "from": [3, 1, 13],
+      "to": [13, 8, 14],
+      "faces": {
+        "north": { "uv": [3, 8, 13, 15], "texture": "#side" },
+        "south": { "uv": [3, 8, 13, 15], "texture": "#side" },
+        "up": { "uv": [3, 13, 13, 14], "texture": "#rim" }
+      }
+    },
+    {
+      "from": [3, 7, 3],
+      "to": [13, 8, 13],
+      "faces": {
+        "up": { "uv": [3, 3, 13, 13], "texture": "#top" },
+        "down": { "uv": [3, 3, 13, 13], "texture": "#side" }
+      }
+    }
+  ]
+}

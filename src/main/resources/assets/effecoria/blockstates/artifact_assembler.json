@@ -1,7 +1,8 @@
 {
   "variants": {
-    "": {
-      "model": "effecoria:block/artifact_assembler"
-    }
+    "facing=east": { "model": "effecoria:block/artifact_assembler", "y": 90 },
+    "facing=north": { "model": "effecoria:block/artifact_assembler" },
+    "facing=south": { "model": "effecoria:block/artifact_assembler", "y": 180 },
+    "facing=west": { "model": "effecoria:block/artifact_assembler", "y": 270 }
   }
 }

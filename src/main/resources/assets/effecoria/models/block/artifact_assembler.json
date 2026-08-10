@@ -1,8 +1,12 @@
 {
-  "parent": "minecraft:block/orientable",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "top": "effecoria:block/phi_stone",
-    "front": "effecoria:block/essence_burner",
-    "side": "effecoria:block/phi_stone"
+    "particle": "effecoria:block/artifact_assembler_front",
+    "down": "effecoria:block/artifact_assembler_bottom",
+    "up": "effecoria:block/artifact_assembler_top",
+    "north": "effecoria:block/artifact_assembler_front",
+    "south": "effecoria:block/artifact_assembler_front",
+    "east": "effecoria:block/artifact_assembler_side",
+    "west": "effecoria:block/artifact_assembler_side"
   }
 }

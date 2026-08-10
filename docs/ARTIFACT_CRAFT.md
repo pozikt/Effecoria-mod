@@ -28,6 +28,12 @@ Item models use scaled vanilla stick / blaze rod textures per form (`custom_mode
 
 **Lathe & facet cutter GUI** use the vanilla stonecutter panel (176×166): input `(20,33)`, output `(143,33)`, **variant pool** as a 4-wide icon grid at `(52,14)` (click to select; invalid options dimmed when input material is wrong).
 
+**Block art:** Generate `art/artifact_stations/face_sheet.png` (5×4 face atlas) and optional `concept_blocks.png` (isometric reference), then bake:
+
+`python scripts/bake_artifact_station_textures.py`
+
+Do **not** draw texels in Python — crops from the concept sheet and downscales to 16×16. Preview: `art/artifact_stations/baked_preview.png`. Shaft lathe & facet cutter are **half-height** benches; rotate with block `facing` like a stonecutter.
+
 **Artifact assembler** uses the mortar panel; the same grid picks **staff / ring / amulet / charm**; craft slots at `(44,35)`, `(80,35)`, output `(134,35)`.
 
 ## Φ-conductivity

@@ -1,7 +1,8 @@
 {
   "variants": {
-    "": {
-      "model": "effecoria:block/facet_cutter"
-    }
+    "facing=east": { "model": "effecoria:block/facet_cutter", "y": 90 },
+    "facing=north": { "model": "effecoria:block/facet_cutter" },
+    "facing=south": { "model": "effecoria:block/facet_cutter", "y": 180 },
+    "facing=west": { "model": "effecoria:block/facet_cutter", "y": 270 }
   }
 }

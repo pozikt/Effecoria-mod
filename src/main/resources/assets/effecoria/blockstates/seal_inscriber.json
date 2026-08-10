@@ -1,7 +1,8 @@
 {
   "variants": {
-    "": {
-      "model": "effecoria:block/seal_inscriber"
-    }
+    "facing=east": { "model": "effecoria:block/seal_inscriber", "y": 90 },
+    "facing=north": { "model": "effecoria:block/seal_inscriber" },
+    "facing=south": { "model": "effecoria:block/seal_inscriber", "y": 180 },
+    "facing=west": { "model": "effecoria:block/seal_inscriber", "y": 270 }
   }
 }

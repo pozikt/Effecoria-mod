@@ -1,8 +1,12 @@
 {
-  "parent": "minecraft:block/orientable",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "top": "effecoria:block/phi_stone",
-    "front": "effecoria:block/essence_burner",
-    "side": "effecoria:block/phi_stone"
+    "particle": "effecoria:block/seal_inscriber_side",
+    "down": "effecoria:block/seal_inscriber_bottom",
+    "up": "effecoria:block/seal_inscriber_top",
+    "north": "effecoria:block/seal_inscriber_side",
+    "south": "effecoria:block/seal_inscriber_side",
+    "east": "effecoria:block/seal_inscriber_side",
+    "west": "effecoria:block/seal_inscriber_side"
   }
 }
