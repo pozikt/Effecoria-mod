@@ -3,9 +3,9 @@
   "category": "misc",
   "key": {
     "S": { "item": "effecoria:phi_stone" },
-    "B": { "item": "minecraft:brick" },
+    "L": { "item": "effecoria:lead_ingot" },
     "P": { "item": "effecoria:phi_planks" }
   },
-  "pattern": [" P ", "SBS", "SSS"],
+  "pattern": [" P ", "SLS", "SSS"],
   "result": { "count": 1, "id": "effecoria:essence_burner" }
 }

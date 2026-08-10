@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/cube_column",
   "textures": {
-    "end": "effecoria:block/phi_stone",
-    "side": "effecoria:block/essence_alembic"
+    "end": "effecoria:block/phi_telegraph_end",
+    "side": "effecoria:block/phi_telegraph_side"
   }
 }

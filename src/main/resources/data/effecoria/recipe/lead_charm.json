@@ -2,17 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "L": {
-      "item": "effecoria:lead_filter"
-    },
-    "I": {
-      "item": "minecraft:iron_nugget"
-    }
+    "L": { "item": "effecoria:lead_filter" },
+    "N": { "item": "effecoria:lead_nugget" }
   },
   "pattern": [
-    " I ",
-    "ILI",
-    " I "
+    " N ",
+    "NLN",
+    " N "
   ],
   "result": {
     "count": 1,

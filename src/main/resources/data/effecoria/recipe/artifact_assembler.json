@@ -2,21 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "S": {
-      "item": "effecoria:phi_stone"
-    },
-    "I": {
-      "item": "minecraft:iron_block"
-    },
-    "G": {
-      "item": "minecraft:gold_ingot"
-    },
-    "C": {
-      "item": "effecoria:phi_cell"
-    }
+    "S": { "item": "effecoria:phi_stone" },
+    "L": { "item": "effecoria:lead_block" },
+    "G": { "item": "minecraft:gold_ingot" },
+    "C": { "item": "effecoria:phi_cell" }
   },
   "pattern": [
-    "GIG",
+    "GLG",
     "SCS",
     "SSS"
   ],

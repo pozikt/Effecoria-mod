@@ -75,4 +75,5 @@ flowchart LR
 - Code: `com.effecoria.core.technomagic`
 - Heat bus: `PhiHeat` / `PhiHeatSource`
 - Wireless Φ-power: `PhiPower` / `PhiPowerProvider`
+- Lead: overworld `lead_ore` / `deepslate_lead_ore` → `raw_lead` → `lead_ingot`; machine casings and lead gear use real lead (`lead_block` is `#effecoria:zero_flux`)
 - UI: Primer chapter `TECHNOMAGIC` + Technomancy button → `TechnomagicScreen`

@@ -27,6 +27,9 @@
                    "effecoria:phi_furnace",
                    "effecoria:psi_imprinter",
                    "effecoria:phi_telegraph",
-                   "effecoria:spark_reactor"
+                   "effecoria:spark_reactor",
+                   "effecoria:lead_ore",
+                   "effecoria:deepslate_lead_ore",
+                   "effecoria:lead_block"
                ]
 }

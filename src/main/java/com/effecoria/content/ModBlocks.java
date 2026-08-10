@@ -74,6 +74,20 @@ public final class ModBlocks {
     public static final DeferredBlock<Block> BASALT_ESSENITE_ORE =
             registerOre("basalt_essonite_ore", MapColor.COLOR_BLACK, 3.2f, 3f, SoundType.BASALT);
 
+    /** Dense Φ-damping metal — casings for technomagic machines. */
+    public static final DeferredBlock<Block> LEAD_ORE = registerOre("lead_ore", MapColor.STONE, 3f, 3f, SoundType.STONE);
+
+    public static final DeferredBlock<Block> DEEPSLATE_LEAD_ORE =
+            registerOre("deepslate_lead_ore", MapColor.DEEPSLATE, 4.5f, 3f, SoundType.DEEPSLATE);
+
+    public static final DeferredBlock<Block> LEAD_BLOCK = BLOCKS.register(
+            "lead_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .requiresCorrectToolForDrops()
+                    .strength(5.0f, 6.0f)
+                    .sound(SoundType.METAL)));
+
     /** Nearly pure essonite — Φ-core mass under the plateau (Y ≤ 0). */
     public static final DeferredBlock<Block> ESSONITE_BLOCK = BLOCKS.register(
             "essonite_block",

@@ -2,19 +2,14 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "S": {
-      "item": "effecoria:phi_stone"
-    },
-    "P": {
-      "item": "minecraft:stick"
-    },
-    "C": {
-      "item": "effecoria:phi_cell"
-    }
+    "S": { "item": "effecoria:phi_stone" },
+    "P": { "item": "minecraft:stick" },
+    "L": { "item": "effecoria:lead_ingot" },
+    "C": { "item": "effecoria:phi_cell" }
   },
   "pattern": [
     "SPS",
-    "PCP",
+    "LCL",
     "SPS"
   ],
   "result": {

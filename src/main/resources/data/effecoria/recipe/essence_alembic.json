@@ -3,8 +3,9 @@
   "category": "misc",
   "key": {
     "G": { "item": "effecoria:phi_glass" },
-    "S": { "item": "effecoria:phi_stone" }
+    "S": { "item": "effecoria:phi_stone" },
+    "L": { "item": "effecoria:lead_ingot" }
   },
-  "pattern": ["G G", "GGG", "SSS"],
+  "pattern": ["G G", "GLG", "SSS"],
   "result": { "count": 1, "id": "effecoria:essence_alembic" }
 }

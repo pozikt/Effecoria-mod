@@ -2,11 +2,11 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "I": { "item": "minecraft:iron_ingot" },
+    "L": { "item": "effecoria:lead_ingot" },
     "B": { "item": "effecoria:essence_burner" },
     "C": { "item": "effecoria:phi_cell" },
     "D": { "item": "effecoria:essonite_dust" }
   },
-  "pattern": ["IDI", "CBC", "III"],
+  "pattern": ["LDL", "CBC", "LLL"],
   "result": { "count": 1, "id": "effecoria:spark_reactor" }
 }

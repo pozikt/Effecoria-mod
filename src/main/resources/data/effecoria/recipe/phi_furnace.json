@@ -3,9 +3,9 @@
   "category": "misc",
   "key": {
     "S": { "item": "effecoria:phi_stone" },
-    "B": { "item": "minecraft:brick" },
+    "L": { "item": "effecoria:lead_ingot" },
     "G": { "item": "effecoria:essonite_shard" }
   },
-  "pattern": ["SGS", "SBS", "SSS"],
+  "pattern": ["SGS", "SLS", "SSS"],
   "result": { "count": 1, "id": "effecoria:phi_furnace" }
 }

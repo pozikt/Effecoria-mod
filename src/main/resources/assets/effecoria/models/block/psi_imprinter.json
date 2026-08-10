@@ -1,8 +1,8 @@
 {
   "parent": "minecraft:block/orientable",
   "textures": {
-    "top": "effecoria:block/phi_stone",
-    "front": "effecoria:block/essence_burner",
-    "side": "effecoria:block/phi_stone"
+    "top": "effecoria:block/psi_imprinter_top",
+    "front": "effecoria:block/psi_imprinter_front",
+    "side": "effecoria:block/psi_imprinter_side"
   }
 }

@@ -1,8 +1,8 @@
 {
   "parent": "minecraft:block/cube_bottom_top",
   "textures": {
-    "bottom": "minecraft:block/terracotta",
-    "top": "minecraft:block/decorated_pot_side",
-    "side": "minecraft:block/terracotta"
+    "bottom": "effecoria:block/clay_crucible_bottom",
+    "top": "effecoria:block/clay_crucible_top",
+    "side": "effecoria:block/clay_crucible_side"
   }
 }

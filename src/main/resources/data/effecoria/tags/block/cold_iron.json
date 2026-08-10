@@ -3,6 +3,8 @@
   "values": [
     "minecraft:iron_ore",
     "minecraft:deepslate_iron_ore",
+    "effecoria:lead_ore",
+    "effecoria:deepslate_lead_ore",
     "minecraft:cauldron",
     "minecraft:lava_cauldron",
     "minecraft:water_cauldron",

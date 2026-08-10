@@ -4,7 +4,7 @@
     "particle": "effecoria:block/essence_burner",
     "side": "effecoria:block/essence_burner",
     "top": "effecoria:block/essence_burner",
-    "bottom": "effecoria:block/phi_stone",
+    "bottom": "effecoria:block/clay_crucible_bottom",
     "rim": "effecoria:block/essence_burner"
   },
   "elements": [

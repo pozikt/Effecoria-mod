@@ -2,21 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "S": {
-      "item": "effecoria:phi_stone"
-    },
-    "P": {
-      "item": "effecoria:pure_essonite"
-    },
-    "G": {
-      "item": "minecraft:iron_ingot"
-    },
-    "C": {
-      "item": "effecoria:resonance_focus"
-    }
+    "S": { "item": "effecoria:phi_stone" },
+    "P": { "item": "effecoria:pure_essonite" },
+    "L": { "item": "effecoria:lead_ingot" },
+    "C": { "item": "effecoria:resonance_focus" }
   },
   "pattern": [
-    "GPG",
+    "LPL",
     "SCS",
     "SSS"
   ],

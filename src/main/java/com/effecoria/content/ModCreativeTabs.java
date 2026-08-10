@@ -29,6 +29,12 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.DIORITE_ESSENITE_ORE.get());
                         output.accept(ModItems.TUFF_ESSENITE_ORE.get());
                         output.accept(ModItems.BASALT_ESSENITE_ORE.get());
+                        output.accept(ModItems.LEAD_ORE.get());
+                        output.accept(ModItems.DEEPSLATE_LEAD_ORE.get());
+                        output.accept(ModItems.LEAD_BLOCK.get());
+                        output.accept(ModItems.RAW_LEAD.get());
+                        output.accept(ModItems.LEAD_INGOT.get());
+                        output.accept(ModItems.LEAD_NUGGET.get());
                         output.accept(ModItems.ESSONITE_BLOCK.get());
                         output.accept(ModItems.STAR_ESSONITE_BLOCK.get());
                         output.accept(ModItems.WHISPERING_SPIRE_VENT.get());

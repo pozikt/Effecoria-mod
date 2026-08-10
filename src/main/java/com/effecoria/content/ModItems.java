@@ -36,6 +36,12 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("tuff_essonite_ore", ModBlocks.TUFF_ESSENITE_ORE);
     public static final DeferredItem<BlockItem> BASALT_ESSENITE_ORE =
             ITEMS.registerSimpleBlockItem("basalt_essonite_ore", ModBlocks.BASALT_ESSENITE_ORE);
+    public static final DeferredItem<BlockItem> LEAD_ORE =
+            ITEMS.registerSimpleBlockItem("lead_ore", ModBlocks.LEAD_ORE);
+    public static final DeferredItem<BlockItem> DEEPSLATE_LEAD_ORE =
+            ITEMS.registerSimpleBlockItem("deepslate_lead_ore", ModBlocks.DEEPSLATE_LEAD_ORE);
+    public static final DeferredItem<BlockItem> LEAD_BLOCK =
+            ITEMS.registerSimpleBlockItem("lead_block", ModBlocks.LEAD_BLOCK);
     public static final DeferredItem<BlockItem> ESSONITE_BLOCK =
             ITEMS.registerSimpleBlockItem("essonite_block", ModBlocks.ESSONITE_BLOCK);
     public static final DeferredItem<BlockItem> STAR_ESSONITE_BLOCK =
@@ -140,6 +146,9 @@ public final class ModItems {
     public static final DeferredItem<Item> ESSONITE_SHARD = ITEMS.registerSimpleItem("essonite_shard");
     public static final DeferredItem<Item> PURE_ESSONITE = ITEMS.registerSimpleItem("pure_essonite");
     public static final DeferredItem<Item> STAR_ESSONITE = ITEMS.registerSimpleItem("star_essonite");
+    public static final DeferredItem<Item> RAW_LEAD = ITEMS.registerSimpleItem("raw_lead");
+    public static final DeferredItem<Item> LEAD_INGOT = ITEMS.registerSimpleItem("lead_ingot");
+    public static final DeferredItem<Item> LEAD_NUGGET = ITEMS.registerSimpleItem("lead_nugget");
     public static final DeferredItem<Item> PHI_CHITIN = ITEMS.registerSimpleItem("phi_chitin");
 
     public static final DeferredItem<Item> PHI_WATER_BUCKET = ITEMS.register(
