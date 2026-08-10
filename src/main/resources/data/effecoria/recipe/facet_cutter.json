@@ -5,11 +5,12 @@
     "S": { "item": "effecoria:phi_stone" },
     "P": { "item": "effecoria:pure_essonite" },
     "L": { "item": "effecoria:lead_ingot" },
+    "M": { "item": "effecoria:mithril_wire" },
     "C": { "item": "effecoria:resonance_focus" }
   },
   "pattern": [
     "LPL",
-    "SCS",
+    "MCM",
     "SSS"
   ],
   "result": {

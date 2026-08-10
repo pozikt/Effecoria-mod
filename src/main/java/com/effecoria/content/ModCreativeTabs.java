@@ -35,6 +35,13 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.RAW_LEAD.get());
                         output.accept(ModItems.LEAD_INGOT.get());
                         output.accept(ModItems.LEAD_NUGGET.get());
+                        output.accept(ModItems.MITHRIL_ORE.get());
+                        output.accept(ModItems.DEEPSLATE_MITHRIL_ORE.get());
+                        output.accept(ModItems.MITHRIL_BLOCK.get());
+                        output.accept(ModItems.RAW_MITHRIL.get());
+                        output.accept(ModItems.MITHRIL_INGOT.get());
+                        output.accept(ModItems.MITHRIL_NUGGET.get());
+                        output.accept(ModItems.MITHRIL_WIRE.get());
                         output.accept(ModItems.ESSONITE_BLOCK.get());
                         output.accept(ModItems.STAR_ESSONITE_BLOCK.get());
                         output.accept(ModItems.WHISPERING_SPIRE_VENT.get());
@@ -154,6 +161,10 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.STAR_ESSONITE_CHESTPLATE.get());
                         output.accept(ModItems.STAR_ESSONITE_LEGGINGS.get());
                         output.accept(ModItems.STAR_ESSONITE_BOOTS.get());
+                        output.accept(ModItems.MITHRIL_HELMET.get());
+                        output.accept(ModItems.MITHRIL_CHESTPLATE.get());
+                        output.accept(ModItems.MITHRIL_LEGGINGS.get());
+                        output.accept(ModItems.MITHRIL_BOOTS.get());
                         output.accept(ModItems.VOID_OBSIDIAN_INSERT.get());
                         output.accept(ModItems.PSI_KEY.get());
                         output.accept(ModItems.PHI_PHONEME_FIRMITAS.get());
@@ -167,6 +178,11 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.VITRIFIED_GLASS_PICKAXE.get());
                         output.accept(ModItems.VITRIFIED_GLASS_AXE.get());
                         output.accept(ModItems.VITRIFIED_GLASS_SHOVEL.get());
+                        output.accept(ModItems.MITHRIL_SWORD.get());
+                        output.accept(ModItems.MITHRIL_PICKAXE.get());
+                        output.accept(ModItems.MITHRIL_AXE.get());
+                        output.accept(ModItems.MITHRIL_SHOVEL.get());
+                        output.accept(ModItems.MITHRIL_HOE.get());
                         output.accept(ModItems.VITRIFIED_GOLEM_CORE.get());
                         output.accept(ModItems.RESONANCE_FOCUS.get());
                         output.accept(ModItems.PHI_CELL.get());

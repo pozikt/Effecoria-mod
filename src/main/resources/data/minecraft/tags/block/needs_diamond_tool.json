@@ -5,6 +5,9 @@
         "effecoria:phi_geyser",
         "effecoria:vitrified_stone",
         "effecoria:star_essonite_block",
-        "effecoria:whispering_spire_vent"
+        "effecoria:whispering_spire_vent",
+        "effecoria:mithril_ore",
+        "effecoria:deepslate_mithril_ore",
+        "effecoria:mithril_block"
     ]
 }

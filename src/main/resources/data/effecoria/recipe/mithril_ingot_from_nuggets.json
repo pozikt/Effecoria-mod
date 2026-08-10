@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": { "#": { "item": "effecoria:mithril_nugget" } },
+  "pattern": ["###", "###", "###"],
+  "result": { "count": 1, "id": "effecoria:mithril_ingot" }
+}

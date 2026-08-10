@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": { "M": { "item": "effecoria:mithril_ingot" } },
+  "pattern": ["M M", "MMM", "MMM"],
+  "result": { "count": 1, "id": "effecoria:mithril_chestplate" }
+}

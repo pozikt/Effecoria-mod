@@ -9,6 +9,7 @@ import com.effecoria.core.disease.PhiDisease;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.ShovelItem;
@@ -42,6 +43,12 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("deepslate_lead_ore", ModBlocks.DEEPSLATE_LEAD_ORE);
     public static final DeferredItem<BlockItem> LEAD_BLOCK =
             ITEMS.registerSimpleBlockItem("lead_block", ModBlocks.LEAD_BLOCK);
+    public static final DeferredItem<BlockItem> MITHRIL_ORE =
+            ITEMS.registerSimpleBlockItem("mithril_ore", ModBlocks.MITHRIL_ORE);
+    public static final DeferredItem<BlockItem> DEEPSLATE_MITHRIL_ORE =
+            ITEMS.registerSimpleBlockItem("deepslate_mithril_ore", ModBlocks.DEEPSLATE_MITHRIL_ORE);
+    public static final DeferredItem<BlockItem> MITHRIL_BLOCK =
+            ITEMS.registerSimpleBlockItem("mithril_block", ModBlocks.MITHRIL_BLOCK);
     public static final DeferredItem<BlockItem> ESSONITE_BLOCK =
             ITEMS.registerSimpleBlockItem("essonite_block", ModBlocks.ESSONITE_BLOCK);
     public static final DeferredItem<BlockItem> STAR_ESSONITE_BLOCK =
@@ -149,6 +156,10 @@ public final class ModItems {
     public static final DeferredItem<Item> RAW_LEAD = ITEMS.registerSimpleItem("raw_lead");
     public static final DeferredItem<Item> LEAD_INGOT = ITEMS.registerSimpleItem("lead_ingot");
     public static final DeferredItem<Item> LEAD_NUGGET = ITEMS.registerSimpleItem("lead_nugget");
+    public static final DeferredItem<Item> RAW_MITHRIL = ITEMS.registerSimpleItem("raw_mithril");
+    public static final DeferredItem<Item> MITHRIL_INGOT = ITEMS.registerSimpleItem("mithril_ingot");
+    public static final DeferredItem<Item> MITHRIL_NUGGET = ITEMS.registerSimpleItem("mithril_nugget");
+    public static final DeferredItem<Item> MITHRIL_WIRE = ITEMS.registerSimpleItem("mithril_wire");
     public static final DeferredItem<Item> PHI_CHITIN = ITEMS.registerSimpleItem("phi_chitin");
 
     public static final DeferredItem<Item> PHI_WATER_BUCKET = ITEMS.register(
@@ -547,6 +558,38 @@ public final class ModItems {
                     new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(37)),
                     EssoniteArmorTier.STAR));
 
+    public static final DeferredItem<ArmorItem> MITHRIL_HELMET = ITEMS.register(
+            "mithril_helmet",
+            () -> new EssoniteArmorItem(
+                    ModMaterials.MITHRIL,
+                    ArmorItem.Type.HELMET,
+                    new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(33)),
+                    EssoniteArmorTier.MITHRIL));
+
+    public static final DeferredItem<ArmorItem> MITHRIL_CHESTPLATE = ITEMS.register(
+            "mithril_chestplate",
+            () -> new EssoniteArmorItem(
+                    ModMaterials.MITHRIL,
+                    ArmorItem.Type.CHESTPLATE,
+                    new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(33)),
+                    EssoniteArmorTier.MITHRIL));
+
+    public static final DeferredItem<ArmorItem> MITHRIL_LEGGINGS = ITEMS.register(
+            "mithril_leggings",
+            () -> new EssoniteArmorItem(
+                    ModMaterials.MITHRIL,
+                    ArmorItem.Type.LEGGINGS,
+                    new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(33)),
+                    EssoniteArmorTier.MITHRIL));
+
+    public static final DeferredItem<ArmorItem> MITHRIL_BOOTS = ITEMS.register(
+            "mithril_boots",
+            () -> new EssoniteArmorItem(
+                    ModMaterials.MITHRIL,
+                    ArmorItem.Type.BOOTS,
+                    new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(33)),
+                    EssoniteArmorTier.MITHRIL));
+
     public static final DeferredItem<Item> VOID_OBSIDIAN_INSERT = ITEMS.registerSimpleItem("void_obsidian_insert");
     public static final DeferredItem<Item> PSI_KEY = ITEMS.registerSimpleItem("psi_key");
 
@@ -593,6 +636,41 @@ public final class ModItems {
                     ModMaterials.VITRIFIED_GLASS,
                     new Item.Properties()
                             .attributes(ShovelItem.createAttributes(ModMaterials.VITRIFIED_GLASS, 1.5f, -3.0f))));
+
+    public static final DeferredItem<SwordItem> MITHRIL_SWORD = ITEMS.register(
+            "mithril_sword",
+            () -> new SwordItem(
+                    ModMaterials.MITHRIL_TOOLS,
+                    new Item.Properties()
+                            .attributes(SwordItem.createAttributes(ModMaterials.MITHRIL_TOOLS, 3, -2.4f))));
+
+    public static final DeferredItem<PickaxeItem> MITHRIL_PICKAXE = ITEMS.register(
+            "mithril_pickaxe",
+            () -> new PickaxeItem(
+                    ModMaterials.MITHRIL_TOOLS,
+                    new Item.Properties()
+                            .attributes(PickaxeItem.createAttributes(ModMaterials.MITHRIL_TOOLS, 1.0f, -2.8f))));
+
+    public static final DeferredItem<AxeItem> MITHRIL_AXE = ITEMS.register(
+            "mithril_axe",
+            () -> new AxeItem(
+                    ModMaterials.MITHRIL_TOOLS,
+                    new Item.Properties()
+                            .attributes(AxeItem.createAttributes(ModMaterials.MITHRIL_TOOLS, 5.0f, -3.0f))));
+
+    public static final DeferredItem<ShovelItem> MITHRIL_SHOVEL = ITEMS.register(
+            "mithril_shovel",
+            () -> new ShovelItem(
+                    ModMaterials.MITHRIL_TOOLS,
+                    new Item.Properties()
+                            .attributes(ShovelItem.createAttributes(ModMaterials.MITHRIL_TOOLS, 1.5f, -3.0f))));
+
+    public static final DeferredItem<HoeItem> MITHRIL_HOE = ITEMS.register(
+            "mithril_hoe",
+            () -> new HoeItem(
+                    ModMaterials.MITHRIL_TOOLS,
+                    new Item.Properties()
+                            .attributes(HoeItem.createAttributes(ModMaterials.MITHRIL_TOOLS, -3.0f, 0.0f))));
 
     public static final DeferredItem<SpawnEggItem> VITRIFIED_GOLEM_SPAWN_EGG = ITEMS.register(
             "vitrified_golem_spawn_egg",

@@ -6,11 +6,12 @@
     "P": { "item": "effecoria:pure_essonite" },
     "G": { "item": "minecraft:gold_ingot" },
     "C": { "item": "effecoria:phi_cell" },
-    "L": { "item": "effecoria:lead_ingot" }
+    "L": { "item": "effecoria:lead_ingot" },
+    "M": { "item": "effecoria:mithril_wire" }
   },
   "pattern": [
     "GPG",
-    "LCL",
+    "MCM",
     "SSS"
   ],
   "result": {

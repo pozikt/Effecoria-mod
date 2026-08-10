@@ -30,6 +30,9 @@
                    "effecoria:spark_reactor",
                    "effecoria:lead_ore",
                    "effecoria:deepslate_lead_ore",
-                   "effecoria:lead_block"
+                   "effecoria:lead_block",
+                   "effecoria:mithril_ore",
+                   "effecoria:deepslate_mithril_ore",
+                   "effecoria:mithril_block"
                ]
 }

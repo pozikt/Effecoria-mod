@@ -1,10 +1,12 @@
 package com.effecoria.armor;
 
-/** Contour grade for Φ-armor. BASIC = Φ-chitin; CRYSTAL/STAR = pure/star essonite sets. */
+/** Contour grade for Φ-armor. BASIC = Φ-chitin; CRYSTAL/MITHRIL/STAR = higher contours. */
 public enum EssoniteArmorTier {
     BASIC(0, 0.35f, 0.012f, 0.12f, true, false, false),
     CRYSTAL(1, 0.70f, 0.022f, 0.22f, true, true, true),
-    STAR(2, 1.00f, 0.035f, 0.35f, true, true, true);
+    /** Φ-superconductor plates — Ω-block, no crystal wings. */
+    MITHRIL(2, 0.85f, 0.028f, 0.28f, true, false, true),
+    STAR(3, 1.00f, 0.035f, 0.35f, true, true, true);
 
     private final int rank;
     private final float capacityWeight;

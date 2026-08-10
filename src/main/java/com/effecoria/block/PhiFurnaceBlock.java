@@ -150,6 +150,11 @@ public final class PhiFurnaceBlock extends BaseEntityBlock {
             if (input.is(Items.SAND) || input.is(Items.RED_SAND)) {
                 return new ItemStack(ModItems.PHI_GLASS.get());
             }
+            if (input.is(ModItems.RAW_MITHRIL.get())
+                    || input.is(ModItems.MITHRIL_ORE.get())
+                    || input.is(ModItems.DEEPSLATE_MITHRIL_ORE.get())) {
+                return new ItemStack(ModItems.MITHRIL_INGOT.get());
+            }
             return null;
         }
 

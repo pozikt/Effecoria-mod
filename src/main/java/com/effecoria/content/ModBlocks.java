@@ -88,6 +88,21 @@ public final class ModBlocks {
                     .strength(5.0f, 6.0f)
                     .sound(SoundType.METAL)));
 
+    /** Φ-superconductor — rare veins in the Essence Plateau. */
+    public static final DeferredBlock<Block> MITHRIL_ORE =
+            registerOre("mithril_ore", MapColor.STONE, 3.5f, 3f, SoundType.STONE);
+
+    public static final DeferredBlock<Block> DEEPSLATE_MITHRIL_ORE =
+            registerOre("deepslate_mithril_ore", MapColor.DEEPSLATE, 5.0f, 3f, SoundType.DEEPSLATE);
+
+    public static final DeferredBlock<Block> MITHRIL_BLOCK = BLOCKS.register(
+            "mithril_block",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .requiresCorrectToolForDrops()
+                    .strength(5.0f, 6.0f)
+                    .sound(SoundType.METAL)));
+
     /** Nearly pure essonite — Φ-core mass under the plateau (Y ≤ 0). */
     public static final DeferredBlock<Block> ESSONITE_BLOCK = BLOCKS.register(
             "essonite_block",

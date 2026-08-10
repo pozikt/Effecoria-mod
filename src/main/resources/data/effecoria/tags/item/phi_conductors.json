@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "effecoria:mithril_ingot",
+    "effecoria:mithril_wire",
+    "effecoria:mithril_nugget",
+    "effecoria:mithril_block"
+  ]
+}

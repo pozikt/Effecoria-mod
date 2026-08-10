@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": { "all": "effecoria:block/deepslate_mithril_ore" }
+}

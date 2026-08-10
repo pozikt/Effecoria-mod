@@ -3,10 +3,11 @@
   "category": "misc",
   "key": {
     "L": { "item": "effecoria:lead_ingot" },
+    "M": { "item": "effecoria:mithril_wire" },
     "B": { "item": "effecoria:essence_burner" },
     "C": { "item": "effecoria:phi_cell" },
     "D": { "item": "effecoria:essonite_dust" }
   },
-  "pattern": ["LDL", "CBC", "LLL"],
+  "pattern": ["LML", "CBC", "LLL"],
   "result": { "count": 1, "id": "effecoria:spark_reactor" }
 }

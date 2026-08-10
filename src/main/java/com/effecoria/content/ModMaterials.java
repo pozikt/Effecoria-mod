@@ -80,6 +80,24 @@ public final class ModMaterials {
                     3.0f,
                     0.1f));
 
+    /** Mithril — diamond defense, light Φ-superconductor plates. */
+    public static final Holder<ArmorMaterial> MITHRIL = ARMOR_MATERIALS.register(
+            "mithril",
+            () -> new ArmorMaterial(
+                    Util.make(new EnumMap<>(ArmorItem.Type.class), map -> {
+                        map.put(ArmorItem.Type.BOOTS, 3);
+                        map.put(ArmorItem.Type.LEGGINGS, 6);
+                        map.put(ArmorItem.Type.CHESTPLATE, 8);
+                        map.put(ArmorItem.Type.HELMET, 3);
+                        map.put(ArmorItem.Type.BODY, 11);
+                    }),
+                    22,
+                    SoundEvents.ARMOR_EQUIP_DIAMOND,
+                    () -> Ingredient.of(ModItems.MITHRIL_INGOT.get()),
+                    List.of(new ArmorMaterial.Layer(EffecoriaMod.id("mithril"))),
+                    2.0f,
+                    0.0f));
+
     /** Iron-ish damage, stone durability (131). */
     public static final Tier VITRIFIED_GLASS = new Tier() {
         private final java.util.function.Supplier<Ingredient> repair =
@@ -108,6 +126,42 @@ public final class ModMaterials {
         @Override
         public int getEnchantmentValue() {
             return 14;
+        }
+
+        @Override
+        public Ingredient getRepairIngredient() {
+            return repair.get();
+        }
+    };
+
+    /** Diamond-class mining, high durability — Φ-superconductor tools. */
+    public static final Tier MITHRIL_TOOLS = new Tier() {
+        private final java.util.function.Supplier<Ingredient> repair =
+                Suppliers.memoize(() -> Ingredient.of(ModItems.MITHRIL_INGOT.get()));
+
+        @Override
+        public int getUses() {
+            return 1800;
+        }
+
+        @Override
+        public float getSpeed() {
+            return 8.0f;
+        }
+
+        @Override
+        public float getAttackDamageBonus() {
+            return 3.0f;
+        }
+
+        @Override
+        public TagKey<Block> getIncorrectBlocksForDrops() {
+            return BlockTags.INCORRECT_FOR_DIAMOND_TOOL;
+        }
+
+        @Override
+        public int getEnchantmentValue() {
+            return 22;
         }
 
         @Override

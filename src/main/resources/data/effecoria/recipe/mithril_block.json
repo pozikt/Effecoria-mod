@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": { "#": { "item": "effecoria:mithril_ingot" } },
+  "pattern": ["###", "###", "###"],
+  "result": { "count": 1, "id": "effecoria:mithril_block" }
+}
