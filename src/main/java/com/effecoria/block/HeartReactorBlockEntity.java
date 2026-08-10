@@ -208,6 +208,13 @@ public final class HeartReactorBlockEntity extends BaseContainerBlockEntity
         return formed && running && primed && overheatCooldown <= 0;
     }
 
+    /** Client: keep the deep Heart hum while the formed hull is lit. */
+    public static void clientTick(Level level, BlockPos pos, BlockState state, HeartReactorBlockEntity be) {
+        if (state.getValue(HeartReactorBlock.LIT)) {
+            com.effecoria.client.sound.ReactorHumClient.ensureHeart(pos);
+        }
+    }
+
     @Override
     public boolean supplying() {
         return isActivelyPowering();

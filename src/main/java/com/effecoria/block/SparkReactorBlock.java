@@ -75,7 +75,7 @@ public final class SparkReactorBlock extends BaseEntityBlock {
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
             Level level, BlockState state, BlockEntityType<T> type) {
         return level.isClientSide()
-                ? null
+                ? createTickerHelper(type, ModBlockEntities.SPARK_REACTOR.get(), SparkReactorBlockEntity::clientTick)
                 : createTickerHelper(type, ModBlockEntities.SPARK_REACTOR.get(), SparkReactorBlockEntity::serverTick);
     }
 

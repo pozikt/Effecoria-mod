@@ -152,6 +152,13 @@ public final class SparkReactorBlockEntity extends BaseContainerBlockEntity
         return running && fuelTicks > 0 && overheatCooldown <= 0;
     }
 
+    /** Client: keep the high-pitched Spark hum while lit. */
+    public static void clientTick(Level level, BlockPos pos, BlockState state, SparkReactorBlockEntity be) {
+        if (state.getValue(SparkReactorBlock.LIT)) {
+            com.effecoria.client.sound.ReactorHumClient.ensureSpark(pos);
+        }
+    }
+
     @Override
     public boolean supplying() {
         return isActivelyPowering();

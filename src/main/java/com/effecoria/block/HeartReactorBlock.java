@@ -92,8 +92,10 @@ public final class HeartReactorBlock extends BaseEntityBlock {
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
             Level level, BlockState state, BlockEntityType<T> type) {
         return level.isClientSide()
-                ? null
-                : createTickerHelper(type, ModBlockEntities.HEART_REACTOR_CORE.get(), HeartReactorBlockEntity::serverTick);
+                ? createTickerHelper(
+                        type, ModBlockEntities.HEART_REACTOR_CORE.get(), HeartReactorBlockEntity::clientTick)
+                : createTickerHelper(
+                        type, ModBlockEntities.HEART_REACTOR_CORE.get(), HeartReactorBlockEntity::serverTick);
     }
 
     @Override
