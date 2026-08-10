@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:seal_inscriber",
+  "era": 3,
+  "icon": "effecoria:seal_inscriber",
+  "status": "available",
+  "requires": [
+    "effecoria:psi_imprinter"
+  ],
+  "display_unlocks": []
+}

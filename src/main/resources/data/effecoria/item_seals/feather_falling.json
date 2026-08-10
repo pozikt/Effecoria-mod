@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:feather_falling",
+  "max_level": 4,
+  "applicable_tags": [
+    "effecoria:sealable_armor"
+  ],
+  "effect": "feather_falling",
+  "params": {
+    "per_level": 0.12
+  },
+  "starter": false
+}

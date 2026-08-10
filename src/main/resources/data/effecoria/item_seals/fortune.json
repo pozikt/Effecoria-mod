@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:fortune",
+  "max_level": 3,
+  "applicable_tags": [
+    "effecoria:sealable_tools"
+  ],
+  "effect": "fortune",
+  "params": {
+    "per_level": 1.0
+  },
+  "starter": false
+}

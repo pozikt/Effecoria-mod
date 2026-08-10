@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:psi_reservoir",
+  "max_level": 2,
+  "applicable_tags": [
+    "effecoria:sealable_jewelry"
+  ],
+  "effect": "psi_reservoir",
+  "params": {
+    "per_level": 5.0
+  },
+  "starter": false
+}

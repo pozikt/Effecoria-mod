@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:frost_walker",
+  "max_level": 2,
+  "applicable_tags": [
+    "effecoria:sealable_armor"
+  ],
+  "effect": "frost_walker",
+  "params": {
+    "per_level": 1.0
+  },
+  "starter": false
+}

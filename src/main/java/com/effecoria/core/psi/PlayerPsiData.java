@@ -67,6 +67,10 @@ public final class PlayerPsiData {
                 for (ResourceLocation word : data.knownSealWords) {
                     ResourceLocation.STREAM_CODEC.encode(buf, word);
                 }
+                ByteBufCodecs.INT.encode(buf, data.knownItemSeals.size());
+                for (ResourceLocation seal : data.knownItemSeals) {
+                    ResourceLocation.STREAM_CODEC.encode(buf, seal);
+                }
                 ByteBufCodecs.INT.encode(buf, data.savedSealExpressions.size());
                 for (List<ResourceLocation> expression : data.savedSealExpressions) {
                     ByteBufCodecs.INT.encode(buf, expression.size());
@@ -134,6 +138,11 @@ public final class PlayerPsiData {
                 for (int i = 0; i < wordCount; i++) {
                     data.knownSealWords.add(ResourceLocation.STREAM_CODEC.decode(buf));
                 }
+                int itemSealCount = ByteBufCodecs.INT.decode(buf);
+                data.knownItemSeals = new ArrayList<>(itemSealCount);
+                for (int i = 0; i < itemSealCount; i++) {
+                    data.knownItemSeals.add(ResourceLocation.STREAM_CODEC.decode(buf));
+                }
                 int expressionCount = ByteBufCodecs.INT.decode(buf);
                 data.savedSealExpressions = new ArrayList<>(expressionCount);
                 for (int i = 0; i < expressionCount; i++) {
@@ -176,6 +185,7 @@ public final class PlayerPsiData {
     private int selectedSpellIndex;
     private List<ResourceLocation> knownSpells = new ArrayList<>();
     private List<ResourceLocation> knownSealWords = new ArrayList<>();
+    private List<ResourceLocation> knownItemSeals = new ArrayList<>();
     private List<List<ResourceLocation>> savedSealExpressions = new ArrayList<>();
     private long phiSenseUntil;
     private float breathingMastery;
@@ -301,6 +311,24 @@ public final class PlayerPsiData {
 
     public List<ResourceLocation> knownSealWords() {
         return knownSealWords;
+    }
+
+    public List<ResourceLocation> knownItemSeals() {
+        return knownItemSeals;
+    }
+
+    public boolean knowsItemSeal(ResourceLocation id) {
+        return knownItemSeals.contains(id);
+    }
+
+    public void unlockItemSeal(ResourceLocation id) {
+        if (!knownItemSeals.contains(id)) {
+            knownItemSeals.add(id);
+        }
+    }
+
+    public void setKnownItemSeals(List<ResourceLocation> seals) {
+        this.knownItemSeals = new ArrayList<>(seals);
     }
 
     public List<List<ResourceLocation>> savedSealExpressions() {
@@ -857,8 +885,10 @@ public final class PlayerPsiData {
         if (chosenSchool == MagicSchool.SEALS) {
             this.knownSealWords = new ArrayList<>(com.effecoria.core.seal.SealProgramService.starterWordIds());
             this.knownSpells = new ArrayList<>();
+            this.knownItemSeals = new ArrayList<>(com.effecoria.core.artifact.ItemSealCatalog.starterIds());
         } else if (resetResources) {
             this.knownSealWords = new ArrayList<>();
+            this.knownItemSeals = new ArrayList<>();
         }
         if (resetResources) {
             this.maxPsi = BalanceConfig.DEFAULT_MAX_PSI.get().floatValue();
@@ -943,6 +973,11 @@ public final class PlayerPsiData {
             wordList.add(net.minecraft.nbt.StringTag.valueOf(word.toString()));
         }
         tag.put("knownSealWords", wordList);
+        ListTag itemSealList = new ListTag();
+        for (ResourceLocation seal : knownItemSeals) {
+            itemSealList.add(net.minecraft.nbt.StringTag.valueOf(seal.toString()));
+        }
+        tag.put("knownItemSeals", itemSealList);
         ListTag expressionsList = new ListTag();
         for (List<ResourceLocation> expression : savedSealExpressions) {
             ListTag expressionTag = new ListTag();
@@ -1081,6 +1116,13 @@ public final class PlayerPsiData {
                 knownSealWords.add(ResourceLocation.parse(entry.getAsString()));
             }
         }
+        knownItemSeals = new ArrayList<>();
+        if (tag.contains("knownItemSeals", Tag.TAG_LIST)) {
+            ListTag itemSealList = tag.getList("knownItemSeals", Tag.TAG_STRING);
+            for (Tag entry : itemSealList) {
+                knownItemSeals.add(ResourceLocation.parse(entry.getAsString()));
+            }
+        }
         savedSealExpressions = new ArrayList<>();
         if (tag.contains("savedSealExpressions", Tag.TAG_LIST)) {
             ListTag expressionsList = tag.getList("savedSealExpressions", Tag.TAG_LIST);
@@ -1136,6 +1178,9 @@ public final class PlayerPsiData {
             if (knownSealWords.isEmpty()) {
                 knownSealWords = new ArrayList<>(com.effecoria.core.seal.SealProgramService.starterWordIds());
             }
+            if (knownItemSeals.isEmpty()) {
+                knownItemSeals = new ArrayList<>(com.effecoria.core.artifact.ItemSealCatalog.starterIds());
+            }
         }
     }
 
@@ -1155,6 +1200,7 @@ public final class PlayerPsiData {
         copy.selectedSpellIndex = selectedSpellIndex;
         copy.knownSpells = new ArrayList<>(knownSpells);
         copy.knownSealWords = new ArrayList<>(knownSealWords);
+        copy.knownItemSeals = new ArrayList<>(knownItemSeals);
         copy.savedSealExpressions = new ArrayList<>();
         for (List<ResourceLocation> expression : savedSealExpressions) {
             copy.savedSealExpressions.add(new ArrayList<>(expression));

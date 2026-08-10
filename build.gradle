@@ -45,6 +45,10 @@ repositories {
             includeGroup('com.github.glitchfiend')
         }
     }
+    maven {
+        name = 'Illusive Soulworks'
+        url = 'https://maven.theillusivec4.top/'
+    }
 }
 
 base {
@@ -158,6 +162,10 @@ dependencies {
 
     implementation "com.github.glitchfiend:TerraBlender-neoforge:${minecraft_version}-${terrablender_version}"
     localRuntime "com.github.glitchfiend:TerraBlender-neoforge:${minecraft_version}-${terrablender_version}"
+
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
+    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+    localRuntime "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
@@ -175,6 +183,7 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             veil_version_range     : veil_version_range,
             geckolib_version_range : geckolib_version_range,
             terrablender_version_range: terrablender_version_range,
+            curios_version_range       : curios_version_range,
     ]
     inputs.properties replaceProperties
     expand replaceProperties

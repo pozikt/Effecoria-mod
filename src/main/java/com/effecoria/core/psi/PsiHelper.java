@@ -31,6 +31,8 @@ public final class PsiHelper {
                 * com.effecoria.core.disease.DiseaseEffects.airBiologyPenalty(player);
         float breath = data.breathingMastery() * breathFactor;
         PhiHarness.FocusBonuses focus = PhiHarness.focusBonuses(player);
+        com.effecoria.core.artifact.StaffStats.Bundle staff =
+                com.effecoria.core.artifact.StaffStats.ofHeld(player);
         return new PsiContext(
                 data.soulStrength(),
                 data.currentPsi(),
@@ -45,7 +47,9 @@ public final class PsiHelper {
                 data.isBreathTrainFatigued(),
                 focus.costFloorRatio(),
                 focus.resonanceWidthBonus(),
-                data.overcastRegenMultiplier(now));
+                data.overcastRegenMultiplier(now),
+                staff.castCostMul(),
+                staff.powerMul());
     }
 
     public static void initiate(Player player, MagicSchool school) {

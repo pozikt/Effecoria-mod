@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "effecoria:essonite_shard",
+    "effecoria:pure_essonite",
+    "effecoria:star_essonite",
+    "minecraft:diamond",
+    "minecraft:emerald",
+    "minecraft:gold_nugget"
+  ]
+}

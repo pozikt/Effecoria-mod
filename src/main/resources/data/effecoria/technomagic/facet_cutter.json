@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:facet_cutter",
+  "era": 3,
+  "icon": "effecoria:facet_cutter",
+  "status": "available",
+  "requires": [
+    "effecoria:resonance_focus"
+  ],
+  "display_unlocks": [
+    "effecoria:artifact_assembler"
+  ]
+}

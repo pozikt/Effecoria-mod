@@ -67,6 +67,11 @@ public final class PhiRadiationService {
             factor = Math.max(factor, 0.55f);
         }
 
+        float jewelry = com.effecoria.core.artifact.JewelryPassives.maxPhiShield(player);
+        if (jewelry > 0f) {
+            factor = Math.max(factor, jewelry);
+        }
+
         if (hasItem(player, ModItems.LEAD_CLOAK.get())
                 || player.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.LEAD_CLOAK.get())) {
             factor = Math.max(factor, 0.72f);

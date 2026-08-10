@@ -21,9 +21,12 @@ import com.effecoria.client.render.RootCageRenderer;
 import com.effecoria.client.render.RotfangMinkRenderer;
 import com.effecoria.client.render.SubspacePortalRenderer;
 import com.effecoria.client.gui.alchemy.AlembicScreen;
+import com.effecoria.client.gui.alchemy.AssemblerScreen;
 import com.effecoria.client.gui.alchemy.BurnerScreen;
+import com.effecoria.client.gui.alchemy.FormSelectScreen;
 import com.effecoria.client.gui.alchemy.ImprinterScreen;
 import com.effecoria.client.gui.alchemy.MortarScreen;
+import com.effecoria.client.gui.alchemy.SealInscriberScreen;
 import com.effecoria.client.render.PhiConstructRenderer;
 import com.effecoria.client.render.VitrifiedGolemRenderer;
 import com.effecoria.content.ModBlocks;
@@ -55,6 +58,10 @@ public final class EffecoriaClient {
         event.register(ModMenus.BURNER.get(), BurnerScreen::new);
         event.register(ModMenus.ALEMBIC.get(), AlembicScreen::new);
         event.register(ModMenus.IMPRINTER.get(), ImprinterScreen::new);
+        event.register(ModMenus.SHAFT_LATHE.get(), FormSelectScreen::new);
+        event.register(ModMenus.FACET_CUTTER.get(), FormSelectScreen::new);
+        event.register(ModMenus.ARTIFACT_ASSEMBLER.get(), AssemblerScreen::new);
+        event.register(ModMenus.SEAL_INSCRIBER.get(), SealInscriberScreen::new);
     }
 
     @SubscribeEvent

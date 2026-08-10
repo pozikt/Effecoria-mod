@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:sharpness",
+  "max_level": 5,
+  "applicable_tags": [
+    "effecoria:sealable_weapons"
+  ],
+  "effect": "damage_bonus",
+  "params": {
+    "per_level": 1.0
+  },
+  "starter": true
+}

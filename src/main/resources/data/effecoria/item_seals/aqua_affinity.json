@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:aqua_affinity",
+  "max_level": 1,
+  "applicable_tags": [
+    "effecoria:sealable_armor"
+  ],
+  "effect": "aqua_affinity",
+  "params": {},
+  "starter": false
+}

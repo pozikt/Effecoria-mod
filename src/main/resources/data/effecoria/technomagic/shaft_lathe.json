@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:shaft_lathe",
+  "era": 3,
+  "icon": "effecoria:shaft_lathe",
+  "status": "available",
+  "requires": [
+    "effecoria:resonance_focus"
+  ],
+  "display_unlocks": [
+    "effecoria:artifact_assembler"
+  ]
+}

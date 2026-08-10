@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:depth_strider",
+  "max_level": 3,
+  "applicable_tags": [
+    "effecoria:sealable_armor"
+  ],
+  "effect": "depth_strider",
+  "params": {
+    "per_level": 0.15
+  },
+  "starter": false
+}

@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:soul_speed",
+  "max_level": 3,
+  "applicable_tags": [
+    "effecoria:sealable_armor"
+  ],
+  "effect": "soul_speed",
+  "params": {
+    "per_level": 0.1
+  },
+  "starter": false
+}

@@ -17,10 +17,13 @@ public record PsiContext(
         boolean breathTrainFatigue,
         float focusCostFloor,
         float focusResonanceWidthBonus,
-        float overcastRegenMult) {
+        float overcastRegenMult,
+        float staffCostMul,
+        float staffPowerMul) {
 
     public static PsiContext defaultHuman(MagicSchool school) {
-        return new PsiContext(1f, 50f, 0.6f, school.nominalFrequencyHz(), school, 0f, 0f, 0, 0f, 0f, false, 0f, 0f, 1f);
+        return new PsiContext(
+                1f, 50f, 0.6f, school.nominalFrequencyHz(), school, 0f, 0f, 0, 0f, 0f, false, 0f, 0f, 1f, 1f, 1f);
     }
 
     public PsiContext withCurrentPsi(float psi) {
@@ -38,7 +41,9 @@ public record PsiContext(
                 breathTrainFatigue,
                 focusCostFloor,
                 focusResonanceWidthBonus,
-                overcastRegenMult);
+                overcastRegenMult,
+                staffCostMul,
+                staffPowerMul);
     }
 
     public float mastery() {

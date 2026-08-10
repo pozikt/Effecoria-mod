@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:swords",
+    "#minecraft:axes",
+    "effecoria:modular_staff",
+    "effecoria:vitrified_glass_sword",
+    "effecoria:vitrified_glass_axe"
+  ]
+}

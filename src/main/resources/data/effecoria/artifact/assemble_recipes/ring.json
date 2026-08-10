@@ -1,0 +1,8 @@
+{
+  "id": "effecoria:assemble_ring",
+  "template": "ring",
+  "input_a": "band",
+  "input_b": "gem",
+  "result": "effecoria:assembled_ring",
+  "cook_ticks": 80
+}

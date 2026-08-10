@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:smite",
+  "max_level": 5,
+  "applicable_tags": [
+    "effecoria:sealable_weapons"
+  ],
+  "effect": "smite",
+  "params": {
+    "per_level": 2.5
+  },
+  "starter": false
+}

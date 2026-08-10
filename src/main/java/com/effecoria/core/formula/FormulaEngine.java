@@ -62,7 +62,8 @@ public final class FormulaEngine {
                 * spell.powerMultiplier()
                 * ctx.mastery()
                 * com.effecoria.core.progression.BiologyService.spellPowerFactor(ctx.biologyQ())
-                * BalanceConfig.SPELL_POWER_SCALE.get().floatValue();
+                * BalanceConfig.SPELL_POWER_SCALE.get().floatValue()
+                * Math.max(0.1f, ctx.staffPowerMul());
     }
 
     /**
@@ -75,7 +76,8 @@ public final class FormulaEngine {
         return spell.baseCost()
                 * proficiencyCostFactor(ctx.breathingMastery(), spell.minMastery(), ctx.focusCostFloor())
                 * phiPenalty
-                * ExhaustionService.costMultiplier(ctx.exhaustion());
+                * ExhaustionService.costMultiplier(ctx.exhaustion())
+                * Math.max(0.25f, ctx.staffCostMul());
     }
 
     /**

@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:efficiency",
+  "max_level": 5,
+  "applicable_tags": [
+    "effecoria:sealable_tools"
+  ],
+  "effect": "efficiency",
+  "params": {
+    "per_level": 0.2
+  },
+  "starter": false
+}

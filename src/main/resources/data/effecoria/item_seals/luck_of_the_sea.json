@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:luck_of_the_sea",
+  "max_level": 3,
+  "applicable_tags": [
+    "effecoria:sealable_tools"
+  ],
+  "effect": "luck_of_sea",
+  "params": {
+    "per_level": 1.0
+  },
+  "starter": false
+}

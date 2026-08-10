@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:power",
+  "max_level": 5,
+  "applicable_tags": [
+    "effecoria:sealable_ranged"
+  ],
+  "effect": "power",
+  "params": {
+    "per_level": 0.25
+  },
+  "starter": false
+}

@@ -10,7 +10,7 @@ See also [ROADMAP.md](ROADMAP.md) Stage IV — **in progress: catalog + Era I–
 |-----|--------|--------|
 | I — Hearth | Torch, campfire heat, crucible, mortar | **Playable** |
 | II — Workshop | Burner, Φ-furnace, glass/flasks, alembic, filters, cell, focus | **Playable** |
-| III — Imprint | Ψ-imprinter, golem chassis / Φ-construct, Φ-telegraph | **Playable** |
+| III — Imprint | Ψ-imprinter, golem chassis / Φ-construct, Φ-telegraph, **artifact craft** (lathe/cutter/assembler), **item seals**, **Curios jewelry** | **Playable** |
 | IV — Reactors | Spark / Heart / Forge reactors, Φ-bus | Catalog `planned` |
 | V — Geo | Geo wells, climate array, portal gate | Catalog `planned` |
 
@@ -31,6 +31,13 @@ flowchart LR
   imprint --> chassis[golem_chassis]
   chassis --> construct[phi_construct]
   imprint --> telegraph[phi_telegraph]
+  focus --> lathe[shaft_lathe]
+  focus --> cutter[facet_cutter]
+  lathe --> assemble[artifact_assembler]
+  cutter --> assemble
+  assemble --> staff[modular_staff]
+  imprint --> inscriber[seal_inscriber]
+  assemble --> jewelry[curios_jewelry]
 ```
 
 ## Era III playable
@@ -41,6 +48,11 @@ flowchart LR
 | Golem Chassis | `golem_chassis` | Blank craft → imprint → use on ground to spawn tame `phi_construct` |
 | Φ-Construct | `phi_construct` | Follow/sit/defend; needs owner Φ-cell charge; 1 per player |
 | Φ-Telegraph | `phi_telegraph` | Pair two (same dim); insert cell; pulse with flask/paper |
+| Shaft Lathe | `shaft_lathe` | Carve shaft forms (MED heat) |
+| Facet Cutter | `facet_cutter` | Cut focus facets (MED heat) |
+| Artifact Assembler | `artifact_assembler` | Staff / ring / amulet / charm |
+| Seal Inscriber | `seal_inscriber` | Item seals (Seals school + discovery) |
+| Modular Staff / Jewelry | `modular_staff`, Curios slots | See [ARTIFACT_CRAFT.md](ARTIFACT_CRAFT.md) |
 
 ## Earlier nodes (I–II)
 

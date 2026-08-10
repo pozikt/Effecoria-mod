@@ -110,3 +110,11 @@ Phase 0: project skeleton, FormulaEngine, data-driven spell templates.
     ordering="AFTER"
     side="BOTH"
     reason="Essence Plateau overworld biome registration"
+
+[[dependencies.${mod_id}]]
+    modId="curios"
+    type="required"
+    versionRange="${curios_version_range}"
+    ordering="NONE"
+    side="BOTH"
+    reason="Accessory slots for rings, amulets, and charms"

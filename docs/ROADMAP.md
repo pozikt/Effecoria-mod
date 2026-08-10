@@ -28,7 +28,7 @@ Stage I ships a **complete cast loop** for all schools. Later stages do **not** 
 | **II — Environment** | **Elemental** | Weather, biomes, flora/fauna, surface Φ anomalies give fire/ice/storm/steam real anchors |
 | **III — Caves & ores** | *(as needed)* Material-tied workings, deep-Φ / low-light school hooks | New ores and underground Φ zones |
 | **IV — Technology** | **Seals** | Reactors, towers, rune wiring, seal-automata — programmable Φ on blocks |
-| **Items + accessory slot library** (Curios / Trinkets / equivalent) | **Corruption (curses)** | Wearable curse marks, blight brands, prey/bind on jewelry & relics — slots make permanent/semi-permanent curses readable |
+| **Items + accessory slot library** (Curios) | **Corruption (curses)** | Wearable curse marks — slots exist; curse gear still Stage IV+ |
 | **V — TSE / VI — Ω** | Spatial + necromancy endgame (and cross-school cosmology) | Singularities, other-side geography |
 
 Rule of thumb: **do not invent a huge school rewrite in Stage I “just because.”** Park deep seal automation until tech, deep curse equipment until accessory slots exist, and big elemental identity until the environment can feed it.
@@ -145,7 +145,8 @@ When (or after) we add meaningful **items / relics** and integrate an **accessor
 
 | Item | Notes |
 |------|-------|
-| Accessory slots | Ring / amulet / charm slots for Effecoria gear |
+| Accessory slots | **Shipped (Curios)** — ring×2 / amulet / charm; see [ARTIFACT_CRAFT.md](ARTIFACT_CRAFT.md) |
+| Modular artifacts | **Shipped (Era III)** — lathe / cutter / assembler / item seals |
 | **Magic: Corruption (curses) expansion** | Curse marks, brands, prey/bind as wearable or slot-bound effects; readable persistence without stuffing the hotbar |
 
 Corruption combat spells can still grow a little in Stage I; **equipment-scale curses** wait on slots + item identity.

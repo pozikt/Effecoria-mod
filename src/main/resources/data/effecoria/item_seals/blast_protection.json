@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:blast_protection",
+  "max_level": 4,
+  "applicable_tags": [
+    "effecoria:sealable_armor"
+  ],
+  "effect": "blast_protection",
+  "params": {
+    "per_level": 0.08
+  },
+  "starter": false
+}

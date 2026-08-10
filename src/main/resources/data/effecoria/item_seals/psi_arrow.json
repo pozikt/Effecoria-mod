@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:psi_arrow",
+  "max_level": 1,
+  "applicable_tags": [
+    "effecoria:sealable_ranged"
+  ],
+  "effect": "psi_arrow",
+  "params": {
+    "psi_cost": 2.0
+  },
+  "starter": false
+}

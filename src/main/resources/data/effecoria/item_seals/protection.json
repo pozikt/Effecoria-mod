@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:protection",
+  "max_level": 4,
+  "applicable_tags": [
+    "effecoria:sealable_armor"
+  ],
+  "effect": "protection",
+  "params": {
+    "per_level": 0.04
+  },
+  "starter": true
+}

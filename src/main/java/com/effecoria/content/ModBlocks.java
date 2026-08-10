@@ -2,6 +2,7 @@ package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.block.AncientEssenceWoodBlock;
+import com.effecoria.block.ArtifactStationBlock;
 import com.effecoria.block.ClayCrucibleBlock;
 import com.effecoria.block.EldritchBloodPuddleBlock;
 import com.effecoria.block.EssoniteCrustBlock;
@@ -689,6 +690,46 @@ public final class ModBlocks {
                     .strength(2.0f, 5f)
                     .sound(ModSoundTypes.PHI_STONE)
                     .noOcclusion()));
+
+    public static final DeferredBlock<ArtifactStationBlock> SHAFT_LATHE = BLOCKS.register(
+            "shaft_lathe",
+            () -> new ArtifactStationBlock(
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.WOOD)
+                            .strength(2.0f, 4f)
+                            .sound(SoundType.WOOD)
+                            .noOcclusion(),
+                    ArtifactStationBlock.Kind.LATHE));
+
+    public static final DeferredBlock<ArtifactStationBlock> FACET_CUTTER = BLOCKS.register(
+            "facet_cutter",
+            () -> new ArtifactStationBlock(
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.STONE)
+                            .strength(2.0f, 5f)
+                            .sound(ModSoundTypes.PHI_STONE)
+                            .noOcclusion(),
+                    ArtifactStationBlock.Kind.CUTTER));
+
+    public static final DeferredBlock<ArtifactStationBlock> ARTIFACT_ASSEMBLER = BLOCKS.register(
+            "artifact_assembler",
+            () -> new ArtifactStationBlock(
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.METAL)
+                            .strength(2.2f, 5f)
+                            .sound(SoundType.METAL)
+                            .noOcclusion(),
+                    ArtifactStationBlock.Kind.ASSEMBLER));
+
+    public static final DeferredBlock<ArtifactStationBlock> SEAL_INSCRIBER = BLOCKS.register(
+            "seal_inscriber",
+            () -> new ArtifactStationBlock(
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_PURPLE)
+                            .strength(2.0f, 5f)
+                            .sound(ModSoundTypes.PHI_STONE)
+                            .noOcclusion(),
+                    ArtifactStationBlock.Kind.INSCRIBER));
 
     /** Era III Φ-telegraph — paired same-dimension messaging. */
     public static final DeferredBlock<PhiTelegraphBlock> PHI_TELEGRAPH = BLOCKS.register(

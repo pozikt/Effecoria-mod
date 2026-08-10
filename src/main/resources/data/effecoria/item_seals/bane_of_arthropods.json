@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:bane_of_arthropods",
+  "max_level": 5,
+  "applicable_tags": [
+    "effecoria:sealable_weapons"
+  ],
+  "effect": "bane",
+  "params": {
+    "per_level": 2.5
+  },
+  "starter": false
+}

@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:respiration",
+  "max_level": 3,
+  "applicable_tags": [
+    "effecoria:sealable_armor"
+  ],
+  "effect": "respiration",
+  "params": {
+    "per_level": 1.0
+  },
+  "starter": false
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": {
+      "item": "effecoria:lead_filter"
+    },
+    "I": {
+      "item": "minecraft:iron_nugget"
+    }
+  },
+  "pattern": [
+    " I ",
+    "ILI",
+    " I "
+  ],
+  "result": {
+    "count": 1,
+    "id": "effecoria:lead_charm"
+  }
+}

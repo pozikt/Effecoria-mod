@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:curios_jewelry",
+  "era": 3,
+  "icon": "effecoria:gold_amulet",
+  "status": "available",
+  "requires": [
+    "effecoria:artifact_assembler"
+  ],
+  "display_unlocks": []
+}

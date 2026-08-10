@@ -1,0 +1,8 @@
+{
+  "id": "effecoria:assemble_amulet",
+  "template": "amulet",
+  "input_a": "band",
+  "input_b": "gem",
+  "result": "effecoria:assembled_amulet",
+  "cook_ticks": 80
+}

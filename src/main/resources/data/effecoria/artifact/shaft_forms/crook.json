@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:crook",
+  "material_tags": [
+    "effecoria:shaft_materials"
+  ],
+  "reach": 1.15,
+  "cast_cost_mul": 1.05,
+  "durability": 220,
+  "cook_ticks": 100
+}

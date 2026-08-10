@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "effecoria:block/artifact_assembler"
+    }
+  }
+}

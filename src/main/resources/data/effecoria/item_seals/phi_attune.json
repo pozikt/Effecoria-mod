@@ -1,0 +1,13 @@
+{
+  "id": "effecoria:phi_attune",
+  "max_level": 3,
+  "applicable_tags": [
+    "effecoria:sealable_weapons",
+    "effecoria:sealable_jewelry"
+  ],
+  "effect": "phi_attune",
+  "params": {
+    "per_level": 0.05
+  },
+  "starter": false
+}

@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:knockback",
+  "max_level": 2,
+  "applicable_tags": [
+    "effecoria:sealable_weapons"
+  ],
+  "effect": "knockback",
+  "params": {
+    "per_level": 0.5
+  },
+  "starter": false
+}

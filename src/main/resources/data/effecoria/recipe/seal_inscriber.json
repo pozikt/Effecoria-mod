@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": {
+      "item": "effecoria:phi_stone"
+    },
+    "P": {
+      "item": "effecoria:phi_paper"
+    },
+    "B": {
+      "item": "minecraft:book"
+    },
+    "C": {
+      "item": "effecoria:pure_essonite"
+    }
+  },
+  "pattern": [
+    "PBP",
+    "SCS",
+    "SSS"
+  ],
+  "result": {
+    "count": 1,
+    "id": "effecoria:seal_inscriber"
+  }
+}

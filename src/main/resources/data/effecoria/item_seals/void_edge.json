@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:void_edge",
+  "max_level": 3,
+  "applicable_tags": [
+    "effecoria:sealable_weapons"
+  ],
+  "effect": "void_edge",
+  "params": {
+    "per_level": 1.5
+  },
+  "starter": false
+}

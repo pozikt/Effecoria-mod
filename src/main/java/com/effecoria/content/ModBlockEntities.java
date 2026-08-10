@@ -1,15 +1,19 @@
 package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.block.ArtifactAssemblerBlockEntity;
 import com.effecoria.block.ClayCrucibleBlock;
 import com.effecoria.block.EssenceAlembicBlockEntity;
 import com.effecoria.block.EssenceBurnerBlockEntity;
+import com.effecoria.block.FacetCutterBlockEntity;
 import com.effecoria.block.MortarBlockEntity;
 import com.effecoria.block.PhiCampfireBlock;
 import com.effecoria.block.PhiFurnaceBlock;
 import com.effecoria.block.PhiGeyserBlockEntity;
 import com.effecoria.block.PhiTelegraphBlock;
 import com.effecoria.block.PsiImprinterBlockEntity;
+import com.effecoria.block.SealInscriberBlockEntity;
+import com.effecoria.block.ShaftLatheBlockEntity;
 import com.effecoria.block.SubspacePortalBlockEntity;
 import com.effecoria.block.WhisperingSpireVentBlockEntity;
 
@@ -79,6 +83,31 @@ public final class ModBlockEntities {
             PSI_IMPRINTER = BLOCK_ENTITY_TYPES.register(
                     "psi_imprinter",
                     () -> BlockEntityType.Builder.of(PsiImprinterBlockEntity::new, ModBlocks.PSI_IMPRINTER.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ShaftLatheBlockEntity>> SHAFT_LATHE =
+            BLOCK_ENTITY_TYPES.register(
+                    "shaft_lathe",
+                    () -> BlockEntityType.Builder.of(ShaftLatheBlockEntity::new, ModBlocks.SHAFT_LATHE.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FacetCutterBlockEntity>> FACET_CUTTER =
+            BLOCK_ENTITY_TYPES.register(
+                    "facet_cutter",
+                    () -> BlockEntityType.Builder.of(FacetCutterBlockEntity::new, ModBlocks.FACET_CUTTER.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ArtifactAssemblerBlockEntity>>
+            ARTIFACT_ASSEMBLER = BLOCK_ENTITY_TYPES.register(
+                    "artifact_assembler",
+                    () -> BlockEntityType.Builder.of(
+                                    ArtifactAssemblerBlockEntity::new, ModBlocks.ARTIFACT_ASSEMBLER.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SealInscriberBlockEntity>> SEAL_INSCRIBER =
+            BLOCK_ENTITY_TYPES.register(
+                    "seal_inscriber",
+                    () -> BlockEntityType.Builder.of(SealInscriberBlockEntity::new, ModBlocks.SEAL_INSCRIBER.get())
                             .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiTelegraphBlock.PhiTelegraphBlockEntity>>

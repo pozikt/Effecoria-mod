@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "#effecoria:sealable_weapons",
+    "#effecoria:sealable_tools",
+    "#effecoria:sealable_armor",
+    "#effecoria:sealable_jewelry",
+    "#effecoria:sealable_ranged",
+    "effecoria:modular_staff"
+  ]
+}

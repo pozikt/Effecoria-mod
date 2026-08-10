@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:brilliant",
+  "material_tags": [
+    "effecoria:focus_materials"
+  ],
+  "power": 1.15,
+  "focus_tier": 2,
+  "school_bias": 0.05,
+  "cook_ticks": 120
+}

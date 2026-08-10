@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:lens",
+  "material_tags": [
+    "effecoria:focus_materials"
+  ],
+  "power": 1.0,
+  "focus_tier": 1,
+  "school_bias": 0.0,
+  "cook_ticks": 120
+}

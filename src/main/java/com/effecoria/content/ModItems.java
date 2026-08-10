@@ -172,6 +172,24 @@ public final class ModItems {
             "psi_imprinter",
             () -> new HintBlockItem(
                     ModBlocks.PSI_IMPRINTER.get(), new Item.Properties(), "tooltip.effecoria.psi_imprinter"));
+    public static final DeferredItem<BlockItem> SHAFT_LATHE = ITEMS.register(
+            "shaft_lathe",
+            () -> new HintBlockItem(
+                    ModBlocks.SHAFT_LATHE.get(), new Item.Properties(), "tooltip.effecoria.shaft_lathe"));
+    public static final DeferredItem<BlockItem> FACET_CUTTER = ITEMS.register(
+            "facet_cutter",
+            () -> new HintBlockItem(
+                    ModBlocks.FACET_CUTTER.get(), new Item.Properties(), "tooltip.effecoria.facet_cutter"));
+    public static final DeferredItem<BlockItem> ARTIFACT_ASSEMBLER = ITEMS.register(
+            "artifact_assembler",
+            () -> new HintBlockItem(
+                    ModBlocks.ARTIFACT_ASSEMBLER.get(),
+                    new Item.Properties(),
+                    "tooltip.effecoria.artifact_assembler"));
+    public static final DeferredItem<BlockItem> SEAL_INSCRIBER = ITEMS.register(
+            "seal_inscriber",
+            () -> new HintBlockItem(
+                    ModBlocks.SEAL_INSCRIBER.get(), new Item.Properties(), "tooltip.effecoria.seal_inscriber"));
     public static final DeferredItem<BlockItem> PHI_TELEGRAPH =
             ITEMS.registerSimpleBlockItem("phi_telegraph", ModBlocks.PHI_TELEGRAPH);
     public static final DeferredItem<Item> GOLEM_CHASSIS = ITEMS.register(
@@ -179,6 +197,31 @@ public final class ModItems {
     public static final DeferredItem<Item> TELEGRAPH_MODULE = ITEMS.register(
             "telegraph_module",
             () -> new HintItem(new Item.Properties().stacksTo(16), "tooltip.effecoria.telegraph_module"));
+
+    public static final DeferredItem<Item> CARVED_SHAFT = ITEMS.register(
+            "carved_shaft", () -> new ModularPartItem(new Item.Properties().stacksTo(16), "shaft"));
+    public static final DeferredItem<Item> FACETED_FOCUS = ITEMS.register(
+            "faceted_focus", () -> new ModularPartItem(new Item.Properties().stacksTo(16), "focus"));
+    public static final DeferredItem<Item> JEWELRY_BAND = ITEMS.register(
+            "jewelry_band", () -> new ModularPartItem(new Item.Properties().stacksTo(16), "band"));
+    public static final DeferredItem<Item> JEWELRY_GEM = ITEMS.register(
+            "jewelry_gem", () -> new ModularPartItem(new Item.Properties().stacksTo(16), "gem"));
+    public static final DeferredItem<Item> MODULAR_STAFF = ITEMS.register(
+            "modular_staff", () -> new ModularStaffItem(new Item.Properties().stacksTo(1).durability(500)));
+    public static final DeferredItem<Item> ASSEMBLED_RING = ITEMS.register(
+            "assembled_ring",
+            () -> new AssembledJewelryItem(
+                    new Item.Properties(), "item.effecoria.assembled_ring.hint", 0.3f, "ring"));
+    public static final DeferredItem<Item> ASSEMBLED_AMULET = ITEMS.register(
+            "assembled_amulet",
+            () -> new AssembledJewelryItem(
+                    new Item.Properties(), "item.effecoria.assembled_amulet.hint", 0.5f, "amulet"));
+    public static final DeferredItem<Item> ASSEMBLED_CHARM = ITEMS.register(
+            "assembled_charm",
+            () -> new AssembledJewelryItem(
+                    new Item.Properties(), "item.effecoria.assembled_charm.hint", 0.45f, "charm"));
+    public static final DeferredItem<Item> ITEM_SEAL_PRIMER = ITEMS.register(
+            "item_seal_primer", () -> new ItemSealPrimerItem(new Item.Properties().stacksTo(16)));
     public static final DeferredItem<BlockItem> ESSENCE_BURNER = ITEMS.register(
             "essence_burner",
             () -> new EssenceBurnerBlockItem(ModBlocks.ESSENCE_BURNER.get(), new Item.Properties()));
@@ -212,9 +255,31 @@ public final class ModItems {
     /** Heavy Φ-insulating cloak (lead mesh stand-in). */
     public static final DeferredItem<Item> LEAD_CLOAK = ITEMS.register(
             "lead_cloak", () -> new Item(new Item.Properties().stacksTo(1)));
-    /** Light gold Φ-reflector worn as jewelry. */
+    /** Light gold Φ-reflector — Curios amulet. */
     public static final DeferredItem<Item> GOLD_AMULET = ITEMS.register(
-            "gold_amulet", () -> new Item(new Item.Properties().stacksTo(1)));
+            "gold_amulet",
+            () -> new JewelryItem(
+                    new Item.Properties(), "item.effecoria.gold_amulet.hint", 0.55f));
+    /** Star essonite amulet — stronger Φ reflection. */
+    public static final DeferredItem<Item> STAR_AMULET = ITEMS.register(
+            "star_amulet",
+            () -> new JewelryItem(
+                    new Item.Properties(), "item.effecoria.star_amulet.hint", 0.7f));
+    /** Essonite ring — modest Φ damp. */
+    public static final DeferredItem<Item> ESSONITE_RING = ITEMS.register(
+            "essonite_ring",
+            () -> new JewelryItem(
+                    new Item.Properties(), "item.effecoria.essonite_ring.hint", 0.35f));
+    /** Φ-band ring — light Ψ subsidy marker (shield). */
+    public static final DeferredItem<Item> PHI_BAND = ITEMS.register(
+            "phi_band",
+            () -> new JewelryItem(
+                    new Item.Properties(), "item.effecoria.phi_band.hint", 0.4f));
+    /** Lead charm — heavy damp in charm slot. */
+    public static final DeferredItem<Item> LEAD_CHARM = ITEMS.register(
+            "lead_charm",
+            () -> new JewelryItem(
+                    new Item.Properties(), "item.effecoria.lead_charm.hint", 0.6f));
     /** Hand-held Φ shade — gold foil on a frame. */
     public static final DeferredItem<Item> ESSENCE_PARASOL = ITEMS.register(
             "essence_parasol", () -> new Item(new Item.Properties().stacksTo(1)));

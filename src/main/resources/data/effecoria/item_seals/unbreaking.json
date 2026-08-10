@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:unbreaking",
+  "max_level": 3,
+  "applicable_tags": [
+    "effecoria:sealable_all"
+  ],
+  "effect": "unbreaking",
+  "params": {
+    "per_level": 0.2
+  },
+  "starter": false
+}

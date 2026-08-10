@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "effecoria:phi_paper"
+    },
+    {
+      "item": "effecoria:essonite_shard"
+    },
+    {
+      "item": "minecraft:lapis_lazuli"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "effecoria:item_seal_primer"
+  }
+}

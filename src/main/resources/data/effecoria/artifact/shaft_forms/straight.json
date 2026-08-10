@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:straight",
+  "material_tags": [
+    "effecoria:shaft_materials"
+  ],
+  "reach": 1.0,
+  "cast_cost_mul": 1.0,
+  "durability": 250,
+  "cook_ticks": 100
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "tag": "effecoria:jewelry_gem_materials"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "effecoria:jewelry_gem"
+  }
+}

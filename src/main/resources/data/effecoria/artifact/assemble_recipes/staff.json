@@ -1,0 +1,8 @@
+{
+  "id": "effecoria:assemble_staff",
+  "template": "staff",
+  "input_a": "shaft",
+  "input_b": "focus",
+  "result": "effecoria:modular_staff",
+  "cook_ticks": 80
+}

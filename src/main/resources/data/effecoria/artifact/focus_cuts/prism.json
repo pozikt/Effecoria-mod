@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:prism",
+  "material_tags": [
+    "effecoria:focus_materials"
+  ],
+  "power": 1.05,
+  "focus_tier": 1,
+  "school_bias": 0.1,
+  "cook_ticks": 120
+}

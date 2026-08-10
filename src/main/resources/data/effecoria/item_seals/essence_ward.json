@@ -1,0 +1,13 @@
+{
+  "id": "effecoria:essence_ward",
+  "max_level": 2,
+  "applicable_tags": [
+    "effecoria:sealable_jewelry",
+    "effecoria:sealable_armor"
+  ],
+  "effect": "essence_ward",
+  "params": {
+    "per_level": 0.1
+  },
+  "starter": false
+}

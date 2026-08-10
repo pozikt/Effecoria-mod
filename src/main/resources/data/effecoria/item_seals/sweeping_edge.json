@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:sweeping_edge",
+  "max_level": 3,
+  "applicable_tags": [
+    "effecoria:sealable_weapons"
+  ],
+  "effect": "sweeping",
+  "params": {
+    "per_level": 0.25
+  },
+  "starter": false
+}

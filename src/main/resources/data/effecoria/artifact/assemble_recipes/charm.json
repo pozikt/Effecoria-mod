@@ -1,0 +1,8 @@
+{
+  "id": "effecoria:assemble_charm",
+  "template": "charm",
+  "input_a": "band",
+  "input_b": "gem",
+  "result": "effecoria:assembled_charm",
+  "cook_ticks": 80
+}

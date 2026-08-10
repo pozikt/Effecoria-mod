@@ -1,0 +1,14 @@
+{
+  "id": "effecoria:artifact_assembler",
+  "era": 3,
+  "icon": "effecoria:artifact_assembler",
+  "status": "available",
+  "requires": [
+    "effecoria:shaft_lathe",
+    "effecoria:facet_cutter"
+  ],
+  "display_unlocks": [
+    "effecoria:modular_staff",
+    "effecoria:curios_jewelry"
+  ]
+}

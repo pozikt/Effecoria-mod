@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "effecoria:gold_amulet",
+    "effecoria:star_amulet",
+    "effecoria:essonite_ring",
+    "effecoria:phi_band",
+    "effecoria:lead_charm",
+    "effecoria:assembled_ring",
+    "effecoria:assembled_amulet",
+    "effecoria:assembled_charm"
+  ]
+}

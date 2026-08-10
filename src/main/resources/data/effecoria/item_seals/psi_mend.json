@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:psi_mend",
+  "max_level": 1,
+  "applicable_tags": [
+    "effecoria:sealable_all"
+  ],
+  "effect": "psi_mend",
+  "params": {
+    "psi_per_point": 0.5
+  },
+  "starter": false
+}

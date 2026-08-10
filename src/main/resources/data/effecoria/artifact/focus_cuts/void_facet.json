@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:void_facet",
+  "material_tags": [
+    "effecoria:focus_materials"
+  ],
+  "power": 1.25,
+  "focus_tier": 3,
+  "school_bias": 0.15,
+  "cook_ticks": 120
+}

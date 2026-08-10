@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:swift_sneak",
+  "max_level": 3,
+  "applicable_tags": [
+    "effecoria:sealable_armor"
+  ],
+  "effect": "swift_sneak",
+  "params": {
+    "per_level": 0.15
+  },
+  "starter": false
+}

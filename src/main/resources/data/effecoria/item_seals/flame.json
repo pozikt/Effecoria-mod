@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:flame",
+  "max_level": 1,
+  "applicable_tags": [
+    "effecoria:sealable_ranged"
+  ],
+  "effect": "flame",
+  "params": {},
+  "starter": false
+}

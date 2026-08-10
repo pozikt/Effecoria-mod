@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:modular_staff",
+  "era": 3,
+  "icon": "effecoria:modular_staff",
+  "status": "available",
+  "requires": [
+    "effecoria:artifact_assembler"
+  ],
+  "display_unlocks": []
+}

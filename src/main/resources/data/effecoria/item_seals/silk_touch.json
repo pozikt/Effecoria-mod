@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:silk_touch",
+  "max_level": 1,
+  "applicable_tags": [
+    "effecoria:sealable_tools"
+  ],
+  "effect": "silk_touch",
+  "params": {},
+  "starter": false
+}
