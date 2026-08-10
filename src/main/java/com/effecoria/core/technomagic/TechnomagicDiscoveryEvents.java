@@ -70,6 +70,8 @@ public final class TechnomagicDiscoveryEvents {
         discoverIfHas(player, ModItems.MORTAR_AND_PESTLE.get(), "mortar_and_pestle");
         discoverIfHas(player, ModItems.ESSENCE_BURNER.get(), "essence_burner");
         discoverIfHas(player, ModItems.SPARK_REACTOR.get(), "spark_reactor");
+        discoverIfHas(player, ModItems.HEART_REACTOR_CORE.get(), "heart_reactor");
+        discoverIfHas(player, ModItems.PHI_BUS.get(), "phi_bus");
         discoverIfHas(player, ModItems.ESSENCE_ALEMBIC.get(), "essence_alembic");
         discoverIfHas(player, ModItems.PHI_CELL.get(), "phi_cell");
         discoverIfHas(player, ModItems.RESONANCE_FOCUS.get(), "resonance_focus");

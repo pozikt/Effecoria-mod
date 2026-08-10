@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "effecoria:block/reactor_casing" }
+  }
+}

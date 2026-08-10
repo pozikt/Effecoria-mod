@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": { "item": "effecoria:essonite_dust" },
+    "C": { "item": "effecoria:phi_cell" },
+    "M": { "item": "effecoria:mithril_wire" }
+  },
+  "pattern": [
+    " D ",
+    "MCM",
+    " D "
+  ],
+  "result": {
+    "count": 2,
+    "id": "effecoria:phi_flux_slug"
+  }
+}

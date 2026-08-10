@@ -1,8 +1,17 @@
 # Technomagic tree
 
-Free-craft progression catalog (no recipe gating). Building and using gear marks nodes as **discovered** in the Primer Technomancy list.
+Craft stays **free**. Operating Era N machines requires completing **all available** catalog nodes of eras 1..N−1 (craft their icon items to discover them). Machines also consume prior-era resources (Φ-heat, charged cells, Φ-flux slugs).
 
-See also [ROADMAP.md](ROADMAP.md) Stage IV — **in progress: catalog + Era I–III**.
+See also [ROADMAP.md](ROADMAP.md) Stage IV.
+
+## Progression rules
+
+| Rule | Effect |
+|------|--------|
+| Free craft | Recipes are never recipe-gated |
+| Era complete | Every `available` node in that era is discovered |
+| Operate Era N | Eras 1..N−1 must be complete (creative mode bypasses) |
+| Resource chain | Era II needs Era I heat; Era III needs MED burner + Φ-cell; Era IV Spark needs flux slug; Heart needs pure essonite / flux priming + coolant |
 
 ## Eras
 
@@ -10,70 +19,39 @@ See also [ROADMAP.md](ROADMAP.md) Stage IV — **in progress: catalog + Era I–
 |-----|--------|--------|
 | I — Hearth | Torch, campfire heat, crucible, mortar | **Playable** |
 | II — Workshop | Burner, Φ-furnace, glass/flasks, alembic, filters, cell, focus | **Playable** |
-| III — Imprint | Ψ-imprinter, golem chassis / Φ-construct, Φ-telegraph, **artifact craft** (lathe/cutter/assembler), **item seals**, **Curios jewelry** | **Playable** |
-| IV — Reactors | Spark / Heart / Forge reactors, Φ-bus | **Spark playable**; Heart/Forge/bus `planned` |
+| III — Imprint | Ψ-imprinter, golem / telegraph, artifact craft, seals, jewelry | **Playable** |
+| IV — Reactors | Spark, **Heart 3×3×3**, **Φ-bus**; Forge planned | **Spark + Heart + bus playable** |
 | V — Geo | Geo wells, climate array, portal gate | Catalog `planned` |
 
-## Flow (I–III)
+## Era IV Heart multiblock (3×3×3)
+
+Around `heart_reactor_core`:
+
+| Position | Block |
+|----------|--------|
+| 8 corners | `void_obsidian` |
+| 12 edges | `reactor_casing` |
+| 6 face centers | `phi_glass` |
+| Center | `heart_reactor_core` |
+
+When the shell is valid, it **assembles**: shell cells become invisible `heart_reactor_part`s and the core BER draws one solid textured 3×3×3. Click any part/core to open the fuel GUI. Breaking a part or the core dismantles and restores the materials (broken cell drops its original block).
+
+Prime with **1× pure essonite** or **4× phi_flux_slug**, then START. Ambient Φ while formed+running (`PhiPower` radius 8). Place ice/water/Φ-water just outside the shell to cool. Adjacent `phi_bus` carries power (BFS, hop attenuation); bus outlets are `PhiPowerProvider` radius 1.
+
+## Flow
 
 ```mermaid
 flowchart LR
-  campfire[phi_campfire] --> crucible[clay_crucible]
-  crucible --> mortar[mortar_and_pestle]
-  mortar --> burner[essence_burner]
-  burner --> furnace[phi_furnace]
-  burner --> alembic[essence_alembic]
-  furnace --> glass[phi_glass_flasks]
-  alembic --> potions[phi_potions]
-  mortar --> cell[phi_cell]
-  cell --> focus[resonance_focus]
-  focus --> imprint[psi_imprinter]
-  imprint --> chassis[golem_chassis]
-  chassis --> construct[phi_construct]
-  imprint --> telegraph[phi_telegraph]
-  focus --> lathe[shaft_lathe]
-  focus --> cutter[facet_cutter]
-  lathe --> assemble[artifact_assembler]
-  cutter --> assemble
-  assemble --> staff[modular_staff]
-  imprint --> inscriber[seal_inscriber]
-  assemble --> jewelry[curios_jewelry]
+  spark[spark_reactor] --> heart[heart_reactor_core]
+  casing[reactor_casing] --> heart
+  heart --> bus[phi_bus]
+  spark --> bus
+  bus --> machines[adjacent_machines]
 ```
-
-## Era III playable
-
-| Node | ID | Notes |
-|------|-----|--------|
-| Ψ-Imprinter | `psi_imprinter` | MED+ neighbor heat; Φ-cell drain; focus tier speeds imprint |
-| Golem Chassis | `golem_chassis` | Blank craft → imprint → use on ground to spawn tame `phi_construct` |
-| Φ-Construct | `phi_construct` | Follow/sit/defend; needs owner Φ-cell charge; 1 per player |
-| Φ-Telegraph | `phi_telegraph` | Pair two (same dim); insert cell; pulse with flask/paper |
-| Shaft Lathe | `shaft_lathe` | Carve shaft forms (MED heat) |
-| Facet Cutter | `facet_cutter` | Cut focus facets (MED heat) |
-| Artifact Assembler | `artifact_assembler` | Staff / ring / amulet / charm |
-| Seal Inscriber | `seal_inscriber` | Item seals (Seals school + discovery) |
-| Modular Staff / Jewelry | `modular_staff`, Curios slots | See [ARTIFACT_CRAFT.md](ARTIFACT_CRAFT.md) |
-
-## Earlier nodes (I–II)
-
-| Node | ID | Notes |
-|------|-----|--------|
-| Φ-Torch | `phi_torch` | Light + Φ-hint particles |
-| Φ-Campfire | `phi_campfire` | `PhiHeatSource` **LOW** |
-| Clay Crucible | `clay_crucible` | Ore/crystal → shard (lossy) |
-| Mortar / Burner / Alembic / filters / cell / focus | existing | Catalog + machines |
-
-## Era IV (partial)
-
-| Node | ID | Notes |
-|------|-----|--------|
-| Spark Reactor | `spark_reactor` | Fuel dust/cell; START/STOP; overheat + pure-essonite boost; wireless `PhiPower` radius 3 (LOS); powers burner/alembic/mortar; charge slot |
 
 ## Data
 
-- Catalog JSON: `data/effecoria/technomagic/*.json`
-- Code: `com.effecoria.core.technomagic`
-- Heat bus: `PhiHeat` / `PhiHeatSource`
-- Wireless Φ-power: `PhiPower` / `PhiPowerProvider`
-- Lead: overworld `lead_ore` / `deepslate_lead_ore` → `raw_lead` → `lead_ingot`; machine casings and lead gear use real lead (`lead_block` is `#effecoria:zero_flux`)
-- UI: Primer chapter `TECHNOMAGIC` + Technomancy button → `TechnomagicScreen`
+- Catalog: `data/effecoria/technomagic/*.json`
+- Code: `HeartMultiblock`, `HeartReactorBlockEntity`, `PhiBusNetwork`, `PhiBusBlockEntity`
+- `PhiPower` scan radius 8 (covers Heart)
+- Gates: `TechnomagicGates` / `TechnomagicProgress`

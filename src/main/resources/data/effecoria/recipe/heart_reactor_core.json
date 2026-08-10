@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": { "item": "effecoria:spark_reactor" },
+    "C": { "item": "effecoria:reactor_casing" },
+    "P": { "item": "effecoria:pure_essonite" },
+    "M": { "item": "effecoria:mithril_wire" }
+  },
+  "pattern": ["CMC", "PSP", "CMC"],
+  "result": { "count": 1, "id": "effecoria:heart_reactor_core" }
+}

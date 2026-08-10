@@ -8,6 +8,8 @@
         "effecoria:whispering_spire_vent",
         "effecoria:mithril_ore",
         "effecoria:deepslate_mithril_ore",
-        "effecoria:mithril_block"
+        "effecoria:mithril_block",
+        "effecoria:heart_reactor_core",
+        "effecoria:heart_reactor_part"
     ]
 }

@@ -1,10 +1,8 @@
 {
   "id": "effecoria:phi_bus",
   "era": 4,
-  "icon": "effecoria:gold_filter",
-  "status": "planned",
-  "requires": [
-    "effecoria:spark_reactor"
-  ],
+  "icon": "effecoria:phi_bus",
+  "status": "available",
+  "requires": ["effecoria:spark_reactor", "effecoria:heart_reactor"],
   "display_unlocks": []
 }

@@ -26,6 +26,9 @@ import com.effecoria.block.PhiTelegraphBlock;
 import com.effecoria.block.PsiImprinterBlock;
 import com.effecoria.block.RottenMossBlock;
 import com.effecoria.block.SparkReactorBlock;
+import com.effecoria.block.HeartReactorBlock;
+import com.effecoria.block.HeartReactorPartBlock;
+import com.effecoria.block.PhiBusBlock;
 import com.effecoria.block.SubspacePortalBlock;
 import com.effecoria.block.VitrifiedBranchesBlock;
 import com.effecoria.block.VitrifiedGeyserCrackBlock;
@@ -711,6 +714,47 @@ public final class ModBlocks {
                     .sound(SoundType.METAL)
                     .requiresCorrectToolForDrops()
                     .lightLevel(state -> state.getValue(SparkReactorBlock.LIT) ? 7 : 0)));
+
+    /** Era IV Heart Reactor core — 3×3×3 multiblock controller. */
+    public static final DeferredBlock<HeartReactorBlock> HEART_REACTOR_CORE = BLOCKS.register(
+            "heart_reactor_core",
+            () -> new HeartReactorBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(4.0f, 8f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> state.getValue(HeartReactorBlock.LIT) ? 12 : 0)));
+
+    /** Invisible solid cell of an assembled Heart hull (no BlockItem). */
+    public static final DeferredBlock<HeartReactorPartBlock> HEART_REACTOR_PART = BLOCKS.register(
+            "heart_reactor_part",
+            () -> new HeartReactorPartBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(4.0f, 8f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noLootTable()
+                    .isViewBlocking((state, level, pos) -> true)
+                    .isSuffocating((state, level, pos) -> true)));
+
+    /** Structural shell for Heart Reactor multiblock. */
+    public static final DeferredBlock<Block> REACTOR_CASING = BLOCKS.register(
+            "reactor_casing",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(4.0f, 8f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()));
+
+    /** Φ-bus cable — relays PhiPower along a tower. */
+    public static final DeferredBlock<PhiBusBlock> PHI_BUS = BLOCKS.register(
+            "phi_bus",
+            () -> new PhiBusBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_CYAN)
+                    .strength(1.5f, 3f)
+                    .sound(SoundType.GLASS)
+                    .noOcclusion()
+                    .lightLevel(state -> state.getValue(PhiBusBlock.POWERED) ? 6 : 0)));
 
     /** Essence alembic — blue cauldron for Φ-water potions. */
     public static final DeferredBlock<EssenceAlembicBlock> ESSENCE_ALEMBIC = BLOCKS.register(

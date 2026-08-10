@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": { "item": "effecoria:lead_ingot" },
+    "P": { "item": "effecoria:phi_stone" },
+    "D": { "item": "effecoria:essonite_dust" }
+  },
+  "pattern": ["LDL", "DPD", "LDL"],
+  "result": { "count": 4, "id": "effecoria:reactor_casing" }
+}

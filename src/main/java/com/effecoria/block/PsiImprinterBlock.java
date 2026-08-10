@@ -87,6 +87,10 @@ public final class PsiImprinterBlock extends BaseEntityBlock {
         if (!level.isClientSide()
                 && player instanceof ServerPlayer serverPlayer
                 && level.getBlockEntity(pos) instanceof PsiImprinterBlockEntity imprinter) {
+            if (!com.effecoria.core.technomagic.TechnomagicGates.checkOperate(
+                    serverPlayer, com.effecoria.core.technomagic.TechnomagicEra.III)) {
+                return;
+            }
             serverPlayer.openMenu(imprinter, buf -> buf.writeBlockPos(pos));
         }
     }

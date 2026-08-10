@@ -85,6 +85,10 @@ public final class SparkReactorBlock extends BaseEntityBlock {
         if (!level.isClientSide()
                 && player instanceof ServerPlayer serverPlayer
                 && level.getBlockEntity(pos) instanceof SparkReactorBlockEntity reactor) {
+            if (!com.effecoria.core.technomagic.TechnomagicGates.checkOperate(
+                    serverPlayer, com.effecoria.core.technomagic.TechnomagicEra.IV)) {
+                return InteractionResult.FAIL;
+            }
             serverPlayer.openMenu(reactor, buf -> buf.writeBlockPos(pos));
         }
         return InteractionResult.sidedSuccess(level.isClientSide());

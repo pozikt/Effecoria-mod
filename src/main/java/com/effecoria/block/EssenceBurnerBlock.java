@@ -119,7 +119,11 @@ public final class EssenceBurnerBlock extends BaseEntityBlock {
         }
         // Quick-feed dust into fuel slot without opening
         if (stack.is(ModItems.ESSENITE_DUST.get()) && player.isShiftKeyDown()) {
-            if (!level.isClientSide()) {
+            if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
+                if (!com.effecoria.core.technomagic.TechnomagicGates.checkOperate(
+                        serverPlayer, com.effecoria.core.technomagic.TechnomagicEra.II)) {
+                    return ItemInteractionResult.FAIL;
+                }
                 ItemStack fuel = burner.getItem(EssenceBurnerBlockEntity.SLOT_FUEL);
                 if (fuel.isEmpty()) {
                     burner.setItem(EssenceBurnerBlockEntity.SLOT_FUEL, stack.split(1));
@@ -148,6 +152,10 @@ public final class EssenceBurnerBlock extends BaseEntityBlock {
         if (!level.isClientSide()
                 && player instanceof ServerPlayer serverPlayer
                 && level.getBlockEntity(pos) instanceof EssenceBurnerBlockEntity burner) {
+            if (!com.effecoria.core.technomagic.TechnomagicGates.checkOperate(
+                    serverPlayer, com.effecoria.core.technomagic.TechnomagicEra.II)) {
+                return;
+            }
             serverPlayer.openMenu(burner, buf -> buf.writeBlockPos(pos));
         }
     }

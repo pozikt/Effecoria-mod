@@ -15,6 +15,9 @@ import com.effecoria.block.PsiImprinterBlockEntity;
 import com.effecoria.block.SealInscriberBlockEntity;
 import com.effecoria.block.ShaftLatheBlockEntity;
 import com.effecoria.block.SparkReactorBlockEntity;
+import com.effecoria.block.HeartReactorBlockEntity;
+import com.effecoria.block.HeartReactorPartBlockEntity;
+import com.effecoria.block.PhiBusBlockEntity;
 import com.effecoria.block.SubspacePortalBlockEntity;
 import com.effecoria.block.WhisperingSpireVentBlockEntity;
 
@@ -52,6 +55,24 @@ public final class ModBlockEntities {
                     "spark_reactor",
                     () -> BlockEntityType.Builder.of(SparkReactorBlockEntity::new, ModBlocks.SPARK_REACTOR.get())
                             .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<HeartReactorBlockEntity>> HEART_REACTOR_CORE =
+            BLOCK_ENTITY_TYPES.register(
+                    "heart_reactor_core",
+                    () -> BlockEntityType.Builder.of(HeartReactorBlockEntity::new, ModBlocks.HEART_REACTOR_CORE.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<HeartReactorPartBlockEntity>>
+            HEART_REACTOR_PART = BLOCK_ENTITY_TYPES.register(
+                    "heart_reactor_part",
+                    () -> BlockEntityType.Builder.of(
+                                    HeartReactorPartBlockEntity::new, ModBlocks.HEART_REACTOR_PART.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiBusBlockEntity>> PHI_BUS =
+            BLOCK_ENTITY_TYPES.register(
+                    "phi_bus",
+                    () -> BlockEntityType.Builder.of(PhiBusBlockEntity::new, ModBlocks.PHI_BUS.get()).build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EssenceAlembicBlockEntity>> ESSENCE_ALEMBIC =
             BLOCK_ENTITY_TYPES.register(

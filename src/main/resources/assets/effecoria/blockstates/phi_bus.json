@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "powered=false": { "model": "effecoria:block/phi_bus" },
+    "powered=true": { "model": "effecoria:block/phi_bus_on" }
+  }
+}

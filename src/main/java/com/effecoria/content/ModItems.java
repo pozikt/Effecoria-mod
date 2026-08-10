@@ -160,6 +160,8 @@ public final class ModItems {
     public static final DeferredItem<Item> MITHRIL_INGOT = ITEMS.registerSimpleItem("mithril_ingot");
     public static final DeferredItem<Item> MITHRIL_NUGGET = ITEMS.registerSimpleItem("mithril_nugget");
     public static final DeferredItem<Item> MITHRIL_WIRE = ITEMS.registerSimpleItem("mithril_wire");
+    /** Synthetic Φ-fuel — Era II workshop products compressed for Era IV reactors. */
+    public static final DeferredItem<Item> PHI_FLUX_SLUG = ITEMS.registerSimpleItem("phi_flux_slug");
     public static final DeferredItem<Item> PHI_CHITIN = ITEMS.registerSimpleItem("phi_chitin");
 
     public static final DeferredItem<Item> PHI_WATER_BUCKET = ITEMS.register(
@@ -249,6 +251,15 @@ public final class ModItems {
             "spark_reactor",
             () -> new HintBlockItem(
                     ModBlocks.SPARK_REACTOR.get(), new Item.Properties(), "tooltip.effecoria.spark_reactor"));
+    public static final DeferredItem<BlockItem> HEART_REACTOR_CORE = ITEMS.register(
+            "heart_reactor_core",
+            () -> new HintBlockItem(
+                    ModBlocks.HEART_REACTOR_CORE.get(), new Item.Properties(), "tooltip.effecoria.heart_reactor"));
+    public static final DeferredItem<BlockItem> REACTOR_CASING =
+            ITEMS.registerSimpleBlockItem("reactor_casing", ModBlocks.REACTOR_CASING);
+    public static final DeferredItem<BlockItem> PHI_BUS = ITEMS.register(
+            "phi_bus",
+            () -> new HintBlockItem(ModBlocks.PHI_BUS.get(), new Item.Properties(), "tooltip.effecoria.phi_bus"));
     public static final DeferredItem<BlockItem> ESSENCE_ALEMBIC =
             ITEMS.registerSimpleBlockItem("essence_alembic", ModBlocks.ESSENCE_ALEMBIC);
 

@@ -138,6 +138,10 @@ public final class ArtifactStationBlock extends BaseEntityBlock {
         if (!level.isClientSide()
                 && player instanceof ServerPlayer serverPlayer
                 && level.getBlockEntity(pos) instanceof net.minecraft.world.MenuProvider menu) {
+            if (!com.effecoria.core.technomagic.TechnomagicGates.checkOperate(
+                    serverPlayer, com.effecoria.core.technomagic.TechnomagicEra.III)) {
+                return;
+            }
             serverPlayer.openMenu(menu, buf -> buf.writeBlockPos(pos));
         }
     }

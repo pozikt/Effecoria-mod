@@ -42,6 +42,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.MITHRIL_INGOT.get());
                         output.accept(ModItems.MITHRIL_NUGGET.get());
                         output.accept(ModItems.MITHRIL_WIRE.get());
+                        output.accept(ModItems.PHI_FLUX_SLUG.get());
                         output.accept(ModItems.ESSONITE_BLOCK.get());
                         output.accept(ModItems.STAR_ESSONITE_BLOCK.get());
                         output.accept(ModItems.WHISPERING_SPIRE_VENT.get());
@@ -141,6 +142,9 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.TELEGRAPH_MODULE.get());
                         output.accept(ModItems.ESSENCE_BURNER.get());
                         output.accept(ModItems.SPARK_REACTOR.get());
+                        output.accept(ModItems.HEART_REACTOR_CORE.get());
+                        output.accept(ModItems.REACTOR_CASING.get());
+                        output.accept(ModItems.PHI_BUS.get());
                         output.accept(ModItems.ESSENCE_ALEMBIC.get());
                         output.accept(ModItems.POTION_PHI_TONIC.get());
                         output.accept(ModItems.POTION_PHI_RESONANCE.get());

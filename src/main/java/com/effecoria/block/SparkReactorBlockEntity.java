@@ -50,6 +50,7 @@ public final class SparkReactorBlockEntity extends BaseContainerBlockEntity
     public static final int DATA_COUNT = 7;
 
     public static final int DUST_FUEL_TICKS = 1200;
+    public static final int FLUX_FUEL_TICKS = 4800;
     public static final int CELL_FUEL_TICKS = 12000;
     public static final int BOOST_TICKS = 600;
     public static final int BOOST_SHUTDOWN_TICKS = 2400;
@@ -255,10 +256,10 @@ public final class SparkReactorBlockEntity extends BaseContainerBlockEntity
             setChanged();
             return;
         }
-        if (fuel.is(ModItems.ESSENITE_DUST.get())) {
+        if (fuel.is(ModItems.PHI_FLUX_SLUG.get())) {
             fuel.shrink(1);
-            fuelTicks = DUST_FUEL_TICKS;
-            fuelMax = DUST_FUEL_TICKS;
+            fuelTicks = FLUX_FUEL_TICKS;
+            fuelMax = FLUX_FUEL_TICKS;
             setChanged();
             return;
         }
@@ -322,10 +323,18 @@ public final class SparkReactorBlockEntity extends BaseContainerBlockEntity
     }
 
     public static boolean isValidFuel(ItemStack stack) {
-        if (stack.is(ModItems.ESSENITE_DUST.get()) || stack.is(ModItems.PURE_ESSONITE.get())) {
+        if (stack.is(ModItems.PHI_FLUX_SLUG.get()) || stack.is(ModItems.PURE_ESSONITE.get())) {
             return true;
         }
         return stack.is(ModItems.PHI_CELL.get()) && PhiHarnessItems.cellCharge(stack) > 0.001f;
+    }
+
+    /** True if the reactor already has burn time or a valid fuel stack to consume. */
+    public static boolean hasUsableFuel(SparkReactorBlockEntity be) {
+        if (be.fuelTicks > 0) {
+            return true;
+        }
+        return isValidFuel(be.items.get(SLOT_FUEL));
     }
 
     public static boolean isChargeCell(ItemStack stack) {

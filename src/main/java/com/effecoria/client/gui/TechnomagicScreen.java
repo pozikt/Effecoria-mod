@@ -18,7 +18,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-/** Catalog list of technomagic nodes by era (cosmetic discovery only). */
+/** Catalog list of technomagic nodes by era (discovery + era-operate gates). */
 public class TechnomagicScreen extends Screen {
     private static final int PANEL_W = 280;
     private static final int PANEL_H = 200;
@@ -106,12 +106,28 @@ public class TechnomagicScreen extends Screen {
             TechnomagicNode node = rows.get(i);
             if (node.era() != lastEra) {
                 lastEra = node.era();
+                int avail = progress.availableCount(lastEra);
+                int done = progress.discoveredCount(lastEra);
+                boolean eraDone = progress.isEraComplete(lastEra);
+                boolean operable = progress.canOperateEra(lastEra);
+                Component eraTitle = Component.translatable("technomagic.effecoria.era." + lastEra.number());
+                Component suffix;
+                if (!operable) {
+                    suffix = Component.literal(" — ").append(Component.translatable("gui.effecoria.technomagic.locked"));
+                } else if (eraDone) {
+                    suffix = Component.literal(" — ").append(Component.translatable("gui.effecoria.technomagic.era_done"));
+                } else if (avail > 0) {
+                    suffix = Component.literal(" — ")
+                            .append(Component.translatable("gui.effecoria.technomagic.era_progress", done, avail));
+                } else {
+                    suffix = Component.empty();
+                }
                 graphics.drawString(
                         this.font,
-                        Component.translatable("technomagic.effecoria.era." + lastEra.number()),
+                        eraTitle.copy().append(suffix),
                         left + 8,
                         y,
-                        0xFF7EC8FF,
+                        operable ? 0xFF7EC8FF : 0xFFB07070,
                         false);
                 y += ROW_H;
                 if (y > top + PANEL_H - ROW_H) {
@@ -120,12 +136,17 @@ public class TechnomagicScreen extends Screen {
             }
             boolean planned = node.status() == TechnomagicNode.TechnomagicStatus.PLANNED;
             boolean found = progress.isDiscovered(node);
-            int color = planned ? 0xFF6A7080 : (found ? 0xFFE8F4FF : 0xFF8A9AAC);
+            boolean operable = progress.canOperateEra(node.era());
+            int color = planned
+                    ? 0xFF6A7080
+                    : (!operable ? 0xFF906060 : (found ? 0xFFE8F4FF : 0xFF8A9AAC));
             Component mark = planned
                     ? Component.translatable("technomagic.effecoria.status.planned")
-                    : (found
-                            ? Component.translatable("technomagic.effecoria.status.found")
-                            : Component.translatable("technomagic.effecoria.status.unknown"));
+                    : (!operable
+                            ? Component.translatable("gui.effecoria.technomagic.locked")
+                            : (found
+                                    ? Component.translatable("technomagic.effecoria.status.found")
+                                    : Component.translatable("technomagic.effecoria.status.unknown")));
             Component line = mark.copy().append(" · ").append(Component.translatable(node.translationKey()));
             graphics.drawString(this.font, line, left + 10, y, color, false);
 

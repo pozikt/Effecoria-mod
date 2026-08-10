@@ -97,6 +97,10 @@ public final class EssenceAlembicBlock extends BaseEntityBlock {
         if (!level.isClientSide()
                 && player instanceof ServerPlayer serverPlayer
                 && level.getBlockEntity(pos) instanceof EssenceAlembicBlockEntity alembic) {
+            if (!com.effecoria.core.technomagic.TechnomagicGates.checkOperate(
+                    serverPlayer, com.effecoria.core.technomagic.TechnomagicEra.II)) {
+                return;
+            }
             serverPlayer.openMenu(alembic, buf -> buf.writeBlockPos(pos));
         }
     }

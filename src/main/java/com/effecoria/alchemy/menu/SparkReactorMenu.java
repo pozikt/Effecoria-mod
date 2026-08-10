@@ -103,6 +103,18 @@ public final class SparkReactorMenu extends MachineMenu {
         if (id != BUTTON_TOGGLE) {
             return false;
         }
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
+                && !com.effecoria.core.technomagic.TechnomagicGates.checkOperate(
+                        serverPlayer, com.effecoria.core.technomagic.TechnomagicEra.IV)) {
+            return false;
+        }
+        // Starting requires flux slug / cell / pure essonite already in fuel slot via isValidFuel.
+        if (!blockEntity.isRunning() && !SparkReactorBlockEntity.hasUsableFuel(blockEntity)) {
+            player.displayClientMessage(
+                    net.minecraft.network.chat.Component.translatable("message.effecoria.spark_need_flux_fuel"),
+                    true);
+            return false;
+        }
         blockEntity.toggleRunning();
         return true;
     }

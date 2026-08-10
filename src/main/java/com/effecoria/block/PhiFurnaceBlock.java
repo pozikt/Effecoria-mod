@@ -12,6 +12,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
@@ -91,6 +92,11 @@ public final class PhiFurnaceBlock extends BaseEntityBlock {
         }
         if (level.isClientSide()) {
             return ItemInteractionResult.SUCCESS;
+        }
+        if (!(player instanceof ServerPlayer serverPlayer)
+                || !com.effecoria.core.technomagic.TechnomagicGates.checkOperate(
+                        serverPlayer, com.effecoria.core.technomagic.TechnomagicEra.II)) {
+            return ItemInteractionResult.FAIL;
         }
         if (stack.isEmpty()) {
             ItemStack taken = furnace.takeOutput();

@@ -81,6 +81,10 @@ public final class PhiTelegraphBlock extends BaseEntityBlock {
         if (!(player instanceof ServerPlayer serverPlayer) || !(level instanceof ServerLevel server)) {
             return ItemInteractionResult.SUCCESS;
         }
+        if (!com.effecoria.core.technomagic.TechnomagicGates.checkOperate(
+                serverPlayer, com.effecoria.core.technomagic.TechnomagicEra.III)) {
+            return ItemInteractionResult.FAIL;
+        }
 
         // Unlink
         if (stack.isEmpty() && player.isShiftKeyDown()) {

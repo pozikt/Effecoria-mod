@@ -158,7 +158,7 @@ public final class ModAttachments {
                     .sync((holder, player) -> holder == player, DiseaseProfile.STREAM_CODEC)
                     .build());
 
-    /** Cosmetically discovered technomagic nodes (no recipe gating). */
+    /** Technomagic discovery + era-operate gates (craft stays free). */
     public static final Supplier<AttachmentType<TechnomagicProgress>> TECHNOMAGIC = ATTACHMENT_TYPES.register(
             "technomagic",
             () -> AttachmentType.builder(TechnomagicProgress::createDefault)

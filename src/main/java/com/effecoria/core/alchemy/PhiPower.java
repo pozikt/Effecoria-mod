@@ -11,7 +11,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * Wireless Φ-power bus: consumers query nearby {@link PhiPowerProvider}s with line-of-sight.
  */
 public final class PhiPower {
-    private static final int SCAN_RADIUS = 3;
+    /** Max Chebyshev scan — must cover Heart radius (8). Providers still clamp to their own radius(). */
+    private static final int SCAN_RADIUS = 8;
 
     private PhiPower() {}
 
@@ -19,7 +20,7 @@ public final class PhiPower {
         return powerFactor(level, consumerPos) > 0f;
     }
 
-    /** Strongest power factor among LOS providers within Chebyshev radius 3; 0 if none. */
+    /** Strongest power factor among LOS providers within scan range; 0 if none. */
     public static float powerFactor(Level level, BlockPos consumerPos) {
         PhiPowerProvider best = findBest(level, consumerPos);
         return best != null ? best.powerFactor() : 0f;

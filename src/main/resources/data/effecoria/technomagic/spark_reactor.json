@@ -4,7 +4,11 @@
   "icon": "effecoria:spark_reactor",
   "status": "available",
   "requires": [
-    "effecoria:psi_imprinter"
+    "effecoria:psi_imprinter",
+    "effecoria:telegraph",
+    "effecoria:artifact_assembler"
   ],
-  "display_unlocks": []
+  "display_unlocks": [
+    "effecoria:phi_flux_slug"
+  ]
 }
