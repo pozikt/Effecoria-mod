@@ -61,7 +61,8 @@ public final class ArtifactCatalog {
 
     public static List<ShaftFormDefinition> shaftForms() {
         List<ShaftFormDefinition> out = new ArrayList<>(SHAFT_FORMS.values());
-        out.sort(Comparator.comparing(d -> d.id().getPath()));
+        out.sort(Comparator.comparingDouble(ShaftFormDefinition::lengthMeters)
+                .thenComparing(d -> d.id().getPath()));
         return out;
     }
 
@@ -101,10 +102,15 @@ public final class ArtifactCatalog {
 
     private static ShaftFormDefinition parseShaft(JsonObject json, ResourceLocation fileId) {
         ResourceLocation id = json.has("id") ? ResourceLocation.parse(json.get("id").getAsString()) : fileId;
+        float length = json.has("length_m")
+                ? json.get("length_m").getAsFloat()
+                : (json.has("reach") ? json.get("reach").getAsFloat() : 1f);
+        float reach = json.has("reach") ? json.get("reach").getAsFloat() : Math.max(0.75f, length / 1.2f);
         return new ShaftFormDefinition(
                 id,
                 readTags(json, "material_tags"),
-                json.has("reach") ? json.get("reach").getAsFloat() : 1f,
+                length,
+                reach,
                 json.has("cast_cost_mul") ? json.get("cast_cost_mul").getAsFloat() : 1f,
                 json.has("durability") ? json.get("durability").getAsInt() : 250,
                 json.has("cook_ticks") ? json.get("cook_ticks").getAsInt() : 100);

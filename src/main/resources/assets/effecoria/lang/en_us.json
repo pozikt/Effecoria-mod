@@ -1631,7 +1631,7 @@
   "container.effecoria.facet_cutter": "Facet Cutter",
   "container.effecoria.artifact_assembler": "Artifact Assembler",
   "container.effecoria.seal_inscriber": "Seal Inscriber",
-  "tooltip.effecoria.shaft_lathe": "Carve shaft forms with MED Φ-heat.",
+  "tooltip.effecoria.shaft_lathe": "Choose shaft length (up to player height) and carve with MED Φ-heat. Material sets Φ-conductivity.",
   "tooltip.effecoria.facet_cutter": "Cut focus facets with MED Φ-heat.",
   "tooltip.effecoria.artifact_assembler": "Join shaft+focus or band+gem.",
   "tooltip.effecoria.seal_inscriber": "Inscribe known item seals (Seals school).",
@@ -1710,5 +1710,14 @@
   "item_seal.effecoria.ward_bind": "Ward Bind",
   "item_seal.effecoria.void_edge": "Void Edge",
   "item_seal.effecoria.essence_ward": "Essence Ward",
-  "item_seal.effecoria.psi_reservoir": "Psi Reservoir"
+  "item_seal.effecoria.psi_reservoir": "Psi Reservoir",
+  "gui.effecoria.shaft_form.wand": "Wand",
+  "gui.effecoria.shaft_form.baton": "Baton",
+  "gui.effecoria.shaft_form.long_staff": "Long staff",
+  "gui.effecoria.shaft_form.stature": "Stature (player-length)",
+  "item.effecoria.modular_part.material": "Material: %s",
+  "item.effecoria.modular_part.length": "Length: %s m",
+  "item.effecoria.modular_part.conductivity": "Φ-conductivity: %s",
+  "item.effecoria.modular_staff.length": "Shaft length: %s m",
+  "item.effecoria.modular_staff.conductivity": "Φ-conductivity: %s"
 }

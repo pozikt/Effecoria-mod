@@ -5,6 +5,7 @@
     "minecraft:bamboo",
     "minecraft:blaze_rod",
     "effecoria:phi_snare_vine",
-    "#minecraft:planks"
+    "#minecraft:planks",
+    "effecoria:phi_planks"
   ]
 }

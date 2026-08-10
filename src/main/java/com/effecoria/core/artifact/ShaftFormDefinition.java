@@ -6,10 +6,14 @@ import net.minecraft.world.item.Item;
 
 import java.util.List;
 
-/** Shaft form from data/effecoria/artifact/shaft_forms. */
+/**
+ * Shaft length profile from data/effecoria/artifact/shaft_forms.
+ * {@code lengthMeters} is physical length (player height ≈ 1.8).
+ */
 public record ShaftFormDefinition(
         ResourceLocation id,
         List<TagKey<Item>> materialTags,
+        float lengthMeters,
         float reach,
         float castCostMul,
         int durability,

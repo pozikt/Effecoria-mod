@@ -22,6 +22,13 @@ public class ModularStaffItem extends Item {
         tooltip.add(Component.translatable("item.effecoria.modular_staff.hint"));
         if (AssembledGearData.isStaff(stack)) {
             StaffStats.Bundle stats = StaffStats.of(stack);
+            if (stats.lengthMeters() > 0f) {
+                tooltip.add(Component.translatable(
+                        "item.effecoria.modular_staff.length", String.format("%.1f", stats.lengthMeters())));
+            }
+            tooltip.add(Component.translatable(
+                    "item.effecoria.modular_staff.conductivity",
+                    String.format("%.0f%%", stats.conductivity() * 100f)));
             tooltip.add(Component.translatable(
                     "item.effecoria.modular_staff.stats",
                     String.format("%.2f", stats.castCostMul()),

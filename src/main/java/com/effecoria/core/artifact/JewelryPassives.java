@@ -25,8 +25,19 @@ public final class JewelryPassives {
 
     private static float bonusIfEquipped(Player player, net.minecraft.world.item.Item item) {
         return CuriosAccess.findEquipped(player, stack -> stack.is(item))
-                .map(JewelryPassives::shieldFromStack)
+                .map(JewelryPassives::effectiveShield)
                 .orElse(0f);
+    }
+
+    /** Base jewelry shield scaled by stamped material conductivity. */
+    public static float effectiveShield(ItemStack stack) {
+        float base = shieldFromStack(stack);
+        if (base <= 0f) {
+            return 0f;
+        }
+        float c = MaterialConductivity.ofStack(stack);
+        // Gold-like conductors keep full bonus; poor conductors lose some reflection.
+        return base * net.minecraft.util.Mth.lerp(c, 0.7f, 1.1f);
     }
 
     public static float shieldFromStack(ItemStack stack) {

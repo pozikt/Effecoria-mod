@@ -1,0 +1,11 @@
+{
+  "id": "effecoria:stature",
+  "material_tags": [
+    "effecoria:shaft_materials"
+  ],
+  "length_m": 1.8,
+  "reach": 1.55,
+  "cast_cost_mul": 1.15,
+  "durability": 340,
+  "cook_ticks": 140
+}

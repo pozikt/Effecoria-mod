@@ -4,25 +4,49 @@ Modular assembly of staves and jewelry, item seals for Seals school, Curios acce
 
 ## Player loop
 
-1. **Shaft Lathe** (`shaft_lathe`) — material from `#effecoria:shaft_materials` + form → `carved_shaft` (MED heat).
+1. **Shaft Lathe** (`shaft_lathe`) — material from `#effecoria:shaft_materials` + **length form** → `carved_shaft` (MED heat).
 2. **Facet Cutter** (`facet_cutter`) — material from `#effecoria:focus_materials` + cut → `faceted_focus`.
 3. **Phonemes** — `phi_phoneme_*` on shaft/focus (or essonite armor) before assemble.
 4. **Artifact Assembler** — staff (shaft+focus) or jewelry (band+gem) → `modular_staff` / `assembled_*`.
 5. **Seal Inscriber** — Seals school + known item seals → bind like enchantments; Strip removes them.
 6. **Curios** — ring×2, amulet×1, charm×1 for jewelry.
 
+## Shaft length
+
+Forms are physical lengths (meters). Lathe UI cycles them shortest → longest:
+
+| Form | Length | Notes |
+|------|--------|--------|
+| `wand` | 0.6 m | Short casting stick |
+| `baton` | 1.0 m | Standard staff |
+| `long_staff` | 1.4 m | Extended reach |
+| `stature` | 1.8 m | About player height |
+
+Longer shafts raise reach and slightly raise cast cost; material conductivity is independent.
+
+## Φ-conductivity
+
+Each craft material has a datapack conductivity `0..1` under `data/effecoria/artifact/materials/`.
+
+- Stamped onto carved parts and merged onto assembled gear (shaft 55% + focus 45%; jewelry 50/50).
+- **Staff:** higher conductivity → lower cast cost, higher spell power.
+- **Jewelry:** scales Curios Φ-shield bonus.
+
+Examples: stick/planks ~0.2, copper/gold high, star essonite ~0.95, lead charm low (damper).
+
 ## Datapack
 
 | Path | Content |
 |------|---------|
-| `data/effecoria/artifact/shaft_forms/` | Forms + stats |
+| `data/effecoria/artifact/shaft_forms/` | Length profiles + reach/cost |
+| `data/effecoria/artifact/materials/` | Item → Φ-conductivity |
 | `data/effecoria/artifact/focus_cuts/` | Cuts + power/tier |
 | `data/effecoria/artifact/assemble_recipes/` | staff/ring/amulet/charm |
 | `data/effecoria/item_seals/` | Vanilla-analogue + Effecoria seals |
 
 ## Code
 
-- `com.effecoria.core.artifact` — catalogs, NBT, Curios helpers, `StaffStats`
+- `com.effecoria.core.artifact` — catalogs, NBT, `MaterialConductivity`, `StaffStats`
 - Stations — `ArtifactStationBlock` + BE/menu/screen
 - `ItemSealEvents` — combat/armor/mend hooks
 - Discovery — `PlayerPsiData.knownItemSeals` (+ `item_seal_primer`)

@@ -161,7 +161,7 @@ public final class ShaftLatheBlockEntity extends BaseContainerBlockEntity implem
         be.maxProgress = form.cookTicks();
         be.progress++;
         if (be.progress >= be.maxProgress) {
-            ItemStack result = ModularPartData.createShaft(in.getItem(), form.id());
+            ItemStack result = ModularPartData.createShaft(in.getItem(), form.id(), form.lengthMeters());
             be.items.set(SLOT_OUT, result);
             in.shrink(1);
             be.progress = 0;

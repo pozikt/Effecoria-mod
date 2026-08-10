@@ -1631,7 +1631,7 @@
   "container.effecoria.facet_cutter": "Гранщик фокуса",
   "container.effecoria.artifact_assembler": "Сборщик артефактов",
   "container.effecoria.seal_inscriber": "Начертатель печатей",
-  "tooltip.effecoria.shaft_lathe": "Вытачивает формы древка при MED Φ-жаре.",
+  "tooltip.effecoria.shaft_lathe": "Выберите длину древка (до роста игрока) и выточите при MED Φ-жаре. Материал задаёт Φ-проводимость.",
   "tooltip.effecoria.facet_cutter": "Обрабатывает грани фокуса при MED Φ-жаре.",
   "tooltip.effecoria.artifact_assembler": "Соединяет древко+фокус или обод+камень.",
   "tooltip.effecoria.seal_inscriber": "Накладывает известные печати на предметы (школа Печатей).",
@@ -1710,5 +1710,14 @@
   "item_seal.effecoria.ward_bind": "Страж-узел",
   "item_seal.effecoria.void_edge": "Грань пустоты",
   "item_seal.effecoria.essence_ward": "Страж сущности",
-  "item_seal.effecoria.psi_reservoir": "Ψ-резервуар"
+  "item_seal.effecoria.psi_reservoir": "Ψ-резервуар",
+  "gui.effecoria.shaft_form.wand": "Жезл",
+  "gui.effecoria.shaft_form.baton": "Жезл-батон",
+  "gui.effecoria.shaft_form.long_staff": "Длинный посох",
+  "gui.effecoria.shaft_form.stature": "В рост игрока",
+  "item.effecoria.modular_part.material": "Материал: %s",
+  "item.effecoria.modular_part.length": "Длина: %s м",
+  "item.effecoria.modular_part.conductivity": "Φ-проводимость: %s",
+  "item.effecoria.modular_staff.length": "Длина древка: %s м",
+  "item.effecoria.modular_staff.conductivity": "Φ-проводимость: %s"
 }

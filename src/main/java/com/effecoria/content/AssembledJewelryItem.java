@@ -24,6 +24,11 @@ public class AssembledJewelryItem extends JewelryItem {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
+        if (AssembledGearData.hasGearConductivity(stack) || AssembledGearData.isAssembled(stack)) {
+            float c = AssembledGearData.conductivity(stack);
+            tooltip.add(Component.translatable(
+                    "item.effecoria.modular_part.conductivity", String.format("%.0f%%", c * 100f)));
+        }
         AssembledGearData.seals(stack).forEach((id, lvl) -> tooltip.add(Component.translatable(
                 "item_seal.effecoria." + id.getPath())));
     }

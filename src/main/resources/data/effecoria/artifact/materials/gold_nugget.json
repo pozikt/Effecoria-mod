@@ -1,0 +1,6 @@
+{
+  "id": "effecoria:mat_gold_nugget",
+  "item": "minecraft:gold_nugget",
+  "conductivity": 0.86,
+  "notes": "gold fragment"
+}

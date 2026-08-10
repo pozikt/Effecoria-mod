@@ -1,0 +1,11 @@
+{
+  "id": "effecoria:long_staff",
+  "material_tags": [
+    "effecoria:shaft_materials"
+  ],
+  "length_m": 1.4,
+  "reach": 1.25,
+  "cast_cost_mul": 1.08,
+  "durability": 300,
+  "cook_ticks": 120
+}

@@ -1,8 +1,9 @@
 {
-  "id": "effecoria:straight",
+  "id": "effecoria:baton",
   "material_tags": [
     "effecoria:shaft_materials"
   ],
+  "length_m": 1.0,
   "reach": 1.0,
   "cast_cost_mul": 1.0,
   "durability": 250,

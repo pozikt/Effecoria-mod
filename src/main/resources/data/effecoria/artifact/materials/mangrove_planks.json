@@ -1,0 +1,6 @@
+{
+  "id": "effecoria:mat_mangrove_planks",
+  "item": "minecraft:mangrove_planks",
+  "conductivity": 0.26,
+  "notes": "wet-tolerant wood"
+}

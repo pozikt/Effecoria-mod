@@ -1,0 +1,6 @@
+{
+  "id": "effecoria:mat_oak_planks",
+  "item": "minecraft:oak_planks",
+  "conductivity": 0.22,
+  "notes": "plank stock"
+}

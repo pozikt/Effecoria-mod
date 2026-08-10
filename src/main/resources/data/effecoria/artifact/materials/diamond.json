@@ -1,0 +1,6 @@
+{
+  "id": "effecoria:mat_diamond",
+  "item": "minecraft:diamond",
+  "conductivity": 0.48,
+  "notes": "hard lattice, middling \u03a6"
+}

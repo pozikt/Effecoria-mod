@@ -1,0 +1,6 @@
+{
+  "id": "effecoria:mat_iron_ingot",
+  "item": "minecraft:iron_ingot",
+  "conductivity": 0.6,
+  "notes": "solid metal"
+}

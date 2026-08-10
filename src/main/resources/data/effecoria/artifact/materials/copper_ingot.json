@@ -1,0 +1,6 @@
+{
+  "id": "effecoria:mat_copper_ingot",
+  "item": "minecraft:copper_ingot",
+  "conductivity": 0.82,
+  "notes": "classic conductor"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "effecoria:mat_blaze_rod",
+  "item": "minecraft:blaze_rod",
+  "conductivity": 0.72,
+  "notes": "thermal spine"
+}

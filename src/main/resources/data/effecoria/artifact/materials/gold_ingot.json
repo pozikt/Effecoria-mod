@@ -1,0 +1,6 @@
+{
+  "id": "effecoria:mat_gold_ingot",
+  "item": "minecraft:gold_ingot",
+  "conductivity": 0.88,
+  "notes": "excellent metal reflector"
+}

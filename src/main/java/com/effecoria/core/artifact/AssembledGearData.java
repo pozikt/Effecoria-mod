@@ -28,6 +28,8 @@ public final class AssembledGearData {
     public static final String SEALS = "seals";
     public static final String SEAL_ID = "id";
     public static final String SEAL_LVL = "lvl";
+    public static final String CONDUCTIVITY = "conductivity";
+    public static final String LENGTH_M = "length_m";
 
     public static final String TEMPLATE_STAFF = "staff";
     public static final String TEMPLATE_RING = "ring";
@@ -51,6 +53,49 @@ public final class AssembledGearData {
 
     public static String template(ItemStack stack) {
         return gearTag(stack).map(t -> t.getString(TEMPLATE)).orElse("");
+    }
+
+    public static boolean hasGearConductivity(ItemStack stack) {
+        return gearTag(stack).filter(t -> t.contains(CONDUCTIVITY)).isPresent();
+    }
+
+    public static float conductivity(ItemStack stack) {
+        return gearTag(stack)
+                .filter(t -> t.contains(CONDUCTIVITY))
+                .map(t -> t.getFloat(CONDUCTIVITY))
+                .orElseGet(() -> computeConductivityFromParts(stack));
+    }
+
+    public static float lengthMeters(ItemStack stack) {
+        return gearTag(stack)
+                .filter(t -> t.contains(LENGTH_M))
+                .map(t -> t.getFloat(LENGTH_M))
+                .orElseGet(() -> shaftPart(stack)
+                        .filter(t -> t.contains(ModularPartData.LENGTH_M))
+                        .map(t -> t.getFloat(ModularPartData.LENGTH_M))
+                        .orElse(0f));
+    }
+
+    private static float computeConductivityFromParts(ItemStack stack) {
+        float sum = 0f;
+        float weight = 0f;
+        for (String key : List.of(SHAFT, FOCUS, BAND, GEM)) {
+            Optional<CompoundTag> part = gearTag(stack).filter(t -> t.contains(key)).map(t -> t.getCompound(key));
+            if (part.isEmpty()) {
+                continue;
+            }
+            CompoundTag tag = part.get();
+            float w = SHAFT.equals(key) || BAND.equals(key) ? 0.55f : 0.45f;
+            float c = tag.contains(ModularPartData.CONDUCTIVITY)
+                    ? tag.getFloat(ModularPartData.CONDUCTIVITY)
+                    : MaterialConductivity.DEFAULT;
+            if (tag.contains(ModularPartData.MATERIAL) && !tag.contains(ModularPartData.CONDUCTIVITY)) {
+                c = MaterialConductivity.ofItemId(ResourceLocation.parse(tag.getString(ModularPartData.MATERIAL)));
+            }
+            sum += c * w;
+            weight += w;
+        }
+        return weight <= 0f ? MaterialConductivity.DEFAULT : sum / weight;
     }
 
     public static Optional<CompoundTag> shaftPart(ItemStack stack) {
@@ -138,6 +183,7 @@ public final class AssembledGearData {
         writeGear(out, TEMPLATE_STAFF, Map.of(
                 SHAFT, ModularPartData.copyPartTag(shaft),
                 FOCUS, ModularPartData.copyPartTag(focus)));
+        stampMergedStats(out, shaft, focus, true);
         return out;
     }
 
@@ -147,7 +193,23 @@ public final class AssembledGearData {
         writeGear(out, template, Map.of(
                 BAND, ModularPartData.copyPartTag(band),
                 GEM, ModularPartData.copyPartTag(gem)));
+        stampMergedStats(out, band, gem, false);
         return out;
+    }
+
+    private static void stampMergedStats(ItemStack out, ItemStack a, ItemStack b, boolean staff) {
+        float ca = MaterialConductivity.ofStack(a);
+        float cb = MaterialConductivity.ofStack(b);
+        float conductivity = staff ? ca * 0.55f + cb * 0.45f : ca * 0.5f + cb * 0.5f;
+        float length = staff ? ModularPartData.lengthMeters(a) : 0f;
+        CustomData.update(DataComponents.CUSTOM_DATA, out, root -> {
+            CompoundTag gear = root.contains(ROOT) ? root.getCompound(ROOT) : new CompoundTag();
+            gear.putFloat(CONDUCTIVITY, conductivity);
+            if (length > 0f) {
+                gear.putFloat(LENGTH_M, length);
+            }
+            root.put(ROOT, gear);
+        });
     }
 
     private static void writeGear(ItemStack stack, String template, Map<String, CompoundTag> parts) {

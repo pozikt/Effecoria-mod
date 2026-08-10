@@ -1,0 +1,6 @@
+{
+  "id": "effecoria:mat_stick",
+  "item": "minecraft:stick",
+  "conductivity": 0.18,
+  "notes": "dry wood \u2014 poor \u03a6 conductor"
+}

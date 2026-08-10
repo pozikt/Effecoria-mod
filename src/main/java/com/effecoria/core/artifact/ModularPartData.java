@@ -25,6 +25,8 @@ public final class ModularPartData {
     public static final String MATERIAL = "material";
     public static final String FORM_OR_CUT = "form_or_cut";
     public static final String PHONEMES = "phonemes";
+    public static final String CONDUCTIVITY = "conductivity";
+    public static final String LENGTH_M = "length_m";
 
     public static final String KIND_SHAFT = "shaft";
     public static final String KIND_FOCUS = "focus";
@@ -75,6 +77,44 @@ public final class ModularPartData {
                 .orElse(ResourceLocation.fromNamespaceAndPath("effecoria", "unknown"));
     }
 
+    /** Stamped conductivity, or -1 if missing (caller may fall back to material table). */
+    public static float conductivity(ItemStack stack) {
+        return partTag(stack)
+                .filter(t -> t.contains(CONDUCTIVITY))
+                .map(t -> t.getFloat(CONDUCTIVITY))
+                .orElse(-1f);
+    }
+
+    public static float lengthMeters(ItemStack stack) {
+        return partTag(stack)
+                .filter(t -> t.contains(LENGTH_M))
+                .map(t -> t.getFloat(LENGTH_M))
+                .orElse(0f);
+    }
+
+    public static void setConductivity(ItemStack stack, float value) {
+        if (!isPart(stack)) {
+            return;
+        }
+        float c = net.minecraft.util.Mth.clamp(value, 0f, 1f);
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, root -> {
+            CompoundTag part = root.contains(ROOT) ? root.getCompound(ROOT) : new CompoundTag();
+            part.putFloat(CONDUCTIVITY, c);
+            root.put(ROOT, part);
+        });
+    }
+
+    public static void setLengthMeters(ItemStack stack, float meters) {
+        if (!isPart(stack)) {
+            return;
+        }
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, root -> {
+            CompoundTag part = root.contains(ROOT) ? root.getCompound(ROOT) : new CompoundTag();
+            part.putFloat(LENGTH_M, Math.max(0.1f, meters));
+            root.put(ROOT, part);
+        });
+    }
+
     public static List<EssonitePhoneme> phonemes(ItemStack stack) {
         List<EssonitePhoneme> out = new ArrayList<>();
         partTag(stack).ifPresent(tag -> {
@@ -111,15 +151,18 @@ public final class ModularPartData {
         });
     }
 
-    public static ItemStack createShaft(Item material, ResourceLocation formId) {
+    public static ItemStack createShaft(Item material, ResourceLocation formId, float lengthMeters) {
         ItemStack stack = new ItemStack(ModItems.CARVED_SHAFT.get());
         writePart(stack, KIND_SHAFT, BuiltInRegistries.ITEM.getKey(material), formId);
+        setConductivity(stack, MaterialConductivity.ofItem(material));
+        setLengthMeters(stack, lengthMeters);
         return stack;
     }
 
     public static ItemStack createFocus(Item material, ResourceLocation cutId) {
         ItemStack stack = new ItemStack(ModItems.FACETED_FOCUS.get());
         writePart(stack, KIND_FOCUS, BuiltInRegistries.ITEM.getKey(material), cutId);
+        setConductivity(stack, MaterialConductivity.ofItem(material));
         return stack;
     }
 
@@ -127,6 +170,7 @@ public final class ModularPartData {
         ItemStack stack = new ItemStack(ModItems.JEWELRY_BAND.get());
         writePart(stack, KIND_BAND, BuiltInRegistries.ITEM.getKey(material),
                 ResourceLocation.fromNamespaceAndPath("effecoria", "plain_band"));
+        setConductivity(stack, MaterialConductivity.ofItem(material));
         return stack;
     }
 
@@ -134,6 +178,7 @@ public final class ModularPartData {
         ItemStack stack = new ItemStack(ModItems.JEWELRY_GEM.get());
         writePart(stack, KIND_GEM, BuiltInRegistries.ITEM.getKey(material),
                 ResourceLocation.fromNamespaceAndPath("effecoria", "plain_gem"));
+        setConductivity(stack, MaterialConductivity.ofItem(material));
         return stack;
     }
 

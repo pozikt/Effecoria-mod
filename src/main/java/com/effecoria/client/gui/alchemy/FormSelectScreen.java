@@ -2,6 +2,7 @@ package com.effecoria.client.gui.alchemy;
 
 import com.effecoria.alchemy.menu.FormSelectMenu;
 import com.effecoria.core.artifact.ArtifactCatalog;
+import com.effecoria.core.artifact.ShaftFormDefinition;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -44,8 +45,7 @@ public final class FormSelectScreen extends AbstractContainerScreen<FormSelectMe
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(graphics, mouseX, mouseY, partialTick);
         super.render(graphics, mouseX, mouseY, partialTick);
-        String label = formLabel();
-        graphics.drawString(font, label, leftPos + 48, topPos + 18, 0x404040, false);
+        graphics.drawCenteredString(font, formLabel(), leftPos + imageWidth / 2, topPos + 18, 0x404040);
         renderTooltip(graphics, mouseX, mouseY);
     }
 
@@ -56,7 +56,9 @@ public final class FormSelectScreen extends AbstractContainerScreen<FormSelectMe
             if (forms.isEmpty()) {
                 return "?";
             }
-            return forms.get(Math.floorMod(idx, forms.size())).id().getPath();
+            ShaftFormDefinition form = forms.get(Math.floorMod(idx, forms.size()));
+            return Component.translatable("gui.effecoria.shaft_form." + form.id().getPath()).getString()
+                    + String.format(" · %.1fm", form.lengthMeters());
         }
         var cuts = ArtifactCatalog.focusCuts();
         if (cuts.isEmpty()) {

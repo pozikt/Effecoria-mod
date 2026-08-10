@@ -1,0 +1,11 @@
+{
+  "id": "effecoria:wand",
+  "material_tags": [
+    "effecoria:shaft_materials"
+  ],
+  "length_m": 0.6,
+  "reach": 0.85,
+  "cast_cost_mul": 0.92,
+  "durability": 180,
+  "cook_ticks": 80
+}
