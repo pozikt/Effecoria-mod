@@ -14,6 +14,7 @@ import com.effecoria.block.PhiTelegraphBlock;
 import com.effecoria.block.PsiImprinterBlockEntity;
 import com.effecoria.block.SealInscriberBlockEntity;
 import com.effecoria.block.ShaftLatheBlockEntity;
+import com.effecoria.block.SparkReactorBlockEntity;
 import com.effecoria.block.SubspacePortalBlockEntity;
 import com.effecoria.block.WhisperingSpireVentBlockEntity;
 
@@ -44,6 +45,12 @@ public final class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register(
                     "essence_burner",
                     () -> BlockEntityType.Builder.of(EssenceBurnerBlockEntity::new, ModBlocks.ESSENCE_BURNER.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SparkReactorBlockEntity>> SPARK_REACTOR =
+            BLOCK_ENTITY_TYPES.register(
+                    "spark_reactor",
+                    () -> BlockEntityType.Builder.of(SparkReactorBlockEntity::new, ModBlocks.SPARK_REACTOR.get())
                             .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EssenceAlembicBlockEntity>> ESSENCE_ALEMBIC =

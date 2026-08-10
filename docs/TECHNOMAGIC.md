@@ -11,7 +11,7 @@ See also [ROADMAP.md](ROADMAP.md) Stage IV — **in progress: catalog + Era I–
 | I — Hearth | Torch, campfire heat, crucible, mortar | **Playable** |
 | II — Workshop | Burner, Φ-furnace, glass/flasks, alembic, filters, cell, focus | **Playable** |
 | III — Imprint | Ψ-imprinter, golem chassis / Φ-construct, Φ-telegraph, **artifact craft** (lathe/cutter/assembler), **item seals**, **Curios jewelry** | **Playable** |
-| IV — Reactors | Spark / Heart / Forge reactors, Φ-bus | Catalog `planned` |
+| IV — Reactors | Spark / Heart / Forge reactors, Φ-bus | **Spark playable**; Heart/Forge/bus `planned` |
 | V — Geo | Geo wells, climate array, portal gate | Catalog `planned` |
 
 ## Flow (I–III)
@@ -63,9 +63,16 @@ flowchart LR
 | Clay Crucible | `clay_crucible` | Ore/crystal → shard (lossy) |
 | Mortar / Burner / Alembic / filters / cell / focus | existing | Catalog + machines |
 
+## Era IV (partial)
+
+| Node | ID | Notes |
+|------|-----|--------|
+| Spark Reactor | `spark_reactor` | Fuel dust/cell; START/STOP; overheat + pure-essonite boost; wireless `PhiPower` radius 3 (LOS); powers burner/alembic/mortar; charge slot |
+
 ## Data
 
 - Catalog JSON: `data/effecoria/technomagic/*.json`
 - Code: `com.effecoria.core.technomagic`
 - Heat bus: `PhiHeat` / `PhiHeatSource`
+- Wireless Φ-power: `PhiPower` / `PhiPowerProvider`
 - UI: Primer chapter `TECHNOMAGIC` + Technomancy button → `TechnomagicScreen`

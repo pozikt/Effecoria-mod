@@ -6,6 +6,7 @@ import com.effecoria.content.ModItemTags;
 import com.effecoria.content.ModItems;
 import com.effecoria.core.alchemy.HeatLevel;
 import com.effecoria.core.alchemy.PhiHeatSource;
+import com.effecoria.core.alchemy.PhiPower;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -118,6 +119,15 @@ public final class EssenceBurnerBlockEntity extends BaseContainerBlockEntity
 
     @Override
     public HeatLevel heatLevel() {
+        if (level != null) {
+            float factor = PhiPower.powerFactor(level, worldPosition);
+            if (factor >= 2f) {
+                return HeatLevel.HIGH;
+            }
+            if (factor > 0f) {
+                return HeatLevel.MEDIUM;
+            }
+        }
         if (fuelTicks <= 0 || overheatCooldown > 0) {
             return HeatLevel.NONE;
         }
@@ -126,6 +136,9 @@ public final class EssenceBurnerBlockEntity extends BaseContainerBlockEntity
 
     @Override
     public boolean consumeHeatTick() {
+        if (level != null && PhiPower.hasPower(level, worldPosition)) {
+            return true;
+        }
         if (fuelTicks <= 0 || overheatCooldown > 0) {
             return false;
         }
@@ -196,7 +209,8 @@ public final class EssenceBurnerBlockEntity extends BaseContainerBlockEntity
             be.highTicks = 0;
         }
 
-        boolean shouldLit = be.fuelTicks > 0 && be.overheatCooldown <= 0;
+        boolean shouldLit = be.fuelTicks > 0 && be.overheatCooldown <= 0
+                || (be.level != null && PhiPower.hasPower(be.level, pos));
         if (state.getValue(EssenceBurnerBlock.LIT) != shouldLit) {
             level.setBlock(pos, state.setValue(EssenceBurnerBlock.LIT, shouldLit), Block.UPDATE_CLIENTS);
         }

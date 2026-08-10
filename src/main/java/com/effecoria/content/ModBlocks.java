@@ -25,6 +25,7 @@ import com.effecoria.block.PhiTorchBlock;
 import com.effecoria.block.PhiTelegraphBlock;
 import com.effecoria.block.PsiImprinterBlock;
 import com.effecoria.block.RottenMossBlock;
+import com.effecoria.block.SparkReactorBlock;
 import com.effecoria.block.SubspacePortalBlock;
 import com.effecoria.block.VitrifiedBranchesBlock;
 import com.effecoria.block.VitrifiedGeyserCrackBlock;
@@ -671,6 +672,16 @@ public final class ModBlocks {
                     .sound(SoundType.STONE)
                     .lightLevel(state -> state.getValue(EssenceBurnerBlock.LIT) ? 9 : 0)
                     .noOcclusion()));
+
+    /** Era IV Spark Reactor («Искра») — wireless Φ-power for nearby machines. */
+    public static final DeferredBlock<SparkReactorBlock> SPARK_REACTOR = BLOCKS.register(
+            "spark_reactor",
+            () -> new SparkReactorBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(3.0f, 6f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> state.getValue(SparkReactorBlock.LIT) ? 7 : 0)));
 
     /** Essence alembic — blue cauldron for Φ-water potions. */
     public static final DeferredBlock<EssenceAlembicBlock> ESSENCE_ALEMBIC = BLOCKS.register(

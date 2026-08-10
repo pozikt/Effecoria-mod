@@ -8,6 +8,7 @@ import com.effecoria.content.ModBlockEntities;
 import com.effecoria.content.ModItemTags;
 import com.effecoria.content.ModItems;
 import com.effecoria.content.PhiHarnessItems;
+import com.effecoria.core.alchemy.PhiPower;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -170,16 +171,18 @@ public final class MortarBlockEntity extends BaseContainerBlockEntity implements
             return;
         }
         boolean auto = be.hasAutoDrive();
-        boolean manual = !auto && be.hasManualPestle(server);
-        be.autoMode = auto;
-        if (!auto && !manual) {
+        boolean reactorPower = PhiPower.hasPower(server, pos);
+        boolean manual = !auto && !reactorPower && be.hasManualPestle(server);
+        boolean driven = auto || reactorPower;
+        be.autoMode = driven;
+        if (!driven && !manual) {
             return;
         }
-        be.maxProgress = auto ? AUTO_MAX : MANUAL_MAX;
+        be.maxProgress = driven ? AUTO_MAX : MANUAL_MAX;
         be.progress++;
         be.setChanged();
         if (be.progress >= be.maxProgress) {
-            be.finishGrind(server, auto);
+            be.finishGrind(server, driven, reactorPower);
         }
     }
 
@@ -229,7 +232,7 @@ public final class MortarBlockEntity extends BaseContainerBlockEntity implements
                 || player.getOffhandItem().is(ModItemTags.PESTLES);
     }
 
-    private void finishGrind(ServerLevel level, boolean auto) {
+    private void finishGrind(ServerLevel level, boolean auto, boolean reactorDriven) {
         ItemStack input = items.get(SLOT_INPUT);
         float purity = auto ? PURITY_AUTO : PURITY_MANUAL;
         Optional<MortarRecipes.Result> result =
@@ -249,7 +252,7 @@ public final class MortarBlockEntity extends BaseContainerBlockEntity implements
         mergeInto(SLOT_BYPRODUCT, r.byproduct());
         mergeInto(SLOT_WASTE, r.waste());
         input.shrink(1);
-        if (auto) {
+        if (auto && !reactorDriven) {
             drainDriveCell();
         }
         progress = 0;

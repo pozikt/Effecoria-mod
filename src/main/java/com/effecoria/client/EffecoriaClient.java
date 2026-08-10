@@ -27,6 +27,7 @@ import com.effecoria.client.gui.alchemy.FormSelectScreen;
 import com.effecoria.client.gui.alchemy.ImprinterScreen;
 import com.effecoria.client.gui.alchemy.MortarScreen;
 import com.effecoria.client.gui.alchemy.SealInscriberScreen;
+import com.effecoria.client.gui.alchemy.SparkReactorScreen;
 import com.effecoria.client.render.PhiConstructRenderer;
 import com.effecoria.client.render.VitrifiedGolemRenderer;
 import com.effecoria.content.ModBlocks;
@@ -56,6 +57,7 @@ public final class EffecoriaClient {
     public static void registerMenuScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenus.MORTAR.get(), MortarScreen::new);
         event.register(ModMenus.BURNER.get(), BurnerScreen::new);
+        event.register(ModMenus.SPARK_REACTOR.get(), SparkReactorScreen::new);
         event.register(ModMenus.ALEMBIC.get(), AlembicScreen::new);
         event.register(ModMenus.IMPRINTER.get(), ImprinterScreen::new);
         event.register(ModMenus.SHAFT_LATHE.get(), FormSelectScreen::new);

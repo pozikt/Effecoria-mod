@@ -127,6 +127,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.GOLEM_CHASSIS.get());
                         output.accept(ModItems.TELEGRAPH_MODULE.get());
                         output.accept(ModItems.ESSENCE_BURNER.get());
+                        output.accept(ModItems.SPARK_REACTOR.get());
                         output.accept(ModItems.ESSENCE_ALEMBIC.get());
                         output.accept(ModItems.POTION_PHI_TONIC.get());
                         output.accept(ModItems.POTION_PHI_RESONANCE.get());

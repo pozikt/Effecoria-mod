@@ -129,6 +129,21 @@ d.rectangle([8, 18, 17, 61], outline=PANEL_DARK, fill=(150, 130, 110, 255))
 player_inventory(d)
 img.save(OUT / "alembic.png")
 
+# --- Spark Reactor: fuel 56,35 | charge 116,35 | toggle well 70,58 ---
+img, d = new_tex()
+slot_frame(d, 56, 35)
+slot_frame(d, 116, 35)
+accent_dot(d, 56, 35, (80, 160, 255, 255))
+accent_dot(d, 116, 35, (120, 200, 255, 255))
+# fuel progress trough
+d.rectangle([52, 53, 124, 59], outline=PANEL_DARK, fill=(150, 160, 175, 255))
+# charge well under charge slot
+d.rectangle([116, 54, 131, 69], outline=PANEL_DARK, fill=(130, 150, 175, 255))
+# START/STOP button well
+d.rectangle([69, 57, 124, 74], outline=ACCENT, fill=(170, 180, 195, 255))
+player_inventory(d)
+img.save(OUT / "spark_reactor.png")
+
 # also write a blank progress arrow strip for filled blit (optional)
 print("saved 256x256:", sorted(p.name for p in OUT.glob("*.png")))
 for p in OUT.glob("*.png"):

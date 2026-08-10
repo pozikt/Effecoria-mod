@@ -8,6 +8,7 @@ import com.effecoria.alchemy.menu.FormSelectMenu;
 import com.effecoria.alchemy.menu.ImprinterMenu;
 import com.effecoria.alchemy.menu.MortarMenu;
 import com.effecoria.alchemy.menu.SealInscriberMenu;
+import com.effecoria.alchemy.menu.SparkReactorMenu;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
@@ -26,6 +27,9 @@ public final class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<BurnerMenu>> BURNER =
             MENUS.register("burner", () -> IMenuTypeExtension.create(BurnerMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<SparkReactorMenu>> SPARK_REACTOR =
+            MENUS.register("spark_reactor", () -> IMenuTypeExtension.create(SparkReactorMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<AlembicMenu>> ALEMBIC =
             MENUS.register("alembic", () -> IMenuTypeExtension.create(AlembicMenu::new));

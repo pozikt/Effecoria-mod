@@ -225,6 +225,10 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> ESSENCE_BURNER = ITEMS.register(
             "essence_burner",
             () -> new EssenceBurnerBlockItem(ModBlocks.ESSENCE_BURNER.get(), new Item.Properties()));
+    public static final DeferredItem<BlockItem> SPARK_REACTOR = ITEMS.register(
+            "spark_reactor",
+            () -> new HintBlockItem(
+                    ModBlocks.SPARK_REACTOR.get(), new Item.Properties(), "tooltip.effecoria.spark_reactor"));
     public static final DeferredItem<BlockItem> ESSENCE_ALEMBIC =
             ITEMS.registerSimpleBlockItem("essence_alembic", ModBlocks.ESSENCE_ALEMBIC);
 

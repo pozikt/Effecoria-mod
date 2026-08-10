@@ -1,8 +1,8 @@
 {
   "id": "effecoria:spark_reactor",
   "era": 4,
-  "icon": "effecoria:essence_burner",
-  "status": "planned",
+  "icon": "effecoria:spark_reactor",
+  "status": "available",
   "requires": [
     "effecoria:psi_imprinter"
   ],

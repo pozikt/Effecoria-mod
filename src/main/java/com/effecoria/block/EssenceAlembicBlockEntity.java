@@ -5,6 +5,7 @@ import com.effecoria.alchemy.recipe.AlembicRecipes;
 import com.effecoria.content.ModBlockEntities;
 import com.effecoria.core.alchemy.HeatLevel;
 import com.effecoria.core.alchemy.PhiHeat;
+import com.effecoria.core.alchemy.PhiPower;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -144,7 +145,8 @@ public final class EssenceAlembicBlockEntity extends BaseContainerBlockEntity im
         if (!PhiHeat.consumeNeighborHeat(server, pos)) {
             return;
         }
-        be.cookProgress++;
+        int steps = PhiPower.hasPower(server, pos) ? 2 : 1;
+        be.cookProgress = Math.min(be.cookTotal, be.cookProgress + steps);
         be.setChanged();
         if (be.cookProgress >= be.cookTotal) {
             be.finishCook(server);

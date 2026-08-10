@@ -23,6 +23,7 @@ public final class AlchemyGui {
     public static final ResourceLocation MORTAR = EffecoriaMod.id("textures/gui/mortar.png");
     public static final ResourceLocation BURNER = EffecoriaMod.id("textures/gui/burner.png");
     public static final ResourceLocation ALEMBIC = EffecoriaMod.id("textures/gui/alembic.png");
+    public static final ResourceLocation SPARK_REACTOR = EffecoriaMod.id("textures/gui/spark_reactor.png");
 
     private AlchemyGui() {}
 

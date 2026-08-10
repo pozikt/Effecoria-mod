@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "lit=false": { "model": "effecoria:block/spark_reactor" },
+    "lit=true": { "model": "effecoria:block/spark_reactor_on" }
+  }
+}
