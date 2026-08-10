@@ -1,8 +1,8 @@
 {
-  "parent": "minecraft:block/cube_bottom_top",
+  "parent": "minecraft:block/orientable",
   "textures": {
-    "bottom": "effecoria:block/spark_reactor_bottom",
     "top": "effecoria:block/spark_reactor_top",
+    "front": "effecoria:block/spark_reactor_front",
     "side": "effecoria:block/spark_reactor_side"
   }
 }
