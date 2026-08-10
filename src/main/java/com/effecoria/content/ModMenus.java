@@ -3,6 +3,7 @@ package com.effecoria.content;
 import com.effecoria.EffecoriaMod;
 import com.effecoria.alchemy.menu.AlembicMenu;
 import com.effecoria.alchemy.menu.BurnerMenu;
+import com.effecoria.alchemy.menu.ImprinterMenu;
 import com.effecoria.alchemy.menu.MortarMenu;
 
 import net.minecraft.core.registries.Registries;
@@ -25,4 +26,7 @@ public final class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<AlembicMenu>> ALEMBIC =
             MENUS.register("alembic", () -> IMenuTypeExtension.create(AlembicMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<ImprinterMenu>> IMPRINTER =
+            MENUS.register("imprinter", () -> IMenuTypeExtension.create(ImprinterMenu::new));
 }

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": {
+      "item": "effecoria:phi_stone"
+    },
+    "P": {
+      "item": "effecoria:pure_essonite"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "C": {
+      "item": "effecoria:phi_cell"
+    }
+  },
+  "pattern": [
+    "GPG",
+    "SCS",
+    "SSS"
+  ],
+  "result": {
+    "count": 1,
+    "id": "effecoria:psi_imprinter"
+  }
+}

@@ -356,6 +356,37 @@ public final class ModNetworking {
         }
     }
 
+    public record TelegraphPulsePayload(int x1, int y1, int z1, int x2, int y2, int z2)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<TelegraphPulsePayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "telegraph_pulse"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, TelegraphPulsePayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.VAR_INT,
+                        TelegraphPulsePayload::x1,
+                        ByteBufCodecs.VAR_INT,
+                        TelegraphPulsePayload::y1,
+                        ByteBufCodecs.VAR_INT,
+                        TelegraphPulsePayload::z1,
+                        ByteBufCodecs.VAR_INT,
+                        TelegraphPulsePayload::x2,
+                        ByteBufCodecs.VAR_INT,
+                        TelegraphPulsePayload::y2,
+                        ByteBufCodecs.VAR_INT,
+                        TelegraphPulsePayload::z2,
+                        TelegraphPulsePayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(TelegraphPulsePayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> com.effecoria.client.ClientTelegraphFx.pulse(payload));
+        }
+    }
+
     public record SelectSpellPayload(int spellIndex) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<SelectSpellPayload> TYPE =
                 new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "select_spell"));

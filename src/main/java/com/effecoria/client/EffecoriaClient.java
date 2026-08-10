@@ -20,10 +20,12 @@ import com.effecoria.client.render.PhiLarvaRenderer;
 import com.effecoria.client.render.RootCageRenderer;
 import com.effecoria.client.render.RotfangMinkRenderer;
 import com.effecoria.client.render.SubspacePortalRenderer;
-import com.effecoria.client.render.VitrifiedGolemRenderer;
 import com.effecoria.client.gui.alchemy.AlembicScreen;
 import com.effecoria.client.gui.alchemy.BurnerScreen;
+import com.effecoria.client.gui.alchemy.ImprinterScreen;
 import com.effecoria.client.gui.alchemy.MortarScreen;
+import com.effecoria.client.render.PhiConstructRenderer;
+import com.effecoria.client.render.VitrifiedGolemRenderer;
 import com.effecoria.content.ModBlocks;
 import com.effecoria.content.ModEntities;
 import com.effecoria.content.ModFluids;
@@ -52,6 +54,7 @@ public final class EffecoriaClient {
         event.register(ModMenus.MORTAR.get(), MortarScreen::new);
         event.register(ModMenus.BURNER.get(), BurnerScreen::new);
         event.register(ModMenus.ALEMBIC.get(), AlembicScreen::new);
+        event.register(ModMenus.IMPRINTER.get(), ImprinterScreen::new);
     }
 
     @SubscribeEvent
@@ -107,6 +110,7 @@ public final class EffecoriaClient {
         event.registerEntityRenderer(ModEntities.CRYSTAL_CRAB.get(), CrystalCrabRenderer::new);
         event.registerEntityRenderer(ModEntities.EIDOS.get(), EidosRenderer::new);
         event.registerEntityRenderer(ModEntities.VITRIFIED_GOLEM.get(), VitrifiedGolemRenderer::new);
+        event.registerEntityRenderer(ModEntities.PHI_CONSTRUCT.get(), PhiConstructRenderer::new);
         event.registerEntityRenderer(ModEntities.ESSENCE_WYVERN.get(), EssenceWyvernRenderer::new);
         event.registerEntityRenderer(ModEntities.ROTFANG_MINK.get(), RotfangMinkRenderer::new);
         event.registerEntityRenderer(ModEntities.OMEGA_SHADE.get(), OmegaShadeRenderer::new);

@@ -113,6 +113,7 @@ public final class ModCommonEvents {
             DeathMarkService.tickMarks(serverLevel);
             MentalCompulsionService.tick(serverLevel);
             MentalServitudeService.tick(serverLevel);
+            com.effecoria.core.technomagic.ConstructBindingService.tick(serverLevel);
             MentalityService.tick(serverLevel);
             MirageWorldService.tick(serverLevel);
             SubspaceEssentializationService.tick(serverLevel);

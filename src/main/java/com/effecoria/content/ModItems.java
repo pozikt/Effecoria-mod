@@ -168,6 +168,17 @@ public final class ModItems {
             "phi_furnace",
             () -> new HintBlockItem(
                     ModBlocks.PHI_FURNACE.get(), new Item.Properties(), "tooltip.effecoria.phi_furnace"));
+    public static final DeferredItem<BlockItem> PSI_IMPRINTER = ITEMS.register(
+            "psi_imprinter",
+            () -> new HintBlockItem(
+                    ModBlocks.PSI_IMPRINTER.get(), new Item.Properties(), "tooltip.effecoria.psi_imprinter"));
+    public static final DeferredItem<BlockItem> PHI_TELEGRAPH =
+            ITEMS.registerSimpleBlockItem("phi_telegraph", ModBlocks.PHI_TELEGRAPH);
+    public static final DeferredItem<Item> GOLEM_CHASSIS = ITEMS.register(
+            "golem_chassis", () -> new GolemChassisItem(new Item.Properties().stacksTo(16)));
+    public static final DeferredItem<Item> TELEGRAPH_MODULE = ITEMS.register(
+            "telegraph_module",
+            () -> new HintItem(new Item.Properties().stacksTo(16), "tooltip.effecoria.telegraph_module"));
     public static final DeferredItem<BlockItem> ESSENCE_BURNER = ITEMS.register(
             "essence_burner",
             () -> new EssenceBurnerBlockItem(ModBlocks.ESSENCE_BURNER.get(), new Item.Properties()));

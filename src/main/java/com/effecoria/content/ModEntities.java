@@ -15,6 +15,7 @@ import com.effecoria.entity.PhiLarvaEntity;
 import com.effecoria.entity.RootCageEntity;
 import com.effecoria.entity.RotfangMinkEntity;
 import com.effecoria.entity.EssenceWyvernEntity;
+import com.effecoria.entity.PhiConstructEntity;
 import com.effecoria.entity.VitrifiedGolemEntity;
 
 import net.minecraft.core.registries.Registries;
@@ -98,6 +99,15 @@ public final class ModEntities {
                             .fireImmune()
                             .build(EffecoriaMod.id("vitrified_golem").toString()));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<PhiConstructEntity>> PHI_CONSTRUCT =
+            ENTITY_TYPES.register(
+                    "phi_construct",
+                    () -> EntityType.Builder.<PhiConstructEntity>of(PhiConstructEntity::new, MobCategory.CREATURE)
+                            .sized(0.9f, 2.15f)
+                            .clientTrackingRange(12)
+                            .fireImmune()
+                            .build(EffecoriaMod.id("phi_construct").toString()));
+
     /** Classical wyvern: no forelegs. Adult MVP hitbox (visual wingspan ~8–10 blocks). */
     public static final DeferredHolder<EntityType<?>, EntityType<EssenceWyvernEntity>> ESSENCE_WYVERN =
             ENTITY_TYPES.register(
@@ -172,6 +182,7 @@ public final class ModEntities {
         event.put(CRYSTAL_CRAB.get(), CrystalCrabEntity.createAttributes().build());
         event.put(EIDOS.get(), EidosEntity.createAttributes().build());
         event.put(VITRIFIED_GOLEM.get(), VitrifiedGolemEntity.createAttributes().build());
+        event.put(PHI_CONSTRUCT.get(), PhiConstructEntity.createAttributes().build());
         event.put(ESSENCE_WYVERN.get(), EssenceWyvernEntity.createAttributes().build());
         event.put(ROTFANG_MINK.get(), RotfangMinkEntity.createAttributes().build());
         event.put(OMEGA_SHADE.get(), OmegaShadeEntity.createAttributes().build());

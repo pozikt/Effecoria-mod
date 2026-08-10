@@ -8,6 +8,8 @@ import com.effecoria.block.MortarBlockEntity;
 import com.effecoria.block.PhiCampfireBlock;
 import com.effecoria.block.PhiFurnaceBlock;
 import com.effecoria.block.PhiGeyserBlockEntity;
+import com.effecoria.block.PhiTelegraphBlock;
+import com.effecoria.block.PsiImprinterBlockEntity;
 import com.effecoria.block.SubspacePortalBlockEntity;
 import com.effecoria.block.WhisperingSpireVentBlockEntity;
 
@@ -71,6 +73,19 @@ public final class ModBlockEntities {
                     "phi_furnace",
                     () -> BlockEntityType.Builder.of(
                                     PhiFurnaceBlock.PhiFurnaceBlockEntity::new, ModBlocks.PHI_FURNACE.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PsiImprinterBlockEntity>>
+            PSI_IMPRINTER = BLOCK_ENTITY_TYPES.register(
+                    "psi_imprinter",
+                    () -> BlockEntityType.Builder.of(PsiImprinterBlockEntity::new, ModBlocks.PSI_IMPRINTER.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiTelegraphBlock.PhiTelegraphBlockEntity>>
+            PHI_TELEGRAPH = BLOCK_ENTITY_TYPES.register(
+                    "phi_telegraph",
+                    () -> BlockEntityType.Builder.of(
+                                    PhiTelegraphBlock.PhiTelegraphBlockEntity::new, ModBlocks.PHI_TELEGRAPH.get())
                             .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WhisperingSpireVentBlockEntity>>

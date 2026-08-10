@@ -201,6 +201,10 @@ public class EffecoriaMod {
                 ModNetworking.MatterBondSyncPayload.TYPE,
                 ModNetworking.MatterBondSyncPayload.STREAM_CODEC,
                 ModNetworking.MatterBondSyncPayload::handle);
+        registrar.playToClient(
+                ModNetworking.TelegraphPulsePayload.TYPE,
+                ModNetworking.TelegraphPulsePayload.STREAM_CODEC,
+                ModNetworking.TelegraphPulsePayload::handle);
         registrar.playToServer(
                 ModNetworking.SelectSpellPayload.TYPE,
                 ModNetworking.SelectSpellPayload.STREAM_CODEC,

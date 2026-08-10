@@ -105,6 +105,10 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PHI_CAMPFIRE.get());
                         output.accept(ModItems.CLAY_CRUCIBLE.get());
                         output.accept(ModItems.PHI_FURNACE.get());
+                        output.accept(ModItems.PSI_IMPRINTER.get());
+                        output.accept(ModItems.PHI_TELEGRAPH.get());
+                        output.accept(ModItems.GOLEM_CHASSIS.get());
+                        output.accept(ModItems.TELEGRAPH_MODULE.get());
                         output.accept(ModItems.ESSENCE_BURNER.get());
                         output.accept(ModItems.ESSENCE_ALEMBIC.get());
                         output.accept(ModItems.POTION_PHI_TONIC.get());

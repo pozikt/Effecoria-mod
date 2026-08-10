@@ -132,7 +132,7 @@ Materials that were “craft only” in Stage I get proper sources here.
 
 | Item | Notes |
 |------|-------|
-| **Technomagic catalog + Era I–II** | **In progress / shipped scaffold** — see [TECHNOMAGIC.md](TECHNOMAGIC.md): free craft, discovery UI, Φ-torch/campfire/crucible/furnace |
+| **Technomagic catalog + Era I–III** | **In progress / shipped scaffold** — see [TECHNOMAGIC.md](TECHNOMAGIC.md): free craft, discovery UI, Era I–II machines, Era III imprinter/construct/telegraph |
 | Phi Cell → reactor tiers | Multiblocks, failure modes (Era III–V catalog `planned`) |
 | Mage towers | Regional Φ, beacons |
 | Rune circuits / wiring | `technomagicPower()` path |

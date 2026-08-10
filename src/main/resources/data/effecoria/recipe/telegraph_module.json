@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": {
+      "item": "effecoria:phi_glass"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "P": {
+      "item": "effecoria:pure_essonite"
+    }
+  },
+  "pattern": [
+    "GRG",
+    "GPG",
+    "GRG"
+  ],
+  "result": {
+    "count": 1,
+    "id": "effecoria:telegraph_module"
+  }
+}

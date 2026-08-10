@@ -212,6 +212,8 @@ public final class PlayerPsiData {
     private List<UUID> mentalServantIds = new ArrayList<>();
     /** Server-only Ψ reserve per mental servant UUID (source of truth for HUD sync). */
     private Map<UUID, Float> mentalServantReserves = new HashMap<>();
+    /** Server-only Φ-construct UUID ledger (MVP: one). */
+    private List<UUID> constructIds = new ArrayList<>();
     private long overcastUntil;
     private float overcastSeverity;
     private Map<ResourceLocation, Integer> spellCastCounts = new HashMap<>();
@@ -671,6 +673,26 @@ public final class PlayerPsiData {
         mentalServantReserves.remove(servantId);
     }
 
+    public List<UUID> constructIds() {
+        return constructIds;
+    }
+
+    public void trackConstruct(UUID constructId) {
+        if (constructId == null) {
+            return;
+        }
+        if (!constructIds.contains(constructId)) {
+            constructIds.add(constructId);
+        }
+    }
+
+    public void untrackConstruct(UUID constructId) {
+        if (constructId == null) {
+            return;
+        }
+        constructIds.remove(constructId);
+    }
+
     /** Sum of Ψ reserved by mental servants (server ledger; independent of entity lookup). */
     public float mentalReservedPsi() {
         float total = 0f;
@@ -904,6 +926,12 @@ public final class PlayerPsiData {
         }
         tag.put("mentalServantReserves", servantReserves);
 
+        ListTag constructList = new ListTag();
+        for (UUID constructId : constructIds) {
+            constructList.add(StringTag.valueOf(constructId.toString()));
+        }
+        tag.put("constructIds", constructList);
+
         ListTag spellList = new ListTag();
         for (ResourceLocation spell : knownSpells) {
             spellList.add(net.minecraft.nbt.StringTag.valueOf(spell.toString()));
@@ -1022,6 +1050,18 @@ public final class PlayerPsiData {
         // Backfill reserve map for older saves that only had UUID lists.
         for (UUID id : mentalServantIds) {
             mentalServantReserves.putIfAbsent(id, 1f);
+        }
+
+        constructIds = new ArrayList<>();
+        if (tag.contains("constructIds", Tag.TAG_LIST)) {
+            ListTag constructList = tag.getList("constructIds", Tag.TAG_STRING);
+            for (Tag entry : constructList) {
+                try {
+                    constructIds.add(UUID.fromString(entry.getAsString()));
+                } catch (IllegalArgumentException ignored) {
+                    // Skip corrupt entries.
+                }
+            }
         }
 
         knownSpells = new ArrayList<>();
@@ -1145,6 +1185,7 @@ public final class PlayerPsiData {
         copy.necroThrallIds = new ArrayList<>(necroThrallIds);
         copy.mentalServantIds = new ArrayList<>(mentalServantIds);
         copy.mentalServantReserves = new HashMap<>(mentalServantReserves);
+        copy.constructIds = new ArrayList<>(constructIds);
         copy.overcastUntil = overcastUntil;
         copy.overcastSeverity = overcastSeverity;
         copy.spellCastCounts = new HashMap<>(spellCastCounts);

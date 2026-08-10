@@ -24,6 +24,8 @@
                    "effecoria:omega_crystal_bud_small",
                    "effecoria:omega_crystal_bud_medium",
                    "effecoria:omega_crystal_bud_large",
-                   "effecoria:phi_furnace"
+                   "effecoria:phi_furnace",
+                   "effecoria:psi_imprinter",
+                   "effecoria:phi_telegraph"
                ]
 }

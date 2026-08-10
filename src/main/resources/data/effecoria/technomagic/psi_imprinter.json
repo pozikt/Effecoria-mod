@@ -1,10 +1,13 @@
 {
   "id": "effecoria:psi_imprinter",
   "era": 3,
-  "icon": "effecoria:resonance_focus",
-  "status": "planned",
+  "icon": "effecoria:psi_imprinter",
+  "status": "available",
   "requires": [
     "effecoria:resonance_focus"
   ],
-  "display_unlocks": []
+  "display_unlocks": [
+    "effecoria:golem_chassis",
+    "effecoria:telegraph_module"
+  ]
 }

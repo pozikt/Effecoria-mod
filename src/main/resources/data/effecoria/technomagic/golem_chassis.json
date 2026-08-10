@@ -1,8 +1,8 @@
 {
   "id": "effecoria:golem_chassis",
   "era": 3,
-  "icon": "effecoria:phi_cell",
-  "status": "planned",
+  "icon": "effecoria:golem_chassis",
+  "status": "available",
   "requires": [
     "effecoria:psi_imprinter"
   ],

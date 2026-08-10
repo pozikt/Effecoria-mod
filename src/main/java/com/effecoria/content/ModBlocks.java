@@ -21,6 +21,8 @@ import com.effecoria.block.PhiLogBlock;
 import com.effecoria.block.PhiSaplingBlock;
 import com.effecoria.block.PhiSnareVineBlock;
 import com.effecoria.block.PhiTorchBlock;
+import com.effecoria.block.PhiTelegraphBlock;
+import com.effecoria.block.PsiImprinterBlock;
 import com.effecoria.block.RottenMossBlock;
 import com.effecoria.block.SubspacePortalBlock;
 import com.effecoria.block.VitrifiedBranchesBlock;
@@ -678,6 +680,24 @@ public final class ModBlocks {
                     .sound(SoundType.GLASS)
                     .lightLevel(state -> 4)
                     .noOcclusion()));
+
+    /** Era III Ψ-imprinter — writes imprint into chassis / telegraph blanks. */
+    public static final DeferredBlock<PsiImprinterBlock> PSI_IMPRINTER = BLOCKS.register(
+            "psi_imprinter",
+            () -> new PsiImprinterBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PURPLE)
+                    .strength(2.0f, 5f)
+                    .sound(ModSoundTypes.PHI_STONE)
+                    .noOcclusion()));
+
+    /** Era III Φ-telegraph — paired same-dimension messaging. */
+    public static final DeferredBlock<PhiTelegraphBlock> PHI_TELEGRAPH = BLOCKS.register(
+            "phi_telegraph",
+            () -> new PhiTelegraphBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(1.8f, 4f)
+                    .sound(SoundType.METAL)
+                    .lightLevel(state -> 5)));
 
     private static DeferredBlock<Block> registerOre(
             String name, MapColor color, float hardness, float resistance, SoundType sound) {

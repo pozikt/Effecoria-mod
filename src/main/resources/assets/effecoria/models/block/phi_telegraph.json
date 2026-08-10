@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "effecoria:block/phi_stone",
+    "side": "effecoria:block/essence_alembic"
+  }
+}

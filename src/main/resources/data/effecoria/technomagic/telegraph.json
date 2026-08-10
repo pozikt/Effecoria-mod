@@ -1,10 +1,12 @@
 {
   "id": "effecoria:telegraph",
   "era": 3,
-  "icon": "effecoria:phi_flask",
-  "status": "planned",
+  "icon": "effecoria:phi_telegraph",
+  "status": "available",
   "requires": [
     "effecoria:psi_imprinter"
   ],
-  "display_unlocks": []
+  "display_unlocks": [
+    "effecoria:phi_telegraph"
+  ]
 }
