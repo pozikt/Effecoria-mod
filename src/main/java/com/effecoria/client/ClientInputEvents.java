@@ -286,7 +286,7 @@ public final class ClientInputEvents {
         PlayerPsiData data = player.getData(ModAttachments.PSI.get());
         boolean harpy = data.race().orElse(null) == com.effecoria.core.progression.PlayerRace.HARPY;
         boolean jumpDown = isKeyPhysicallyDown(minecraft, minecraft.options.keyJump.getKey());
-        if (harpy && player.isFallFlying() && jumpDown && !harpyJumpWasDown && !player.onGround()) {
+        if (harpy && !player.onGround() && jumpDown && !harpyJumpWasDown) {
             PacketDistributor.sendToServer(new ModNetworking.HarpyFlapPayload());
         }
         harpyJumpWasDown = jumpDown;

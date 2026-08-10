@@ -93,7 +93,7 @@ public final class StaffStats {
             cost *= Math.max(0.7f, 1f - 0.05f * attune);
             power *= 1f + 0.03f * attune;
         }
-        int capacity = 1 + Math.max(0, tier) + ward;
+        int capacity = Math.max(3, 1 + Math.max(0, tier) + ward);
         return new Bundle(cost, power, reach, length, cond, tier, capacity);
     }
 }

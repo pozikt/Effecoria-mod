@@ -20,6 +20,8 @@ public final class SealInscriberMenu extends MachineMenu {
     public static final int BUTTON_LEVEL_UP = 3;
     public static final int BUTTON_APPLY = 4;
     public static final int BUTTON_STRIP = 5;
+    /** {@code id = SELECT_INDEX_BASE + sealIndex} picks that seal in the catalog list. */
+    public static final int SELECT_INDEX_BASE = 100;
 
     private final SealInscriberBlockEntity blockEntity;
     private final ContainerData data;
@@ -37,7 +39,7 @@ public final class SealInscriberMenu extends MachineMenu {
         this.blockEntity = be;
         this.data = data == null ? be.getData() : data;
         checkContainerSize(be, SealInscriberBlockEntity.SLOT_COUNT);
-        addSlot(new Slot(be, SealInscriberBlockEntity.SLOT_TARGET, 80, 35));
+        addSlot(new Slot(be, SealInscriberBlockEntity.SLOT_TARGET, StonecutterMenuLayout.SLOT_INPUT_X, StonecutterMenuLayout.SLOT_INPUT_Y));
         addPlayerInventory(playerInv);
         addDataSlots(this.data);
     }
@@ -79,7 +81,13 @@ public final class SealInscriberMenu extends MachineMenu {
             }
             case BUTTON_APPLY -> blockEntity.tryInscribe(player);
             case BUTTON_STRIP -> blockEntity.tryStrip(player);
-            default -> false;
+            default -> {
+                if (id >= SELECT_INDEX_BASE) {
+                    blockEntity.setSealIndex(id - SELECT_INDEX_BASE);
+                    yield true;
+                }
+                yield false;
+            }
         };
     }
 

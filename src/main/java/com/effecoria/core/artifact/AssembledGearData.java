@@ -124,8 +124,19 @@ public final class AssembledGearData {
         return seals(stack).getOrDefault(sealId, 0);
     }
 
-    public static boolean hasSeal(ItemStack stack, ResourceLocation sealId) {
-        return sealLevel(stack, sealId) > 0;
+    public static int sealCapacity(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return 0;
+        }
+        if (isStaff(stack)) {
+            return Math.max(3, StaffStats.of(stack).sealCapacity());
+        }
+        int ward = sealLevel(stack, ResourceLocation.fromNamespaceAndPath("effecoria", "ward_bind"));
+        return 3 + Math.max(0, ward);
+    }
+
+    public static boolean hasInscribedSeals(ItemStack stack) {
+        return !seals(stack).isEmpty();
     }
 
     public static List<EssonitePhoneme> allPhonemes(ItemStack stack) {

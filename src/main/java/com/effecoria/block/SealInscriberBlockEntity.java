@@ -5,7 +5,6 @@ import com.effecoria.content.ModBlockEntities;
 import com.effecoria.core.artifact.AssembledGearData;
 import com.effecoria.core.artifact.ItemSealCatalog;
 import com.effecoria.core.artifact.ItemSealDefinition;
-import com.effecoria.core.artifact.StaffStats;
 import com.effecoria.core.magic.MagicSchool;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
@@ -99,9 +98,9 @@ public final class SealInscriberBlockEntity extends BaseContainerBlockEntity imp
             player.displayClientMessage(Component.translatable("message.effecoria.item_seal_need_seals"), true);
             return false;
         }
-        List<ResourceLocation> known = new ArrayList<>(psi.knownItemSeals());
+        List<ResourceLocation> known = ItemSealCatalog.knownOrdered(psi.knownItemSeals());
         if (known.isEmpty()) {
-            known.addAll(ItemSealCatalog.starterIds());
+            known = ItemSealCatalog.knownOrdered(ItemSealCatalog.starterIds());
         }
         if (known.isEmpty()) {
             return false;
@@ -119,10 +118,7 @@ public final class SealInscriberBlockEntity extends BaseContainerBlockEntity imp
         }
         int level = Math.min(def.maxLevel(), Math.max(1, sealLevel));
         Map<ResourceLocation, Integer> seals = new LinkedHashMap<>(AssembledGearData.seals(target));
-        int capacity = AssembledGearData.isStaff(target)
-                ? StaffStats.of(target).sealCapacity()
-                : 1 + AssembledGearData.sealLevel(
-                        target, ResourceLocation.fromNamespaceAndPath("effecoria", "ward_bind"));
+        int capacity = AssembledGearData.sealCapacity(target);
         if (!seals.containsKey(sealId) && seals.size() >= capacity) {
             player.displayClientMessage(Component.translatable("message.effecoria.item_seal_full"), true);
             return false;

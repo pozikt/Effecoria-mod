@@ -79,15 +79,20 @@ public final class ItemSealCatalog {
     }
 
     public static boolean appliesTo(ItemSealDefinition def, ItemStack stack) {
-        if (def.applicableTags().isEmpty()) {
-            return true;
-        }
-        for (TagKey<Item> tag : def.applicableTags()) {
-            if (stack.is(tag)) {
-                return true;
+        return !stack.isEmpty();
+    }
+
+    /** Known seals in catalog order (stable GUI / inscriber list). */
+    public static List<ResourceLocation> knownOrdered(Iterable<ResourceLocation> known) {
+        java.util.Set<ResourceLocation> set = new java.util.HashSet<>();
+        known.forEach(set::add);
+        List<ResourceLocation> out = new ArrayList<>();
+        for (ItemSealDefinition def : sorted()) {
+            if (set.contains(def.id())) {
+                out.add(def.id());
             }
         }
-        return false;
+        return out;
     }
 
     private static ItemSealDefinition parse(JsonObject json, ResourceLocation fileId) {

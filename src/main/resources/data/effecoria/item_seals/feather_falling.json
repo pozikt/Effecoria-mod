@@ -8,5 +8,5 @@
   "params": {
     "per_level": 0.12
   },
-  "starter": false
+  "starter": true
 }

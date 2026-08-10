@@ -1180,6 +1180,12 @@ public final class PlayerPsiData {
             }
             if (knownItemSeals.isEmpty()) {
                 knownItemSeals = new ArrayList<>(com.effecoria.core.artifact.ItemSealCatalog.starterIds());
+            } else {
+                for (ResourceLocation starter : com.effecoria.core.artifact.ItemSealCatalog.starterIds()) {
+                    if (!knownItemSeals.contains(starter)) {
+                        knownItemSeals.add(starter);
+                    }
+                }
             }
         }
     }

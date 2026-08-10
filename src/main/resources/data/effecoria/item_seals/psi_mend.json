@@ -8,5 +8,5 @@
   "params": {
     "psi_per_point": 0.5
   },
-  "starter": false
+  "starter": true
 }

@@ -160,6 +160,43 @@ public final class HarpyFlightService {
         player.displayClientMessage(Component.translatable("message.effecoria.harpy.launch"), true);
     }
 
+    /**
+     * Jump while falling — spread wings without the ground sprint + triple-jump wind-up.
+     * Also used from {@link #tryFlap} when not yet gliding.
+     */
+    public static boolean tryDeployWhileFalling(ServerPlayer player, FlightState existing) {
+        if (!isHarpy(player)) {
+            return false;
+        }
+        FlightState s = existing != null ? existing : state(player);
+        if (s.gliding || player.onGround() || player.isInWater() || player.isInLava() || player.isPassenger()) {
+            return false;
+        }
+        if (player.getDeltaMovement().y > 0.12) {
+            return false;
+        }
+        if (player.getFoodData().getFoodLevel() <= 0) {
+            player.displayClientMessage(Component.translatable("message.effecoria.harpy.starving"), true);
+            return false;
+        }
+        s.gliding = true;
+        s.jumpStreak = 0;
+        s.jumpHintShown = false;
+        if (!player.isFallFlying()) {
+            player.startFallFlying();
+        }
+        float launchEx = BalanceConfig.HARPY_FLAP_EXHAUSTION.get().floatValue() * 0.35f;
+        if (launchEx > 0f) {
+            player.getFoodData().addExhaustion(launchEx);
+        }
+        player.displayClientMessage(Component.translatable("message.effecoria.harpy.spread_wings"), true);
+        return true;
+    }
+
+    public static boolean tryDeployWhileFalling(ServerPlayer player) {
+        return tryDeployWhileFalling(player, null);
+    }
+
     /** Space flap while gliding — firework-style boost with hunger cost. */
     public static boolean tryFlap(ServerPlayer player) {
         if (!isHarpy(player)) {
@@ -167,7 +204,7 @@ public final class HarpyFlightService {
         }
         FlightState s = state(player);
         if (!s.gliding && !player.isFallFlying()) {
-            return false;
+            return tryDeployWhileFalling(player, s);
         }
         if (player.onGround() || player.isInWater()) {
             return false;

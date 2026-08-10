@@ -9,6 +9,7 @@ import com.effecoria.core.psi.PsiHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -17,14 +18,35 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
+import java.util.List;
 import java.util.Map;
 
 /** Applies Effecoria item-seal combat / armor effects. */
 @EventBusSubscriber(modid = EffecoriaMod.MOD_ID)
 public final class ItemSealEvents {
     private ItemSealEvents() {}
+
+    @SubscribeEvent
+    public static void onTooltip(ItemTooltipEvent event) {
+        ItemStack stack = event.getItemStack();
+        Map<ResourceLocation, Integer> seals = AssembledGearData.seals(stack);
+        if (seals.isEmpty()) {
+            return;
+        }
+        List<Component> tip = event.getToolTip();
+        tip.add(Component.empty());
+        tip.add(Component.translatable(
+                "tooltip.effecoria.item_seals_header",
+                seals.size(),
+                AssembledGearData.sealCapacity(stack)));
+        seals.forEach((id, lvl) -> tip.add(Component.translatable(
+                "tooltip.effecoria.item_seal_line",
+                Component.translatable("item_seal.effecoria." + id.getPath()),
+                lvl)));
+    }
 
     @SubscribeEvent
     public static void onDamage(LivingIncomingDamageEvent event) {
