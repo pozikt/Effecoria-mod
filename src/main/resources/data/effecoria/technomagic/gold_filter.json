@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:gold_filter",
+  "era": 2,
+  "icon": "effecoria:gold_filter",
+  "status": "available",
+  "requires": [
+    "effecoria:essence_alembic"
+  ],
+  "display_unlocks": []
+}

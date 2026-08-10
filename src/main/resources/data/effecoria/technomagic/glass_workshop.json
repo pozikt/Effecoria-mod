@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:glass_workshop",
+  "era": 2,
+  "icon": "effecoria:phi_glass",
+  "status": "available",
+  "requires": [
+    "effecoria:phi_furnace"
+  ],
+  "display_unlocks": [
+    "effecoria:phi_flask"
+  ]
+}

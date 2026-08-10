@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:block",
+  "pools": [{
+    "bonus_rolls": 0.0,
+    "entries": [{ "type": "minecraft:effecoria:phi_torch", "phi_torch": "effecoria:phi_torch" }],
+    "rolls": 1.0,
+    "conditions": [{ "condition": "minecraft:survives_explosion" }]
+  }],
+  "random_sequence": "effecoria:blocks/phi_torch"
+}

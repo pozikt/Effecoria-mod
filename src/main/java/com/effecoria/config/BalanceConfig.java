@@ -324,6 +324,19 @@ public final class BalanceConfig {
             .comment("Extra max Ψ granted to Lonvers on race assign")
             .defineInRange("race_lonver_max_psi_bonus", 15.0, 0.0, 100.0);
 
+    public static final ModConfigSpec.DoubleValue RACE_VANILLA_HEIGHT = BUILDER
+            .comment("Reference vanilla player standing height in meters (blocks) for race scale math")
+            .defineInRange("race_vanilla_height", 1.8, 1.0, 3.0);
+    public static final ModConfigSpec.DoubleValue RACE_DWARF_HEIGHT = BUILDER
+            .comment("Dwarf standing height in meters")
+            .defineInRange("race_dwarf_height", 1.5, 0.8, 2.5);
+    public static final ModConfigSpec.DoubleValue RACE_ELF_HEIGHT = BUILDER
+            .comment("Elf standing height in meters (vanilla + 0.2)")
+            .defineInRange("race_elf_height", 2.0, 1.0, 3.0);
+    public static final ModConfigSpec.DoubleValue RACE_LONVER_HEIGHT = BUILDER
+            .comment("Lonver standing height in meters (vanilla + 0.2)")
+            .defineInRange("race_lonver_height", 2.0, 1.0, 3.0);
+
     // --- Harpy flight ---
     public static final ModConfigSpec.DoubleValue HARPY_MIN_SPEED = BUILDER
             .comment("Min horizontal speed (blocks/tick) while sprinting to count wind-up jumps")

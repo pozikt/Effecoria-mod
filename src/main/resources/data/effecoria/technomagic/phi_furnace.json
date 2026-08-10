@@ -1,0 +1,13 @@
+{
+  "id": "effecoria:phi_furnace",
+  "era": 2,
+  "icon": "effecoria:phi_furnace",
+  "status": "available",
+  "requires": [
+    "effecoria:essence_burner"
+  ],
+  "display_unlocks": [
+    "effecoria:pure_essonite",
+    "effecoria:phi_glass"
+  ]
+}

@@ -82,6 +82,7 @@ public final class ModCommonEvents {
     public static void onAddReloadListeners(AddReloadListenerEvent event) {
         event.addListener(SpellRegistry.RELOAD_LISTENER);
         event.addListener(com.effecoria.core.seal.SealWordRegistry.RELOAD_LISTENER);
+        event.addListener(com.effecoria.core.technomagic.TechnomagicCatalog.RELOAD_LISTENER);
     }
 
     @SubscribeEvent

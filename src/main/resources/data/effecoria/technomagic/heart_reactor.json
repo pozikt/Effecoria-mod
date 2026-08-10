@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:heart_reactor",
+  "era": 4,
+  "icon": "effecoria:phi_furnace",
+  "status": "planned",
+  "requires": [
+    "effecoria:spark_reactor"
+  ],
+  "display_unlocks": []
+}

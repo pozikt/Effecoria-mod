@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:block",
+  "pools": [{
+    "bonus_rolls": 0.0,
+    "entries": [{ "type": "minecraft:effecoria:phi_campfire", "phi_campfire": "effecoria:phi_campfire" }],
+    "rolls": 1.0,
+    "conditions": [{ "condition": "minecraft:survives_explosion" }]
+  }],
+  "random_sequence": "effecoria:blocks/phi_campfire"
+}

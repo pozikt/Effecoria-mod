@@ -101,6 +101,10 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.ORKANUMN_STIMULANT.get());
                         output.accept(ModItems.OMEGA_AMPUTATION_SALVE.get());
                         output.accept(ModItems.MORTAR_AND_PESTLE.get());
+                        output.accept(ModItems.PHI_TORCH.get());
+                        output.accept(ModItems.PHI_CAMPFIRE.get());
+                        output.accept(ModItems.CLAY_CRUCIBLE.get());
+                        output.accept(ModItems.PHI_FURNACE.get());
                         output.accept(ModItems.ESSENCE_BURNER.get());
                         output.accept(ModItems.ESSENCE_ALEMBIC.get());
                         output.accept(ModItems.POTION_PHI_TONIC.get());

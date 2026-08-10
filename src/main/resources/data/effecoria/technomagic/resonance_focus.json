@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:resonance_focus",
+  "era": 2,
+  "icon": "effecoria:resonance_focus",
+  "status": "available",
+  "requires": [
+    "effecoria:phi_cell"
+  ],
+  "display_unlocks": []
+}

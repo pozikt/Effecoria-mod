@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:geo_well",
+  "era": 5,
+  "icon": "effecoria:phi_campfire",
+  "status": "planned",
+  "requires": [
+    "effecoria:forge_reactor"
+  ],
+  "display_unlocks": []
+}

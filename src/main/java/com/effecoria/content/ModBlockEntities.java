@@ -1,9 +1,12 @@
 package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.block.ClayCrucibleBlock;
 import com.effecoria.block.EssenceAlembicBlockEntity;
 import com.effecoria.block.EssenceBurnerBlockEntity;
 import com.effecoria.block.MortarBlockEntity;
+import com.effecoria.block.PhiCampfireBlock;
+import com.effecoria.block.PhiFurnaceBlock;
 import com.effecoria.block.PhiGeyserBlockEntity;
 import com.effecoria.block.SubspacePortalBlockEntity;
 import com.effecoria.block.WhisperingSpireVentBlockEntity;
@@ -47,6 +50,27 @@ public final class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register(
                     "mortar_and_pestle",
                     () -> BlockEntityType.Builder.of(MortarBlockEntity::new, ModBlocks.MORTAR_AND_PESTLE.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiCampfireBlock.PhiCampfireBlockEntity>>
+            PHI_CAMPFIRE = BLOCK_ENTITY_TYPES.register(
+                    "phi_campfire",
+                    () -> BlockEntityType.Builder.of(
+                                    PhiCampfireBlock.PhiCampfireBlockEntity::new, ModBlocks.PHI_CAMPFIRE.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ClayCrucibleBlock.ClayCrucibleBlockEntity>>
+            CLAY_CRUCIBLE = BLOCK_ENTITY_TYPES.register(
+                    "clay_crucible",
+                    () -> BlockEntityType.Builder.of(
+                                    ClayCrucibleBlock.ClayCrucibleBlockEntity::new, ModBlocks.CLAY_CRUCIBLE.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiFurnaceBlock.PhiFurnaceBlockEntity>>
+            PHI_FURNACE = BLOCK_ENTITY_TYPES.register(
+                    "phi_furnace",
+                    () -> BlockEntityType.Builder.of(
+                                    PhiFurnaceBlock.PhiFurnaceBlockEntity::new, ModBlocks.PHI_FURNACE.get())
                             .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WhisperingSpireVentBlockEntity>>

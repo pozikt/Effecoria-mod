@@ -2,6 +2,7 @@ package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.block.AncientEssenceWoodBlock;
+import com.effecoria.block.ClayCrucibleBlock;
 import com.effecoria.block.EldritchBloodPuddleBlock;
 import com.effecoria.block.EssoniteCrustBlock;
 import com.effecoria.block.EssonitePointedBlock;
@@ -10,13 +11,16 @@ import com.effecoria.block.EssenceBurnerBlock;
 import com.effecoria.block.MortarAndPestleBlock;
 import com.effecoria.block.OmegaBladesBlock;
 import com.effecoria.block.PhiBladesBlock;
+import com.effecoria.block.PhiCampfireBlock;
 import com.effecoria.block.PhiFieldBlock;
+import com.effecoria.block.PhiFurnaceBlock;
 import com.effecoria.block.PhiGeyserBlock;
 import com.effecoria.block.PhiGrassBlock;
 import com.effecoria.block.PhiLeavesBlock;
 import com.effecoria.block.PhiLogBlock;
 import com.effecoria.block.PhiSaplingBlock;
 import com.effecoria.block.PhiSnareVineBlock;
+import com.effecoria.block.PhiTorchBlock;
 import com.effecoria.block.RottenMossBlock;
 import com.effecoria.block.SubspacePortalBlock;
 import com.effecoria.block.VitrifiedBranchesBlock;
@@ -614,6 +618,46 @@ public final class ModBlocks {
                     .strength(1.2f, 4f)
                     .sound(ModSoundTypes.PHI_STONE)
                     .noOcclusion()));
+
+    /** Era I Φ-torch — blue light, wind-resistant ambience. */
+    public static final DeferredBlock<PhiTorchBlock> PHI_TORCH = BLOCKS.register(
+            "phi_torch",
+            () -> new PhiTorchBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .noCollission()
+                    .instabreak()
+                    .lightLevel(state -> 12)
+                    .sound(SoundType.WOOD)
+                    .pushReaction(PushReaction.DESTROY)));
+
+    /** Era I Φ-campfire — LOW heat source fueled by essonite dust/shards. */
+    public static final DeferredBlock<PhiCampfireBlock> PHI_CAMPFIRE = BLOCKS.register(
+            "phi_campfire",
+            () -> new PhiCampfireBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(1.2f, 3f)
+                    .sound(SoundType.WOOD)
+                    .lightLevel(state -> state.getValue(PhiCampfireBlock.LIT) ? 10 : 0)
+                    .noOcclusion()));
+
+    /** Era I clay crucible — impure ore→shard over heat. */
+    public static final DeferredBlock<ClayCrucibleBlock> CLAY_CRUCIBLE = BLOCKS.register(
+            "clay_crucible",
+            () -> new ClayCrucibleBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_BROWN)
+                    .strength(1.0f, 3f)
+                    .sound(SoundType.DECORATED_POT)
+                    .noOcclusion()));
+
+    /** Era II Φ-furnace — refine shards / bake Φ-glass using neighbor heat. */
+    public static final DeferredBlock<PhiFurnaceBlock> PHI_FURNACE = BLOCKS.register(
+            "phi_furnace",
+            () -> new PhiFurnaceBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .strength(2.5f, 6f)
+                    .sound(ModSoundTypes.PHI_STONE)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> 4)));
 
     /** Flameless Φ-burner — dust fuel until Φ-oil exists. */
     public static final DeferredBlock<EssenceBurnerBlock> ESSENCE_BURNER = BLOCKS.register(

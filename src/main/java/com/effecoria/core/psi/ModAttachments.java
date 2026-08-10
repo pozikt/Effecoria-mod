@@ -2,6 +2,7 @@ package com.effecoria.core.psi;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.core.disease.DiseaseProfile;
+import com.effecoria.core.technomagic.TechnomagicProgress;
 import com.effecoria.core.seal.ChunkSealData;
 import com.effecoria.effect.necromancy.PlayerLastDeath;
 import com.effecoria.effect.organic.gene.GeneProfile;
@@ -155,6 +156,30 @@ public final class ModAttachments {
                     })
                     .copyOnDeath()
                     .sync((holder, player) -> holder == player, DiseaseProfile.STREAM_CODEC)
+                    .build());
+
+    /** Cosmetically discovered technomagic nodes (no recipe gating). */
+    public static final Supplier<AttachmentType<TechnomagicProgress>> TECHNOMAGIC = ATTACHMENT_TYPES.register(
+            "technomagic",
+            () -> AttachmentType.builder(TechnomagicProgress::createDefault)
+                    .serialize(new IAttachmentSerializer<>() {
+                        @Override
+                        public TechnomagicProgress read(
+                                IAttachmentHolder holder, Tag tag, HolderLookup.Provider provider) {
+                            TechnomagicProgress data = TechnomagicProgress.createDefault();
+                            if (tag instanceof CompoundTag compound) {
+                                data.load(provider, compound);
+                            }
+                            return data;
+                        }
+
+                        @Override
+                        public Tag write(TechnomagicProgress attachment, HolderLookup.Provider provider) {
+                            return attachment.save(provider);
+                        }
+                    })
+                    .copyOnDeath()
+                    .sync((holder, player) -> holder == player, TechnomagicProgress.STREAM_CODEC)
                     .build());
 
     /** Spatial pocket inventory — dumps on death (no copyOnDeath). */

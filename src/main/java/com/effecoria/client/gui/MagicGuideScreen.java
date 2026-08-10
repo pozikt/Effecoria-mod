@@ -3,6 +3,7 @@ package com.effecoria.client.gui;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.effecoria.client.ClientGuiHooks;
 import com.effecoria.core.progression.PrimerChapters;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
@@ -81,6 +82,11 @@ public class MagicGuideScreen extends Screen {
                 .build());
         addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
                 .bounds(this.width / 2 - 40, bookTop + BOOK_H + 14, 80, 20)
+                .build());
+        addRenderableWidget(Button.builder(Component.translatable("gui.effecoria.technomagic"), b -> {
+                    ClientGuiHooks.openTechnomagic(this);
+                })
+                .bounds(this.width / 2 + 48, bookTop + BOOK_H + 14, 100, 20)
                 .build());
 
         if (!openedSoundPlayed && minecraft != null) {

@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:phi_cell",
+  "era": 2,
+  "icon": "effecoria:phi_cell",
+  "status": "available",
+  "requires": [
+    "effecoria:mortar_and_pestle"
+  ],
+  "display_unlocks": []
+}

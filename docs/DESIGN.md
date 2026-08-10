@@ -52,7 +52,7 @@ Magic is **not** a separate ruleset — it is Φ-field conversion through the Ψ
 | 3 | materials-catalog | Tags, ZNΦ blocks, conductors |
 | 4 | races.md | Race selection, Q_biology modifiers |
 | 5 | liches.md, magic-system | Necromancy, phylacteries, kin curses |
-| 6 | technomagic.md, phi-reactors.md | Multiblocks, Φ cells |
+| 6 | [TECHNOMAGIC.md](TECHNOMAGIC.md), phi-reactors.md | Multiblocks, Φ cells |
 | 7 | flora.md, astrophysical-objects.md | Biomes, TSE structures |
 
 See [ROADMAP.md](ROADMAP.md) for full plan.

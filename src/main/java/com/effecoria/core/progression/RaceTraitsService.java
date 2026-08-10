@@ -33,11 +33,13 @@ public final class RaceTraitsService {
     private static final ResourceLocation HARPY_FALL = EffecoriaMod.id("race_harpy_fall");
     private static final ResourceLocation HARPY_SAFE_FALL = EffecoriaMod.id("race_harpy_safe_fall");
     private static final ResourceLocation HARPY_CLAW = EffecoriaMod.id("race_harpy_claw");
+    private static final ResourceLocation RACE_SCALE = EffecoriaMod.id("race_body_scale");
 
     private RaceTraitsService() {}
 
     public static void applyOnAssign(ServerPlayer player, PlayerPsiData data, PlayerRace race) {
         clearAttributes(player);
+        applyBodyScale(player, race);
         switch (race) {
             case ORC -> addOrReplace(
                     player, Attributes.MAX_HEALTH, ORC_HP, 0.10, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
@@ -84,6 +86,28 @@ public final class RaceTraitsService {
         }
     }
 
+    /** Standing-height scale vs vanilla ~1.8 m via {@link Attributes#SCALE}. */
+    private static void applyBodyScale(ServerPlayer player, PlayerRace race) {
+        float vanilla = BalanceConfig.RACE_VANILLA_HEIGHT.get().floatValue();
+        if (vanilla <= 0.01f) {
+            return;
+        }
+        Float target = switch (race) {
+            case DWARF -> BalanceConfig.RACE_DWARF_HEIGHT.get().floatValue();
+            case ELF -> BalanceConfig.RACE_ELF_HEIGHT.get().floatValue();
+            case LONVER -> BalanceConfig.RACE_LONVER_HEIGHT.get().floatValue();
+            default -> null;
+        };
+        if (target == null) {
+            return;
+        }
+        double scaleDelta = (target / vanilla) - 1.0;
+        if (Math.abs(scaleDelta) < 1.0e-4) {
+            return;
+        }
+        addOrReplace(player, Attributes.SCALE, RACE_SCALE, scaleDelta, AttributeModifier.Operation.ADD_VALUE);
+    }
+
     public static void clear(ServerPlayer player, PlayerRace previous) {
         clearAttributes(player);
         if (previous == PlayerRace.LONVER) {
@@ -112,6 +136,7 @@ public final class RaceTraitsService {
         remove(player, Attributes.FALL_DAMAGE_MULTIPLIER, HARPY_FALL);
         remove(player, Attributes.SAFE_FALL_DISTANCE, HARPY_SAFE_FALL);
         remove(player, Attributes.ATTACK_DAMAGE, HARPY_CLAW);
+        remove(player, Attributes.SCALE, RACE_SCALE);
     }
 
     public static float spellCostMultiplier(Player player, MagicSchool school) {

@@ -1,0 +1,14 @@
+{
+  "id": "effecoria:essence_alembic",
+  "era": 2,
+  "icon": "effecoria:essence_alembic",
+  "status": "available",
+  "requires": [
+    "effecoria:essence_burner"
+  ],
+  "display_unlocks": [
+    "effecoria:potion_phi_tonic",
+    "effecoria:potion_phi_resonance",
+    "effecoria:potion_phi_stimulant"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:lead_filter",
+  "era": 2,
+  "icon": "effecoria:lead_filter",
+  "status": "available",
+  "requires": [
+    "effecoria:essence_alembic"
+  ],
+  "display_unlocks": []
+}

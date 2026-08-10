@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:psi_imprinter",
+  "era": 3,
+  "icon": "effecoria:resonance_focus",
+  "status": "planned",
+  "requires": [
+    "effecoria:resonance_focus"
+  ],
+  "display_unlocks": []
+}

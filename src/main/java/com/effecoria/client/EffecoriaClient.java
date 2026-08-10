@@ -76,6 +76,7 @@ public final class EffecoriaClient {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_LEAVES.get(), RenderType.cutoutMipped());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_SNARE_VINE.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_GLASS.get(), RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_TORCH.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.ESSONITE_POINTED.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.BLOOD_FLUID.get(), RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_WATER.get(), RenderType.translucent());

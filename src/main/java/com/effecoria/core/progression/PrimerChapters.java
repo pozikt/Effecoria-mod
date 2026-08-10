@@ -28,7 +28,8 @@ public final class PrimerChapters {
         ORGANIC(11),
         NECROMANCY(12),
         CORRUPTION(13),
-        SPATIAL(14);
+        SPATIAL(14),
+        TECHNOMAGIC(15);
 
         private final int bitIndex;
 

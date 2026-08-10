@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:forge_reactor",
+  "era": 4,
+  "icon": "effecoria:clay_crucible",
+  "status": "planned",
+  "requires": [
+    "effecoria:heart_reactor"
+  ],
+  "display_unlocks": []
+}

@@ -153,6 +153,21 @@ public final class ModItems {
 
     public static final DeferredItem<BlockItem> MORTAR_AND_PESTLE =
             ITEMS.registerSimpleBlockItem("mortar_and_pestle", ModBlocks.MORTAR_AND_PESTLE);
+    public static final DeferredItem<BlockItem> PHI_TORCH = ITEMS.register(
+            "phi_torch",
+            () -> new HintBlockItem(ModBlocks.PHI_TORCH.get(), new Item.Properties(), "tooltip.effecoria.phi_torch"));
+    public static final DeferredItem<BlockItem> PHI_CAMPFIRE = ITEMS.register(
+            "phi_campfire",
+            () -> new HintBlockItem(
+                    ModBlocks.PHI_CAMPFIRE.get(), new Item.Properties(), "tooltip.effecoria.phi_campfire"));
+    public static final DeferredItem<BlockItem> CLAY_CRUCIBLE = ITEMS.register(
+            "clay_crucible",
+            () -> new HintBlockItem(
+                    ModBlocks.CLAY_CRUCIBLE.get(), new Item.Properties(), "tooltip.effecoria.clay_crucible"));
+    public static final DeferredItem<BlockItem> PHI_FURNACE = ITEMS.register(
+            "phi_furnace",
+            () -> new HintBlockItem(
+                    ModBlocks.PHI_FURNACE.get(), new Item.Properties(), "tooltip.effecoria.phi_furnace"));
     public static final DeferredItem<BlockItem> ESSENCE_BURNER = ITEMS.register(
             "essence_burner",
             () -> new EssenceBurnerBlockItem(ModBlocks.ESSENCE_BURNER.get(), new Item.Properties()));

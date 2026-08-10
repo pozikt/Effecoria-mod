@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:clay_crucible",
+  "era": 1,
+  "icon": "effecoria:clay_crucible",
+  "status": "available",
+  "requires": [
+    "effecoria:phi_campfire"
+  ],
+  "display_unlocks": [
+    "effecoria:essonite_shard"
+  ]
+}

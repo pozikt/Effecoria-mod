@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": { "item": "effecoria:phi_log" },
+    "D": { "item": "effecoria:essonite_dust" },
+    "S": { "item": "minecraft:stick" }
+  },
+  "pattern": [" S ", "SDS", "LLL"],
+  "result": { "count": 1, "id": "effecoria:phi_campfire" }
+}

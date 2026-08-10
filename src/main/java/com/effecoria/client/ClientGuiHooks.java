@@ -5,6 +5,7 @@ import com.effecoria.client.gui.MagicGuideScreen;
 import com.effecoria.client.gui.RaceSelectScreen;
 import com.effecoria.client.gui.SchoolSelectScreen;
 import com.effecoria.client.gui.SpellHubScreen;
+import com.effecoria.client.gui.TechnomagicScreen;
 import com.effecoria.core.progression.PrimerChapters;
 import com.effecoria.core.psi.PsiHelper;
 
@@ -39,6 +40,10 @@ public final class ClientGuiHooks {
 
     public static void openMagicGuideChapter(PrimerChapters.Chapter chapter) {
         Minecraft.getInstance().setScreen(new MagicGuideScreen(chapter));
+    }
+
+    public static void openTechnomagic(Screen parent) {
+        Minecraft.getInstance().setScreen(new TechnomagicScreen(parent));
     }
 
     public static boolean primerHasUnseenPages() {

@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:mortar_and_pestle",
+  "era": 1,
+  "icon": "effecoria:mortar_and_pestle",
+  "status": "available",
+  "requires": [
+    "effecoria:clay_crucible"
+  ],
+  "display_unlocks": [
+    "effecoria:essonite_dust"
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "lit=false": { "model": "effecoria:block/phi_campfire_off" },
+    "lit=true": { "model": "effecoria:block/phi_campfire" }
+  }
+}

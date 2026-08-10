@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": { "item": "effecoria:phi_stone" },
+    "B": { "item": "minecraft:brick" },
+    "G": { "item": "effecoria:essonite_shard" }
+  },
+  "pattern": ["SGS", "SBS", "SSS"],
+  "result": { "count": 1, "id": "effecoria:phi_furnace" }
+}

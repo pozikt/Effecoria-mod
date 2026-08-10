@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:portal_gate",
+  "era": 5,
+  "icon": "effecoria:void_obsidian_insert",
+  "status": "planned",
+  "requires": [
+    "effecoria:geo_well"
+  ],
+  "display_unlocks": []
+}

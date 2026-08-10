@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:phi_campfire",
+  "era": 1,
+  "icon": "effecoria:phi_campfire",
+  "status": "available",
+  "requires": [
+    "effecoria:phi_torch"
+  ],
+  "display_unlocks": []
+}

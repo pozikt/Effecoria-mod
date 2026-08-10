@@ -1,0 +1,10 @@
+{
+  "id": "effecoria:climate_array",
+  "era": 5,
+  "icon": "effecoria:phi_torch",
+  "status": "planned",
+  "requires": [
+    "effecoria:geo_well"
+  ],
+  "display_unlocks": []
+}

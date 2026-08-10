@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": { "item": "effecoria:essonite_dust" },
+    "S": { "item": "minecraft:stick" }
+  },
+  "pattern": ["D", "S"],
+  "result": { "count": 4, "id": "effecoria:phi_torch" }
+}
