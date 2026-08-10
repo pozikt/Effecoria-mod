@@ -11,6 +11,7 @@ import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.magic.ShadeService;
 import com.effecoria.core.progression.EntropyService;
 import com.effecoria.core.progression.ExhaustionService;
+import com.effecoria.core.disease.DiseaseService;
 import com.effecoria.core.progression.FirstHourTips;
 import com.effecoria.core.progression.ProgressionService;
 import com.effecoria.core.alchemy.AlchemyPotionService;
@@ -199,6 +200,9 @@ public final class ModCommonEvents {
             return;
         }
 
+        // Disease exposures (radiation / dust / low-Φ) apply to mages and mundanes.
+        DiseaseService.tick(player);
+
         PlayerPsiData data = PsiHelper.get(player);
         if (!data.initiated()) {
             return;
@@ -222,6 +226,10 @@ public final class ModCommonEvents {
 
         ExhaustionService.tick(player, data);
         EntropyService.tick(player, data);
+        DiseaseService.tryNaturalBurnRecovery(player);
+        if (player.tickCount % 40 == 0) {
+            DiseaseService.onOmegaWoundTick(player);
+        }
 
         long gameTime = player.serverLevel().getGameTime();
         if (data.tickLichAscension(gameTime)) {
@@ -294,6 +302,9 @@ public final class ModCommonEvents {
         PsiHelper.set(player, data);
         ExhaustionService.stripExhaustionEffects(player);
         player.syncData(ModAttachments.PSI.get());
+        if (DiseaseService.get(player).clearOnDeath()) {
+            DiseaseService.clearAll(player);
+        }
     }
 
     @SubscribeEvent

@@ -134,6 +134,32 @@ public final class PsiHudOverlay {
             lineY += 14;
         }
 
+        var diseaseProfile = minecraft.player.getData(ModAttachments.DISEASE_PROFILE.get());
+        if (!diseaseProfile.diseases().isEmpty() || diseaseProfile.orkanumnScar()) {
+            MutableComponent diseaseLine = Component.translatable("hud.effecoria.diseases");
+            int shown = 0;
+            for (var entry : diseaseProfile.diseases().entrySet()) {
+                if (shown >= 3) {
+                    diseaseLine.append(Component.literal("…"));
+                    break;
+                }
+                if (shown > 0) {
+                    diseaseLine.append(Component.literal(" "));
+                }
+                diseaseLine.append(Component.translatable(entry.getKey().translationKey()))
+                        .append(Component.literal(" " + entry.getValue().stage()));
+                shown++;
+            }
+            if (diseaseProfile.orkanumnScar()) {
+                if (shown > 0) {
+                    diseaseLine.append(Component.literal(" · "));
+                }
+                diseaseLine.append(Component.translatable("hud.effecoria.orkanumn_scar"));
+            }
+            graphics.drawString(minecraft.font, diseaseLine, x, lineY, 0xFFE088AA);
+            lineY += 10;
+        }
+
         if (data.exhaustion() >= BalanceConfig.EXHAUSTION_WARM.get().floatValue()) {
             float exFill = data.exhaustion() / ExhaustionService.MAX;
             drawBar(graphics, x, lineY, 90, 5, exFill, 0xFFAA4444, 0xFF331111);

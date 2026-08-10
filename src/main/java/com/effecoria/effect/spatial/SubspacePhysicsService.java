@@ -59,6 +59,10 @@ public final class SubspacePhysicsService {
             return;
         }
 
+        if (player.tickCount % 200 == 0) {
+            com.effecoria.core.disease.DiseaseTriggers.onSubspaceTransit(player);
+        }
+
         applyZeroG(player);
         player.fallDistance = 0f;
 

@@ -16,6 +16,11 @@ public final class OmegaWoundEvents {
     public static void onHeal(LivingHealEvent event) {
         if (event.getEntity().hasEffect(ModMobEffects.OMEGA_WOUND)) {
             event.setCanceled(true);
+            return;
+        }
+        if (event.getEntity() instanceof net.minecraft.world.entity.player.Player player
+                && com.effecoria.core.disease.DiseaseEffects.blocksHealing(player)) {
+            event.setCanceled(true);
         }
     }
 }

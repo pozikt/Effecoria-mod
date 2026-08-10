@@ -2,6 +2,10 @@ package com.effecoria.command;
 
 import com.effecoria.entity.MirageHorrorEntity;
 import com.effecoria.config.BalanceConfig;
+import com.effecoria.core.disease.DiseaseInstance;
+import com.effecoria.core.disease.DiseaseProfile;
+import com.effecoria.core.disease.DiseaseService;
+import com.effecoria.core.disease.PhiDisease;
 import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.magic.MagicSchool;
 import com.effecoria.core.magic.MobMagicService;
@@ -17,6 +21,7 @@ import com.effecoria.core.seal.SealWordRegistry;
 import com.effecoria.magic.CastPipeline;
 import com.effecoria.magic.SpellRegistry;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -65,6 +70,11 @@ public final class EffecoriaCommands {
                     Arrays.stream(com.effecoria.core.progression.PlayerRace.values())
                             .map(com.effecoria.core.progression.PlayerRace::getSerializedName)
                             .collect(Collectors.toList()),
+                    builder);
+
+    private static final SuggestionProvider<CommandSourceStack> DISEASE_SUGGESTIONS = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(
+                    Arrays.stream(PhiDisease.values()).map(PhiDisease::id).collect(Collectors.toList()),
                     builder);
 
     private EffecoriaCommands() {}
@@ -161,12 +171,75 @@ public final class EffecoriaCommands {
                         .executes(ctx -> subspaceSpeedGet(ctx.getSource()))
                         .then(Commands.argument("speed", IntegerArgumentType.integer(0, 4096))
                                 .executes(ctx -> subspaceSpeedSet(
-                                        ctx.getSource(), IntegerArgumentType.getInteger(ctx, "speed"))))));
+                                        ctx.getSource(), IntegerArgumentType.getInteger(ctx, "speed")))))
+                .then(Commands.literal("disease")
+                        .then(Commands.literal("list")
+                                .executes(ctx -> diseaseList(ctx.getSource(), null))
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> diseaseList(
+                                                ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                        .then(Commands.literal("infect")
+                                .requires(source -> source.hasPermission(2))
+                                .then(Commands.argument("id", StringArgumentType.word())
+                                        .suggests(DISEASE_SUGGESTIONS)
+                                        .executes(ctx -> diseaseInfect(
+                                                ctx.getSource(),
+                                                StringArgumentType.getString(ctx, "id"),
+                                                1,
+                                                null))
+                                        .then(Commands.argument("stage", IntegerArgumentType.integer(1, 4))
+                                                .executes(ctx -> diseaseInfect(
+                                                        ctx.getSource(),
+                                                        StringArgumentType.getString(ctx, "id"),
+                                                        IntegerArgumentType.getInteger(ctx, "stage"),
+                                                        null))
+                                                .then(Commands.argument("player", EntityArgument.player())
+                                                        .executes(ctx -> diseaseInfect(
+                                                                ctx.getSource(),
+                                                                StringArgumentType.getString(ctx, "id"),
+                                                                IntegerArgumentType.getInteger(ctx, "stage"),
+                                                                EntityArgument.getPlayer(ctx, "player")))))))
+                        .then(Commands.literal("cure")
+                                .requires(source -> source.hasPermission(2))
+                                .then(Commands.argument("id", StringArgumentType.word())
+                                        .suggests((c, b) -> SharedSuggestionProvider.suggest(
+                                                java.util.stream.Stream.concat(
+                                                                Arrays.stream(PhiDisease.values()).map(PhiDisease::id),
+                                                                java.util.stream.Stream.of("all"))
+                                                        .collect(Collectors.toList()),
+                                                b))
+                                        .executes(ctx -> diseaseCure(
+                                                ctx.getSource(),
+                                                StringArgumentType.getString(ctx, "id"),
+                                                null))
+                                        .then(Commands.argument("player", EntityArgument.player())
+                                                .executes(ctx -> diseaseCure(
+                                                        ctx.getSource(),
+                                                        StringArgumentType.getString(ctx, "id"),
+                                                        EntityArgument.getPlayer(ctx, "player"))))))
+                        .then(Commands.literal("clear")
+                                .requires(source -> source.hasPermission(2))
+                                .executes(ctx -> diseaseClear(ctx.getSource(), null))
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> diseaseClear(
+                                                ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                        .then(Commands.literal("clear_on_death")
+                                .requires(source -> source.hasPermission(2))
+                                .then(Commands.argument("value", BoolArgumentType.bool())
+                                        .executes(ctx -> diseaseClearOnDeath(
+                                                ctx.getSource(),
+                                                BoolArgumentType.getBool(ctx, "value"),
+                                                null))
+                                        .then(Commands.argument("player", EntityArgument.player())
+                                                .executes(ctx -> diseaseClearOnDeath(
+                                                        ctx.getSource(),
+                                                        BoolArgumentType.getBool(ctx, "value"),
+                                                        EntityArgument.getPlayer(ctx, "player"))))))));
     }
 
     private static int help(CommandSourceStack source) {
         source.sendSuccess(() -> Component.literal(
-                "Effecoria: help | version | debug | race [id] | rerace <id> | initiate <school> | reschool <school> | initiateMob [school] | cast <id> [self|nearest|random|@e] | spells | max [school] | set <stat> <value> | horror | subspaceSpeed [0-4096]"),
+                "Effecoria: help | version | debug | race | initiate | cast | spells | max | set | disease list|infect|cure|clear|clear_on_death | horror | subspaceSpeed"),
                 false);
         return 1;
     }
@@ -588,5 +661,107 @@ public final class EffecoriaCommands {
         source.sendSuccess(
                 () -> Component.translatable("message.effecoria.subspace.speed_set", speed), true);
         return speed;
+    }
+
+    private static ServerPlayer diseaseTarget(CommandSourceStack source, @Nullable ServerPlayer explicit)
+            throws CommandSyntaxException {
+        return explicit != null ? explicit : source.getPlayerOrException();
+    }
+
+    private static int diseaseList(CommandSourceStack source, @Nullable ServerPlayer explicit)
+            throws CommandSyntaxException {
+        ServerPlayer player = diseaseTarget(source, explicit);
+        DiseaseProfile profile = DiseaseService.get(player);
+        if (profile.diseases().isEmpty() && !profile.orkanumnScar()) {
+            source.sendSuccess(() -> Component.translatable("message.effecoria.disease_list_empty"), false);
+            return 1;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (var entry : profile.diseases().entrySet()) {
+            if (!sb.isEmpty()) {
+                sb.append(", ");
+            }
+            DiseaseInstance inst = entry.getValue();
+            sb.append(entry.getKey().id()).append("@").append(inst.stage());
+        }
+        if (profile.orkanumnScar()) {
+            if (!sb.isEmpty()) {
+                sb.append(", ");
+            }
+            sb.append("orkanumn_scar");
+        }
+        String list = sb.toString();
+        source.sendSuccess(
+                () -> Component.translatable(
+                        "message.effecoria.disease_list",
+                        player.getGameProfile().getName(),
+                        list,
+                        Boolean.toString(profile.clearOnDeath())),
+                false);
+        return 1;
+    }
+
+    private static int diseaseInfect(
+            CommandSourceStack source, String id, int stage, @Nullable ServerPlayer explicit)
+            throws CommandSyntaxException {
+        ServerPlayer player = diseaseTarget(source, explicit);
+        var diseaseOpt = PhiDisease.byId(id);
+        if (diseaseOpt.isEmpty()) {
+            source.sendFailure(Component.translatable("message.effecoria.disease_unknown", id));
+            return 0;
+        }
+        DiseaseService.infect(player, diseaseOpt.get(), stage);
+        source.sendSuccess(
+                () -> Component.translatable(
+                        "message.effecoria.disease_infect_ok",
+                        diseaseOpt.get().id(),
+                        player.getGameProfile().getName()),
+                true);
+        return 1;
+    }
+
+    private static int diseaseCure(CommandSourceStack source, String id, @Nullable ServerPlayer explicit)
+            throws CommandSyntaxException {
+        ServerPlayer player = diseaseTarget(source, explicit);
+        if ("all".equalsIgnoreCase(id)) {
+            int n = DiseaseService.cureAll(player);
+            source.sendSuccess(() -> Component.translatable("message.effecoria.disease_cure_count", n), true);
+            return 1;
+        }
+        var diseaseOpt = PhiDisease.byId(id);
+        if (diseaseOpt.isEmpty()) {
+            source.sendFailure(Component.translatable("message.effecoria.disease_unknown", id));
+            return 0;
+        }
+        if (!DiseaseService.cure(player, diseaseOpt.get())) {
+            source.sendFailure(Component.translatable("message.effecoria.disease_cure_none"));
+            return 0;
+        }
+        return 1;
+    }
+
+    private static int diseaseClear(CommandSourceStack source, @Nullable ServerPlayer explicit)
+            throws CommandSyntaxException {
+        ServerPlayer player = diseaseTarget(source, explicit);
+        DiseaseService.clearAll(player);
+        source.sendSuccess(
+                () -> Component.translatable(
+                        "message.effecoria.disease_cleared_player", player.getGameProfile().getName()),
+                true);
+        return 1;
+    }
+
+    private static int diseaseClearOnDeath(
+            CommandSourceStack source, boolean value, @Nullable ServerPlayer explicit)
+            throws CommandSyntaxException {
+        ServerPlayer player = diseaseTarget(source, explicit);
+        DiseaseService.setClearOnDeath(player, value);
+        source.sendSuccess(
+                () -> Component.translatable(
+                        "message.effecoria.disease_clear_on_death_set",
+                        player.getGameProfile().getName(),
+                        Boolean.toString(value)),
+                true);
+        return 1;
     }
 }

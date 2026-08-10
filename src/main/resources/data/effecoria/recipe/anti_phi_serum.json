@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "effecoria:essonite_dust" },
+    { "item": "effecoria:phi_chitin" },
+    { "item": "minecraft:glass_bottle" }
+  ],
+  "result": { "count": 1, "id": "effecoria:anti_phi_serum" }
+}

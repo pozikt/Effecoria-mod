@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "effecoria:gold_filter" },
+    { "item": "effecoria:lead_filter" },
+    { "item": "minecraft:glass_bottle" }
+  ],
+  "result": { "count": 1, "id": "effecoria:potion_omega_cleanse" }
+}

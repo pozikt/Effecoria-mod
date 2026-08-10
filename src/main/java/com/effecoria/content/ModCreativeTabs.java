@@ -93,6 +93,13 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.POTION_PHI_RESISTANCE.get());
                         output.accept(ModItems.ESSENCE_CLAY_SALVE.get());
                         output.accept(ModItems.LEAD_PILL.get());
+                        output.accept(ModItems.POTION_OMEGA_CLEANSE.get());
+                        output.accept(ModItems.ANTI_PHI_SERUM.get());
+                        output.accept(ModItems.LUNG_RINSE.get());
+                        output.accept(ModItems.ESSENTOCYTE_KIT.get());
+                        output.accept(ModItems.PSI_RESONATOR_THERAPY.get());
+                        output.accept(ModItems.ORKANUMN_STIMULANT.get());
+                        output.accept(ModItems.OMEGA_AMPUTATION_SALVE.get());
                         output.accept(ModItems.MORTAR_AND_PESTLE.get());
                         output.accept(ModItems.ESSENCE_BURNER.get());
                         output.accept(ModItems.ESSENCE_ALEMBIC.get());

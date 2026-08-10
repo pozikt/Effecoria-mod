@@ -111,6 +111,7 @@ public final class EssoniteDustItem extends Item {
         }
 
         PlayerPsiData data = PsiHelper.get(serverPlayer);
+        com.effecoria.core.disease.DiseaseService.onDustInhale(serverPlayer, 8);
         if (data.initiated()) {
             float gain = Math.max(6f, data.maxPsi() * 0.12f);
             data.setCurrentPsi(data.currentPsi() + gain);

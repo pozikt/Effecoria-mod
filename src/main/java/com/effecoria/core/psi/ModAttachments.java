@@ -1,6 +1,7 @@
 package com.effecoria.core.psi;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.core.disease.DiseaseProfile;
 import com.effecoria.core.seal.ChunkSealData;
 import com.effecoria.effect.necromancy.PlayerLastDeath;
 import com.effecoria.effect.organic.gene.GeneProfile;
@@ -131,6 +132,29 @@ public final class ModAttachments {
                         }
                     })
                     .copyOnDeath()
+                    .build());
+
+    /** Φ-disease profile — survives death unless clear_on_death is set. */
+    public static final Supplier<AttachmentType<DiseaseProfile>> DISEASE_PROFILE = ATTACHMENT_TYPES.register(
+            "disease_profile",
+            () -> AttachmentType.builder(DiseaseProfile::createDefault)
+                    .serialize(new IAttachmentSerializer<>() {
+                        @Override
+                        public DiseaseProfile read(IAttachmentHolder holder, Tag tag, HolderLookup.Provider provider) {
+                            DiseaseProfile data = DiseaseProfile.createDefault();
+                            if (tag instanceof CompoundTag compound) {
+                                data.load(provider, compound);
+                            }
+                            return data;
+                        }
+
+                        @Override
+                        public Tag write(DiseaseProfile attachment, HolderLookup.Provider provider) {
+                            return attachment.save(provider);
+                        }
+                    })
+                    .copyOnDeath()
+                    .sync((holder, player) -> holder == player, DiseaseProfile.STREAM_CODEC)
                     .build());
 
     /** Spatial pocket inventory — dumps on death (no copyOnDeath). */

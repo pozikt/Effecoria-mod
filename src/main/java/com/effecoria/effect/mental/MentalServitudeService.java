@@ -198,6 +198,7 @@ public final class MentalServitudeService {
         casterData.trackMentalServant(mob.getUUID(), reserve);
         PsiHelper.set(caster, casterData);
         DeathMarkService.syncReservedPsi(caster);
+        com.effecoria.core.disease.DiseaseTriggers.onMentalConflict(caster);
         return true;
     }
 

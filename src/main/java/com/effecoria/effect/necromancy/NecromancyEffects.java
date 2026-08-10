@@ -306,6 +306,7 @@ public final class NecromancyEffects {
                 ? effect.params().get("duration_ticks").getAsInt()
                 : DeathMarkService.LIVING_MARK_TICKS;
         DeathMarkService.applyMark(caster, target, duration);
+        com.effecoria.core.disease.DiseaseTriggers.onNecroRitual(caster);
     }
 
     /**

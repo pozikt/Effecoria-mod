@@ -234,6 +234,9 @@ public final class CorruptionCurseService {
             mob.setCanPickUpLoot(false);
         }
         entity.getPersistentData().remove(CURSE_TAG);
+        if (entity instanceof net.minecraft.server.level.ServerPlayer player) {
+            com.effecoria.core.disease.DiseaseService.cure(player, com.effecoria.core.disease.PhiDisease.CURSE_ROT);
+        }
         if (entity.level() instanceof ServerLevel level) {
             CorruptionEffects.spawnCorruptionParticles(level, entity.position().add(0, 1, 0));
         }

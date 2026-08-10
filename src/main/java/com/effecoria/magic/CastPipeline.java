@@ -62,6 +62,18 @@ public final class CastPipeline {
             player.displayClientMessage(Component.translatable("message.effecoria.not_initiated"), true);
             return CastResult.NOT_INITIATED;
         }
+        if (!CreativeGodMode.isActive(player)
+                && com.effecoria.core.disease.DiseaseEffects.suppressesMagic(player)) {
+            player.displayClientMessage(Component.translatable("message.effecoria.disease_atrophy_asleep"), true);
+            return CastResult.CANNOT_CAST;
+        }
+        if (!CreativeGodMode.isActive(player)) {
+            float fail = com.effecoria.core.disease.DiseaseEffects.castFailChance(player);
+            if (fail > 0f && player.getRandom().nextFloat() < fail) {
+                player.displayClientMessage(Component.translatable("message.effecoria.disease_cast_fail"), true);
+                return CastResult.CANNOT_CAST;
+            }
+        }
 
         Optional<SpellDefinition> spellOpt = SpellRegistry.get(spellId);
         if (spellOpt.isEmpty()) {
@@ -111,6 +123,7 @@ public final class CastPipeline {
         fullCost *= com.effecoria.world.EssencePlateauService.spellCostMultiplier(player.level(), player.position());
         fullCost *= com.effecoria.world.OmegaScarService.spellCostMultiplier(player);
         fullCost *= com.effecoria.core.progression.RaceTraitsService.spellCostMultiplier(player, data.school());
+        fullCost *= com.effecoria.core.disease.DiseaseEffects.castCostMultiplier(player);
         if (!godMode && data.school() == com.effecoria.core.magic.MagicSchool.NECROMANCY) {
             fullCost *= com.effecoria.world.weather.PhiWeatherService.necroCostFactor(player);
         }
@@ -120,6 +133,7 @@ public final class CastPipeline {
         power *= com.effecoria.world.EssencePlateauService.spellPowerMultiplier(player.level(), player.position());
         power *= com.effecoria.world.OmegaScarService.spellPowerMultiplier(player);
         power *= com.effecoria.core.progression.RaceTraitsService.spellPowerMultiplier(player, data.school());
+        power *= com.effecoria.core.disease.DiseaseEffects.spellPowerMultiplier(player);
         if (data.school() == com.effecoria.core.magic.MagicSchool.NECROMANCY) {
             power *= com.effecoria.world.weather.PhiWeatherService.necroPowerBonus(player);
         }
@@ -182,7 +196,8 @@ public final class CastPipeline {
                         data.entropyB(),
                         power * FormMutateService.MUTATE_ENTROPY_FACTOR,
                         spell.sideEntropyRatio()
-                                * com.effecoria.core.progression.RaceTraitsService.entropyGainMultiplier(player));
+                                * com.effecoria.core.progression.RaceTraitsService.entropyGainMultiplier(player)
+                                * com.effecoria.core.disease.DiseaseEffects.entropyGainMultiplier(player));
                 data.setEntropyB(newEntropy);
                 EntropyService.maybeWarnRising(player, data);
                 if (FormulaEngine.isBacklashTriggered(newEntropy)) {
@@ -224,7 +239,8 @@ public final class CastPipeline {
 
             float entropyPower = delivery == CastDelivery.FULL ? power : actualCost;
             float sideEntropy = spell.sideEntropyRatio()
-                    * com.effecoria.core.progression.RaceTraitsService.entropyGainMultiplier(player);
+                    * com.effecoria.core.progression.RaceTraitsService.entropyGainMultiplier(player)
+                    * com.effecoria.core.disease.DiseaseEffects.entropyGainMultiplier(player);
             float newEntropy = FormulaEngine.accumulateEntropy(data.entropyB(), entropyPower, sideEntropy);
             data.setEntropyB(newEntropy);
             EntropyService.maybeWarnRising(player, data);
@@ -286,5 +302,6 @@ public final class CastPipeline {
         ExhaustionService.onBacklash(player, data);
         player.displayClientMessage(Component.translatable("message.effecoria.backlash"), true);
         EntropyService.onBacklash(player, data);
+        com.effecoria.core.disease.DiseaseService.onBacklash(player);
     }
 }

@@ -4,6 +4,7 @@ import com.effecoria.EffecoriaMod;
 import com.effecoria.armor.EssoniteArmorItem;
 import com.effecoria.armor.EssoniteArmorTier;
 import com.effecoria.armor.EssonitePhoneme;
+import com.effecoria.core.disease.PhiDisease;
 
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.AxeItem;
@@ -216,6 +217,73 @@ public final class ModItems {
                     60 * 20,
                     "item.effecoria.lead_pill.hint",
                     true));
+
+    /** Ω-cleansing draught — Omega Sickness / early Omega Rot. */
+    public static final DeferredItem<Item> POTION_OMEGA_CLEANSE = ITEMS.register(
+            "potion_omega_cleanse",
+            () -> DiseaseCureItem.of(
+                    new Item.Properties(),
+                    "item.effecoria.potion_omega_cleanse.hint",
+                    PhiDisease.OMEGA_SICKNESS,
+                    PhiDisease.OMEGA_ROT));
+
+    /** Anti-Φ serum — Crystal Fever. */
+    public static final DeferredItem<Item> ANTI_PHI_SERUM = ITEMS.register(
+            "anti_phi_serum",
+            () -> DiseaseCureItem.of(
+                    new Item.Properties(),
+                    "item.effecoria.anti_phi_serum.hint",
+                    PhiDisease.CRYSTAL_FEVER));
+
+    /** Lung rinse — Dust Lung. */
+    public static final DeferredItem<Item> LUNG_RINSE = ITEMS.register(
+            "lung_rinse",
+            () -> DiseaseCureItem.of(
+                    new Item.Properties(),
+                    "item.effecoria.lung_rinse.hint",
+                    PhiDisease.DUST_LUNG));
+
+    /** Surgical kit — Essentocytosis (costly). */
+    public static final DeferredItem<Item> ESSENTOCYTE_KIT = ITEMS.register(
+            "essentocyte_kit",
+            () -> new DiseaseCureItem(
+                    new Item.Properties(),
+                    java.util.EnumSet.of(PhiDisease.ESSENTOCYTOSIS),
+                    "item.effecoria.essentocyte_kit.hint",
+                    player -> player.hurt(player.damageSources().magic(), 6f),
+                    net.minecraft.world.item.UseAnim.BOW,
+                    48));
+
+    /** Ψ-therapy resonator — Soul Dissonance / Ghost Echo. */
+    public static final DeferredItem<Item> PSI_RESONATOR_THERAPY = ITEMS.register(
+            "psi_resonator_therapy",
+            () -> DiseaseCureItem.of(
+                    new Item.Properties(),
+                    "item.effecoria.psi_resonator_therapy.hint",
+                    PhiDisease.SOUL_DISSONANCE,
+                    PhiDisease.GHOST_ECHO));
+
+    /** Orkanum stimulant — early Atrophy (stage ≤2 auto via DiseaseService helper). */
+    public static final DeferredItem<Item> ORKANUMN_STIMULANT = ITEMS.register(
+            "orkanumn_stimulant",
+            () -> new DiseaseCureItem(
+                    new Item.Properties(),
+                    java.util.EnumSet.of(PhiDisease.ORKANUMN_ATROPHY),
+                    "item.effecoria.orkanumn_stimulant.hint",
+                    null,
+                    net.minecraft.world.item.UseAnim.DRINK,
+                    28));
+
+    /** Gold salve / amputation draught — Omega Rot. */
+    public static final DeferredItem<Item> OMEGA_AMPUTATION_SALVE = ITEMS.register(
+            "omega_amputation_salve",
+            () -> new DiseaseCureItem(
+                    new Item.Properties(),
+                    java.util.EnumSet.of(PhiDisease.OMEGA_ROT),
+                    "item.effecoria.omega_amputation_salve.hint",
+                    player -> player.hurt(player.damageSources().magic(), 8f),
+                    net.minecraft.world.item.UseAnim.BOW,
+                    40));
 
     public static final DeferredItem<Item> POTION_PHI_TONIC = ITEMS.register(
             "potion_phi_tonic",

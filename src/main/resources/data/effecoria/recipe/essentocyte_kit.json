@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GI ",
+    "ISG",
+    " GI"
+  ],
+  "key": {
+    "G": { "item": "minecraft:gold_ingot" },
+    "I": { "item": "minecraft:iron_ingot" },
+    "S": { "item": "effecoria:pure_essonite" }
+  },
+  "result": { "count": 1, "id": "effecoria:essentocyte_kit" }
+}

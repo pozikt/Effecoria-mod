@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "effecoria:gold_amulet" },
+    { "item": "effecoria:potion_phi_resonance" },
+    { "item": "effecoria:essonite_dust" }
+  ],
+  "result": { "count": 1, "id": "effecoria:psi_resonator_therapy" }
+}

@@ -20,7 +20,9 @@ public final class BiologyService {
 
     /** Effective Orkanum used by regen / soft cast scaling (includes breathing bonus + body). */
     public static float effectiveOrkanum(Player player, PlayerPsiData data) {
-        return data.effectiveBiologyQ() * bodyFactor(player);
+        float base = data.effectiveBiologyQ() * bodyFactor(player);
+        return base * com.effecoria.core.disease.DiseaseEffects.orkanumMultiplier(player)
+                * com.effecoria.core.disease.DiseaseEffects.airBiologyPenalty(player);
     }
 
     /**

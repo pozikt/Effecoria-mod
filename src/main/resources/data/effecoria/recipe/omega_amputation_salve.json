@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "minecraft:gold_ingot" },
+    { "item": "effecoria:essence_clay_salve" },
+    { "item": "effecoria:potion_omega_cleanse" }
+  ],
+  "result": { "count": 1, "id": "effecoria:omega_amputation_salve" }
+}

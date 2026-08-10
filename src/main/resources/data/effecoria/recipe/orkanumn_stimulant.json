@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "effecoria:potion_phi_stimulant" },
+    { "item": "effecoria:essence_dew" },
+    { "item": "effecoria:essonite_dust" }
+  ],
+  "result": { "count": 1, "id": "effecoria:orkanumn_stimulant" }
+}

@@ -1084,5 +1084,67 @@ public final class BalanceConfig {
             .comment("Chance to harvest Essence Dew from Φ foliage in the morning")
             .defineInRange("phi_weather_dew_harvest_chance", 0.55, 0.0, 1.0);
 
+    // --- Φ diseases ---
+    public static final ModConfigSpec.DoubleValue DISEASE_SCAR_ORKANUM_MULT = BUILDER
+            .comment("Orkanum multiplier after stage-3 Essence Burn scarring")
+            .defineInRange("disease_scar_orkanumn_mult", 0.7, 0.1, 1.0);
+    public static final ModConfigSpec.DoubleValue DISEASE_ATROPHY_STAGE1 = BUILDER
+            .comment("Orkanum mult at Orkanum Atrophy stage 1")
+            .defineInRange("disease_atrophy_stage1", 0.85, 0.05, 1.0);
+    public static final ModConfigSpec.DoubleValue DISEASE_ATROPHY_STAGE2 = BUILDER
+            .comment("Orkanum mult at Orkanum Atrophy stage 2")
+            .defineInRange("disease_atrophy_stage2", 0.55, 0.05, 1.0);
+    public static final ModConfigSpec.DoubleValue DISEASE_ATROPHY_STAGE3 = BUILDER
+            .comment("Orkanum mult at Orkanum Atrophy stage 3 (near non-mage)")
+            .defineInRange("disease_atrophy_stage3", 0.12, 0.01, 1.0);
+    public static final ModConfigSpec.IntValue DISEASE_STAGE_TICKS = BUILDER
+            .comment("Base disease ticks (at 10-tick cadence units) before stage may advance")
+            .defineInRange("disease_stage_ticks", 2400, 200, 72000);
+    public static final ModConfigSpec.IntValue DISEASE_RAD_BURN_TICKS = BUILDER
+            .comment("High-radiation exposure ticks before Essence Burn")
+            .defineInRange("disease_rad_burn_ticks", 1200, 100, 72000);
+    public static final ModConfigSpec.IntValue DISEASE_RAD_CANCER_TICKS = BUILDER
+            .comment("High-radiation exposure ticks before Essentocytosis")
+            .defineInRange("disease_rad_cancer_ticks", 6000, 200, 144000);
+    public static final ModConfigSpec.DoubleValue DISEASE_RAD_BURN_REMAIN = BUILDER
+            .comment("PhiRadiation remaining factor required to count as high exposure")
+            .defineInRange("disease_rad_burn_remain", 0.55, 0.1, 1.0);
+    public static final ModConfigSpec.IntValue DISEASE_ATROPHY_TICKS = BUILDER
+            .comment("Low-Φ exposure ticks before Orkanum Atrophy")
+            .defineInRange("disease_atrophy_ticks", 6000, 200, 144000);
+    public static final ModConfigSpec.IntValue DISEASE_DUST_TICKS = BUILDER
+            .comment("Dust exposure points before Dust Lung")
+            .defineInRange("disease_dust_ticks", 40, 5, 500);
+    public static final ModConfigSpec.IntValue DISEASE_BURN_RECOVER_TICKS = BUILDER
+            .comment("Shielded ticks before Essence Burn improves one stage")
+            .defineInRange("disease_burn_recover_ticks", 1800, 100, 72000);
+    public static final ModConfigSpec.IntValue DISEASE_FEVER_DURATION_TICKS = BUILDER
+            .comment("Crystal Fever self-resolve duration (disease tick units)")
+            .defineInRange("disease_fever_duration_ticks", 8400, 200, 72000);
+    public static final ModConfigSpec.DoubleValue DISEASE_BACKLASH_BURN_CHANCE = BUILDER
+            .comment("Chance to gain Essence Burn on entropy backlash")
+            .defineInRange("disease_backlash_burn_chance", 0.55, 0.0, 1.0);
+    public static final ModConfigSpec.DoubleValue DISEASE_OMEGA_SCAR_CHANCE = BUILDER
+            .comment("Chance per 10s pulse in Ω-Scar to catch Omega Sickness")
+            .defineInRange("disease_omega_scar_chance", 0.08, 0.0, 1.0);
+    public static final ModConfigSpec.DoubleValue DISEASE_OMEGA_ENTROPY_RATIO = BUILDER
+            .comment("Fraction of entropy threshold that risks Omega Sickness")
+            .defineInRange("disease_omega_entropy_ratio", 0.75, 0.1, 1.0);
+    public static final ModConfigSpec.DoubleValue DISEASE_CRAB_FEVER_CHANCE = BUILDER
+            .comment("Chance Crystal Crab melee applies Crystal Fever")
+            .defineInRange("disease_crab_fever_chance", 0.35, 0.0, 1.0);
+    public static final ModConfigSpec.DoubleValue DISEASE_OMEGA_ROT_CHANCE = BUILDER
+            .comment("Chance per check while Ω-wound active to escalate to Omega Rot")
+            .defineInRange("disease_omega_rot_chance", 0.04, 0.0, 1.0);
+    public static final ModConfigSpec.DoubleValue DISEASE_CURSE_ROT_CHANCE = BUILDER
+            .comment("Chance when corruption curse is present to gain Curse Rot")
+            .defineInRange("disease_curse_rot_chance", 0.06, 0.0, 1.0);
+    public static final ModConfigSpec.DoubleValue DISEASE_GHOST_ECHO_CHANCE = BUILDER
+            .comment("Chance on necro/subspace risk hooks to gain Ghost Echo")
+            .defineInRange("disease_ghost_echo_chance", 0.12, 0.0, 1.0);
+    public static final ModConfigSpec.DoubleValue DISEASE_DISSONANCE_CHANCE = BUILDER
+            .comment("Chance on foreign-focus / mental conflict hooks to gain Soul Dissonance")
+            .defineInRange("disease_dissonance_chance", 0.15, 0.0, 1.0);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 }

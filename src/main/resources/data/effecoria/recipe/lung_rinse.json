@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "effecoria:purified_phi_water_bucket" },
+    { "item": "minecraft:glass_bottle" },
+    { "item": "minecraft:sugar" }
+  ],
+  "result": { "count": 2, "id": "effecoria:lung_rinse" }
+}

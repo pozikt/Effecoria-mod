@@ -27,6 +27,8 @@ public final class PsiHelper {
         long now = player.level().getGameTime();
         float breathFactor = data.overcastBreathFactor(now);
         float biology = data.effectiveBiologyQ() * BiologyService.bodyFactor(player) * breathFactor;
+        biology *= com.effecoria.core.disease.DiseaseEffects.orkanumMultiplier(player)
+                * com.effecoria.core.disease.DiseaseEffects.airBiologyPenalty(player);
         float breath = data.breathingMastery() * breathFactor;
         PhiHarness.FocusBonuses focus = PhiHarness.focusBonuses(player);
         return new PsiContext(
@@ -47,6 +49,13 @@ public final class PsiHelper {
     }
 
     public static void initiate(Player player, MagicSchool school) {
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
+                && com.effecoria.core.disease.DiseaseEffects.blocksInitiation(serverPlayer)) {
+            serverPlayer.displayClientMessage(
+                    net.minecraft.network.chat.Component.translatable("message.effecoria.disease_barren_block"),
+                    true);
+            return;
+        }
         PlayerPsiData data = get(player);
         java.util.ArrayList<ResourceLocation> starters = new java.util.ArrayList<>(SpellProgression.starterSpells(school));
         for (ResourceLocation id : SpellProgression.commonStarterSpells()) {
