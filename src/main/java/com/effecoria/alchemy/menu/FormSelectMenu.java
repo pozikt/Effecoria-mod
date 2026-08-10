@@ -23,6 +23,8 @@ public final class FormSelectMenu extends MachineMenu {
 
     public static final int BUTTON_PREV = 0;
     public static final int BUTTON_NEXT = 1;
+    /** {@code id = SELECT_INDEX_BASE + variantIndex} picks that row in the stonecutter grid. */
+    public static final int SELECT_INDEX_BASE = 100;
 
     private final BaseContainerBlockEntity blockEntity;
     private final ContainerData data;
@@ -54,8 +56,8 @@ public final class FormSelectMenu extends MachineMenu {
         this.data = data;
         this.mode = mode;
         checkContainerSize(be, 2);
-        addSlot(new Slot(be, 0, 56, 35));
-        addSlot(new Slot(be, 1, 116, 35) {
+        addSlot(new Slot(be, 0, StonecutterMenuLayout.SLOT_INPUT_X, StonecutterMenuLayout.SLOT_INPUT_Y));
+        addSlot(new Slot(be, 1, StonecutterMenuLayout.SLOT_OUTPUT_X, StonecutterMenuLayout.SLOT_OUTPUT_Y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
@@ -83,6 +85,18 @@ public final class FormSelectMenu extends MachineMenu {
 
     @Override
     public boolean clickMenuButton(Player player, int id) {
+        if (id >= SELECT_INDEX_BASE) {
+            int index = id - SELECT_INDEX_BASE;
+            if (blockEntity instanceof ShaftLatheBlockEntity lathe) {
+                lathe.setFormIndex(index);
+                return true;
+            }
+            if (blockEntity instanceof FacetCutterBlockEntity cutter) {
+                cutter.setFormIndex(index);
+                return true;
+            }
+            return false;
+        }
         int current = formIndex();
         if (id == BUTTON_PREV) {
             current--;

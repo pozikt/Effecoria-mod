@@ -1,6 +1,11 @@
 {
   "parent": "minecraft:item/handheld",
   "textures": {
-    "layer0": "minecraft:item/blaze_rod"
-  }
+    "layer0": "effecoria:item/modular_staff/wand"
+  },
+  "overrides": [
+    { "predicate": { "custom_model_data": 2 }, "model": "effecoria:item/modular_staff/baton" },
+    { "predicate": { "custom_model_data": 3 }, "model": "effecoria:item/modular_staff/long_staff" },
+    { "predicate": { "custom_model_data": 4 }, "model": "effecoria:item/modular_staff/stature" }
+  ]
 }

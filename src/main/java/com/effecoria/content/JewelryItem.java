@@ -26,5 +26,6 @@ public class JewelryItem extends Item implements ICurioItem {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable(hintKey));
+        tooltip.add(Component.translatable("item.effecoria.curios_wear_hint"));
     }
 }

@@ -156,6 +156,7 @@ public final class ModularPartData {
         writePart(stack, KIND_SHAFT, BuiltInRegistries.ITEM.getKey(material), formId);
         setConductivity(stack, MaterialConductivity.ofItem(material));
         setLengthMeters(stack, lengthMeters);
+        ShaftVisuals.applyShaftModel(stack, formId);
         return stack;
     }
 

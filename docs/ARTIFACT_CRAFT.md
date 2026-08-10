@@ -9,7 +9,7 @@ Modular assembly of staves and jewelry, item seals for Seals school, Curios acce
 3. **Phonemes** — `phi_phoneme_*` on shaft/focus (or essonite armor) before assemble.
 4. **Artifact Assembler** — staff (shaft+focus) or jewelry (band+gem) → `modular_staff` / `assembled_*`.
 5. **Seal Inscriber** — Seals school + known item seals → bind like enchantments; Strip removes them.
-6. **Curios** — ring×2, amulet×1, charm×1 for jewelry.
+6. **Curios** — ring×2, amulet×1, charm×1 for jewelry. Open the **Curios** panel from the button next to your survival inventory (requires the Curios mod, bundled in dev via Gradle). Datapack path: `data/effecoria/curios/`.
 
 ## Shaft length
 
@@ -23,6 +23,12 @@ Forms are physical lengths (meters). Lathe UI cycles them shortest → longest:
 | `stature` | 1.8 m | About player height |
 
 Longer shafts raise reach and slightly raise cast cost; material conductivity is independent.
+
+Item models use scaled vanilla stick / blaze rod textures per form (`custom_model_data` 1–4). Regenerate PNGs with `scripts/gen_carved_shaft_textures.py` after changing length tables.
+
+**Lathe & facet cutter GUI** use the vanilla stonecutter panel (176×166): input `(20,33)`, output `(143,33)`, **variant pool** as a 4-wide icon grid at `(52,14)` (click to select; invalid options dimmed when input material is wrong).
+
+**Artifact assembler** uses the mortar panel; the same grid picks **staff / ring / amulet / charm**; craft slots at `(44,35)`, `(80,35)`, output `(134,35)`.
 
 ## Φ-conductivity
 

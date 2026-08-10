@@ -1,6 +1,11 @@
 {
-  "parent": "minecraft:item/generated",
+  "parent": "minecraft:item/handheld",
   "textures": {
-    "layer0": "minecraft:item/stick"
-  }
+    "layer0": "effecoria:item/carved_shaft/wand"
+  },
+  "overrides": [
+    { "predicate": { "custom_model_data": 2 }, "model": "effecoria:item/carved_shaft/baton" },
+    { "predicate": { "custom_model_data": 3 }, "model": "effecoria:item/carved_shaft/long_staff" },
+    { "predicate": { "custom_model_data": 4 }, "model": "effecoria:item/carved_shaft/stature" }
+  ]
 }

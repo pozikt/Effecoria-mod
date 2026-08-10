@@ -184,6 +184,7 @@ public final class AssembledGearData {
                 SHAFT, ModularPartData.copyPartTag(shaft),
                 FOCUS, ModularPartData.copyPartTag(focus)));
         stampMergedStats(out, shaft, focus, true);
+        ShaftVisuals.applyStaffModelFromShaft(out, shaft);
         return out;
     }
 
