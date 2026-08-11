@@ -15,10 +15,18 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
+/**
+ * Forge GUI layout (220×166): left forge bay (fuel / catalyst / IO), right reactor controls.
+ * Player inventory offset x=29 to center under the wider panel.
+ */
 public final class ForgeReactorMenu extends MachineMenu {
     public static final int BUTTON_TOGGLE = 0;
     public static final int BUTTON_MODE = 1;
     public static final int BUTTON_SCRAM = 2;
+
+    public static final int PANEL_WIDTH = 220;
+    public static final int PLAYER_INV_X = 29;
+    public static final int PLAYER_INV_Y = 84;
 
     private final ForgeReactorBlockEntity blockEntity;
     private final ContainerData data;
@@ -37,44 +45,46 @@ public final class ForgeReactorMenu extends MachineMenu {
         this.data = data;
         checkContainerSize(be, ForgeReactorBlockEntity.SLOT_COUNT);
 
-        addSlot(new Slot(be, ForgeReactorBlockEntity.SLOT_FUEL_1, 26, 20) {
+        // Left bay — fuel ×2, catalyst
+        addSlot(new Slot(be, ForgeReactorBlockEntity.SLOT_FUEL_1, 17, 23) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return ForgeReactorBlockEntity.isValidFuel(stack);
             }
         });
-        addSlot(new Slot(be, ForgeReactorBlockEntity.SLOT_FUEL_2, 44, 20) {
+        addSlot(new Slot(be, ForgeReactorBlockEntity.SLOT_FUEL_2, 37, 23) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return ForgeReactorBlockEntity.isValidFuel(stack);
             }
         });
-        addSlot(new Slot(be, ForgeReactorBlockEntity.SLOT_CATALYST, 80, 20) {
+        addSlot(new Slot(be, ForgeReactorBlockEntity.SLOT_CATALYST, 65, 23) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return ForgeReactorBlockEntity.isValidCatalyst(stack);
             }
         });
-        addSlot(new Slot(be, ForgeReactorBlockEntity.SLOT_IN_1, 44, 52) {
+        // Left bay — forge IO
+        addSlot(new Slot(be, ForgeReactorBlockEntity.SLOT_IN_1, 21, 53) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return true;
             }
         });
-        addSlot(new Slot(be, ForgeReactorBlockEntity.SLOT_IN_2, 62, 52) {
+        addSlot(new Slot(be, ForgeReactorBlockEntity.SLOT_IN_2, 41, 53) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return true;
             }
         });
-        addSlot(new Slot(be, ForgeReactorBlockEntity.SLOT_OUT, 116, 52) {
+        addSlot(new Slot(be, ForgeReactorBlockEntity.SLOT_OUT, 83, 53) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
             }
         });
 
-        addPlayerInventory(playerInv);
+        addPlayerInventory(playerInv, PLAYER_INV_X, PLAYER_INV_Y);
         addDataSlots(data);
     }
 

@@ -24,7 +24,8 @@ public final class ReactorHumSoundInstance extends AbstractTickableSoundInstance
     public enum Kind {
         SPARK(SoundEvents.BEACON_AMBIENT, 0.28f, 1.92f),
         HEART(SoundEvents.BEACON_AMBIENT, 0.62f, 0.36f),
-        FORGE(SoundEvents.BEACON_AMBIENT, 0.75f, 0.22f);
+        /** Deeper than Heart — sub-bass industrial rumble. */
+        FORGE(SoundEvents.BEACON_AMBIENT, 0.88f, 0.12f);
 
         private final SoundEvent sound;
         private final float volume;
@@ -50,7 +51,7 @@ public final class ReactorHumSoundInstance extends AbstractTickableSoundInstance
         this.pitch = kind.pitch;
         this.attenuation = SoundInstance.Attenuation.LINEAR;
         this.x = pos.getX() + 0.5;
-        this.y = pos.getY() + (kind == Kind.HEART ? 0.5 : 0.5);
+        this.y = pos.getY() + (kind == Kind.FORGE ? 1.0 : 0.5);
         this.z = pos.getZ() + 0.5;
     }
 

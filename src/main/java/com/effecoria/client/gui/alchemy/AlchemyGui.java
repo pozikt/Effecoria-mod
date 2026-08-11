@@ -24,12 +24,18 @@ public final class AlchemyGui {
     public static final ResourceLocation BURNER = EffecoriaMod.id("textures/gui/burner.png");
     public static final ResourceLocation ALEMBIC = EffecoriaMod.id("textures/gui/alembic.png");
     public static final ResourceLocation SPARK_REACTOR = EffecoriaMod.id("textures/gui/spark_reactor.png");
+    public static final ResourceLocation FORGE_REACTOR = EffecoriaMod.id("textures/gui/forge_reactor.png");
 
     private AlchemyGui() {}
 
     public static void blitPanel(GuiGraphics graphics, ResourceLocation texture, int left, int top) {
+        blitPanel(graphics, texture, left, top, WIDTH, HEIGHT);
+    }
+
+    public static void blitPanel(
+            GuiGraphics graphics, ResourceLocation texture, int left, int top, int width, int height) {
         // Explicit texture size — never rely on a non-256 source texture with the short blit overload.
-        graphics.blit(texture, left, top, 0, 0, WIDTH, HEIGHT, TEXTURE_SIZE, TEXTURE_SIZE);
+        graphics.blit(texture, left, top, 0, 0, width, height, TEXTURE_SIZE, TEXTURE_SIZE);
     }
 
     /** Fill the hollow arrow drawn at (arrowX, arrowY) in the panel. */
