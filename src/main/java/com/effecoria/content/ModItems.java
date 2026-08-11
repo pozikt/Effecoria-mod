@@ -261,6 +261,20 @@ public final class ModItems {
             "forge_reactor_core",
             () -> new HintBlockItem(
                     ModBlocks.FORGE_REACTOR_CORE.get(), new Item.Properties(), "tooltip.effecoria.forge_reactor"));
+    public static final DeferredItem<BlockItem> GEO_CASING =
+            ITEMS.registerSimpleBlockItem("geo_casing", ModBlocks.GEO_CASING);
+    public static final DeferredItem<BlockItem> GEO_WELL_CORE = ITEMS.register(
+            "geo_well_core",
+            () -> new HintBlockItem(
+                    ModBlocks.GEO_WELL_CORE.get(), new Item.Properties(), "tooltip.effecoria.geo_well"));
+    public static final DeferredItem<BlockItem> CLIMATE_ARRAY = ITEMS.register(
+            "climate_array",
+            () -> new HintBlockItem(
+                    ModBlocks.CLIMATE_ARRAY.get(), new Item.Properties(), "tooltip.effecoria.climate_array"));
+    public static final DeferredItem<BlockItem> PORTAL_GATE = ITEMS.register(
+            "portal_gate",
+            () -> new HintBlockItem(
+                    ModBlocks.PORTAL_GATE.get(), new Item.Properties(), "tooltip.effecoria.portal_gate"));
     public static final DeferredItem<BlockItem> REACTOR_CASING =
             ITEMS.registerSimpleBlockItem("reactor_casing", ModBlocks.REACTOR_CASING);
     public static final DeferredItem<BlockItem> PURIFIED_OBSIDIAN =
@@ -370,6 +384,9 @@ public final class ModItems {
             ITEMS.register("omega_waste", () -> new OmegaWasteItem(new Item.Properties()));
     public static final DeferredItem<Item> OMEGA_FILTER =
             ITEMS.register("omega_filter", () -> new OmegaFilterItem(new Item.Properties()));
+    public static final DeferredItem<Item> DEEP_PHI_CATALYST = ITEMS.register(
+            "deep_phi_catalyst",
+            () -> new HintItem(new Item.Properties(), "item.effecoria.deep_phi_catalyst.hint"));
 
     public static final DeferredItem<Item> GOLD_FILTER = ITEMS.register(
             "gold_filter", () -> new GoldFilterItem(new Item.Properties()));

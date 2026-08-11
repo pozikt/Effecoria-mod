@@ -145,6 +145,11 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.SPARK_REACTOR.get());
                         output.accept(ModItems.HEART_REACTOR_CORE.get());
                         output.accept(ModItems.FORGE_REACTOR_CORE.get());
+                        output.accept(ModItems.GEO_CASING.get());
+                        output.accept(ModItems.GEO_WELL_CORE.get());
+                        output.accept(ModItems.CLIMATE_ARRAY.get());
+                        output.accept(ModItems.PORTAL_GATE.get());
+                        output.accept(ModItems.DEEP_PHI_CATALYST.get());
                         output.accept(ModItems.REACTOR_CASING.get());
                         output.accept(ModItems.PURIFIED_OBSIDIAN.get());
                         output.accept(ModItems.OMEGA_TAINTED_OBSIDIAN.get());

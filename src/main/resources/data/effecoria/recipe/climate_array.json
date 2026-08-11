@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": { "item": "effecoria:deep_phi_catalyst" },
+    "B": { "item": "effecoria:phi_bus" },
+    "G": { "item": "effecoria:phi_glass" },
+    "W": { "item": "effecoria:mithril_wire" },
+    "C": { "item": "effecoria:geo_casing" }
+  },
+  "pattern": ["GBG", "WDW", "CCC"],
+  "result": { "count": 1, "id": "effecoria:climate_array" }
+}

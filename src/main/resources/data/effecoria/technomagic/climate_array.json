@@ -1,10 +1,13 @@
 {
   "id": "effecoria:climate_array",
   "era": 5,
-  "icon": "effecoria:phi_torch",
-  "status": "planned",
+  "icon": "effecoria:climate_array",
+  "status": "available",
   "requires": [
     "effecoria:geo_well"
   ],
-  "display_unlocks": []
+  "display_unlocks": [
+    "local_phi_weather",
+    "effecoria:climate_array"
+  ]
 }

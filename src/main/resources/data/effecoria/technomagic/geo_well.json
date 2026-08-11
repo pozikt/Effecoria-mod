@@ -1,10 +1,15 @@
 {
   "id": "effecoria:geo_well",
   "era": 5,
-  "icon": "effecoria:phi_campfire",
-  "status": "planned",
+  "icon": "effecoria:geo_well_core",
+  "status": "available",
   "requires": [
     "effecoria:forge_reactor"
   ],
-  "display_unlocks": []
+  "display_unlocks": [
+    "phi_power_hub",
+    "deep_phi_catalyst",
+    "effecoria:geo_casing",
+    "effecoria:geo_well_core"
+  ]
 }

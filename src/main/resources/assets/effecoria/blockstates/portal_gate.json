@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,active=false": {
+      "model": "effecoria:block/portal_gate"
+    },
+    "facing=south,active=false": {
+      "model": "effecoria:block/portal_gate",
+      "y": 180
+    },
+    "facing=west,active=false": {
+      "model": "effecoria:block/portal_gate",
+      "y": 270
+    },
+    "facing=east,active=false": {
+      "model": "effecoria:block/portal_gate",
+      "y": 90
+    },
+    "facing=north,active=true": {
+      "model": "effecoria:block/portal_gate_active"
+    },
+    "facing=south,active=true": {
+      "model": "effecoria:block/portal_gate_active",
+      "y": 180
+    },
+    "facing=west,active=true": {
+      "model": "effecoria:block/portal_gate_active",
+      "y": 270
+    },
+    "facing=east,active=true": {
+      "model": "effecoria:block/portal_gate_active",
+      "y": 90
+    }
+  }
+}

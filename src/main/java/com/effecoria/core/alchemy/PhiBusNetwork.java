@@ -9,6 +9,8 @@ import java.util.Set;
 
 import com.effecoria.block.ForgeReactorBlockEntity;
 import com.effecoria.block.ForgeReactorPartBlockEntity;
+import com.effecoria.block.GeoWellBlockEntity;
+import com.effecoria.block.GeoWellPartBlockEntity;
 import com.effecoria.block.HeartReactorBlockEntity;
 import com.effecoria.block.HeartReactorPartBlockEntity;
 import com.effecoria.block.SparkReactorBlockEntity;
@@ -90,6 +92,9 @@ public final class PhiBusNetwork {
         if (be instanceof ForgeReactorBlockEntity forge) {
             return forge;
         }
+        if (be instanceof GeoWellBlockEntity geo) {
+            return geo;
+        }
         if (be instanceof HeartReactorPartBlockEntity part && part.getControllerPos() != null) {
             BlockEntity core = level.getBlockEntity(part.getControllerPos());
             if (core instanceof HeartReactorBlockEntity heart) {
@@ -100,6 +105,12 @@ public final class PhiBusNetwork {
             BlockEntity core = level.getBlockEntity(part.getControllerPos());
             if (core instanceof ForgeReactorBlockEntity forge) {
                 return forge;
+            }
+        }
+        if (be instanceof GeoWellPartBlockEntity part && part.getControllerPos() != null) {
+            BlockEntity core = level.getBlockEntity(part.getControllerPos());
+            if (core instanceof GeoWellBlockEntity geo) {
+                return geo;
             }
         }
         return null;

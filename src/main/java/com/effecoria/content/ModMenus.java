@@ -11,6 +11,8 @@ import com.effecoria.alchemy.menu.SealInscriberMenu;
 import com.effecoria.alchemy.menu.SparkReactorMenu;
 import com.effecoria.alchemy.menu.HeartReactorMenu;
 import com.effecoria.alchemy.menu.ForgeReactorMenu;
+import com.effecoria.alchemy.menu.GeoWellMenu;
+import com.effecoria.alchemy.menu.ClimateArrayMenu;
 import com.effecoria.alchemy.menu.PhiTurretMenu;
 import com.effecoria.alchemy.menu.PhiCrusherMenu;
 
@@ -40,6 +42,12 @@ public final class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<ForgeReactorMenu>> FORGE_REACTOR =
             MENUS.register("forge_reactor", () -> IMenuTypeExtension.create(ForgeReactorMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<GeoWellMenu>> GEO_WELL =
+            MENUS.register("geo_well", () -> IMenuTypeExtension.create(GeoWellMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<ClimateArrayMenu>> CLIMATE_ARRAY =
+            MENUS.register("climate_array", () -> IMenuTypeExtension.create(ClimateArrayMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<PhiTurretMenu>> PHI_TURRET =
             MENUS.register("phi_turret", () -> IMenuTypeExtension.create(PhiTurretMenu::new));

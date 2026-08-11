@@ -14,6 +14,9 @@
         "effecoria:forge_reactor_core",
         "effecoria:forge_reactor_part",
         "effecoria:purified_obsidian",
-        "effecoria:omega_tainted_obsidian"
+        "effecoria:omega_tainted_obsidian",
+        "effecoria:geo_well_core",
+        "effecoria:geo_well_part",
+        "effecoria:portal_gate"
     ]
 }

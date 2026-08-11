@@ -19,6 +19,10 @@ import com.effecoria.block.HeartReactorBlockEntity;
 import com.effecoria.block.HeartReactorPartBlockEntity;
 import com.effecoria.block.ForgeReactorBlockEntity;
 import com.effecoria.block.ForgeReactorPartBlockEntity;
+import com.effecoria.block.GeoWellBlockEntity;
+import com.effecoria.block.GeoWellPartBlockEntity;
+import com.effecoria.block.ClimateArrayBlockEntity;
+import com.effecoria.block.PortalGateBlockEntity;
 import com.effecoria.block.PhiBusBlockEntity;
 import com.effecoria.block.PhiCrusherBlockEntity;
 import com.effecoria.block.PhiCrusherHopperBlockEntity;
@@ -86,6 +90,30 @@ public final class ModBlockEntities {
                     "forge_reactor_part",
                     () -> BlockEntityType.Builder.of(
                                     ForgeReactorPartBlockEntity::new, ModBlocks.FORGE_REACTOR_PART.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GeoWellBlockEntity>> GEO_WELL_CORE =
+            BLOCK_ENTITY_TYPES.register(
+                    "geo_well_core",
+                    () -> BlockEntityType.Builder.of(GeoWellBlockEntity::new, ModBlocks.GEO_WELL_CORE.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GeoWellPartBlockEntity>> GEO_WELL_PART =
+            BLOCK_ENTITY_TYPES.register(
+                    "geo_well_part",
+                    () -> BlockEntityType.Builder.of(GeoWellPartBlockEntity::new, ModBlocks.GEO_WELL_PART.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ClimateArrayBlockEntity>> CLIMATE_ARRAY =
+            BLOCK_ENTITY_TYPES.register(
+                    "climate_array",
+                    () -> BlockEntityType.Builder.of(ClimateArrayBlockEntity::new, ModBlocks.CLIMATE_ARRAY.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PortalGateBlockEntity>> PORTAL_GATE =
+            BLOCK_ENTITY_TYPES.register(
+                    "portal_gate",
+                    () -> BlockEntityType.Builder.of(PortalGateBlockEntity::new, ModBlocks.PORTAL_GATE.get())
                             .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiBusBlockEntity>> PHI_BUS =

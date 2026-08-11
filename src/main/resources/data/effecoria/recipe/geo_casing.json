@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": { "item": "effecoria:reactor_casing" },
+    "P": { "item": "effecoria:purified_obsidian" },
+    "W": { "item": "effecoria:mithril_wire" }
+  },
+  "pattern": ["CPC", "PWP", "CPC"],
+  "result": { "count": 4, "id": "effecoria:geo_casing" }
+}

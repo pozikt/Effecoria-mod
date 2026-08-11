@@ -12,6 +12,10 @@ import com.effecoria.block.EssenceBurnerBlock;
 import com.effecoria.block.MortarAndPestleBlock;
 import com.effecoria.block.OmegaBladesBlock;
 import com.effecoria.block.OmegaAnchorBlock;
+import com.effecoria.block.GeoWellBlock;
+import com.effecoria.block.GeoWellPartBlock;
+import com.effecoria.block.ClimateArrayBlock;
+import com.effecoria.block.PortalGateBlock;
 import com.effecoria.block.PhiBladesBlock;
 import com.effecoria.block.PhiCampfireBlock;
 import com.effecoria.block.PhiFieldBlock;
@@ -805,6 +809,58 @@ public final class ModBlocks {
                     .sound(SoundType.STONE)
                     .requiresCorrectToolForDrops()
                     .lightLevel(state -> 5)));
+
+    /** Era V Geo Well casing — shell edges. */
+    public static final DeferredBlock<Block> GEO_CASING = BLOCKS.register(
+            "geo_casing",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(4.0f, 8f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()));
+
+    /** Era V Geo Well core — 3×3×3 planetary Φ tap. */
+    public static final DeferredBlock<GeoWellBlock> GEO_WELL_CORE = BLOCKS.register(
+            "geo_well_core",
+            () -> new GeoWellBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_CYAN)
+                    .strength(5.0f, 10f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> state.getValue(GeoWellBlock.LIT) ? 12 : 0)));
+
+    /** Invisible solid cell of an assembled Geo Well hull. */
+    public static final DeferredBlock<GeoWellPartBlock> GEO_WELL_PART = BLOCKS.register(
+            "geo_well_part",
+            () -> new GeoWellPartBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_CYAN)
+                    .strength(5.0f, 10f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noLootTable()
+                    .isViewBlocking((state, level, pos) -> true)
+                    .isSuffocating((state, level, pos) -> true)));
+
+    /** Era V Climate Array — local Φ-weather emitter. */
+    public static final DeferredBlock<ClimateArrayBlock> CLIMATE_ARRAY = BLOCKS.register(
+            "climate_array",
+            () -> new ClimateArrayBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(3.5f, 6f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> state.getValue(ClimateArrayBlock.LIT) ? 8 : 0)));
+
+    /** Era V Portal Gate — linked same-dimension teleport. */
+    public static final DeferredBlock<PortalGateBlock> PORTAL_GATE = BLOCKS.register(
+            "portal_gate",
+            () -> new PortalGateBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .strength(8.0f, 600f)
+                    .sound(SoundType.STONE)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> state.getValue(PortalGateBlock.ACTIVE) ? 10 : 0)
+                    .noOcclusion()));
 
     /** Ω-tainted obsidian — cleansed in Forge. */
     public static final DeferredBlock<Block> OMEGA_TAINTED_OBSIDIAN = BLOCKS.register(

@@ -11,7 +11,7 @@ See also [ROADMAP.md](ROADMAP.md) Stage IV.
 | Free craft | Recipes are never recipe-gated |
 | Era complete | Every `available` node in that era is discovered |
 | Operate Era N | Eras 1..N−1 must be complete (creative mode bypasses) |
-| Resource chain | Era II needs Era I heat; Era III needs MED burner + Φ-cell; Era IV Spark needs flux slug; Heart needs pure essonite / flux priming + coolant; Forge needs star/pure essonite or charged cell |
+| Resource chain | Era II needs Era I heat; Era III needs MED burner + Φ-cell; Era IV Spark needs flux slug; Heart needs pure essonite / flux priming + coolant; Forge needs star/pure essonite or charged cell; Era V Geo needs charged cell/flux + coolant; Climate/Portal burn Φ-power from a hub |
 
 ## Eras
 
@@ -21,7 +21,7 @@ See also [ROADMAP.md](ROADMAP.md) Stage IV.
 | II — Workshop | Burner, Φ-furnace, glass/flasks, alembic, filters, cell, focus | **Playable** |
 | III — Imprint | Ψ-imprinter, golem / telegraph, artifact craft, seals, jewelry, **Φ-crusher** | **Playable** |
 | IV — Reactors | Spark, Heart 3×3×3, Φ-bus, Forge 3×4×3, **Φ-turrets** | **Playable** |
-| V — Geo | Geo wells, climate array, portal gate | Catalog `planned` |
+| V — Geo | Geo Well 3×3×3, Climate Array, Portal Gate | **Playable** |
 
 ## Era IV Heart multiblock (3×3×3)
 
@@ -69,6 +69,23 @@ Drain via `PhiPower.consumeTick(load)` at the mount (Spark/Heart/Forge; bus drai
 
 Arm in mount GUI. Targets hostiles with LOS from the barrel cell. Overheat after sustained fire.
 
+## Era V Geo Well (3×3×3)
+
+Around `geo_well_core`:
+
+| Position | Block |
+|----------|--------|
+| 8 corners | `purified_obsidian` |
+| 12 edges | `geo_casing` |
+| 6 face centers | `phi_concrete` |
+| Center | `geo_well_core` |
+
+Assembles like Heart (invisible `geo_well_part` + BER hull). Fuel: charged Φ-cell or Φ-flux slug. Coolant on the ring outside the shell. Mild Ω meter — clear with `omega_filter`. While formed+running+cooled: `PhiPowerProvider` radius **12**, factor **2.0**, hub registration, and a slow chance drip of `deep_phi_catalyst`.
+
+**Climate Array** — single block; GUI modes essence dew / mist / rain via `PhiWeatherService.startLocalEvent`; each cast costs Φ-power + cooldown.
+
+**Portal Gate** — place two frames; RMB with `resonance_focus` to link. Walk-in teleport when active and powered (same dimension only).
+
 ## Era III Φ-crusher (2×1×1)
 
 Two items: **`phi_crusher`** base (BE + GUI) + **`phi_crusher_hopper`** on top. Same facing → `FORMED`. Input from above (hopper), outputs from sides/bottom.
@@ -105,6 +122,10 @@ flowchart LR
   heart --> forge[forge_reactor_core]
   heart --> bus[phi_bus]
   forge --> bus
+  forge --> geo[geo_well]
+  geo --> bus
+  geo --> climate[climate_array]
+  geo --> portal[portal_gate]
   spark --> bus
   bus --> machines[adjacent_machines]
   heart --> turrets[phi_turrets]
@@ -115,6 +136,6 @@ flowchart LR
 ## Data
 
 - Catalog: `data/effecoria/technomagic/*.json`
-- Code: `HeartMultiblock`, `ForgeMultiblock`, `*ReactorBlockEntity`, `PhiBusNetwork`, `PhiPowerHubs`, `TurretMountBlock`, `PhiTurretBlock` (barrel), `PhiTurretBlockEntity`, `TurretAssembly`, `TurretKind`, `PhiCrusherBlock`, `PhiCrusherHopperBlock`, `PhiCrusherBlockEntity`, `CrusherRecipes`
-- `PhiPower` local scan radius 8; Forge hubs via `PhiPowerHubs` up to 32; `drainFuel` on providers
+- Code: `HeartMultiblock`, `ForgeMultiblock`, `GeoWellMultiblock`, `*ReactorBlockEntity`, `GeoWellBlockEntity`, `ClimateArrayBlockEntity`, `PortalGateBlockEntity`, `PhiBusNetwork`, `PhiPowerHubs`, `TurretMountBlock`, `PhiTurretBlock` (barrel), `PhiTurretBlockEntity`, `TurretAssembly`, `TurretKind`, `PhiCrusherBlock`, `PhiCrusherHopperBlock`, `PhiCrusherBlockEntity`, `CrusherRecipes`
+- `PhiPower` local scan radius 8; Forge hubs via `PhiPowerHubs` up to 32; Geo Well hubs radius 12; `drainFuel` on providers
 - Gates: `TechnomagicGates` / `TechnomagicProgress`

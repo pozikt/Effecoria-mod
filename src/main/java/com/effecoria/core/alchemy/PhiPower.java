@@ -118,7 +118,9 @@ public final class PhiPower {
             }
             check.set(bx, by, bz);
             BlockState state = level.getBlockState(check);
-            if (state.is(ModBlocks.HEART_REACTOR_PART.get()) || state.is(ModBlocks.FORGE_REACTOR_PART.get())) {
+            if (state.is(ModBlocks.HEART_REACTOR_PART.get())
+                    || state.is(ModBlocks.FORGE_REACTOR_PART.get())
+                    || state.is(ModBlocks.GEO_WELL_PART.get())) {
                 continue;
             }
             // Φ-bus is a conductive cable — power ray should not be blocked by the cable itself.

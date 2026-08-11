@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "effecoria:block/geo_well_top",
+    "front": "effecoria:block/geo_well_side_on",
+    "side": "effecoria:block/geo_well_side_on"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "F": { "item": "effecoria:forge_reactor_core" },
+    "P": { "item": "effecoria:purified_obsidian" },
+    "W": { "item": "effecoria:mithril_wire" },
+    "S": { "item": "effecoria:star_essonite" },
+    "C": { "item": "effecoria:phi_concrete" }
+  },
+  "pattern": ["PWP", "CFS", "PWP"],
+  "result": { "count": 1, "id": "effecoria:geo_well_core" }
+}

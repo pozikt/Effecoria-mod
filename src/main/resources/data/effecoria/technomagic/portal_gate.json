@@ -1,10 +1,13 @@
 {
   "id": "effecoria:portal_gate",
   "era": 5,
-  "icon": "effecoria:void_obsidian_insert",
-  "status": "planned",
+  "icon": "effecoria:portal_gate",
+  "status": "available",
   "requires": [
     "effecoria:geo_well"
   ],
-  "display_unlocks": []
+  "display_unlocks": [
+    "paired_teleport",
+    "effecoria:portal_gate"
+  ]
 }

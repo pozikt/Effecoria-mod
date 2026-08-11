@@ -53,6 +53,11 @@
                    "effecoria:phi_crusher",
                    "effecoria:phi_crusher_hopper",
                    "effecoria:phi_concrete",
-                   "effecoria:omega_anchor"
+                   "effecoria:omega_anchor",
+                   "effecoria:geo_casing",
+                   "effecoria:geo_well_core",
+                   "effecoria:geo_well_part",
+                   "effecoria:climate_array",
+                   "effecoria:portal_gate"
                ]
 }

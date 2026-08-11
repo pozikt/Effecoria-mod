@@ -322,6 +322,26 @@ public final class PhiWeatherService {
         announceNear(level, origin, radius, "message.effecoria.weather.essence_storm_start");
     }
 
+    /**
+     * Player/machine-triggered local Φ-weather (Climate Array). Skips Ω/blood extremes.
+     */
+    public static boolean startLocalEvent(
+            ServerLevel level,
+            PhiWeatherKind kind,
+            BlockPos origin,
+            double radius,
+            long durationTicks,
+            float intensity) {
+        if (kind == null || kind == PhiWeatherKind.CLEAR || kind.isOmega()) {
+            return false;
+        }
+        long until = level.getGameTime() + Math.max(40L, durationTicks);
+        float inten = Math.max(0.1f, Math.min(1f, intensity));
+        addEvent(level, new ActiveEvent(kind, until, origin.immutable(), Math.max(4.0, radius), inten));
+        announceNear(level, origin, radius, "message.effecoria.weather.climate_array");
+        return true;
+    }
+
     public static void syncTo(ServerPlayer player) {
         Snapshot snap = snapshotAt(player.level(), player.blockPosition());
         PacketDistributor.sendToPlayer(

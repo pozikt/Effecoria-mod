@@ -3,6 +3,7 @@ package com.effecoria.content;
 import java.util.List;
 
 import com.effecoria.block.ForgeReactorBlockEntity;
+import com.effecoria.block.GeoWellBlockEntity;
 import com.effecoria.block.PhiCrusherBlockEntity;
 
 import net.minecraft.core.BlockPos;
@@ -18,7 +19,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-/** Obsidian grit + lead foil filter — clears Ω meters on crusher / forge. */
+/** Obsidian grit + lead foil filter — clears Ω meters on crusher / forge / geo well. */
 public final class OmegaFilterItem extends Item {
     public OmegaFilterItem(Properties properties) {
         super(properties.stacksTo(16));
@@ -40,6 +41,8 @@ public final class OmegaFilterItem extends Item {
             cleared = crusher.clearOmegaMeter();
         } else if (be instanceof ForgeReactorBlockEntity forge) {
             cleared = forge.clearOmegaMeter();
+        } else if (be instanceof GeoWellBlockEntity well) {
+            cleared = well.clearOmegaMeter();
         }
 
         if (!cleared) {
