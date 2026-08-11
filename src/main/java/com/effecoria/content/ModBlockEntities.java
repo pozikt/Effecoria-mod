@@ -22,6 +22,7 @@ import com.effecoria.block.ForgeReactorPartBlockEntity;
 import com.effecoria.block.PhiBusBlockEntity;
 import com.effecoria.block.PhiCrusherBlockEntity;
 import com.effecoria.block.PhiCrusherHopperBlockEntity;
+import com.effecoria.block.OmegaAnchorBlockEntity;
 import com.effecoria.block.PhiTurretBlockEntity;
 import com.effecoria.block.SubspacePortalBlockEntity;
 import com.effecoria.block.WhisperingSpireVentBlockEntity;
@@ -109,6 +110,12 @@ public final class ModBlockEntities {
                     "phi_crusher_hopper",
                     () -> BlockEntityType.Builder.of(
                                     PhiCrusherHopperBlockEntity::new, ModBlocks.PHI_CRUSHER_HOPPER.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<OmegaAnchorBlockEntity>> OMEGA_ANCHOR =
+            BLOCK_ENTITY_TYPES.register(
+                    "omega_anchor",
+                    () -> BlockEntityType.Builder.of(OmegaAnchorBlockEntity::new, ModBlocks.OMEGA_ANCHOR.get())
                             .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EssenceAlembicBlockEntity>> ESSENCE_ALEMBIC =

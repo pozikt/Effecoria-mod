@@ -78,7 +78,23 @@ Two items: **`phi_crusher`** base (BE + GUI) + **`phi_crusher_hopper`** on top. 
 | COARSE | 40 | 1 |
 | FINE | 160 | 3 |
 
-Power via `PhiPower.consumeTick` or optional Φ-cell in the drive slot. Heat pauses at ≥100; void-obsidian crush raises Ω meter — at ≥20, RMB `lead_foil` on the base clears it and drops `omega_waste`. Working (`LIT`) machines shake the camera lightly within 2 blocks.
+Power via `PhiPower.consumeTick` or optional Φ-cell in the drive slot. Heat pauses at ≥100; void-obsidian crush raises Ω meter — at ≥20, RMB `lead_foil` on the base clears it and drops `omega_waste` (or use `omega_filter`). Working (`LIT`) machines shake the camera lightly within 2 blocks.
+
+### Crusher / forge byproduct sinks
+
+| Output | Sink |
+|--------|------|
+| `phi_stone_grit` | Craft `phi_concrete` (grit + clay) |
+| `bone_grit` | Φ-soil fertilizer (2×) or 2→`bone_meal` |
+| `phi_bone_paste` | Brew awkward → Regeneration; anvil-repair Φ-chitin |
+| `phi_wood_shavings` | Furnace fuel (300 ticks) |
+| `phi_fiber` | `phi_cloth` / `phi_rope` → cloak / lead |
+| `obsidian_grit` | Craft `omega_filter` (+ foil) |
+| `omega_nugget` | 9→`omega_dust`; Ω-turret ammo |
+| `soul_shard` | Cheap Ψ-imprinter focus (consumed) |
+| `omega_waste` | Bury on Ω-Scar surfaces |
+| `phi_steel_ingot` | Φ-steel armor & tools |
+| `purified_obsidian` | Craft `omega_anchor` (+ pure essonite) |
 
 ## Flow
 

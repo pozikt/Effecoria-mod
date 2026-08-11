@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GG",
+    "GC"
+  ],
+  "key": {
+    "G": {
+      "item": "effecoria:phi_stone_grit"
+    },
+    "C": {
+      "item": "minecraft:clay_ball"
+    }
+  },
+  "result": {
+    "id": "effecoria:phi_concrete",
+    "count": 4
+  }
+}

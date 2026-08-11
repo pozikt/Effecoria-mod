@@ -11,6 +11,7 @@ import com.effecoria.block.EssenceAlembicBlock;
 import com.effecoria.block.EssenceBurnerBlock;
 import com.effecoria.block.MortarAndPestleBlock;
 import com.effecoria.block.OmegaBladesBlock;
+import com.effecoria.block.OmegaAnchorBlock;
 import com.effecoria.block.PhiBladesBlock;
 import com.effecoria.block.PhiCampfireBlock;
 import com.effecoria.block.PhiFieldBlock;
@@ -784,6 +785,26 @@ public final class ModBlocks {
                     .strength(50.0f, 1200f)
                     .sound(SoundType.STONE)
                     .requiresCorrectToolForDrops()));
+
+    /** Φ-concrete — grit + clay building block. */
+    public static final DeferredBlock<Block> PHI_CONCRETE = BLOCKS.register(
+            "phi_concrete",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(2.0f, 6.0f)
+                    .sound(SoundType.STONE)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> 3)));
+
+    /** Ω-anchor — mild entropy / Ω-sickness suppression. */
+    public static final DeferredBlock<OmegaAnchorBlock> OMEGA_ANCHOR = BLOCKS.register(
+            "omega_anchor",
+            () -> new OmegaAnchorBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .strength(8.0f, 600f)
+                    .sound(SoundType.STONE)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> 5)));
 
     /** Ω-tainted obsidian — cleansed in Forge. */
     public static final DeferredBlock<Block> OMEGA_TAINTED_OBSIDIAN = BLOCKS.register(

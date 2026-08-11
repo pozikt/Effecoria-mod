@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "I",
+    "#",
+    "#"
+  ],
+  "key": {
+    "I": {
+      "item": "effecoria:phi_steel_ingot"
+    },
+    "#": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "effecoria:phi_steel_shovel",
+    "count": 1
+  }
+}

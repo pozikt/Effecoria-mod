@@ -70,7 +70,8 @@ public enum TurretKind implements StringRepresentable {
                     || stack.is(Items.IRON_NUGGET);
             case OMEGA -> stack.is(ModItems.OMEGA_DUST.get())
                     || stack.is(ModItems.OMEGA_TAINTED_OBSIDIAN.get())
-                    || stack.is(ModItems.OMEGA_CRYSTAL_SHARD.get());
+                    || stack.is(ModItems.OMEGA_CRYSTAL_SHARD.get())
+                    || stack.is(ModItems.OMEGA_NUGGET.get());
             default -> false;
         };
     }

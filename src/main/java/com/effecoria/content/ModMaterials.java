@@ -98,6 +98,24 @@ public final class ModMaterials {
                     2.0f,
                     0.0f));
 
+    /** Φ-steel — iron+ defense, mild Φ contour. */
+    public static final Holder<ArmorMaterial> PHI_STEEL = ARMOR_MATERIALS.register(
+            "phi_steel",
+            () -> new ArmorMaterial(
+                    Util.make(new EnumMap<>(ArmorItem.Type.class), map -> {
+                        map.put(ArmorItem.Type.BOOTS, 2);
+                        map.put(ArmorItem.Type.LEGGINGS, 5);
+                        map.put(ArmorItem.Type.CHESTPLATE, 7);
+                        map.put(ArmorItem.Type.HELMET, 2);
+                        map.put(ArmorItem.Type.BODY, 6);
+                    }),
+                    14,
+                    SoundEvents.ARMOR_EQUIP_IRON,
+                    () -> Ingredient.of(ModItems.PHI_STEEL_INGOT.get()),
+                    List.of(new ArmorMaterial.Layer(EffecoriaMod.id("phi_steel"))),
+                    0.5f,
+                    0.0f));
+
     /** Iron-ish damage, stone durability (131). */
     public static final Tier VITRIFIED_GLASS = new Tier() {
         private final java.util.function.Supplier<Ingredient> repair =
@@ -162,6 +180,42 @@ public final class ModMaterials {
         @Override
         public int getEnchantmentValue() {
             return 22;
+        }
+
+        @Override
+        public Ingredient getRepairIngredient() {
+            return repair.get();
+        }
+    };
+
+    /** Iron+ tools — durable enough for early Φ work. */
+    public static final Tier PHI_STEEL_TOOLS = new Tier() {
+        private final java.util.function.Supplier<Ingredient> repair =
+                Suppliers.memoize(() -> Ingredient.of(ModItems.PHI_STEEL_INGOT.get()));
+
+        @Override
+        public int getUses() {
+            return 320;
+        }
+
+        @Override
+        public float getSpeed() {
+            return 6.5f;
+        }
+
+        @Override
+        public float getAttackDamageBonus() {
+            return 2.0f;
+        }
+
+        @Override
+        public TagKey<Block> getIncorrectBlocksForDrops() {
+            return BlockTags.INCORRECT_FOR_IRON_TOOL;
+        }
+
+        @Override
+        public int getEnchantmentValue() {
+            return 16;
         }
 
         @Override

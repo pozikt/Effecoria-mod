@@ -265,6 +265,10 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("reactor_casing", ModBlocks.REACTOR_CASING);
     public static final DeferredItem<BlockItem> PURIFIED_OBSIDIAN =
             ITEMS.registerSimpleBlockItem("purified_obsidian", ModBlocks.PURIFIED_OBSIDIAN);
+    public static final DeferredItem<BlockItem> PHI_CONCRETE =
+            ITEMS.registerSimpleBlockItem("phi_concrete", ModBlocks.PHI_CONCRETE);
+    public static final DeferredItem<BlockItem> OMEGA_ANCHOR =
+            ITEMS.registerSimpleBlockItem("omega_anchor", ModBlocks.OMEGA_ANCHOR);
     public static final DeferredItem<BlockItem> OMEGA_TAINTED_OBSIDIAN =
             ITEMS.registerSimpleBlockItem("omega_tainted_obsidian", ModBlocks.OMEGA_TAINTED_OBSIDIAN);
     public static final DeferredItem<BlockItem> PHI_BUS = ITEMS.register(
@@ -330,15 +334,22 @@ public final class ModItems {
     public static final DeferredItem<Item> PHI_STEEL_INGOT = ITEMS.registerSimpleItem("phi_steel_ingot");
     public static final DeferredItem<Item> OMEGA_DUST = ITEMS.registerSimpleItem("omega_dust");
     public static final DeferredItem<Item> PHI_STONE_GRIT = ITEMS.registerSimpleItem("phi_stone_grit");
-    public static final DeferredItem<Item> BONE_GRIT = ITEMS.registerSimpleItem("bone_grit");
+    public static final DeferredItem<Item> BONE_GRIT =
+            ITEMS.register("bone_grit", () -> new BoneGritItem(new Item.Properties()));
     public static final DeferredItem<Item> PHI_BONE_PASTE = ITEMS.registerSimpleItem("phi_bone_paste");
-    public static final DeferredItem<Item> PHI_WOOD_SHAVINGS = ITEMS.registerSimpleItem("phi_wood_shavings");
+    public static final DeferredItem<Item> PHI_WOOD_SHAVINGS =
+            ITEMS.register("phi_wood_shavings", () -> new FuelItem(new Item.Properties(), 300));
     public static final DeferredItem<Item> PHI_FIBER = ITEMS.registerSimpleItem("phi_fiber");
+    public static final DeferredItem<Item> PHI_CLOTH = ITEMS.registerSimpleItem("phi_cloth");
+    public static final DeferredItem<Item> PHI_ROPE = ITEMS.registerSimpleItem("phi_rope");
     public static final DeferredItem<Item> OBSIDIAN_GRIT = ITEMS.registerSimpleItem("obsidian_grit");
     public static final DeferredItem<Item> OMEGA_NUGGET = ITEMS.registerSimpleItem("omega_nugget");
     public static final DeferredItem<Item> SOUL_SHARD = ITEMS.registerSimpleItem("soul_shard");
     public static final DeferredItem<Item> LEAD_FOIL = ITEMS.registerSimpleItem("lead_foil");
-    public static final DeferredItem<Item> OMEGA_WASTE = ITEMS.registerSimpleItem("omega_waste");
+    public static final DeferredItem<Item> OMEGA_WASTE =
+            ITEMS.register("omega_waste", () -> new OmegaWasteItem(new Item.Properties()));
+    public static final DeferredItem<Item> OMEGA_FILTER =
+            ITEMS.register("omega_filter", () -> new OmegaFilterItem(new Item.Properties()));
 
     public static final DeferredItem<Item> GOLD_FILTER = ITEMS.register(
             "gold_filter", () -> new GoldFilterItem(new Item.Properties()));
@@ -740,6 +751,62 @@ public final class ModItems {
                     ModMaterials.MITHRIL_TOOLS,
                     new Item.Properties()
                             .attributes(HoeItem.createAttributes(ModMaterials.MITHRIL_TOOLS, -3.0f, 0.0f))));
+
+    public static final DeferredItem<ArmorItem> PHI_STEEL_HELMET = ITEMS.register(
+            "phi_steel_helmet",
+            () -> new ArmorItem(
+                    ModMaterials.PHI_STEEL,
+                    ArmorItem.Type.HELMET,
+                    new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(18))));
+    public static final DeferredItem<ArmorItem> PHI_STEEL_CHESTPLATE = ITEMS.register(
+            "phi_steel_chestplate",
+            () -> new ArmorItem(
+                    ModMaterials.PHI_STEEL,
+                    ArmorItem.Type.CHESTPLATE,
+                    new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(18))));
+    public static final DeferredItem<ArmorItem> PHI_STEEL_LEGGINGS = ITEMS.register(
+            "phi_steel_leggings",
+            () -> new ArmorItem(
+                    ModMaterials.PHI_STEEL,
+                    ArmorItem.Type.LEGGINGS,
+                    new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(18))));
+    public static final DeferredItem<ArmorItem> PHI_STEEL_BOOTS = ITEMS.register(
+            "phi_steel_boots",
+            () -> new ArmorItem(
+                    ModMaterials.PHI_STEEL,
+                    ArmorItem.Type.BOOTS,
+                    new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(18))));
+
+    public static final DeferredItem<SwordItem> PHI_STEEL_SWORD = ITEMS.register(
+            "phi_steel_sword",
+            () -> new SwordItem(
+                    ModMaterials.PHI_STEEL_TOOLS,
+                    new Item.Properties()
+                            .attributes(SwordItem.createAttributes(ModMaterials.PHI_STEEL_TOOLS, 3, -2.4f))));
+    public static final DeferredItem<PickaxeItem> PHI_STEEL_PICKAXE = ITEMS.register(
+            "phi_steel_pickaxe",
+            () -> new PickaxeItem(
+                    ModMaterials.PHI_STEEL_TOOLS,
+                    new Item.Properties()
+                            .attributes(PickaxeItem.createAttributes(ModMaterials.PHI_STEEL_TOOLS, 1.0f, -2.8f))));
+    public static final DeferredItem<AxeItem> PHI_STEEL_AXE = ITEMS.register(
+            "phi_steel_axe",
+            () -> new AxeItem(
+                    ModMaterials.PHI_STEEL_TOOLS,
+                    new Item.Properties()
+                            .attributes(AxeItem.createAttributes(ModMaterials.PHI_STEEL_TOOLS, 5.5f, -3.0f))));
+    public static final DeferredItem<ShovelItem> PHI_STEEL_SHOVEL = ITEMS.register(
+            "phi_steel_shovel",
+            () -> new ShovelItem(
+                    ModMaterials.PHI_STEEL_TOOLS,
+                    new Item.Properties()
+                            .attributes(ShovelItem.createAttributes(ModMaterials.PHI_STEEL_TOOLS, 1.5f, -3.0f))));
+    public static final DeferredItem<HoeItem> PHI_STEEL_HOE = ITEMS.register(
+            "phi_steel_hoe",
+            () -> new HoeItem(
+                    ModMaterials.PHI_STEEL_TOOLS,
+                    new Item.Properties()
+                            .attributes(HoeItem.createAttributes(ModMaterials.PHI_STEEL_TOOLS, -2.0f, -1.0f))));
 
     public static final DeferredItem<SpawnEggItem> VITRIFIED_GOLEM_SPAWN_EGG = ITEMS.register(
             "vitrified_golem_spawn_egg",

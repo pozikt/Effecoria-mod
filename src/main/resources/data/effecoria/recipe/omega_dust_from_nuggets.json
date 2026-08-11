@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "NNN",
+    "NNN",
+    "NNN"
+  ],
+  "key": {
+    "N": {
+      "item": "effecoria:omega_nugget"
+    }
+  },
+  "result": {
+    "id": "effecoria:omega_dust",
+    "count": 1
+  }
+}

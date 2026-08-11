@@ -144,6 +144,19 @@ public final class PhiCrusherBlockEntity extends BaseContainerBlockEntity implem
         return true;
     }
 
+    /** Clears Ω without consuming foil / dropping waste (used by omega_filter). */
+    public boolean clearOmegaMeter() {
+        if (omegaMeter <= 0) {
+            return false;
+        }
+        omegaMeter = 0;
+        setChanged();
+        if (level != null && !level.isClientSide()) {
+            level.playSound(null, worldPosition, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.4f, 1.3f);
+        }
+        return true;
+    }
+
     private int powerCenti() {
         if (level == null) {
             return 0;

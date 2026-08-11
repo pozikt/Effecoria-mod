@@ -241,6 +241,19 @@ public final class ForgeReactorBlockEntity extends BaseContainerBlockEntity
         return Mth.clamp(omegaCentis / 100, 0, 100);
     }
 
+    /** Clears Ω contamination (omega_filter). */
+    public boolean clearOmegaMeter() {
+        if (omegaCentis <= 0) {
+            return false;
+        }
+        omegaCentis = 0;
+        setChanged();
+        if (level != null && !level.isClientSide()) {
+            level.playSound(null, worldPosition, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 1.2f);
+        }
+        return true;
+    }
+
     private boolean isActivelyPowering() {
         return formed && running && fuelTicks > 0 && scramCooldown <= 0 && omegaPercent() < OMEGA_SCRAM;
     }

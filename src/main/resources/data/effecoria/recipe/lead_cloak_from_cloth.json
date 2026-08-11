@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "LLL",
+    "LCL",
+    "L L"
+  ],
+  "key": {
+    "L": {
+      "item": "effecoria:lead_ingot"
+    },
+    "C": {
+      "item": "effecoria:phi_cloth"
+    }
+  },
+  "result": {
+    "id": "effecoria:lead_cloak",
+    "count": 1
+  }
+}

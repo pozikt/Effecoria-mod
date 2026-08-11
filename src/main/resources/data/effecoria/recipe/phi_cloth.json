@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "FF",
+    "FF"
+  ],
+  "key": {
+    "F": {
+      "item": "effecoria:phi_fiber"
+    }
+  },
+  "result": {
+    "id": "effecoria:phi_cloth",
+    "count": 1
+  }
+}

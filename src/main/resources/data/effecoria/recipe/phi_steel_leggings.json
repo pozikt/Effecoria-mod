@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "III",
+    "I I",
+    "I I"
+  ],
+  "key": {
+    "I": {
+      "item": "effecoria:phi_steel_ingot"
+    }
+  },
+  "result": {
+    "id": "effecoria:phi_steel_leggings",
+    "count": 1
+  }
+}

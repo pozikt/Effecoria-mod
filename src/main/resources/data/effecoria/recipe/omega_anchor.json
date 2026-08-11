@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    "PSP",
+    " P "
+  ],
+  "key": {
+    "P": {
+      "item": "effecoria:purified_obsidian"
+    },
+    "S": {
+      "item": "effecoria:pure_essonite"
+    }
+  },
+  "result": {
+    "id": "effecoria:omega_anchor",
+    "count": 1
+  }
+}

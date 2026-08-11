@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RR ",
+    "RS ",
+    "  S"
+  ],
+  "key": {
+    "R": {
+      "item": "effecoria:phi_rope"
+    },
+    "S": {
+      "item": "minecraft:slime_ball"
+    }
+  },
+  "result": {
+    "id": "minecraft:lead",
+    "count": 2
+  }
+}

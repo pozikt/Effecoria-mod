@@ -129,7 +129,7 @@ public final class PsiImprinterBlockEntity extends BaseContainerBlockEntity impl
     public boolean canPlaceItem(int slot, ItemStack stack) {
         return switch (slot) {
             case SLOT_DRIVE -> stack.is(ModItems.PHI_CELL.get());
-            case SLOT_FOCUS -> stack.is(ModItems.RESONANCE_FOCUS.get());
+            case SLOT_FOCUS -> stack.is(ModItems.RESONANCE_FOCUS.get()) || stack.is(ModItems.SOUL_SHARD.get());
             case SLOT_BLANK -> isValidBlank(stack);
             default -> false;
         };
@@ -168,7 +168,7 @@ public final class PsiImprinterBlockEntity extends BaseContainerBlockEntity impl
         if (!be.isValidBlank(blank)
                 || !drive.is(ModItems.PHI_CELL.get())
                 || PhiHarnessItems.cellCharge(drive) < CELL_DRAIN
-                || !focus.is(ModItems.RESONANCE_FOCUS.get())
+                || !isValidFocus(focus)
                 || !out.isEmpty()) {
             if (be.progress > 0) {
                 be.progress = Math.max(0, be.progress - 2);
@@ -184,7 +184,8 @@ public final class PsiImprinterBlockEntity extends BaseContainerBlockEntity impl
             }
             return;
         }
-        int tier = PhiHarnessItems.focusTier(focus);
+        boolean soulFocus = focus.is(ModItems.SOUL_SHARD.get());
+        int tier = soulFocus ? 0 : PhiHarnessItems.focusTier(focus);
         be.maxProgress = Math.max(80, BASE_COOK - tier * 40);
         be.progress++;
         PhiHarnessItems.setCellCharge(drive, PhiHarnessItems.cellCharge(drive) - CELL_DRAIN);
@@ -200,9 +201,16 @@ public final class PsiImprinterBlockEntity extends BaseContainerBlockEntity impl
             }
             be.items.set(SLOT_BLANK, ItemStack.EMPTY);
             be.items.set(SLOT_OUTPUT, result);
+            if (soulFocus) {
+                focus.shrink(1);
+            }
             level.playSound(null, pos, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 0.55f, 1.35f);
         }
         be.setChanged();
+    }
+
+    private static boolean isValidFocus(ItemStack stack) {
+        return stack.is(ModItems.RESONANCE_FOCUS.get()) || stack.is(ModItems.SOUL_SHARD.get());
     }
 
     @Override
