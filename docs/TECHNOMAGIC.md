@@ -78,7 +78,7 @@ Two items: **`phi_crusher`** base (BE + GUI) + **`phi_crusher_hopper`** on top. 
 | COARSE | 40 | 1 |
 | FINE | 160 | 3 |
 
-Power via `PhiPower.consumeTick` or optional Φ-cell in the drive slot. Heat pauses at ≥100; void-obsidian crush raises Ω meter — at ≥20, RMB `lead_foil` on the base clears it and drops `omega_waste` (or use `omega_filter`). Working (`LIT`) machines shake the camera lightly within 2 blocks.
+Power via `PhiPower.consumeTick` or optional Φ-cell in the drive slot. Heat pauses at ≥100; void-obsidian crush raises Ω meter — at ≥20, RMB `lead_foil` on the base clears it and drops `omega_waste`, or RMB `omega_filter` (also works on Forge core; no waste drop).
 
 ### Crusher / forge byproduct sinks
 

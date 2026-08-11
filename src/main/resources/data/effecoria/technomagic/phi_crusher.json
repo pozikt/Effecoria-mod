@@ -10,6 +10,9 @@
   "display_unlocks": [
     "effecoria:phi_crusher_hopper",
     "effecoria:lead_foil",
-    "effecoria:phi_stone_grit"
+    "effecoria:omega_filter",
+    "effecoria:phi_stone_grit",
+    "effecoria:phi_concrete",
+    "effecoria:phi_steel_ingot"
   ]
 }

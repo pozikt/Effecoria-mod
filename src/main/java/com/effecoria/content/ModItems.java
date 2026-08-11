@@ -265,12 +265,20 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("reactor_casing", ModBlocks.REACTOR_CASING);
     public static final DeferredItem<BlockItem> PURIFIED_OBSIDIAN =
             ITEMS.registerSimpleBlockItem("purified_obsidian", ModBlocks.PURIFIED_OBSIDIAN);
-    public static final DeferredItem<BlockItem> PHI_CONCRETE =
-            ITEMS.registerSimpleBlockItem("phi_concrete", ModBlocks.PHI_CONCRETE);
-    public static final DeferredItem<BlockItem> OMEGA_ANCHOR =
-            ITEMS.registerSimpleBlockItem("omega_anchor", ModBlocks.OMEGA_ANCHOR);
-    public static final DeferredItem<BlockItem> OMEGA_TAINTED_OBSIDIAN =
-            ITEMS.registerSimpleBlockItem("omega_tainted_obsidian", ModBlocks.OMEGA_TAINTED_OBSIDIAN);
+    public static final DeferredItem<BlockItem> PHI_CONCRETE = ITEMS.register(
+            "phi_concrete",
+            () -> new HintBlockItem(
+                    ModBlocks.PHI_CONCRETE.get(), new Item.Properties(), "tooltip.effecoria.phi_concrete"));
+    public static final DeferredItem<BlockItem> OMEGA_ANCHOR = ITEMS.register(
+            "omega_anchor",
+            () -> new HintBlockItem(
+                    ModBlocks.OMEGA_ANCHOR.get(), new Item.Properties(), "tooltip.effecoria.omega_anchor"));
+    public static final DeferredItem<BlockItem> OMEGA_TAINTED_OBSIDIAN = ITEMS.register(
+            "omega_tainted_obsidian",
+            () -> new HintBlockItem(
+                    ModBlocks.OMEGA_TAINTED_OBSIDIAN.get(),
+                    new Item.Properties(),
+                    "tooltip.effecoria.omega_tainted_obsidian"));
     public static final DeferredItem<BlockItem> PHI_BUS = ITEMS.register(
             "phi_bus",
             () -> new HintBlockItem(ModBlocks.PHI_BUS.get(), new Item.Properties(), "tooltip.effecoria.phi_bus"));
@@ -331,21 +339,33 @@ public final class ModItems {
             "lonver_blood_vial", () -> new Item(new Item.Properties().stacksTo(16)));
     public static final DeferredItem<Item> PHI_NECTAR = ITEMS.registerSimpleItem("phi_nectar");
     public static final DeferredItem<Item> FIREFLOWER = ITEMS.registerSimpleItem("fireflower");
-    public static final DeferredItem<Item> PHI_STEEL_INGOT = ITEMS.registerSimpleItem("phi_steel_ingot");
-    public static final DeferredItem<Item> OMEGA_DUST = ITEMS.registerSimpleItem("omega_dust");
-    public static final DeferredItem<Item> PHI_STONE_GRIT = ITEMS.registerSimpleItem("phi_stone_grit");
+    public static final DeferredItem<Item> PHI_STEEL_INGOT = ITEMS.register(
+            "phi_steel_ingot", () -> new HintItem(new Item.Properties(), "item.effecoria.phi_steel_ingot.hint"));
+    public static final DeferredItem<Item> OMEGA_DUST = ITEMS.register(
+            "omega_dust", () -> new HintItem(new Item.Properties(), "item.effecoria.omega_dust.hint"));
+    public static final DeferredItem<Item> PHI_STONE_GRIT = ITEMS.register(
+            "phi_stone_grit", () -> new HintItem(new Item.Properties(), "item.effecoria.phi_stone_grit.hint"));
     public static final DeferredItem<Item> BONE_GRIT =
             ITEMS.register("bone_grit", () -> new BoneGritItem(new Item.Properties()));
-    public static final DeferredItem<Item> PHI_BONE_PASTE = ITEMS.registerSimpleItem("phi_bone_paste");
-    public static final DeferredItem<Item> PHI_WOOD_SHAVINGS =
-            ITEMS.register("phi_wood_shavings", () -> new FuelItem(new Item.Properties(), 300));
-    public static final DeferredItem<Item> PHI_FIBER = ITEMS.registerSimpleItem("phi_fiber");
-    public static final DeferredItem<Item> PHI_CLOTH = ITEMS.registerSimpleItem("phi_cloth");
-    public static final DeferredItem<Item> PHI_ROPE = ITEMS.registerSimpleItem("phi_rope");
-    public static final DeferredItem<Item> OBSIDIAN_GRIT = ITEMS.registerSimpleItem("obsidian_grit");
-    public static final DeferredItem<Item> OMEGA_NUGGET = ITEMS.registerSimpleItem("omega_nugget");
-    public static final DeferredItem<Item> SOUL_SHARD = ITEMS.registerSimpleItem("soul_shard");
-    public static final DeferredItem<Item> LEAD_FOIL = ITEMS.registerSimpleItem("lead_foil");
+    public static final DeferredItem<Item> PHI_BONE_PASTE = ITEMS.register(
+            "phi_bone_paste", () -> new HintItem(new Item.Properties(), "item.effecoria.phi_bone_paste.hint"));
+    public static final DeferredItem<Item> PHI_WOOD_SHAVINGS = ITEMS.register(
+            "phi_wood_shavings",
+            () -> new FuelItem(new Item.Properties(), 300, "item.effecoria.phi_wood_shavings.hint"));
+    public static final DeferredItem<Item> PHI_FIBER = ITEMS.register(
+            "phi_fiber", () -> new HintItem(new Item.Properties(), "item.effecoria.phi_fiber.hint"));
+    public static final DeferredItem<Item> PHI_CLOTH = ITEMS.register(
+            "phi_cloth", () -> new HintItem(new Item.Properties(), "item.effecoria.phi_cloth.hint"));
+    public static final DeferredItem<Item> PHI_ROPE = ITEMS.register(
+            "phi_rope", () -> new HintItem(new Item.Properties(), "item.effecoria.phi_rope.hint"));
+    public static final DeferredItem<Item> OBSIDIAN_GRIT = ITEMS.register(
+            "obsidian_grit", () -> new HintItem(new Item.Properties(), "item.effecoria.obsidian_grit.hint"));
+    public static final DeferredItem<Item> OMEGA_NUGGET = ITEMS.register(
+            "omega_nugget", () -> new HintItem(new Item.Properties(), "item.effecoria.omega_nugget.hint"));
+    public static final DeferredItem<Item> SOUL_SHARD = ITEMS.register(
+            "soul_shard", () -> new HintItem(new Item.Properties(), "item.effecoria.soul_shard.hint"));
+    public static final DeferredItem<Item> LEAD_FOIL = ITEMS.register(
+            "lead_foil", () -> new HintItem(new Item.Properties(), "item.effecoria.lead_foil.hint"));
     public static final DeferredItem<Item> OMEGA_WASTE =
             ITEMS.register("omega_waste", () -> new OmegaWasteItem(new Item.Properties()));
     public static final DeferredItem<Item> OMEGA_FILTER =

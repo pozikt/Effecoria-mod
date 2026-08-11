@@ -1,0 +1,8 @@
+{
+  "id": "effecoria:omega_anchor",
+  "era": 4,
+  "icon": "effecoria:omega_anchor",
+  "status": "available",
+  "requires": ["effecoria:forge_reactor"],
+  "display_unlocks": ["entropy_suppression", "purified_obsidian_sink"]
+}

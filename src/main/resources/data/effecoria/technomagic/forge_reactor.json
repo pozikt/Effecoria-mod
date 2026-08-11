@@ -4,5 +4,11 @@
   "icon": "effecoria:forge_reactor_core",
   "status": "available",
   "requires": ["effecoria:spark_reactor", "effecoria:heart_reactor"],
-  "display_unlocks": ["energy_mode", "smelt_synth_cleanse", "phi_bus_feed"]
+  "display_unlocks": [
+    "energy_mode",
+    "smelt_synth_cleanse",
+    "phi_bus_feed",
+    "effecoria:purified_obsidian",
+    "effecoria:omega_filter"
+  ]
 }
