@@ -1,6 +1,12 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "all": "effecoria:block/omega_anchor"
+    "particle": "effecoria:block/omega_anchor_side",
+    "down": "effecoria:block/omega_anchor_bottom",
+    "up": "effecoria:block/omega_anchor_top",
+    "north": "effecoria:block/omega_anchor_side",
+    "south": "effecoria:block/omega_anchor_side",
+    "east": "effecoria:block/omega_anchor_side",
+    "west": "effecoria:block/omega_anchor_side"
   }
 }

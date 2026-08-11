@@ -1,6 +1,12 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "all": "effecoria:block/phi_concrete"
+    "particle": "effecoria:block/phi_concrete_side",
+    "down": "effecoria:block/phi_concrete_bottom",
+    "up": "effecoria:block/phi_concrete_top",
+    "north": "effecoria:block/phi_concrete_side",
+    "south": "effecoria:block/phi_concrete_side",
+    "east": "effecoria:block/phi_concrete_side",
+    "west": "effecoria:block/phi_concrete_side"
   }
 }
