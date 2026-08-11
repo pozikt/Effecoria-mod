@@ -31,7 +31,10 @@ import com.effecoria.block.HeartReactorPartBlock;
 import com.effecoria.block.ForgeReactorBlock;
 import com.effecoria.block.ForgeReactorPartBlock;
 import com.effecoria.block.PhiBusBlock;
+import com.effecoria.block.PhiTurretBlock;
+import com.effecoria.block.TurretMountBlock;
 import com.effecoria.block.SubspacePortalBlock;
+import com.effecoria.core.alchemy.TurretKind;
 import com.effecoria.block.VitrifiedBranchesBlock;
 import com.effecoria.block.VitrifiedGeyserCrackBlock;
 import com.effecoria.block.VitrifiedLogBlock;
@@ -798,6 +801,72 @@ public final class ModBlocks {
                     .sound(SoundType.GLASS)
                     .noOcclusion()
                     .lightLevel(state -> state.getValue(PhiBusBlock.POWERED) ? 6 : 0)));
+
+    /** Shared turret mount (half-slab). Φ-power intake; barrels assemble on the outward face. */
+    public static final DeferredBlock<TurretMountBlock> TURRET_MOUNT = BLOCKS.register(
+            "turret_mount",
+            () -> new TurretMountBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(3.0f, 8f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()
+                    .lightLevel(s -> s.getValue(TurretMountBlock.LIT) ? 8 : 0)));
+
+    public static final DeferredBlock<PhiTurretBlock> PLASMA_TURRET = BLOCKS.register(
+            "plasma_turret",
+            () -> new PhiTurretBlock(
+                    TurretKind.PLASMA,
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                            .strength(3.5f, 8f)
+                            .sound(SoundType.METAL)
+                            .requiresCorrectToolForDrops()
+                            .noOcclusion()));
+
+    public static final DeferredBlock<PhiTurretBlock> KINETIC_TURRET = BLOCKS.register(
+            "kinetic_turret",
+            () -> new PhiTurretBlock(
+                    TurretKind.KINETIC,
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_GRAY)
+                            .strength(3.5f, 8f)
+                            .sound(SoundType.METAL)
+                            .requiresCorrectToolForDrops()
+                            .noOcclusion()));
+
+    public static final DeferredBlock<PhiTurretBlock> SPATIAL_TURRET = BLOCKS.register(
+            "spatial_turret",
+            () -> new PhiTurretBlock(
+                    TurretKind.SPATIAL,
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_PURPLE)
+                            .strength(4.0f, 10f)
+                            .sound(SoundType.METAL)
+                            .requiresCorrectToolForDrops()
+                            .noOcclusion()));
+
+    public static final DeferredBlock<PhiTurretBlock> MENTAL_TURRET = BLOCKS.register(
+            "mental_turret",
+            () -> new PhiTurretBlock(
+                    TurretKind.MENTAL,
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_BLUE)
+                            .strength(3.5f, 8f)
+                            .sound(SoundType.METAL)
+                            .requiresCorrectToolForDrops()
+                            .noOcclusion()));
+
+    public static final DeferredBlock<PhiTurretBlock> OMEGA_TURRET = BLOCKS.register(
+            "omega_turret",
+            () -> new PhiTurretBlock(
+                    TurretKind.OMEGA,
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_BLACK)
+                            .strength(4.0f, 10f)
+                            .sound(SoundType.METAL)
+                            .requiresCorrectToolForDrops()
+                            .noOcclusion()));
 
     /** Essence alembic — blue cauldron for Φ-water potions. */
     public static final DeferredBlock<EssenceAlembicBlock> ESSENCE_ALEMBIC = BLOCKS.register(

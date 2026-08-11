@@ -268,6 +268,29 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> PHI_BUS = ITEMS.register(
             "phi_bus",
             () -> new HintBlockItem(ModBlocks.PHI_BUS.get(), new Item.Properties(), "tooltip.effecoria.phi_bus"));
+    public static final DeferredItem<BlockItem> TURRET_MOUNT = ITEMS.register(
+            "turret_mount",
+            () -> new HintBlockItem(ModBlocks.TURRET_MOUNT.get(), new Item.Properties(), "tooltip.effecoria.turret_mount"));
+    public static final DeferredItem<BlockItem> PLASMA_TURRET = ITEMS.register(
+            "plasma_turret",
+            () -> new HintBlockItem(
+                    ModBlocks.PLASMA_TURRET.get(), new Item.Properties(), "tooltip.effecoria.plasma_turret"));
+    public static final DeferredItem<BlockItem> KINETIC_TURRET = ITEMS.register(
+            "kinetic_turret",
+            () -> new HintBlockItem(
+                    ModBlocks.KINETIC_TURRET.get(), new Item.Properties(), "tooltip.effecoria.kinetic_turret"));
+    public static final DeferredItem<BlockItem> SPATIAL_TURRET = ITEMS.register(
+            "spatial_turret",
+            () -> new HintBlockItem(
+                    ModBlocks.SPATIAL_TURRET.get(), new Item.Properties(), "tooltip.effecoria.spatial_turret"));
+    public static final DeferredItem<BlockItem> MENTAL_TURRET = ITEMS.register(
+            "mental_turret",
+            () -> new HintBlockItem(
+                    ModBlocks.MENTAL_TURRET.get(), new Item.Properties(), "tooltip.effecoria.mental_turret"));
+    public static final DeferredItem<BlockItem> OMEGA_TURRET = ITEMS.register(
+            "omega_turret",
+            () -> new HintBlockItem(ModBlocks.OMEGA_TURRET.get(), new Item.Properties(), "tooltip.effecoria.omega_turret"));
+    public static final DeferredItem<Item> MITHRIL_BOLT = ITEMS.registerSimpleItem("mithril_bolt");
     public static final DeferredItem<BlockItem> ESSENCE_ALEMBIC =
             ITEMS.registerSimpleBlockItem("essence_alembic", ModBlocks.ESSENCE_ALEMBIC);
 

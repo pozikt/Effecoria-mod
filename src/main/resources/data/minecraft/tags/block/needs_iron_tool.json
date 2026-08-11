@@ -14,6 +14,12 @@
     "effecoria:lead_block",
     "effecoria:reactor_casing",
     "effecoria:phi_bus",
-    "effecoria:ancient_essence_wood"
+    "effecoria:turret_mount",
+    "effecoria:ancient_essence_wood",
+    "effecoria:plasma_turret",
+    "effecoria:kinetic_turret",
+    "effecoria:spatial_turret",
+    "effecoria:mental_turret",
+    "effecoria:omega_turret"
   ]
 }

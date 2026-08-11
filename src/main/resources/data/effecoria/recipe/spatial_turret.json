@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "M": { "item": "effecoria:mithril_ingot" },
+    "S": { "item": "effecoria:star_essonite" },
+    "V": { "item": "effecoria:void_obsidian" },
+    "G": { "item": "effecoria:phi_glass" }
+  },
+  "pattern": ["MSG", " V ", " M "],
+  "result": { "count": 1, "id": "effecoria:spatial_turret" }
+}

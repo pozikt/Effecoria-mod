@@ -102,6 +102,8 @@ public class EffecoriaMod {
 
         ModParticleTypes.PARTICLE_TYPES.register(modEventBus);
 
+        com.effecoria.content.ModSounds.SOUND_EVENTS.register(modEventBus);
+
         ModCreativeTabs.CREATIVE_TABS.register(modEventBus);
 
         com.effecoria.world.ModGameRules.bootstrap();

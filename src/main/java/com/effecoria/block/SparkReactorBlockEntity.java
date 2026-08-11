@@ -183,6 +183,16 @@ public final class SparkReactorBlockEntity extends BaseContainerBlockEntity
         return 1f;
     }
 
+    @Override
+    public boolean drainFuel(int ticks) {
+        if (!isActivelyPowering() || ticks <= 0 || fuelTicks < ticks) {
+            return false;
+        }
+        fuelTicks -= ticks;
+        setChanged();
+        return true;
+    }
+
     public static void serverTick(Level level, BlockPos pos, BlockState state, SparkReactorBlockEntity be) {
         if (!(level instanceof ServerLevel server)) {
             return;

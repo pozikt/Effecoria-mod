@@ -1,0 +1,8 @@
+{
+  "id": "effecoria:kinetic_turret",
+  "era": 4,
+  "icon": "effecoria:kinetic_turret",
+  "status": "available",
+  "requires": ["effecoria:turret_mount"],
+  "display_unlocks": ["bolt_ammo", "armor_pierce"]
+}

@@ -1,0 +1,8 @@
+{
+  "id": "effecoria:mental_turret",
+  "era": 4,
+  "icon": "effecoria:mental_turret",
+  "status": "available",
+  "requires": ["effecoria:turret_mount"],
+  "display_unlocks": ["psi_suppression"]
+}

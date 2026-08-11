@@ -20,6 +20,7 @@ import com.effecoria.block.HeartReactorPartBlockEntity;
 import com.effecoria.block.ForgeReactorBlockEntity;
 import com.effecoria.block.ForgeReactorPartBlockEntity;
 import com.effecoria.block.PhiBusBlockEntity;
+import com.effecoria.block.PhiTurretBlockEntity;
 import com.effecoria.block.SubspacePortalBlockEntity;
 import com.effecoria.block.WhisperingSpireVentBlockEntity;
 
@@ -88,6 +89,12 @@ public final class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register(
                     "phi_bus",
                     () -> BlockEntityType.Builder.of(PhiBusBlockEntity::new, ModBlocks.PHI_BUS.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiTurretBlockEntity>> PHI_TURRET =
+            BLOCK_ENTITY_TYPES.register(
+                    "phi_turret",
+                    () -> BlockEntityType.Builder.of(PhiTurretBlockEntity::new, ModBlocks.TURRET_MOUNT.get())
+                            .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EssenceAlembicBlockEntity>> ESSENCE_ALEMBIC =
             BLOCK_ENTITY_TYPES.register(

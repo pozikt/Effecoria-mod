@@ -11,6 +11,7 @@ import com.effecoria.alchemy.menu.SealInscriberMenu;
 import com.effecoria.alchemy.menu.SparkReactorMenu;
 import com.effecoria.alchemy.menu.HeartReactorMenu;
 import com.effecoria.alchemy.menu.ForgeReactorMenu;
+import com.effecoria.alchemy.menu.PhiTurretMenu;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
@@ -38,6 +39,9 @@ public final class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<ForgeReactorMenu>> FORGE_REACTOR =
             MENUS.register("forge_reactor", () -> IMenuTypeExtension.create(ForgeReactorMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<PhiTurretMenu>> PHI_TURRET =
+            MENUS.register("phi_turret", () -> IMenuTypeExtension.create(PhiTurretMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<AlembicMenu>> ALEMBIC =
             MENUS.register("alembic", () -> IMenuTypeExtension.create(AlembicMenu::new));

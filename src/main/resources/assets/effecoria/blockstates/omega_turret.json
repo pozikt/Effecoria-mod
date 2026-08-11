@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,formed=false": { "model": "effecoria:block/omega_turret" },
+    "facing=south,formed=false": { "model": "effecoria:block/omega_turret", "y": 180 },
+    "facing=west,formed=false": { "model": "effecoria:block/omega_turret", "y": 270 },
+    "facing=east,formed=false": { "model": "effecoria:block/omega_turret", "y": 90 },
+    "facing=north,formed=true": { "model": "effecoria:block/turret_barrel_formed" },
+    "facing=south,formed=true": { "model": "effecoria:block/turret_barrel_formed" },
+    "facing=west,formed=true": { "model": "effecoria:block/turret_barrel_formed" },
+    "facing=east,formed=true": { "model": "effecoria:block/turret_barrel_formed" }
+  }
+}

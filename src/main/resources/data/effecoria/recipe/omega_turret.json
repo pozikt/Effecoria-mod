@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "M": { "item": "effecoria:mithril_ingot" },
+    "O": { "item": "effecoria:omega_crystal_shard" },
+    "T": { "item": "effecoria:omega_tainted_obsidian" },
+    "V": { "item": "effecoria:void_obsidian" }
+  },
+  "pattern": [" M ", "OTO", " V "],
+  "result": { "count": 1, "id": "effecoria:omega_turret" }
+}

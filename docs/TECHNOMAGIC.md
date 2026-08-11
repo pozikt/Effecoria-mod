@@ -20,7 +20,7 @@ See also [ROADMAP.md](ROADMAP.md) Stage IV.
 | I — Hearth | Torch, campfire heat, crucible, mortar | **Playable** |
 | II — Workshop | Burner, Φ-furnace, glass/flasks, alembic, filters, cell, focus | **Playable** |
 | III — Imprint | Ψ-imprinter, golem / telegraph, artifact craft, seals, jewelry | **Playable** |
-| IV — Reactors | Spark, Heart 3×3×3, Φ-bus, **Forge 3×4×3** | **Playable** |
+| IV — Reactors | Spark, Heart 3×3×3, Φ-bus, Forge 3×4×3, **Φ-turrets** | **Playable** |
 | V — Geo | Geo wells, climate array, portal gate | Catalog `planned` |
 
 ## Era IV Heart multiblock (3×3×3)
@@ -36,7 +36,7 @@ Around `heart_reactor_core`:
 
 When the shell is valid, it **assembles**: shell cells become invisible `heart_reactor_part`s and the core BER draws one solid textured 3×3×3. Click any part/core to open the fuel GUI. Breaking a part or the core dismantles and restores the materials (broken cell drops its original block).
 
-Prime with **1× pure essonite** or **4× phi_flux_slug**, then START. Ambient Φ while formed+running (`PhiPower` radius 8). Place ice/water/Φ-water just outside the shell to cool. Adjacent `phi_bus` carries power (BFS, hop attenuation); bus outlets are `PhiPowerProvider` radius 1.
+Prime with **1× pure essonite** or **4× phi_flux_slug**, then START. Ambient Φ while formed+running (`PhiPower` radius 8; hull parts are Φ-transparent for LOS). Place ice/water/Φ-water just outside the shell to cool. Adjacent `phi_bus` on the **hull** (or Spark) energizes the cable (BFS to controller; hop attenuation); bus outlets are `PhiPowerProvider` radius 1 — place the last bus **adjacent to the machine** (turret mount).
 
 ## Era IV Forge multiblock (3×4×3)
 
@@ -53,6 +53,22 @@ Assembles into invisible `forge_reactor_part`s + BER 3×4×3 golden hull. Deep h
 
 **Modes:** ENERGY (Φ radius 32 + bus), SMELT, SYNTH, CLEANSE. Fuels: star essonite / pure essonite / charged Φ-cell (≥85%). Catalysts: Lonver blood vial, Φ-nectar, fireflower. Coolant outside hull; Ω meter scrams at 25%, burst at 50%.
 
+## Era IV Φ-turrets
+
+Two-block assembly: shared **`turret_mount`** (half-slab, attaches to floor / wall / ceiling) + type **barrel**. Φ-power connects to the mount only (wireless in Heart radius, or last `phi_bus` touching the mount). When a barrel sits on the outward face, both become `FORMED`; BER draws a fixed plate + rotating yoke/barrel that aims at hostiles.
+
+Drain via `PhiPower.consumeTick(load)` at the mount (Spark/Heart/Forge; bus drains the injector).
+
+| Barrel | Power cost / shot | Ammo | Catalog |
+|--------|-------------------|------|---------|
+| Plasma | 20 | — | mount |
+| Kinetic | 40 | mithril bolt / nuggets | mount |
+| Mental | 30 | — | mount |
+| Spatial | 200 (needs factor ≥1.5) | — | mount + Forge |
+| Omega | 120 | Ω-dust / tainted / shard | mount + Forge |
+
+Arm in mount GUI. Targets hostiles with LOS from the barrel cell. Overheat after sustained fire.
+
 ## Flow
 
 ```mermaid
@@ -64,11 +80,14 @@ flowchart LR
   forge --> bus
   spark --> bus
   bus --> machines[adjacent_machines]
+  heart --> turrets[phi_turrets]
+  forge --> turrets
+  bus --> turrets
 ```
 
 ## Data
 
 - Catalog: `data/effecoria/technomagic/*.json`
-- Code: `HeartMultiblock`, `ForgeMultiblock`, `*ReactorBlockEntity`, `PhiBusNetwork`, `PhiPowerHubs`
-- `PhiPower` local scan radius 8; Forge hubs via `PhiPowerHubs` up to 32
+- Code: `HeartMultiblock`, `ForgeMultiblock`, `*ReactorBlockEntity`, `PhiBusNetwork`, `PhiPowerHubs`, `TurretMountBlock`, `PhiTurretBlock` (barrel), `PhiTurretBlockEntity`, `TurretAssembly`, `TurretKind`
+- `PhiPower` local scan radius 8; Forge hubs via `PhiPowerHubs` up to 32; `drainFuel` on providers
 - Gates: `TechnomagicGates` / `TechnomagicProgress`

@@ -17,10 +17,12 @@ import com.effecoria.client.render.MirageHorrorRenderer;
 import com.effecoria.client.render.OmegaShadeRenderer;
 import com.effecoria.client.render.OmegaWormRenderer;
 import com.effecoria.client.render.PhiLarvaRenderer;
+import com.effecoria.client.render.TurretBoltRenderer;
 import com.effecoria.client.render.RootCageRenderer;
 import com.effecoria.client.render.RotfangMinkRenderer;
 import com.effecoria.client.render.HeartReactorRenderer;
 import com.effecoria.client.render.ForgeReactorRenderer;
+import com.effecoria.client.render.TurretMountRenderer;
 import com.effecoria.client.render.SubspacePortalRenderer;
 import com.effecoria.client.gui.alchemy.AlembicScreen;
 import com.effecoria.client.gui.alchemy.AssemblerScreen;
@@ -32,6 +34,7 @@ import com.effecoria.client.gui.alchemy.SealInscriberScreen;
 import com.effecoria.client.gui.alchemy.SparkReactorScreen;
 import com.effecoria.client.gui.alchemy.HeartReactorScreen;
 import com.effecoria.client.gui.alchemy.ForgeReactorScreen;
+import com.effecoria.client.gui.alchemy.PhiTurretScreen;
 import com.effecoria.client.render.PhiConstructRenderer;
 import com.effecoria.client.render.VitrifiedGolemRenderer;
 import com.effecoria.content.ModBlocks;
@@ -64,6 +67,7 @@ public final class EffecoriaClient {
         event.register(ModMenus.SPARK_REACTOR.get(), SparkReactorScreen::new);
         event.register(ModMenus.HEART_REACTOR.get(), HeartReactorScreen::new);
         event.register(ModMenus.FORGE_REACTOR.get(), ForgeReactorScreen::new);
+        event.register(ModMenus.PHI_TURRET.get(), PhiTurretScreen::new);
         event.register(ModMenus.ALEMBIC.get(), AlembicScreen::new);
         event.register(ModMenus.IMPRINTER.get(), ImprinterScreen::new);
         event.register(ModMenus.SHAFT_LATHE.get(), FormSelectScreen::new);
@@ -120,6 +124,7 @@ public final class EffecoriaClient {
     @SubscribeEvent
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.ROOT_CAGE.get(), RootCageRenderer::new);
+        event.registerEntityRenderer(ModEntities.TURRET_BOLT.get(), TurretBoltRenderer::new);
         event.registerEntityRenderer(ModEntities.DEATH_SHADOW.get(), DeathShadowRenderer::new);
         event.registerEntityRenderer(ModEntities.MIRAGE_HORROR.get(), MirageHorrorRenderer::new);
         event.registerEntityRenderer(ModEntities.PHI_LARVA.get(), PhiLarvaRenderer::new);
@@ -141,6 +146,8 @@ public final class EffecoriaClient {
                 com.effecoria.content.ModBlockEntities.HEART_REACTOR_CORE.get(), HeartReactorRenderer::new);
         event.registerBlockEntityRenderer(
                 com.effecoria.content.ModBlockEntities.FORGE_REACTOR_CORE.get(), ForgeReactorRenderer::new);
+        event.registerBlockEntityRenderer(
+                com.effecoria.content.ModBlockEntities.PHI_TURRET.get(), TurretMountRenderer::new);
     }
 
     @SubscribeEvent

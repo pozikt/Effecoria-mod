@@ -1,0 +1,8 @@
+{
+  "id": "effecoria:spatial_turret",
+  "era": 4,
+  "icon": "effecoria:spatial_turret",
+  "status": "available",
+  "requires": ["effecoria:turret_mount", "effecoria:forge_reactor"],
+  "display_unlocks": ["micro_portal_cut"]
+}

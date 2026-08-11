@@ -16,4 +16,11 @@ public interface PhiPowerProvider {
      * Consumers may ignore exact values and only check presence / thresholds.
      */
     float powerFactor();
+
+    /**
+     * Drain fuel / runtime budget from this source.
+     *
+     * @return false if not supplying or cannot cover {@code ticks}
+     */
+    boolean drainFuel(int ticks);
 }

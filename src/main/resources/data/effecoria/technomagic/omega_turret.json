@@ -1,0 +1,8 @@
+{
+  "id": "effecoria:omega_turret",
+  "era": 4,
+  "icon": "effecoria:omega_turret",
+  "status": "available",
+  "requires": ["effecoria:turret_mount", "effecoria:forge_reactor"],
+  "display_unlocks": ["omega_infection", "forbidden"]
+}

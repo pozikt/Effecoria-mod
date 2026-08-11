@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "M": { "item": "effecoria:mithril_ingot" },
+    "I": { "item": "minecraft:iron_ingot" },
+    "N": { "item": "effecoria:mithril_nugget" }
+  },
+  "pattern": [" M ", "INI", " M "],
+  "result": { "count": 1, "id": "effecoria:kinetic_turret" }
+}

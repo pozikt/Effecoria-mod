@@ -239,6 +239,25 @@ public final class HeartReactorBlockEntity extends BaseContainerBlockEntity
         return 1f;
     }
 
+    /**
+     * Heart has no discrete fuel meter — load drains boost first, then accelerates thermal run
+     * toward overheat (still succeeds while actively powering).
+     */
+    @Override
+    public boolean drainFuel(int ticks) {
+        if (!isActivelyPowering() || ticks <= 0) {
+            return false;
+        }
+        int fromBoost = Math.min(boostTicks, ticks);
+        boostTicks -= fromBoost;
+        int remainder = ticks - fromBoost;
+        if (remainder > 0) {
+            continuousRunTicks += remainder * 4;
+        }
+        setChanged();
+        return true;
+    }
+
     private boolean hasCoolant() {
         if (level == null) {
             return false;

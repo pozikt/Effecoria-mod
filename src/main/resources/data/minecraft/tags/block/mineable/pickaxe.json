@@ -1,4 +1,4 @@
-﻿{
+{
     "replace":  false,
     "values":  [
                    "effecoria:essonite_ore",
@@ -42,6 +42,12 @@
                    "effecoria:omega_tainted_obsidian",
                    "effecoria:reactor_casing",
                    "effecoria:phi_bus",
-                   "effecoria:spark_reactor"
+                   "effecoria:spark_reactor",
+                   "effecoria:turret_mount",
+                   "effecoria:plasma_turret",
+                   "effecoria:kinetic_turret",
+                   "effecoria:spatial_turret",
+                   "effecoria:mental_turret",
+                   "effecoria:omega_turret"
                ]
 }

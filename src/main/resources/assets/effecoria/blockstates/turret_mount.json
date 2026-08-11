@@ -1,0 +1,28 @@
+{
+  "multipart": [
+    {
+      "when": { "formed": "false", "face": "floor" },
+      "apply": { "model": "effecoria:block/turret_mount" }
+    },
+    {
+      "when": { "formed": "false", "face": "ceiling" },
+      "apply": { "model": "effecoria:block/turret_mount", "x": 180, "y": 180 }
+    },
+    {
+      "when": { "formed": "false", "face": "wall", "facing": "north" },
+      "apply": { "model": "effecoria:block/turret_mount_wall" }
+    },
+    {
+      "when": { "formed": "false", "face": "wall", "facing": "south" },
+      "apply": { "model": "effecoria:block/turret_mount_wall", "y": 180 }
+    },
+    {
+      "when": { "formed": "false", "face": "wall", "facing": "west" },
+      "apply": { "model": "effecoria:block/turret_mount_wall", "y": 270 }
+    },
+    {
+      "when": { "formed": "false", "face": "wall", "facing": "east" },
+      "apply": { "model": "effecoria:block/turret_mount_wall", "y": 90 }
+    }
+  ]
+}

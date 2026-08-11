@@ -73,6 +73,12 @@ public final class TechnomagicDiscoveryEvents {
         discoverIfHas(player, ModItems.HEART_REACTOR_CORE.get(), "heart_reactor");
         discoverIfHas(player, ModItems.FORGE_REACTOR_CORE.get(), "forge_reactor");
         discoverIfHas(player, ModItems.PHI_BUS.get(), "phi_bus");
+        discoverIfHas(player, ModItems.TURRET_MOUNT.get(), "turret_mount");
+        discoverIfHas(player, ModItems.PLASMA_TURRET.get(), "plasma_turret");
+        discoverIfHas(player, ModItems.KINETIC_TURRET.get(), "kinetic_turret");
+        discoverIfHas(player, ModItems.MENTAL_TURRET.get(), "mental_turret");
+        discoverIfHas(player, ModItems.SPATIAL_TURRET.get(), "spatial_turret");
+        discoverIfHas(player, ModItems.OMEGA_TURRET.get(), "omega_turret");
         discoverIfHas(player, ModItems.ESSENCE_ALEMBIC.get(), "essence_alembic");
         discoverIfHas(player, ModItems.PHI_CELL.get(), "phi_cell");
         discoverIfHas(player, ModItems.RESONANCE_FOCUS.get(), "resonance_focus");

@@ -16,6 +16,7 @@ import com.effecoria.entity.RootCageEntity;
 import com.effecoria.entity.RotfangMinkEntity;
 import com.effecoria.entity.EssenceWyvernEntity;
 import com.effecoria.entity.PhiConstructEntity;
+import com.effecoria.entity.TurretBoltEntity;
 import com.effecoria.entity.VitrifiedGolemEntity;
 
 import net.minecraft.core.registries.Registries;
@@ -44,6 +45,15 @@ public final class ModEntities {
                             .updateInterval(1)
                             .fireImmune()
                             .build(EffecoriaMod.id("root_cage").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<TurretBoltEntity>> TURRET_BOLT =
+            ENTITY_TYPES.register(
+                    "turret_bolt",
+                    () -> EntityType.Builder.<TurretBoltEntity>of(TurretBoltEntity::new, MobCategory.MISC)
+                            .sized(0.35f, 0.35f)
+                            .clientTrackingRange(64)
+                            .updateInterval(1)
+                            .build(EffecoriaMod.id("turret_bolt").toString()));
 
     public static final DeferredHolder<EntityType<?>, EntityType<DeathShadowEntity>> DEATH_SHADOW =
             ENTITY_TYPES.register(

@@ -1,0 +1,8 @@
+﻿{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "effecoria:block/kinetic_turret_top",
+    "front": "effecoria:block/kinetic_turret_front",
+    "side": "effecoria:block/kinetic_turret_side"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "kinetic_gauss_shot": {
+    "sounds": [
+      {
+        "name": "effecoria:kinetic_gauss_shot",
+        "stream": false
+      }
+    ],
+    "subtitle": "subtitles.effecoria.kinetic_gauss_shot"
+  }
+}

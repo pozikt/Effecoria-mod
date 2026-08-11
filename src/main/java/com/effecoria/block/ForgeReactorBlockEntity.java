@@ -270,6 +270,16 @@ public final class ForgeReactorBlockEntity extends BaseContainerBlockEntity
         return base;
     }
 
+    @Override
+    public boolean drainFuel(int ticks) {
+        if (!isActivelyPowering() || ticks <= 0 || fuelTicks < ticks) {
+            return false;
+        }
+        fuelTicks -= ticks;
+        setChanged();
+        return true;
+    }
+
     public static boolean isValidFuel(ItemStack stack) {
         if (stack.is(ModItems.STAR_ESSONITE.get()) || stack.is(ModItems.PURE_ESSONITE.get())) {
             return true;

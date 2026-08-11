@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": { "item": "effecoria:lead_ingot" },
+    "M": { "item": "effecoria:mithril_ingot" },
+    "C": { "item": "effecoria:reactor_casing" }
+  },
+  "pattern": ["MLM", "LCL", "MLM"],
+  "result": { "count": 1, "id": "effecoria:turret_mount" }
+}

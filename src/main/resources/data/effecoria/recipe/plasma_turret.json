@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "M": { "item": "effecoria:mithril_ingot" },
+    "P": { "item": "effecoria:pure_essonite" },
+    "G": { "item": "effecoria:phi_glass" }
+  },
+  "pattern": [" M ", "GPG", " M "],
+  "result": { "count": 1, "id": "effecoria:plasma_turret" }
+}

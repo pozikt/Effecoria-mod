@@ -8,7 +8,9 @@ import java.util.Queue;
 import java.util.Set;
 
 import com.effecoria.block.ForgeReactorBlockEntity;
+import com.effecoria.block.ForgeReactorPartBlockEntity;
 import com.effecoria.block.HeartReactorBlockEntity;
+import com.effecoria.block.HeartReactorPartBlockEntity;
 import com.effecoria.block.SparkReactorBlockEntity;
 import com.effecoria.content.ModBlocks;
 
@@ -18,12 +20,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
- * BFS along {@code phi_bus} to find a supplying Heart/Spark and hop distance.
+ * BFS along {@code phi_bus} to find a supplying Heart/Spark/Forge and hop distance.
+ * Touching a Heart/Forge hull part counts as touching the controller core.
  */
 public final class PhiBusNetwork {
     public static final int MAX_HOPS = 64;
 
-    public record Source(float powerFactor, int hops) {}
+    public record Source(float powerFactor, int hops, @javax.annotation.Nullable PhiPowerProvider injector) {}
 
     private PhiBusNetwork() {}
 
@@ -46,16 +49,11 @@ public final class PhiBusNetwork {
             if (hops > MAX_HOPS) {
                 continue;
             }
-            // Adjacent power injectors (Heart / Spark)
             for (Direction dir : Direction.values()) {
                 BlockPos adj = cur.relative(dir);
-                BlockEntity be = level.getBlockEntity(adj);
-                if (be instanceof HeartReactorBlockEntity heart && heart.supplying()) {
-                    best = better(best, heart.powerFactor(), hops);
-                } else if (be instanceof ForgeReactorBlockEntity forge && forge.supplying()) {
-                    best = better(best, forge.powerFactor(), hops);
-                } else if (be instanceof SparkReactorBlockEntity spark && spark.supplying()) {
-                    best = better(best, spark.powerFactor(), hops);
+                PhiPowerProvider injector = resolveInjector(level, adj);
+                if (injector != null && injector.supplying()) {
+                    best = better(best, injector, hops);
                 }
             }
             if (hops >= MAX_HOPS) {
@@ -77,10 +75,41 @@ public final class PhiBusNetwork {
         return best;
     }
 
-    private static Source better(@javax.annotation.Nullable Source cur, float factor, int hops) {
-        float attenuated = Math.max(0.25f, factor * (1f - 0.05f * hops));
+    /**
+     * Spark / Heart core / Forge core, or a multiblock hull part that points at its controller.
+     */
+    @javax.annotation.Nullable
+    public static PhiPowerProvider resolveInjector(Level level, BlockPos pos) {
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof SparkReactorBlockEntity spark) {
+            return spark;
+        }
+        if (be instanceof HeartReactorBlockEntity heart) {
+            return heart;
+        }
+        if (be instanceof ForgeReactorBlockEntity forge) {
+            return forge;
+        }
+        if (be instanceof HeartReactorPartBlockEntity part && part.getControllerPos() != null) {
+            BlockEntity core = level.getBlockEntity(part.getControllerPos());
+            if (core instanceof HeartReactorBlockEntity heart) {
+                return heart;
+            }
+        }
+        if (be instanceof ForgeReactorPartBlockEntity part && part.getControllerPos() != null) {
+            BlockEntity core = level.getBlockEntity(part.getControllerPos());
+            if (core instanceof ForgeReactorBlockEntity forge) {
+                return forge;
+            }
+        }
+        return null;
+    }
+
+    private static Source better(
+            @javax.annotation.Nullable Source cur, PhiPowerProvider injector, int hops) {
+        float attenuated = Math.max(0.25f, injector.powerFactor() * (1f - 0.05f * hops));
         if (cur == null || attenuated > cur.powerFactor()) {
-            return new Source(attenuated, hops);
+            return new Source(attenuated, hops, injector);
         }
         return cur;
     }

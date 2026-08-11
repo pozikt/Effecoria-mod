@@ -1,0 +1,8 @@
+{
+  "id": "effecoria:plasma_turret",
+  "era": 4,
+  "icon": "effecoria:plasma_turret",
+  "status": "available",
+  "requires": ["effecoria:turret_mount"],
+  "display_unlocks": ["autonomous_fire", "phi_drain"]
+}

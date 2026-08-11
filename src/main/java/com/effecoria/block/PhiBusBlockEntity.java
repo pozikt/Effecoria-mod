@@ -43,6 +43,18 @@ public final class PhiBusBlockEntity extends BlockEntity implements PhiPowerProv
         return supplying() ? cachedFactor : 0f;
     }
 
+    @Override
+    public boolean drainFuel(int ticks) {
+        if (!supplying() || ticks <= 0 || level == null) {
+            return false;
+        }
+        PhiBusNetwork.Source source = PhiBusNetwork.findSource(level, worldPosition);
+        if (source == null || source.injector() == null) {
+            return false;
+        }
+        return source.injector().drainFuel(ticks);
+    }
+
     public static void serverTick(Level level, BlockPos pos, BlockState state, PhiBusBlockEntity be) {
         if (be.refreshCooldown > 0) {
             be.refreshCooldown--;

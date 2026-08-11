@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "M": { "item": "effecoria:mithril_ingot" },
+    "F": { "item": "effecoria:resonance_focus" },
+    "P": { "item": "effecoria:phi_paper" }
+  },
+  "pattern": [" M ", "PFP", " M "],
+  "result": { "count": 1, "id": "effecoria:mental_turret" }
+}

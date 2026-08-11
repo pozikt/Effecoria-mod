@@ -1,0 +1,8 @@
+{
+  "id": "effecoria:turret_mount",
+  "era": 4,
+  "icon": "effecoria:turret_mount",
+  "status": "available",
+  "requires": ["effecoria:heart_reactor"],
+  "display_unlocks": ["turret_assembly", "phi_power_intake"]
+}

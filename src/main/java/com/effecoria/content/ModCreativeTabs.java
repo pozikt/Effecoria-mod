@@ -153,6 +153,13 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PHI_STEEL_INGOT.get());
                         output.accept(ModItems.OMEGA_DUST.get());
                         output.accept(ModItems.PHI_BUS.get());
+                        output.accept(ModItems.TURRET_MOUNT.get());
+                        output.accept(ModItems.PLASMA_TURRET.get());
+                        output.accept(ModItems.KINETIC_TURRET.get());
+                        output.accept(ModItems.MENTAL_TURRET.get());
+                        output.accept(ModItems.SPATIAL_TURRET.get());
+                        output.accept(ModItems.OMEGA_TURRET.get());
+                        output.accept(ModItems.MITHRIL_BOLT.get());
                         output.accept(ModItems.ESSENCE_ALEMBIC.get());
                         output.accept(ModItems.POTION_PHI_TONIC.get());
                         output.accept(ModItems.POTION_PHI_RESONANCE.get());

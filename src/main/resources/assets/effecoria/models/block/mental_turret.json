@@ -1,0 +1,8 @@
+﻿{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "effecoria:block/mental_turret_top",
+    "front": "effecoria:block/mental_turret_front",
+    "side": "effecoria:block/mental_turret_side"
+  }
+}
