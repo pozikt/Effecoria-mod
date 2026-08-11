@@ -31,6 +31,8 @@ import com.effecoria.block.HeartReactorPartBlock;
 import com.effecoria.block.ForgeReactorBlock;
 import com.effecoria.block.ForgeReactorPartBlock;
 import com.effecoria.block.PhiBusBlock;
+import com.effecoria.block.PhiCrusherBlock;
+import com.effecoria.block.PhiCrusherHopperBlock;
 import com.effecoria.block.PhiTurretBlock;
 import com.effecoria.block.TurretMountBlock;
 import com.effecoria.block.SubspacePortalBlock;
@@ -236,6 +238,16 @@ public final class ModBlocks {
                     .strength(1.5f, 6f)
                     .sound(ModSoundTypes.PHI_STONE)
                     .lightLevel(state -> 7)));
+
+    /** Coarse crush of Φ-stone. */
+    public static final DeferredBlock<Block> PHI_COBBLE = BLOCKS.register(
+            "phi_cobble",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .requiresCorrectToolForDrops()
+                    .strength(1.6f, 6f)
+                    .sound(ModSoundTypes.PHI_STONE)
+                    .lightLevel(state -> 4)));
 
     /** Φ-saturated earth — glows and slowly converts dirt / grass. */
     public static final DeferredBlock<PhiFieldBlock> PHI_DIRT = BLOCKS.register(
@@ -935,6 +947,28 @@ public final class ModBlocks {
                     .strength(1.8f, 4f)
                     .sound(SoundType.METAL)
                     .lightLevel(state -> 5)));
+
+    /** Era III Φ-crusher base — needs hopper above to form. */
+    public static final DeferredBlock<PhiCrusherBlock> PHI_CRUSHER = BLOCKS.register(
+            "phi_crusher",
+            () -> new PhiCrusherBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(3.0f, 6f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> state.getValue(PhiCrusherBlock.LIT) ? 8 : 0)
+                    .noOcclusion()));
+
+    /** Era III Φ-crusher hopper — place on crusher base. */
+    public static final DeferredBlock<PhiCrusherHopperBlock> PHI_CRUSHER_HOPPER = BLOCKS.register(
+            "phi_crusher_hopper",
+            () -> new PhiCrusherHopperBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(2.5f, 5f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> state.getValue(PhiCrusherHopperBlock.LIT) ? 6 : 0)
+                    .noOcclusion()));
 
     private static DeferredBlock<Block> registerOre(
             String name, MapColor color, float hardness, float resistance, SoundType sound) {

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": { "item": "effecoria:reactor_casing" },
+    "L": { "item": "effecoria:lead_ingot" },
+    "M": { "item": "effecoria:mithril_ingot" },
+    "D": { "item": "effecoria:essonite_dust" },
+    "P": { "item": "effecoria:mortar_and_pestle" }
+  },
+  "pattern": ["CLC", "MPM", "CLC"],
+  "result": { "count": 1, "id": "effecoria:phi_crusher" }
+}

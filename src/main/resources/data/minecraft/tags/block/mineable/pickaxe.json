@@ -16,6 +16,7 @@
                    "effecoria:essonite_dripstone_block",
                    "effecoria:essonite_pointed",
                    "effecoria:phi_stone",
+                   "effecoria:phi_cobble",
                    "effecoria:parched_sandstone",
                    "effecoria:vitrified_dirt",
                    "effecoria:vitrified_stone",
@@ -48,6 +49,8 @@
                    "effecoria:kinetic_turret",
                    "effecoria:spatial_turret",
                    "effecoria:mental_turret",
-                   "effecoria:omega_turret"
+                   "effecoria:omega_turret",
+                   "effecoria:phi_crusher",
+                   "effecoria:phi_crusher_hopper"
                ]
 }

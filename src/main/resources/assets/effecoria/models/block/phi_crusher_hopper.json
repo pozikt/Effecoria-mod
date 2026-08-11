@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/hopper",
+  "textures": {
+    "particle": "effecoria:block/phi_crusher_hopper_side",
+    "top": "effecoria:block/phi_crusher_hopper_top",
+    "side": "effecoria:block/phi_crusher_hopper_side",
+    "inside": "effecoria:block/phi_crusher_hopper_inside"
+  }
+}

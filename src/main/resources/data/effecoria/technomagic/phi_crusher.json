@@ -1,0 +1,15 @@
+{
+  "id": "effecoria:phi_crusher",
+  "era": 3,
+  "icon": "effecoria:phi_crusher",
+  "status": "available",
+  "requires": [
+    "effecoria:mortar_and_pestle",
+    "effecoria:spark_reactor"
+  ],
+  "display_unlocks": [
+    "effecoria:phi_crusher_hopper",
+    "effecoria:lead_foil",
+    "effecoria:phi_stone_grit"
+  ]
+}

@@ -56,6 +56,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.VITRIFIED_BRANCHES.get());
                         output.accept(ModItems.VITRIFIED_GEYSER_CRACK.get());
                         output.accept(ModItems.PHI_STONE.get());
+                        output.accept(ModItems.PHI_COBBLE.get());
                         output.accept(ModItems.PHI_DIRT.get());
                         output.accept(ModItems.PHI_GRASS.get());
                         output.accept(ModItems.ESSONITE_CRYSTAL.get());
@@ -152,6 +153,16 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.FIREFLOWER.get());
                         output.accept(ModItems.PHI_STEEL_INGOT.get());
                         output.accept(ModItems.OMEGA_DUST.get());
+                        output.accept(ModItems.PHI_STONE_GRIT.get());
+                        output.accept(ModItems.BONE_GRIT.get());
+                        output.accept(ModItems.PHI_BONE_PASTE.get());
+                        output.accept(ModItems.PHI_WOOD_SHAVINGS.get());
+                        output.accept(ModItems.PHI_FIBER.get());
+                        output.accept(ModItems.OBSIDIAN_GRIT.get());
+                        output.accept(ModItems.OMEGA_NUGGET.get());
+                        output.accept(ModItems.SOUL_SHARD.get());
+                        output.accept(ModItems.LEAD_FOIL.get());
+                        output.accept(ModItems.OMEGA_WASTE.get());
                         output.accept(ModItems.PHI_BUS.get());
                         output.accept(ModItems.TURRET_MOUNT.get());
                         output.accept(ModItems.PLASMA_TURRET.get());
@@ -159,6 +170,8 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.MENTAL_TURRET.get());
                         output.accept(ModItems.SPATIAL_TURRET.get());
                         output.accept(ModItems.OMEGA_TURRET.get());
+                        output.accept(ModItems.PHI_CRUSHER.get());
+                        output.accept(ModItems.PHI_CRUSHER_HOPPER.get());
                         output.accept(ModItems.MITHRIL_BOLT.get());
                         output.accept(ModItems.ESSENCE_ALEMBIC.get());
                         output.accept(ModItems.POTION_PHI_TONIC.get());

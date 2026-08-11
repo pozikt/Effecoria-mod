@@ -121,6 +121,10 @@ public final class PhiPower {
             if (state.is(ModBlocks.HEART_REACTOR_PART.get()) || state.is(ModBlocks.FORGE_REACTOR_PART.get())) {
                 continue;
             }
+            // Φ-bus is a conductive cable — power ray should not be blocked by the cable itself.
+            if (state.is(ModBlocks.PHI_BUS.get())) {
+                continue;
+            }
             if (state.canOcclude() && state.isCollisionShapeFullBlock(level, check)) {
                 return false;
             }

@@ -35,6 +35,7 @@ import com.effecoria.client.gui.alchemy.SparkReactorScreen;
 import com.effecoria.client.gui.alchemy.HeartReactorScreen;
 import com.effecoria.client.gui.alchemy.ForgeReactorScreen;
 import com.effecoria.client.gui.alchemy.PhiTurretScreen;
+import com.effecoria.client.gui.alchemy.PhiCrusherScreen;
 import com.effecoria.client.render.PhiConstructRenderer;
 import com.effecoria.client.render.VitrifiedGolemRenderer;
 import com.effecoria.content.ModBlocks;
@@ -68,6 +69,7 @@ public final class EffecoriaClient {
         event.register(ModMenus.HEART_REACTOR.get(), HeartReactorScreen::new);
         event.register(ModMenus.FORGE_REACTOR.get(), ForgeReactorScreen::new);
         event.register(ModMenus.PHI_TURRET.get(), PhiTurretScreen::new);
+        event.register(ModMenus.PHI_CRUSHER.get(), PhiCrusherScreen::new);
         event.register(ModMenus.ALEMBIC.get(), AlembicScreen::new);
         event.register(ModMenus.IMPRINTER.get(), ImprinterScreen::new);
         event.register(ModMenus.SHAFT_LATHE.get(), FormSelectScreen::new);
@@ -99,6 +101,7 @@ public final class EffecoriaClient {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_SNARE_VINE.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_GLASS.get(), RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_BUS.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_CRUSHER_HOPPER.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.PHI_TORCH.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.ESSONITE_POINTED.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.BLOOD_FLUID.get(), RenderType.translucent());

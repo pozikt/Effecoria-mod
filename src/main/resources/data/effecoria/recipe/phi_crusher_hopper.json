@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": { "item": "effecoria:lead_ingot" },
+    "M": { "item": "effecoria:mithril_wire" },
+    "I": { "item": "minecraft:iron_ingot" }
+  },
+  "pattern": ["L L", "LML", " I "],
+  "result": { "count": 1, "id": "effecoria:phi_crusher_hopper" }
+}

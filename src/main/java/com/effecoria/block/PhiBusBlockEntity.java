@@ -64,14 +64,18 @@ public final class PhiBusBlockEntity extends BlockEntity implements PhiPowerProv
         PhiBusNetwork.Source source = PhiBusNetwork.findSource(level, pos);
         boolean nextEnergized = source != null;
         float nextFactor = source != null ? source.powerFactor() : 0f;
+        // Keep wire arms in sync (machines placed nearby, world reload, etc.).
+        BlockState connected = PhiBusBlock.withConnections(state, level, pos);
+        boolean powered = connected.getValue(PhiBusBlock.POWERED);
+        BlockState nextState = connected.setValue(PhiBusBlock.POWERED, nextEnergized);
+
         if (nextEnergized != be.energized || Math.abs(nextFactor - be.cachedFactor) > 0.01f) {
             be.energized = nextEnergized;
             be.cachedFactor = nextFactor;
             be.setChanged();
-            boolean powered = state.getValue(PhiBusBlock.POWERED);
-            if (powered != nextEnergized) {
-                level.setBlock(pos, state.setValue(PhiBusBlock.POWERED, nextEnergized), Block.UPDATE_CLIENTS);
-            }
+        }
+        if (!nextState.equals(state) || powered != nextEnergized) {
+            level.setBlock(pos, nextState, Block.UPDATE_CLIENTS);
         }
     }
 

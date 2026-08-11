@@ -79,6 +79,7 @@ public final class TechnomagicDiscoveryEvents {
         discoverIfHas(player, ModItems.MENTAL_TURRET.get(), "mental_turret");
         discoverIfHas(player, ModItems.SPATIAL_TURRET.get(), "spatial_turret");
         discoverIfHas(player, ModItems.OMEGA_TURRET.get(), "omega_turret");
+        discoverIfHas(player, ModItems.PHI_CRUSHER.get(), "phi_crusher");
         discoverIfHas(player, ModItems.ESSENCE_ALEMBIC.get(), "essence_alembic");
         discoverIfHas(player, ModItems.PHI_CELL.get(), "phi_cell");
         discoverIfHas(player, ModItems.RESONANCE_FOCUS.get(), "resonance_focus");

@@ -20,6 +20,8 @@ import com.effecoria.block.HeartReactorPartBlockEntity;
 import com.effecoria.block.ForgeReactorBlockEntity;
 import com.effecoria.block.ForgeReactorPartBlockEntity;
 import com.effecoria.block.PhiBusBlockEntity;
+import com.effecoria.block.PhiCrusherBlockEntity;
+import com.effecoria.block.PhiCrusherHopperBlockEntity;
 import com.effecoria.block.PhiTurretBlockEntity;
 import com.effecoria.block.SubspacePortalBlockEntity;
 import com.effecoria.block.WhisperingSpireVentBlockEntity;
@@ -94,6 +96,19 @@ public final class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register(
                     "phi_turret",
                     () -> BlockEntityType.Builder.of(PhiTurretBlockEntity::new, ModBlocks.TURRET_MOUNT.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiCrusherBlockEntity>> PHI_CRUSHER =
+            BLOCK_ENTITY_TYPES.register(
+                    "phi_crusher",
+                    () -> BlockEntityType.Builder.of(PhiCrusherBlockEntity::new, ModBlocks.PHI_CRUSHER.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiCrusherHopperBlockEntity>>
+            PHI_CRUSHER_HOPPER = BLOCK_ENTITY_TYPES.register(
+                    "phi_crusher_hopper",
+                    () -> BlockEntityType.Builder.of(
+                                    PhiCrusherHopperBlockEntity::new, ModBlocks.PHI_CRUSHER_HOPPER.get())
                             .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EssenceAlembicBlockEntity>> ESSENCE_ALEMBIC =

@@ -75,6 +75,8 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("vitrified_geyser_crack", ModBlocks.VITRIFIED_GEYSER_CRACK);
     public static final DeferredItem<BlockItem> PHI_STONE =
             ITEMS.registerSimpleBlockItem("phi_stone", ModBlocks.PHI_STONE);
+    public static final DeferredItem<BlockItem> PHI_COBBLE =
+            ITEMS.registerSimpleBlockItem("phi_cobble", ModBlocks.PHI_COBBLE);
     public static final DeferredItem<BlockItem> PHI_DIRT =
             ITEMS.registerSimpleBlockItem("phi_dirt", ModBlocks.PHI_DIRT);
     public static final DeferredItem<BlockItem> PHI_GRASS =
@@ -290,6 +292,15 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> OMEGA_TURRET = ITEMS.register(
             "omega_turret",
             () -> new HintBlockItem(ModBlocks.OMEGA_TURRET.get(), new Item.Properties(), "tooltip.effecoria.omega_turret"));
+    public static final DeferredItem<BlockItem> PHI_CRUSHER = ITEMS.register(
+            "phi_crusher",
+            () -> new HintBlockItem(ModBlocks.PHI_CRUSHER.get(), new Item.Properties(), "tooltip.effecoria.phi_crusher"));
+    public static final DeferredItem<BlockItem> PHI_CRUSHER_HOPPER = ITEMS.register(
+            "phi_crusher_hopper",
+            () -> new HintBlockItem(
+                    ModBlocks.PHI_CRUSHER_HOPPER.get(),
+                    new Item.Properties(),
+                    "tooltip.effecoria.phi_crusher_hopper"));
     public static final DeferredItem<Item> MITHRIL_BOLT = ITEMS.registerSimpleItem("mithril_bolt");
     public static final DeferredItem<BlockItem> ESSENCE_ALEMBIC =
             ITEMS.registerSimpleBlockItem("essence_alembic", ModBlocks.ESSENCE_ALEMBIC);
@@ -318,6 +329,16 @@ public final class ModItems {
     public static final DeferredItem<Item> FIREFLOWER = ITEMS.registerSimpleItem("fireflower");
     public static final DeferredItem<Item> PHI_STEEL_INGOT = ITEMS.registerSimpleItem("phi_steel_ingot");
     public static final DeferredItem<Item> OMEGA_DUST = ITEMS.registerSimpleItem("omega_dust");
+    public static final DeferredItem<Item> PHI_STONE_GRIT = ITEMS.registerSimpleItem("phi_stone_grit");
+    public static final DeferredItem<Item> BONE_GRIT = ITEMS.registerSimpleItem("bone_grit");
+    public static final DeferredItem<Item> PHI_BONE_PASTE = ITEMS.registerSimpleItem("phi_bone_paste");
+    public static final DeferredItem<Item> PHI_WOOD_SHAVINGS = ITEMS.registerSimpleItem("phi_wood_shavings");
+    public static final DeferredItem<Item> PHI_FIBER = ITEMS.registerSimpleItem("phi_fiber");
+    public static final DeferredItem<Item> OBSIDIAN_GRIT = ITEMS.registerSimpleItem("obsidian_grit");
+    public static final DeferredItem<Item> OMEGA_NUGGET = ITEMS.registerSimpleItem("omega_nugget");
+    public static final DeferredItem<Item> SOUL_SHARD = ITEMS.registerSimpleItem("soul_shard");
+    public static final DeferredItem<Item> LEAD_FOIL = ITEMS.registerSimpleItem("lead_foil");
+    public static final DeferredItem<Item> OMEGA_WASTE = ITEMS.registerSimpleItem("omega_waste");
 
     public static final DeferredItem<Item> GOLD_FILTER = ITEMS.register(
             "gold_filter", () -> new GoldFilterItem(new Item.Properties()));

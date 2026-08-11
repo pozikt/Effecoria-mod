@@ -1,6 +1,134 @@
 {
-  "variants": {
-    "powered=false": { "model": "effecoria:block/phi_bus" },
-    "powered=true": { "model": "effecoria:block/phi_bus_on" }
-  }
+  "multipart": [
+    {
+      "when": {
+        "powered": "false"
+      },
+      "apply": {
+        "model": "effecoria:block/phi_bus_core"
+      }
+    },
+    {
+      "when": {
+        "powered": "false",
+        "north": "true"
+      },
+      "apply": {
+        "model": "effecoria:block/phi_bus_arm"
+      }
+    },
+    {
+      "when": {
+        "powered": "false",
+        "east": "true"
+      },
+      "apply": {
+        "model": "effecoria:block/phi_bus_arm",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "powered": "false",
+        "south": "true"
+      },
+      "apply": {
+        "model": "effecoria:block/phi_bus_arm",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "powered": "false",
+        "west": "true"
+      },
+      "apply": {
+        "model": "effecoria:block/phi_bus_arm",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "powered": "false",
+        "up": "true"
+      },
+      "apply": {
+        "model": "effecoria:block/phi_bus_arm_up"
+      }
+    },
+    {
+      "when": {
+        "powered": "false",
+        "down": "true"
+      },
+      "apply": {
+        "model": "effecoria:block/phi_bus_arm_down"
+      }
+    },
+    {
+      "when": {
+        "powered": "true"
+      },
+      "apply": {
+        "model": "effecoria:block/phi_bus_core_on"
+      }
+    },
+    {
+      "when": {
+        "powered": "true",
+        "north": "true"
+      },
+      "apply": {
+        "model": "effecoria:block/phi_bus_arm_on"
+      }
+    },
+    {
+      "when": {
+        "powered": "true",
+        "east": "true"
+      },
+      "apply": {
+        "model": "effecoria:block/phi_bus_arm_on",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "powered": "true",
+        "south": "true"
+      },
+      "apply": {
+        "model": "effecoria:block/phi_bus_arm_on",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "powered": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "effecoria:block/phi_bus_arm_on",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "powered": "true",
+        "up": "true"
+      },
+      "apply": {
+        "model": "effecoria:block/phi_bus_arm_up_on"
+      }
+    },
+    {
+      "when": {
+        "powered": "true",
+        "down": "true"
+      },
+      "apply": {
+        "model": "effecoria:block/phi_bus_arm_down_on"
+      }
+    }
+  ]
 }

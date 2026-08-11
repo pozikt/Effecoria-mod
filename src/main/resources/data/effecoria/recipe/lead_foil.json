@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "effecoria:lead_nugget" },
+    { "item": "effecoria:lead_nugget" },
+    { "item": "effecoria:lead_nugget" },
+    { "item": "effecoria:lead_nugget" }
+  ],
+  "result": { "count": 1, "id": "effecoria:lead_foil" }
+}

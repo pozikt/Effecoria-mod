@@ -19,7 +19,7 @@ See also [ROADMAP.md](ROADMAP.md) Stage IV.
 |-----|--------|--------|
 | I — Hearth | Torch, campfire heat, crucible, mortar | **Playable** |
 | II — Workshop | Burner, Φ-furnace, glass/flasks, alembic, filters, cell, focus | **Playable** |
-| III — Imprint | Ψ-imprinter, golem / telegraph, artifact craft, seals, jewelry | **Playable** |
+| III — Imprint | Ψ-imprinter, golem / telegraph, artifact craft, seals, jewelry, **Φ-crusher** | **Playable** |
 | IV — Reactors | Spark, Heart 3×3×3, Φ-bus, Forge 3×4×3, **Φ-turrets** | **Playable** |
 | V — Geo | Geo wells, climate array, portal gate | Catalog `planned` |
 
@@ -69,6 +69,17 @@ Drain via `PhiPower.consumeTick(load)` at the mount (Spark/Heart/Forge; bus drai
 
 Arm in mount GUI. Targets hostiles with LOS from the barrel cell. Overheat after sustained fire.
 
+## Era III Φ-crusher (2×1×1)
+
+Two items: **`phi_crusher`** base (BE + GUI) + **`phi_crusher_hopper`** on top. Same facing → `FORMED`. Input from above (hopper), outputs from sides/bottom.
+
+| Mode | Ticks | Power load / tick |
+|------|-------|-------------------|
+| COARSE | 40 | 1 |
+| FINE | 160 | 3 |
+
+Power via `PhiPower.consumeTick` or optional Φ-cell in the drive slot. Heat pauses at ≥100; void-obsidian crush raises Ω meter — at ≥20, RMB `lead_foil` on the base clears it and drops `omega_waste`. Working (`LIT`) machines shake the camera lightly within 2 blocks.
+
 ## Flow
 
 ```mermaid
@@ -88,6 +99,6 @@ flowchart LR
 ## Data
 
 - Catalog: `data/effecoria/technomagic/*.json`
-- Code: `HeartMultiblock`, `ForgeMultiblock`, `*ReactorBlockEntity`, `PhiBusNetwork`, `PhiPowerHubs`, `TurretMountBlock`, `PhiTurretBlock` (barrel), `PhiTurretBlockEntity`, `TurretAssembly`, `TurretKind`
+- Code: `HeartMultiblock`, `ForgeMultiblock`, `*ReactorBlockEntity`, `PhiBusNetwork`, `PhiPowerHubs`, `TurretMountBlock`, `PhiTurretBlock` (barrel), `PhiTurretBlockEntity`, `TurretAssembly`, `TurretKind`, `PhiCrusherBlock`, `PhiCrusherHopperBlock`, `PhiCrusherBlockEntity`, `CrusherRecipes`
 - `PhiPower` local scan radius 8; Forge hubs via `PhiPowerHubs` up to 32; `drainFuel` on providers
 - Gates: `TechnomagicGates` / `TechnomagicProgress`
