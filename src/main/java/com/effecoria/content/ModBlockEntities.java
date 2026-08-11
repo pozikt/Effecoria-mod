@@ -17,6 +17,8 @@ import com.effecoria.block.ShaftLatheBlockEntity;
 import com.effecoria.block.SparkReactorBlockEntity;
 import com.effecoria.block.HeartReactorBlockEntity;
 import com.effecoria.block.HeartReactorPartBlockEntity;
+import com.effecoria.block.ForgeReactorBlockEntity;
+import com.effecoria.block.ForgeReactorPartBlockEntity;
 import com.effecoria.block.PhiBusBlockEntity;
 import com.effecoria.block.SubspacePortalBlockEntity;
 import com.effecoria.block.WhisperingSpireVentBlockEntity;
@@ -67,6 +69,19 @@ public final class ModBlockEntities {
                     "heart_reactor_part",
                     () -> BlockEntityType.Builder.of(
                                     HeartReactorPartBlockEntity::new, ModBlocks.HEART_REACTOR_PART.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ForgeReactorBlockEntity>> FORGE_REACTOR_CORE =
+            BLOCK_ENTITY_TYPES.register(
+                    "forge_reactor_core",
+                    () -> BlockEntityType.Builder.of(ForgeReactorBlockEntity::new, ModBlocks.FORGE_REACTOR_CORE.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ForgeReactorPartBlockEntity>>
+            FORGE_REACTOR_PART = BLOCK_ENTITY_TYPES.register(
+                    "forge_reactor_part",
+                    () -> BlockEntityType.Builder.of(
+                                    ForgeReactorPartBlockEntity::new, ModBlocks.FORGE_REACTOR_PART.get())
                             .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiBusBlockEntity>> PHI_BUS =

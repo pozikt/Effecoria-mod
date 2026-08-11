@@ -68,6 +68,10 @@ public final class PhiPower {
                 }
             }
         }
+        PhiPowerProvider hub = PhiPowerHubs.findBestHub(level, consumerPos);
+        if (hub != null && hub.powerFactor() > bestFactor) {
+            best = hub;
+        }
         return best;
     }
 

@@ -255,8 +255,16 @@ public final class ModItems {
             "heart_reactor_core",
             () -> new HintBlockItem(
                     ModBlocks.HEART_REACTOR_CORE.get(), new Item.Properties(), "tooltip.effecoria.heart_reactor"));
+    public static final DeferredItem<BlockItem> FORGE_REACTOR_CORE = ITEMS.register(
+            "forge_reactor_core",
+            () -> new HintBlockItem(
+                    ModBlocks.FORGE_REACTOR_CORE.get(), new Item.Properties(), "tooltip.effecoria.forge_reactor"));
     public static final DeferredItem<BlockItem> REACTOR_CASING =
             ITEMS.registerSimpleBlockItem("reactor_casing", ModBlocks.REACTOR_CASING);
+    public static final DeferredItem<BlockItem> PURIFIED_OBSIDIAN =
+            ITEMS.registerSimpleBlockItem("purified_obsidian", ModBlocks.PURIFIED_OBSIDIAN);
+    public static final DeferredItem<BlockItem> OMEGA_TAINTED_OBSIDIAN =
+            ITEMS.registerSimpleBlockItem("omega_tainted_obsidian", ModBlocks.OMEGA_TAINTED_OBSIDIAN);
     public static final DeferredItem<BlockItem> PHI_BUS = ITEMS.register(
             "phi_bus",
             () -> new HintBlockItem(ModBlocks.PHI_BUS.get(), new Item.Properties(), "tooltip.effecoria.phi_bus"));
@@ -281,6 +289,12 @@ public final class ModItems {
     /** Forbidden Ω-reagent — scooped from Eldritch Blood puddles in the Scar. */
     public static final DeferredItem<Item> OMEGA_BLOOD_VIAL = ITEMS.register(
             "omega_blood_vial", () -> new Item(new Item.Properties().stacksTo(16)));
+    public static final DeferredItem<Item> LONVER_BLOOD_VIAL = ITEMS.register(
+            "lonver_blood_vial", () -> new Item(new Item.Properties().stacksTo(16)));
+    public static final DeferredItem<Item> PHI_NECTAR = ITEMS.registerSimpleItem("phi_nectar");
+    public static final DeferredItem<Item> FIREFLOWER = ITEMS.registerSimpleItem("fireflower");
+    public static final DeferredItem<Item> PHI_STEEL_INGOT = ITEMS.registerSimpleItem("phi_steel_ingot");
+    public static final DeferredItem<Item> OMEGA_DUST = ITEMS.registerSimpleItem("omega_dust");
 
     public static final DeferredItem<Item> GOLD_FILTER = ITEMS.register(
             "gold_filter", () -> new GoldFilterItem(new Item.Properties()));

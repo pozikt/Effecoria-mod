@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "effecoria:omega_crystal_shard" },
+    { "item": "effecoria:void_obsidian" }
+  ],
+  "result": { "count": 1, "id": "effecoria:omega_tainted_obsidian" }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "H": { "item": "effecoria:heart_reactor_core" },
+    "L": { "item": "effecoria:lead_block" },
+    "S": { "item": "effecoria:star_essonite" },
+    "M": { "item": "effecoria:mithril_ingot" },
+    "V": { "item": "effecoria:void_obsidian" }
+  },
+  "pattern": ["LML", "VHV", "LSL"],
+  "result": { "count": 1, "id": "effecoria:forge_reactor_core" }
+}

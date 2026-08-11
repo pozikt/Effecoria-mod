@@ -25,6 +25,10 @@ public final class ReactorHumClient {
         ensure(pos, ReactorHumSoundInstance.Kind.HEART);
     }
 
+    public static void ensureForge(BlockPos pos) {
+        ensure(pos, ReactorHumSoundInstance.Kind.FORGE);
+    }
+
     private static void ensure(BlockPos pos, ReactorHumSoundInstance.Kind kind) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.getSoundManager() == null) {

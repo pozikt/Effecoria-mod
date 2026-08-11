@@ -36,6 +36,10 @@
                    "effecoria:mithril_block",
                    "effecoria:heart_reactor_core",
                    "effecoria:heart_reactor_part",
+                   "effecoria:forge_reactor_core",
+                   "effecoria:forge_reactor_part",
+                   "effecoria:purified_obsidian",
+                   "effecoria:omega_tainted_obsidian",
                    "effecoria:reactor_casing",
                    "effecoria:phi_bus",
                    "effecoria:spark_reactor"

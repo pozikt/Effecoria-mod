@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "effecoria:mage_blood_vial" },
+    { "item": "effecoria:pure_essonite" }
+  ],
+  "result": { "count": 1, "id": "effecoria:lonver_blood_vial" }
+}

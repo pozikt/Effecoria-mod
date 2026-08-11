@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import com.effecoria.block.ForgeReactorBlockEntity;
 import com.effecoria.block.HeartReactorBlockEntity;
 import com.effecoria.block.SparkReactorBlockEntity;
 import com.effecoria.content.ModBlocks;
@@ -51,6 +52,8 @@ public final class PhiBusNetwork {
                 BlockEntity be = level.getBlockEntity(adj);
                 if (be instanceof HeartReactorBlockEntity heart && heart.supplying()) {
                     best = better(best, heart.powerFactor(), hops);
+                } else if (be instanceof ForgeReactorBlockEntity forge && forge.supplying()) {
+                    best = better(best, forge.powerFactor(), hops);
                 } else if (be instanceof SparkReactorBlockEntity spark && spark.supplying()) {
                     best = better(best, spark.powerFactor(), hops);
                 }

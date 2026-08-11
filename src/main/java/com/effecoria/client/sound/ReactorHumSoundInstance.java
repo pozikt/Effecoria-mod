@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import com.effecoria.block.ForgeReactorBlock;
 import com.effecoria.block.HeartReactorBlock;
 import com.effecoria.block.SparkReactorBlock;
 import com.effecoria.content.ModBlocks;
@@ -22,7 +23,8 @@ import com.effecoria.content.ModBlocks;
 public final class ReactorHumSoundInstance extends AbstractTickableSoundInstance {
     public enum Kind {
         SPARK(SoundEvents.BEACON_AMBIENT, 0.28f, 1.92f),
-        HEART(SoundEvents.BEACON_AMBIENT, 0.62f, 0.36f);
+        HEART(SoundEvents.BEACON_AMBIENT, 0.62f, 0.36f),
+        FORGE(SoundEvents.BEACON_AMBIENT, 0.75f, 0.22f);
 
         private final SoundEvent sound;
         private final float volume;
@@ -78,6 +80,7 @@ public final class ReactorHumSoundInstance extends AbstractTickableSoundInstance
         return switch (kind) {
             case SPARK -> state.is(ModBlocks.SPARK_REACTOR.get()) && state.getValue(SparkReactorBlock.LIT);
             case HEART -> state.is(ModBlocks.HEART_REACTOR_CORE.get()) && state.getValue(HeartReactorBlock.LIT);
+            case FORGE -> state.is(ModBlocks.FORGE_REACTOR_CORE.get()) && state.getValue(ForgeReactorBlock.LIT);
         };
     }
 }

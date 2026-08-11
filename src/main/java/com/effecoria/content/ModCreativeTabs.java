@@ -143,7 +143,15 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.ESSENCE_BURNER.get());
                         output.accept(ModItems.SPARK_REACTOR.get());
                         output.accept(ModItems.HEART_REACTOR_CORE.get());
+                        output.accept(ModItems.FORGE_REACTOR_CORE.get());
                         output.accept(ModItems.REACTOR_CASING.get());
+                        output.accept(ModItems.PURIFIED_OBSIDIAN.get());
+                        output.accept(ModItems.OMEGA_TAINTED_OBSIDIAN.get());
+                        output.accept(ModItems.LONVER_BLOOD_VIAL.get());
+                        output.accept(ModItems.PHI_NECTAR.get());
+                        output.accept(ModItems.FIREFLOWER.get());
+                        output.accept(ModItems.PHI_STEEL_INGOT.get());
+                        output.accept(ModItems.OMEGA_DUST.get());
                         output.accept(ModItems.PHI_BUS.get());
                         output.accept(ModItems.ESSENCE_ALEMBIC.get());
                         output.accept(ModItems.POTION_PHI_TONIC.get());

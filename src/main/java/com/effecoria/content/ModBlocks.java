@@ -28,6 +28,8 @@ import com.effecoria.block.RottenMossBlock;
 import com.effecoria.block.SparkReactorBlock;
 import com.effecoria.block.HeartReactorBlock;
 import com.effecoria.block.HeartReactorPartBlock;
+import com.effecoria.block.ForgeReactorBlock;
+import com.effecoria.block.ForgeReactorPartBlock;
 import com.effecoria.block.PhiBusBlock;
 import com.effecoria.block.SubspacePortalBlock;
 import com.effecoria.block.VitrifiedBranchesBlock;
@@ -736,6 +738,47 @@ public final class ModBlocks {
                     .noLootTable()
                     .isViewBlocking((state, level, pos) -> true)
                     .isSuffocating((state, level, pos) -> true)));
+
+    /** Era IV Forge Reactor («Кузница») — 3×4×3 industrial controller. */
+    public static final DeferredBlock<ForgeReactorBlock> FORGE_REACTOR_CORE = BLOCKS.register(
+            "forge_reactor_core",
+            () -> new ForgeReactorBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.GOLD)
+                    .strength(5.0f, 10f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> state.getValue(ForgeReactorBlock.LIT) ? 15 : 0)));
+
+    /** Invisible solid cell of an assembled Forge hull (no BlockItem). */
+    public static final DeferredBlock<ForgeReactorPartBlock> FORGE_REACTOR_PART = BLOCKS.register(
+            "forge_reactor_part",
+            () -> new ForgeReactorPartBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.GOLD)
+                    .strength(5.0f, 10f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noLootTable()
+                    .isViewBlocking((state, level, pos) -> true)
+                    .isSuffocating((state, level, pos) -> true)));
+
+    /** Purified void-obsidian product of Forge smelting. */
+    public static final DeferredBlock<Block> PURIFIED_OBSIDIAN = BLOCKS.register(
+            "purified_obsidian",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .strength(50.0f, 1200f)
+                    .sound(SoundType.STONE)
+                    .requiresCorrectToolForDrops()));
+
+    /** Ω-tainted obsidian — cleansed in Forge. */
+    public static final DeferredBlock<Block> OMEGA_TAINTED_OBSIDIAN = BLOCKS.register(
+            "omega_tainted_obsidian",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PURPLE)
+                    .strength(40.0f, 600f)
+                    .sound(SoundType.STONE)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> 3)));
 
     /** Structural shell for Heart Reactor multiblock. */
     public static final DeferredBlock<Block> REACTOR_CASING = BLOCKS.register(
