@@ -14,35 +14,50 @@ import com.effecoria.block.GeoWellPartBlockEntity;
 import com.effecoria.block.HeartReactorBlockEntity;
 import com.effecoria.block.HeartReactorPartBlockEntity;
 import com.effecoria.block.SparkReactorBlockEntity;
+import com.effecoria.content.ModBlockTags;
 import com.effecoria.content.ModBlocks;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * BFS along {@code phi_bus} to find a supplying Heart/Spark/Forge and hop distance.
- * Touching a Heart/Forge hull part counts as touching the controller core.
+ * BFS along Φ-conductors ({@code phi_bus}, mithril, …) to find a supplying injector and hop distance.
+ * Mithril is a Φ-superconductor — hops across it do not attenuate. Only {@code phi_bus} cable adds hop loss.
+ * Touching a Heart/Forge/Geo hull part counts as touching the controller core.
  */
 public final class PhiBusNetwork {
     public static final int MAX_HOPS = 64;
+    /** Attenuation per phi_bus hop (mithril does not count). */
+    public static final float HOP_LOSS = 0.03f;
+    public static final float MIN_ATTENUATION = 0.35f;
 
     public record Source(float powerFactor, int hops, @javax.annotation.Nullable PhiPowerProvider injector) {}
 
     private PhiBusNetwork() {}
 
+    public static boolean isConductor(BlockState state) {
+        return state.is(ModBlockTags.PHI_CONDUCTORS);
+    }
+
+    /** Superconductor cells — carry Φ without hop attenuation. */
+    public static boolean isSuperconductor(BlockState state) {
+        return state.is(ModBlocks.MITHRIL_BLOCK.get());
+    }
+
     @javax.annotation.Nullable
-    public static Source findSource(Level level, BlockPos startBus) {
-        if (!level.getBlockState(startBus).is(ModBlocks.PHI_BUS.get())) {
+    public static Source findSource(Level level, BlockPos start) {
+        if (!isConductor(level.getBlockState(start))) {
             return null;
         }
         Queue<BlockPos> queue = new ArrayDeque<>();
         Map<BlockPos, Integer> dist = new HashMap<>();
         Set<BlockPos> visited = new HashSet<>();
-        queue.add(startBus);
-        dist.put(startBus, 0);
-        visited.add(startBus);
+        queue.add(start);
+        dist.put(start, 0);
+        visited.add(start);
 
         Source best = null;
         while (!queue.isEmpty()) {
@@ -66,11 +81,14 @@ public final class PhiBusNetwork {
                 if (visited.contains(next)) {
                     continue;
                 }
-                if (!level.getBlockState(next).is(ModBlocks.PHI_BUS.get())) {
+                BlockState nextState = level.getBlockState(next);
+                if (!isConductor(nextState)) {
                     continue;
                 }
+                // Only resistive cable hops count; mithril is lossless.
+                int nextHops = isSuperconductor(nextState) ? hops : hops + 1;
                 visited.add(next);
-                dist.put(next, hops + 1);
+                dist.put(next, nextHops);
                 queue.add(next);
             }
         }
@@ -78,7 +96,7 @@ public final class PhiBusNetwork {
     }
 
     /**
-     * Spark / Heart core / Forge core, or a multiblock hull part that points at its controller.
+     * Spark / Heart core / Forge core / Geo core, or a multiblock hull part that points at its controller.
      */
     @javax.annotation.Nullable
     public static PhiPowerProvider resolveInjector(Level level, BlockPos pos) {
@@ -118,7 +136,7 @@ public final class PhiBusNetwork {
 
     private static Source better(
             @javax.annotation.Nullable Source cur, PhiPowerProvider injector, int hops) {
-        float attenuated = Math.max(0.25f, injector.powerFactor() * (1f - 0.05f * hops));
+        float attenuated = Math.max(MIN_ATTENUATION, injector.powerFactor() * (1f - HOP_LOSS * hops));
         if (cur == null || attenuated > cur.powerFactor()) {
             return new Source(attenuated, hops, injector);
         }

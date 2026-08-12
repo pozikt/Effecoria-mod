@@ -183,13 +183,13 @@ public final class PhiBusBlock extends BaseEntityBlock {
                 .setValue(DOWN, canConnectTo(level, pos.below()));
     }
 
-    /** Wire joins other buses, Φ injectors, and any adjacent machine (block entity). */
+    /** Wire joins other conductors, Φ injectors, and any adjacent machine (block entity). */
     public static boolean canConnectTo(Level level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         if (state.isAir()) {
             return false;
         }
-        if (state.is(ModBlocks.PHI_BUS.get())) {
+        if (PhiBusNetwork.isConductor(state)) {
             return true;
         }
         if (PhiBusNetwork.resolveInjector(level, pos) != null) {

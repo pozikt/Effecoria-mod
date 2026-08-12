@@ -21,7 +21,7 @@ See also [ROADMAP.md](ROADMAP.md) Stage IV.
 | II — Workshop | Burner, Φ-furnace, glass/flasks, alembic, filters, cell, focus | **Playable** |
 | III — Imprint | Ψ-imprinter, golem / telegraph, artifact craft, seals, jewelry, **Φ-crusher** | **Playable** |
 | IV — Reactors | Spark, Heart 3×3×3, Φ-bus, Forge 3×4×3, **Φ-turrets** | **Playable** |
-| V — Geo | Geo Well 3×3×3, Climate Array, Portal Gate | **Playable** |
+| V — Geo | Geo Well 3×3×3, Climate Array, mithril-frame Portal | **Playable** |
 
 ## Era IV Heart multiblock (3×3×3)
 
@@ -84,7 +84,7 @@ Assembles like Heart (invisible `geo_well_part` + BER hull). Fuel: charged Φ-ce
 
 **Climate Array** — single block; GUI modes essence dew / mist / rain via `PhiWeatherService.startLocalEvent`; each cast costs Φ-power + cooldown.
 
-**Portal Gate** — place two frames; RMB with `resonance_focus` to link. Walk-in teleport when active and powered (same dimension only).
+**Portal Gate (ETP)** — build a closed **mithril** frame of any shape; place a **`portal_modulator`** touching it. Set XYZ or pick a named **`phi_beacon`**. Open fills the interior with tunnel film. Needs Heart-tier Φ (or higher) via bus/mithril conductors + coolant near the modulator. Destination is a beacon or coordinates — no second portal.
 
 ## Era III Φ-crusher (2×1×1)
 
@@ -125,8 +125,12 @@ flowchart LR
   forge --> geo[geo_well]
   geo --> bus
   geo --> climate[climate_array]
-  geo --> portal[portal_gate]
+  geo --> portal[portal_modulator]
+  mithril[mithril_block] --> portal
+  portal --> film[portal_film]
+  beacon[phi_beacon] --> portal
   spark --> bus
+  bus --> mithril
   bus --> machines[adjacent_machines]
   heart --> turrets[phi_turrets]
   forge --> turrets
@@ -136,6 +140,6 @@ flowchart LR
 ## Data
 
 - Catalog: `data/effecoria/technomagic/*.json`
-- Code: `HeartMultiblock`, `ForgeMultiblock`, `GeoWellMultiblock`, `*ReactorBlockEntity`, `GeoWellBlockEntity`, `ClimateArrayBlockEntity`, `PortalGateBlockEntity`, `PhiBusNetwork`, `PhiPowerHubs`, `TurretMountBlock`, `PhiTurretBlock` (barrel), `PhiTurretBlockEntity`, `TurretAssembly`, `TurretKind`, `PhiCrusherBlock`, `PhiCrusherHopperBlock`, `PhiCrusherBlockEntity`, `CrusherRecipes`
-- `PhiPower` local scan radius 8; Forge hubs via `PhiPowerHubs` up to 32; Geo Well hubs radius 12; `drainFuel` on providers
+- Code: `HeartMultiblock`, `ForgeMultiblock`, `GeoWellMultiblock`, `PortalFrameFinder`, `PhiBeaconIndex`, `*ReactorBlockEntity`, `GeoWellBlockEntity`, `ClimateArrayBlockEntity`, `PortalModulatorBlockEntity`, `PhiBeaconBlockEntity`, `PhiBusNetwork`, `PhiPowerHubs`, `TurretMountBlock`, `PhiTurretBlock` (barrel), `PhiTurretBlockEntity`, `TurretAssembly`, `TurretKind`, `PhiCrusherBlock`, `PhiCrusherHopperBlock`, `PhiCrusherBlockEntity`, `CrusherRecipes`
+- `PhiPower` local scan radius 8; Forge hubs via `PhiPowerHubs` up to 32; Geo Well hubs radius 12; mithril/phi_bus are `phi_conductors`; `drainFuel` on providers
 - Gates: `TechnomagicGates` / `TechnomagicProgress`

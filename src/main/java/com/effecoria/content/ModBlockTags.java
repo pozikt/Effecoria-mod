@@ -18,4 +18,8 @@ public final class ModBlockTags {
 
     /** Φ-field blocks (stone / earth / turf) — spread and ambient glow. */
     public static final TagKey<Block> PHI_FIELD = TagKey.create(Registries.BLOCK, EffecoriaMod.id("phi_field"));
+
+    /** Φ-bus network conductors (cable + mithril frame, etc.). */
+    public static final TagKey<Block> PHI_CONDUCTORS =
+            TagKey.create(Registries.BLOCK, EffecoriaMod.id("phi_conductors"));
 }

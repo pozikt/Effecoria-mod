@@ -23,6 +23,9 @@ import com.effecoria.block.GeoWellBlockEntity;
 import com.effecoria.block.GeoWellPartBlockEntity;
 import com.effecoria.block.ClimateArrayBlockEntity;
 import com.effecoria.block.PortalGateBlockEntity;
+import com.effecoria.block.MithrilBlockEntity;
+import com.effecoria.block.PortalModulatorBlockEntity;
+import com.effecoria.block.PhiBeaconBlockEntity;
 import com.effecoria.block.PhiBusBlockEntity;
 import com.effecoria.block.PhiCrusherBlockEntity;
 import com.effecoria.block.PhiCrusherHopperBlockEntity;
@@ -116,10 +119,29 @@ public final class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(PortalGateBlockEntity::new, ModBlocks.PORTAL_GATE.get())
                             .build(null));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PortalModulatorBlockEntity>> PORTAL_MODULATOR =
+            BLOCK_ENTITY_TYPES.register(
+                    "portal_modulator",
+                    () -> BlockEntityType.Builder.of(
+                                    PortalModulatorBlockEntity::new, ModBlocks.PORTAL_MODULATOR.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiBeaconBlockEntity>> PHI_BEACON =
+            BLOCK_ENTITY_TYPES.register(
+                    "phi_beacon",
+                    () -> BlockEntityType.Builder.of(PhiBeaconBlockEntity::new, ModBlocks.PHI_BEACON.get())
+                            .build(null));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiBusBlockEntity>> PHI_BUS =
             BLOCK_ENTITY_TYPES.register(
                     "phi_bus",
                     () -> BlockEntityType.Builder.of(PhiBusBlockEntity::new, ModBlocks.PHI_BUS.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MithrilBlockEntity>> MITHRIL_BLOCK =
+            BLOCK_ENTITY_TYPES.register(
+                    "mithril_block",
+                    () -> BlockEntityType.Builder.of(MithrilBlockEntity::new, ModBlocks.MITHRIL_BLOCK.get())
+                            .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiTurretBlockEntity>> PHI_TURRET =
             BLOCK_ENTITY_TYPES.register(

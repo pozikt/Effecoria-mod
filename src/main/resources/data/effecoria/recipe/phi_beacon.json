@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": { "item": "effecoria:pure_essonite" },
+    "M": { "item": "effecoria:mithril_ingot" },
+    "S": { "item": "effecoria:star_essonite" }
+  },
+  "pattern": [" M ", "ESE", " M "],
+  "result": { "count": 1, "id": "effecoria:phi_beacon" }
+}

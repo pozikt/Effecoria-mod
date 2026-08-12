@@ -327,6 +327,14 @@ public class EffecoriaMod {
                 ModNetworking.PhiWeatherSyncPayload.TYPE,
                 ModNetworking.PhiWeatherSyncPayload.STREAM_CODEC,
                 ModNetworking.PhiWeatherSyncPayload::handle);
+        registrar.playToServer(
+                ModNetworking.PhiBeaconRenamePayload.TYPE,
+                ModNetworking.PhiBeaconRenamePayload.STREAM_CODEC,
+                ModNetworking.PhiBeaconRenamePayload::handle);
+        registrar.playToServer(
+                ModNetworking.PortalModulatorConfigPayload.TYPE,
+                ModNetworking.PortalModulatorConfigPayload.STREAM_CODEC,
+                ModNetworking.PortalModulatorConfigPayload::handle);
     }
 
 }

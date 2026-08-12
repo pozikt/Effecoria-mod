@@ -273,12 +273,16 @@ public final class ForgeReactorBlockEntity extends BaseContainerBlockEntity
         if (!isActivelyPowering()) {
             return 0f;
         }
+        // ENERGY mode is the city-scale hub; other modes still radiate but weaker.
         float base = mode == ForgeRecipes.Mode.ENERGY ? 2.5f : 1.5f;
-        if (powerPercent() >= 100) {
-            base *= 2f;
-        }
+        // Scale with remaining fuel (was a cliff at exactly 100% that made mid-burn feel "weak").
+        float fuelRatio = Math.max(0.35f, fuelTicks / (float) Math.max(1, fuelMax));
+        base *= 0.7f + 0.6f * fuelRatio;
         if (temperature > 2800) {
             base *= 0.6f;
+        } else if (temperature >= 800 && temperature <= 2200) {
+            // Stable operating band — slight boost when actually hot.
+            base *= 1.1f;
         }
         return base;
     }
@@ -538,17 +542,29 @@ public final class ForgeReactorBlockEntity extends BaseContainerBlockEntity
                 be.fuelTicks--;
                 changed = true;
                 boolean cooled = be.hasCoolant();
-                float heat = (cooled ? 1.2f : 4.5f) * be.catalystHeatMul();
-                be.temperature = Mth.clamp(be.temperature + Math.round(heat), 200, MAX_TEMP + 200);
-                if (!cooled) {
+                float heatMul = be.catalystHeatMul();
+                if (cooled) {
+                    // Approach a stable operating band (~1000–1400°C) instead of floor-locking at 200
+                    // (old cool 3 > heat 1.2 kept temp stuck while "running").
+                    int target = 1200;
+                    if (be.temperature < target) {
+                        be.temperature = Math.min(target, be.temperature + Math.max(2, Math.round(3.2f * heatMul)));
+                    } else if (be.temperature > target + 200) {
+                        be.temperature = Math.max(target, be.temperature - 3);
+                    } else {
+                        // Gentle drift within band
+                        be.temperature += (server.random.nextBoolean() ? 1 : -1);
+                        be.temperature = Mth.clamp(be.temperature, target - 100, target + 200);
+                    }
+                    be.runWithoutCoolant = Math.max(0, be.runWithoutCoolant - 4);
+                } else {
+                    be.temperature = Mth.clamp(
+                            be.temperature + Math.round(5.5f * heatMul), 200, MAX_TEMP + 200);
                     be.runWithoutCoolant++;
                     if (be.runWithoutCoolant >= OVERHEAT_NO_COOLANT_TICKS) {
                         be.scram(true);
                         be.omegaCentis += 800;
                     }
-                } else {
-                    be.runWithoutCoolant = Math.max(0, be.runWithoutCoolant - 4);
-                    be.temperature = Math.max(200, be.temperature - 3);
                 }
                 if (be.temperature >= MAX_TEMP) {
                     be.scram(true);

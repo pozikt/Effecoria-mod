@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "effecoria:block/portal_gate_top",
+    "front": "effecoria:block/portal_gate_side",
+    "side": "effecoria:block/geo_casing"
+  }
+}

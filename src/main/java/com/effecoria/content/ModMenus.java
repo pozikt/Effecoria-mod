@@ -13,6 +13,8 @@ import com.effecoria.alchemy.menu.HeartReactorMenu;
 import com.effecoria.alchemy.menu.ForgeReactorMenu;
 import com.effecoria.alchemy.menu.GeoWellMenu;
 import com.effecoria.alchemy.menu.ClimateArrayMenu;
+import com.effecoria.alchemy.menu.PortalModulatorMenu;
+import com.effecoria.alchemy.menu.PhiBeaconMenu;
 import com.effecoria.alchemy.menu.PhiTurretMenu;
 import com.effecoria.alchemy.menu.PhiCrusherMenu;
 
@@ -48,6 +50,12 @@ public final class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<ClimateArrayMenu>> CLIMATE_ARRAY =
             MENUS.register("climate_array", () -> IMenuTypeExtension.create(ClimateArrayMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<PortalModulatorMenu>> PORTAL_MODULATOR =
+            MENUS.register("portal_modulator", () -> IMenuTypeExtension.create(PortalModulatorMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<PhiBeaconMenu>> PHI_BEACON =
+            MENUS.register("phi_beacon", () -> IMenuTypeExtension.create(PhiBeaconMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<PhiTurretMenu>> PHI_TURRET =
             MENUS.register("phi_turret", () -> IMenuTypeExtension.create(PhiTurretMenu::new));

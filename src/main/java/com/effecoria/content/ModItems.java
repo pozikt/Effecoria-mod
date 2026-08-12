@@ -47,8 +47,10 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("mithril_ore", ModBlocks.MITHRIL_ORE);
     public static final DeferredItem<BlockItem> DEEPSLATE_MITHRIL_ORE =
             ITEMS.registerSimpleBlockItem("deepslate_mithril_ore", ModBlocks.DEEPSLATE_MITHRIL_ORE);
-    public static final DeferredItem<BlockItem> MITHRIL_BLOCK =
-            ITEMS.registerSimpleBlockItem("mithril_block", ModBlocks.MITHRIL_BLOCK);
+    public static final DeferredItem<BlockItem> MITHRIL_BLOCK = ITEMS.register(
+            "mithril_block",
+            () -> new HintBlockItem(
+                    ModBlocks.MITHRIL_BLOCK.get(), new Item.Properties(), "tooltip.effecoria.mithril_block"));
     public static final DeferredItem<BlockItem> ESSONITE_BLOCK =
             ITEMS.registerSimpleBlockItem("essonite_block", ModBlocks.ESSONITE_BLOCK);
     public static final DeferredItem<BlockItem> STAR_ESSONITE_BLOCK =
@@ -271,10 +273,14 @@ public final class ModItems {
             "climate_array",
             () -> new HintBlockItem(
                     ModBlocks.CLIMATE_ARRAY.get(), new Item.Properties(), "tooltip.effecoria.climate_array"));
-    public static final DeferredItem<BlockItem> PORTAL_GATE = ITEMS.register(
-            "portal_gate",
+    public static final DeferredItem<BlockItem> PORTAL_MODULATOR = ITEMS.register(
+            "portal_modulator",
             () -> new HintBlockItem(
-                    ModBlocks.PORTAL_GATE.get(), new Item.Properties(), "tooltip.effecoria.portal_gate"));
+                    ModBlocks.PORTAL_MODULATOR.get(), new Item.Properties(), "tooltip.effecoria.portal_modulator"));
+    public static final DeferredItem<BlockItem> PHI_BEACON = ITEMS.register(
+            "phi_beacon",
+            () -> new HintBlockItem(
+                    ModBlocks.PHI_BEACON.get(), new Item.Properties(), "tooltip.effecoria.phi_beacon"));
     public static final DeferredItem<BlockItem> REACTOR_CASING =
             ITEMS.registerSimpleBlockItem("reactor_casing", ModBlocks.REACTOR_CASING);
     public static final DeferredItem<BlockItem> PURIFIED_OBSIDIAN =

@@ -17,6 +17,7 @@
         "effecoria:omega_tainted_obsidian",
         "effecoria:geo_well_core",
         "effecoria:geo_well_part",
-        "effecoria:portal_gate"
+        "effecoria:portal_modulator",
+        "effecoria:phi_beacon"
     ]
 }

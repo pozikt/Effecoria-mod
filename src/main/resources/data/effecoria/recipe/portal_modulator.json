@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": { "item": "effecoria:deep_phi_catalyst" },
+    "M": { "item": "effecoria:mithril_ingot" },
+    "R": { "item": "effecoria:resonance_focus" },
+    "C": { "item": "effecoria:geo_casing" },
+    "G": { "item": "effecoria:phi_glass" }
+  },
+  "pattern": ["CMC", "GDG", "CRC"],
+  "result": { "count": 1, "id": "effecoria:portal_modulator" }
+}

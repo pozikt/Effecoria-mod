@@ -1,13 +1,15 @@
 {
   "id": "effecoria:portal_gate",
   "era": 5,
-  "icon": "effecoria:portal_gate",
+  "icon": "effecoria:portal_modulator",
   "status": "available",
   "requires": [
     "effecoria:geo_well"
   ],
   "display_unlocks": [
-    "paired_teleport",
-    "effecoria:portal_gate"
+    "mithril_frame",
+    "portal_modulator",
+    "phi_beacon",
+    "hyper_tunnel"
   ]
 }

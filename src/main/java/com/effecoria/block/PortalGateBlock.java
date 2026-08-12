@@ -1,25 +1,15 @@
 package com.effecoria.block;
 
 import com.effecoria.content.ModBlockEntities;
-import com.effecoria.content.ModItems;
-import com.effecoria.core.alchemy.PhiPower;
-import com.effecoria.core.technomagic.TechnomagicEra;
-import com.effecoria.core.technomagic.TechnomagicGates;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -28,35 +18,23 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.WeakHashMap;
-
 import javax.annotation.Nullable;
 
-/** Era V Portal Gate — linked pair teleports players for Φ-power cost. */
+/**
+ * Hyper-tunnel film — mirror membrane reflecting hyperspace (BER).
+ * Not crafted — machine-placed only. Registry id remains {@code portal_gate}.
+ */
 public final class PortalGateBlock extends BaseEntityBlock {
     public static final MapCodec<PortalGateBlock> CODEC = simpleCodec(PortalGateBlock::new);
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
 
-    private static final VoxelShape SHAPE_NS = Block.box(1.0, 0.0, 6.5, 15.0, 16.0, 9.5);
-    private static final VoxelShape SHAPE_EW = Block.box(6.5, 0.0, 1.0, 9.5, 16.0, 15.0);
-
-    /** First RMB with Resonance Focus stores this gate; second links both. */
-    private static final WeakHashMap<Player, BlockPos> PENDING_LINK = new WeakHashMap<>();
+    private static final VoxelShape SHAPE = Shapes.block();
 
     public PortalGateBlock(Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(ACTIVE, false));
     }
 
     @Override
@@ -65,24 +43,14 @@ public final class PortalGateBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, ACTIVE);
-    }
-
-    @Nullable
-    @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
-    }
-
-    @Override
     protected RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+        // BER draws the hyperspace mirror; block model stays invisible.
+        return RenderShape.INVISIBLE;
     }
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return state.getValue(FACING).getAxis() == Direction.Axis.Z ? SHAPE_NS : SHAPE_EW;
+        return SHAPE;
     }
 
     @Override
@@ -115,57 +83,30 @@ public final class PortalGateBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(
-            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        return InteractionResult.PASS;
-    }
-
-    @Override
-    protected ItemInteractionResult useItemOn(
-            ItemStack stack,
-            BlockState state,
-            Level level,
-            BlockPos pos,
-            Player player,
-            InteractionHand hand,
-            BlockHitResult hit) {
-        if (!stack.is(ModItems.RESONANCE_FOCUS.get())) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+        double x = pos.getX() + 0.5;
+        double y = pos.getY() + 0.5;
+        double z = pos.getZ() + 0.5;
+        for (int i = 0; i < 2; i++) {
+            level.addParticle(
+                    ParticleTypes.REVERSE_PORTAL,
+                    x + (random.nextDouble() - 0.5) * 0.7,
+                    y + (random.nextDouble() - 0.5) * 0.7,
+                    z + (random.nextDouble() - 0.5) * 0.7,
+                    (random.nextDouble() - 0.5) * 0.02,
+                    (random.nextDouble() - 0.5) * 0.02,
+                    (random.nextDouble() - 0.5) * 0.02);
         }
-        if (level.isClientSide()) {
-            return ItemInteractionResult.SUCCESS;
+        if (random.nextFloat() < 0.35f) {
+            level.addParticle(
+                    ParticleTypes.END_ROD,
+                    x + (random.nextDouble() - 0.5) * 0.5,
+                    y + (random.nextDouble() - 0.5) * 0.5,
+                    z + (random.nextDouble() - 0.5) * 0.5,
+                    0,
+                    0.02,
+                    0);
         }
-        if (!(player instanceof ServerPlayer serverPlayer)
-                || !(level.getBlockEntity(pos) instanceof PortalGateBlockEntity gate)) {
-            return ItemInteractionResult.FAIL;
-        }
-        if (!TechnomagicGates.checkOperate(serverPlayer, TechnomagicEra.V)) {
-            return ItemInteractionResult.FAIL;
-        }
-
-        BlockPos pending = PENDING_LINK.get(player);
-        if (pending == null || pending.equals(pos)) {
-            PENDING_LINK.put(player, pos.immutable());
-            player.displayClientMessage(
-                    net.minecraft.network.chat.Component.translatable("message.effecoria.portal_gate_pending"), true);
-            level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.55f, 1.2f);
-            return ItemInteractionResult.SUCCESS;
-        }
-
-        if (!(level.getBlockEntity(pending) instanceof PortalGateBlockEntity other)) {
-            PENDING_LINK.put(player, pos.immutable());
-            player.displayClientMessage(
-                    net.minecraft.network.chat.Component.translatable("message.effecoria.portal_gate_pending"), true);
-            return ItemInteractionResult.SUCCESS;
-        }
-
-        gate.linkWith(other);
-        PENDING_LINK.remove(player);
-        level.playSound(null, pos, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 0.7f, 1.1f);
-        level.playSound(null, pending, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 0.7f, 1.1f);
-        player.displayClientMessage(
-                net.minecraft.network.chat.Component.translatable("message.effecoria.portal_gate_linked"), true);
-        return ItemInteractionResult.SUCCESS;
     }
 
     @Override
@@ -173,21 +114,30 @@ public final class PortalGateBlock extends BaseEntityBlock {
         if (level.isClientSide() || !(entity instanceof ServerPlayer player)) {
             return;
         }
-        if (!(level.getBlockEntity(pos) instanceof PortalGateBlockEntity gate)) {
-            return;
-        }
-        if (!state.getValue(ACTIVE) || !gate.hasPartner()) {
-            return;
-        }
-        if (gate.isPlayerOnCooldown(player)) {
-            return;
-        }
-        if (!PhiPower.consumeTick(level, pos, PortalGateBlockEntity.TELEPORT_POWER_COST)) {
+        if (!(level.getBlockEntity(pos) instanceof PortalGateBlockEntity film)) {
             return;
         }
         if (!(level instanceof ServerLevel server)) {
             return;
         }
-        gate.teleportPlayer(server, player);
+        film.tryTeleport(server, player);
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+        if (!state.is(newState.getBlock())
+                && level.getBlockEntity(pos) instanceof PortalGateBlockEntity film) {
+            film.onFilmBroken();
+        }
+        super.onRemove(state, level, pos, newState, moved);
+    }
+
+    @Override
+    protected void neighborChanged(
+            BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
+        super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
+        if (!level.isClientSide() && neighborBlock instanceof MithrilBlock) {
+            PortalModulatorBlock.notifyNearby(level, neighborPos);
+        }
     }
 }

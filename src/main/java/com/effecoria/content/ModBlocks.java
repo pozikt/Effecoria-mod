@@ -4,6 +4,7 @@ import com.effecoria.EffecoriaMod;
 import com.effecoria.block.AncientEssenceWoodBlock;
 import com.effecoria.block.ArtifactStationBlock;
 import com.effecoria.block.ClayCrucibleBlock;
+import com.effecoria.block.MithrilBlock;
 import com.effecoria.block.EldritchBloodPuddleBlock;
 import com.effecoria.block.EssoniteCrustBlock;
 import com.effecoria.block.EssonitePointedBlock;
@@ -16,6 +17,8 @@ import com.effecoria.block.GeoWellBlock;
 import com.effecoria.block.GeoWellPartBlock;
 import com.effecoria.block.ClimateArrayBlock;
 import com.effecoria.block.PortalGateBlock;
+import com.effecoria.block.PortalModulatorBlock;
+import com.effecoria.block.PhiBeaconBlock;
 import com.effecoria.block.PhiBladesBlock;
 import com.effecoria.block.PhiCampfireBlock;
 import com.effecoria.block.PhiFieldBlock;
@@ -110,13 +113,14 @@ public final class ModBlocks {
     public static final DeferredBlock<Block> DEEPSLATE_MITHRIL_ORE =
             registerOre("deepslate_mithril_ore", MapColor.DEEPSLATE, 5.0f, 3f, SoundType.DEEPSLATE);
 
-    public static final DeferredBlock<Block> MITHRIL_BLOCK = BLOCKS.register(
+    public static final DeferredBlock<MithrilBlock> MITHRIL_BLOCK = BLOCKS.register(
             "mithril_block",
-            () -> new Block(BlockBehaviour.Properties.of()
+            () -> new MithrilBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.METAL)
                     .requiresCorrectToolForDrops()
                     .strength(5.0f, 6.0f)
-                    .sound(SoundType.METAL)));
+                    .sound(SoundType.METAL)
+                    .lightLevel(state -> state.getValue(MithrilBlock.POWERED) ? 4 : 0)));
 
     /** Nearly pure essonite — Φ-core mass under the plateau (Y ≤ 0). */
     public static final DeferredBlock<Block> ESSONITE_BLOCK = BLOCKS.register(
@@ -851,16 +855,37 @@ public final class ModBlocks {
                     .requiresCorrectToolForDrops()
                     .lightLevel(state -> state.getValue(ClimateArrayBlock.LIT) ? 8 : 0)));
 
-    /** Era V Portal Gate — linked same-dimension teleport. */
+    /** Hyper-tunnel film — placed by portal modulator inside a mithril frame (not crafted). */
     public static final DeferredBlock<PortalGateBlock> PORTAL_GATE = BLOCKS.register(
             "portal_gate",
             () -> new PortalGateBlock(BlockBehaviour.Properties.of()
-                    .mapColor(MapColor.COLOR_BLACK)
-                    .strength(8.0f, 600f)
-                    .sound(SoundType.STONE)
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(-1.0f, 3600000f)
+                    .sound(SoundType.GLASS)
+                    .noLootTable()
+                    .lightLevel(state -> 12)
+                    .noOcclusion()
+                    .noCollission()));
+
+    /** Portal modulator — Ψ-computer for mithril-frame hyper-tunnels. */
+    public static final DeferredBlock<PortalModulatorBlock> PORTAL_MODULATOR = BLOCKS.register(
+            "portal_modulator",
+            () -> new PortalModulatorBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_CYAN)
+                    .strength(4.0f, 8f)
+                    .sound(SoundType.METAL)
                     .requiresCorrectToolForDrops()
-                    .lightLevel(state -> state.getValue(PortalGateBlock.ACTIVE) ? 10 : 0)
-                    .noOcclusion()));
+                    .lightLevel(state -> state.getValue(PortalModulatorBlock.LIT) ? 10 : 0)));
+
+    /** Named Φ-beacon — destination star for modulators. */
+    public static final DeferredBlock<PhiBeaconBlock> PHI_BEACON = BLOCKS.register(
+            "phi_beacon",
+            () -> new PhiBeaconBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .strength(3.0f, 6f)
+                    .sound(SoundType.AMETHYST)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> 11)));
 
     /** Ω-tainted obsidian — cleansed in Forge. */
     public static final DeferredBlock<Block> OMEGA_TAINTED_OBSIDIAN = BLOCKS.register(

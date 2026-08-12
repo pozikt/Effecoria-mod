@@ -1624,4 +1624,87 @@ public final class ModNetworking {
             });
         }
     }
+
+    public record PhiBeaconRenamePayload(BlockPos pos, String name) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<PhiBeaconRenamePayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "phi_beacon_rename"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, PhiBeaconRenamePayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        BlockPos.STREAM_CODEC,
+                        PhiBeaconRenamePayload::pos,
+                        ByteBufCodecs.STRING_UTF8,
+                        PhiBeaconRenamePayload::name,
+                        PhiBeaconRenamePayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(PhiBeaconRenamePayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                if (!(player.level().getBlockEntity(payload.pos())
+                        instanceof com.effecoria.block.PhiBeaconBlockEntity beacon)) {
+                    return;
+                }
+                if (!beacon.setBeaconName(payload.name())) {
+                    player.displayClientMessage(Component.translatable("message.effecoria.phi_beacon_name_taken"), true);
+                } else {
+                    player.displayClientMessage(Component.translatable("message.effecoria.phi_beacon_named"), true);
+                }
+            });
+        }
+    }
+
+    public record PortalModulatorConfigPayload(
+            BlockPos pos, int mode, int x, int y, int z, String beacon) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<PortalModulatorConfigPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "portal_modulator_config"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, PortalModulatorConfigPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        BlockPos.STREAM_CODEC,
+                        PortalModulatorConfigPayload::pos,
+                        ByteBufCodecs.VAR_INT,
+                        PortalModulatorConfigPayload::mode,
+                        ByteBufCodecs.VAR_INT,
+                        PortalModulatorConfigPayload::x,
+                        ByteBufCodecs.VAR_INT,
+                        PortalModulatorConfigPayload::y,
+                        ByteBufCodecs.VAR_INT,
+                        PortalModulatorConfigPayload::z,
+                        ByteBufCodecs.STRING_UTF8,
+                        PortalModulatorConfigPayload::beacon,
+                        PortalModulatorConfigPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(PortalModulatorConfigPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                if (!(player.level().getBlockEntity(payload.pos())
+                        instanceof com.effecoria.block.PortalModulatorBlockEntity mod)) {
+                    return;
+                }
+                if (!com.effecoria.core.technomagic.TechnomagicGates.checkOperate(
+                        player, com.effecoria.core.technomagic.TechnomagicEra.V)) {
+                    return;
+                }
+                mod.setMode(payload.mode());
+                mod.setCoords(payload.x(), payload.y(), payload.z());
+                mod.setBeaconName(payload.beacon());
+            });
+        }
+    }
 }

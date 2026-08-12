@@ -123,8 +123,8 @@ public final class PhiPower {
                     || state.is(ModBlocks.GEO_WELL_PART.get())) {
                 continue;
             }
-            // Φ-bus is a conductive cable — power ray should not be blocked by the cable itself.
-            if (state.is(ModBlocks.PHI_BUS.get())) {
+            // Conductors are Φ-transparent for wireless LOS through cabling / mithril frames.
+            if (state.is(ModBlocks.PHI_BUS.get()) || state.is(ModBlocks.MITHRIL_BLOCK.get())) {
                 continue;
             }
             if (state.canOcclude() && state.isCollisionShapeFullBlock(level, check)) {

@@ -58,6 +58,8 @@
                    "effecoria:geo_well_core",
                    "effecoria:geo_well_part",
                    "effecoria:climate_array",
-                   "effecoria:portal_gate"
+                   "effecoria:portal_gate",
+                   "effecoria:portal_modulator",
+                   "effecoria:phi_beacon"
                ]
 }

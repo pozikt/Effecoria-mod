@@ -1,5 +1,6 @@
 {
   "variants": {
-    "": { "model": "effecoria:block/mithril_block" }
+    "powered=false": { "model": "effecoria:block/mithril_block" },
+    "powered=true": { "model": "effecoria:block/mithril_block" }
   }
 }

@@ -148,7 +148,8 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.GEO_CASING.get());
                         output.accept(ModItems.GEO_WELL_CORE.get());
                         output.accept(ModItems.CLIMATE_ARRAY.get());
-                        output.accept(ModItems.PORTAL_GATE.get());
+                        output.accept(ModItems.PORTAL_MODULATOR.get());
+                        output.accept(ModItems.PHI_BEACON.get());
                         output.accept(ModItems.DEEP_PHI_CATALYST.get());
                         output.accept(ModItems.REACTOR_CASING.get());
                         output.accept(ModItems.PURIFIED_OBSIDIAN.get());
