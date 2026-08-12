@@ -21,6 +21,7 @@ import com.effecoria.client.render.TurretBoltRenderer;
 import com.effecoria.client.render.RootCageRenderer;
 import com.effecoria.client.render.RotfangMinkRenderer;
 import com.effecoria.client.render.HeartReactorRenderer;
+import com.effecoria.client.render.RegenChamberRenderer;
 import com.effecoria.client.render.ForgeReactorRenderer;
 import com.effecoria.client.render.TurretMountRenderer;
 import com.effecoria.client.render.SubspacePortalRenderer;
@@ -159,6 +160,8 @@ public final class EffecoriaClient {
                 com.effecoria.content.ModBlockEntities.SUBSPACE_PORTAL.get(), SubspacePortalRenderer::new);
         event.registerBlockEntityRenderer(
                 com.effecoria.content.ModBlockEntities.HEART_REACTOR_CORE.get(), HeartReactorRenderer::new);
+        event.registerBlockEntityRenderer(
+                com.effecoria.content.ModBlockEntities.REGEN_CHAMBER.get(), RegenChamberRenderer::new);
         event.registerBlockEntityRenderer(
                 com.effecoria.content.ModBlockEntities.FORGE_REACTOR_CORE.get(), ForgeReactorRenderer::new);
         event.registerBlockEntityRenderer(

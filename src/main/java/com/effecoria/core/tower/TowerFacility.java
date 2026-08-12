@@ -96,7 +96,9 @@ public final class TowerFacility {
     }
 
     public static boolean hasRegenChamber(ServerLevel level, BlockPos computerPos) {
-        return findInComponent(level, computerPos, RegenChamberBlockEntity.class).isPresent();
+        return findInComponent(level, computerPos, RegenChamberBlockEntity.class)
+                .filter(RegenChamberBlockEntity::isOperational)
+                .isPresent();
     }
 
     public static <T extends BlockEntity> Optional<T> findInComponent(
@@ -152,8 +154,18 @@ public final class TowerFacility {
                 out.add(lifeEntry("air_synth", pos, towerLive, phi));
             } else if (be instanceof PhiWaterPurifierBlockEntity) {
                 out.add(lifeEntry("water_purifier", pos, towerLive, phi));
-            } else if (be instanceof RegenChamberBlockEntity) {
-                out.add(lifeEntry("regen_chamber", pos, towerLive, phi));
+            } else if (be instanceof RegenChamberBlockEntity regen) {
+                if (!regen.isFormed()) {
+                    out.add(entry("regen_chamber", pos, "unformed", MonitorEntry.BAD));
+                } else if (!regen.isFull()) {
+                    out.add(entry("regen_chamber", pos, "filling", MonitorEntry.WARN));
+                } else if (!towerLive) {
+                    out.add(entry("regen_chamber", pos, "tower_offline", MonitorEntry.IDLE));
+                } else if (!phi) {
+                    out.add(entry("regen_chamber", pos, "no_power", MonitorEntry.BAD));
+                } else {
+                    out.add(entry("regen_chamber", pos, "active", MonitorEntry.OK));
+                }
             } else if (be instanceof TowerConsoleBlockEntity) {
                 out.add(entry("console", pos, "online", MonitorEntry.OK));
             } else if (state.is(ModBlocks.SPARK_REACTOR.get())) {

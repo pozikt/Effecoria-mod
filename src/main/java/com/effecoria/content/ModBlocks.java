@@ -25,6 +25,7 @@ import com.effecoria.block.OmegaDamperBlock;
 import com.effecoria.block.PhiAirSynthBlock;
 import com.effecoria.block.PhiWaterPurifierBlock;
 import com.effecoria.block.RegenChamberBlock;
+import com.effecoria.block.RegenChamberPartBlock;
 import com.effecoria.block.TowerConsoleBlock;
 import com.effecoria.block.PhiBladesBlock;
 import com.effecoria.block.PhiCampfireBlock;
@@ -906,7 +907,26 @@ public final class ModBlocks {
     public static final DeferredBlock<PhiWaterPurifierBlock> PHI_WATER_PURIFIER = BLOCKS.register(
             "phi_water_purifier", () -> new PhiWaterPurifierBlock(towerFacilityProps()));
     public static final DeferredBlock<RegenChamberBlock> REGEN_CHAMBER = BLOCKS.register(
-            "regen_chamber", () -> new RegenChamberBlock(towerFacilityProps()));
+            "regen_chamber",
+            () -> new RegenChamberBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN)
+                    .strength(4.0f, 12f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(s -> s.getValue(RegenChamberBlock.FORMED) ? 10 : 7)));
+
+    /** Invisible solid cell of an assembled regen capsule hull (no BlockItem). */
+    public static final DeferredBlock<RegenChamberPartBlock> REGEN_CHAMBER_PART = BLOCKS.register(
+            "regen_chamber_part",
+            () -> new RegenChamberPartBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN)
+                    .strength(4.0f, 12f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noLootTable()
+                    .isViewBlocking((state, level, pos) -> true)
+                    .isSuffocating((state, level, pos) -> true)));
+
     public static final DeferredBlock<TowerConsoleBlock> TOWER_CONSOLE = BLOCKS.register(
             "tower_console", () -> new TowerConsoleBlock(towerFacilityProps()));
 

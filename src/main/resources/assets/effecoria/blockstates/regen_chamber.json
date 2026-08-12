@@ -1,5 +1,6 @@
 ﻿{
   "variants": {
-    "": { "model": "effecoria:block/regen_chamber" }
+    "formed=false": { "model": "effecoria:block/regen_chamber" },
+    "formed=true": { "model": "effecoria:block/regen_chamber_formed" }
   }
 }

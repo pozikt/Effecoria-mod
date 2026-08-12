@@ -32,6 +32,7 @@ import com.effecoria.block.OmegaDamperBlockEntity;
 import com.effecoria.block.PhiAirSynthBlockEntity;
 import com.effecoria.block.PhiWaterPurifierBlockEntity;
 import com.effecoria.block.RegenChamberBlockEntity;
+import com.effecoria.block.RegenChamberPartBlockEntity;
 import com.effecoria.block.TowerConsoleBlockEntity;
 import com.effecoria.block.PhiBusBlockEntity;
 import com.effecoria.block.PhiCrusherBlockEntity;
@@ -159,6 +160,9 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RegenChamberBlockEntity>> REGEN_CHAMBER =
             BLOCK_ENTITY_TYPES.register("regen_chamber", () -> BlockEntityType.Builder.of(
                     RegenChamberBlockEntity::new, ModBlocks.REGEN_CHAMBER.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RegenChamberPartBlockEntity>> REGEN_CHAMBER_PART =
+            BLOCK_ENTITY_TYPES.register("regen_chamber_part", () -> BlockEntityType.Builder.of(
+                    RegenChamberPartBlockEntity::new, ModBlocks.REGEN_CHAMBER_PART.get()).build(null));
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TowerConsoleBlockEntity>> TOWER_CONSOLE =
             BLOCK_ENTITY_TYPES.register("tower_console", () -> BlockEntityType.Builder.of(
                     TowerConsoleBlockEntity::new, ModBlocks.TOWER_CONSOLE.get()).build(null));

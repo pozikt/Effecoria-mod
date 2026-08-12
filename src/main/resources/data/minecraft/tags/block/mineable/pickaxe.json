@@ -67,6 +67,7 @@
                    "effecoria:phi_air_synth",
                    "effecoria:phi_water_purifier",
                    "effecoria:regen_chamber",
+                   "effecoria:regen_chamber_part",
                    "effecoria:tower_console"
                ]
 }
