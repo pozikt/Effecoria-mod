@@ -106,6 +106,14 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
         return gluedCells;
     }
 
+    public int presentBlocks() {
+        return presentBlocks;
+    }
+
+    public String reactorClass() {
+        return reactorClass;
+    }
+
     public AABB structureBounds() {
         return structureBounds;
     }
