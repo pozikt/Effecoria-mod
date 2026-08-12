@@ -26,6 +26,7 @@ import com.effecoria.block.PortalGateBlockEntity;
 import com.effecoria.block.MithrilBlockEntity;
 import com.effecoria.block.PortalModulatorBlockEntity;
 import com.effecoria.block.PhiBeaconBlockEntity;
+import com.effecoria.block.TowerAnchorBlockEntity;
 import com.effecoria.block.PhiBusBlockEntity;
 import com.effecoria.block.PhiCrusherBlockEntity;
 import com.effecoria.block.PhiCrusherHopperBlockEntity;
@@ -130,6 +131,12 @@ public final class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register(
                     "phi_beacon",
                     () -> BlockEntityType.Builder.of(PhiBeaconBlockEntity::new, ModBlocks.PHI_BEACON.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TowerAnchorBlockEntity>> TOWER_ANCHOR =
+            BLOCK_ENTITY_TYPES.register(
+                    "tower_anchor",
+                    () -> BlockEntityType.Builder.of(TowerAnchorBlockEntity::new, ModBlocks.TOWER_ANCHOR.get())
                             .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiBusBlockEntity>> PHI_BUS =

@@ -60,6 +60,7 @@
                    "effecoria:climate_array",
                    "effecoria:portal_gate",
                    "effecoria:portal_modulator",
-                   "effecoria:phi_beacon"
+                   "effecoria:phi_beacon",
+                   "effecoria:tower_anchor"
                ]
 }

@@ -1,0 +1,8 @@
+{
+  "id": "effecoria:essence_structure",
+  "era": 6,
+  "icon": "effecoria:essence_glue",
+  "status": "available",
+  "requires": ["effecoria:portal_gate", "effecoria:geo_well"],
+  "display_unlocks": ["essence_glue", "tower_anchor"]
+}

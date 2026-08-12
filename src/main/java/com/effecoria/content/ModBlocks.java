@@ -19,6 +19,7 @@ import com.effecoria.block.ClimateArrayBlock;
 import com.effecoria.block.PortalGateBlock;
 import com.effecoria.block.PortalModulatorBlock;
 import com.effecoria.block.PhiBeaconBlock;
+import com.effecoria.block.TowerAnchorBlock;
 import com.effecoria.block.PhiBladesBlock;
 import com.effecoria.block.PhiCampfireBlock;
 import com.effecoria.block.PhiFieldBlock;
@@ -886,6 +887,10 @@ public final class ModBlocks {
                     .sound(SoundType.AMETHYST)
                     .requiresCorrectToolForDrops()
                     .lightLevel(state -> 11)));
+
+    /** Mage Tower Ψ-anchor — consecrate Φ-glued structures and soulbind. */
+    public static final DeferredBlock<TowerAnchorBlock> TOWER_ANCHOR = BLOCKS.register(
+            "tower_anchor", () -> new TowerAnchorBlock(TowerAnchorBlock.props()));
 
     /** Ω-tainted obsidian — cleansed in Forge. */
     public static final DeferredBlock<Block> OMEGA_TAINTED_OBSIDIAN = BLOCKS.register(

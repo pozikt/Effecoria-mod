@@ -229,6 +229,18 @@ public final class PlayerPsiData {
     private Map<ResourceLocation, Integer> spellCastCounts = new HashMap<>();
     private Map<ResourceLocation, Long> spellLastCastAt = new HashMap<>();
 
+    /** Soulbound Mage Tower (server-persisted via NBT / copyOnDeath). */
+    private boolean towerBound;
+    private String towerDimId = "";
+    private int towerX;
+    private int towerY;
+    private int towerZ;
+    private boolean pendingTowerRevive;
+    private String preferredBodyType = "basic";
+    private int savedTowerXpTotal;
+    private int savedTowerXpLevel;
+    private float savedTowerXpProgress;
+
     /** Server-only last position for movement-based training XP. */
     private transient double trainingSampleX = Double.NaN;
     private transient double trainingSampleZ = Double.NaN;
@@ -782,6 +794,88 @@ public final class PlayerPsiData {
         this.soulStrength = Math.max(0.1f, value);
     }
 
+    public boolean towerBound() {
+        return towerBound;
+    }
+
+    public net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> towerDim() {
+        if (towerDimId == null || towerDimId.isEmpty()) {
+            return null;
+        }
+        return net.minecraft.resources.ResourceKey.create(
+                net.minecraft.core.registries.Registries.DIMENSION,
+                ResourceLocation.parse(towerDimId));
+    }
+
+    public net.minecraft.core.BlockPos towerPos() {
+        if (!towerBound) {
+            return null;
+        }
+        return new net.minecraft.core.BlockPos(towerX, towerY, towerZ);
+    }
+
+    public boolean pendingTowerRevive() {
+        return pendingTowerRevive;
+    }
+
+    public com.effecoria.core.tower.TowerBodyType preferredBodyType() {
+        return com.effecoria.core.tower.TowerBodyType.fromId(preferredBodyType);
+    }
+
+    public void setPreferredBodyType(com.effecoria.core.tower.TowerBodyType type) {
+        this.preferredBodyType = type == null ? "basic" : type.getSerializedName();
+    }
+
+    public int savedTowerXpTotal() {
+        return savedTowerXpTotal;
+    }
+
+    public int savedTowerXpLevel() {
+        return savedTowerXpLevel;
+    }
+
+    public float savedTowerXpProgress() {
+        return savedTowerXpProgress;
+    }
+
+    public void bindTower(
+            net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dim,
+            net.minecraft.core.BlockPos pos,
+            com.effecoria.core.tower.TowerBodyType body) {
+        this.towerBound = true;
+        this.towerDimId = dim.location().toString();
+        this.towerX = pos.getX();
+        this.towerY = pos.getY();
+        this.towerZ = pos.getZ();
+        setPreferredBodyType(body);
+    }
+
+    public void clearTowerBind() {
+        this.towerBound = false;
+        this.towerDimId = "";
+        this.towerX = 0;
+        this.towerY = 0;
+        this.towerZ = 0;
+        this.pendingTowerRevive = false;
+        this.savedTowerXpTotal = 0;
+        this.savedTowerXpLevel = 0;
+        this.savedTowerXpProgress = 0f;
+    }
+
+    public void prepareTowerRevive(int xpTotal, int xpLevel, float xpProgress) {
+        this.pendingTowerRevive = true;
+        this.savedTowerXpTotal = Math.max(0, xpTotal);
+        this.savedTowerXpLevel = Math.max(0, xpLevel);
+        this.savedTowerXpProgress = Math.max(0f, xpProgress);
+    }
+
+    public void clearPendingTowerRevive() {
+        this.pendingTowerRevive = false;
+        this.savedTowerXpTotal = 0;
+        this.savedTowerXpLevel = 0;
+        this.savedTowerXpProgress = 0f;
+    }
+
     public void setMaxPsi(float value) {
         this.maxPsi = Math.max(10f, value);
         this.currentPsi = Math.min(this.currentPsi, this.maxPsi);
@@ -937,6 +1031,16 @@ public final class PlayerPsiData {
         tag.putFloat("necroReservedPsi", necroReservedPsi);
         tag.putLong("overcastUntil", overcastUntil);
         tag.putFloat("overcastSeverity", overcastSeverity);
+        tag.putBoolean("towerBound", towerBound);
+        tag.putString("towerDimId", towerDimId == null ? "" : towerDimId);
+        tag.putInt("towerX", towerX);
+        tag.putInt("towerY", towerY);
+        tag.putInt("towerZ", towerZ);
+        tag.putBoolean("pendingTowerRevive", pendingTowerRevive);
+        tag.putString("preferredBodyType", preferredBodyType == null ? "basic" : preferredBodyType);
+        tag.putInt("savedTowerXpTotal", savedTowerXpTotal);
+        tag.putInt("savedTowerXpLevel", savedTowerXpLevel);
+        tag.putFloat("savedTowerXpProgress", savedTowerXpProgress);
 
         ListTag thrallList = new ListTag();
         for (UUID thrallId : necroThrallIds) {
@@ -1047,6 +1151,16 @@ public final class PlayerPsiData {
         castSuccessStreak = tag.contains("castSuccessStreak") ? tag.getInt("castSuccessStreak") : 0;
         overcastUntil = tag.contains("overcastUntil") ? tag.getLong("overcastUntil") : 0L;
         overcastSeverity = tag.contains("overcastSeverity") ? tag.getFloat("overcastSeverity") : 0f;
+        towerBound = tag.contains("towerBound") && tag.getBoolean("towerBound");
+        towerDimId = tag.contains("towerDimId") ? tag.getString("towerDimId") : "";
+        towerX = tag.contains("towerX") ? tag.getInt("towerX") : 0;
+        towerY = tag.contains("towerY") ? tag.getInt("towerY") : 0;
+        towerZ = tag.contains("towerZ") ? tag.getInt("towerZ") : 0;
+        pendingTowerRevive = tag.contains("pendingTowerRevive") && tag.getBoolean("pendingTowerRevive");
+        preferredBodyType = tag.contains("preferredBodyType") ? tag.getString("preferredBodyType") : "basic";
+        savedTowerXpTotal = tag.contains("savedTowerXpTotal") ? tag.getInt("savedTowerXpTotal") : 0;
+        savedTowerXpLevel = tag.contains("savedTowerXpLevel") ? tag.getInt("savedTowerXpLevel") : 0;
+        savedTowerXpProgress = tag.contains("savedTowerXpProgress") ? tag.getFloat("savedTowerXpProgress") : 0f;
         necroReservedPsi = tag.contains("necroReservedPsi") ? tag.getFloat("necroReservedPsi") : 0f;
 
         necroThrallIds = new ArrayList<>();
@@ -1242,6 +1356,16 @@ public final class PlayerPsiData {
         copy.overcastSeverity = overcastSeverity;
         copy.spellCastCounts = new HashMap<>(spellCastCounts);
         copy.spellLastCastAt = new HashMap<>(spellLastCastAt);
+        copy.towerBound = towerBound;
+        copy.towerDimId = towerDimId;
+        copy.towerX = towerX;
+        copy.towerY = towerY;
+        copy.towerZ = towerZ;
+        copy.pendingTowerRevive = pendingTowerRevive;
+        copy.preferredBodyType = preferredBodyType;
+        copy.savedTowerXpTotal = savedTowerXpTotal;
+        copy.savedTowerXpLevel = savedTowerXpLevel;
+        copy.savedTowerXpProgress = savedTowerXpProgress;
         return copy;
     }
 }

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": { "item": "effecoria:pure_essonite" },
+    "M": { "item": "effecoria:mithril_ingot" },
+    "B": { "item": "effecoria:phi_bus" }
+  },
+  "pattern": [" M ", "EBE", " M "],
+  "result": { "count": 1, "id": "effecoria:tower_anchor" }
+}

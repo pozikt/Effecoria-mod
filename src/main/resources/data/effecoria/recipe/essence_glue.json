@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "effecoria:essonite_dust" },
+    { "item": "effecoria:phi_bone_paste" },
+    { "item": "effecoria:purified_phi_water_bucket" }
+  ],
+  "result": { "count": 4, "id": "effecoria:essence_glue" }
+}

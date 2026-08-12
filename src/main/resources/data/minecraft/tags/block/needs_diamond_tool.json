@@ -18,6 +18,7 @@
         "effecoria:geo_well_core",
         "effecoria:geo_well_part",
         "effecoria:portal_modulator",
-        "effecoria:phi_beacon"
+        "effecoria:phi_beacon",
+        "effecoria:tower_anchor"
     ]
 }

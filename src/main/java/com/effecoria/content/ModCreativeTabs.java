@@ -150,6 +150,8 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.CLIMATE_ARRAY.get());
                         output.accept(ModItems.PORTAL_MODULATOR.get());
                         output.accept(ModItems.PHI_BEACON.get());
+                        output.accept(ModItems.TOWER_ANCHOR.get());
+                        output.accept(ModItems.ESSENCE_GLUE.get());
                         output.accept(ModItems.DEEP_PHI_CATALYST.get());
                         output.accept(ModItems.REACTOR_CASING.get());
                         output.accept(ModItems.PURIFIED_OBSIDIAN.get());

@@ -1,6 +1,7 @@
 package com.effecoria.content;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.item.EssenceGlueItem;
 import com.effecoria.armor.EssoniteArmorItem;
 import com.effecoria.armor.EssoniteArmorTier;
 import com.effecoria.armor.EssonitePhoneme;
@@ -281,6 +282,15 @@ public final class ModItems {
             "phi_beacon",
             () -> new HintBlockItem(
                     ModBlocks.PHI_BEACON.get(), new Item.Properties(), "tooltip.effecoria.phi_beacon"));
+
+    public static final DeferredItem<BlockItem> TOWER_ANCHOR = ITEMS.register(
+            "tower_anchor",
+            () -> new HintBlockItem(
+                    ModBlocks.TOWER_ANCHOR.get(), new Item.Properties(), "tooltip.effecoria.tower_anchor"));
+
+    public static final DeferredItem<Item> ESSENCE_GLUE = ITEMS.register(
+            "essence_glue",
+            () -> new EssenceGlueItem(new Item.Properties().stacksTo(16)));
     public static final DeferredItem<BlockItem> REACTOR_CASING =
             ITEMS.registerSimpleBlockItem("reactor_casing", ModBlocks.REACTOR_CASING);
     public static final DeferredItem<BlockItem> PURIFIED_OBSIDIAN =

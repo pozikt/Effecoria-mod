@@ -25,6 +25,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
+import javax.annotation.Nullable;
+
 public final class ModNetworking {
     private ModNetworking() {}
 
@@ -1704,6 +1706,49 @@ public final class ModNetworking {
                 mod.setMode(payload.mode());
                 mod.setCoords(payload.x(), payload.y(), payload.z());
                 mod.setBeaconName(payload.beacon());
+            });
+        }
+    }
+
+    public record EssenceGlueSyncPayload(
+            java.util.List<BlockPos> glued, java.util.List<BlockPos> session, java.util.List<BlockPos> pending)
+            implements CustomPacketPayload {
+        public static final Type<EssenceGlueSyncPayload> TYPE =
+                new Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "essence_glue_sync"));
+
+        public static EssenceGlueSyncPayload of(
+                java.util.Set<BlockPos> glued, java.util.Set<BlockPos> session, @Nullable BlockPos pending) {
+            java.util.List<BlockPos> pendingList = new java.util.ArrayList<>(1);
+            if (pending != null) {
+                pendingList.add(pending.immutable());
+            }
+            return new EssenceGlueSyncPayload(
+                    new java.util.ArrayList<>(glued), new java.util.ArrayList<>(session), pendingList);
+        }
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, EssenceGlueSyncPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()),
+                        EssenceGlueSyncPayload::glued,
+                        BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()),
+                        EssenceGlueSyncPayload::session,
+                        BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()),
+                        EssenceGlueSyncPayload::pending,
+                        EssenceGlueSyncPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(EssenceGlueSyncPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                BlockPos pending =
+                        payload.pending().isEmpty() ? null : payload.pending().getFirst();
+                com.effecoria.client.glue.EssenceGlueClient.apply(
+                        new java.util.HashSet<>(payload.glued()),
+                        new java.util.HashSet<>(payload.session()),
+                        pending);
             });
         }
     }
