@@ -40,6 +40,10 @@ public final class EssenceGlueHighlight {
 
         boolean holdingGlue = mc.player.getMainHandItem().is(ModItems.ESSENCE_GLUE.get())
                 || mc.player.getOffhandItem().is(ModItems.ESSENCE_GLUE.get());
+        if (!holdingGlue) {
+            return;
+        }
+
         BlockPos pending = EssenceGlueClient.pending();
         boolean hasSession = !EssenceGlueClient.session().isEmpty();
         boolean hasGlued = !EssenceGlueClient.glued().isEmpty();
@@ -72,8 +76,8 @@ public final class EssenceGlueHighlight {
         if (pending != null) {
             drawAxeOutline(pose, lines, mc, pending, 0.25f, 1.0f, 0.45f, 1.0f);
 
-            // Live preview while holding glue and aiming at pos2.
-            if (holdingGlue && mc.hitResult instanceof BlockHitResult hit && hit.getType() == HitResult.Type.BLOCK) {
+            // Live preview while aiming at pos2.
+            if (mc.hitResult instanceof BlockHitResult hit && hit.getType() == HitResult.Type.BLOCK) {
                 BlockPos look = hit.getBlockPos();
                 if (!look.equals(pending)) {
                     AABB preview = EssenceGlueService.cuboid(pending, look);
