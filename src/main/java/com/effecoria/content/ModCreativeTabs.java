@@ -151,6 +151,12 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PORTAL_MODULATOR.get());
                         output.accept(ModItems.PHI_BEACON.get());
                         output.accept(ModItems.TOWER_ANCHOR.get());
+                        output.accept(ModItems.FOUNDATION_AMULET.get());
+                        output.accept(ModItems.OMEGA_DAMPER.get());
+                        output.accept(ModItems.PHI_AIR_SYNTH.get());
+                        output.accept(ModItems.PHI_WATER_PURIFIER.get());
+                        output.accept(ModItems.REGEN_CHAMBER.get());
+                        output.accept(ModItems.TOWER_CONSOLE.get());
                         output.accept(ModItems.ESSENCE_GLUE.get());
                         output.accept(ModItems.DEEP_PHI_CATALYST.get());
                         output.accept(ModItems.REACTOR_CASING.get());
@@ -239,6 +245,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.MITHRIL_HOE.get());
                         output.accept(ModItems.VITRIFIED_GOLEM_CORE.get());
                         output.accept(ModItems.RESONANCE_FOCUS.get());
+                        output.accept(ModItems.PSI_FOCUS.get());
                         output.accept(ModItems.PHI_CELL.get());
                         output.accept(ModItems.BREATHING_SCROLL.get());
                         output.accept(ModItems.MAGIC_PRIMER.get());

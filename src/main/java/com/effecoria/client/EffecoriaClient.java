@@ -36,6 +36,7 @@ import com.effecoria.client.gui.alchemy.HeartReactorScreen;
 import com.effecoria.client.gui.alchemy.ForgeReactorScreen;
 import com.effecoria.client.gui.alchemy.GeoWellScreen;
 import com.effecoria.client.gui.alchemy.ClimateArrayScreen;
+import com.effecoria.client.gui.alchemy.TowerConsoleScreen;
 import com.effecoria.client.gui.alchemy.PortalModulatorScreen;
 import com.effecoria.client.gui.alchemy.PhiBeaconScreen;
 import com.effecoria.client.gui.alchemy.PhiTurretScreen;
@@ -75,6 +76,7 @@ public final class EffecoriaClient {
         event.register(ModMenus.FORGE_REACTOR.get(), ForgeReactorScreen::new);
         event.register(ModMenus.GEO_WELL.get(), GeoWellScreen::new);
         event.register(ModMenus.CLIMATE_ARRAY.get(), ClimateArrayScreen::new);
+        event.register(ModMenus.TOWER_CONSOLE.get(), TowerConsoleScreen::new);
         event.register(ModMenus.PORTAL_MODULATOR.get(), PortalModulatorScreen::new);
         event.register(ModMenus.PHI_BEACON.get(), PhiBeaconScreen::new);
         event.register(ModMenus.PHI_TURRET.get(), PhiTurretScreen::new);

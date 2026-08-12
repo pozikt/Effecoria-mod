@@ -71,7 +71,7 @@ public final class TowerReviveService {
             player.displayClientMessage(Component.translatable("message.effecoria.tower.body_fallback"), true);
         }
 
-        int delay = body.delayTicks();
+        int delay = TowerFacility.hasRegenChamber(towerLevel, pos) ? 0 : body.delayTicks();
         clearBodyModifiers(player);
 
         final TowerBodyType finalBody = body;

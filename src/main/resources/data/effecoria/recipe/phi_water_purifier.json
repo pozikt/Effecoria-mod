@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": { "item": "effecoria:phi_bus" },
+    "F": { "item": "effecoria:gold_filter" },
+    "C": { "item": "minecraft:cauldron" },
+    "G": { "item": "minecraft:glass" }
+  },
+  "pattern": ["GFG", "BCB", "GGG"],
+  "result": { "count": 1, "id": "effecoria:phi_water_purifier" }
+}

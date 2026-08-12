@@ -61,6 +61,12 @@
                    "effecoria:portal_gate",
                    "effecoria:portal_modulator",
                    "effecoria:phi_beacon",
-                   "effecoria:tower_anchor"
+                   "effecoria:tower_anchor",
+                   "effecoria:foundation_amulet",
+                   "effecoria:omega_damper",
+                   "effecoria:phi_air_synth",
+                   "effecoria:phi_water_purifier",
+                   "effecoria:regen_chamber",
+                   "effecoria:tower_console"
                ]
 }

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": { "item": "effecoria:pure_essonite" },
+    "G": { "item": "minecraft:gold_ingot" },
+    "O": { "item": "effecoria:purified_obsidian" }
+  },
+  "pattern": [" G ", "EOE", " G "],
+  "result": { "count": 1, "id": "effecoria:foundation_amulet" }
+}

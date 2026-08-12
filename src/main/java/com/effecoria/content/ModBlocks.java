@@ -20,6 +20,12 @@ import com.effecoria.block.PortalGateBlock;
 import com.effecoria.block.PortalModulatorBlock;
 import com.effecoria.block.PhiBeaconBlock;
 import com.effecoria.block.TowerAnchorBlock;
+import com.effecoria.block.FoundationAmuletBlock;
+import com.effecoria.block.OmegaDamperBlock;
+import com.effecoria.block.PhiAirSynthBlock;
+import com.effecoria.block.PhiWaterPurifierBlock;
+import com.effecoria.block.RegenChamberBlock;
+import com.effecoria.block.TowerConsoleBlock;
 import com.effecoria.block.PhiBladesBlock;
 import com.effecoria.block.PhiCampfireBlock;
 import com.effecoria.block.PhiFieldBlock;
@@ -891,6 +897,18 @@ public final class ModBlocks {
     /** Mage Tower Ψ-anchor — consecrate Φ-glued structures and soulbind. */
     public static final DeferredBlock<TowerAnchorBlock> TOWER_ANCHOR = BLOCKS.register(
             "tower_anchor", () -> new TowerAnchorBlock(TowerAnchorBlock.props()));
+    public static final DeferredBlock<FoundationAmuletBlock> FOUNDATION_AMULET = BLOCKS.register(
+            "foundation_amulet", () -> new FoundationAmuletBlock(towerFacilityProps()));
+    public static final DeferredBlock<OmegaDamperBlock> OMEGA_DAMPER = BLOCKS.register(
+            "omega_damper", () -> new OmegaDamperBlock(towerFacilityProps()));
+    public static final DeferredBlock<PhiAirSynthBlock> PHI_AIR_SYNTH = BLOCKS.register(
+            "phi_air_synth", () -> new PhiAirSynthBlock(towerFacilityProps()));
+    public static final DeferredBlock<PhiWaterPurifierBlock> PHI_WATER_PURIFIER = BLOCKS.register(
+            "phi_water_purifier", () -> new PhiWaterPurifierBlock(towerFacilityProps()));
+    public static final DeferredBlock<RegenChamberBlock> REGEN_CHAMBER = BLOCKS.register(
+            "regen_chamber", () -> new RegenChamberBlock(towerFacilityProps()));
+    public static final DeferredBlock<TowerConsoleBlock> TOWER_CONSOLE = BLOCKS.register(
+            "tower_console", () -> new TowerConsoleBlock(towerFacilityProps()));
 
     /** Ω-tainted obsidian — cleansed in Forge. */
     public static final DeferredBlock<Block> OMEGA_TAINTED_OBSIDIAN = BLOCKS.register(
@@ -1088,5 +1106,10 @@ public final class ModBlocks {
                                 .requiresCorrectToolForDrops()
                                 .strength(hardness, resistance)
                                 .sound(sound)));
+    }
+
+    private static BlockBehaviour.Properties towerFacilityProps() {
+        return BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).strength(4.0f, 12f)
+                .sound(SoundType.METAL).requiresCorrectToolForDrops().lightLevel(s -> 7);
     }
 }

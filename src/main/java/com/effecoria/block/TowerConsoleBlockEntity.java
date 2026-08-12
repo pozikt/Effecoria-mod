@@ -1,0 +1,226 @@
+package com.effecoria.block;
+
+import com.effecoria.alchemy.menu.TowerConsoleMenu;
+import com.effecoria.content.ModBlockEntities;
+import com.effecoria.core.tower.TowerBodyType;
+import com.effecoria.core.tower.TowerFacility;
+import com.effecoria.core.psi.PsiHelper;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+
+import javax.annotation.Nullable;
+
+/** Syncs tower telemetry for the Control Console GUI. */
+public final class TowerConsoleBlockEntity extends BlockEntity implements MenuProvider {
+    public static final int DATA_INTEGRITY = 0;
+    public static final int DATA_OMEGA = 1;
+    public static final int DATA_DOME_POWERED = 2;
+    public static final int DATA_DOME_COMBAT = 3;
+    public static final int DATA_BODY = 4;
+    public static final int DATA_AMULET = 5;
+    public static final int DATA_AIR = 6;
+    public static final int DATA_WATER = 7;
+    public static final int DATA_REGEN = 8;
+    public static final int DATA_BOUND = 9;
+    public static final int DATA_COUNT = 10;
+
+    private int integrityPct;
+    private int omegaPct;
+    private int domePowered;
+    private int domeCombat;
+    private int bodyOrdinal;
+    private int amuletCharged;
+    private int airOnline;
+    private int waterOnline;
+    private int regenOnline;
+    private int bound;
+
+    private final ContainerData data = new ContainerData() {
+        @Override
+        public int get(int index) {
+            return switch (index) {
+                case DATA_INTEGRITY -> integrityPct;
+                case DATA_OMEGA -> omegaPct;
+                case DATA_DOME_POWERED -> domePowered;
+                case DATA_DOME_COMBAT -> domeCombat;
+                case DATA_BODY -> bodyOrdinal;
+                case DATA_AMULET -> amuletCharged;
+                case DATA_AIR -> airOnline;
+                case DATA_WATER -> waterOnline;
+                case DATA_REGEN -> regenOnline;
+                case DATA_BOUND -> bound;
+                default -> 0;
+            };
+        }
+
+        @Override
+        public void set(int index, int value) {
+            switch (index) {
+                case DATA_INTEGRITY -> integrityPct = value;
+                case DATA_OMEGA -> omegaPct = value;
+                case DATA_DOME_POWERED -> domePowered = value;
+                case DATA_DOME_COMBAT -> domeCombat = value;
+                case DATA_BODY -> bodyOrdinal = value;
+                case DATA_AMULET -> amuletCharged = value;
+                case DATA_AIR -> airOnline = value;
+                case DATA_WATER -> waterOnline = value;
+                case DATA_REGEN -> regenOnline = value;
+                case DATA_BOUND -> bound = value;
+                default -> {}
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return DATA_COUNT;
+        }
+    };
+
+    public TowerConsoleBlockEntity(BlockPos pos, BlockState state) {
+        super(ModBlockEntities.TOWER_CONSOLE.get(), pos, state);
+    }
+
+    public ContainerData getData() {
+        return data;
+    }
+
+    public static void serverTick(Level level, BlockPos pos, BlockState state, TowerConsoleBlockEntity be) {
+        if (!(level instanceof ServerLevel server) || level.getGameTime() % 10 != 0) {
+            return;
+        }
+        be.refreshTelemetry(server);
+    }
+
+    public void refreshTelemetry(ServerLevel level) {
+        TowerAnchorBlockEntity computer = TowerFacility.findComputer(level, worldPosition).orElse(null);
+        if (computer == null) {
+            integrityPct = 0;
+            omegaPct = 0;
+            domePowered = 0;
+            domeCombat = 0;
+            bodyOrdinal = 0;
+            amuletCharged = 0;
+            airOnline = 0;
+            waterOnline = 0;
+            regenOnline = 0;
+            bound = 0;
+            return;
+        }
+        computer.refreshIntegrity(level);
+        integrityPct = (int) Math.round(computer.integrity() * 100.0);
+        omegaPct = computer.omegaPercent();
+        domePowered = computer.domePowered() ? 1 : 0;
+        domeCombat = computer.domeCombat() ? 1 : 0;
+        bodyOrdinal = computer.bodyType().ordinal();
+        bound = computer.bound() ? 1 : 0;
+        amuletCharged = TowerFacility.findChargedAmulet(level, worldPosition, computer.ownerUuid()).isPresent() ? 1 : 0;
+        airOnline = TowerFacility.findInComponent(level, worldPosition, PhiAirSynthBlockEntity.class).isPresent() ? 1 : 0;
+        waterOnline =
+                TowerFacility.findInComponent(level, worldPosition, PhiWaterPurifierBlockEntity.class).isPresent()
+                        ? 1
+                        : 0;
+        regenOnline = TowerFacility.hasRegenChamber(level, computer.getBlockPos()) ? 1 : 0;
+    }
+
+    public boolean tryToggleDome(Player player) {
+        if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp)) {
+            return false;
+        }
+        TowerAnchorBlockEntity computer = TowerFacility.findComputer(server, worldPosition).orElse(null);
+        if (computer == null || !computer.bound() || computer.ownerUuid() == null) {
+            return false;
+        }
+        if (!computer.ownerUuid().equals(sp.getUUID())) {
+            sp.displayClientMessage(Component.translatable("message.effecoria.tower.not_owner"), true);
+            return false;
+        }
+        boolean combat = computer.toggleDomeCombat();
+        sp.displayClientMessage(
+                Component.translatable(
+                        combat
+                                ? "message.effecoria.tower.dome_combat_on"
+                                : "message.effecoria.tower.dome_combat_off"),
+                true);
+        refreshTelemetry(server);
+        return true;
+    }
+
+    public boolean tryCycleBody(Player player) {
+        if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp)) {
+            return false;
+        }
+        TowerAnchorBlockEntity computer = TowerFacility.findComputer(server, worldPosition).orElse(null);
+        if (computer == null || !computer.consecrated()) {
+            return false;
+        }
+        if (computer.ownerUuid() != null && !computer.ownerUuid().equals(sp.getUUID())) {
+            sp.displayClientMessage(Component.translatable("message.effecoria.tower.not_owner"), true);
+            return false;
+        }
+        computer.cycleBodyType();
+        if (computer.ownerUuid() != null && computer.ownerUuid().equals(sp.getUUID())) {
+            var data = PsiHelper.get(sp);
+            data.setPreferredBodyType(computer.bodyType());
+            PsiHelper.set(sp, data);
+        }
+        sp.displayClientMessage(
+                Component.translatable("message.effecoria.tower.body_cycle", computer.bodyType().getSerializedName()),
+                true);
+        refreshTelemetry(server);
+        return true;
+    }
+
+    public TowerBodyType bodyType() {
+        TowerBodyType[] values = TowerBodyType.values();
+        int i = Math.max(0, Math.min(values.length - 1, bodyOrdinal));
+        return values[i];
+    }
+
+    @Override
+    public Component getDisplayName() {
+        return Component.translatable("container.effecoria.tower_console");
+    }
+
+    @Nullable
+    @Override
+    public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
+        if (level instanceof ServerLevel server) {
+            refreshTelemetry(server);
+        }
+        return new TowerConsoleMenu(id, inv, this, data);
+    }
+
+    @Override
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+        super.saveAdditional(tag, provider);
+    }
+
+    @Override
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+        super.loadAdditional(tag, provider);
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+        return saveWithoutMetadata(provider);
+    }
+}

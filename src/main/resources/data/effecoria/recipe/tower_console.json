@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": { "item": "effecoria:essonite_shard" },
+    "G": { "item": "minecraft:gold_ingot" },
+    "B": { "item": "effecoria:phi_bus" },
+    "R": { "item": "minecraft:redstone" }
+  },
+  "pattern": ["GRG", "EBE", "GGG"],
+  "result": { "count": 1, "id": "effecoria:tower_console" }
+}

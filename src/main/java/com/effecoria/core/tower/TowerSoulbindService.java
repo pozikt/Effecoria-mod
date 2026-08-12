@@ -1,6 +1,7 @@
 package com.effecoria.core.tower;
 
 import com.effecoria.block.TowerAnchorBlockEntity;
+import com.effecoria.block.FoundationAmuletBlockEntity;
 import com.effecoria.content.ModItems;
 import com.effecoria.core.alchemy.PhiPower;
 import com.effecoria.core.glue.EssenceGlueStructure;
@@ -25,8 +26,13 @@ public final class TowerSoulbindService {
 
     private TowerSoulbindService() {}
 
-    public static boolean bind(
-            ServerPlayer player, ServerLevel level, TowerAnchorBlockEntity anchor, ItemStack shardStack) {
+    public static boolean bindAtAmulet(
+            ServerPlayer player, ServerLevel level, FoundationAmuletBlockEntity amulet, ItemStack shardStack) {
+        TowerAnchorBlockEntity anchor = TowerFacility.findComputer(level, amulet.getBlockPos()).orElse(null);
+        if (anchor == null || !anchor.consecrated()) {
+            player.displayClientMessage(Component.translatable("message.effecoria.tower.need_consecrate"), true);
+            return false;
+        }
         if (!anchor.consecrated()) {
             player.displayClientMessage(Component.translatable("message.effecoria.tower.need_consecrate"), true);
             return false;
@@ -66,6 +72,7 @@ public final class TowerSoulbindService {
         }
 
         anchor.bindOwner(player.getUUID());
+        amulet.charge(player.getUUID());
         data.bindTower(level.dimension(), anchor.getBlockPos().immutable(), anchor.bodyType());
         PsiHelper.set(player, data);
         player.syncData(ModAttachments.PSI.get());
@@ -79,6 +86,23 @@ public final class TowerSoulbindService {
                 0.85f);
         player.displayClientMessage(Component.translatable("message.effecoria.tower.bound"), true);
         return true;
+    }
+
+    /** Break a charged foundation amulet: tear down every binding in its Φ component. */
+    public static void onAmuletBroken(ServerLevel level, FoundationAmuletBlockEntity amulet) {
+        java.util.UUID owner = amulet.ownerUuid();
+        TowerFacility.findComputer(level, amulet.getBlockPos()).ifPresent(TowerAnchorBlockEntity::unbind);
+        amulet.clearCharge();
+        if (owner == null) return;
+        ServerPlayer player = level.getServer().getPlayerList().getPlayer(owner);
+        if (player != null) {
+            PlayerPsiData data = PsiHelper.get(player);
+            data.clearTowerBind();
+            PsiHelper.set(player, data);
+            player.syncData(ModAttachments.PSI.get());
+            player.hurt(player.damageSources().magic(), BLOOD_DAMAGE);
+            player.displayClientMessage(Component.translatable("message.effecoria.tower.amulet_broken"), true);
+        }
     }
 
     private static boolean consumeFromPlayer(ServerPlayer player, net.minecraft.world.item.Item item, int count) {
@@ -139,6 +163,9 @@ public final class TowerSoulbindService {
             return false;
         }
         if (!player.getUUID().equals(anchor.ownerUuid())) {
+            return false;
+        }
+        if (TowerFacility.findChargedAmulet(towerLevel, data.towerPos(), player.getUUID()).isEmpty()) {
             return false;
         }
         EssenceGlueStructure.Report report =

@@ -27,6 +27,12 @@ import com.effecoria.block.MithrilBlockEntity;
 import com.effecoria.block.PortalModulatorBlockEntity;
 import com.effecoria.block.PhiBeaconBlockEntity;
 import com.effecoria.block.TowerAnchorBlockEntity;
+import com.effecoria.block.FoundationAmuletBlockEntity;
+import com.effecoria.block.OmegaDamperBlockEntity;
+import com.effecoria.block.PhiAirSynthBlockEntity;
+import com.effecoria.block.PhiWaterPurifierBlockEntity;
+import com.effecoria.block.RegenChamberBlockEntity;
+import com.effecoria.block.TowerConsoleBlockEntity;
 import com.effecoria.block.PhiBusBlockEntity;
 import com.effecoria.block.PhiCrusherBlockEntity;
 import com.effecoria.block.PhiCrusherHopperBlockEntity;
@@ -138,6 +144,24 @@ public final class ModBlockEntities {
                     "tower_anchor",
                     () -> BlockEntityType.Builder.of(TowerAnchorBlockEntity::new, ModBlocks.TOWER_ANCHOR.get())
                             .build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FoundationAmuletBlockEntity>> FOUNDATION_AMULET =
+            BLOCK_ENTITY_TYPES.register("foundation_amulet", () -> BlockEntityType.Builder.of(
+                    FoundationAmuletBlockEntity::new, ModBlocks.FOUNDATION_AMULET.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<OmegaDamperBlockEntity>> OMEGA_DAMPER =
+            BLOCK_ENTITY_TYPES.register("omega_damper", () -> BlockEntityType.Builder.of(
+                    OmegaDamperBlockEntity::new, ModBlocks.OMEGA_DAMPER.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiAirSynthBlockEntity>> PHI_AIR_SYNTH =
+            BLOCK_ENTITY_TYPES.register("phi_air_synth", () -> BlockEntityType.Builder.of(
+                    PhiAirSynthBlockEntity::new, ModBlocks.PHI_AIR_SYNTH.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiWaterPurifierBlockEntity>> PHI_WATER_PURIFIER =
+            BLOCK_ENTITY_TYPES.register("phi_water_purifier", () -> BlockEntityType.Builder.of(
+                    PhiWaterPurifierBlockEntity::new, ModBlocks.PHI_WATER_PURIFIER.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RegenChamberBlockEntity>> REGEN_CHAMBER =
+            BLOCK_ENTITY_TYPES.register("regen_chamber", () -> BlockEntityType.Builder.of(
+                    RegenChamberBlockEntity::new, ModBlocks.REGEN_CHAMBER.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TowerConsoleBlockEntity>> TOWER_CONSOLE =
+            BLOCK_ENTITY_TYPES.register("tower_console", () -> BlockEntityType.Builder.of(
+                    TowerConsoleBlockEntity::new, ModBlocks.TOWER_CONSOLE.get()).build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiBusBlockEntity>> PHI_BUS =
             BLOCK_ENTITY_TYPES.register(

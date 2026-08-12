@@ -287,6 +287,18 @@ public final class ModItems {
             "tower_anchor",
             () -> new HintBlockItem(
                     ModBlocks.TOWER_ANCHOR.get(), new Item.Properties(), "tooltip.effecoria.tower_anchor"));
+    public static final DeferredItem<BlockItem> FOUNDATION_AMULET = ITEMS.register(
+            "foundation_amulet", () -> new HintBlockItem(ModBlocks.FOUNDATION_AMULET.get(), new Item.Properties(), "tooltip.effecoria.foundation_amulet"));
+    public static final DeferredItem<BlockItem> OMEGA_DAMPER = ITEMS.register(
+            "omega_damper", () -> new HintBlockItem(ModBlocks.OMEGA_DAMPER.get(), new Item.Properties(), "tooltip.effecoria.omega_damper"));
+    public static final DeferredItem<BlockItem> PHI_AIR_SYNTH = ITEMS.register(
+            "phi_air_synth", () -> new HintBlockItem(ModBlocks.PHI_AIR_SYNTH.get(), new Item.Properties(), "tooltip.effecoria.phi_air_synth"));
+    public static final DeferredItem<BlockItem> PHI_WATER_PURIFIER = ITEMS.register(
+            "phi_water_purifier", () -> new HintBlockItem(ModBlocks.PHI_WATER_PURIFIER.get(), new Item.Properties(), "tooltip.effecoria.phi_water_purifier"));
+    public static final DeferredItem<BlockItem> REGEN_CHAMBER = ITEMS.register(
+            "regen_chamber", () -> new HintBlockItem(ModBlocks.REGEN_CHAMBER.get(), new Item.Properties(), "tooltip.effecoria.regen_chamber"));
+    public static final DeferredItem<BlockItem> TOWER_CONSOLE = ITEMS.register(
+            "tower_console", () -> new HintBlockItem(ModBlocks.TOWER_CONSOLE.get(), new Item.Properties(), "tooltip.effecoria.tower_console"));
 
     public static final DeferredItem<Item> ESSENCE_GLUE = ITEMS.register(
             "essence_glue",
@@ -564,6 +576,8 @@ public final class ModItems {
     public static final DeferredItem<Item> RESONANCE_FOCUS = ITEMS.register(
             "resonance_focus",
             () -> new ResonanceFocusItem(new Item.Properties().stacksTo(1)));
+    public static final DeferredItem<Item> PSI_FOCUS = ITEMS.register(
+            "psi_focus", () -> new PsiFocusItem(new Item.Properties()));
 
     /** Portable Φ buffer for low-Φ caves. */
     public static final DeferredItem<Item> PHI_CELL = ITEMS.register(

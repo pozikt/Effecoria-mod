@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "O": { "item": "effecoria:purified_obsidian" },
+    "L": { "item": "effecoria:lead_ingot" },
+    "P": { "item": "effecoria:omega_filter" }
+  },
+  "pattern": ["OLO", "LPL", "OLO"],
+  "result": { "count": 1, "id": "effecoria:omega_damper" }
+}

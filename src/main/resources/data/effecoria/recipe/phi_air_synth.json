@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": { "item": "effecoria:phi_bus" },
+    "C": { "item": "effecoria:phi_cloth" },
+    "G": { "item": "minecraft:glass" },
+    "E": { "item": "effecoria:essonite_shard" }
+  },
+  "pattern": ["GCG", "EBE", "GGG"],
+  "result": { "count": 1, "id": "effecoria:phi_air_synth" }
+}

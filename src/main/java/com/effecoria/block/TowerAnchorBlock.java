@@ -4,7 +4,6 @@ import com.effecoria.content.ModBlockEntities;
 import com.effecoria.content.ModItems;
 import com.effecoria.core.technomagic.TechnomagicEra;
 import com.effecoria.core.technomagic.TechnomagicGates;
-import com.effecoria.core.tower.TowerSoulbindService;
 import com.effecoria.core.tower.TowerStructureValidator;
 import com.mojang.serialization.MapCodec;
 
@@ -95,22 +94,9 @@ public final class TowerAnchorBlock extends BaseEntityBlock {
             return ItemInteractionResult.FAIL;
         }
 
-        if (stack.is(ModItems.PURIFIED_OBSIDIAN.get())) {
-            if (anchor.clearOmega()) {
-                if (!sp.getAbilities().instabuild) {
-                    stack.shrink(1);
-                }
-                sp.displayClientMessage(Component.translatable("message.effecoria.tower.omega_cleared"), true);
-            } else {
-                sp.displayClientMessage(Component.translatable("message.effecoria.tower.omega_empty"), true);
-            }
-            return ItemInteractionResult.CONSUME;
-        }
-
         if (stack.is(ModItems.SOUL_SHARD.get())) {
-            return TowerSoulbindService.bind(sp, server, anchor, stack)
-                    ? ItemInteractionResult.CONSUME
-                    : ItemInteractionResult.FAIL;
+            sp.displayClientMessage(Component.translatable("message.effecoria.tower.use_foundation_amulet"), true);
+            return ItemInteractionResult.FAIL;
         }
 
         if (stack.is(ModItems.RESONANCE_FOCUS.get())) {

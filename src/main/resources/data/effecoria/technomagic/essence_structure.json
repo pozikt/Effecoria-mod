@@ -1,8 +1,8 @@
-{
-  "id": "effecoria:essence_structure",
-  "era": 6,
-  "icon": "effecoria:essence_glue",
-  "status": "available",
-  "requires": ["effecoria:portal_gate", "effecoria:geo_well"],
-  "display_unlocks": ["essence_glue", "tower_anchor"]
-}
+{
+  "id": "effecoria:essence_structure",
+  "era": 6,
+  "icon": "effecoria:essence_glue",
+  "status": "available",
+  "requires": ["effecoria:portal_gate", "effecoria:geo_well"],
+  "display_unlocks": ["essence_glue", "tower_anchor", "foundation_amulet", "omega_damper", "phi_air_synth", "phi_water_purifier", "regen_chamber", "tower_console", "psi_focus"]
+}

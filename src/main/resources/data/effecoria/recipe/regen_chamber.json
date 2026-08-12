@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": { "item": "effecoria:essonite_shard" },
+    "G": { "item": "minecraft:gold_ingot" },
+    "B": { "item": "minecraft:white_bed" },
+    "P": { "item": "effecoria:phi_bus" }
+  },
+  "pattern": ["GEG", "PBP", "GEG"],
+  "result": { "count": 1, "id": "effecoria:regen_chamber" }
+}
