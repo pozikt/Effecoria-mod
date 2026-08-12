@@ -203,6 +203,8 @@ public final class ModCommonEvents {
             PsiHelper.set(player, flightData);
         }
 
+        com.effecoria.core.tower.TowerGeniusLociService.tickPlayer(player);
+
         if (player.tickCount % 10 != 0) {
             return;
         }

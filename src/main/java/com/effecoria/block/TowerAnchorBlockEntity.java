@@ -3,6 +3,7 @@ package com.effecoria.block;
 import com.effecoria.content.ModBlockEntities;
 import com.effecoria.content.ModItems;
 import com.effecoria.core.tower.TowerBodyType;
+import com.effecoria.core.tower.TowerDomeService;
 import com.effecoria.core.tower.TowerStructureValidator;
 
 import net.minecraft.core.BlockPos;
@@ -15,6 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -22,7 +24,7 @@ import net.minecraft.world.phys.AABB;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-/** Ψ-computer heart of a Mage Tower — consecrate, soulbind, revive chamber. */
+/** Ψ-computer heart of a Mage Tower — consecrate, soulbind, revive chamber, Φ-dome. */
 public final class TowerAnchorBlockEntity extends BlockEntity {
     public static final int INV_SIZE = 9;
     public static final int OMEGA_MAX = 10000;
@@ -43,10 +45,20 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
     private int reviveCount;
     private TowerBodyType bodyType = TowerBodyType.BASIC;
 
+    private boolean domeCombat;
+    /** Last successful Φ drain for the dome (transient runtime). */
+    private boolean domePowered;
+    /** Avoid spamming clear packets while passive. */
+    private boolean clientDomeSynced;
+
     private final NonNullList<ItemStack> items = NonNullList.withSize(INV_SIZE, ItemStack.EMPTY);
 
     public TowerAnchorBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.TOWER_ANCHOR.get(), pos, state);
+    }
+
+    public static void serverTick(Level level, BlockPos pos, BlockState state, TowerAnchorBlockEntity be) {
+        TowerDomeService.serverTick(level, pos, be);
     }
 
     public boolean consecrated() {
@@ -92,6 +104,44 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
 
     public int gluedCells() {
         return gluedCells;
+    }
+
+    public AABB structureBounds() {
+        return structureBounds;
+    }
+
+    public boolean domeCombat() {
+        return domeCombat;
+    }
+
+    public void setDomeCombat(boolean value) {
+        if (domeCombat == value) {
+            return;
+        }
+        domeCombat = value;
+        setChanged();
+        sync();
+    }
+
+    public boolean toggleDomeCombat() {
+        setDomeCombat(!domeCombat);
+        return domeCombat;
+    }
+
+    public boolean domePowered() {
+        return domePowered;
+    }
+
+    public void setDomePowered(boolean value) {
+        domePowered = value;
+    }
+
+    public boolean clientDomeSynced() {
+        return clientDomeSynced;
+    }
+
+    public void setClientDomeSynced(boolean value) {
+        clientDomeSynced = value;
     }
 
     public void cycleBodyType() {
@@ -142,6 +192,8 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
     public void unbind() {
         ownerUuid = null;
         bound = false;
+        domeCombat = false;
+        domePowered = false;
         setChanged();
         sync();
     }
@@ -213,7 +265,6 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
             setChanged();
             return true;
         }
-        // rollback not implemented — only call after has(item,count)
         return false;
     }
 
@@ -264,7 +315,9 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
                 bodyType.getSerializedName(),
                 omegaPercent(),
                 reviveCount,
-                bound ? 1 : 0);
+                bound ? 1 : 0,
+                domePowered ? 1 : 0,
+                domeCombat ? 1 : 0);
     }
 
     public BlockPos revivePos() {
@@ -300,6 +353,7 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
         tag.putInt("Omega", omegaCentis);
         tag.putInt("ReviveCount", reviveCount);
         tag.putString("BodyType", bodyType.getSerializedName());
+        tag.putBoolean("DomeCombat", domeCombat);
         ContainerHelper.saveAllItems(tag, items, provider);
     }
 
@@ -327,6 +381,7 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
         omegaCentis = tag.getInt("Omega");
         reviveCount = tag.getInt("ReviveCount");
         bodyType = TowerBodyType.fromId(tag.getString("BodyType"));
+        domeCombat = tag.getBoolean("DomeCombat");
         ContainerHelper.loadAllItems(tag, items, provider);
     }
 

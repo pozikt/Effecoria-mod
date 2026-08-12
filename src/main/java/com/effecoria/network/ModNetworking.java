@@ -22,6 +22,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -1749,6 +1750,67 @@ public final class ModNetworking {
                         new java.util.HashSet<>(payload.glued()),
                         new java.util.HashSet<>(payload.session()),
                         pending);
+            });
+        }
+    }
+
+    /** Combat Φ-dome outline sync (ultramarine AABB around a Mage Tower). */
+    public record TowerDomeSyncPayload(
+            BlockPos anchor, boolean combat, double minX, double minY, double minZ, double maxX, double maxY, double maxZ)
+            implements CustomPacketPayload {
+        public static final Type<TowerDomeSyncPayload> TYPE =
+                new Type<>(ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "tower_dome_sync"));
+
+        public static TowerDomeSyncPayload active(BlockPos anchor, AABB box) {
+            return new TowerDomeSyncPayload(
+                    anchor.immutable(), true, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
+        }
+
+        public static TowerDomeSyncPayload clear(BlockPos anchor) {
+            return new TowerDomeSyncPayload(anchor.immutable(), false, 0, 0, 0, 0, 0, 0);
+        }
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, TowerDomeSyncPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, payload) -> {
+                            BlockPos.STREAM_CODEC.encode(buf, payload.anchor());
+                            ByteBufCodecs.BOOL.encode(buf, payload.combat());
+                            buf.writeDouble(payload.minX());
+                            buf.writeDouble(payload.minY());
+                            buf.writeDouble(payload.minZ());
+                            buf.writeDouble(payload.maxX());
+                            buf.writeDouble(payload.maxY());
+                            buf.writeDouble(payload.maxZ());
+                        },
+                        buf -> new TowerDomeSyncPayload(
+                                BlockPos.STREAM_CODEC.decode(buf),
+                                ByteBufCodecs.BOOL.decode(buf),
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readDouble(),
+                                buf.readDouble()));
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(TowerDomeSyncPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!payload.combat()) {
+                    com.effecoria.client.tower.ClientTowerDomeOutline.apply(payload.anchor(), false, null);
+                    return;
+                }
+                AABB box = new AABB(
+                        payload.minX(),
+                        payload.minY(),
+                        payload.minZ(),
+                        payload.maxX(),
+                        payload.maxY(),
+                        payload.maxZ());
+                com.effecoria.client.tower.ClientTowerDomeOutline.apply(payload.anchor(), true, box);
             });
         }
     }

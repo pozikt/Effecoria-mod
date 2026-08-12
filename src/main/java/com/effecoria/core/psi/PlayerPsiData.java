@@ -240,6 +240,8 @@ public final class PlayerPsiData {
     private int savedTowerXpTotal;
     private int savedTowerXpLevel;
     private float savedTowerXpProgress;
+    private float lastTowerIntegrity;
+    private int lociWarnCooldown;
 
     /** Server-only last position for movement-based training XP. */
     private transient double trainingSampleX = Double.NaN;
@@ -838,6 +840,22 @@ public final class PlayerPsiData {
         return savedTowerXpProgress;
     }
 
+    public float lastTowerIntegrity() {
+        return lastTowerIntegrity;
+    }
+
+    public void setLastTowerIntegrity(float value) {
+        this.lastTowerIntegrity = Math.max(0f, value);
+    }
+
+    public int lociWarnCooldown() {
+        return lociWarnCooldown;
+    }
+
+    public void setLociWarnCooldown(int ticks) {
+        this.lociWarnCooldown = Math.max(0, ticks);
+    }
+
     public void bindTower(
             net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dim,
             net.minecraft.core.BlockPos pos,
@@ -1041,6 +1059,8 @@ public final class PlayerPsiData {
         tag.putInt("savedTowerXpTotal", savedTowerXpTotal);
         tag.putInt("savedTowerXpLevel", savedTowerXpLevel);
         tag.putFloat("savedTowerXpProgress", savedTowerXpProgress);
+        tag.putFloat("lastTowerIntegrity", lastTowerIntegrity);
+        tag.putInt("lociWarnCooldown", lociWarnCooldown);
 
         ListTag thrallList = new ListTag();
         for (UUID thrallId : necroThrallIds) {
@@ -1161,6 +1181,8 @@ public final class PlayerPsiData {
         savedTowerXpTotal = tag.contains("savedTowerXpTotal") ? tag.getInt("savedTowerXpTotal") : 0;
         savedTowerXpLevel = tag.contains("savedTowerXpLevel") ? tag.getInt("savedTowerXpLevel") : 0;
         savedTowerXpProgress = tag.contains("savedTowerXpProgress") ? tag.getFloat("savedTowerXpProgress") : 0f;
+        lastTowerIntegrity = tag.contains("lastTowerIntegrity") ? tag.getFloat("lastTowerIntegrity") : 0f;
+        lociWarnCooldown = tag.contains("lociWarnCooldown") ? tag.getInt("lociWarnCooldown") : 0;
         necroReservedPsi = tag.contains("necroReservedPsi") ? tag.getFloat("necroReservedPsi") : 0f;
 
         necroThrallIds = new ArrayList<>();
@@ -1366,6 +1388,8 @@ public final class PlayerPsiData {
         copy.savedTowerXpTotal = savedTowerXpTotal;
         copy.savedTowerXpLevel = savedTowerXpLevel;
         copy.savedTowerXpProgress = savedTowerXpProgress;
+        copy.lastTowerIntegrity = lastTowerIntegrity;
+        copy.lociWarnCooldown = lociWarnCooldown;
         return copy;
     }
 }

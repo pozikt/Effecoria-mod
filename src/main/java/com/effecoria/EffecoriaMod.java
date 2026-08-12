@@ -339,6 +339,10 @@ public class EffecoriaMod {
                 ModNetworking.EssenceGlueSyncPayload.TYPE,
                 ModNetworking.EssenceGlueSyncPayload.STREAM_CODEC,
                 ModNetworking.EssenceGlueSyncPayload::handle);
+        registrar.playToClient(
+                ModNetworking.TowerDomeSyncPayload.TYPE,
+                ModNetworking.TowerDomeSyncPayload.STREAM_CODEC,
+                ModNetworking.TowerDomeSyncPayload::handle);
     }
 
 }

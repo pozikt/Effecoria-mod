@@ -1,6 +1,8 @@
 package com.effecoria.event;
 
+import com.effecoria.core.glue.EssenceGlueData;
 import com.effecoria.core.glue.EssenceGlueService;
+import com.effecoria.core.tower.TowerGeniusLociService;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -17,6 +19,9 @@ public final class EssenceGlueEvents {
         Level level = (Level) event.getLevel();
         if (level.isClientSide() || !(level instanceof ServerLevel server)) {
             return;
+        }
+        if (EssenceGlueData.get(server).isGlued(event.getPos())) {
+            TowerGeniusLociService.onGluedCellBroken(server, event.getPos());
         }
         EssenceGlueService.onBlockRemoved(server, event.getPos());
     }
