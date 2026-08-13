@@ -17,14 +17,16 @@ import net.minecraft.world.phys.AABB;
 import org.joml.Matrix4f;
 
 /**
- * Assembled regen capsule: open-top 4×3×4 hull centered on the floor core,
- * plus a translucent Φ-fluid column that rises with fillAmount.
+ * Assembled regen capsule hull (open-top 4×3×4). Bath liquid is real
+ * {@code purified_phi_water} fluid blocks in the cavity — not BER fake fluid.
  */
 public final class RegenChamberRenderer implements BlockEntityRenderer<RegenChamberBlockEntity> {
     private static final ResourceLocation HULL =
             ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "textures/block/regen_capsule_hull.png");
-    private static final ResourceLocation FLUID =
-            ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "textures/block/regen_capsule_fluid.png");
+    private static final ResourceLocation FLOOR =
+            ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "textures/block/regen_capsule_floor.png");
+    private static final ResourceLocation RIM =
+            ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "textures/block/regen_capsule_rim_top.png");
 
     public RegenChamberRenderer(BlockEntityRendererProvider.Context context) {}
 
@@ -41,61 +43,36 @@ public final class RegenChamberRenderer implements BlockEntityRenderer<RegenCham
         }
 
         int overlay = OverlayTexture.NO_OVERLAY;
-
-        // Hull: AABB relative to core [-1..3]×[0..3]×[-1..3] in block space.
         poseStack.pushPose();
         poseStack.translate(-1.0, 0.0, -1.0);
         Matrix4f mat = poseStack.last().pose();
         PoseStack.Pose pose = poseStack.last();
-        VertexConsumer hull = buffer.getBuffer(RenderType.entityTranslucent(HULL));
 
         float min = 0.02f;
         float maxX = 3.98f;
         float maxY = 2.98f;
         float maxZ = 3.98f;
-        // Floor
-        quad(hull, pose, mat, min, min, min, maxX, min, min, maxX, min, maxZ, min, min, maxZ, 0, -1, 0, packedLight, overlay, 200);
-        // Walls (open top — no +Y face)
-        quad(hull, pose, mat, min, min, min, min, maxY, min, maxX, maxY, min, maxX, min, min, 0, 0, -1, packedLight, overlay, 180);
-        quad(hull, pose, mat, maxX, min, maxZ, maxX, maxY, maxZ, min, maxY, maxZ, min, min, maxZ, 0, 0, 1, packedLight, overlay, 180);
-        quad(hull, pose, mat, min, min, maxZ, min, maxY, maxZ, min, maxY, min, min, min, min, -1, 0, 0, packedLight, overlay, 180);
-        quad(hull, pose, mat, maxX, min, min, maxX, maxY, min, maxX, maxY, maxZ, maxX, min, maxZ, 1, 0, 0, packedLight, overlay, 180);
-        // Inner rim around open top
         float ix0 = 1.02f;
         float ix1 = 2.98f;
         float iz0 = 1.02f;
         float iz1 = 2.98f;
         float top = maxY;
-        quad(hull, pose, mat, min, top, min, maxX, top, min, maxX, top, iz0, min, top, iz0, 0, 1, 0, packedLight, overlay, 200);
-        quad(hull, pose, mat, min, top, iz1, maxX, top, iz1, maxX, top, maxZ, min, top, maxZ, 0, 1, 0, packedLight, overlay, 200);
-        quad(hull, pose, mat, min, top, iz0, min, top, iz1, ix0, top, iz1, ix0, top, iz0, 0, 1, 0, packedLight, overlay, 200);
-        quad(hull, pose, mat, ix1, top, iz0, ix1, top, iz1, maxX, top, iz1, maxX, top, iz0, 0, 1, 0, packedLight, overlay, 200);
-        poseStack.popPose();
 
-        float ratio = Math.max(0f, Math.min(1f, be.fillRatio()));
-        if (ratio <= 0.001f) {
-            return;
-        }
+        // One RenderType at a time — concurrent getBuffer ends the previous builder (1.21).
+        VertexConsumer floor = buffer.getBuffer(RenderType.entityTranslucent(FLOOR));
+        quad(floor, pose, mat, min, min, min, maxX, min, min, maxX, min, maxZ, min, min, maxZ, 0, -1, 0, packedLight, overlay, 230);
 
-        // Fluid column above cavity floor (local to core): [0..2]×[1..1+3r]×[0..2]
-        poseStack.pushPose();
-        mat = poseStack.last().pose();
-        pose = poseStack.last();
-        VertexConsumer fluid = buffer.getBuffer(RenderType.entityTranslucent(FLUID));
-        float fy0 = 1.01f;
-        float fy1 = 1.01f + 2.96f * ratio;
-        float fx0 = 0.08f;
-        float fx1 = 1.92f;
-        float fz0 = 0.08f;
-        float fz1 = 1.92f;
-        int a = 140;
-        // sides
-        quad(fluid, pose, mat, fx0, fy0, fz0, fx0, fy1, fz0, fx1, fy1, fz0, fx1, fy0, fz0, 0, 0, -1, packedLight, overlay, a);
-        quad(fluid, pose, mat, fx1, fy0, fz1, fx1, fy1, fz1, fx0, fy1, fz1, fx0, fy0, fz1, 0, 0, 1, packedLight, overlay, a);
-        quad(fluid, pose, mat, fx0, fy0, fz1, fx0, fy1, fz1, fx0, fy1, fz0, fx0, fy0, fz0, -1, 0, 0, packedLight, overlay, a);
-        quad(fluid, pose, mat, fx1, fy0, fz0, fx1, fy1, fz0, fx1, fy1, fz1, fx1, fy0, fz1, 1, 0, 0, packedLight, overlay, a);
-        // surface
-        quad(fluid, pose, mat, fx0, fy1, fz1, fx1, fy1, fz1, fx1, fy1, fz0, fx0, fy1, fz0, 0, 1, 0, packedLight, overlay, 180);
+        VertexConsumer hull = buffer.getBuffer(RenderType.entityTranslucent(HULL));
+        quad(hull, pose, mat, min, min, min, min, maxY, min, maxX, maxY, min, maxX, min, min, 0, 0, -1, packedLight, overlay, 200);
+        quad(hull, pose, mat, maxX, min, maxZ, maxX, maxY, maxZ, min, maxY, maxZ, min, min, maxZ, 0, 0, 1, packedLight, overlay, 200);
+        quad(hull, pose, mat, min, min, maxZ, min, maxY, maxZ, min, maxY, min, min, min, min, -1, 0, 0, packedLight, overlay, 200);
+        quad(hull, pose, mat, maxX, min, min, maxX, maxY, min, maxX, maxY, maxZ, maxX, min, maxZ, 1, 0, 0, packedLight, overlay, 200);
+
+        VertexConsumer rim = buffer.getBuffer(RenderType.entityTranslucent(RIM));
+        quad(rim, pose, mat, min, top, min, maxX, top, min, maxX, top, iz0, min, top, iz0, 0, 1, 0, packedLight, overlay, 230);
+        quad(rim, pose, mat, min, top, iz1, maxX, top, iz1, maxX, top, maxZ, min, top, maxZ, 0, 1, 0, packedLight, overlay, 230);
+        quad(rim, pose, mat, min, top, iz0, min, top, iz1, ix0, top, iz1, ix0, top, iz0, 0, 1, 0, packedLight, overlay, 230);
+        quad(rim, pose, mat, ix1, top, iz0, ix1, top, iz1, maxX, top, iz1, maxX, top, iz0, 0, 1, 0, packedLight, overlay, 230);
         poseStack.popPose();
     }
 

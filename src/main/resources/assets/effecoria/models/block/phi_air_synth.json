@@ -1,4 +1,12 @@
-﻿{
-  "parent": "minecraft:block/cube_all",
-  "textures": { "all": "effecoria:block/phi_air_synth" }
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "effecoria:block/phi_air_synth_front",
+    "north": "effecoria:block/phi_air_synth_front",
+    "south": "effecoria:block/phi_air_synth_back",
+    "west": "effecoria:block/phi_air_synth_left",
+    "east": "effecoria:block/phi_air_synth_right",
+    "up": "effecoria:block/phi_air_synth_top",
+    "down": "effecoria:block/phi_air_synth_bottom"
+  }
 }

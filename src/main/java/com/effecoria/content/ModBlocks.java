@@ -680,6 +680,22 @@ public final class ModBlocks {
                             .lightLevel(state -> 8)
                             .sound(SoundType.EMPTY)));
 
+    /** Filtered Φ-solution — contained bath fluid for the regen capsule. */
+    public static final DeferredBlock<LiquidBlock> PURIFIED_PHI_WATER = BLOCKS.register(
+            "purified_phi_water",
+            () -> new LiquidBlock(
+                    ModFluids.PURIFIED_PHI_WATER.get(),
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_CYAN)
+                            .replaceable()
+                            .noCollission()
+                            .strength(100.0f)
+                            .pushReaction(PushReaction.DESTROY)
+                            .noLootTable()
+                            .liquid()
+                            .lightLevel(state -> 10)
+                            .sound(SoundType.EMPTY)));
+
     /** Village mortar — grind essonite materials into dust. */
     public static final DeferredBlock<MortarAndPestleBlock> MORTAR_AND_PESTLE = BLOCKS.register(
             "mortar_and_pestle",

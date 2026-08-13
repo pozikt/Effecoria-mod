@@ -1,4 +1,12 @@
-﻿{
-  "parent": "minecraft:block/cube_all",
-  "textures": { "all": "effecoria:block/regen_chamber" }
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "effecoria:block/regen_chamber_front",
+    "north": "effecoria:block/regen_chamber_front",
+    "south": "effecoria:block/regen_chamber_back",
+    "west": "effecoria:block/regen_chamber_left",
+    "east": "effecoria:block/regen_chamber_right",
+    "up": "effecoria:block/regen_chamber_top",
+    "down": "effecoria:block/regen_chamber_bottom"
+  }
 }

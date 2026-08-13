@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
  * </pre>
  */
 public final class RegenChamberMultiblock {
-    public static final int CAPACITY = 12;
+    public static final int CAPACITY = 8; // 2×2×2 air cavity cells
 
     private RegenChamberMultiblock() {}
 
@@ -187,6 +187,7 @@ public final class RegenChamberMultiblock {
         }
         chamber.setDismantling(true);
         try {
+            clearBathFluid(level, core);
             BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
             for (int dy = 0; dy <= 2; dy++) {
                 for (int dx = -1; dx <= 2; dx++) {
@@ -242,6 +243,57 @@ public final class RegenChamberMultiblock {
                 core.getX() + 2.0,
                 core.getY() + 3.0,
                 core.getZ() + 2.0);
+    }
+
+    /** Bottom-up fill order for the 2×2×2 air cavity. */
+    public static @Nullable BlockPos nextEmptyBathCell(LevelReader level, BlockPos core) {
+        for (int dy = 1; dy <= 2; dy++) {
+            for (int dz = 0; dz <= 1; dz++) {
+                for (int dx = 0; dx <= 1; dx++) {
+                    BlockPos cell = core.offset(dx, dy, dz);
+                    if (level.getBlockState(cell).isAir()) {
+                        return cell;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static int countBathFluid(LevelReader level, BlockPos core) {
+        int n = 0;
+        for (int dy = 1; dy <= 2; dy++) {
+            for (int dz = 0; dz <= 1; dz++) {
+                for (int dx = 0; dx <= 1; dx++) {
+                    if (level.getBlockState(core.offset(dx, dy, dz)).is(ModBlocks.PURIFIED_PHI_WATER.get())) {
+                        n++;
+                    }
+                }
+            }
+        }
+        return n;
+    }
+
+    public static void clearBathFluid(ServerLevel level, BlockPos core) {
+        for (int dy = 1; dy <= 2; dy++) {
+            for (int dz = 0; dz <= 1; dz++) {
+                for (int dx = 0; dx <= 1; dx++) {
+                    BlockPos cell = core.offset(dx, dy, dz);
+                    if (level.getBlockState(cell).is(ModBlocks.PURIFIED_PHI_WATER.get())) {
+                        level.setBlock(cell, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+                    }
+                }
+            }
+        }
+    }
+
+    public static boolean placeBathFluid(ServerLevel level, BlockPos core) {
+        BlockPos cell = nextEmptyBathCell(level, core);
+        if (cell == null) {
+            return false;
+        }
+        level.setBlock(cell, ModBlocks.PURIFIED_PHI_WATER.get().defaultBlockState(), Block.UPDATE_ALL);
+        return true;
     }
 
     public static void forEachShellOffset(ShellConsumer consumer) {

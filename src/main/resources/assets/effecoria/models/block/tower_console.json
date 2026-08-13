@@ -1,4 +1,12 @@
-﻿{
-  "parent": "minecraft:block/cube_all",
-  "textures": { "all": "effecoria:block/tower_console" }
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "effecoria:block/tower_console_front",
+    "north": "effecoria:block/tower_console_front",
+    "south": "effecoria:block/tower_console_back",
+    "west": "effecoria:block/tower_console_left",
+    "east": "effecoria:block/tower_console_right",
+    "up": "effecoria:block/tower_console_top",
+    "down": "effecoria:block/tower_console_bottom"
+  }
 }

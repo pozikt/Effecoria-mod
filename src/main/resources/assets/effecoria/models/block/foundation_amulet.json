@@ -1,4 +1,12 @@
-﻿{
-  "parent": "minecraft:block/cube_all",
-  "textures": { "all": "effecoria:block/foundation_amulet" }
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "effecoria:block/foundation_amulet_front",
+    "north": "effecoria:block/foundation_amulet_front",
+    "south": "effecoria:block/foundation_amulet_back",
+    "west": "effecoria:block/foundation_amulet_left",
+    "east": "effecoria:block/foundation_amulet_right",
+    "up": "effecoria:block/foundation_amulet_top",
+    "down": "effecoria:block/foundation_amulet_bottom"
+  }
 }

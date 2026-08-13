@@ -63,5 +63,50 @@ public final class PhiWaterClient {
                     }
                 },
                 ModFluids.PHI_WATER_TYPE.value());
+
+        event.registerFluidType(
+                new IClientFluidTypeExtensions() {
+                    private static final int TINT = 0xFF3EC8B0;
+
+                    @Override
+                    public ResourceLocation getStillTexture() {
+                        return ResourceLocation.withDefaultNamespace("block/water_still");
+                    }
+
+                    @Override
+                    public ResourceLocation getFlowingTexture() {
+                        return ResourceLocation.withDefaultNamespace("block/water_flow");
+                    }
+
+                    @Override
+                    public ResourceLocation getOverlayTexture() {
+                        return ResourceLocation.withDefaultNamespace("block/water_overlay");
+                    }
+
+                    @Override
+                    public int getTintColor() {
+                        return TINT;
+                    }
+
+                    @Override
+                    public int getTintColor(
+                            net.minecraft.world.level.material.FluidState state,
+                            net.minecraft.world.level.BlockAndTintGetter getter,
+                            net.minecraft.core.BlockPos pos) {
+                        return TINT;
+                    }
+
+                    @Override
+                    public Vector3f modifyFogColor(
+                            net.minecraft.client.Camera camera,
+                            float partialTick,
+                            net.minecraft.client.multiplayer.ClientLevel level,
+                            int renderDistance,
+                            float darkenWorldAmount,
+                            Vector3f fluidFogColor) {
+                        return new Vector3f(0.18f, 0.72f, 0.62f);
+                    }
+                },
+                ModFluids.PURIFIED_PHI_WATER_TYPE.value());
     }
 }

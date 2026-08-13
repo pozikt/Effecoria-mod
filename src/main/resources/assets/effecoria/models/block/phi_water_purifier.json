@@ -1,4 +1,12 @@
-﻿{
-  "parent": "minecraft:block/cube_all",
-  "textures": { "all": "effecoria:block/phi_water_purifier" }
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "effecoria:block/phi_water_purifier_front",
+    "north": "effecoria:block/phi_water_purifier_front",
+    "south": "effecoria:block/phi_water_purifier_back",
+    "west": "effecoria:block/phi_water_purifier_left",
+    "east": "effecoria:block/phi_water_purifier_right",
+    "up": "effecoria:block/phi_water_purifier_top",
+    "down": "effecoria:block/phi_water_purifier_bottom"
+  }
 }

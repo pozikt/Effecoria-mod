@@ -75,6 +75,9 @@ public final class RegenChamberBlockEntity extends BlockEntity {
     }
 
     public void onDisassembled() {
+        if (level instanceof ServerLevel server) {
+            RegenChamberMultiblock.clearBathFluid(server, worldPosition);
+        }
         fillAmount = 0;
     }
 
@@ -90,12 +93,17 @@ public final class RegenChamberBlockEntity extends BlockEntity {
         }
     }
 
-    /** Insert one bucket of purified Φ-water. Returns true if accepted. */
+    /** Insert one bucket of purified Φ-water into the next empty cavity cell. */
     public boolean tryFill(ServerPlayer player, ItemStack stack) {
-        if (!formed || isFull() || !stack.is(ModItems.PURIFIED_PHI_WATER_BUCKET.get())) {
+        if (!(level instanceof ServerLevel server) || !formed || isFull()
+                || !stack.is(ModItems.PURIFIED_PHI_WATER_BUCKET.get())) {
             return false;
         }
-        fillAmount++;
+        if (!RegenChamberMultiblock.placeBathFluid(server, worldPosition)) {
+            fillAmount = RegenChamberMultiblock.countBathFluid(server, worldPosition);
+            return false;
+        }
+        fillAmount = RegenChamberMultiblock.countBathFluid(server, worldPosition);
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
             ItemStack empty = new ItemStack(Items.BUCKET);
@@ -128,6 +136,15 @@ public final class RegenChamberBlockEntity extends BlockEntity {
             RegenChamberMultiblock.disassemble(server, pos);
         }
 
+        if (be.formed) {
+            int counted = RegenChamberMultiblock.countBathFluid(server, pos);
+            if (counted != be.fillAmount) {
+                be.fillAmount = counted;
+                be.setChanged();
+                be.sync();
+            }
+        }
+
         BlockState current = level.getBlockState(pos);
         if (current.is(com.effecoria.content.ModBlocks.REGEN_CHAMBER.get())
                 && current.getValue(RegenChamberBlock.FORMED) != be.formed) {
@@ -144,7 +161,6 @@ public final class RegenChamberBlockEntity extends BlockEntity {
         if (!towerOk) {
             return;
         }
-        // Prefer owner-alive gate when possible, but chamber still works for guests in a live tower.
         if (!PhiPower.consumeTick(level, pos, 3)) {
             return;
         }

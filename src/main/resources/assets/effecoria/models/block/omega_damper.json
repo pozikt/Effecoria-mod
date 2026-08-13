@@ -1,4 +1,12 @@
-﻿{
-  "parent": "minecraft:block/cube_all",
-  "textures": { "all": "effecoria:block/omega_damper" }
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "effecoria:block/omega_damper_front",
+    "north": "effecoria:block/omega_damper_front",
+    "south": "effecoria:block/omega_damper_back",
+    "west": "effecoria:block/omega_damper_left",
+    "east": "effecoria:block/omega_damper_right",
+    "up": "effecoria:block/omega_damper_top",
+    "down": "effecoria:block/omega_damper_bottom"
+  }
 }
