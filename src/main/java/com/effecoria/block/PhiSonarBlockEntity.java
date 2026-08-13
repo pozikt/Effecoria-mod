@@ -43,8 +43,13 @@ public final class PhiSonarBlockEntity extends BlockEntity {
 
     /** Marks a successful scan and starts the cooldown. */
     public void markScanned(long gameTime) {
+        markScanned(gameTime, SCAN_COOLDOWN_TICKS);
+    }
+
+    /** Marks a successful scan with a mode-specific cooldown. */
+    public void markScanned(long gameTime, int cooldown) {
         lastScanGameTime = gameTime;
-        cooldownTicks = SCAN_COOLDOWN_TICKS;
+        cooldownTicks = Math.max(1, cooldown);
         setChanged();
     }
 

@@ -7,8 +7,6 @@ import com.effecoria.core.tower.TowerFacility;
 import com.effecoria.network.ModNetworking;
 
 import net.minecraft.client.gui.GuiGraphics;
-
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -30,7 +28,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     private static final int LIST_W = 160;
     private static final int LIST_H = 150;
     private static final int ROW_H = 18;
-    private static final int MAP_SIZE = 180;
+    private static final int MAP_SIZE = 168;
 
     private static final int BG_OUTER = 0xCC15202C;
     private static final int BG_INNER = 0xEE1E2E3C;
@@ -47,10 +45,6 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     private static final int BAR_BG = 0xFF0A1218;
     private static final int TAB_ON = 0xFF2A4A5C;
     private static final int TAB_OFF = 0xFF152430;
-    private static final int BLIP_LIVING = 0xFF55FF88;
-    private static final int BLIP_UNDEAD = 0xFFC080FF;
-    private static final int BLIP_PLAYER = 0xFFFFD060;
-    private static final int CROSSHAIR = 0xFFFF6060;
 
     private enum Tab {
         STATUS,
@@ -59,11 +53,14 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
 
     private Tab tab = Tab.STATUS;
     private int scroll;
+    private PhiSonarService.Mode scanMode = PhiSonarService.Mode.ACTIVE;
+    private final PhiSonarMapPainter mapPainter = new PhiSonarMapPainter();
     private Button domeBtn;
     private Button bodyBtn;
     private Button scrollUpBtn;
     private Button scrollDownBtn;
     private Button scanBtn;
+    private Button modeBtn;
 
     public TowerConsoleScreen(TowerConsoleMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -90,10 +87,22 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         scrollDownBtn = addRenderableWidget(Button.builder(Component.literal("▼"), b -> scroll(1))
                 .bounds(leftPos + PANEL_W - 22, topPos + LIST_Y + LIST_H - 14, 14, 14)
                 .build());
+        modeBtn = addRenderableWidget(Button.builder(modeLabel(), b -> cycleMode())
+                .bounds(leftPos + 10, topPos + PANEL_H - 28, 88, 18)
+                .build());
         scanBtn = addRenderableWidget(Button.builder(Component.translatable("gui.effecoria.tower_console.scan_btn"), b -> scan())
                 .bounds(leftPos + PANEL_W - 72, topPos + PANEL_H - 28, 62, 18)
                 .build());
         applyTabVisibility();
+    }
+
+    private Component modeLabel() {
+        return Component.translatable("gui.effecoria.phi_sonar.mode." + scanMode.name().toLowerCase());
+    }
+
+    private void cycleMode() {
+        scanMode = scanMode.next();
+        modeBtn.setMessage(modeLabel());
     }
 
     private void applyTabVisibility() {
@@ -102,7 +111,9 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         bodyBtn.visible = status;
         scrollUpBtn.visible = status;
         scrollDownBtn.visible = status;
-        scanBtn.visible = tab == Tab.MAP;
+        boolean map = tab == Tab.MAP;
+        scanBtn.visible = map;
+        modeBtn.visible = map;
         scanBtn.active = menu.sonarPresent() && menu.linked();
     }
 
@@ -124,7 +135,16 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     }
 
     private void scan() {
-        PacketDistributor.sendToServer(new ModNetworking.PhiSonarRequestPayload(menu.blockEntity().getBlockPos()));
+        PacketDistributor.sendToServer(
+                new ModNetworking.PhiSonarRequestPayload(menu.blockEntity().getBlockPos(), scanMode.id()));
+    }
+
+    private int mapX() {
+        return leftPos + (PANEL_W - MAP_SIZE) / 2;
+    }
+
+    private int mapY() {
+        return topPos + 22;
     }
 
     private int visibleRows() {
@@ -147,6 +167,9 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
             scroll(scrollY > 0 ? -1 : 1);
             return true;
         }
+        if (tab == Tab.MAP && mapPainter.mouseScrolled(mapX(), mapY(), MAP_SIZE, mouseX, mouseY, scrollY)) {
+            return true;
+        }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
@@ -162,7 +185,26 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                 return true;
             }
         }
+        if (tab == Tab.MAP && mapPainter.mouseClicked(mapX(), mapY(), MAP_SIZE, mouseX, mouseY, button)) {
+            return true;
+        }
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (mapPainter.mouseReleased(button)) {
+            return true;
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (tab == Tab.MAP && mapPainter.mouseDragged(MAP_SIZE, mouseX, mouseY, button)) {
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
     private boolean hitTab(double mouseX, double mouseY, int index) {
@@ -218,27 +260,29 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     }
 
     private void drawMapTab(GuiGraphics graphics, int mouseX, int mouseY) {
-        int mapX = leftPos + (PANEL_W - MAP_SIZE) / 2;
-        int mapY = topPos + 22;
-        graphics.fill(mapX - 2, mapY - 2, mapX + MAP_SIZE + 2, mapY + MAP_SIZE + 2, LINE);
-        graphics.fill(mapX, mapY, mapX + MAP_SIZE, mapY + MAP_SIZE, BG_LIST);
+        int mx = mapX();
+        int my = mapY();
 
         if (!menu.sonarPresent()) {
+            graphics.fill(mx - 2, my - 2, mx + MAP_SIZE + 2, my + MAP_SIZE + 2, LINE);
+            graphics.fill(mx, my, mx + MAP_SIZE, my + MAP_SIZE, BG_LIST);
             graphics.drawCenteredString(
                     font,
                     Component.translatable("gui.effecoria.tower_console.sonar_missing"),
                     leftPos + PANEL_W / 2,
-                    mapY + MAP_SIZE / 2 - 4,
+                    my + MAP_SIZE / 2 - 4,
                     WARN);
             return;
         }
 
         if (!ClientPhiSonarMap.hasMap()) {
+            graphics.fill(mx - 2, my - 2, mx + MAP_SIZE + 2, my + MAP_SIZE + 2, LINE);
+            graphics.fill(mx, my, mx + MAP_SIZE, my + MAP_SIZE, BG_LIST);
             graphics.drawCenteredString(
                     font,
                     Component.translatable("gui.effecoria.tower_console.sonar_empty"),
                     leftPos + PANEL_W / 2,
-                    mapY + MAP_SIZE / 2 - 4,
+                    my + MAP_SIZE / 2 - 4,
                     MUTED);
             String ready = menu.sonarReady()
                     ? "gui.effecoria.tower_console.sonar_ready"
@@ -247,110 +291,12 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                     font,
                     Component.translatable(ready),
                     leftPos + PANEL_W / 2,
-                    mapY + MAP_SIZE / 2 + 8,
+                    my + MAP_SIZE / 2 + 8,
                     menu.sonarReady() ? OK : WARN);
             return;
         }
 
-        byte[] heights = ClientPhiSonarMap.heights();
-        int width = ClientPhiSonarMap.width();
-        if (heights == null || width <= 0) {
-            return;
-        }
-
-        int minH = 127;
-        int maxH = -128;
-        for (byte h : heights) {
-            minH = Math.min(minH, h);
-            maxH = Math.max(maxH, h);
-        }
-        int span = Math.max(1, maxH - minH);
-        float cell = MAP_SIZE / (float) width;
-
-        for (int iz = 0; iz < width; iz++) {
-            for (int ix = 0; ix < width; ix++) {
-                int idx = iz * width + ix;
-                int h = heights[idx];
-                float t = (h - minH) / (float) span;
-                int color = heightColor(t);
-                int x0 = mapX + Math.round(ix * cell);
-                int y0 = mapY + Math.round(iz * cell);
-                int x1 = mapX + Math.round((ix + 1) * cell);
-                int y1 = mapY + Math.round((iz + 1) * cell);
-                graphics.fill(x0, y0, Math.max(x0 + 1, x1), Math.max(y0 + 1, y1), color);
-            }
-        }
-
-        // Center crosshair = sonar
-        int cx = mapX + MAP_SIZE / 2;
-        int cy = mapY + MAP_SIZE / 2;
-        graphics.fill(cx - 2, cy, cx + 3, cy + 1, CROSSHAIR);
-        graphics.fill(cx, cy - 2, cx + 1, cy + 3, CROSSHAIR);
-
-        float scale = MAP_SIZE / (float) (ClientPhiSonarMap.radius() * 2 + 1);
-        for (PhiSonarService.Blip blip : ClientPhiSonarMap.blips()) {
-            int px = mapX + MAP_SIZE / 2 + Math.round(blip.relX() * scale);
-            int pz = mapY + MAP_SIZE / 2 + Math.round(blip.relZ() * scale);
-            int color = switch (blip.kind()) {
-                case PhiSonarService.BLIP_PLAYER -> BLIP_PLAYER;
-                case PhiSonarService.BLIP_UNDEAD -> BLIP_UNDEAD;
-                default -> BLIP_LIVING;
-            };
-            graphics.fill(px - 1, pz - 1, px + 2, pz + 2, color);
-        }
-
-        // Cursor world coords
-        if (mouseX >= mapX && mouseX < mapX + MAP_SIZE && mouseY >= mapY && mouseY < mapY + MAP_SIZE) {
-            float u = (mouseX - mapX) / (float) MAP_SIZE;
-            float v = (mouseY - mapY) / (float) MAP_SIZE;
-            int relX = Math.round((u - 0.5f) * 2f * ClientPhiSonarMap.radius());
-            int relZ = Math.round((v - 0.5f) * 2f * ClientPhiSonarMap.radius());
-            int worldX = ClientPhiSonarMap.originX() + relX;
-            int worldZ = ClientPhiSonarMap.originZ() + relZ;
-            int gi = Math.min(width - 1, Math.max(0, Math.round(v * (width - 1))));
-            int gj = Math.min(width - 1, Math.max(0, Math.round(u * (width - 1))));
-            int surface = ClientPhiSonarMap.originY() + heights[gi * width + gj];
-            graphics.drawString(
-                    font,
-                    Component.translatable(
-                            "gui.effecoria.tower_console.sonar_cursor", worldX, surface, worldZ),
-                    leftPos + 10,
-                    topPos + PANEL_H - 26,
-                    LABEL,
-                    false);
-        } else {
-            graphics.drawString(
-                    font,
-                    Component.translatable(
-                            "gui.effecoria.tower_console.sonar_origin",
-                            ClientPhiSonarMap.originX(),
-                            ClientPhiSonarMap.originY(),
-                            ClientPhiSonarMap.originZ()),
-                    leftPos + 10,
-                    topPos + PANEL_H - 26,
-                    MUTED,
-                    false);
-        }
-    }
-
-    private static int heightColor(float t) {
-        // Low dark slate → mid teal → high pale sand
-        float clamped = Math.max(0f, Math.min(1f, t));
-        int r;
-        int g;
-        int b;
-        if (clamped < 0.5f) {
-            float u = clamped * 2f;
-            r = (int) (18 + 30 * u);
-            g = (int) (40 + 70 * u);
-            b = (int) (48 + 60 * u);
-        } else {
-            float u = (clamped - 0.5f) * 2f;
-            r = (int) (48 + 140 * u);
-            g = (int) (110 + 80 * u);
-            b = (int) (108 - 40 * u);
-        }
-        return 0xFF000000 | (r << 16) | (g << 8) | b;
+        mapPainter.draw(graphics, font, mx, my, MAP_SIZE, mouseX, mouseY, leftPos + 104, topPos + PANEL_H - 26);
     }
 
     private void drawSummary(GuiGraphics graphics) {
@@ -577,15 +523,27 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                 graphics.renderTooltip(
                         font, Component.translatable("gui.effecoria.tower_console.body_tip"), mouseX, mouseY);
             }
-        } else if (tab == Tab.MAP && isHovering(PANEL_W - 72, PANEL_H - 28, 62, 18, mouseX, mouseY)) {
-            List<Component> tip = new ArrayList<>();
-            tip.add(Component.translatable("gui.effecoria.tower_console.scan_tip"));
-            if (!menu.sonarPresent()) {
-                tip.add(Component.translatable("gui.effecoria.tower_console.sonar_missing"));
-            } else if (!menu.sonarReady()) {
-                tip.add(Component.translatable("gui.effecoria.tower_console.sonar_busy"));
+        } else if (tab == Tab.MAP) {
+            if (isHovering(PANEL_W - 72, PANEL_H - 28, 62, 18, mouseX, mouseY)) {
+                List<Component> tip = new ArrayList<>();
+                tip.add(Component.translatable(
+                        "gui.effecoria.tower_console.scan_tip_mode",
+                        Component.translatable("gui.effecoria.phi_sonar.mode." + scanMode.name().toLowerCase()),
+                        scanMode.phiCost()));
+                tip.add(Component.translatable("gui.effecoria.phi_sonar.zoom_tip"));
+                if (!menu.sonarPresent()) {
+                    tip.add(Component.translatable("gui.effecoria.tower_console.sonar_missing"));
+                } else if (!menu.sonarReady()) {
+                    tip.add(Component.translatable("gui.effecoria.tower_console.sonar_busy"));
+                }
+                graphics.renderComponentTooltip(font, tip, mouseX, mouseY);
+            } else if (isHovering(10, PANEL_H - 28, 88, 18, mouseX, mouseY)) {
+                graphics.renderTooltip(
+                        font,
+                        Component.translatable("gui.effecoria.phi_sonar.mode_tip." + scanMode.name().toLowerCase()),
+                        mouseX,
+                        mouseY);
             }
-            graphics.renderComponentTooltip(font, tip, mouseX, mouseY);
         }
     }
 

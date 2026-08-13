@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": {
+      "item": "effecoria:essonite_shard"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "B": {
+      "item": "effecoria:phi_bus"
+    },
+    "L": {
+      "item": "effecoria:lead_ingot"
+    },
+    "M": {
+      "item": "minecraft:map"
+    }
+  },
+  "pattern": [
+    "PMP",
+    "LBL",
+    "LEL"
+  ],
+  "result": {
+    "count": 1,
+    "id": "effecoria:phi_cartography_table"
+  }
+}

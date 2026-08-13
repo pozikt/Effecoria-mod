@@ -13,8 +13,11 @@ public final class ClientPhiSonarMap {
     private static int radius;
     private static int step;
     private static int width;
+    private static int modeId;
     @Nullable
     private static byte[] heights;
+    @Nullable
+    private static byte[] terrain;
     private static List<PhiSonarService.Blip> blips = List.of();
     private static boolean hasMap;
 
@@ -27,7 +30,9 @@ public final class ClientPhiSonarMap {
             int r,
             int s,
             int w,
+            int mode,
             byte[] heightBytes,
+            byte[] terrainBytes,
             List<PhiSonarService.Blip> mapBlips) {
         originX = ox;
         originY = oy;
@@ -35,9 +40,14 @@ public final class ClientPhiSonarMap {
         radius = r;
         step = s;
         width = w;
+        modeId = mode;
         heights = heightBytes;
+        terrain = terrainBytes;
         blips = List.copyOf(mapBlips);
-        hasMap = heightBytes != null && heightBytes.length == w * w;
+        hasMap = heightBytes != null
+                && terrainBytes != null
+                && heightBytes.length == w * w
+                && terrainBytes.length == w * w;
     }
 
     public static boolean hasMap() {
@@ -68,9 +78,18 @@ public final class ClientPhiSonarMap {
         return width;
     }
 
+    public static int modeId() {
+        return modeId;
+    }
+
     @Nullable
     public static byte[] heights() {
         return heights;
+    }
+
+    @Nullable
+    public static byte[] terrain() {
+        return terrain;
     }
 
     public static List<PhiSonarService.Blip> blips() {
@@ -80,6 +99,8 @@ public final class ClientPhiSonarMap {
     public static void clear() {
         hasMap = false;
         heights = null;
+        terrain = null;
         blips = List.of();
+        modeId = 0;
     }
 }

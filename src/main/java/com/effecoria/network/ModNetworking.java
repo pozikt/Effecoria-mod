@@ -1815,8 +1815,8 @@ public final class ModNetworking {
         }
     }
 
-    /** Client → server: request an active Φ-sonar sweep from the tower console. */
-    public record PhiSonarRequestPayload(BlockPos consolePos) implements CustomPacketPayload {
+    /** Client → server: request a Φ-sonar sweep (mode) from console or cartography table. */
+    public record PhiSonarRequestPayload(BlockPos accessPos, int modeId) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<PhiSonarRequestPayload> TYPE =
                 new CustomPacketPayload.Type<>(
                         ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "phi_sonar_request"));
@@ -1824,7 +1824,9 @@ public final class ModNetworking {
         public static final StreamCodec<RegistryFriendlyByteBuf, PhiSonarRequestPayload> STREAM_CODEC =
                 StreamCodec.composite(
                         BlockPos.STREAM_CODEC,
-                        PhiSonarRequestPayload::consolePos,
+                        PhiSonarRequestPayload::accessPos,
+                        ByteBufCodecs.VAR_INT,
+                        PhiSonarRequestPayload::modeId,
                         PhiSonarRequestPayload::new);
 
         @Override
@@ -1841,12 +1843,13 @@ public final class ModNetworking {
                         player, com.effecoria.core.technomagic.TechnomagicEra.VI)) {
                     return;
                 }
-                com.effecoria.core.tower.PhiSonarService.requestScan(player, payload.consolePos());
+                com.effecoria.core.tower.PhiSonarService.requestScan(
+                        player, payload.accessPos(), payload.modeId());
             });
         }
     }
 
-    /** Server → client: packed heightmap + entity blips for the console Map tab. */
+    /** Server → client: heightmap + terrain class + blips for Map / cartography GUIs. */
     public record PhiSonarMapPayload(
             int originX,
             int originY,
@@ -1854,7 +1857,9 @@ public final class ModNetworking {
             int radius,
             int step,
             int width,
+            int modeId,
             byte[] heights,
+            byte[] terrain,
             List<com.effecoria.core.tower.PhiSonarService.Blip> blips)
             implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<PhiSonarMapPayload> TYPE =
@@ -1870,8 +1875,11 @@ public final class ModNetworking {
                             buf.writeVarInt(p.radius());
                             buf.writeVarInt(p.step());
                             buf.writeVarInt(p.width());
+                            buf.writeVarInt(p.modeId());
                             buf.writeVarInt(p.heights().length);
                             buf.writeBytes(p.heights());
+                            buf.writeVarInt(p.terrain().length);
+                            buf.writeBytes(p.terrain());
                             buf.writeVarInt(p.blips().size());
                             for (var blip : p.blips()) {
                                 buf.writeShort(blip.relX());
@@ -1886,16 +1894,21 @@ public final class ModNetworking {
                             int radius = buf.readVarInt();
                             int step = buf.readVarInt();
                             int width = buf.readVarInt();
+                            int modeId = buf.readVarInt();
                             int heightLen = Math.min(128 * 128, Math.max(0, buf.readVarInt()));
                             byte[] heights = new byte[heightLen];
                             buf.readBytes(heights);
+                            int terrainLen = Math.min(128 * 128, Math.max(0, buf.readVarInt()));
+                            byte[] terrain = new byte[terrainLen];
+                            buf.readBytes(terrain);
                             int blipCount = Math.min(128, Math.max(0, buf.readVarInt()));
                             List<com.effecoria.core.tower.PhiSonarService.Blip> blips = new ArrayList<>(blipCount);
                             for (int i = 0; i < blipCount; i++) {
                                 blips.add(new com.effecoria.core.tower.PhiSonarService.Blip(
                                         buf.readShort(), buf.readShort(), buf.readByte()));
                             }
-                            return new PhiSonarMapPayload(ox, oy, oz, radius, step, width, heights, blips);
+                            return new PhiSonarMapPayload(
+                                    ox, oy, oz, radius, step, width, modeId, heights, terrain, blips);
                         });
 
         @Override
@@ -1912,7 +1925,9 @@ public final class ModNetworking {
                             payload.radius(),
                             payload.step(),
                             payload.width(),
+                            payload.modeId(),
                             payload.heights(),
+                            payload.terrain(),
                             payload.blips()));
         }
     }

@@ -301,6 +301,12 @@ public final class ModItems {
             "tower_console", () -> new HintBlockItem(ModBlocks.TOWER_CONSOLE.get(), new Item.Properties(), "tooltip.effecoria.tower_console"));
     public static final DeferredItem<BlockItem> PHI_SONAR = ITEMS.register(
             "phi_sonar", () -> new HintBlockItem(ModBlocks.PHI_SONAR.get(), new Item.Properties(), "tooltip.effecoria.phi_sonar"));
+    public static final DeferredItem<BlockItem> PHI_CARTOGRAPHY_TABLE = ITEMS.register(
+            "phi_cartography_table",
+            () -> new HintBlockItem(
+                    ModBlocks.PHI_CARTOGRAPHY_TABLE.get(),
+                    new Item.Properties(),
+                    "tooltip.effecoria.phi_cartography_table"));
 
     public static final DeferredItem<Item> ESSENCE_GLUE = ITEMS.register(
             "essence_glue",

@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "effecoria:block/phi_cartography_table_side3",
+    "down": "effecoria:block/phi_cartography_table_bottom",
+    "up": "effecoria:block/phi_cartography_table_top",
+    "north": "effecoria:block/phi_cartography_table_side3",
+    "south": "effecoria:block/phi_cartography_table_side1",
+    "east": "effecoria:block/phi_cartography_table_side2",
+    "west": "effecoria:block/phi_cartography_table_side2"
+  }
+}

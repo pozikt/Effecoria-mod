@@ -3,6 +3,7 @@ package com.effecoria.core.tower;
 import com.effecoria.block.FoundationAmuletBlockEntity;
 import com.effecoria.block.OmegaDamperBlockEntity;
 import com.effecoria.block.PhiAirSynthBlockEntity;
+import com.effecoria.block.PhiCartographyTableBlockEntity;
 import com.effecoria.block.PhiSonarBlockEntity;
 import com.effecoria.block.PhiWaterPurifierBlockEntity;
 import com.effecoria.block.RegenChamberBlockEntity;
@@ -179,6 +180,8 @@ public final class TowerFacility {
                 } else {
                     out.add(entry("sonar", pos, "ready", MonitorEntry.OK));
                 }
+            } else if (be instanceof PhiCartographyTableBlockEntity) {
+                out.add(entry("cartography", pos, towerLive ? "online" : "idle", towerLive ? MonitorEntry.OK : MonitorEntry.IDLE));
             } else if (state.is(ModBlocks.SPARK_REACTOR.get())) {
                 out.add(reactorEntry("spark_reactor", pos, PhiPower.hasPower(level, pos)));
             } else if (state.is(ModBlocks.HEART_REACTOR_CORE.get())) {
@@ -226,7 +229,8 @@ public final class TowerFacility {
             case "water_purifier" -> 5;
             case "regen_chamber" -> 6;
             case "sonar" -> 7;
-            case "spark_reactor", "heart_reactor", "forge_reactor" -> 8;
+            case "cartography" -> 8;
+            case "spark_reactor", "heart_reactor", "forge_reactor" -> 9;
             default -> 50;
         };
     }

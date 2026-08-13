@@ -22,4 +22,12 @@ public final class ModBlockTags {
     /** Φ-bus network conductors (cable + mithril frame, etc.). */
     public static final TagKey<Block> PHI_CONDUCTORS =
             TagKey.create(Registries.BLOCK, EffecoriaMod.id("phi_conductors"));
+
+    /** Essonite ore variants — Φ-sonar / deep scan highlights. */
+    public static final TagKey<Block> ESSONITE_ORES =
+            TagKey.create(Registries.BLOCK, EffecoriaMod.id("essonite_ores"));
+
+    /** Mithril ore variants — Φ-sonar / deep scan highlights. */
+    public static final TagKey<Block> MITHRIL_ORES =
+            TagKey.create(Registries.BLOCK, EffecoriaMod.id("mithril_ores"));
 }
