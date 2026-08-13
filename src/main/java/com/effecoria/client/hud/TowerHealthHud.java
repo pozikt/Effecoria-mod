@@ -71,7 +71,7 @@ public final class TowerHealthHud {
             float fill = Math.min(1f, Math.max(0f, tFrac * 3f - i));
             drawHeart(graphics, x, top, 0.25f, 0.45f, 0.95f, fill);
         }
-        String towerNum = towerMax <= 0 ? "0" : (towerHp + "/" + towerMax);
+        String towerNum = String.valueOf(towerHp);
         graphics.drawString(mc.font, towerNum, towerLeft + 28, top + 1, 0x88AAFF, true);
     }
 

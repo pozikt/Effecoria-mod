@@ -151,7 +151,7 @@ public final class RegenChamberBlockEntity extends BlockEntity {
             level.setBlock(pos, current.setValue(RegenChamberBlock.FORMED, be.formed), Block.UPDATE_CLIENTS);
         }
 
-        if (!be.isOperational() || server.getGameTime() % 20 != 0) {
+        if (!be.formed || be.fillAmount() <= 0 || server.getGameTime() % 20 != 0) {
             return;
         }
 
@@ -166,14 +166,29 @@ public final class RegenChamberBlockEntity extends BlockEntity {
         }
 
         AABB box = RegenChamberMultiblock.interiorAabb(pos);
+        boolean fullBath = be.isOperational();
         for (Player player : level.getEntitiesOfClass(Player.class, box)) {
-            applyHealing(server, player);
+            restoreHunger(player);
+            if (fullBath) {
+                applyHealing(server, player);
+            }
         }
+    }
+
+    /** Standing in the capsule slowly restores hunger even if the bath is not full. */
+    private static void restoreHunger(Player player) {
+        var food = player.getFoodData();
+        if (food.getFoodLevel() < 20) {
+            food.setFoodLevel(Math.min(20, food.getFoodLevel() + 2));
+        }
+        if (food.getSaturationLevel() < food.getFoodLevel()) {
+            food.setSaturation(Math.min(food.getFoodLevel(), food.getSaturationLevel() + 1.0f));
+        }
+        player.removeEffect(MobEffects.HUNGER);
     }
 
     private static void applyHealing(ServerLevel server, Player player) {
         player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 60, 0, false, true));
-        player.getFoodData().eat(1, 0.3f);
         player.clearFire();
         if (player.getTicksFrozen() > 0) {
             player.setTicksFrozen(0);
@@ -181,7 +196,6 @@ public final class RegenChamberBlockEntity extends BlockEntity {
 
         player.removeEffect(MobEffects.POISON);
         player.removeEffect(MobEffects.WITHER);
-        player.removeEffect(MobEffects.HUNGER);
         player.removeEffect(MobEffects.CONFUSION);
         player.removeEffect(MobEffects.BLINDNESS);
         player.removeEffect(MobEffects.WEAKNESS);

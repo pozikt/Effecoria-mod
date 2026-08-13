@@ -234,15 +234,16 @@ public final class RegenChamberMultiblock {
         disassemble(level, controller, partPos);
     }
 
-    /** Interior volume where standing players receive healing (above floor). */
+    /** Interior volume where standing players receive healing / hunger restore (above floor). */
     public static AABB interiorAabb(BlockPos core) {
+        // Slightly padded so players standing on the cavity floor are always inside.
         return new AABB(
-                core.getX(),
-                core.getY() + 1.0,
-                core.getZ(),
-                core.getX() + 2.0,
-                core.getY() + 3.0,
-                core.getZ() + 2.0);
+                core.getX() - 0.05,
+                core.getY() + 0.95,
+                core.getZ() - 0.05,
+                core.getX() + 2.05,
+                core.getY() + 3.05,
+                core.getZ() + 2.05);
     }
 
     /** Bottom-up fill order for the 2×2×2 air cavity. */
