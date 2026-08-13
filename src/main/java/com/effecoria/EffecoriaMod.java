@@ -343,6 +343,14 @@ public class EffecoriaMod {
                 ModNetworking.TowerDomeSyncPayload.TYPE,
                 ModNetworking.TowerDomeSyncPayload.STREAM_CODEC,
                 ModNetworking.TowerDomeSyncPayload::handle);
+        registrar.playToServer(
+                ModNetworking.PhiSonarRequestPayload.TYPE,
+                ModNetworking.PhiSonarRequestPayload.STREAM_CODEC,
+                ModNetworking.PhiSonarRequestPayload::handle);
+        registrar.playToClient(
+                ModNetworking.PhiSonarMapPayload.TYPE,
+                ModNetworking.PhiSonarMapPayload.STREAM_CODEC,
+                ModNetworking.PhiSonarMapPayload::handle);
     }
 
 }

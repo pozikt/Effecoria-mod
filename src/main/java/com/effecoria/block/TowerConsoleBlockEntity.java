@@ -49,7 +49,9 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
     public static final int DATA_REACTOR = 13;
     public static final int DATA_REVIVES = 14;
     public static final int DATA_PHI_POWER = 15;
-    public static final int DATA_COUNT = 16;
+    public static final int DATA_SONAR_PRESENT = 16;
+    public static final int DATA_SONAR_READY = 17;
+    public static final int DATA_COUNT = 18;
 
     private int integrityPct;
     private int omegaPct;
@@ -67,6 +69,8 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
     private int reactorOrdinal;
     private int reviveCount;
     private int phiPower;
+    private int sonarPresent;
+    private int sonarReady;
 
     private List<TowerFacility.MonitorEntry> monitors = new ArrayList<>();
 
@@ -90,6 +94,8 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
                 case DATA_REACTOR -> reactorOrdinal;
                 case DATA_REVIVES -> reviveCount;
                 case DATA_PHI_POWER -> phiPower;
+                case DATA_SONAR_PRESENT -> sonarPresent;
+                case DATA_SONAR_READY -> sonarReady;
                 default -> 0;
             };
         }
@@ -113,6 +119,8 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
                 case DATA_REACTOR -> reactorOrdinal = value;
                 case DATA_REVIVES -> reviveCount = value;
                 case DATA_PHI_POWER -> phiPower = value;
+                case DATA_SONAR_PRESENT -> sonarPresent = value;
+                case DATA_SONAR_READY -> sonarReady = value;
                 default -> {}
             }
         }
@@ -169,6 +177,13 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         amuletCharged =
                 TowerFacility.findChargedAmulet(level, worldPosition, computer.ownerUuid()).isPresent() ? 1 : 0;
         monitors = TowerFacility.listMonitors(level, worldPosition);
+        var sonarOpt = TowerFacility.findInComponent(level, worldPosition, com.effecoria.block.PhiSonarBlockEntity.class);
+        sonarPresent = sonarOpt.isPresent() ? 1 : 0;
+        sonarReady = sonarOpt.filter(com.effecoria.block.PhiSonarBlockEntity::ready)
+                        .filter(s -> phiPower != 0 && consecrated != 0 && bound != 0)
+                        .isPresent()
+                ? 1
+                : 0;
         setChanged();
         syncClient();
     }
@@ -190,6 +205,8 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         reactorOrdinal = 0;
         reviveCount = 0;
         phiPower = 0;
+        sonarPresent = 0;
+        sonarReady = 0;
     }
 
     private void syncClient() {
@@ -307,6 +324,8 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         tag.putInt("Reactor", reactorOrdinal);
         tag.putInt("Revives", reviveCount);
         tag.putInt("PhiPower", phiPower);
+        tag.putInt("SonarPresent", sonarPresent);
+        tag.putInt("SonarReady", sonarReady);
         tag.put("Monitors", TowerFacility.saveMonitorList(monitors));
     }
 
@@ -327,6 +346,8 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         reactorOrdinal = tag.getInt("Reactor");
         reviveCount = tag.getInt("Revives");
         phiPower = tag.getInt("PhiPower");
+        sonarPresent = tag.getInt("SonarPresent");
+        sonarReady = tag.getInt("SonarReady");
         if (tag.contains("Monitors", Tag.TAG_LIST)) {
             monitors = new ArrayList<>(TowerFacility.loadMonitorList(tag.getList("Monitors", Tag.TAG_COMPOUND)));
         } else {

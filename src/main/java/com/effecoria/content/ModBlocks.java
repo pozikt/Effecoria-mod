@@ -23,6 +23,7 @@ import com.effecoria.block.TowerAnchorBlock;
 import com.effecoria.block.FoundationAmuletBlock;
 import com.effecoria.block.OmegaDamperBlock;
 import com.effecoria.block.PhiAirSynthBlock;
+import com.effecoria.block.PhiSonarBlock;
 import com.effecoria.block.PhiWaterPurifierBlock;
 import com.effecoria.block.RegenChamberBlock;
 import com.effecoria.block.RegenChamberPartBlock;
@@ -945,6 +946,8 @@ public final class ModBlocks {
 
     public static final DeferredBlock<TowerConsoleBlock> TOWER_CONSOLE = BLOCKS.register(
             "tower_console", () -> new TowerConsoleBlock(towerFacilityProps()));
+    public static final DeferredBlock<PhiSonarBlock> PHI_SONAR = BLOCKS.register(
+            "phi_sonar", () -> new PhiSonarBlock(towerFacilityProps()));
 
     /** Ω-tainted obsidian — cleansed in Forge. */
     public static final DeferredBlock<Block> OMEGA_TAINTED_OBSIDIAN = BLOCKS.register(

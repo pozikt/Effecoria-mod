@@ -157,6 +157,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PHI_WATER_PURIFIER.get());
                         output.accept(ModItems.REGEN_CHAMBER.get());
                         output.accept(ModItems.TOWER_CONSOLE.get());
+                        output.accept(ModItems.PHI_SONAR.get());
                         output.accept(ModItems.ESSENCE_GLUE.get());
                         output.accept(ModItems.DEEP_PHI_CATALYST.get());
                         output.accept(ModItems.REACTOR_CASING.get());

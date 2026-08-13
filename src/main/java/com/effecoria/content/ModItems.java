@@ -299,6 +299,8 @@ public final class ModItems {
             "regen_chamber", () -> new HintBlockItem(ModBlocks.REGEN_CHAMBER.get(), new Item.Properties(), "tooltip.effecoria.regen_chamber"));
     public static final DeferredItem<BlockItem> TOWER_CONSOLE = ITEMS.register(
             "tower_console", () -> new HintBlockItem(ModBlocks.TOWER_CONSOLE.get(), new Item.Properties(), "tooltip.effecoria.tower_console"));
+    public static final DeferredItem<BlockItem> PHI_SONAR = ITEMS.register(
+            "phi_sonar", () -> new HintBlockItem(ModBlocks.PHI_SONAR.get(), new Item.Properties(), "tooltip.effecoria.phi_sonar"));
 
     public static final DeferredItem<Item> ESSENCE_GLUE = ITEMS.register(
             "essence_glue",

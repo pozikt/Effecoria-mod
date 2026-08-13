@@ -129,6 +129,14 @@ public final class TowerConsoleMenu extends MachineMenu {
         return data.get(TowerConsoleBlockEntity.DATA_PHI_POWER) != 0;
     }
 
+    public boolean sonarPresent() {
+        return data.get(TowerConsoleBlockEntity.DATA_SONAR_PRESENT) != 0;
+    }
+
+    public boolean sonarReady() {
+        return data.get(TowerConsoleBlockEntity.DATA_SONAR_READY) != 0;
+    }
+
     @Override
     public boolean clickMenuButton(Player player, int id) {
         if (player instanceof ServerPlayer serverPlayer

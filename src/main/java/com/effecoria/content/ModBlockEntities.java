@@ -30,6 +30,7 @@ import com.effecoria.block.TowerAnchorBlockEntity;
 import com.effecoria.block.FoundationAmuletBlockEntity;
 import com.effecoria.block.OmegaDamperBlockEntity;
 import com.effecoria.block.PhiAirSynthBlockEntity;
+import com.effecoria.block.PhiSonarBlockEntity;
 import com.effecoria.block.PhiWaterPurifierBlockEntity;
 import com.effecoria.block.RegenChamberBlockEntity;
 import com.effecoria.block.RegenChamberPartBlockEntity;
@@ -166,6 +167,9 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TowerConsoleBlockEntity>> TOWER_CONSOLE =
             BLOCK_ENTITY_TYPES.register("tower_console", () -> BlockEntityType.Builder.of(
                     TowerConsoleBlockEntity::new, ModBlocks.TOWER_CONSOLE.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiSonarBlockEntity>> PHI_SONAR =
+            BLOCK_ENTITY_TYPES.register("phi_sonar", () -> BlockEntityType.Builder.of(
+                    PhiSonarBlockEntity::new, ModBlocks.PHI_SONAR.get()).build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiBusBlockEntity>> PHI_BUS =
             BLOCK_ENTITY_TYPES.register(

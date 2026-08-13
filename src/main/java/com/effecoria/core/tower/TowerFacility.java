@@ -3,6 +3,7 @@ package com.effecoria.core.tower;
 import com.effecoria.block.FoundationAmuletBlockEntity;
 import com.effecoria.block.OmegaDamperBlockEntity;
 import com.effecoria.block.PhiAirSynthBlockEntity;
+import com.effecoria.block.PhiSonarBlockEntity;
 import com.effecoria.block.PhiWaterPurifierBlockEntity;
 import com.effecoria.block.RegenChamberBlockEntity;
 import com.effecoria.block.TowerAnchorBlockEntity;
@@ -168,6 +169,16 @@ public final class TowerFacility {
                 }
             } else if (be instanceof TowerConsoleBlockEntity) {
                 out.add(entry("console", pos, "online", MonitorEntry.OK));
+            } else if (be instanceof PhiSonarBlockEntity sonar) {
+                if (!towerLive) {
+                    out.add(entry("sonar", pos, "tower_offline", MonitorEntry.IDLE));
+                } else if (!phi) {
+                    out.add(entry("sonar", pos, "no_power", MonitorEntry.BAD));
+                } else if (!sonar.ready()) {
+                    out.add(entry("sonar", pos, "cooldown", MonitorEntry.WARN));
+                } else {
+                    out.add(entry("sonar", pos, "ready", MonitorEntry.OK));
+                }
             } else if (state.is(ModBlocks.SPARK_REACTOR.get())) {
                 out.add(reactorEntry("spark_reactor", pos, PhiPower.hasPower(level, pos)));
             } else if (state.is(ModBlocks.HEART_REACTOR_CORE.get())) {
@@ -214,7 +225,8 @@ public final class TowerFacility {
             case "air_synth" -> 4;
             case "water_purifier" -> 5;
             case "regen_chamber" -> 6;
-            case "spark_reactor", "heart_reactor", "forge_reactor" -> 7;
+            case "sonar" -> 7;
+            case "spark_reactor", "heart_reactor", "forge_reactor" -> 8;
             default -> 50;
         };
     }

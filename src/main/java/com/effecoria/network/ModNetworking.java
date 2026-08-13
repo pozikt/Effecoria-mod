@@ -1814,4 +1814,106 @@ public final class ModNetworking {
             });
         }
     }
+
+    /** Client → server: request an active Φ-sonar sweep from the tower console. */
+    public record PhiSonarRequestPayload(BlockPos consolePos) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<PhiSonarRequestPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "phi_sonar_request"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, PhiSonarRequestPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        BlockPos.STREAM_CODEC,
+                        PhiSonarRequestPayload::consolePos,
+                        PhiSonarRequestPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(PhiSonarRequestPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                if (!com.effecoria.core.technomagic.TechnomagicGates.checkOperate(
+                        player, com.effecoria.core.technomagic.TechnomagicEra.VI)) {
+                    return;
+                }
+                com.effecoria.core.tower.PhiSonarService.requestScan(player, payload.consolePos());
+            });
+        }
+    }
+
+    /** Server → client: packed heightmap + entity blips for the console Map tab. */
+    public record PhiSonarMapPayload(
+            int originX,
+            int originY,
+            int originZ,
+            int radius,
+            int step,
+            int width,
+            byte[] heights,
+            List<com.effecoria.core.tower.PhiSonarService.Blip> blips)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<PhiSonarMapPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "phi_sonar_map"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, PhiSonarMapPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, p) -> {
+                            buf.writeVarInt(p.originX());
+                            buf.writeVarInt(p.originY());
+                            buf.writeVarInt(p.originZ());
+                            buf.writeVarInt(p.radius());
+                            buf.writeVarInt(p.step());
+                            buf.writeVarInt(p.width());
+                            buf.writeVarInt(p.heights().length);
+                            buf.writeBytes(p.heights());
+                            buf.writeVarInt(p.blips().size());
+                            for (var blip : p.blips()) {
+                                buf.writeShort(blip.relX());
+                                buf.writeShort(blip.relZ());
+                                buf.writeByte(blip.kind());
+                            }
+                        },
+                        buf -> {
+                            int ox = buf.readVarInt();
+                            int oy = buf.readVarInt();
+                            int oz = buf.readVarInt();
+                            int radius = buf.readVarInt();
+                            int step = buf.readVarInt();
+                            int width = buf.readVarInt();
+                            int heightLen = Math.min(128 * 128, Math.max(0, buf.readVarInt()));
+                            byte[] heights = new byte[heightLen];
+                            buf.readBytes(heights);
+                            int blipCount = Math.min(128, Math.max(0, buf.readVarInt()));
+                            List<com.effecoria.core.tower.PhiSonarService.Blip> blips = new ArrayList<>(blipCount);
+                            for (int i = 0; i < blipCount; i++) {
+                                blips.add(new com.effecoria.core.tower.PhiSonarService.Blip(
+                                        buf.readShort(), buf.readShort(), buf.readByte()));
+                            }
+                            return new PhiSonarMapPayload(ox, oy, oz, radius, step, width, heights, blips);
+                        });
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(PhiSonarMapPayload payload, IPayloadContext context) {
+            context.enqueueWork(
+                    () -> com.effecoria.client.ClientPhiSonarMap.accept(
+                            payload.originX(),
+                            payload.originY(),
+                            payload.originZ(),
+                            payload.radius(),
+                            payload.step(),
+                            payload.width(),
+                            payload.heights(),
+                            payload.blips()));
+        }
+    }
 }
