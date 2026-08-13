@@ -132,9 +132,18 @@ public final class PhiSonarMapPainter {
 
         int minH = 127;
         int maxH = -128;
-        for (byte h : heights) {
-            minH = Math.min(minH, h);
-            maxH = Math.max(maxH, h);
+        boolean anyInside = false;
+        for (int idx = 0; idx < heights.length; idx++) {
+            if (terrain[idx] == PhiSonarService.TERRAIN_OUTSIDE) {
+                continue;
+            }
+            anyInside = true;
+            minH = Math.min(minH, heights[idx]);
+            maxH = Math.max(maxH, heights[idx]);
+        }
+        if (!anyInside) {
+            minH = 0;
+            maxH = 0;
         }
         int span = Math.max(1, maxH - minH);
 
@@ -152,6 +161,9 @@ public final class PhiSonarMapPainter {
         for (int iz = iz0; iz < iz1; iz++) {
             for (int ix = ix0; ix < ix1; ix++) {
                 int idx = iz * width + ix;
+                if (terrain[idx] == PhiSonarService.TERRAIN_OUTSIDE) {
+                    continue;
+                }
                 float cellU0 = ix / (float) width;
                 float cellV0 = iz / (float) width;
                 float cellU1 = (ix + 1) / (float) width;
@@ -213,18 +225,28 @@ public final class PhiSonarMapPainter {
             int worldZ = ClientPhiSonarMap.originZ() + relZ;
             int surface = ClientPhiSonarMap.originY() + heights[gi * width + gj];
             byte kind = terrain[gi * width + gj];
-            graphics.drawString(
-                    font,
-                    Component.translatable(
-                            "gui.effecoria.phi_sonar.cursor",
-                            worldX,
-                            surface,
-                            worldZ,
-                            Component.translatable("gui.effecoria.phi_sonar.terrain." + terrainKey(kind))),
-                    footerX,
-                    footerY,
-                    LABEL,
-                    false);
+            if (kind == PhiSonarService.TERRAIN_OUTSIDE) {
+                graphics.drawString(
+                        font,
+                        Component.translatable("gui.effecoria.phi_sonar.outside"),
+                        footerX,
+                        footerY,
+                        MUTED,
+                        false);
+            } else {
+                graphics.drawString(
+                        font,
+                        Component.translatable(
+                                "gui.effecoria.phi_sonar.cursor",
+                                worldX,
+                                surface,
+                                worldZ,
+                                Component.translatable("gui.effecoria.phi_sonar.terrain." + terrainKey(kind))),
+                        footerX,
+                        footerY,
+                        LABEL,
+                        false);
+            }
         } else {
             PhiSonarService.Mode mode = PhiSonarService.Mode.fromId(ClientPhiSonarMap.modeId());
             graphics.drawString(
@@ -256,6 +278,7 @@ public final class PhiSonarMapPainter {
             case PhiSonarService.TERRAIN_SHIELD -> "shield";
             case PhiSonarService.TERRAIN_CAVE -> "cave";
             case PhiSonarService.TERRAIN_METAL -> "metal";
+            case PhiSonarService.TERRAIN_OUTSIDE -> "outside";
             default -> "ground";
         };
     }
@@ -273,6 +296,7 @@ public final class PhiSonarMapPainter {
             case PhiSonarService.TERRAIN_SHIELD -> 0xFFD0B040;
             case PhiSonarService.TERRAIN_CAVE -> 0xFF1A2030;
             case PhiSonarService.TERRAIN_METAL -> 0xFF8A9AAA;
+            case PhiSonarService.TERRAIN_OUTSIDE -> 0xFF0A1018;
             default -> 0xFF3A5A48; // ground / grass
         };
     }

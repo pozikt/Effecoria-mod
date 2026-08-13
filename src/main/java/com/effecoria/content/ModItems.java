@@ -457,6 +457,11 @@ public final class ModItems {
             "lead_charm",
             () -> new JewelryItem(
                     new Item.Properties(), "item.effecoria.lead_charm.hint", 0.6f));
+    /** Curios head — overlays tower Φ-sonar ore/anomaly feed in the world. */
+    public static final DeferredItem<Item> PHI_SONAR_GOGGLES = ITEMS.register(
+            "phi_sonar_goggles",
+            () -> new JewelryItem(
+                    new Item.Properties(), "item.effecoria.phi_sonar_goggles.hint", 0.15f));
     /** Hand-held Φ shade — gold foil on a frame. */
     public static final DeferredItem<Item> ESSENCE_PARASOL = ITEMS.register(
             "essence_parasol", () -> new Item(new Item.Properties().stacksTo(1)));

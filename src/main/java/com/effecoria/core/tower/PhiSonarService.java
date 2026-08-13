@@ -7,7 +7,6 @@ import com.effecoria.block.TowerAnchorBlockEntity;
 import com.effecoria.content.ModBlockTags;
 import com.effecoria.content.ModBlocks;
 import com.effecoria.core.alchemy.PhiPower;
-import com.effecoria.network.ModNetworking;
 import com.effecoria.world.OmegaScarService;
 import com.effecoria.world.weather.PhiWeatherService;
 
@@ -24,7 +23,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +50,14 @@ public final class PhiSonarService {
     public static final byte TERRAIN_SHIELD = 9;
     public static final byte TERRAIN_CAVE = 10;
     public static final byte TERRAIN_METAL = 11;
+    /** Outside the circular sweep — not scanned. */
+    public static final byte TERRAIN_OUTSIDE = 12;
+
+    /** True if (dx, dz) lies within the circular sonar radius (inclusive). */
+    public static boolean inCircle(int dx, int dz, int radius) {
+        long r = radius;
+        return (long) dx * dx + (long) dz * dz <= r * r;
+    }
 
     public enum Mode {
         ACTIVE(0, 64, 2, 12, 160),
@@ -167,20 +173,9 @@ public final class PhiSonarService {
         }
 
         ScanResult result = scan(level, origin, mode);
+        sonar.storeScan(result);
         sonar.markScanned(level.getGameTime(), mode.cooldownTicks());
-        PacketDistributor.sendToPlayer(
-                player,
-                new ModNetworking.PhiSonarMapPayload(
-                        result.originX(),
-                        result.originY(),
-                        result.originZ(),
-                        result.radius(),
-                        result.step(),
-                        result.width(),
-                        result.modeId(),
-                        result.heights(),
-                        result.terrain(),
-                        result.blips()));
+        PhiSonarGogglesService.distributeScan(level, computer, result, player);
         player.displayClientMessage(
                 Component.translatable(
                         "message.effecoria.phi_sonar.scanned_mode",
@@ -202,6 +197,12 @@ public final class PhiSonarService {
         int i = 0;
         for (int iz = -radius; iz <= radius; iz += step) {
             for (int ix = -radius; ix <= radius; ix += step) {
+                if (!inCircle(ix, iz, radius)) {
+                    heights[i] = 0;
+                    terrain[i] = TERRAIN_OUTSIDE;
+                    i++;
+                    continue;
+                }
                 int worldX = ox + ix;
                 int worldZ = oz + iz;
                 int surfaceY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, worldX, worldZ);
@@ -363,7 +364,7 @@ public final class PhiSonarService {
             }
             int dx = entity.blockPosition().getX() - ox;
             int dz = entity.blockPosition().getZ() - oz;
-            if (Math.abs(dx) > radius || Math.abs(dz) > radius) {
+            if (!inCircle(dx, dz, radius)) {
                 continue;
             }
             byte kind;
@@ -384,6 +385,9 @@ public final class PhiSonarService {
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
         for (int dz = -radius; dz <= radius && blips.size() < MAX_BLIPS; dz += sample) {
             for (int dx = -radius; dx <= radius && blips.size() < MAX_BLIPS; dx += sample) {
+                if (!inCircle(dx, dz, radius)) {
+                    continue;
+                }
                 cursor.set(ox + dx, oy, oz + dz);
                 if (OmegaScarService.isBiome(level, cursor)) {
                     blips.add(new Blip((short) dx, (short) dz, BLIP_OMEGA));

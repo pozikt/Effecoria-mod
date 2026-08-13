@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": { "item": "minecraft:glass_pane" },
+    "E": { "item": "effecoria:essonite_shard" },
+    "C": { "item": "effecoria:phi_bus" },
+    "L": { "item": "effecoria:lead_ingot" }
+  },
+  "pattern": ["LGL", "E E", " C "],
+  "result": { "count": 1, "id": "effecoria:phi_sonar_goggles" }
+}

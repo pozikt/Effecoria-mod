@@ -138,6 +138,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.ESSONITE_RING.get());
                         output.accept(ModItems.PHI_BAND.get());
                         output.accept(ModItems.LEAD_CHARM.get());
+                        output.accept(ModItems.PHI_SONAR_GOGGLES.get());
                         output.accept(ModItems.PHI_TELEGRAPH.get());
                         output.accept(ModItems.GOLEM_CHASSIS.get());
                         output.accept(ModItems.TELEGRAPH_MODULE.get());
@@ -159,6 +160,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.TOWER_CONSOLE.get());
                         output.accept(ModItems.PHI_SONAR.get());
                         output.accept(ModItems.PHI_CARTOGRAPHY_TABLE.get());
+                        output.accept(ModItems.PHI_SONAR_GOGGLES.get());
                         output.accept(ModItems.ESSENCE_GLUE.get());
                         output.accept(ModItems.DEEP_PHI_CATALYST.get());
                         output.accept(ModItems.REACTOR_CASING.get());
