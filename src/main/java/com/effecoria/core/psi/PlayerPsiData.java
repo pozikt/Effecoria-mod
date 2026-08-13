@@ -88,6 +88,10 @@ public final class PlayerPsiData {
                     ResourceLocation.STREAM_CODEC.encode(buf, entry.getKey());
                     ByteBufCodecs.VAR_LONG.encode(buf, entry.getValue());
                 }
+                ByteBufCodecs.BOOL.encode(buf, data.towerBound);
+                ByteBufCodecs.BOOL.encode(buf, data.towerGhost);
+                ByteBufCodecs.VAR_INT.encode(buf, data.towerHp);
+                ByteBufCodecs.VAR_INT.encode(buf, data.towerMaxHp);
             },
             buf -> {
                 PlayerPsiData data = new PlayerPsiData();
@@ -165,6 +169,10 @@ public final class PlayerPsiData {
                     ResourceLocation id = ResourceLocation.STREAM_CODEC.decode(buf);
                     data.spellLastCastAt.put(id, ByteBufCodecs.VAR_LONG.decode(buf));
                 }
+                data.towerBound = ByteBufCodecs.BOOL.decode(buf);
+                data.towerGhost = ByteBufCodecs.BOOL.decode(buf);
+                data.towerHp = ByteBufCodecs.VAR_INT.decode(buf);
+                data.towerMaxHp = ByteBufCodecs.VAR_INT.decode(buf);
                 return data;
             });
 
@@ -236,6 +244,9 @@ public final class PlayerPsiData {
     private int towerY;
     private int towerZ;
     private boolean pendingTowerRevive;
+    private boolean towerGhost;
+    private int towerHp;
+    private int towerMaxHp;
     private String preferredBodyType = "basic";
     private int savedTowerXpTotal;
     private int savedTowerXpLevel;
@@ -820,6 +831,27 @@ public final class PlayerPsiData {
         return pendingTowerRevive;
     }
 
+    public boolean towerGhost() {
+        return towerGhost;
+    }
+
+    public void setTowerGhost(boolean value) {
+        this.towerGhost = value;
+    }
+
+    public int towerHp() {
+        return towerHp;
+    }
+
+    public int towerMaxHp() {
+        return towerMaxHp;
+    }
+
+    public void setTowerHp(int current, int max) {
+        this.towerMaxHp = Math.max(0, max);
+        this.towerHp = Math.max(0, Math.min(current, this.towerMaxHp));
+    }
+
     public com.effecoria.core.tower.TowerBodyType preferredBodyType() {
         return com.effecoria.core.tower.TowerBodyType.fromId(preferredBodyType);
     }
@@ -875,6 +907,9 @@ public final class PlayerPsiData {
         this.towerY = 0;
         this.towerZ = 0;
         this.pendingTowerRevive = false;
+        this.towerGhost = false;
+        this.towerHp = 0;
+        this.towerMaxHp = 0;
         this.savedTowerXpTotal = 0;
         this.savedTowerXpLevel = 0;
         this.savedTowerXpProgress = 0f;
@@ -1055,6 +1090,9 @@ public final class PlayerPsiData {
         tag.putInt("towerY", towerY);
         tag.putInt("towerZ", towerZ);
         tag.putBoolean("pendingTowerRevive", pendingTowerRevive);
+        tag.putBoolean("towerGhost", towerGhost);
+        tag.putInt("towerHp", towerHp);
+        tag.putInt("towerMaxHp", towerMaxHp);
         tag.putString("preferredBodyType", preferredBodyType == null ? "basic" : preferredBodyType);
         tag.putInt("savedTowerXpTotal", savedTowerXpTotal);
         tag.putInt("savedTowerXpLevel", savedTowerXpLevel);
@@ -1177,6 +1215,9 @@ public final class PlayerPsiData {
         towerY = tag.contains("towerY") ? tag.getInt("towerY") : 0;
         towerZ = tag.contains("towerZ") ? tag.getInt("towerZ") : 0;
         pendingTowerRevive = tag.contains("pendingTowerRevive") && tag.getBoolean("pendingTowerRevive");
+        towerGhost = tag.contains("towerGhost") && tag.getBoolean("towerGhost");
+        towerHp = tag.contains("towerHp") ? tag.getInt("towerHp") : 0;
+        towerMaxHp = tag.contains("towerMaxHp") ? tag.getInt("towerMaxHp") : 0;
         preferredBodyType = tag.contains("preferredBodyType") ? tag.getString("preferredBodyType") : "basic";
         savedTowerXpTotal = tag.contains("savedTowerXpTotal") ? tag.getInt("savedTowerXpTotal") : 0;
         savedTowerXpLevel = tag.contains("savedTowerXpLevel") ? tag.getInt("savedTowerXpLevel") : 0;
@@ -1384,6 +1425,9 @@ public final class PlayerPsiData {
         copy.towerY = towerY;
         copy.towerZ = towerZ;
         copy.pendingTowerRevive = pendingTowerRevive;
+        copy.towerGhost = towerGhost;
+        copy.towerHp = towerHp;
+        copy.towerMaxHp = towerMaxHp;
         copy.preferredBodyType = preferredBodyType;
         copy.savedTowerXpTotal = savedTowerXpTotal;
         copy.savedTowerXpLevel = savedTowerXpLevel;

@@ -78,7 +78,7 @@ public final class TowerReturnProtocol {
         if (!TechnomagicGates.checkOperate(player, TechnomagicEra.VI)) {
             return false;
         }
-        if (!TowerSoulbindService.towerAliveFor(player)) {
+        if (!TowerSoulbindService.towerPoweredFor(player)) {
             player.displayClientMessage(Component.translatable("message.effecoria.tower.return_offline"), true);
             return false;
         }

@@ -1931,4 +1931,44 @@ public final class ModNetworking {
                             payload.blips()));
         }
     }
+
+    /** Client → server: remote tower command (scan / turret / beacon / open console). */
+    public record TowerRemoteCommandPayload(BlockPos accessPos, int actionId, BlockPos targetPos, int modeId)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<TowerRemoteCommandPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "tower_remote_cmd"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, TowerRemoteCommandPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        BlockPos.STREAM_CODEC,
+                        TowerRemoteCommandPayload::accessPos,
+                        ByteBufCodecs.VAR_INT,
+                        TowerRemoteCommandPayload::actionId,
+                        BlockPos.STREAM_CODEC,
+                        TowerRemoteCommandPayload::targetPos,
+                        ByteBufCodecs.VAR_INT,
+                        TowerRemoteCommandPayload::modeId,
+                        TowerRemoteCommandPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(TowerRemoteCommandPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                if (!com.effecoria.core.technomagic.TechnomagicGates.checkOperate(
+                        player, com.effecoria.core.technomagic.TechnomagicEra.VI)) {
+                    return;
+                }
+                BlockPos target = payload.targetPos().equals(BlockPos.ZERO) ? null : payload.targetPos();
+                com.effecoria.core.tower.TowerRemoteService.execute(
+                        player, payload.accessPos(), payload.actionId(), target, payload.modeId());
+            });
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.effecoria.core.tower;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.block.TowerAnchorBlockEntity;
+import com.effecoria.core.alchemy.PhiPower;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
@@ -52,9 +53,13 @@ public final class TowerReviveService {
         BlockPos pos = data.towerPos().immutable();
         int savedXp = data.savedTowerXpTotal();
 
-        data.clearPendingTowerRevive();
-        PsiHelper.set(player, data);
-        player.syncData(ModAttachments.PSI.get());
+        if (!TowerSoulbindService.towerAliveFor(player)) {
+            data.clearPendingTowerRevive();
+            PsiHelper.set(player, data);
+            player.syncData(ModAttachments.PSI.get());
+            clearBodyModifiers(player);
+            return;
+        }
 
         ServerLevel towerLevel = player.server.getLevel(dim);
         if (towerLevel == null) {
@@ -62,8 +67,23 @@ public final class TowerReviveService {
         }
         BlockEntity be = towerLevel.getBlockEntity(pos);
         if (!(be instanceof TowerAnchorBlockEntity anchor) || !anchor.bound()) {
+            data.clearPendingTowerRevive();
+            PsiHelper.set(player, data);
+            player.syncData(ModAttachments.PSI.get());
             return;
         }
+
+        clearBodyModifiers(player);
+
+        if (!PhiPower.hasPower(towerLevel, pos)) {
+            // Keep saved XP until materialize; stay "pending" for ghost.
+            TowerGhostService.enterGhost(player);
+            return;
+        }
+
+        data.clearPendingTowerRevive();
+        PsiHelper.set(player, data);
+        player.syncData(ModAttachments.PSI.get());
 
         TowerBodyType body = anchor.bodyType();
         if (!anchor.payBodyCosts(body)) {
@@ -72,61 +92,12 @@ public final class TowerReviveService {
         }
 
         int delay = TowerFacility.hasRegenChamber(towerLevel, pos) ? 0 : body.delayTicks();
-        clearBodyModifiers(player);
-
         final TowerBodyType finalBody = body;
         Runnable finish = () -> {
             if (!player.isAlive()) {
                 return;
             }
-            BlockPos revive = anchor.revivePos();
-            double x = revive.getX() + 0.5;
-            double y = revive.getY() + 0.05;
-            double z = revive.getZ() + 0.5;
-            if (player.level() == towerLevel) {
-                player.teleportTo(x, y, z);
-            } else {
-                player.changeDimension(new DimensionTransition(
-                        towerLevel,
-                        new Vec3(x, y, z),
-                        Vec3.ZERO,
-                        player.getYRot(),
-                        player.getXRot(),
-                        DimensionTransition.DO_NOTHING));
-            }
-
-            boolean keptXp = false;
-            if (anchor.consumeSoulShardForXp() && savedXp > 0) {
-                player.giveExperiencePoints(-player.totalExperience);
-                player.giveExperiencePoints(savedXp);
-                keptXp = true;
-            }
-
-            applyBodyModifiers(player, finalBody);
-            applyReviveDrain(player, anchor.reviveCount() + 1);
-
-            int omega = finalBody.omegaPercent();
-            if (keptXp) {
-                omega += 2;
-            }
-            anchor.addOmegaPercent(omega);
-            anchor.onRevive();
-            if (anchor.omegaPercent() >= 100) {
-                player.displayClientMessage(Component.translatable("message.effecoria.tower.omega_critical"), true);
-            }
-
-            towerLevel.playSound(null, revive, SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.85f, 1.15f);
-            player.displayClientMessage(
-                    Component.translatable(
-                            "message.effecoria.tower.revived",
-                            finalBody.getSerializedName(),
-                            anchor.omegaPercent()),
-                    true);
-
-            PlayerPsiData after = PsiHelper.get(player);
-            after.setPreferredBodyType(anchor.bodyType());
-            PsiHelper.set(player, after);
-            player.syncData(ModAttachments.PSI.get());
+            finishRevive(player, anchor, finalBody, savedXp);
         };
 
         if (delay <= 0) {
@@ -138,6 +109,66 @@ public final class TowerReviveService {
                     Component.translatable("message.effecoria.tower.reviving", delay / 20), true);
             player.server.tell(new net.minecraft.server.TickTask(player.server.getTickCount() + delay, finish));
         }
+    }
+
+    /** Shared finish for normal revive and ghost materialization. */
+    public static void finishRevive(
+            ServerPlayer player, TowerAnchorBlockEntity anchor, TowerBodyType body, int savedXp) {
+        ServerLevel towerLevel = (ServerLevel) anchor.getLevel();
+        if (towerLevel == null || !player.isAlive()) {
+            return;
+        }
+
+        BlockPos revive = anchor.revivePos();
+        double x = revive.getX() + 0.5;
+        double y = revive.getY() + 0.05;
+        double z = revive.getZ() + 0.5;
+        if (player.level() == towerLevel) {
+            player.teleportTo(x, y, z);
+        } else {
+            player.changeDimension(new DimensionTransition(
+                    towerLevel,
+                    new Vec3(x, y, z),
+                    Vec3.ZERO,
+                    player.getYRot(),
+                    player.getXRot(),
+                    DimensionTransition.DO_NOTHING));
+        }
+
+        boolean keptXp = false;
+        if (anchor.consumeSoulShardForXp() && savedXp > 0) {
+            player.giveExperiencePoints(-player.totalExperience);
+            player.giveExperiencePoints(savedXp);
+            keptXp = true;
+        }
+
+        applyBodyModifiers(player, body);
+        applyReviveDrain(player, anchor.reviveCount() + 1);
+
+        int omega = body.omegaPercent();
+        if (keptXp) {
+            omega += 2;
+        }
+        anchor.addOmegaPercent(omega);
+        anchor.onRevive();
+        if (anchor.omegaPercent() >= 100) {
+            player.displayClientMessage(Component.translatable("message.effecoria.tower.omega_critical"), true);
+        }
+
+        towerLevel.playSound(null, revive, SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.85f, 1.15f);
+        player.displayClientMessage(
+                Component.translatable(
+                        "message.effecoria.tower.revived",
+                        body.getSerializedName(),
+                        anchor.omegaPercent()),
+                true);
+
+        PlayerPsiData after = PsiHelper.get(player);
+        after.setPreferredBodyType(anchor.bodyType());
+        after.clearPendingTowerRevive();
+        PsiHelper.set(player, after);
+        player.syncData(ModAttachments.PSI.get());
+        TowerBodyHpService.syncFromAnchor(player, towerLevel, anchor);
     }
 
     private static void applyBodyModifiers(ServerPlayer player, TowerBodyType body) {
@@ -198,7 +229,7 @@ public final class TowerReviveService {
     }
 
     private static void applyReviveDrain(ServerPlayer player, int reviveCount) {
-        if (reviveCount < 4) {
+        if (!player.server.isHardcore() || reviveCount < 4) {
             return;
         }
         PlayerPsiData psi = PsiHelper.get(player);
@@ -207,6 +238,11 @@ public final class TowerReviveService {
         psi.setCurrentPsi(Math.min(psi.currentPsi(), psi.maxPsi()));
         if (reviveCount >= 6) {
             psi.setSoulStrength(Math.max(0.4f, psi.soulStrength() * 0.95f));
+        }
+        if (reviveCount >= 8) {
+            player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20 * 60 * 10, 0, false, false));
+            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 60 * 10, 0, false, false));
+            player.displayClientMessage(Component.translatable("message.effecoria.tower.soul_fatigue"), true);
         }
         PsiHelper.set(player, psi);
         player.syncData(ModAttachments.PSI.get());

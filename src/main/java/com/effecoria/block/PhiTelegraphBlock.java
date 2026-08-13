@@ -93,6 +93,14 @@ public final class PhiTelegraphBlock extends BaseEntityBlock {
             return ItemInteractionResult.SUCCESS;
         }
 
+        // Linked telegraph → remote tower console (empty hand)
+        if (stack.isEmpty() && telegraph.hasLink()) {
+            if (com.effecoria.core.tower.TowerRemoteService.tryOpenRemoteFromTelegraph(
+                    serverPlayer, server, telegraph)) {
+                return ItemInteractionResult.SUCCESS;
+            }
+        }
+
         // Pairing with empty hand
         if (stack.isEmpty()) {
             TelegraphService.handlePairClick(serverPlayer, server, pos, telegraph);

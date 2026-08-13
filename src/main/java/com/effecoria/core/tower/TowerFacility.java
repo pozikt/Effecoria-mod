@@ -3,8 +3,11 @@ package com.effecoria.core.tower;
 import com.effecoria.block.FoundationAmuletBlockEntity;
 import com.effecoria.block.OmegaDamperBlockEntity;
 import com.effecoria.block.PhiAirSynthBlockEntity;
+import com.effecoria.block.PhiBeaconBlockEntity;
 import com.effecoria.block.PhiCartographyTableBlockEntity;
 import com.effecoria.block.PhiSonarBlockEntity;
+import com.effecoria.block.PhiTelegraphBlock;
+import com.effecoria.block.PhiTurretBlockEntity;
 import com.effecoria.block.PhiWaterPurifierBlockEntity;
 import com.effecoria.block.RegenChamberBlockEntity;
 import com.effecoria.block.TowerAnchorBlockEntity;
@@ -182,6 +185,29 @@ public final class TowerFacility {
                 }
             } else if (be instanceof PhiCartographyTableBlockEntity) {
                 out.add(entry("cartography", pos, towerLive ? "online" : "idle", towerLive ? MonitorEntry.OK : MonitorEntry.IDLE));
+            } else if (be instanceof PhiTurretBlockEntity turret) {
+                if (!turret.formed()) {
+                    out.add(entry("turret", pos, "unformed", MonitorEntry.BAD));
+                } else if (!phi) {
+                    out.add(entry("turret", pos, "no_power", MonitorEntry.BAD));
+                } else if (turret.armed()) {
+                    out.add(entry("turret", pos, "armed", MonitorEntry.OK));
+                } else {
+                    out.add(entry("turret", pos, "idle", MonitorEntry.IDLE));
+                }
+            } else if (be instanceof PhiBeaconBlockEntity beacon) {
+                String status = beacon.beaconName().isEmpty() ? "unnamed" : "online";
+                int sev = beacon.beaconName().isEmpty() ? MonitorEntry.WARN : (phi ? MonitorEntry.OK : MonitorEntry.BAD);
+                if (!phi && !beacon.beaconName().isEmpty()) {
+                    status = "no_power";
+                }
+                out.add(entry("beacon", pos, status, sev));
+            } else if (be instanceof PhiTelegraphBlock.PhiTelegraphBlockEntity telegraph) {
+                out.add(entry(
+                        "telegraph",
+                        pos,
+                        telegraph.hasLink() ? "linked" : "unlinked",
+                        telegraph.hasLink() ? MonitorEntry.OK : MonitorEntry.WARN));
             } else if (state.is(ModBlocks.SPARK_REACTOR.get())) {
                 out.add(reactorEntry("spark_reactor", pos, PhiPower.hasPower(level, pos)));
             } else if (state.is(ModBlocks.HEART_REACTOR_CORE.get())) {
@@ -230,7 +256,10 @@ public final class TowerFacility {
             case "regen_chamber" -> 6;
             case "sonar" -> 7;
             case "cartography" -> 8;
-            case "spark_reactor", "heart_reactor", "forge_reactor" -> 9;
+            case "turret" -> 9;
+            case "beacon" -> 10;
+            case "telegraph" -> 11;
+            case "spark_reactor", "heart_reactor", "forge_reactor" -> 12;
             default -> 50;
         };
     }

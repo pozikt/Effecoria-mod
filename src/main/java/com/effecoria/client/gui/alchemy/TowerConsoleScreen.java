@@ -9,6 +9,7 @@ import com.effecoria.network.ModNetworking;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -136,7 +137,11 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
 
     private void scan() {
         PacketDistributor.sendToServer(
-                new ModNetworking.PhiSonarRequestPayload(menu.blockEntity().getBlockPos(), scanMode.id()));
+                new ModNetworking.TowerRemoteCommandPayload(
+                        menu.blockEntity().getBlockPos(),
+                        com.effecoria.core.tower.TowerRemoteService.ACTION_SCAN,
+                        BlockPos.ZERO,
+                        scanMode.id()));
     }
 
     private int mapX() {
@@ -183,6 +188,37 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
             if (hitTab(mouseX, mouseY, 1)) {
                 setTab(Tab.MAP);
                 return true;
+            }
+        }
+        if (tab == Tab.STATUS && button == 0 && menu.linked()) {
+            List<TowerFacility.MonitorEntry> rows = menu.monitors();
+            int lx = leftPos + LIST_X;
+            int ly = topPos + LIST_Y;
+            int end = Math.min(rows.size(), scroll + visibleRows());
+            for (int i = scroll; i < end; i++) {
+                int rowY = ly + (i - scroll) * ROW_H;
+                if (mouseX >= lx && mouseX < lx + LIST_W - 16 && mouseY >= rowY && mouseY < rowY + ROW_H) {
+                    TowerFacility.MonitorEntry e = rows.get(i);
+                    BlockPos access = menu.blockEntity().getBlockPos();
+                    BlockPos target = e.pos();
+                    if ("turret".equals(e.kind())) {
+                        PacketDistributor.sendToServer(new ModNetworking.TowerRemoteCommandPayload(
+                                access,
+                                com.effecoria.core.tower.TowerRemoteService.ACTION_TURRET_TOGGLE,
+                                target,
+                                0));
+                        return true;
+                    }
+                    if ("beacon".equals(e.kind())) {
+                        PacketDistributor.sendToServer(new ModNetworking.TowerRemoteCommandPayload(
+                                access,
+                                com.effecoria.core.tower.TowerRemoteService.ACTION_BEACON_QUERY,
+                                target,
+                                0));
+                        return true;
+                    }
+                    break;
+                }
             }
         }
         if (tab == Tab.MAP && mapPainter.mouseClicked(mapX(), mapY(), MAP_SIZE, mouseX, mouseY, button)) {

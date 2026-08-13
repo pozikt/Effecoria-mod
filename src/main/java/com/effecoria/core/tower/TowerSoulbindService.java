@@ -76,6 +76,7 @@ public final class TowerSoulbindService {
         data.bindTower(level.dimension(), anchor.getBlockPos().immutable(), anchor.bodyType());
         PsiHelper.set(player, data);
         player.syncData(ModAttachments.PSI.get());
+        TowerBodyHpService.syncFromAnchor(player, level, anchor);
 
         level.playSound(
                 null,
@@ -173,6 +174,17 @@ public final class TowerSoulbindService {
         if (report.integrity() < TowerStructureValidator.MIN_INTEGRITY) {
             return false;
         }
-        return PhiPower.hasPower(towerLevel, data.towerPos());
+        // Φ power is NOT required here — no power → tower ghost on death, not permanent death.
+        return true;
+    }
+
+    /** Like {@link #towerAliveFor} but also requires a live Φ reactor. */
+    public static boolean towerPoweredFor(ServerPlayer player) {
+        if (!towerAliveFor(player)) {
+            return false;
+        }
+        PlayerPsiData data = PsiHelper.get(player);
+        ServerLevel towerLevel = player.server.getLevel(data.towerDim());
+        return towerLevel != null && PhiPower.hasPower(towerLevel, data.towerPos());
     }
 }

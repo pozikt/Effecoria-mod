@@ -204,6 +204,8 @@ public final class ModCommonEvents {
         }
 
         com.effecoria.core.tower.TowerGeniusLociService.tickPlayer(player);
+        com.effecoria.core.tower.TowerGhostService.tickPlayer(player);
+        com.effecoria.core.tower.TowerBodyHpService.tickSync(player);
 
         if (player.tickCount % 10 != 0) {
             return;

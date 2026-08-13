@@ -5,6 +5,7 @@ import com.effecoria.client.hud.BlurredLocusHud;
 import com.effecoria.client.hud.PhiSonarGogglesHud;
 import com.effecoria.client.hud.PsiHudOverlay;
 import com.effecoria.client.hud.SealInspectHud;
+import com.effecoria.client.hud.TowerHealthHud;
 import com.effecoria.client.particle.SchoolParticles;
 import com.effecoria.client.render.CrystalCrabRenderer;
 import com.effecoria.client.render.DeathShadowRenderer;
@@ -45,6 +46,7 @@ import com.effecoria.client.gui.alchemy.PortalModulatorScreen;
 import com.effecoria.client.gui.alchemy.PhiBeaconScreen;
 import com.effecoria.client.gui.alchemy.PhiTurretScreen;
 import com.effecoria.client.gui.alchemy.PhiCrusherScreen;
+import com.effecoria.client.gui.alchemy.PhiWaterPurifierScreen;
 import com.effecoria.client.render.PhiConstructRenderer;
 import com.effecoria.client.render.VitrifiedGolemRenderer;
 import com.effecoria.client.render.GeoWellRenderer;
@@ -86,6 +88,7 @@ public final class EffecoriaClient {
         event.register(ModMenus.PHI_BEACON.get(), PhiBeaconScreen::new);
         event.register(ModMenus.PHI_TURRET.get(), PhiTurretScreen::new);
         event.register(ModMenus.PHI_CRUSHER.get(), PhiCrusherScreen::new);
+        event.register(ModMenus.PHI_WATER_PURIFIER.get(), PhiWaterPurifierScreen::new);
         event.register(ModMenus.ALEMBIC.get(), AlembicScreen::new);
         event.register(ModMenus.IMPRINTER.get(), ImprinterScreen::new);
         event.register(ModMenus.SHAFT_LATHE.get(), FormSelectScreen::new);
@@ -184,6 +187,7 @@ public final class EffecoriaClient {
 
     @SubscribeEvent
     public static void registerGuiLayers(RegisterGuiLayersEvent event) {
+        event.registerAbove(VanillaGuiLayers.PLAYER_HEALTH, EffecoriaMod.id("tower_health"), TowerHealthHud::render);
         event.registerAbove(VanillaGuiLayers.HOTBAR, EffecoriaMod.id("psi_hud"), PsiHudOverlay::render);
         event.registerAbove(VanillaGuiLayers.HOTBAR, EffecoriaMod.id("blurred_locus"), BlurredLocusHud::render);
         event.registerAbove(VanillaGuiLayers.CROSSHAIR, EffecoriaMod.id("seal_inspect"), SealInspectHud::render);

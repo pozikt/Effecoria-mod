@@ -19,6 +19,7 @@ import com.effecoria.alchemy.menu.PortalModulatorMenu;
 import com.effecoria.alchemy.menu.PhiBeaconMenu;
 import com.effecoria.alchemy.menu.PhiTurretMenu;
 import com.effecoria.alchemy.menu.PhiCrusherMenu;
+import com.effecoria.alchemy.menu.PhiWaterPurifierMenu;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
@@ -70,6 +71,9 @@ public final class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<PhiCrusherMenu>> PHI_CRUSHER =
             MENUS.register("phi_crusher", () -> IMenuTypeExtension.create(PhiCrusherMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<PhiWaterPurifierMenu>> PHI_WATER_PURIFIER =
+            MENUS.register("phi_water_purifier", () -> IMenuTypeExtension.create(PhiWaterPurifierMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<AlembicMenu>> ALEMBIC =
             MENUS.register("alembic", () -> IMenuTypeExtension.create(AlembicMenu::new));
