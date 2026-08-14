@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * Dedicated Mage Tower console — no player inventory.
- * Tabs: Status (summary + devices) | Map (Φ-sonar heightmap).
+ * Tabs: Status | Map | Edicts (Lex Loci Phoenix + symbol table).
  */
 public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConsoleMenu> {
     private static final int PANEL_W = 320;
@@ -30,6 +30,8 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     private static final int LIST_H = 150;
     private static final int ROW_H = 18;
     private static final int MAP_SIZE = 168;
+    private static final int EDICT_LIST_Y = 118;
+    private static final int EDICT_LIST_H = 60;
 
     private static final int BG_OUTER = 0xCC15202C;
     private static final int BG_INNER = 0xEE1E2E3C;
@@ -49,11 +51,13 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
 
     private enum Tab {
         STATUS,
-        MAP
+        MAP,
+        EDICTS
     }
 
     private Tab tab = Tab.STATUS;
     private int scroll;
+    private int edictScroll;
     private PhiSonarService.Mode scanMode = PhiSonarService.Mode.ACTIVE;
     private final PhiSonarMapPainter mapPainter = new PhiSonarMapPainter();
     private Button domeBtn;
@@ -62,6 +66,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     private Button scrollDownBtn;
     private Button scanBtn;
     private Button modeBtn;
+    private Button phoenixBtn;
 
     public TowerConsoleScreen(TowerConsoleMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -94,7 +99,17 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         scanBtn = addRenderableWidget(Button.builder(Component.translatable("gui.effecoria.tower_console.scan_btn"), b -> scan())
                 .bounds(leftPos + PANEL_W - 72, topPos + PANEL_H - 28, 62, 18)
                 .build());
+        phoenixBtn = addRenderableWidget(Button.builder(phoenixLabel(), b -> phoenix())
+                .bounds(leftPos + 10, topPos + PANEL_H - 28, 100, 18)
+                .build());
         applyTabVisibility();
+    }
+
+    private Component phoenixLabel() {
+        return Component.translatable(
+                menu.phoenixEdictEnabled()
+                        ? "gui.effecoria.tower_console.phoenix_on"
+                        : "gui.effecoria.tower_console.phoenix_off");
     }
 
     private Component modeLabel() {
@@ -116,6 +131,12 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         scanBtn.visible = map;
         modeBtn.visible = map;
         scanBtn.active = menu.sonarPresent() && menu.linked();
+        boolean edicts = tab == Tab.EDICTS;
+        phoenixBtn.visible = edicts;
+        phoenixBtn.active = menu.linked() && menu.bound();
+        if (edicts) {
+            phoenixBtn.setMessage(phoenixLabel());
+        }
     }
 
     private void setTab(Tab next) {
@@ -132,6 +153,12 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     private void body() {
         if (minecraft != null && minecraft.gameMode != null) {
             minecraft.gameMode.handleInventoryButtonClick(menu.containerId, TowerConsoleMenu.BUTTON_BODY);
+        }
+    }
+
+    private void phoenix() {
+        if (minecraft != null && minecraft.gameMode != null) {
+            minecraft.gameMode.handleInventoryButtonClick(menu.containerId, TowerConsoleMenu.BUTTON_PHOENIX);
         }
     }
 
@@ -162,6 +189,31 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         scroll = Math.max(0, Math.min(scroll + delta, max));
     }
 
+    private int edictVisibleRows() {
+        return Math.max(1, EDICT_LIST_H / 12);
+    }
+
+    private List<String> symbolRows() {
+        List<String> out = new ArrayList<>();
+        out.add("душа");
+        out.add("владелец");
+        out.add("шина:life");
+        out.add("шина:industry");
+        out.add("шина:defense");
+        out.add("шина:psi");
+        out.add("шина:broadband");
+        for (TowerFacility.MonitorEntry e : menu.monitors()) {
+            out.add(e.kind() + "@" + e.x() + "," + e.y() + "," + e.z());
+        }
+        return out;
+    }
+
+    private void scrollEdicts(int delta) {
+        List<String> rows = symbolRows();
+        int max = Math.max(0, rows.size() - edictVisibleRows());
+        edictScroll = Math.max(0, Math.min(edictScroll + delta, max));
+    }
+
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (tab == Tab.STATUS
@@ -170,6 +222,14 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                 && mouseY >= topPos + LIST_Y
                 && mouseY <= topPos + LIST_Y + LIST_H) {
             scroll(scrollY > 0 ? -1 : 1);
+            return true;
+        }
+        if (tab == Tab.EDICTS
+                && mouseX >= leftPos + 10
+                && mouseX <= leftPos + PANEL_W - 10
+                && mouseY >= topPos + EDICT_LIST_Y
+                && mouseY <= topPos + EDICT_LIST_Y + EDICT_LIST_H) {
+            scrollEdicts(scrollY > 0 ? -1 : 1);
             return true;
         }
         if (tab == Tab.MAP && mapPainter.mouseScrolled(mapX(), mapY(), MAP_SIZE, mouseX, mouseY, scrollY)) {
@@ -187,6 +247,10 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
             }
             if (hitTab(mouseX, mouseY, 1)) {
                 setTab(Tab.MAP);
+                return true;
+            }
+            if (hitTab(mouseX, mouseY, 2)) {
+                setTab(Tab.EDICTS);
                 return true;
             }
         }
@@ -244,9 +308,9 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     }
 
     private boolean hitTab(double mouseX, double mouseY, int index) {
-        int x0 = leftPos + 90 + index * 54;
+        int x0 = leftPos + 78 + index * 48;
         int y0 = topPos + 4;
-        return mouseX >= x0 && mouseX < x0 + 50 && mouseY >= y0 && mouseY < y0 + 14;
+        return mouseX >= x0 && mouseX < x0 + 46 && mouseY >= y0 && mouseY < y0 + 14;
     }
 
     @Override
@@ -254,6 +318,10 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         super.containerTick();
         if (scanBtn != null) {
             scanBtn.active = menu.sonarPresent() && menu.linked();
+        }
+        if (phoenixBtn != null && tab == Tab.EDICTS) {
+            phoenixBtn.active = menu.linked() && menu.bound();
+            phoenixBtn.setMessage(phoenixLabel());
         }
     }
 
@@ -277,22 +345,68 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
             graphics.fill(leftPos + LIST_X - 6, topPos + 22, leftPos + LIST_X - 5, topPos + PANEL_H - 34, LINE);
             drawSummary(graphics);
             drawMonitorList(graphics, mouseX, mouseY);
-        } else {
+        } else if (tab == Tab.MAP) {
             drawMapTab(graphics, mouseX, mouseY);
+        } else {
+            drawEdictsTab(graphics);
         }
     }
 
     private void drawTabs(GuiGraphics graphics) {
         drawTabChip(graphics, 0, "gui.effecoria.tower_console.tab.status", tab == Tab.STATUS);
         drawTabChip(graphics, 1, "gui.effecoria.tower_console.tab.map", tab == Tab.MAP);
+        drawTabChip(graphics, 2, "gui.effecoria.tower_console.tab.edicts", tab == Tab.EDICTS);
     }
 
     private void drawTabChip(GuiGraphics graphics, int index, String key, boolean on) {
-        int x0 = leftPos + 90 + index * 54;
+        int x0 = leftPos + 78 + index * 48;
         int y0 = topPos + 4;
-        graphics.fill(x0, y0, x0 + 50, y0 + 14, on ? TAB_ON : TAB_OFF);
-        graphics.fill(x0, y0 + 13, x0 + 50, y0 + 14, on ? TITLE : LINE);
-        graphics.drawCenteredString(font, Component.translatable(key), x0 + 25, y0 + 3, on ? TITLE : MUTED);
+        graphics.fill(x0, y0, x0 + 46, y0 + 14, on ? TAB_ON : TAB_OFF);
+        graphics.fill(x0, y0 + 13, x0 + 46, y0 + 14, on ? TITLE : LINE);
+        graphics.drawCenteredString(font, Component.translatable(key), x0 + 23, y0 + 3, on ? TITLE : MUTED);
+    }
+
+    private void drawEdictsTab(GuiGraphics graphics) {
+        int x = leftPos + 10;
+        int y = topPos + 22;
+        graphics.drawString(font, Component.translatable("gui.effecoria.tower_console.edict.phoenix_title"), x, y, TITLE, false);
+        y += 12;
+        String body = Component.translatable("gui.effecoria.tower_console.edict.phoenix").getString();
+        for (String line : body.split("\n", -1)) {
+            graphics.drawString(font, line, x, y, LABEL, false);
+            y += 10;
+            if (y > topPos + EDICT_LIST_Y - 14) {
+                break;
+            }
+        }
+
+        int flagColor = menu.phoenixEdictEnabled() ? OK : MUTED;
+        graphics.drawString(
+                font,
+                Component.translatable(
+                        menu.phoenixEdictEnabled()
+                                ? "gui.effecoria.tower_console.edict.active"
+                                : "gui.effecoria.tower_console.edict.inactive"),
+                x,
+                topPos + EDICT_LIST_Y - 12,
+                flagColor,
+                false);
+
+        graphics.drawString(
+                font,
+                Component.translatable("gui.effecoria.tower_console.edict.symbols"),
+                x,
+                topPos + EDICT_LIST_Y - 2,
+                TITLE,
+                false);
+        int listY = topPos + EDICT_LIST_Y + 10;
+        graphics.fill(leftPos + 8, listY - 2, leftPos + PANEL_W - 8, listY + EDICT_LIST_H, BG_LIST);
+        List<String> rows = symbolRows();
+        int end = Math.min(rows.size(), edictScroll + edictVisibleRows());
+        for (int i = edictScroll; i < end; i++) {
+            int rowY = listY + (i - edictScroll) * 12;
+            graphics.drawString(font, rows.get(i), x, rowY, MUTED, false);
+        }
     }
 
     private void drawMapTab(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -580,6 +694,9 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                         mouseX,
                         mouseY);
             }
+        } else if (tab == Tab.EDICTS && isHovering(10, PANEL_H - 28, 100, 18, mouseX, mouseY)) {
+            graphics.renderTooltip(
+                    font, Component.translatable("gui.effecoria.tower_console.phoenix_tip"), mouseX, mouseY);
         }
     }
 

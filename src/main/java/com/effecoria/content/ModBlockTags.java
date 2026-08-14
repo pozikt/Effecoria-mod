@@ -23,6 +23,13 @@ public final class ModBlockTags {
     public static final TagKey<Block> PHI_CONDUCTORS =
             TagKey.create(Registries.BLOCK, EffecoriaMod.id("phi_conductors"));
 
+    /**
+     * Machines that Phoenix shed must keep powered (life channel / rematerialize path).
+     * Contactors adjacent to these stay closed on owner death.
+     */
+    public static final TagKey<Block> PHI_LIFE_LOADS =
+            TagKey.create(Registries.BLOCK, EffecoriaMod.id("phi_life_loads"));
+
     /** Essonite ore variants — Φ-sonar / deep scan highlights. */
     public static final TagKey<Block> ESSONITE_ORES =
             TagKey.create(Registries.BLOCK, EffecoriaMod.id("essonite_ores"));

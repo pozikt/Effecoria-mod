@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "effecoria:regen_chamber",
+    "effecoria:regen_chamber_part",
+    "effecoria:psi_imprinter",
+    "effecoria:omega_damper"
+  ]
+}

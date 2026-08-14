@@ -85,6 +85,22 @@ public final class PhiContactorBlock extends net.minecraft.world.level.block.Bas
                 : createTickerHelper(type, ModBlockEntities.PHI_CONTACTOR.get(), PhiContactorBlockEntity::serverTick);
     }
 
+    /**
+     * Programmatic open/close for Lex / Phoenix shed. {@code closed=true} conducts;
+     * {@code false} splits the island. Marks the network dirty when the BE is present.
+     */
+    public static boolean setClosed(Level level, BlockPos pos, boolean closed) {
+        BlockState state = level.getBlockState(pos);
+        if (!(state.getBlock() instanceof PhiContactorBlock) || state.getValue(CLOSED) == closed) {
+            return false;
+        }
+        level.setBlock(pos, state.setValue(CLOSED, closed), Block.UPDATE_ALL);
+        if (level.getBlockEntity(pos) instanceof PhiContactorBlockEntity be) {
+            be.markDirtyNetwork();
+        }
+        return true;
+    }
+
     @Override
     protected InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
@@ -92,7 +108,7 @@ public final class PhiContactorBlock extends net.minecraft.world.level.block.Bas
             return InteractionResult.SUCCESS;
         }
         boolean next = !state.getValue(CLOSED);
-        level.setBlock(pos, state.setValue(CLOSED, next), Block.UPDATE_ALL);
+        setClosed(level, pos, next);
         player.displayClientMessage(
                 Component.translatable(next ? "message.effecoria.phi_contactor.closed" : "message.effecoria.phi_contactor.open"),
                 true);
@@ -107,9 +123,8 @@ public final class PhiContactorBlock extends net.minecraft.world.level.block.Bas
         }
         boolean signal = level.hasNeighborSignal(pos);
         if (signal && state.getValue(CLOSED)) {
-            level.setBlock(pos, state.setValue(CLOSED, false), Block.UPDATE_ALL);
-        }
-        if (level.getBlockEntity(pos) instanceof PhiContactorBlockEntity be) {
+            setClosed(level, pos, false);
+        } else if (level.getBlockEntity(pos) instanceof PhiContactorBlockEntity be) {
             be.markDirtyNetwork();
         }
     }

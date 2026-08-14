@@ -51,7 +51,8 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
     public static final int DATA_PHI_POWER = 15;
     public static final int DATA_SONAR_PRESENT = 16;
     public static final int DATA_SONAR_READY = 17;
-    public static final int DATA_COUNT = 18;
+    public static final int DATA_PHOENIX = 18;
+    public static final int DATA_COUNT = 19;
 
     private int integrityPct;
     private int omegaPct;
@@ -71,6 +72,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
     private int phiPower;
     private int sonarPresent;
     private int sonarReady;
+    private int phoenixEdict;
 
     private List<TowerFacility.MonitorEntry> monitors = new ArrayList<>();
 
@@ -96,6 +98,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
                 case DATA_PHI_POWER -> phiPower;
                 case DATA_SONAR_PRESENT -> sonarPresent;
                 case DATA_SONAR_READY -> sonarReady;
+                case DATA_PHOENIX -> phoenixEdict;
                 default -> 0;
             };
         }
@@ -121,6 +124,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
                 case DATA_PHI_POWER -> phiPower = value;
                 case DATA_SONAR_PRESENT -> sonarPresent = value;
                 case DATA_SONAR_READY -> sonarReady = value;
+                case DATA_PHOENIX -> phoenixEdict = value;
                 default -> {}
             }
         }
@@ -184,6 +188,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
                         .isPresent()
                 ? 1
                 : 0;
+        phoenixEdict = computer.phoenixEdictEnabled() ? 1 : 0;
         setChanged();
         syncClient();
     }
@@ -207,6 +212,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         phiPower = 0;
         sonarPresent = 0;
         sonarReady = 0;
+        phoenixEdict = 1;
     }
 
     private void syncClient() {
@@ -275,6 +281,29 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         return true;
     }
 
+    public boolean tryTogglePhoenix(Player player) {
+        if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp)) {
+            return false;
+        }
+        TowerAnchorBlockEntity computer = TowerFacility.findComputer(server, worldPosition).orElse(null);
+        if (computer == null || !computer.bound() || computer.ownerUuid() == null) {
+            return false;
+        }
+        if (!computer.ownerUuid().equals(sp.getUUID())) {
+            sp.displayClientMessage(Component.translatable("message.effecoria.tower.not_owner"), true);
+            return false;
+        }
+        boolean on = computer.togglePhoenixEdict();
+        sp.displayClientMessage(
+                Component.translatable(
+                        on
+                                ? "message.effecoria.tower.phoenix_on"
+                                : "message.effecoria.tower.phoenix_off"),
+                true);
+        refreshTelemetry(server);
+        return true;
+    }
+
     public TowerBodyType bodyType() {
         TowerBodyType[] values = TowerBodyType.values();
         int i = Math.max(0, Math.min(values.length - 1, bodyOrdinal));
@@ -326,6 +355,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         tag.putInt("PhiPower", phiPower);
         tag.putInt("SonarPresent", sonarPresent);
         tag.putInt("SonarReady", sonarReady);
+        tag.putInt("Phoenix", phoenixEdict);
         tag.put("Monitors", TowerFacility.saveMonitorList(monitors));
     }
 
@@ -348,6 +378,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         phiPower = tag.getInt("PhiPower");
         sonarPresent = tag.getInt("SonarPresent");
         sonarReady = tag.getInt("SonarReady");
+        phoenixEdict = tag.contains("Phoenix") ? tag.getInt("Phoenix") : 1;
         if (tag.contains("Monitors", Tag.TAG_LIST)) {
             monitors = new ArrayList<>(TowerFacility.loadMonitorList(tag.getList("Monitors", Tag.TAG_COMPOUND)));
         } else {

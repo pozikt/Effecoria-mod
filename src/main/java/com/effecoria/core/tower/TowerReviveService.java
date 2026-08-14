@@ -40,6 +40,15 @@ public final class TowerReviveService {
         PlayerPsiData data = PsiHelper.get(player);
         data.prepareTowerRevive(player.totalExperience, player.experienceLevel, player.experienceProgress);
         PsiHelper.set(player, data);
+
+        ResourceKey<Level> dim = data.towerDim();
+        BlockPos pos = data.towerPos();
+        if (dim != null && pos != null) {
+            ServerLevel towerLevel = player.server.getLevel(dim);
+            if (towerLevel != null) {
+                PhoenixShedService.onSoulDead(towerLevel, pos);
+            }
+        }
     }
 
     public static void onRespawn(ServerPlayer player) {
@@ -169,6 +178,7 @@ public final class TowerReviveService {
         PsiHelper.set(player, after);
         player.syncData(ModAttachments.PSI.get());
         TowerBodyHpService.syncFromAnchor(player, towerLevel, anchor);
+        PhoenixShedService.onSoulAlive(towerLevel, anchor.getBlockPos());
     }
 
     private static void applyBodyModifiers(ServerPlayer player, TowerBodyType body) {

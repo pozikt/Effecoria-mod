@@ -1,6 +1,6 @@
 # Lex Loci — язык программирования башни
 
-**Status:** design — edict language not shipped. Physical Φ-circuitry (channels, contactors, couplers, accumulators, filaments) is playable; see [PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md).  
+**Status:** design — full edict language not shipped. Physical Φ-circuitry playable ([PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md)). **Phoenix hardware shed shipped** (`PhoenixShedService`). **E0.5 console Edicts tab shipped** (built-in Phoenix text + enable toggle + live symbol list). Full word editor / compiler = phase E.  
 **Depends on:** [PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md), seals word grammar ([SEAL_PROGRAMMING.md](SEAL_PROGRAMMING.md)), tower facility (`TowerFacility`, console, Ψ-computer).  
 **Roadmap:** Stage IV / Technomagic Era VI (nervous system atop Era IV–V reactors).
 
@@ -144,7 +144,9 @@ Lex Loci («закон места») — словесные **эдикты** д�
 | B | Контакторы, имена каналов, вкладка нагрузки/Ω |
 | C | Накопитель ΔQ + inrush revive |
 | D | Согласователь; штраф импринтера при Δω |
-| E | Редактор Lex Loci + эдикт Феникса по умолчанию |
+| E0 | **Phoenix hardware shed (shipped)** — смерть владельца → open non-`life` contactors; снимок на якоре; restore на revive |
+| E0.5 | **Console Edicts tab (shipped)** — встроенный текст Феникса, тумблер, живые символы facility; без компилятора |
+| E | Редактор Lex Loci + эдикт Феникса по умолчанию (слова / compiler) |
 | F | Φ-нить + клеммы |
 | G | Сторож, автономия турелей, инкубатор |
 

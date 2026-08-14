@@ -24,6 +24,7 @@ import java.util.List;
 public final class TowerConsoleMenu extends MachineMenu {
     public static final int BUTTON_DOME = 0;
     public static final int BUTTON_BODY = 1;
+    public static final int BUTTON_PHOENIX = 2;
 
     private final TowerConsoleBlockEntity blockEntity;
     private final ContainerData data;
@@ -137,6 +138,10 @@ public final class TowerConsoleMenu extends MachineMenu {
         return data.get(TowerConsoleBlockEntity.DATA_SONAR_READY) != 0;
     }
 
+    public boolean phoenixEdictEnabled() {
+        return data.get(TowerConsoleBlockEntity.DATA_PHOENIX) != 0;
+    }
+
     @Override
     public boolean clickMenuButton(Player player, int id) {
         if (player instanceof ServerPlayer serverPlayer
@@ -146,6 +151,7 @@ public final class TowerConsoleMenu extends MachineMenu {
         return switch (id) {
             case BUTTON_DOME -> blockEntity.tryToggleDome(player);
             case BUTTON_BODY -> blockEntity.tryCycleBody(player);
+            case BUTTON_PHOENIX -> blockEntity.tryTogglePhoenix(player);
             default -> false;
         };
     }

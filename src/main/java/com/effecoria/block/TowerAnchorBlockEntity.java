@@ -10,6 +10,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -50,6 +52,13 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
     private boolean domePowered;
     /** Avoid spamming clear packets while passive. */
     private boolean clientDomeSynced;
+
+    /** Pre-Phoenix contactor CLOSED snapshot; cleared on restore. */
+    @Nullable
+    private ListTag phoenixContactorSnapshot;
+
+    /** Lex Loci hardware Phoenix edict — shed non-life contactors on owner death. */
+    private boolean phoenixEdictEnabled = true;
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(INV_SIZE, ItemStack.EMPTY);
 
@@ -202,8 +211,46 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
         bound = false;
         domeCombat = false;
         domePowered = false;
+        phoenixContactorSnapshot = null;
+        phoenixEdictEnabled = true;
         setChanged();
         sync();
+    }
+
+    public boolean phoenixEdictEnabled() {
+        return phoenixEdictEnabled;
+    }
+
+    public void setPhoenixEdictEnabled(boolean enabled) {
+        if (phoenixEdictEnabled == enabled) {
+            return;
+        }
+        phoenixEdictEnabled = enabled;
+        setChanged();
+        sync();
+    }
+
+    public boolean togglePhoenixEdict() {
+        setPhoenixEdictEnabled(!phoenixEdictEnabled);
+        return phoenixEdictEnabled;
+    }
+
+    public boolean hasPhoenixSnapshot() {
+        return phoenixContactorSnapshot != null && !phoenixContactorSnapshot.isEmpty();
+    }
+
+    public void storePhoenixSnapshot(ListTag snapshot) {
+        phoenixContactorSnapshot = snapshot == null || snapshot.isEmpty() ? null : snapshot.copy();
+        setChanged();
+    }
+
+    /** Returns and clears the stored snapshot (may be empty). */
+    @Nullable
+    public ListTag takePhoenixSnapshot() {
+        ListTag snap = phoenixContactorSnapshot;
+        phoenixContactorSnapshot = null;
+        setChanged();
+        return snap;
     }
 
     public boolean clearOmega() {
@@ -362,6 +409,10 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
         tag.putInt("ReviveCount", reviveCount);
         tag.putString("BodyType", bodyType.getSerializedName());
         tag.putBoolean("DomeCombat", domeCombat);
+        tag.putBoolean("PhoenixEdict", phoenixEdictEnabled);
+        if (phoenixContactorSnapshot != null && !phoenixContactorSnapshot.isEmpty()) {
+            tag.put("PhoenixContactors", phoenixContactorSnapshot.copy());
+        }
         ContainerHelper.saveAllItems(tag, items, provider);
     }
 
@@ -390,6 +441,12 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
         reviveCount = tag.getInt("ReviveCount");
         bodyType = TowerBodyType.fromId(tag.getString("BodyType"));
         domeCombat = tag.getBoolean("DomeCombat");
+        phoenixEdictEnabled = !tag.contains("PhoenixEdict") || tag.getBoolean("PhoenixEdict");
+        if (tag.contains("PhoenixContactors", Tag.TAG_LIST)) {
+            phoenixContactorSnapshot = tag.getList("PhoenixContactors", Tag.TAG_COMPOUND).copy();
+        } else {
+            phoenixContactorSnapshot = null;
+        }
         ContainerHelper.loadAllItems(tag, items, provider);
     }
 
