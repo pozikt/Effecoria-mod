@@ -4,5 +4,10 @@
   "icon": "effecoria:phi_coupler",
   "status": "available",
   "requires": ["effecoria:phi_bus"],
-  "display_unlocks": ["effecoria:phi_contactor", "effecoria:phi_coupler", "effecoria:phi_accumulator"]
+  "display_unlocks": [
+    "effecoria:phi_contactor",
+    "effecoria:phi_coupler",
+    "effecoria:phi_matcher",
+    "effecoria:phi_accumulator"
+  ]
 }

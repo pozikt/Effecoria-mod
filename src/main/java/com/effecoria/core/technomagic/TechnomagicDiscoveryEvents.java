@@ -75,6 +75,7 @@ public final class TechnomagicDiscoveryEvents {
         discoverIfHas(player, ModItems.PHI_BUS.get(), "phi_bus");
         discoverIfHas(player, ModItems.PHI_CONTACTOR.get(), "phi_circuit");
         discoverIfHas(player, ModItems.PHI_COUPLER.get(), "phi_circuit");
+        discoverIfHas(player, ModItems.PHI_MATCHER.get(), "phi_circuit");
         discoverIfHas(player, ModItems.PHI_ACCUMULATOR.get(), "phi_circuit");
         discoverIfHas(player, ModItems.TURRET_MOUNT.get(), "turret_mount");
         discoverIfHas(player, ModItems.PLASMA_TURRET.get(), "plasma_turret");

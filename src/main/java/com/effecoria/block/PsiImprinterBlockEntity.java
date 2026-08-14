@@ -6,6 +6,7 @@ import com.effecoria.content.ModItems;
 import com.effecoria.content.PhiHarnessItems;
 import com.effecoria.core.alchemy.HeatLevel;
 import com.effecoria.core.alchemy.PhiHeat;
+import com.effecoria.core.alchemy.PhiPower;
 import com.effecoria.core.technomagic.ImprintData;
 
 import net.minecraft.core.BlockPos;
@@ -184,9 +185,17 @@ public final class PsiImprinterBlockEntity extends BaseContainerBlockEntity impl
             }
             return;
         }
+        if (!PhiPower.consumeTick(level, pos, 1)) {
+            if (be.progress > 0) {
+                be.progress = Math.max(0, be.progress - 1);
+                be.setChanged();
+            }
+            return;
+        }
         boolean soulFocus = focus.is(ModItems.SOUL_SHARD.get());
         int tier = soulFocus ? 0 : PhiHarnessItems.focusTier(focus);
-        be.maxProgress = Math.max(80, BASE_COOK - tier * 40);
+        float resonance = Math.max(0.35f, PhiPower.resonanceAt(level, pos));
+        be.maxProgress = Math.max(80, Math.round((BASE_COOK - tier * 40) / resonance));
         be.progress++;
         PhiHarnessItems.setCellCharge(drive, PhiHarnessItems.cellCharge(drive) - CELL_DRAIN);
         if (be.progress >= be.maxProgress) {

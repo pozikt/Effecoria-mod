@@ -148,6 +148,20 @@ public final class PhiPower {
         }
     }
 
+    /**
+     * Frequency resonance for a consumer without draining fuel (1 = perfect match).
+     * Islands with a {@code phi_matcher} force full match.
+     */
+    public static float resonanceAt(Level level, BlockPos consumerPos) {
+        PhiChannel device = PhiChannels.ofDevice(level, consumerPos);
+        PhiPowerProvider best = findBest(level, consumerPos);
+        if (best == null) {
+            return 0f;
+        }
+        PhiChannel source = channelOf(level, consumerPos, best);
+        return FormulaEngine.phiFlowResonance(source.hz(), device.hz());
+    }
+
     private static PhiChannel channelOf(Level level, BlockPos consumerPos, PhiPowerProvider best) {
         if (best instanceof com.effecoria.core.circuit.PhiTuned tuned) {
             PhiChannel ch = tuned.phiChannel();
@@ -158,11 +172,25 @@ public final class PhiPower {
         for (Direction dir : Direction.values()) {
             BlockPos adj = consumerPos.relative(dir);
             if (PhiBusNetwork.isConductor(level.getBlockState(adj))) {
+                PhiBusNetwork.Source src = PhiBusNetwork.findSource(level, adj);
+                if (src != null && src.matched()) {
+                    return PhiChannels.ofDevice(level, consumerPos);
+                }
+                if (src != null) {
+                    return src.channel();
+                }
                 return PhiBusNetwork.channelAt(level, adj);
             }
         }
         for (BlockPos far : com.effecoria.core.circuit.PhiFilamentLinks.neighbors(level, consumerPos)) {
             if (PhiBusNetwork.isConductor(level.getBlockState(far))) {
+                PhiBusNetwork.Source src = PhiBusNetwork.findSource(level, far);
+                if (src != null && src.matched()) {
+                    return PhiChannels.ofDevice(level, consumerPos);
+                }
+                if (src != null) {
+                    return src.channel();
+                }
                 return PhiBusNetwork.channelAt(level, far);
             }
         }

@@ -42,9 +42,18 @@ public final class PhiBusNetwork {
             float powerFactor,
             int hops,
             @javax.annotation.Nullable PhiPowerProvider injector,
-            PhiChannel channel) {
+            PhiChannel channel,
+            boolean matched) {
         public Source(float powerFactor, int hops, @javax.annotation.Nullable PhiPowerProvider injector) {
-            this(powerFactor, hops, injector, PhiChannel.BROADBAND);
+            this(powerFactor, hops, injector, PhiChannel.BROADBAND, false);
+        }
+
+        public Source(
+                float powerFactor,
+                int hops,
+                @javax.annotation.Nullable PhiPowerProvider injector,
+                PhiChannel channel) {
+            this(powerFactor, hops, injector, channel, false);
         }
     }
 
@@ -81,16 +90,20 @@ public final class PhiBusNetwork {
 
         Source best = null;
         PhiChannel island = PhiChannel.BROADBAND;
+        boolean matched = false;
         while (!queue.isEmpty()) {
             BlockPos cur = queue.poll();
             int hops = dist.get(cur);
             if (hops > MAX_HOPS) {
                 continue;
             }
+            BlockState curState = level.getBlockState(cur);
+            if (curState.is(ModBlocks.PHI_MATCHER.get())) {
+                matched = true;
+            }
             // Read channel from coupler blockstate only — never call PhiTuned.phiChannel()
             // here: accumulators (and any Tuned that BFS's) would recurse into findSource.
             if (island == PhiChannel.BROADBAND) {
-                BlockState curState = level.getBlockState(cur);
                 if (curState.is(ModBlocks.PHI_COUPLER.get())) {
                     PhiChannel stamped = curState.getValue(com.effecoria.block.PhiCouplerBlock.CHANNEL);
                     if (stamped != PhiChannel.BROADBAND) {
@@ -100,13 +113,13 @@ public final class PhiBusNetwork {
             }
             PhiPowerProvider self = resolveInjector(level, cur, includeBuffers);
             if (self != null && self.supplying()) {
-                best = better(best, self, hops, island);
+                best = better(best, self, hops, island, matched);
             }
             for (Direction dir : Direction.values()) {
                 BlockPos adj = cur.relative(dir);
                 PhiPowerProvider injector = resolveInjector(level, adj, includeBuffers);
                 if (injector != null && injector.supplying()) {
-                    best = better(best, injector, hops, island);
+                    best = better(best, injector, hops, island, matched);
                 }
             }
             if (hops >= MAX_HOPS) {
@@ -122,7 +135,7 @@ public final class PhiBusNetwork {
         if (best == null) {
             return null;
         }
-        return new Source(best.powerFactor(), best.hops(), best.injector(), island);
+        return new Source(best.powerFactor(), best.hops(), best.injector(), island, matched);
     }
 
     private static void tryEnqueue(
@@ -210,18 +223,27 @@ public final class PhiBusNetwork {
             @javax.annotation.Nullable Source cur,
             PhiPowerProvider injector,
             int hops,
-            PhiChannel channel) {
+            PhiChannel channel,
+            boolean matched) {
         float attenuated = Math.max(MIN_ATTENUATION, injector.powerFactor() * (1f - HOP_LOSS * hops));
         if (cur == null || attenuated > cur.powerFactor()) {
-            return new Source(attenuated, hops, injector, channel);
+            return new Source(attenuated, hops, injector, channel, matched);
         }
         return cur;
     }
 
-    /** Island channel at a conductor (or BROADBAND). */
+    /** Island channel at a conductor (or BROADBAND). Matched islands report broadband for UI. */
     public static PhiChannel channelAt(Level level, BlockPos start) {
         Source source = findSource(level, start);
-        return source == null ? PhiChannel.BROADBAND : source.channel();
+        if (source == null) {
+            return PhiChannel.BROADBAND;
+        }
+        return source.matched() ? PhiChannel.BROADBAND : source.channel();
+    }
+
+    public static boolean isMatched(Level level, BlockPos start) {
+        Source source = findSource(level, start);
+        return source != null && source.matched();
     }
 
     public static void noteCoupler(PhiCouplerBlockEntity ignored) {

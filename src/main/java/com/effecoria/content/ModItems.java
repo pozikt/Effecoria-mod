@@ -340,6 +340,9 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> PHI_COUPLER = ITEMS.register(
             "phi_coupler",
             () -> new HintBlockItem(ModBlocks.PHI_COUPLER.get(), new Item.Properties(), "tooltip.effecoria.phi_coupler"));
+    public static final DeferredItem<BlockItem> PHI_MATCHER = ITEMS.register(
+            "phi_matcher",
+            () -> new HintBlockItem(ModBlocks.PHI_MATCHER.get(), new Item.Properties(), "tooltip.effecoria.phi_matcher"));
     public static final DeferredItem<BlockItem> PHI_ACCUMULATOR = ITEMS.register(
             "phi_accumulator",
             () -> new HintBlockItem(

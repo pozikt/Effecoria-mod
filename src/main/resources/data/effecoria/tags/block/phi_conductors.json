@@ -5,6 +5,7 @@
     "effecoria:mithril_block",
     "effecoria:phi_contactor",
     "effecoria:phi_coupler",
+    "effecoria:phi_matcher",
     "effecoria:phi_accumulator"
   ]
 }

@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "powered=false": { "model": "effecoria:block/phi_matcher" },
+    "powered=true": { "model": "effecoria:block/phi_matcher_on" }
+  }
+}

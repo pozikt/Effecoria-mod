@@ -222,6 +222,9 @@ public final class TowerFacility {
                 int sev = coupler.omegaPercent() >= 70f ? MonitorEntry.BAD
                         : coupler.omegaPercent() >= 35f ? MonitorEntry.WARN : MonitorEntry.OK;
                 out.add(entry("coupler", pos, ch, sev));
+            } else if (be instanceof com.effecoria.block.PhiMatcherBlockEntity) {
+                boolean on = state.getValue(com.effecoria.block.PhiMatcherBlock.POWERED);
+                out.add(entry("matcher", pos, on ? "matched" : "idle", on ? MonitorEntry.OK : MonitorEntry.IDLE));
             } else if (be instanceof com.effecoria.block.PhiAccumulatorBlockEntity acc) {
                 int sev = acc.supplying() ? MonitorEntry.OK : MonitorEntry.WARN;
                 out.add(entry("accumulator", pos, acc.supplying() ? "charged" : "uncharged", sev));
@@ -271,7 +274,7 @@ public final class TowerFacility {
             case "beacon" -> 10;
             case "telegraph" -> 11;
             case "spark_reactor", "heart_reactor", "forge_reactor" -> 12;
-            case "contactor", "coupler", "accumulator" -> 13;
+            case "contactor", "coupler", "matcher", "accumulator" -> 13;
             default -> 50;
         };
     }

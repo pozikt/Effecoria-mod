@@ -45,6 +45,7 @@
                    "effecoria:phi_bus",
                    "effecoria:phi_contactor",
                    "effecoria:phi_coupler",
+                   "effecoria:phi_matcher",
                    "effecoria:phi_accumulator",
                    "effecoria:spark_reactor",
                    "effecoria:turret_mount",
