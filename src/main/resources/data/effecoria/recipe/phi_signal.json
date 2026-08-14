@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": { "item": "effecoria:phi_glass" },
+    "W": { "item": "effecoria:mithril_wire" },
+    "C": { "item": "effecoria:phi_coupler" }
+  },
+  "pattern": [" W ", "CGC", " W "],
+  "result": { "count": 1, "id": "effecoria:phi_signal" }
+}

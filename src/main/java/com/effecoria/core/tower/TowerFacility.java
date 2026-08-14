@@ -6,6 +6,7 @@ import com.effecoria.block.PhiAirSynthBlockEntity;
 import com.effecoria.block.PhiBeaconBlockEntity;
 import com.effecoria.block.PhiCartographyTableBlockEntity;
 import com.effecoria.block.PhiIncubatorBlockEntity;
+import com.effecoria.block.PhiSignalBlockEntity;
 import com.effecoria.block.PhiSonarBlockEntity;
 import com.effecoria.block.PhiTelegraphBlock;
 import com.effecoria.block.PhiTurretBlockEntity;
@@ -254,6 +255,10 @@ public final class TowerFacility {
                 } else {
                     out.add(entry("incubator", pos, "idle", MonitorEntry.IDLE));
                 }
+            } else if (be instanceof PhiSignalBlockEntity) {
+                boolean alarm = state.hasProperty(com.effecoria.block.PhiSignalBlock.LIT)
+                        && state.getValue(com.effecoria.block.PhiSignalBlock.LIT);
+                out.add(entry("signal", pos, alarm ? "alarm" : "idle", alarm ? MonitorEntry.WARN : MonitorEntry.IDLE));
             } else if (be instanceof TowerConsoleBlockEntity) {
                 out.add(entry("console", pos, "online", MonitorEntry.OK));
             } else if (be instanceof PhiSonarBlockEntity sonar) {
@@ -352,13 +357,14 @@ public final class TowerFacility {
             case "water_purifier" -> 5;
             case "regen_chamber" -> 6;
             case "incubator" -> 7;
-            case "sonar" -> 8;
-            case "cartography" -> 9;
-            case "turret" -> 10;
-            case "beacon" -> 11;
-            case "telegraph" -> 12;
-            case "spark_reactor", "heart_reactor", "forge_reactor" -> 13;
-            case "contactor", "coupler", "matcher", "accumulator" -> 14;
+            case "signal" -> 8;
+            case "sonar" -> 9;
+            case "cartography" -> 10;
+            case "turret" -> 11;
+            case "beacon" -> 12;
+            case "telegraph" -> 13;
+            case "spark_reactor", "heart_reactor", "forge_reactor" -> 14;
+            case "contactor", "coupler", "matcher", "accumulator" -> 15;
             default -> 50;
         };
     }

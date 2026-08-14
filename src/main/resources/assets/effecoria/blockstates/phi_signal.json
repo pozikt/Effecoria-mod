@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "lit=false": { "model": "effecoria:block/phi_signal" },
+    "lit=true": { "model": "effecoria:block/phi_signal_on" }
+  }
+}

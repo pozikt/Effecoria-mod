@@ -237,6 +237,9 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
             return;
         }
         phoenixEdictEnabled = enabled;
+        if (!enabled && level instanceof ServerLevel server) {
+            PhoenixShedService.clearSignalsIfDisarmed(server, worldPosition);
+        }
         setChanged();
         sync();
     }

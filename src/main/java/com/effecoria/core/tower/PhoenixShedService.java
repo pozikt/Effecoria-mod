@@ -2,6 +2,7 @@ package com.effecoria.core.tower;
 
 import com.effecoria.block.PhiContactorBlock;
 import com.effecoria.block.PhiCouplerBlock;
+import com.effecoria.block.PhiSignalBlock;
 import com.effecoria.block.PhiTurretBlockEntity;
 import com.effecoria.block.TowerAnchorBlockEntity;
 import com.effecoria.content.ModBlockTags;
@@ -14,16 +15,22 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.UUID;
 
 /**
  * Hardware Phoenix shed: on owner death, open non-{@link PhiChannel#LIFE} contactors in the
  * glued facility so industry loads drop while life-path contactors stay closed.
  * Contactor CLOSED states are snapshotted on the Ψ-anchor and restored on rematerialize.
- * While the snapshot is held, {@link #reenforceIfNeeded} re-applies topology and keeps turrets
- * autonomous (Phase G0 watchdog).
+ * While the snapshot is held, {@link #reenforceIfNeeded} re-applies topology, keeps turrets
+ * autonomous, and holds {@code phi_signal} lamps (Phase G+).
  */
 public final class PhoenixShedService {
     private PhoenixShedService() {}
@@ -40,6 +47,8 @@ public final class PhoenixShedService {
         }
         applyShed(level, anchorPos);
         armTurretsAutonomous(level, anchorPos);
+        setSignals(level, anchorPos, true);
+        notifyOwnerAlarm(level, anchor);
     }
 
     /** Restore pre-death contactor states after successful revive / materialize. */
@@ -48,6 +57,7 @@ public final class PhoenixShedService {
             return;
         }
         clearTurretAutonomy(level, anchorPos);
+        setSignals(level, anchorPos, false);
         ListTag snap = anchor.takePhoenixSnapshot();
         if (snap == null || snap.isEmpty()) {
             return;
@@ -57,7 +67,7 @@ public final class PhoenixShedService {
 
     /**
      * Watchdog: while a phoenix snapshot is held and the edict is enabled, re-open non-life
-     * contactors and keep facility turrets autonomous.
+     * contactors, keep facility turrets autonomous, and pulse the signal lamps.
      */
     public static void reenforceIfNeeded(ServerLevel level, BlockPos anchorPos) {
         if (!(level.getBlockEntity(anchorPos) instanceof TowerAnchorBlockEntity anchor)
@@ -68,6 +78,16 @@ public final class PhoenixShedService {
         }
         applyShed(level, anchorPos);
         armTurretsAutonomous(level, anchorPos);
+        setSignals(level, anchorPos, true);
+    }
+
+    /** Extinguish facility lamps when the edict is disarmed while a snapshot is still held. */
+    public static void clearSignalsIfDisarmed(ServerLevel level, BlockPos anchorPos) {
+        if (!(level.getBlockEntity(anchorPos) instanceof TowerAnchorBlockEntity anchor)
+                || anchor.phoenixEdictEnabled()) {
+            return;
+        }
+        setSignals(level, anchorPos, false);
     }
 
     private static ListTag snapshotContactors(ServerLevel level, BlockPos anchorPos) {
@@ -125,6 +145,35 @@ public final class PhoenixShedService {
                 turret.clearAutonomy();
             }
         }
+    }
+
+    private static void setSignals(ServerLevel level, BlockPos anchorPos, boolean lit) {
+        BlockPos soundAt = null;
+        for (BlockPos pos : EssenceGlueData.get(level).component(anchorPos)) {
+            BlockState state = level.getBlockState(pos);
+            if (!state.is(ModBlocks.PHI_SIGNAL.get())) {
+                continue;
+            }
+            PhiSignalBlock.setLit(level, pos, lit);
+            if (soundAt == null) {
+                soundAt = pos.immutable();
+            }
+        }
+        if (lit && soundAt != null) {
+            level.playSound(null, soundAt, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 0.85f, 0.55f);
+        }
+    }
+
+    private static void notifyOwnerAlarm(ServerLevel level, TowerAnchorBlockEntity anchor) {
+        UUID owner = anchor.ownerUuid();
+        if (owner == null) {
+            return;
+        }
+        ServerPlayer player = level.getServer().getPlayerList().getPlayer(owner);
+        if (player == null) {
+            return;
+        }
+        player.displayClientMessage(Component.translatable("message.effecoria.tower.signal_alarm"), true);
     }
 
     /**

@@ -375,7 +375,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         for (String line : body.split("\n", -1)) {
             graphics.drawString(font, line, x, y, LABEL, false);
             y += 10;
-            if (y > topPos + EDICT_LIST_Y - 26) {
+            if (y > topPos + EDICT_LIST_Y - 38) {
                 break;
             }
         }
@@ -388,7 +388,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                                 ? "gui.effecoria.tower_console.edict.active"
                                 : "gui.effecoria.tower_console.edict.inactive"),
                 x,
-                topPos + EDICT_LIST_Y - 24,
+                topPos + EDICT_LIST_Y - 36,
                 flagColor,
                 false);
         int watchColor = menu.phoenixWatchdogActive() ? OK : MUTED;
@@ -399,8 +399,19 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                                 ? "gui.effecoria.tower_console.edict.watchdog_active"
                                 : "gui.effecoria.tower_console.edict.watchdog_idle"),
                 x,
-                topPos + EDICT_LIST_Y - 12,
+                topPos + EDICT_LIST_Y - 24,
                 watchColor,
+                false);
+        int signalColor = menu.phoenixWatchdogActive() ? WARN : MUTED;
+        graphics.drawString(
+                font,
+                Component.translatable(
+                        menu.phoenixWatchdogActive()
+                                ? "gui.effecoria.tower_console.edict.signal_alarm"
+                                : "gui.effecoria.tower_console.edict.signal_idle"),
+                x,
+                topPos + EDICT_LIST_Y - 12,
+                signalColor,
                 false);
 
         graphics.drawString(

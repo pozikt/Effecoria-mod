@@ -18,6 +18,7 @@
     "effecoria:phi_coupler",
     "effecoria:phi_matcher",
     "effecoria:phi_incubator",
+    "effecoria:phi_signal",
     "effecoria:phi_accumulator",
     "effecoria:turret_mount",
     "effecoria:ancient_essence_wood",

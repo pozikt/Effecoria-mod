@@ -347,6 +347,9 @@ public final class ModItems {
             "phi_incubator",
             () -> new HintBlockItem(
                     ModBlocks.PHI_INCUBATOR.get(), new Item.Properties(), "tooltip.effecoria.phi_incubator"));
+    public static final DeferredItem<BlockItem> PHI_SIGNAL = ITEMS.register(
+            "phi_signal",
+            () -> new HintBlockItem(ModBlocks.PHI_SIGNAL.get(), new Item.Properties(), "tooltip.effecoria.phi_signal"));
     public static final DeferredItem<BlockItem> PHI_ACCUMULATOR = ITEMS.register(
             "phi_accumulator",
             () -> new HintBlockItem(

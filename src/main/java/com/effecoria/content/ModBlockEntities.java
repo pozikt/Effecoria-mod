@@ -41,6 +41,7 @@ import com.effecoria.block.PhiContactorBlockEntity;
 import com.effecoria.block.PhiCouplerBlockEntity;
 import com.effecoria.block.PhiMatcherBlockEntity;
 import com.effecoria.block.PhiIncubatorBlockEntity;
+import com.effecoria.block.PhiSignalBlockEntity;
 import com.effecoria.block.PhiAccumulatorBlockEntity;
 import com.effecoria.block.PhiCrusherBlockEntity;
 import com.effecoria.block.PhiCrusherHopperBlockEntity;
@@ -207,6 +208,12 @@ public final class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register(
                     "phi_incubator",
                     () -> BlockEntityType.Builder.of(PhiIncubatorBlockEntity::new, ModBlocks.PHI_INCUBATOR.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiSignalBlockEntity>> PHI_SIGNAL =
+            BLOCK_ENTITY_TYPES.register(
+                    "phi_signal",
+                    () -> BlockEntityType.Builder.of(PhiSignalBlockEntity::new, ModBlocks.PHI_SIGNAL.get())
                             .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiAccumulatorBlockEntity>> PHI_ACCUMULATOR =
