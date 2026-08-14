@@ -187,4 +187,32 @@ public final class FormulaEngine {
         }
         return Math.max(0f, 1f - delta / width);
     }
+
+    /**
+     * Essential Flow Law 2: P_device = P_Φ · cos(Δω). Broadband (0 Hz) vs a tuned
+     * load is a 0.65 match — usable, leaky. Both broadband → 1.
+     */
+    public static float phiDevicePower(float pPhi, float sourceHz, float deviceHz) {
+        return pPhi * phiFlowResonance(sourceHz, deviceHz);
+    }
+
+    public static float phiFlowResonance(float sourceHz, float deviceHz) {
+        boolean srcBroad = sourceHz <= 0.01f;
+        boolean dstBroad = deviceHz <= 0.01f;
+        if (srcBroad && dstBroad) {
+            return 1f;
+        }
+        if (srcBroad || dstBroad) {
+            return 0.65f;
+        }
+        float dOmega = Math.abs(sourceHz - deviceHz);
+        float x = Mth.clamp(dOmega / 40f, 0f, 1f) * ((float) Math.PI * 0.5f);
+        return (float) Math.cos(x);
+    }
+
+    /** Law 4 increment: I_Ω from mismatch × delivered flux. */
+    public static float phiOmegaLeak(float fluxTicks, float resonance) {
+        float miss = 1f - Mth.clamp(resonance, 0f, 1f);
+        return Math.max(0f, fluxTicks) * miss * 0.08f;
+    }
 }

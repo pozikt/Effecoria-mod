@@ -1,0 +1,8 @@
+{
+  "id": "effecoria:phi_circuit",
+  "era": 4,
+  "icon": "effecoria:phi_coupler",
+  "status": "available",
+  "requires": ["effecoria:phi_bus"],
+  "display_unlocks": ["effecoria:phi_contactor", "effecoria:phi_coupler", "effecoria:phi_accumulator"]
+}

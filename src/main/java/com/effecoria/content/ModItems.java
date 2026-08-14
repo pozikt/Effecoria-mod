@@ -164,7 +164,8 @@ public final class ModItems {
     public static final DeferredItem<Item> RAW_MITHRIL = ITEMS.registerSimpleItem("raw_mithril");
     public static final DeferredItem<Item> MITHRIL_INGOT = ITEMS.registerSimpleItem("mithril_ingot");
     public static final DeferredItem<Item> MITHRIL_NUGGET = ITEMS.registerSimpleItem("mithril_nugget");
-    public static final DeferredItem<Item> MITHRIL_WIRE = ITEMS.registerSimpleItem("mithril_wire");
+    public static final DeferredItem<Item> MITHRIL_WIRE = ITEMS.register(
+            "mithril_wire", () -> new MithrilWireItem(new Item.Properties()));
     /** Synthetic Φ-fuel — Era II workshop products compressed for Era IV reactors. */
     public static final DeferredItem<Item> PHI_FLUX_SLUG = ITEMS.registerSimpleItem("phi_flux_slug");
     public static final DeferredItem<Item> PHI_CHITIN = ITEMS.registerSimpleItem("phi_chitin");
@@ -332,6 +333,17 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> PHI_BUS = ITEMS.register(
             "phi_bus",
             () -> new HintBlockItem(ModBlocks.PHI_BUS.get(), new Item.Properties(), "tooltip.effecoria.phi_bus"));
+    public static final DeferredItem<BlockItem> PHI_CONTACTOR = ITEMS.register(
+            "phi_contactor",
+            () -> new HintBlockItem(
+                    ModBlocks.PHI_CONTACTOR.get(), new Item.Properties(), "tooltip.effecoria.phi_contactor"));
+    public static final DeferredItem<BlockItem> PHI_COUPLER = ITEMS.register(
+            "phi_coupler",
+            () -> new HintBlockItem(ModBlocks.PHI_COUPLER.get(), new Item.Properties(), "tooltip.effecoria.phi_coupler"));
+    public static final DeferredItem<BlockItem> PHI_ACCUMULATOR = ITEMS.register(
+            "phi_accumulator",
+            () -> new HintBlockItem(
+                    ModBlocks.PHI_ACCUMULATOR.get(), new Item.Properties(), "tooltip.effecoria.phi_accumulator"));
     public static final DeferredItem<BlockItem> TURRET_MOUNT = ITEMS.register(
             "turret_mount",
             () -> new HintBlockItem(ModBlocks.TURRET_MOUNT.get(), new Item.Properties(), "tooltip.effecoria.turret_mount"));

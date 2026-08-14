@@ -74,6 +74,8 @@ $$Effect \propto \Phi_{reactor} \cdot C_{circuit} \cdot K_{rune}$$
 power = Φ_reactor × C_circuit × K_rune × techno_power_scale
 ```
 
+**Φ-сети (design):** C_circuit becomes a real channel quantity under the Lonver **Essential Flow Laws** — not Kirchhoff. See [PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md). Tower edict programming: [LEX_LOCI.md](LEX_LOCI.md).
+
 ---
 
 ## Entropy / b-component (backlash)

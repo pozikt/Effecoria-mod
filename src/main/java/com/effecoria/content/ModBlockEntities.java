@@ -37,6 +37,9 @@ import com.effecoria.block.RegenChamberBlockEntity;
 import com.effecoria.block.RegenChamberPartBlockEntity;
 import com.effecoria.block.TowerConsoleBlockEntity;
 import com.effecoria.block.PhiBusBlockEntity;
+import com.effecoria.block.PhiContactorBlockEntity;
+import com.effecoria.block.PhiCouplerBlockEntity;
+import com.effecoria.block.PhiAccumulatorBlockEntity;
 import com.effecoria.block.PhiCrusherBlockEntity;
 import com.effecoria.block.PhiCrusherHopperBlockEntity;
 import com.effecoria.block.OmegaAnchorBlockEntity;
@@ -179,6 +182,24 @@ public final class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register(
                     "phi_bus",
                     () -> BlockEntityType.Builder.of(PhiBusBlockEntity::new, ModBlocks.PHI_BUS.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiContactorBlockEntity>> PHI_CONTACTOR =
+            BLOCK_ENTITY_TYPES.register(
+                    "phi_contactor",
+                    () -> BlockEntityType.Builder.of(PhiContactorBlockEntity::new, ModBlocks.PHI_CONTACTOR.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiCouplerBlockEntity>> PHI_COUPLER =
+            BLOCK_ENTITY_TYPES.register(
+                    "phi_coupler",
+                    () -> BlockEntityType.Builder.of(PhiCouplerBlockEntity::new, ModBlocks.PHI_COUPLER.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiAccumulatorBlockEntity>> PHI_ACCUMULATOR =
+            BLOCK_ENTITY_TYPES.register(
+                    "phi_accumulator",
+                    () -> BlockEntityType.Builder.of(PhiAccumulatorBlockEntity::new, ModBlocks.PHI_ACCUMULATOR.get())
+                            .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MithrilBlockEntity>> MITHRIL_BLOCK =
             BLOCK_ENTITY_TYPES.register(

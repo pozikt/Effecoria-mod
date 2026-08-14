@@ -11,6 +11,7 @@ import com.effecoria.entity.PhiEntEntity;
 import com.effecoria.entity.PhiLemurEntity;
 import com.effecoria.entity.WailerBatEntity;
 import com.effecoria.entity.OmegaWormEntity;
+import com.effecoria.entity.PhiFilamentEntity;
 import com.effecoria.entity.PhiLarvaEntity;
 import com.effecoria.entity.RootCageEntity;
 import com.effecoria.entity.RotfangMinkEntity;
@@ -54,6 +55,16 @@ public final class ModEntities {
                             .clientTrackingRange(64)
                             .updateInterval(1)
                             .build(EffecoriaMod.id("turret_bolt").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<PhiFilamentEntity>> PHI_FILAMENT =
+            ENTITY_TYPES.register(
+                    "phi_filament",
+                    () -> EntityType.Builder.<PhiFilamentEntity>of(PhiFilamentEntity::new, MobCategory.MISC)
+                            .sized(0.2f, 0.2f)
+                            .clientTrackingRange(64)
+                            .updateInterval(10)
+                            .fireImmune()
+                            .build(EffecoriaMod.id("phi_filament").toString()));
 
     public static final DeferredHolder<EntityType<?>, EntityType<DeathShadowEntity>> DEATH_SHADOW =
             ENTITY_TYPES.register(

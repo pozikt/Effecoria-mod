@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north,closed=true,powered=false": { "model": "effecoria:block/phi_contactor" },
+    "facing=south,closed=true,powered=false": { "model": "effecoria:block/phi_contactor", "y": 180 },
+    "facing=west,closed=true,powered=false": { "model": "effecoria:block/phi_contactor", "y": 270 },
+    "facing=east,closed=true,powered=false": { "model": "effecoria:block/phi_contactor", "y": 90 },
+    "facing=north,closed=true,powered=true": { "model": "effecoria:block/phi_contactor_on" },
+    "facing=south,closed=true,powered=true": { "model": "effecoria:block/phi_contactor_on", "y": 180 },
+    "facing=west,closed=true,powered=true": { "model": "effecoria:block/phi_contactor_on", "y": 270 },
+    "facing=east,closed=true,powered=true": { "model": "effecoria:block/phi_contactor_on", "y": 90 },
+    "facing=north,closed=false,powered=false": { "model": "effecoria:block/phi_contactor_open" },
+    "facing=south,closed=false,powered=false": { "model": "effecoria:block/phi_contactor_open", "y": 180 },
+    "facing=west,closed=false,powered=false": { "model": "effecoria:block/phi_contactor_open", "y": 270 },
+    "facing=east,closed=false,powered=false": { "model": "effecoria:block/phi_contactor_open", "y": 90 },
+    "facing=north,closed=false,powered=true": { "model": "effecoria:block/phi_contactor_open" },
+    "facing=south,closed=false,powered=true": { "model": "effecoria:block/phi_contactor_open", "y": 180 },
+    "facing=west,closed=false,powered=true": { "model": "effecoria:block/phi_contactor_open", "y": 270 },
+    "facing=east,closed=false,powered=true": { "model": "effecoria:block/phi_contactor_open", "y": 90 }
+  }
+}

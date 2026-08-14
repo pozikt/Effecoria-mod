@@ -134,9 +134,9 @@ Materials that were “craft only” in Stage I get proper sources here.
 |------|-------|
 | **Technomagic catalog + Era I–III** | **In progress / shipped scaffold** — see [TECHNOMAGIC.md](TECHNOMAGIC.md): free craft, discovery UI, Era I–II machines, Era III imprinter/construct/telegraph |
 | Phi Cell → reactor tiers | Multiblocks, failure modes (Era III–V catalog `planned`) |
-| Mage towers | Regional Φ, beacons |
-| Rune circuits / wiring | `technomagicPower()` path |
-| Seal-automata | Automated wards |
+| Mage towers | Regional Φ, beacons; **Soulbound Conclave (multi-owner)** — [planned](SOULBOUND_CONCLAVE.md); **Lex Loci** tower edicts + Φ-channels — [planned](LEX_LOCI.md) / [PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md) |
+| Rune circuits / wiring | `technomagicPower()` path → Essential Flow Solver (frequency channels, ΔQ, I_Ω) |
+| Seal-automata | Automated wards; turret autonomy when Ψ-computer busy |
 | **Magic: Seals expansion** | Deeper word grammar, networks, automation — seals scale with tech, not only with Stage I polish |
 
 ### Parallel track — Items & accessories → Corruption
@@ -146,7 +146,7 @@ When (or after) we add meaningful **items / relics** and integrate an **accessor
 | Item | Notes |
 |------|-------|
 | Accessory slots | **Shipped (Curios)** — ring×2 / amulet / charm; see [ARTIFACT_CRAFT.md](ARTIFACT_CRAFT.md) |
-| Modular artifacts | **Shipped (Era III)** — lathe / cutter / assembler / item seals |
+| Modular artifacts | **Shipped (Era III)** — lathe / cutter / assembler / item seals. **Reform planned** — weapon families (melee tips, Φ-guns, composited textures); freeform artifacts later — [ARTIFACT_CRAFT.md](ARTIFACT_CRAFT.md#reform--weapon-families-planned) |
 | **Magic: Corruption (curses) expansion** | Curse marks, brands, prey/bind as wearable or slot-bound effects; readable persistence without stuffing the hotbar |
 
 Corruption combat spells can still grow a little in Stage I; **equipment-scale curses** wait on slots + item identity.

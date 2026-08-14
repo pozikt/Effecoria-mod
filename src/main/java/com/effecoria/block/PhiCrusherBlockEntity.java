@@ -201,13 +201,16 @@ public final class PhiCrusherBlockEntity extends BaseContainerBlockEntity implem
         boolean working = false;
         if (formed && be.coolCooldown <= 0 && be.omegaMeter < OMEGA_LIMIT) {
             ItemStack input = be.items.get(SLOT_INPUT);
-            var recipe = CrusherRecipes.crush(input, be.mode, server.getRandom());
-            if (recipe.isPresent() && be.canOutput(recipe.get())) {
+            // Footprint (worst-case) gates work — never re-roll chance outputs each tick,
+            // or LIT flickers when waste/byproduct sometimes needs a slot.
+            var room = CrusherRecipes.footprint(input, be.mode);
+            if (room.isPresent() && be.canOutput(room.get())) {
                 if (be.tryConsumePower()) {
                     working = true;
                     be.progress++;
                     if (be.progress >= be.mode.ticks) {
-                        be.finishCrush(server, recipe.get());
+                        CrusherRecipes.crush(input, be.mode, server.getRandom())
+                                .ifPresent(rolled -> be.finishCrush(server, rolled));
                         be.progress = 0;
                     }
                     changed = true;
@@ -264,8 +267,13 @@ public final class PhiCrusherBlockEntity extends BaseContainerBlockEntity implem
     private void finishCrush(ServerLevel server, CrusherRecipes.Result result) {
         items.get(SLOT_INPUT).shrink(1);
         merge(SLOT_PRIMARY, result.primary());
-        merge(SLOT_BYPRODUCT, result.byproduct());
-        merge(SLOT_WASTE, result.waste());
+        // Optionals: skip if the slot was emptied/changed mid-craft; never stall the cycle.
+        if (canMerge(SLOT_BYPRODUCT, result.byproduct())) {
+            merge(SLOT_BYPRODUCT, result.byproduct());
+        }
+        if (canMerge(SLOT_WASTE, result.waste())) {
+            merge(SLOT_WASTE, result.waste());
+        }
         heatCycles++;
         if (result.omegaWork()) {
             omegaMeter++;

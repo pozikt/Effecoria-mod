@@ -143,3 +143,12 @@ flowchart LR
 - Code: `HeartMultiblock`, `ForgeMultiblock`, `GeoWellMultiblock`, `PortalFrameFinder`, `PhiBeaconIndex`, `*ReactorBlockEntity`, `GeoWellBlockEntity`, `ClimateArrayBlockEntity`, `PortalModulatorBlockEntity`, `PhiBeaconBlockEntity`, `PhiBusNetwork`, `PhiPowerHubs`, `TurretMountBlock`, `PhiTurretBlock` (barrel), `PhiTurretBlockEntity`, `TurretAssembly`, `TurretKind`, `PhiCrusherBlock`, `PhiCrusherHopperBlock`, `PhiCrusherBlockEntity`, `CrusherRecipes`
 - `PhiPower` local scan radius 8; Forge hubs via `PhiPowerHubs` up to 32; Geo Well hubs radius 12; mithril/phi_bus are `phi_conductors`; `drainFuel` on providers
 - Gates: `TechnomagicGates` / `TechnomagicProgress`
+
+## Planned — Era VI nervous system
+
+Φ-frequency channels and tower edict language (not a second energy type). Canon:
+
+- [PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md) — Lonver Essential Flow Laws
+- [LEX_LOCI.md](LEX_LOCI.md) — Ψ-computer edicts (Phoenix revive + defense / Ω / portal / telegraph)
+
+**Shipped (Era IV node `phi_circuit`):** Φ-contactor, resonant coupler, accumulator, mithril-wire filaments. `PhiBusNetwork` respects open contactors and filament links; `PhiPower.consumeTick` applies `cos(Δω)` and Ω leak.

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": { "item": "effecoria:phi_cell" },
+    "E": { "item": "effecoria:pure_essonite" },
+    "W": { "item": "effecoria:mithril_wire" },
+    "B": { "item": "effecoria:phi_bus" }
+  },
+  "pattern": ["WBW", "CEC", "WBW"],
+  "result": { "count": 1, "id": "effecoria:phi_accumulator" }
+}

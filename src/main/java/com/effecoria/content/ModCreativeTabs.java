@@ -196,6 +196,9 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PHI_CONCRETE.get());
                         output.accept(ModItems.OMEGA_ANCHOR.get());
                         output.accept(ModItems.PHI_BUS.get());
+                        output.accept(ModItems.PHI_CONTACTOR.get());
+                        output.accept(ModItems.PHI_COUPLER.get());
+                        output.accept(ModItems.PHI_ACCUMULATOR.get());
                         output.accept(ModItems.TURRET_MOUNT.get());
                         output.accept(ModItems.PLASMA_TURRET.get());
                         output.accept(ModItems.KINETIC_TURRET.get());

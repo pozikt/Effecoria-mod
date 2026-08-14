@@ -19,6 +19,7 @@ import com.effecoria.client.render.MirageHorrorRenderer;
 import com.effecoria.client.render.OmegaShadeRenderer;
 import com.effecoria.client.render.OmegaWormRenderer;
 import com.effecoria.client.render.PhiLarvaRenderer;
+import com.effecoria.client.render.PhiFilamentRenderer;
 import com.effecoria.client.render.TurretBoltRenderer;
 import com.effecoria.client.render.RootCageRenderer;
 import com.effecoria.client.render.RotfangMinkRenderer;
@@ -151,6 +152,7 @@ public final class EffecoriaClient {
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.ROOT_CAGE.get(), RootCageRenderer::new);
         event.registerEntityRenderer(ModEntities.TURRET_BOLT.get(), TurretBoltRenderer::new);
+        event.registerEntityRenderer(ModEntities.PHI_FILAMENT.get(), PhiFilamentRenderer::new);
         event.registerEntityRenderer(ModEntities.DEATH_SHADOW.get(), DeathShadowRenderer::new);
         event.registerEntityRenderer(ModEntities.MIRAGE_HORROR.get(), MirageHorrorRenderer::new);
         event.registerEntityRenderer(ModEntities.PHI_LARVA.get(), PhiLarvaRenderer::new);

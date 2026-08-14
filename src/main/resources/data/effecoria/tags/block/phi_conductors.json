@@ -2,6 +2,9 @@
   "replace": false,
   "values": [
     "effecoria:phi_bus",
-    "effecoria:mithril_block"
+    "effecoria:mithril_block",
+    "effecoria:phi_contactor",
+    "effecoria:phi_coupler",
+    "effecoria:phi_accumulator"
   ]
 }

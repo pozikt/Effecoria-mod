@@ -42,6 +42,9 @@ import com.effecoria.block.PhiSnareVineBlock;
 import com.effecoria.block.PhiTorchBlock;
 import com.effecoria.block.PhiTelegraphBlock;
 import com.effecoria.block.PsiImprinterBlock;
+import com.effecoria.block.PhiContactorBlock;
+import com.effecoria.block.PhiCouplerBlock;
+import com.effecoria.block.PhiAccumulatorBlock;
 import com.effecoria.block.RottenMossBlock;
 import com.effecoria.block.SparkReactorBlock;
 import com.effecoria.block.HeartReactorBlock;
@@ -980,6 +983,33 @@ public final class ModBlocks {
                     .sound(SoundType.GLASS)
                     .noOcclusion()
                     .lightLevel(state -> state.getValue(PhiBusBlock.POWERED) ? 6 : 0)));
+
+    public static final DeferredBlock<PhiContactorBlock> PHI_CONTACTOR = BLOCKS.register(
+            "phi_contactor",
+            () -> new PhiContactorBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_ORANGE)
+                    .strength(2.0f, 4f)
+                    .sound(SoundType.METAL)
+                    .noOcclusion()
+                    .lightLevel(s -> s.getValue(PhiContactorBlock.POWERED) ? 7 : 0)));
+
+    public static final DeferredBlock<PhiCouplerBlock> PHI_COUPLER = BLOCKS.register(
+            "phi_coupler",
+            () -> new PhiCouplerBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_CYAN)
+                    .strength(2.5f, 6f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(s -> 6)));
+
+    public static final DeferredBlock<PhiAccumulatorBlock> PHI_ACCUMULATOR = BLOCKS.register(
+            "phi_accumulator",
+            () -> new PhiAccumulatorBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PURPLE)
+                    .strength(2.5f, 6f)
+                    .sound(SoundType.AMETHYST)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(s -> 8)));
 
     /** Shared turret mount (half-slab). Φ-power intake; barrels assemble on the outward face. */
     public static final DeferredBlock<TurretMountBlock> TURRET_MOUNT = BLOCKS.register(

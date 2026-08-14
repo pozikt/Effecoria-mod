@@ -37,58 +37,71 @@ public final class CrusherRecipes {
     private CrusherRecipes() {}
 
     public static boolean isInput(ItemStack stack) {
-        return !stack.isEmpty() && resolve(stack, Mode.COARSE, RandomSource.create(0L)).isPresent();
+        return !stack.isEmpty() && footprint(stack, Mode.COARSE).isPresent();
     }
 
     public static Optional<Result> crush(ItemStack input, Mode mode, RandomSource random) {
-        return resolve(input, mode, random);
+        return resolve(input, mode, random, false);
     }
 
-    private static Optional<Result> resolve(ItemStack input, Mode mode, RandomSource random) {
+    /**
+     * Deterministic worst-case outputs for inventory gating. Random byproduct/waste are assumed
+     * present so a machine does not flicker when a per-tick roll sometimes needs a full slot.
+     */
+    public static Optional<Result> footprint(ItemStack input, Mode mode) {
+        return resolve(input, mode, RandomSource.create(0L), true);
+    }
+
+    private static Optional<Result> resolve(
+            ItemStack input, Mode mode, RandomSource random, boolean footprint) {
         Item item = input.getItem();
         boolean fine = mode == Mode.FINE;
 
         // Essonite ore family
         if (isEssoniteOre(item)) {
-            int n = fine ? 4 + random.nextInt(2) : 2 + random.nextInt(2);
+            int n = fine ? (footprint ? 5 : 4 + random.nextInt(2)) : (footprint ? 3 : 2 + random.nextInt(2));
             return Optional.of(roll(
                     new ItemStack(ModItems.ESSENITE_DUST.get(), n),
-                    chance(random, mode.byproductChance + (fine ? 0.06f : 0f), Items.GOLD_NUGGET),
-                    wasteStone(random, mode),
+                    side(random, footprint, mode.byproductChance + (fine ? 0.06f : 0f), Items.GOLD_NUGGET),
+                    wasteStone(random, mode, footprint),
                     false,
                     mode,
-                    random));
+                    random,
+                    footprint));
         }
         if (item == ModItems.ESSONITE_SHARD.get()) {
             int n = fine ? 2 : 1;
             return Optional.of(roll(
                     new ItemStack(ModItems.ESSENITE_DUST.get(), n),
                     ItemStack.EMPTY,
-                    wasteStone(random, mode),
+                    wasteStone(random, mode, footprint),
                     false,
                     mode,
-                    random));
+                    random,
+                    footprint));
         }
         if (item == ModItems.PURE_ESSONITE.get()) {
             int n = fine ? 6 : 3;
             return Optional.of(roll(
                     new ItemStack(ModItems.ESSENITE_DUST.get(), n),
-                    chance(random, fine ? 0.05f : 0.02f, ModItems.SOUL_SHARD.get()),
-                    wasteStone(random, mode),
+                    side(random, footprint, fine ? 0.05f : 0.02f, ModItems.SOUL_SHARD.get()),
+                    wasteStone(random, mode, footprint),
                     false,
                     mode,
-                    random));
+                    random,
+                    footprint));
         }
         if (item == ModBlocks.PHI_STONE.get().asItem()) {
             return Optional.of(roll(
                     fine
                             ? new ItemStack(ModItems.PHI_STONE_GRIT.get(), 2)
                             : new ItemStack(ModBlocks.PHI_COBBLE.get(), 1),
-                    chance(random, fine ? 0.05f : 0.02f, ModItems.ESSENITE_DUST.get()),
+                    side(random, footprint, fine ? 0.05f : 0.02f, ModItems.ESSENITE_DUST.get()),
                     ItemStack.EMPTY,
                     false,
                     mode,
-                    random));
+                    random,
+                    footprint));
         }
         if (item == ModItems.DISTORTED_BONE.get()) {
             return Optional.of(roll(
@@ -99,7 +112,8 @@ public final class CrusherRecipes {
                     ItemStack.EMPTY,
                     false,
                     mode,
-                    random));
+                    random,
+                    footprint));
         }
         if (item == ModBlocks.PHI_LOG.get().asItem()
                 || item == ModBlocks.PHI_PLANKS.get().asItem()
@@ -112,18 +126,20 @@ public final class CrusherRecipes {
                     ItemStack.EMPTY,
                     false,
                     mode,
-                    random));
+                    random,
+                    footprint));
         }
         if (item == ModBlocks.VOID_OBSIDIAN.get().asItem()) {
             return Optional.of(roll(
                     fine
                             ? new ItemStack(ModItems.OMEGA_DUST.get(), 1)
                             : new ItemStack(ModItems.OBSIDIAN_GRIT.get(), 1),
-                    chance(random, fine ? 0.05f : 0.02f, ModItems.OMEGA_NUGGET.get()),
+                    side(random, footprint, fine ? 0.05f : 0.02f, ModItems.OMEGA_NUGGET.get()),
                     ItemStack.EMPTY,
                     true,
                     mode,
-                    random));
+                    random,
+                    footprint));
         }
         if (item == Blocks.STONE.asItem() || item == Blocks.COBBLESTONE.asItem()) {
             return Optional.of(roll(
@@ -132,13 +148,15 @@ public final class CrusherRecipes {
                     ItemStack.EMPTY,
                     false,
                     mode,
-                    random));
+                    random,
+                    footprint));
         }
         if (item == Items.GRAVEL) {
             if (!fine) {
                 return Optional.empty();
             }
-            return Optional.of(roll(new ItemStack(Items.SAND), ItemStack.EMPTY, ItemStack.EMPTY, false, mode, random));
+            return Optional.of(roll(
+                    new ItemStack(Items.SAND), ItemStack.EMPTY, ItemStack.EMPTY, false, mode, random, footprint));
         }
         return Optional.empty();
     }
@@ -155,14 +173,20 @@ public final class CrusherRecipes {
                 || item == ModBlocks.ESSONITE_BLOCK.get().asItem();
     }
 
-    private static ItemStack wasteStone(RandomSource random, Mode mode) {
+    private static ItemStack wasteStone(RandomSource random, Mode mode, boolean footprint) {
+        if (footprint) {
+            return mode.wasteChance > 0f ? new ItemStack(Items.COBBLESTONE) : ItemStack.EMPTY;
+        }
         if (random.nextFloat() < mode.wasteChance) {
             return new ItemStack(Items.COBBLESTONE);
         }
         return ItemStack.EMPTY;
     }
 
-    private static ItemStack chance(RandomSource random, float p, Item item) {
+    private static ItemStack side(RandomSource random, boolean footprint, float p, Item item) {
+        if (footprint) {
+            return p > 0f ? new ItemStack(item) : ItemStack.EMPTY;
+        }
         return random.nextFloat() < p ? new ItemStack(item) : ItemStack.EMPTY;
     }
 
@@ -172,9 +196,14 @@ public final class CrusherRecipes {
             ItemStack waste,
             boolean omega,
             Mode mode,
-            RandomSource random) {
-        // Soft yield clamp for coarse: sometimes lose one primary
-        if (!primary.isEmpty() && mode == Mode.COARSE && primary.getCount() > 1 && random.nextFloat() > mode.yield) {
+            RandomSource random,
+            boolean footprint) {
+        // Soft yield clamp for coarse: sometimes lose one primary (not in footprint — keep max).
+        if (!footprint
+                && !primary.isEmpty()
+                && mode == Mode.COARSE
+                && primary.getCount() > 1
+                && random.nextFloat() > mode.yield) {
             primary.shrink(1);
         }
         return new Result(primary, byproduct, waste, omega);

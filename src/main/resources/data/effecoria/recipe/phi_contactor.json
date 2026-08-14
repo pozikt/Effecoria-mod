@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "M": { "item": "effecoria:mithril_ingot" },
+    "W": { "item": "effecoria:mithril_wire" },
+    "L": { "item": "effecoria:lead_nugget" }
+  },
+  "pattern": [" L ", "WMW", " L "],
+  "result": { "count": 1, "id": "effecoria:phi_contactor" }
+}

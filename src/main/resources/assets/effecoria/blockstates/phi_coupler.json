@@ -1,0 +1,9 @@
+{
+  "variants": {
+    "channel=broadband": { "model": "effecoria:block/phi_coupler" },
+    "channel=life": { "model": "effecoria:block/phi_coupler_life" },
+    "channel=psi": { "model": "effecoria:block/phi_coupler_psi" },
+    "channel=industry": { "model": "effecoria:block/phi_coupler_industry" },
+    "channel=defense": { "model": "effecoria:block/phi_coupler_defense" }
+  }
+}

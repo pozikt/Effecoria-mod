@@ -1,8 +1,12 @@
 package com.effecoria.core.alchemy;
 
 import com.effecoria.content.ModBlocks;
+import com.effecoria.core.circuit.PhiChannel;
+import com.effecoria.core.circuit.PhiChannels;
+import com.effecoria.core.formula.FormulaEngine;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -35,20 +39,50 @@ public final class PhiPower {
 
     /**
      * Drain {@code loadTicks} from the strongest LOS provider (or Forge hub / bus injector).
-     * Returns false if no provider or drain fails.
+     * Returns false if no provider or drain fails. Tries the next-best source if the first
+     * cannot cover the load (e.g. a nearly-empty accumulator).
      */
     public static boolean consumeTick(Level level, BlockPos consumerPos, int loadTicks) {
         if (loadTicks <= 0) {
             return hasPower(level, consumerPos);
         }
-        PhiPowerProvider best = findBest(level, consumerPos);
-        return best != null && best.drainFuel(loadTicks);
+        PhiChannel device = PhiChannels.ofDevice(level, consumerPos);
+        for (PhiPowerProvider candidate : findCandidates(level, consumerPos)) {
+            if (!candidate.supplying()) {
+                continue;
+            }
+            PhiChannel source = channelOf(level, consumerPos, candidate);
+            float resonance = FormulaEngine.phiFlowResonance(source.hz(), device.hz());
+            if (resonance <= 0.05f) {
+                PhiChannels.leakOmega(level, consumerPos, loadTicks);
+                continue;
+            }
+            int drain = loadTicks;
+            if (resonance < 0.99f) {
+                drain = Math.max(loadTicks, Mth.ceil(loadTicks / Math.max(0.2f, resonance)));
+                PhiChannels.leakOmega(level, consumerPos, FormulaEngine.phiOmegaLeak(drain, resonance));
+            }
+            if (candidate.drainFuel(drain)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    @javax.annotation.Nullable
-    public static PhiPowerProvider findBest(Level level, BlockPos consumerPos) {
-        PhiPowerProvider best = null;
-        float bestFactor = 0f;
+    private static java.util.List<PhiPowerProvider> findCandidates(Level level, BlockPos consumerPos) {
+        java.util.ArrayList<PhiPowerProvider> out = new java.util.ArrayList<>();
+        java.util.HashSet<PhiPowerProvider> seen = new java.util.HashSet<>();
+
+        // Hardwired terminals: any adjacent Φ-conductor (bus, mithril, coupler, contactor,
+        // accumulator) relays the island injector. Coupler/contactor are NOT PhiPowerProviders,
+        // so without this a machine touching only a coupler gets nothing from a wired reactor.
+        for (Direction dir : Direction.values()) {
+            addWiredInjector(level, consumerPos.relative(dir), seen, out);
+        }
+        for (BlockPos far : com.effecoria.core.circuit.PhiFilamentLinks.neighbors(level, consumerPos)) {
+            addWiredInjector(level, far, seen, out);
+        }
+
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
         int cx = consumerPos.getX();
         int cy = consumerPos.getY();
@@ -68,23 +102,77 @@ public final class PhiPower {
                     if (chebyshev > provider.radius()) {
                         continue;
                     }
-                    // Adjacent (incl. bus outlets) is always hardwired — no LOS required.
                     if (chebyshev > 1 && !hasLineOfSight(level, consumerPos, cursor.immutable())) {
                         continue;
                     }
-                    float factor = provider.powerFactor();
-                    if (factor > bestFactor) {
-                        bestFactor = factor;
-                        best = provider;
+                    if (seen.add(provider)) {
+                        out.add(provider);
                     }
                 }
             }
         }
         PhiPowerProvider hub = PhiPowerHubs.findBestHub(level, consumerPos);
-        if (hub != null && hub.powerFactor() > bestFactor) {
-            best = hub;
+        if (hub != null && hub.supplying() && seen.add(hub)) {
+            out.add(hub);
         }
-        return best;
+        // Prefer live injectors over bus outlets / UPS buffers so a charged accumulator
+        // next to a machine does not win the sort and empty/recharge (LIT flicker).
+        out.sort((a, b) -> {
+            int cmp = Integer.compare(providerTier(b), providerTier(a));
+            return cmp != 0 ? cmp : Float.compare(b.powerFactor(), a.powerFactor());
+        });
+        return out;
+    }
+
+    private static int providerTier(PhiPowerProvider provider) {
+        if (provider instanceof com.effecoria.block.PhiAccumulatorBlockEntity) {
+            return 0;
+        }
+        if (provider instanceof com.effecoria.block.PhiBusBlockEntity) {
+            return 1;
+        }
+        return 2;
+    }
+
+    private static void addWiredInjector(
+            Level level,
+            BlockPos terminal,
+            java.util.HashSet<PhiPowerProvider> seen,
+            java.util.ArrayList<PhiPowerProvider> out) {
+        if (!PhiBusNetwork.isConductor(level.getBlockState(terminal))) {
+            return;
+        }
+        PhiBusNetwork.Source wired = PhiBusNetwork.findSource(level, terminal);
+        if (wired != null && wired.injector() != null && wired.injector().supplying() && seen.add(wired.injector())) {
+            out.add(wired.injector());
+        }
+    }
+
+    private static PhiChannel channelOf(Level level, BlockPos consumerPos, PhiPowerProvider best) {
+        if (best instanceof com.effecoria.core.circuit.PhiTuned tuned) {
+            PhiChannel ch = tuned.phiChannel();
+            if (ch != PhiChannel.BROADBAND) {
+                return ch;
+            }
+        }
+        for (Direction dir : Direction.values()) {
+            BlockPos adj = consumerPos.relative(dir);
+            if (PhiBusNetwork.isConductor(level.getBlockState(adj))) {
+                return PhiBusNetwork.channelAt(level, adj);
+            }
+        }
+        for (BlockPos far : com.effecoria.core.circuit.PhiFilamentLinks.neighbors(level, consumerPos)) {
+            if (PhiBusNetwork.isConductor(level.getBlockState(far))) {
+                return PhiBusNetwork.channelAt(level, far);
+            }
+        }
+        return PhiChannel.BROADBAND;
+    }
+
+    @javax.annotation.Nullable
+    public static PhiPowerProvider findBest(Level level, BlockPos consumerPos) {
+        java.util.List<PhiPowerProvider> candidates = findCandidates(level, consumerPos);
+        return candidates.isEmpty() ? null : candidates.get(0);
     }
 
     /**
@@ -124,7 +212,11 @@ public final class PhiPower {
                 continue;
             }
             // Conductors are Φ-transparent for wireless LOS through cabling / mithril frames.
-            if (state.is(ModBlocks.PHI_BUS.get()) || state.is(ModBlocks.MITHRIL_BLOCK.get())) {
+            if (state.is(ModBlocks.PHI_BUS.get())
+                    || state.is(ModBlocks.MITHRIL_BLOCK.get())
+                    || state.is(ModBlocks.PHI_CONTACTOR.get())
+                    || state.is(ModBlocks.PHI_COUPLER.get())
+                    || state.is(ModBlocks.PHI_ACCUMULATOR.get())) {
                 continue;
             }
             if (state.canOcclude() && state.isCollisionShapeFullBlock(level, check)) {
