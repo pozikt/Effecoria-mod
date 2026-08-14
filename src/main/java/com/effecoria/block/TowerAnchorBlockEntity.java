@@ -2,6 +2,7 @@ package com.effecoria.block;
 
 import com.effecoria.content.ModBlockEntities;
 import com.effecoria.content.ModItems;
+import com.effecoria.core.tower.PhoenixShedService;
 import com.effecoria.core.tower.TowerBodyType;
 import com.effecoria.core.tower.TowerDomeService;
 import com.effecoria.core.tower.TowerStructureValidator;
@@ -60,6 +61,9 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
     /** Lex Loci hardware Phoenix edict — shed non-life contactors on owner death. */
     private boolean phoenixEdictEnabled = true;
 
+    /** Re-apply Phoenix shed / turret autonomy every 2s while snapshot is held. */
+    public static final int PHOENIX_WATCHDOG_INTERVAL = 40;
+
     private final NonNullList<ItemStack> items = NonNullList.withSize(INV_SIZE, ItemStack.EMPTY);
 
     public TowerAnchorBlockEntity(BlockPos pos, BlockState state) {
@@ -68,6 +72,13 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, TowerAnchorBlockEntity be) {
         TowerDomeService.serverTick(level, pos, be);
+        if (!(level instanceof ServerLevel server)
+                || !be.hasPhoenixSnapshot()
+                || !be.phoenixEdictEnabled()
+                || level.getGameTime() % PHOENIX_WATCHDOG_INTERVAL != 0L) {
+            return;
+        }
+        PhoenixShedService.reenforceIfNeeded(server, pos);
     }
 
     public boolean consecrated() {

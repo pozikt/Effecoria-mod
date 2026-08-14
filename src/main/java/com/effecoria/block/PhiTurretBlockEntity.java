@@ -74,6 +74,8 @@ public final class PhiTurretBlockEntity extends BaseContainerBlockEntity impleme
     private final NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     private TurretKind kind = TurretKind.NONE;
     private boolean armed;
+    /** Phoenix shed / watchdog: stay armed until revive clears autonomy. */
+    private boolean autonomous;
     private int heat;
     private int cooldown;
     private int overheatCooldown;
@@ -104,7 +106,11 @@ public final class PhiTurretBlockEntity extends BaseContainerBlockEntity impleme
         @Override
         public void set(int index, int value) {
             switch (index) {
-                case DATA_ARMED -> armed = value != 0;
+                case DATA_ARMED -> {
+                    if (!autonomous) {
+                        armed = value != 0;
+                    }
+                }
                 case DATA_HEAT -> heat = value;
                 case DATA_COOLDOWN -> cooldown = value;
                 default -> {}
@@ -135,6 +141,7 @@ public final class PhiTurretBlockEntity extends BaseContainerBlockEntity impleme
             kind = next == null ? TurretKind.NONE : next;
             if (!kind.isEmitter()) {
                 armed = false;
+                autonomous = false;
             }
             setChanged();
             syncAim();
@@ -196,8 +203,38 @@ public final class PhiTurretBlockEntity extends BaseContainerBlockEntity impleme
         return armed;
     }
 
+    public boolean autonomous() {
+        return autonomous;
+    }
+
+    /** Enter Phoenix autonomy: formed emitters force-armed until {@link #clearAutonomy()}. */
+    public void setAutonomous(boolean value) {
+        boolean changed = false;
+        if (autonomous != value) {
+            autonomous = value;
+            changed = true;
+        }
+        if (autonomous && formed() && !armed) {
+            armed = true;
+            changed = true;
+        }
+        if (changed) {
+            setChanged();
+            syncAim();
+        }
+    }
+
+    public void clearAutonomy() {
+        if (!autonomous) {
+            return;
+        }
+        autonomous = false;
+        setChanged();
+        syncAim();
+    }
+
     public void toggleArmed() {
-        if (!formed()) {
+        if (!formed() || autonomous) {
             return;
         }
         armed = !armed;
@@ -235,6 +272,10 @@ public final class PhiTurretBlockEntity extends BaseContainerBlockEntity impleme
         }
 
         boolean formed = state.getValue(TurretMountBlock.FORMED) && be.kind.isEmitter();
+        if (be.autonomous && formed && !be.armed) {
+            be.armed = true;
+            changed = true;
+        }
         boolean litWanted = formed && be.armed && PhiPower.hasPower(level, pos) && be.overheatCooldown <= 0;
         if (state.getValue(TurretMountBlock.LIT) != litWanted) {
             level.setBlock(pos, state.setValue(TurretMountBlock.LIT, litWanted), Block.UPDATE_CLIENTS);
@@ -507,6 +548,7 @@ public final class PhiTurretBlockEntity extends BaseContainerBlockEntity impleme
         super.saveAdditional(tag, provider);
         ContainerHelper.saveAllItems(tag, items, provider);
         tag.putBoolean("Armed", armed);
+        tag.putBoolean("Autonomous", autonomous);
         tag.putInt("Heat", heat);
         tag.putInt("Cooldown", cooldown);
         tag.putInt("Overheat", overheatCooldown);
@@ -524,6 +566,7 @@ public final class PhiTurretBlockEntity extends BaseContainerBlockEntity impleme
         super.loadAdditional(tag, provider);
         ContainerHelper.loadAllItems(tag, items, provider);
         armed = tag.getBoolean("Armed");
+        autonomous = tag.getBoolean("Autonomous");
         heat = tag.getInt("Heat");
         cooldown = tag.getInt("Cooldown");
         overheatCooldown = tag.getInt("Overheat");

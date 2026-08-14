@@ -142,6 +142,10 @@ public final class TowerConsoleMenu extends MachineMenu {
         return data.get(TowerConsoleBlockEntity.DATA_PHOENIX) != 0;
     }
 
+    public boolean phoenixWatchdogActive() {
+        return data.get(TowerConsoleBlockEntity.DATA_WATCHDOG) != 0;
+    }
+
     @Override
     public boolean clickMenuButton(Player player, int id) {
         if (player instanceof ServerPlayer serverPlayer

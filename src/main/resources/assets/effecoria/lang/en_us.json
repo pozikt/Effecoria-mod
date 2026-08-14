@@ -1925,6 +1925,8 @@
   "gui.effecoria.tower_console.edict.phoenix": "WHEN soul.dead\nTHEN open non-life contactors\nKEEP life path closed\nRESTORE on rematerialize",
   "gui.effecoria.tower_console.edict.active": "Hardware shed: armed",
   "gui.effecoria.tower_console.edict.inactive": "Hardware shed: disarmed",
+  "gui.effecoria.tower_console.edict.watchdog_active": "Watchdog: active",
+  "gui.effecoria.tower_console.edict.watchdog_idle": "Watchdog: idle",
   "gui.effecoria.tower_console.edict.symbols": "Symbols (live inventory)",
   "gui.effecoria.tower_console.phoenix_on": "Phoenix ON",
   "gui.effecoria.tower_console.phoenix_off": "Phoenix OFF",

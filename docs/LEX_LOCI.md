@@ -1,6 +1,6 @@
 # Lex Loci — язык программирования башни
 
-**Status:** design — full edict language not shipped. Physical Φ-circuitry playable ([PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md)). **Phoenix shed / E0.5 / Phase C inrush shipped**. **Phase D matcher shipped** (`phi_matcher` + Ψ-imprinter Δω penalty). Full word editor = phase E.  
+**Status:** design — full edict language not shipped. Physical Φ-circuitry playable ([PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md)). **Phoenix shed / E0.5 / Phase C inrush shipped**. **Phase D matcher shipped** (`phi_matcher` + Ψ-imprinter Δω penalty). **Phase G0 watchdog shipped** (re-shed while phoenix snapshot held; turrets autonomous). Full word editor = phase E.  
 **Depends on:** [PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md), seals word grammar ([SEAL_PROGRAMMING.md](SEAL_PROGRAMMING.md)), tower facility (`TowerFacility`, console, Ψ-computer).  
 **Roadmap:** Stage IV / Technomagic Era VI (nervous system atop Era IV–V reactors).
 
@@ -148,7 +148,8 @@ Lex Loci («закон места») — словесные **эдикты** д�
 | E0.5 | **Console Edicts tab (shipped)** — встроенный текст Феникса, тумблер, живые символы facility; без компилятора |
 | E | Редактор Lex Loci + эдикт Феникса по умолчанию (слова / compiler) |
 | F | Φ-нить + клеммы |
-| G | Сторож, автономия турелей, инкубатор |
+| G0 | **Сторож + автономия турелей (shipped)** — пока на якоре phoenix-snapshot: каждые 2 с re-shed; турели `autonomous`+armed; clear на revive |
+| G | Инкубатор (+ остальное из сторожа сверх G0) |
 
 ## Антипаттерны
 

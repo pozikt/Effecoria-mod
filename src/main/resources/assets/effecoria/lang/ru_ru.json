@@ -1918,6 +1918,8 @@
   "gui.effecoria.tower_console.edict.phoenix": "КОГДА душа.мертва\nТО разомкнуть не-life контакторы\nОСТАВИТЬ life-путь закрытым\nВОССТАНОВИТЬ при материализации",
   "gui.effecoria.tower_console.edict.active": "Аппаратный shed: вооружён",
   "gui.effecoria.tower_console.edict.inactive": "Аппаратный shed: снят",
+  "gui.effecoria.tower_console.edict.watchdog_active": "Сторож: активен",
+  "gui.effecoria.tower_console.edict.watchdog_idle": "Сторож: покой",
   "gui.effecoria.tower_console.edict.symbols": "Символы (живой инвентарь)",
   "gui.effecoria.tower_console.phoenix_on": "Феникс ВКЛ",
   "gui.effecoria.tower_console.phoenix_off": "Феникс ВЫКЛ",

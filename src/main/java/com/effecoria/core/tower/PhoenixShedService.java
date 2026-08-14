@@ -2,6 +2,7 @@ package com.effecoria.core.tower;
 
 import com.effecoria.block.PhiContactorBlock;
 import com.effecoria.block.PhiCouplerBlock;
+import com.effecoria.block.PhiTurretBlockEntity;
 import com.effecoria.block.TowerAnchorBlockEntity;
 import com.effecoria.content.ModBlockTags;
 import com.effecoria.content.ModBlocks;
@@ -14,12 +15,15 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Hardware Phoenix shed: on owner death, open non-{@link PhiChannel#LIFE} contactors in the
- * glued facility so industry/defense loads drop while life-path contactors stay closed.
+ * glued facility so industry loads drop while life-path contactors stay closed.
  * Contactor CLOSED states are snapshotted on the Ψ-anchor and restored on rematerialize.
+ * While the snapshot is held, {@link #reenforceIfNeeded} re-applies topology and keeps turrets
+ * autonomous (Phase G0 watchdog).
  */
 public final class PhoenixShedService {
     private PhoenixShedService() {}
@@ -35,6 +39,7 @@ public final class PhoenixShedService {
             anchor.storePhoenixSnapshot(snapshotContactors(level, anchorPos));
         }
         applyShed(level, anchorPos);
+        armTurretsAutonomous(level, anchorPos);
     }
 
     /** Restore pre-death contactor states after successful revive / materialize. */
@@ -42,11 +47,27 @@ public final class PhoenixShedService {
         if (!(level.getBlockEntity(anchorPos) instanceof TowerAnchorBlockEntity anchor)) {
             return;
         }
+        clearTurretAutonomy(level, anchorPos);
         ListTag snap = anchor.takePhoenixSnapshot();
         if (snap == null || snap.isEmpty()) {
             return;
         }
         restoreSnapshot(level, snap);
+    }
+
+    /**
+     * Watchdog: while a phoenix snapshot is held and the edict is enabled, re-open non-life
+     * contactors and keep facility turrets autonomous.
+     */
+    public static void reenforceIfNeeded(ServerLevel level, BlockPos anchorPos) {
+        if (!(level.getBlockEntity(anchorPos) instanceof TowerAnchorBlockEntity anchor)
+                || !anchor.bound()
+                || !anchor.phoenixEdictEnabled()
+                || !anchor.hasPhoenixSnapshot()) {
+            return;
+        }
+        applyShed(level, anchorPos);
+        armTurretsAutonomous(level, anchorPos);
     }
 
     private static ListTag snapshotContactors(ServerLevel level, BlockPos anchorPos) {
@@ -85,6 +106,24 @@ public final class PhoenixShedService {
                 continue;
             }
             PhiContactorBlock.setClosed(level, pos, entry.getBoolean("Closed"));
+        }
+    }
+
+    private static void armTurretsAutonomous(ServerLevel level, BlockPos anchorPos) {
+        for (BlockPos pos : EssenceGlueData.get(level).component(anchorPos)) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof PhiTurretBlockEntity turret) {
+                turret.setAutonomous(true);
+            }
+        }
+    }
+
+    private static void clearTurretAutonomy(ServerLevel level, BlockPos anchorPos) {
+        for (BlockPos pos : EssenceGlueData.get(level).component(anchorPos)) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof PhiTurretBlockEntity turret) {
+                turret.clearAutonomy();
+            }
         }
     }
 

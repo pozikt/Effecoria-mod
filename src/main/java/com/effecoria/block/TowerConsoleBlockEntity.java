@@ -52,7 +52,8 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
     public static final int DATA_SONAR_PRESENT = 16;
     public static final int DATA_SONAR_READY = 17;
     public static final int DATA_PHOENIX = 18;
-    public static final int DATA_COUNT = 19;
+    public static final int DATA_WATCHDOG = 19;
+    public static final int DATA_COUNT = 20;
 
     private int integrityPct;
     private int omegaPct;
@@ -73,6 +74,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
     private int sonarPresent;
     private int sonarReady;
     private int phoenixEdict;
+    private int watchdogActive;
 
     private List<TowerFacility.MonitorEntry> monitors = new ArrayList<>();
 
@@ -99,6 +101,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
                 case DATA_SONAR_PRESENT -> sonarPresent;
                 case DATA_SONAR_READY -> sonarReady;
                 case DATA_PHOENIX -> phoenixEdict;
+                case DATA_WATCHDOG -> watchdogActive;
                 default -> 0;
             };
         }
@@ -125,6 +128,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
                 case DATA_SONAR_PRESENT -> sonarPresent = value;
                 case DATA_SONAR_READY -> sonarReady = value;
                 case DATA_PHOENIX -> phoenixEdict = value;
+                case DATA_WATCHDOG -> watchdogActive = value;
                 default -> {}
             }
         }
@@ -189,6 +193,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
                 ? 1
                 : 0;
         phoenixEdict = computer.phoenixEdictEnabled() ? 1 : 0;
+        watchdogActive = computer.hasPhoenixSnapshot() && computer.phoenixEdictEnabled() ? 1 : 0;
         setChanged();
         syncClient();
     }
@@ -213,6 +218,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         sonarPresent = 0;
         sonarReady = 0;
         phoenixEdict = 1;
+        watchdogActive = 0;
     }
 
     private void syncClient() {
@@ -356,6 +362,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         tag.putInt("SonarPresent", sonarPresent);
         tag.putInt("SonarReady", sonarReady);
         tag.putInt("Phoenix", phoenixEdict);
+        tag.putInt("Watchdog", watchdogActive);
         tag.put("Monitors", TowerFacility.saveMonitorList(monitors));
     }
 
@@ -379,6 +386,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         sonarPresent = tag.getInt("SonarPresent");
         sonarReady = tag.getInt("SonarReady");
         phoenixEdict = tag.contains("Phoenix") ? tag.getInt("Phoenix") : 1;
+        watchdogActive = tag.getInt("Watchdog");
         if (tag.contains("Monitors", Tag.TAG_LIST)) {
             monitors = new ArrayList<>(TowerFacility.loadMonitorList(tag.getList("Monitors", Tag.TAG_COMPOUND)));
         } else {
