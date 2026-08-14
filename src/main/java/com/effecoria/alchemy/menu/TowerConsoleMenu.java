@@ -10,6 +10,7 @@ import com.effecoria.core.tower.TowerFacility;
 import com.effecoria.core.tower.TowerStructureValidator;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -144,6 +145,10 @@ public final class TowerConsoleMenu extends MachineMenu {
 
     public boolean phoenixWatchdogActive() {
         return data.get(TowerConsoleBlockEntity.DATA_WATCHDOG) != 0;
+    }
+
+    public List<ResourceLocation> lociTokens() {
+        return blockEntity.lociTokens();
     }
 
     @Override

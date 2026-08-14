@@ -12,8 +12,10 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.ContainerHelper;
@@ -25,6 +27,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 /** Ψ-computer heart of a Mage Tower — consecrate, soulbind, revive chamber, Φ-dome. */
@@ -60,6 +65,9 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
 
     /** Lex Loci hardware Phoenix edict — shed non-life contactors on owner death. */
     private boolean phoenixEdictEnabled = true;
+
+    /** Empty = built-in Phoenix word program. */
+    private final List<ResourceLocation> lociTokens = new ArrayList<>();
 
     /** Re-apply Phoenix shed / turret autonomy every 2s while snapshot is held. */
     public static final int PHOENIX_WATCHDOG_INTERVAL = 40;
@@ -224,6 +232,24 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
         domePowered = false;
         phoenixContactorSnapshot = null;
         phoenixEdictEnabled = true;
+        lociTokens.clear();
+        setChanged();
+        sync();
+    }
+
+    public List<ResourceLocation> lociTokens() {
+        return Collections.unmodifiableList(lociTokens);
+    }
+
+    public void setLociTokens(List<ResourceLocation> tokens) {
+        lociTokens.clear();
+        if (tokens != null) {
+            for (ResourceLocation id : tokens) {
+                if (id != null) {
+                    lociTokens.add(id);
+                }
+            }
+        }
         setChanged();
         sync();
     }
@@ -424,6 +450,13 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
         tag.putString("BodyType", bodyType.getSerializedName());
         tag.putBoolean("DomeCombat", domeCombat);
         tag.putBoolean("PhoenixEdict", phoenixEdictEnabled);
+        if (!lociTokens.isEmpty()) {
+            ListTag tokens = new ListTag();
+            for (ResourceLocation id : lociTokens) {
+                tokens.add(StringTag.valueOf(id.toString()));
+            }
+            tag.put("LociTokens", tokens);
+        }
         if (phoenixContactorSnapshot != null && !phoenixContactorSnapshot.isEmpty()) {
             tag.put("PhoenixContactors", phoenixContactorSnapshot.copy());
         }
@@ -456,6 +489,20 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
         bodyType = TowerBodyType.fromId(tag.getString("BodyType"));
         domeCombat = tag.getBoolean("DomeCombat");
         phoenixEdictEnabled = !tag.contains("PhoenixEdict") || tag.getBoolean("PhoenixEdict");
+        lociTokens.clear();
+        if (tag.contains("LociTokens", Tag.TAG_LIST)) {
+            ListTag tokens = tag.getList("LociTokens", Tag.TAG_STRING);
+            for (int i = 0; i < tokens.size(); i++) {
+                String raw = tokens.getString(i);
+                if (raw.isEmpty()) {
+                    continue;
+                }
+                ResourceLocation id = ResourceLocation.tryParse(raw);
+                if (id != null) {
+                    lociTokens.add(id);
+                }
+            }
+        }
         if (tag.contains("PhoenixContactors", Tag.TAG_LIST)) {
             phoenixContactorSnapshot = tag.getList("PhoenixContactors", Tag.TAG_COMPOUND).copy();
         } else {

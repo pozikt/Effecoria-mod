@@ -12,8 +12,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -77,6 +79,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
     private int watchdogActive;
 
     private List<TowerFacility.MonitorEntry> monitors = new ArrayList<>();
+    private List<ResourceLocation> lociTokens = new ArrayList<>();
 
     private final ContainerData data = new ContainerData() {
         @Override
@@ -151,6 +154,10 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         return Collections.unmodifiableList(monitors);
     }
 
+    public List<ResourceLocation> lociTokens() {
+        return Collections.unmodifiableList(lociTokens);
+    }
+
     public static void serverTick(Level level, BlockPos pos, BlockState state, TowerConsoleBlockEntity be) {
         if (!(level instanceof ServerLevel server) || level.getGameTime() % 10 != 0) {
             return;
@@ -163,6 +170,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         if (computer == null) {
             clearTelemetry();
             monitors = List.of();
+            lociTokens = List.of();
             syncClient();
             return;
         }
@@ -194,6 +202,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
                 : 0;
         phoenixEdict = computer.phoenixEdictEnabled() ? 1 : 0;
         watchdogActive = computer.hasPhoenixSnapshot() && computer.phoenixEdictEnabled() ? 1 : 0;
+        lociTokens = new ArrayList<>(computer.lociTokens());
         setChanged();
         syncClient();
     }
@@ -219,6 +228,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         sonarReady = 0;
         phoenixEdict = 1;
         watchdogActive = 0;
+        lociTokens = List.of();
     }
 
     private void syncClient() {
@@ -364,6 +374,11 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         tag.putInt("Phoenix", phoenixEdict);
         tag.putInt("Watchdog", watchdogActive);
         tag.put("Monitors", TowerFacility.saveMonitorList(monitors));
+        ListTag tokens = new ListTag();
+        for (ResourceLocation id : lociTokens) {
+            tokens.add(StringTag.valueOf(id.toString()));
+        }
+        tag.put("LociTokens", tokens);
     }
 
     private void readTelemetry(CompoundTag tag) {
@@ -391,6 +406,20 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
             monitors = new ArrayList<>(TowerFacility.loadMonitorList(tag.getList("Monitors", Tag.TAG_COMPOUND)));
         } else {
             monitors = List.of();
+        }
+        lociTokens = new ArrayList<>();
+        if (tag.contains("LociTokens", Tag.TAG_LIST)) {
+            ListTag tokens = tag.getList("LociTokens", Tag.TAG_STRING);
+            for (int i = 0; i < tokens.size(); i++) {
+                String raw = tokens.getString(i);
+                if (raw.isEmpty()) {
+                    continue;
+                }
+                ResourceLocation id = ResourceLocation.tryParse(raw);
+                if (id != null) {
+                    lociTokens.add(id);
+                }
+            }
         }
     }
 

@@ -2,6 +2,8 @@ package com.effecoria.client.gui.alchemy;
 
 import com.effecoria.alchemy.menu.TowerConsoleMenu;
 import com.effecoria.client.ClientPhiSonarMap;
+import com.effecoria.core.loci.LexLociCompiler;
+import com.effecoria.core.loci.LociActuator;
 import com.effecoria.core.tower.PhiSonarService;
 import com.effecoria.core.tower.TowerFacility;
 import com.effecoria.network.ModNetworking;
@@ -11,6 +13,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -30,8 +33,15 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     private static final int LIST_H = 150;
     private static final int ROW_H = 18;
     private static final int MAP_SIZE = 168;
-    private static final int EDICT_LIST_Y = 118;
-    private static final int EDICT_LIST_H = 60;
+    private static final int EDICT_LIST_Y = 110;
+    private static final int EDICT_LIST_H = 58;
+    private static final int CHIP_H = 16;
+    private static final int CHIP_PROGRAM = 0xFF3A4A5C;
+    private static final int CHIP_SENSE = 0xFF1A4A5C;
+    private static final int CHIP_TRIGGER = 0xFF4A3A20;
+    private static final int CHIP_PALETTE = 0xFF2A2438;
+    private static final int CHIP_HOVER = 0xFF554488;
+    private static final int CHIP_DISABLED = 0xFF1A2028;
 
     private static final int BG_OUTER = 0xCC15202C;
     private static final int BG_INNER = 0xEE1E2E3C;
@@ -67,6 +77,10 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     private Button scanBtn;
     private Button modeBtn;
     private Button phoenixBtn;
+    private Button lociApplyBtn;
+    private Button lociResetBtn;
+    private final List<ResourceLocation> lociDraft = new ArrayList<>();
+    private boolean lociDirty;
 
     public TowerConsoleScreen(TowerConsoleMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -100,8 +114,20 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                 .bounds(leftPos + PANEL_W - 72, topPos + PANEL_H - 28, 62, 18)
                 .build());
         phoenixBtn = addRenderableWidget(Button.builder(phoenixLabel(), b -> phoenix())
-                .bounds(leftPos + 10, topPos + PANEL_H - 28, 100, 18)
+                .bounds(leftPos + 10, topPos + PANEL_H - 28, 80, 18)
                 .build());
+        lociApplyBtn = addRenderableWidget(
+                Button.builder(Component.translatable("gui.effecoria.tower_console.edict.apply"), b -> applyLoci())
+                        .bounds(leftPos + 94, topPos + PANEL_H - 28, 70, 18)
+                        .build());
+        lociResetBtn = addRenderableWidget(
+                Button.builder(Component.translatable("gui.effecoria.tower_console.edict.reset"), b -> resetLoci())
+                        .bounds(leftPos + 168, topPos + PANEL_H - 28, 70, 18)
+                        .build());
+        if (!lociDirty) {
+            lociDraft.clear();
+            lociDraft.addAll(LexLociCompiler.effectiveTokens(menu.lociTokens()));
+        }
         applyTabVisibility();
     }
 
@@ -134,6 +160,10 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         boolean edicts = tab == Tab.EDICTS;
         phoenixBtn.visible = edicts;
         phoenixBtn.active = menu.linked() && menu.bound();
+        lociApplyBtn.visible = edicts;
+        lociResetBtn.visible = edicts;
+        lociApplyBtn.active = menu.linked() && menu.bound() && lociDraftValid();
+        lociResetBtn.active = menu.linked() && menu.bound();
         if (edicts) {
             phoenixBtn.setMessage(phoenixLabel());
         }
@@ -160,6 +190,29 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         if (minecraft != null && minecraft.gameMode != null) {
             minecraft.gameMode.handleInventoryButtonClick(menu.containerId, TowerConsoleMenu.BUTTON_PHOENIX);
         }
+    }
+
+    private void applyLoci() {
+        if (!lociDraftValid()) {
+            return;
+        }
+        List<ResourceLocation> send =
+                LexLociCompiler.isDefault(lociDraft) ? List.of() : List.copyOf(lociDraft);
+        PacketDistributor.sendToServer(
+                new ModNetworking.ApplyLociProgramPayload(menu.blockEntity().getBlockPos(), send));
+        lociDirty = false;
+    }
+
+    private void resetLoci() {
+        PacketDistributor.sendToServer(
+                new ModNetworking.ApplyLociProgramPayload(menu.blockEntity().getBlockPos(), List.of()));
+        lociDraft.clear();
+        lociDraft.addAll(LexLociCompiler.defaultPhoenixTokens());
+        lociDirty = false;
+    }
+
+    private boolean lociDraftValid() {
+        return lociDraft.isEmpty() || LexLociCompiler.compile(lociDraft).ok();
     }
 
     private void scan() {
@@ -285,6 +338,39 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                 }
             }
         }
+        if (tab == Tab.EDICTS && button == 0 && menu.linked()) {
+            final boolean[] hit = {false};
+            visitProgramChips((id, cx, cy, w, h, last) -> {
+                if (hit[0] || !last) {
+                    return;
+                }
+                if (mouseX >= cx && mouseX < cx + w && mouseY >= cy && mouseY < cy + h && !lociDraft.isEmpty()) {
+                    lociDraft.remove(lociDraft.size() - 1);
+                    lociDirty = true;
+                    hit[0] = true;
+                }
+            });
+            if (hit[0]) {
+                return true;
+            }
+            visitPaletteChips((id, cx, cy, w, h, last) -> {
+                if (hit[0]) {
+                    return;
+                }
+                if (mouseX >= cx
+                        && mouseX < cx + w
+                        && mouseY >= cy
+                        && mouseY < cy + h
+                        && LexLociCompiler.canAppend(lociDraft, id)) {
+                    lociDraft.add(id);
+                    lociDirty = true;
+                    hit[0] = true;
+                }
+            });
+            if (hit[0]) {
+                return true;
+            }
+        }
         if (tab == Tab.MAP && mapPainter.mouseClicked(mapX(), mapY(), MAP_SIZE, mouseX, mouseY, button)) {
             return true;
         }
@@ -323,6 +409,17 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
             phoenixBtn.active = menu.linked() && menu.bound();
             phoenixBtn.setMessage(phoenixLabel());
         }
+        if (lociApplyBtn != null && tab == Tab.EDICTS) {
+            lociApplyBtn.active = menu.linked() && menu.bound() && lociDraftValid();
+            lociResetBtn.active = menu.linked() && menu.bound();
+        }
+        if (!lociDirty) {
+            List<ResourceLocation> server = LexLociCompiler.effectiveTokens(menu.lociTokens());
+            if (!lociDraft.equals(server)) {
+                lociDraft.clear();
+                lociDraft.addAll(server);
+            }
+        }
     }
 
     @Override
@@ -348,7 +445,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         } else if (tab == Tab.MAP) {
             drawMapTab(graphics, mouseX, mouseY);
         } else {
-            drawEdictsTab(graphics);
+            drawEdictsTab(graphics, mouseX, mouseY);
         }
     }
 
@@ -366,19 +463,44 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         graphics.drawCenteredString(font, Component.translatable(key), x0 + 23, y0 + 3, on ? TITLE : MUTED);
     }
 
-    private void drawEdictsTab(GuiGraphics graphics) {
+    private void drawEdictsTab(GuiGraphics graphics, int mouseX, int mouseY) {
         int x = leftPos + 10;
-        int y = topPos + 22;
-        graphics.drawString(font, Component.translatable("gui.effecoria.tower_console.edict.phoenix_title"), x, y, TITLE, false);
-        y += 12;
-        String body = Component.translatable("gui.effecoria.tower_console.edict.phoenix").getString();
-        for (String line : body.split("\n", -1)) {
-            graphics.drawString(font, line, x, y, LABEL, false);
-            y += 10;
-            if (y > topPos + EDICT_LIST_Y - 38) {
-                break;
+        graphics.drawString(
+                font, Component.translatable("gui.effecoria.tower_console.edict.phoenix_title"), x, topPos + 22, TITLE, false);
+
+        if (lociDraft.isEmpty()) {
+            graphics.drawString(
+                    font,
+                    Component.translatable("gui.effecoria.tower_console.edict.empty"),
+                    x,
+                    topPos + 36,
+                    MUTED,
+                    false);
+        } else {
+            visitProgramChips((id, cx, cy, w, h, last) -> {
+                boolean hover = mouseX >= cx && mouseX < cx + w && mouseY >= cy && mouseY < cy + h;
+                graphics.fill(cx, cy, cx + w, cy + h, hover && last ? CHIP_HOVER : chipColor(id));
+                graphics.drawCenteredString(font, lociLabel(id), cx + w / 2, cy + 4, LABEL);
+            });
+            if (lociDraft.size() >= 2) {
+                int thenX = thenX();
+                graphics.drawString(
+                        font,
+                        Component.translatable("gui.effecoria.tower_console.edict.then"),
+                        thenX,
+                        topPos + 38,
+                        MUTED,
+                        false);
             }
         }
+
+        visitPaletteChips((id, cx, cy, w, h, last) -> {
+            boolean can = LexLociCompiler.canAppend(lociDraft, id);
+            boolean hover = mouseX >= cx && mouseX < cx + w && mouseY >= cy && mouseY < cy + h;
+            int fill = !can ? CHIP_DISABLED : (hover ? CHIP_HOVER : CHIP_PALETTE);
+            graphics.fill(cx, cy, cx + w, cy + h, fill);
+            graphics.drawCenteredString(font, lociLabel(id), cx + w / 2, cy + 4, can ? LABEL : MUTED);
+        });
 
         int flagColor = menu.phoenixEdictEnabled() ? OK : MUTED;
         graphics.drawString(
@@ -388,7 +510,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                                 ? "gui.effecoria.tower_console.edict.active"
                                 : "gui.effecoria.tower_console.edict.inactive"),
                 x,
-                topPos + EDICT_LIST_Y - 36,
+                topPos + 88,
                 flagColor,
                 false);
         int watchColor = menu.phoenixWatchdogActive() ? OK : MUTED;
@@ -399,18 +521,20 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                                 ? "gui.effecoria.tower_console.edict.watchdog_active"
                                 : "gui.effecoria.tower_console.edict.watchdog_idle"),
                 x,
-                topPos + EDICT_LIST_Y - 24,
+                topPos + 98,
                 watchColor,
                 false);
-        int signalColor = menu.phoenixWatchdogActive() ? WARN : MUTED;
+        boolean signalOn = menu.phoenixWatchdogActive()
+                && LexLociCompiler.compile(menu.lociTokens()).actuators().contains(LociActuator.SIGNAL);
+        int signalColor = signalOn ? WARN : MUTED;
         graphics.drawString(
                 font,
                 Component.translatable(
-                        menu.phoenixWatchdogActive()
+                        signalOn
                                 ? "gui.effecoria.tower_console.edict.signal_alarm"
                                 : "gui.effecoria.tower_console.edict.signal_idle"),
-                x,
-                topPos + EDICT_LIST_Y - 12,
+                leftPos + 160,
+                topPos + 98,
                 signalColor,
                 false);
 
@@ -428,6 +552,66 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         for (int i = edictScroll; i < end; i++) {
             int rowY = listY + (i - edictScroll) * 12;
             graphics.drawString(font, rows.get(i), x, rowY, MUTED, false);
+        }
+    }
+
+    private String lociLabel(ResourceLocation id) {
+        return Component.translatable(LexLociCompiler.wordLabelKey(id)).getString();
+    }
+
+    private int chipColor(ResourceLocation id) {
+        if (LexLociCompiler.WHEN.equals(id)) {
+            return CHIP_PROGRAM;
+        }
+        if (LexLociCompiler.SOUL_DEAD.equals(id)) {
+            return CHIP_SENSE;
+        }
+        return CHIP_TRIGGER;
+    }
+
+    private int chipWidth(ResourceLocation id) {
+        return Math.max(28, font.width(lociLabel(id)) + 8);
+    }
+
+    private int thenX() {
+        int x = leftPos + 10;
+        int n = Math.min(2, lociDraft.size());
+        for (int i = 0; i < n; i++) {
+            x += chipWidth(lociDraft.get(i)) + 4;
+        }
+        return x;
+    }
+
+    @FunctionalInterface
+    private interface ChipVisitor {
+        void accept(ResourceLocation id, int x, int y, int w, int h, boolean last);
+    }
+
+    private void visitProgramChips(ChipVisitor visitor) {
+        int x = leftPos + 10;
+        int y = topPos + 34;
+        for (int i = 0; i < lociDraft.size(); i++) {
+            if (i == 2) {
+                x = leftPos + 10;
+                y = topPos + 52;
+            }
+            ResourceLocation id = lociDraft.get(i);
+            int w = chipWidth(id);
+            visitor.accept(id, x, y, w, CHIP_H, i == lociDraft.size() - 1);
+            x += w + 4;
+        }
+    }
+
+    private void visitPaletteChips(ChipVisitor visitor) {
+        int x = leftPos + 10;
+        int y = topPos + 70;
+        List<ResourceLocation> palette = LexLociCompiler.palette();
+        int slot = Math.max(40, (PANEL_W - 24) / Math.max(1, palette.size()));
+        for (int i = 0; i < palette.size(); i++) {
+            ResourceLocation id = palette.get(i);
+            int w = slot - 4;
+            visitor.accept(id, x, y, w, CHIP_H, false);
+            x += slot;
         }
     }
 
@@ -716,10 +900,40 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                         mouseX,
                         mouseY);
             }
-        } else if (tab == Tab.EDICTS && isHovering(10, PANEL_H - 28, 100, 18, mouseX, mouseY)) {
-            graphics.renderTooltip(
-                    font, Component.translatable("gui.effecoria.tower_console.phoenix_tip"), mouseX, mouseY);
+        } else if (tab == Tab.EDICTS) {
+            ResourceLocation hovered = hoveredLociWord(mouseX, mouseY);
+            if (hovered != null) {
+                graphics.renderTooltip(
+                        font, Component.translatable(LexLociCompiler.wordLabelKey(hovered)), mouseX, mouseY);
+            } else if (isHovering(10, PANEL_H - 28, 80, 18, mouseX, mouseY)) {
+                graphics.renderTooltip(
+                        font, Component.translatable("gui.effecoria.tower_console.phoenix_tip"), mouseX, mouseY);
+            } else if (isHovering(94, PANEL_H - 28, 70, 18, mouseX, mouseY)) {
+                graphics.renderTooltip(
+                        font, Component.translatable("gui.effecoria.tower_console.edict.apply_tip"), mouseX, mouseY);
+            } else if (isHovering(168, PANEL_H - 28, 70, 18, mouseX, mouseY)) {
+                graphics.renderTooltip(
+                        font, Component.translatable("gui.effecoria.tower_console.edict.reset_tip"), mouseX, mouseY);
+            }
         }
+    }
+
+    private ResourceLocation hoveredLociWord(int mouseX, int mouseY) {
+        final ResourceLocation[] found = {null};
+        visitProgramChips((id, cx, cy, w, h, last) -> {
+            if (found[0] == null && mouseX >= cx && mouseX < cx + w && mouseY >= cy && mouseY < cy + h) {
+                found[0] = id;
+            }
+        });
+        if (found[0] != null) {
+            return found[0];
+        }
+        visitPaletteChips((id, cx, cy, w, h, last) -> {
+            if (found[0] == null && mouseX >= cx && mouseX < cx + w && mouseY >= cy && mouseY < cy + h) {
+                found[0] = id;
+            }
+        });
+        return found[0];
     }
 
     private static int severityColor(int severity) {

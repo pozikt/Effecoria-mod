@@ -10,6 +10,9 @@ import com.effecoria.content.ModBlocks;
 import com.effecoria.core.alchemy.PhiBusNetwork;
 import com.effecoria.core.circuit.PhiChannel;
 import com.effecoria.core.glue.EssenceGlueData;
+import com.effecoria.core.loci.LexLociCompiler;
+import com.effecoria.core.loci.LociActuator;
+import com.effecoria.core.loci.LociEvent;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -29,8 +32,8 @@ import java.util.UUID;
  * Hardware Phoenix shed: on owner death, open non-{@link PhiChannel#LIFE} contactors in the
  * glued facility so industry loads drop while life-path contactors stay closed.
  * Contactor CLOSED states are snapshotted on the Ψ-anchor and restored on rematerialize.
- * While the snapshot is held, {@link #reenforceIfNeeded} re-applies topology, keeps turrets
- * autonomous, and holds {@code phi_signal} lamps (Phase G+).
+ * While the snapshot is held, {@link #reenforceIfNeeded} re-applies the compiled Phoenix
+ * word program (shed / turrets / signal).
  */
 public final class PhoenixShedService {
     private PhoenixShedService() {}
@@ -45,10 +48,7 @@ public final class PhoenixShedService {
         if (!anchor.hasPhoenixSnapshot()) {
             anchor.storePhoenixSnapshot(snapshotContactors(level, anchorPos));
         }
-        applyShed(level, anchorPos);
-        armTurretsAutonomous(level, anchorPos);
-        setSignals(level, anchorPos, true);
-        notifyOwnerAlarm(level, anchor);
+        dispatch(level, anchorPos, true);
     }
 
     /** Restore pre-death contactor states after successful revive / materialize. */
@@ -76,9 +76,34 @@ public final class PhoenixShedService {
                 || !anchor.hasPhoenixSnapshot()) {
             return;
         }
-        applyShed(level, anchorPos);
-        armTurretsAutonomous(level, anchorPos);
-        setSignals(level, anchorPos, true);
+        dispatch(level, anchorPos, false);
+    }
+
+    /**
+     * Run the compiled Phoenix word program (empty tokens = built-in edict).
+     * {@code notifyAlarm} is true only on the rising death edge, not watchdog ticks.
+     */
+    private static void dispatch(ServerLevel level, BlockPos anchorPos, boolean notifyAlarm) {
+        if (!(level.getBlockEntity(anchorPos) instanceof TowerAnchorBlockEntity anchor)) {
+            return;
+        }
+        LexLociCompiler.CompileResult program = LexLociCompiler.compile(anchor.lociTokens());
+        if (!program.ok() || program.event() != LociEvent.SOUL_DEAD) {
+            program = LexLociCompiler.defaultProgram();
+        }
+        if (program.actuators().contains(LociActuator.SHED)) {
+            applyShed(level, anchorPos);
+        }
+        if (program.actuators().contains(LociActuator.AUTONOM)) {
+            armTurretsAutonomous(level, anchorPos);
+        } else {
+            clearTurretAutonomy(level, anchorPos);
+        }
+        boolean wantSignal = program.actuators().contains(LociActuator.SIGNAL);
+        setSignals(level, anchorPos, wantSignal);
+        if (notifyAlarm && wantSignal) {
+            notifyOwnerAlarm(level, anchor);
+        }
     }
 
     /** Extinguish facility lamps when the edict is disarmed while a snapshot is still held. */

@@ -82,6 +82,7 @@ public final class ModCommonEvents {
     public static void onAddReloadListeners(AddReloadListenerEvent event) {
         event.addListener(SpellRegistry.RELOAD_LISTENER);
         event.addListener(com.effecoria.core.seal.SealWordRegistry.RELOAD_LISTENER);
+        event.addListener(com.effecoria.core.loci.LociWordRegistry.RELOAD_LISTENER);
         event.addListener(com.effecoria.core.technomagic.TechnomagicCatalog.RELOAD_LISTENER);
         event.addListener(com.effecoria.core.artifact.ArtifactCatalog.SHAFT_FORMS_LISTENER);
         event.addListener(com.effecoria.core.artifact.ArtifactCatalog.FOCUS_CUTS_LISTENER);
@@ -131,10 +132,12 @@ public final class ModCommonEvents {
         if (player != null) {
             SpellRegistry.syncTo(player);
             SealWordRegistry.syncTo(player);
+            com.effecoria.core.loci.LociWordRegistry.syncTo(player);
             return;
         }
         SpellRegistry.syncToAll(event.getPlayerList().getServer());
         SealWordRegistry.syncToAll(event.getPlayerList().getServer());
+        com.effecoria.core.loci.LociWordRegistry.syncToAll(event.getPlayerList().getServer());
     }
 
     @SubscribeEvent
@@ -156,6 +159,7 @@ public final class ModCommonEvents {
             SteamCloudService.syncToPlayer(player, serverLevel);
             SpellRegistry.syncTo(player);
             SealWordRegistry.syncTo(player);
+            com.effecoria.core.loci.LociWordRegistry.syncTo(player);
         }
     }
 

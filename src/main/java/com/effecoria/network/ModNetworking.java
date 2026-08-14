@@ -1411,6 +1411,53 @@ public final class ModNetworking {
         }
     }
 
+    /** Server → client: Lex Loci word lexicon for the console editor. */
+    public record LociWordCatalogPayload(List<com.effecoria.core.loci.LociWordDefinition> words)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<LociWordCatalogPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "loci_word_catalog"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, LociWordCatalogPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, payload) -> {
+                            buf.writeVarInt(payload.words().size());
+                            for (com.effecoria.core.loci.LociWordDefinition word : payload.words()) {
+                                ResourceLocation.STREAM_CODEC.encode(buf, word.id());
+                                buf.writeUtf(word.kind().serializedName(), 32);
+                                buf.writeUtf(word.effect() == null ? "" : word.effect(), 128);
+                            }
+                        },
+                        buf -> {
+                            int count = buf.readVarInt();
+                            List<com.effecoria.core.loci.LociWordDefinition> list = new ArrayList<>(count);
+                            for (int i = 0; i < count; i++) {
+                                ResourceLocation id = ResourceLocation.STREAM_CODEC.decode(buf);
+                                com.effecoria.core.seal.SealWordKind kind =
+                                        com.effecoria.core.seal.SealWordKind.fromSerialized(buf.readUtf(32));
+                                String effect = buf.readUtf(128);
+                                list.add(new com.effecoria.core.loci.LociWordDefinition(id, kind, effect));
+                            }
+                            return new LociWordCatalogPayload(list);
+                        });
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(LociWordCatalogPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                java.util.HashMap<ResourceLocation, com.effecoria.core.loci.LociWordDefinition> map =
+                        new java.util.HashMap<>();
+                for (com.effecoria.core.loci.LociWordDefinition word : payload.words()) {
+                    map.put(word.id(), word);
+                }
+                com.effecoria.core.loci.LociWordRegistry.replaceAll(map);
+            });
+        }
+    }
+
     /** Client notifies server that the spell hub was opened — first-hour tip. */
     public record HubOpenedPayload() implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<HubOpenedPayload> TYPE =
@@ -1968,6 +2015,59 @@ public final class ModNetworking {
                 BlockPos target = payload.targetPos().equals(BlockPos.ZERO) ? null : payload.targetPos();
                 com.effecoria.core.tower.TowerRemoteService.execute(
                         player, payload.accessPos(), payload.actionId(), target, payload.modeId());
+            });
+        }
+    }
+
+    /** Client → server: apply a Lex Loci Phoenix word program via the tower console. */
+    public record ApplyLociProgramPayload(BlockPos consolePos, List<ResourceLocation> tokens)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<ApplyLociProgramPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "apply_loci_program"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, ApplyLociProgramPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, p) -> {
+                            buf.writeBlockPos(p.consolePos());
+                            buf.writeVarInt(p.tokens().size());
+                            for (ResourceLocation id : p.tokens()) {
+                                ResourceLocation.STREAM_CODEC.encode(buf, id);
+                            }
+                        },
+                        buf -> {
+                            BlockPos pos = buf.readBlockPos();
+                            int n = buf.readVarInt();
+                            List<ResourceLocation> tokens = new ArrayList<>(n);
+                            for (int i = 0; i < n; i++) {
+                                tokens.add(ResourceLocation.STREAM_CODEC.decode(buf));
+                            }
+                            return new ApplyLociProgramPayload(pos, tokens);
+                        });
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(ApplyLociProgramPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                if (!(player.containerMenu instanceof com.effecoria.alchemy.menu.TowerConsoleMenu menu)
+                        || !menu.blockEntity().getBlockPos().equals(payload.consolePos())) {
+                    return;
+                }
+                if (payload.tokens().size() > com.effecoria.core.loci.LexLociCompiler.MAX_TOKENS) {
+                    return;
+                }
+                var status = com.effecoria.core.loci.LexLociService.apply(
+                        player, payload.consolePos(), payload.tokens());
+                if (status == com.effecoria.core.loci.LexLociService.ApplyStatus.BAD_PROGRAM) {
+                    player.displayClientMessage(
+                            Component.translatable("message.effecoria.tower.loci_invalid"), true);
+                }
             });
         }
     }

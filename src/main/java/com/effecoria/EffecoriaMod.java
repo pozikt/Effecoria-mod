@@ -283,6 +283,10 @@ public class EffecoriaMod {
                 ModNetworking.SealWordCatalogPayload.TYPE,
                 ModNetworking.SealWordCatalogPayload.STREAM_CODEC,
                 ModNetworking.SealWordCatalogPayload::handle);
+        registrar.playToClient(
+                ModNetworking.LociWordCatalogPayload.TYPE,
+                ModNetworking.LociWordCatalogPayload.STREAM_CODEC,
+                ModNetworking.LociWordCatalogPayload::handle);
         registrar.playToServer(
                 ModNetworking.BreathTrainHitPayload.TYPE,
                 ModNetworking.BreathTrainHitPayload.STREAM_CODEC,
@@ -355,6 +359,10 @@ public class EffecoriaMod {
                 ModNetworking.TowerRemoteCommandPayload.TYPE,
                 ModNetworking.TowerRemoteCommandPayload.STREAM_CODEC,
                 ModNetworking.TowerRemoteCommandPayload::handle);
+        registrar.playToServer(
+                ModNetworking.ApplyLociProgramPayload.TYPE,
+                ModNetworking.ApplyLociProgramPayload.STREAM_CODEC,
+                ModNetworking.ApplyLociProgramPayload::handle);
     }
 
 }
