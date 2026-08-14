@@ -1,7 +1,6 @@
 package com.effecoria.core.tower;
 
 import com.effecoria.block.TowerAnchorBlockEntity;
-import com.effecoria.core.alchemy.PhiPower;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
@@ -62,7 +61,7 @@ public final class TowerGhostService {
         if (!TowerSoulbindService.towerAliveFor(player)) {
             return;
         }
-        if (!PhiPower.hasPower(towerLevel, pos)) {
+        if (!PhoenixInrushService.canSupportRevive(towerLevel, pos)) {
             return;
         }
         BlockEntity be = towerLevel.getBlockEntity(pos);

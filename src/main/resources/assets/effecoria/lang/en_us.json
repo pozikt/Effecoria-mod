@@ -2061,6 +2061,7 @@
   "message.effecoria.tower.dome_combat_off": "Combat Φ-dome disarmed (passive ward remains while powered)",
   "message.effecoria.tower.phoenix_on": "Phoenix edict armed — non-life contactors shed on death",
   "message.effecoria.tower.phoenix_off": "Phoenix edict disarmed — contactors unchanged on death",
+  "message.effecoria.tower.inrush": "ΔQ inrush %s / %s — rematerialize buffer discharge",
   "message.effecoria.tower.loci_home": "Genius Loci · integrity %s%%",
   "message.effecoria.tower.loci_damaged": "Your tower is wounded — integrity %s%%",
   "message.effecoria.tower.loci_cell_broken": "Hull cell broken at %s, %s, %s",

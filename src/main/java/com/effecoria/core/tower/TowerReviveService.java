@@ -2,7 +2,6 @@ package com.effecoria.core.tower;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.block.TowerAnchorBlockEntity;
-import com.effecoria.core.alchemy.PhiPower;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
@@ -84,7 +83,7 @@ public final class TowerReviveService {
 
         clearBodyModifiers(player);
 
-        if (!PhiPower.hasPower(towerLevel, pos)) {
+        if (!PhoenixInrushService.canSupportRevive(towerLevel, pos)) {
             // Keep saved XP until materialize; stay "pending" for ghost.
             TowerGhostService.enterGhost(player);
             return;
@@ -126,6 +125,16 @@ public final class TowerReviveService {
         ServerLevel towerLevel = (ServerLevel) anchor.getLevel();
         if (towerLevel == null || !player.isAlive()) {
             return;
+        }
+
+        int inrush = PhoenixInrushService.dischargeInrush(towerLevel, anchor.getBlockPos(), body);
+        if (inrush > 0) {
+            player.displayClientMessage(
+                    Component.translatable(
+                            "message.effecoria.tower.inrush",
+                            inrush,
+                            PhoenixInrushService.inrushCost(body)),
+                    true);
         }
 
         BlockPos revive = anchor.revivePos();

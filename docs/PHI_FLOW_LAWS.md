@@ -1,6 +1,6 @@
 # Законы Эссенциальных Потоков (Φ-ток)
 
-**Status:** runtime solver shipped (channels, contactors, couplers, accumulators, filaments). Lex Loci edicts still planned.  
+**Status:** runtime solver shipped (channels, contactors, couplers, accumulators, filaments). **Phase C inrush shipped** (`PhoenixInrushService` — facility ΔQ can rematerialize without a live reactor; body rebuild discharges buffers). Lex Loci edict language still planned.  
 **Lore:** сформулированы Лонверами.  
 **Related:** [FORMULAS.md](FORMULAS.md), [TECHNOMAGIC.md](TECHNOMAGIC.md), [LEX_LOCI.md](LEX_LOCI.md).
 

@@ -2061,6 +2061,7 @@
   "message.effecoria.tower.dome_combat_off": "Боевой Φ-купол выключен (пассивный щит остаётся при питании)",
   "message.effecoria.tower.phoenix_on": "Эдикт Феникса вооружён — non-life контакторы shed при смерти",
   "message.effecoria.tower.phoenix_off": "Эдикт Феникса снят — контакторы при смерти не трогаем",
+  "message.effecoria.tower.inrush": "ΔQ inrush %s / %s — разряд накопителя на сборку тела",
   "message.effecoria.tower.loci_home": "Genius Loci · целостность %s%%",
   "message.effecoria.tower.loci_damaged": "Ваша башня ранена — целостность %s%%",
   "message.effecoria.tower.loci_cell_broken": "Клетка корпуса разрушена: %s, %s, %s",

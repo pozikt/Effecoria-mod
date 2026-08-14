@@ -27,8 +27,26 @@ public final class PhiAccumulatorBlockEntity extends BlockEntity implements PhiP
         super(ModBlockEntities.PHI_ACCUMULATOR.get(), pos, state);
     }
 
+    public int charge() {
+        return charge;
+    }
+
     public int chargePercent() {
         return Math.round(100f * charge / (float) MAX_CHARGE);
+    }
+
+    /**
+     * Forced ΔQ discharge for Phoenix inrush — bypasses UPS {@link #supplying()} gate.
+     * @return amount actually removed
+     */
+    public int takeCharge(int amount) {
+        if (amount <= 0 || charge <= 0) {
+            return 0;
+        }
+        int taken = Math.min(amount, charge);
+        charge -= taken;
+        setChanged();
+        return taken;
     }
 
     public float omegaPercent() {

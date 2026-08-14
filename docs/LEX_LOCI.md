@@ -1,6 +1,6 @@
 # Lex Loci — язык программирования башни
 
-**Status:** design — full edict language not shipped. Physical Φ-circuitry playable ([PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md)). **Phoenix hardware shed shipped** (`PhoenixShedService`). **E0.5 console Edicts tab shipped** (built-in Phoenix text + enable toggle + live symbol list). Full word editor / compiler = phase E.  
+**Status:** design — full edict language not shipped. Physical Φ-circuitry playable ([PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md)). **Phoenix hardware shed shipped** (`PhoenixShedService`). **E0.5 console Edicts tab shipped**. **Phase C inrush shipped** (`PhoenixInrushService`). Full word editor / compiler = phase E.  
 **Depends on:** [PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md), seals word grammar ([SEAL_PROGRAMMING.md](SEAL_PROGRAMMING.md)), tower facility (`TowerFacility`, console, Ψ-computer).  
 **Roadmap:** Stage IV / Technomagic Era VI (nervous system atop Era IV–V reactors).
 
@@ -142,7 +142,7 @@ Lex Loci («закон места») — словесные **эдикты** д�
 |------|----------|
 | A | Частотные каналы + Essential Flow Solver |
 | B | Контакторы, имена каналов, вкладка нагрузки/Ω |
-| C | Накопитель ΔQ + inrush revive |
+| C | **Накопитель ΔQ + inrush revive (shipped)** — `PhoenixInrushService`: буфер facility ≥120 или живой Φ; разряд на материализации |
 | D | Согласователь; штраф импринтера при Δω |
 | E0 | **Phoenix hardware shed (shipped)** — смерть владельца → open non-`life` contactors; снимок на якоре; restore на revive |
 | E0.5 | **Console Edicts tab (shipped)** — встроенный текст Феникса, тумблер, живые символы facility; без компилятора |
