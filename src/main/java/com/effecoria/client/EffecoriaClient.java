@@ -1,6 +1,7 @@
 package com.effecoria.client;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.client.hud.ShellWakeHud;
 import com.effecoria.client.hud.BlurredLocusHud;
 import com.effecoria.client.hud.PhiSonarGogglesHud;
 import com.effecoria.client.hud.PsiHudOverlay;
@@ -196,6 +197,7 @@ public final class EffecoriaClient {
         event.registerAbove(VanillaGuiLayers.HOTBAR, EffecoriaMod.id("blurred_locus"), BlurredLocusHud::render);
         event.registerAbove(VanillaGuiLayers.CROSSHAIR, EffecoriaMod.id("seal_inspect"), SealInspectHud::render);
         event.registerAbove(VanillaGuiLayers.HOTBAR, EffecoriaMod.id("phi_sonar_goggles"), PhiSonarGogglesHud::render);
+        event.registerAboveAll(EffecoriaMod.id("shell_wake"), ShellWakeHud::render);
     }
 
     @SubscribeEvent
