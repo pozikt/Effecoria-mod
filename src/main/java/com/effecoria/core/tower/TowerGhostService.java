@@ -1,15 +1,22 @@
 package com.effecoria.core.tower;
 
+import com.effecoria.block.RegenChamberBlockEntity;
 import com.effecoria.block.TowerAnchorBlockEntity;
+import com.effecoria.core.loci.LexLociCompiler;
+import com.effecoria.core.loci.LociActuator;
+import com.effecoria.core.loci.LociEvent;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
 import com.effecoria.core.psi.PsiHelper;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.Level;
@@ -28,6 +35,7 @@ public final class TowerGhostService {
         enableGhostFlight(player);
         player.displayClientMessage(Component.translatable("message.effecoria.tower.ghost_enter"), false);
         player.displayClientMessage(Component.translatable("message.effecoria.tower.ghost_wait"), true);
+        pulseGhostBeacon(player);
     }
 
     public static void tickPlayer(ServerPlayer player) {
@@ -46,6 +54,7 @@ public final class TowerGhostService {
         if (player.tickCount % 40 == 0) {
             applyGhostEffects(player);
             enableGhostFlight(player);
+            pulseGhostBeacon(player);
         }
 
         if (player.tickCount % 20 != 0) {
@@ -99,6 +108,38 @@ public final class TowerGhostService {
 
     public static boolean isGhost(ServerPlayer player) {
         return PsiHelper.get(player).towerGhost();
+    }
+
+    /** Lex Loci {@code soul_ghost} + {@code beacon}: point the ghost at the regen chamber. */
+    private static void pulseGhostBeacon(ServerPlayer player) {
+        PlayerPsiData data = PsiHelper.get(player);
+        if (!data.towerBound() || data.towerDim() == null || data.towerPos() == null) {
+            return;
+        }
+        ServerLevel towerLevel = player.server.getLevel(data.towerDim());
+        BlockPos anchorPos = data.towerPos();
+        if (towerLevel == null) {
+            return;
+        }
+        BlockEntity be = towerLevel.getBlockEntity(anchorPos);
+        if (!(be instanceof TowerAnchorBlockEntity anchor)
+                || !anchor.bound()
+                || !anchor.phoenixEdictEnabled()) {
+            return;
+        }
+        var program = LexLociCompiler.compile(anchor.lociTokens());
+        if (!program.ok() || !program.actuatorsFor(LociEvent.SOUL_GHOST).contains(LociActuator.BEACON)) {
+            return;
+        }
+        BlockPos at = TowerFacility.findInComponent(towerLevel, anchorPos, RegenChamberBlockEntity.class)
+                .map(BlockEntity::getBlockPos)
+                .orElse(anchorPos);
+        player.displayClientMessage(
+                Component.translatable("message.effecoria.tower.ghost_beacon", at.getX(), at.getY(), at.getZ()),
+                true);
+        towerLevel.sendParticles(
+                ParticleTypes.SOUL, at.getX() + 0.5, at.getY() + 1.2, at.getZ() + 0.5, 10, 0.45, 0.55, 0.45, 0.02);
+        towerLevel.playSound(null, at, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.45f, 1.35f);
     }
 
     private static void applyGhostEffects(ServerPlayer player) {

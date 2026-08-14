@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Server apply for the E1 Phoenix word program on a linked Ψ-anchor. */
+/** Server apply for the Phoenix word program on a linked Ψ-anchor. */
 public final class LexLociService {
     private LexLociService() {}
 

@@ -4,5 +4,6 @@ package com.effecoria.core.loci;
 public enum LociActuator {
     SHED,
     SIGNAL,
-    AUTONOM
+    AUTONOM,
+    BEACON
 }

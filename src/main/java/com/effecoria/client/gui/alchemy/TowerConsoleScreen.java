@@ -4,6 +4,7 @@ import com.effecoria.alchemy.menu.TowerConsoleMenu;
 import com.effecoria.client.ClientPhiSonarMap;
 import com.effecoria.core.loci.LexLociCompiler;
 import com.effecoria.core.loci.LociActuator;
+import com.effecoria.core.loci.LociEvent;
 import com.effecoria.core.tower.PhiSonarService;
 import com.effecoria.core.tower.TowerFacility;
 import com.effecoria.network.ModNetworking;
@@ -33,8 +34,8 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     private static final int LIST_H = 150;
     private static final int ROW_H = 18;
     private static final int MAP_SIZE = 168;
-    private static final int EDICT_LIST_Y = 110;
-    private static final int EDICT_LIST_H = 58;
+    private static final int EDICT_LIST_Y = 132;
+    private static final int EDICT_LIST_H = 36;
     private static final int CHIP_H = 16;
     private static final int CHIP_PROGRAM = 0xFF3A4A5C;
     private static final int CHIP_SENSE = 0xFF1A4A5C;
@@ -481,17 +482,16 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                 boolean hover = mouseX >= cx && mouseX < cx + w && mouseY >= cy && mouseY < cy + h;
                 graphics.fill(cx, cy, cx + w, cy + h, hover && last ? CHIP_HOVER : chipColor(id));
                 graphics.drawCenteredString(font, lociLabel(id), cx + w / 2, cy + 4, LABEL);
+                if (LexLociCompiler.isSense(id)) {
+                    graphics.drawString(
+                            font,
+                            Component.translatable("gui.effecoria.tower_console.edict.then"),
+                            cx + w + 2,
+                            cy + 4,
+                            MUTED,
+                            false);
+                }
             });
-            if (lociDraft.size() >= 2) {
-                int thenX = thenX();
-                graphics.drawString(
-                        font,
-                        Component.translatable("gui.effecoria.tower_console.edict.then"),
-                        thenX,
-                        topPos + 38,
-                        MUTED,
-                        false);
-            }
         }
 
         visitPaletteChips((id, cx, cy, w, h, last) -> {
@@ -510,7 +510,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                                 ? "gui.effecoria.tower_console.edict.active"
                                 : "gui.effecoria.tower_console.edict.inactive"),
                 x,
-                topPos + 88,
+                topPos + 108,
                 flagColor,
                 false);
         int watchColor = menu.phoenixWatchdogActive() ? OK : MUTED;
@@ -521,11 +521,13 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                                 ? "gui.effecoria.tower_console.edict.watchdog_active"
                                 : "gui.effecoria.tower_console.edict.watchdog_idle"),
                 x,
-                topPos + 98,
+                topPos + 118,
                 watchColor,
                 false);
         boolean signalOn = menu.phoenixWatchdogActive()
-                && LexLociCompiler.compile(menu.lociTokens()).actuators().contains(LociActuator.SIGNAL);
+                && LexLociCompiler.compile(menu.lociTokens())
+                        .actuatorsFor(LociEvent.SOUL_DEAD)
+                        .contains(LociActuator.SIGNAL);
         int signalColor = signalOn ? WARN : MUTED;
         graphics.drawString(
                 font,
@@ -534,7 +536,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                                 ? "gui.effecoria.tower_console.edict.signal_alarm"
                                 : "gui.effecoria.tower_console.edict.signal_idle"),
                 leftPos + 160,
-                topPos + 98,
+                topPos + 118,
                 signalColor,
                 false);
 
@@ -563,7 +565,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         if (LexLociCompiler.WHEN.equals(id)) {
             return CHIP_PROGRAM;
         }
-        if (LexLociCompiler.SOUL_DEAD.equals(id)) {
+        if (LexLociCompiler.isSense(id)) {
             return CHIP_SENSE;
         }
         return CHIP_TRIGGER;
@@ -573,13 +575,8 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         return Math.max(28, font.width(lociLabel(id)) + 8);
     }
 
-    private int thenX() {
-        int x = leftPos + 10;
-        int n = Math.min(2, lociDraft.size());
-        for (int i = 0; i < n; i++) {
-            x += chipWidth(lociDraft.get(i)) + 4;
-        }
-        return x;
+    private int thenWidth() {
+        return font.width(Component.translatable("gui.effecoria.tower_console.edict.then").getString()) + 6;
     }
 
     @FunctionalInterface
@@ -590,23 +587,25 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     private void visitProgramChips(ChipVisitor visitor) {
         int x = leftPos + 10;
         int y = topPos + 34;
+        int maxX = leftPos + PANEL_W - 10;
         for (int i = 0; i < lociDraft.size(); i++) {
-            if (i == 2) {
-                x = leftPos + 10;
-                y = topPos + 52;
-            }
             ResourceLocation id = lociDraft.get(i);
             int w = chipWidth(id);
+            int extra = LexLociCompiler.isSense(id) ? thenWidth() : 0;
+            if ((LexLociCompiler.WHEN.equals(id) && i > 0) || x + w + extra > maxX) {
+                x = leftPos + 10;
+                y += CHIP_H + 2;
+            }
             visitor.accept(id, x, y, w, CHIP_H, i == lociDraft.size() - 1);
-            x += w + 4;
+            x += w + 4 + extra;
         }
     }
 
     private void visitPaletteChips(ChipVisitor visitor) {
         int x = leftPos + 10;
-        int y = topPos + 70;
+        int y = topPos + 90;
         List<ResourceLocation> palette = LexLociCompiler.palette();
-        int slot = Math.max(40, (PANEL_W - 24) / Math.max(1, palette.size()));
+        int slot = Math.max(36, (PANEL_W - 24) / Math.max(1, palette.size()));
         for (int i = 0; i < palette.size(); i++) {
             ResourceLocation id = palette.get(i);
             int w = slot - 4;

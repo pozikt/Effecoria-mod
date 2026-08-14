@@ -9,21 +9,36 @@ import java.util.EnumSet;
 import java.util.List;
 
 /**
- * E1 Phoenix compiler: {@code WHEN} + {@code soul_dead} + at least one trigger
- * ({@code shed} / {@code signal} / {@code autonom}). Empty stored tokens mean the built-in edict.
+ * Phoenix compiler: one or two {@code WHEN} rules.
+ * {@code soul_dead} drives shed / signal / autonom; {@code soul_ghost} may add {@code beacon}.
+ * Empty stored tokens mean the built-in death edict.
  */
 public final class LexLociCompiler {
     public static final ResourceLocation WHEN = EffecoriaMod.id("when");
     public static final ResourceLocation SOUL_DEAD = EffecoriaMod.id("soul_dead");
+    public static final ResourceLocation SOUL_GHOST = EffecoriaMod.id("soul_ghost");
     public static final ResourceLocation SHED = EffecoriaMod.id("shed");
     public static final ResourceLocation SIGNAL = EffecoriaMod.id("signal");
     public static final ResourceLocation AUTONOM = EffecoriaMod.id("autonom");
+    public static final ResourceLocation BEACON = EffecoriaMod.id("beacon");
 
-    public static final int MAX_TOKENS = 5;
+    public static final int MAX_TOKENS = 8;
+    public static final int MAX_RULES = 2;
 
-    public record CompileResult(LociEvent event, EnumSet<LociActuator> actuators, List<String> errors) {
+    public record Rule(LociEvent event, EnumSet<LociActuator> actuators) {}
+
+    public record CompileResult(List<Rule> rules, List<String> errors) {
         public boolean ok() {
-            return errors.isEmpty() && event != null && !actuators.isEmpty();
+            return errors.isEmpty() && !rules.isEmpty();
+        }
+
+        public EnumSet<LociActuator> actuatorsFor(LociEvent event) {
+            for (Rule rule : rules) {
+                if (rule.event() == event) {
+                    return rule.actuators();
+                }
+            }
+            return EnumSet.noneOf(LociActuator.class);
         }
     }
 
@@ -34,7 +49,7 @@ public final class LexLociCompiler {
     }
 
     public static List<ResourceLocation> palette() {
-        return defaultPhoenixTokens();
+        return List.of(WHEN, SOUL_DEAD, SOUL_GHOST, SHED, SIGNAL, AUTONOM, BEACON);
     }
 
     /** Empty / null storage is the shipped Phoenix edict. */
@@ -51,47 +66,28 @@ public final class LexLociCompiler {
 
     public static CompileResult defaultProgram() {
         return new CompileResult(
-                LociEvent.SOUL_DEAD,
-                EnumSet.of(LociActuator.SHED, LociActuator.SIGNAL, LociActuator.AUTONOM),
+                List.of(new Rule(
+                        LociEvent.SOUL_DEAD,
+                        EnumSet.of(LociActuator.SHED, LociActuator.SIGNAL, LociActuator.AUTONOM))),
                 List.of());
     }
 
     public static CompileResult compile(List<ResourceLocation> stored) {
-        List<ResourceLocation> tokens = effectiveTokens(stored);
-        List<String> errors = new ArrayList<>();
-        if (tokens.size() > MAX_TOKENS) {
-            errors.add("too_many");
-            return new CompileResult(null, EnumSet.noneOf(LociActuator.class), errors);
+        return parse(effectiveTokens(stored), true);
+    }
+
+    public static boolean canAppend(List<ResourceLocation> draft, ResourceLocation word) {
+        if (word == null || draft == null || draft.size() >= MAX_TOKENS) {
+            return false;
         }
-        if (tokens.size() < 3) {
-            errors.add("too_short");
-            return new CompileResult(null, EnumSet.noneOf(LociActuator.class), errors);
-        }
-        if (!WHEN.equals(tokens.get(0))) {
-            errors.add("need_when");
-        }
-        if (!SOUL_DEAD.equals(tokens.get(1))) {
-            errors.add("need_soul_dead");
-        }
-        EnumSet<LociActuator> actuators = EnumSet.noneOf(LociActuator.class);
-        for (int i = 2; i < tokens.size(); i++) {
-            ResourceLocation id = tokens.get(i);
-            LociActuator actuator = actuatorOf(id);
-            if (actuator == null) {
-                errors.add("unknown:" + id);
-                continue;
-            }
-            if (!actuators.add(actuator)) {
-                errors.add("dup:" + id);
-            }
-        }
-        if (actuators.isEmpty()) {
-            errors.add("no_action");
-        }
-        if (!errors.isEmpty()) {
-            return new CompileResult(null, EnumSet.noneOf(LociActuator.class), errors);
-        }
-        return new CompileResult(LociEvent.SOUL_DEAD, actuators, List.of());
+        List<ResourceLocation> next = new ArrayList<>(draft);
+        next.add(word);
+        CompileResult prefix = parse(next, false);
+        return prefix.errors().isEmpty();
+    }
+
+    public static boolean isSense(ResourceLocation id) {
+        return SOUL_DEAD.equals(id) || SOUL_GHOST.equals(id);
     }
 
     public static LociActuator actuatorOf(ResourceLocation id) {
@@ -104,32 +100,111 @@ public final class LexLociCompiler {
         if (AUTONOM.equals(id)) {
             return LociActuator.AUTONOM;
         }
+        if (BEACON.equals(id)) {
+            return LociActuator.BEACON;
+        }
         return null;
     }
 
-    public static boolean canAppend(List<ResourceLocation> draft, ResourceLocation word) {
-        if (word == null || draft == null) {
-            return false;
+    public static LociEvent eventOf(ResourceLocation id) {
+        if (SOUL_DEAD.equals(id)) {
+            return LociEvent.SOUL_DEAD;
         }
-        if (draft.size() >= MAX_TOKENS) {
-            return false;
+        if (SOUL_GHOST.equals(id)) {
+            return LociEvent.SOUL_GHOST;
         }
-        if (WHEN.equals(word)) {
-            return draft.isEmpty();
-        }
-        if (SOUL_DEAD.equals(word)) {
-            return draft.size() == 1 && WHEN.equals(draft.get(0));
-        }
-        if (actuatorOf(word) == null) {
-            return false;
-        }
-        if (draft.size() < 2 || !WHEN.equals(draft.get(0)) || !SOUL_DEAD.equals(draft.get(1))) {
-            return false;
-        }
-        return !draft.contains(word);
+        return null;
     }
 
     public static String wordLabelKey(ResourceLocation id) {
         return "loci_word.effecoria." + id.getPath();
+    }
+
+    private static CompileResult parse(List<ResourceLocation> tokens, boolean requireComplete) {
+        List<String> errors = new ArrayList<>();
+        if (tokens.size() > MAX_TOKENS) {
+            errors.add("too_many");
+            return new CompileResult(List.of(), errors);
+        }
+        List<Rule> rules = new ArrayList<>();
+        EnumSet<LociEvent> seen = EnumSet.noneOf(LociEvent.class);
+        enum Phase {
+            IDLE,
+            SENSE,
+            ACTION
+        }
+        Phase phase = Phase.IDLE;
+        LociEvent openEvent = null;
+        EnumSet<LociActuator> openActs = EnumSet.noneOf(LociActuator.class);
+
+        for (ResourceLocation id : tokens) {
+            if (WHEN.equals(id)) {
+                if (phase == Phase.ACTION && openEvent != null && !openActs.isEmpty()) {
+                    rules.add(new Rule(openEvent, EnumSet.copyOf(openActs)));
+                    openEvent = null;
+                    openActs = EnumSet.noneOf(LociActuator.class);
+                    phase = Phase.IDLE;
+                }
+                if (phase != Phase.IDLE) {
+                    errors.add("bad_when");
+                    break;
+                }
+                if (rules.size() >= MAX_RULES) {
+                    errors.add("too_many_rules");
+                    break;
+                }
+                phase = Phase.SENSE;
+                continue;
+            }
+            LociEvent event = eventOf(id);
+            if (event != null) {
+                if (phase != Phase.SENSE) {
+                    errors.add("need_when");
+                    break;
+                }
+                if (!seen.add(event)) {
+                    errors.add("dup_event");
+                    break;
+                }
+                openEvent = event;
+                openActs = EnumSet.noneOf(LociActuator.class);
+                phase = Phase.ACTION;
+                continue;
+            }
+            LociActuator actuator = actuatorOf(id);
+            if (actuator != null) {
+                if (phase != Phase.ACTION || openEvent == null) {
+                    errors.add("need_sense");
+                    break;
+                }
+                if (!openActs.add(actuator)) {
+                    errors.add("dup:" + id);
+                    break;
+                }
+                continue;
+            }
+            errors.add("unknown:" + id);
+            break;
+        }
+
+        if (openEvent != null) {
+            if (openActs.isEmpty()) {
+                if (requireComplete) {
+                    errors.add("no_action");
+                }
+            } else {
+                rules.add(new Rule(openEvent, EnumSet.copyOf(openActs)));
+            }
+        } else if (phase == Phase.SENSE && requireComplete) {
+            errors.add("need_sense");
+        }
+
+        if (requireComplete && rules.isEmpty() && errors.isEmpty()) {
+            errors.add("empty");
+        }
+        if (!errors.isEmpty()) {
+            return new CompileResult(List.of(), errors);
+        }
+        return new CompileResult(List.copyOf(rules), List.of());
     }
 }

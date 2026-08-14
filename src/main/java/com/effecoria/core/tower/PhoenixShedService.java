@@ -88,18 +88,19 @@ public final class PhoenixShedService {
             return;
         }
         LexLociCompiler.CompileResult program = LexLociCompiler.compile(anchor.lociTokens());
-        if (!program.ok() || program.event() != LociEvent.SOUL_DEAD) {
+        if (!program.ok()) {
             program = LexLociCompiler.defaultProgram();
         }
-        if (program.actuators().contains(LociActuator.SHED)) {
+        var dead = program.actuatorsFor(LociEvent.SOUL_DEAD);
+        if (dead.contains(LociActuator.SHED)) {
             applyShed(level, anchorPos);
         }
-        if (program.actuators().contains(LociActuator.AUTONOM)) {
+        if (dead.contains(LociActuator.AUTONOM)) {
             armTurretsAutonomous(level, anchorPos);
         } else {
             clearTurretAutonomy(level, anchorPos);
         }
-        boolean wantSignal = program.actuators().contains(LociActuator.SIGNAL);
+        boolean wantSignal = dead.contains(LociActuator.SIGNAL);
         setSignals(level, anchorPos, wantSignal);
         if (notifyAlarm && wantSignal) {
             notifyOwnerAlarm(level, anchor);
