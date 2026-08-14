@@ -343,6 +343,10 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> PHI_MATCHER = ITEMS.register(
             "phi_matcher",
             () -> new HintBlockItem(ModBlocks.PHI_MATCHER.get(), new Item.Properties(), "tooltip.effecoria.phi_matcher"));
+    public static final DeferredItem<BlockItem> PHI_INCUBATOR = ITEMS.register(
+            "phi_incubator",
+            () -> new HintBlockItem(
+                    ModBlocks.PHI_INCUBATOR.get(), new Item.Properties(), "tooltip.effecoria.phi_incubator"));
     public static final DeferredItem<BlockItem> PHI_ACCUMULATOR = ITEMS.register(
             "phi_accumulator",
             () -> new HintBlockItem(

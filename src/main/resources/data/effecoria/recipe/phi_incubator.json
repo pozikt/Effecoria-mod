@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": { "item": "effecoria:phi_glass" },
+    "B": { "item": "effecoria:phi_bone_paste" },
+    "C": { "item": "effecoria:phi_coupler" },
+    "E": { "item": "effecoria:pure_essonite" }
+  },
+  "pattern": [" B ", "CEC", " G "],
+  "result": { "count": 1, "id": "effecoria:phi_incubator" }
+}

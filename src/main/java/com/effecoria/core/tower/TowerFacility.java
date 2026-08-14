@@ -5,6 +5,7 @@ import com.effecoria.block.OmegaDamperBlockEntity;
 import com.effecoria.block.PhiAirSynthBlockEntity;
 import com.effecoria.block.PhiBeaconBlockEntity;
 import com.effecoria.block.PhiCartographyTableBlockEntity;
+import com.effecoria.block.PhiIncubatorBlockEntity;
 import com.effecoria.block.PhiSonarBlockEntity;
 import com.effecoria.block.PhiTelegraphBlock;
 import com.effecoria.block.PhiTurretBlockEntity;
@@ -87,6 +88,43 @@ public final class TowerFacility {
         return findInComponent(level, anyPosInComponent, TowerAnchorBlockEntity.class);
     }
 
+    /**
+     * Facility computer: glued component first, else nearest bound Ψ-anchor within
+     * {@code searchRadius} (chunk-scanned). Used by the incubator when not yet glued.
+     */
+    public static Optional<TowerAnchorBlockEntity> findLinkedComputer(
+            ServerLevel level, BlockPos origin, int searchRadius) {
+        Optional<TowerAnchorBlockEntity> glued = findComputer(level, origin);
+        if (glued.isPresent()) {
+            return glued;
+        }
+        TowerAnchorBlockEntity best = null;
+        double bestDist = Double.MAX_VALUE;
+        int minCx = (origin.getX() - searchRadius) >> 4;
+        int maxCx = (origin.getX() + searchRadius) >> 4;
+        int minCz = (origin.getZ() - searchRadius) >> 4;
+        int maxCz = (origin.getZ() + searchRadius) >> 4;
+        long r2 = (long) searchRadius * searchRadius;
+        for (int cx = minCx; cx <= maxCx; cx++) {
+            for (int cz = minCz; cz <= maxCz; cz++) {
+                if (!level.hasChunk(cx, cz)) {
+                    continue;
+                }
+                for (BlockEntity be : level.getChunk(cx, cz).getBlockEntities().values()) {
+                    if (!(be instanceof TowerAnchorBlockEntity anchor) || !anchor.bound()) {
+                        continue;
+                    }
+                    double d = anchor.getBlockPos().distSqr(origin);
+                    if (d <= r2 && d < bestDist) {
+                        bestDist = d;
+                        best = anchor;
+                    }
+                }
+            }
+        }
+        return Optional.ofNullable(best);
+    }
+
     public static Optional<FoundationAmuletBlockEntity> findChargedAmulet(
             ServerLevel level, BlockPos componentOrPos, @Nullable UUID ownerUuid) {
         for (BlockPos pos : EssenceGlueData.get(level).component(componentOrPos)) {
@@ -104,6 +142,35 @@ public final class TowerFacility {
         return findInComponent(level, computerPos, RegenChamberBlockEntity.class)
                 .filter(RegenChamberBlockEntity::isOperational)
                 .isPresent();
+    }
+
+    /**
+     * Consume a ready incubated body matching {@code type} from any incubator in the facility.
+     * {@link TowerBodyType#BASIC} is never incubated — returns false.
+     */
+    public static boolean tryConsumeIncubatedBody(ServerLevel level, BlockPos computerPos, TowerBodyType type) {
+        if (type == TowerBodyType.BASIC) {
+            return false;
+        }
+        for (BlockPos pos : EssenceGlueData.get(level).component(computerPos)) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof PhiIncubatorBlockEntity incubator && incubator.consumeReady(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Prefer incubator prepaid body, else pay from the Ψ-anchor inventory. */
+    public static boolean payBodyCosts(
+            ServerLevel level, BlockPos computerPos, TowerAnchorBlockEntity anchor, TowerBodyType type) {
+        if (type == TowerBodyType.BASIC) {
+            return true;
+        }
+        if (tryConsumeIncubatedBody(level, computerPos, type)) {
+            return true;
+        }
+        return anchor.payBodyCosts(type);
     }
 
     public static <T extends BlockEntity> Optional<T> findInComponent(
@@ -170,6 +237,22 @@ public final class TowerFacility {
                     out.add(entry("regen_chamber", pos, "no_power", MonitorEntry.BAD));
                 } else {
                     out.add(entry("regen_chamber", pos, "active", MonitorEntry.OK));
+                }
+            } else if (be instanceof PhiIncubatorBlockEntity incubator) {
+                if (incubator.readyBody() != null) {
+                    out.add(entry(
+                            "incubator",
+                            pos,
+                            "ready_" + incubator.readyBody().getSerializedName(),
+                            MonitorEntry.OK));
+                } else if (!towerLive) {
+                    out.add(entry("incubator", pos, "tower_offline", MonitorEntry.IDLE));
+                } else if (!PhiPower.hasPower(level, pos)) {
+                    out.add(entry("incubator", pos, "no_power", MonitorEntry.BAD));
+                } else if (incubator.progress() > 0 || incubator.hasTargetMaterials()) {
+                    out.add(entry("incubator", pos, "incubating", MonitorEntry.WARN));
+                } else {
+                    out.add(entry("incubator", pos, "idle", MonitorEntry.IDLE));
                 }
             } else if (be instanceof TowerConsoleBlockEntity) {
                 out.add(entry("console", pos, "online", MonitorEntry.OK));
@@ -268,13 +351,14 @@ public final class TowerFacility {
             case "air_synth" -> 4;
             case "water_purifier" -> 5;
             case "regen_chamber" -> 6;
-            case "sonar" -> 7;
-            case "cartography" -> 8;
-            case "turret" -> 9;
-            case "beacon" -> 10;
-            case "telegraph" -> 11;
-            case "spark_reactor", "heart_reactor", "forge_reactor" -> 12;
-            case "contactor", "coupler", "matcher", "accumulator" -> 13;
+            case "incubator" -> 7;
+            case "sonar" -> 8;
+            case "cartography" -> 9;
+            case "turret" -> 10;
+            case "beacon" -> 11;
+            case "telegraph" -> 12;
+            case "spark_reactor", "heart_reactor", "forge_reactor" -> 13;
+            case "contactor", "coupler", "matcher", "accumulator" -> 14;
             default -> 50;
         };
     }

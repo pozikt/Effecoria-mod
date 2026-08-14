@@ -88,7 +88,8 @@ public final class TowerGhostService {
         player.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
 
         TowerBodyType body = anchor.bodyType();
-        if (!anchor.payBodyCosts(body)) {
+        if (!(anchor.getLevel() instanceof ServerLevel server)
+                || !TowerFacility.payBodyCosts(server, anchor.getBlockPos(), anchor, body)) {
             body = TowerBodyType.BASIC;
             player.displayClientMessage(Component.translatable("message.effecoria.tower.body_fallback"), true);
         }

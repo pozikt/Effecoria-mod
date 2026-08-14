@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "lit=false": { "model": "effecoria:block/phi_incubator" },
+    "lit=true": { "model": "effecoria:block/phi_incubator_on" }
+  }
+}

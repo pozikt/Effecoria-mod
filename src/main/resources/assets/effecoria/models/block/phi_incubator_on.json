@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "effecoria:block/phi_incubator_top_on",
+    "front": "effecoria:block/phi_incubator_front_on",
+    "side": "effecoria:block/phi_incubator_side"
+  }
+}

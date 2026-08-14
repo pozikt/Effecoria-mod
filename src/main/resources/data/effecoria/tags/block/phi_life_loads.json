@@ -4,6 +4,7 @@
     "effecoria:regen_chamber",
     "effecoria:regen_chamber_part",
     "effecoria:psi_imprinter",
-    "effecoria:omega_damper"
+    "effecoria:omega_damper",
+    "effecoria:phi_incubator"
   ]
 }

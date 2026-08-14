@@ -94,7 +94,7 @@ public final class TowerReviveService {
         player.syncData(ModAttachments.PSI.get());
 
         TowerBodyType body = anchor.bodyType();
-        if (!anchor.payBodyCosts(body)) {
+        if (!TowerFacility.payBodyCosts(towerLevel, pos, anchor, body)) {
             body = TowerBodyType.BASIC;
             player.displayClientMessage(Component.translatable("message.effecoria.tower.body_fallback"), true);
         }
