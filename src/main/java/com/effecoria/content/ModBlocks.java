@@ -926,7 +926,13 @@ public final class ModBlocks {
     public static final DeferredBlock<FoundationAmuletBlock> FOUNDATION_AMULET = BLOCKS.register(
             "foundation_amulet", () -> new FoundationAmuletBlock(towerFacilityProps()));
     public static final DeferredBlock<OmegaDamperBlock> OMEGA_DAMPER = BLOCKS.register(
-            "omega_damper", () -> new OmegaDamperBlock(towerFacilityProps()));
+            "omega_damper",
+            () -> new OmegaDamperBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .strength(4.0f, 12f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(s -> s.getValue(OmegaDamperBlock.LIT) ? 10 : 4)));
     public static final DeferredBlock<PhiAirSynthBlock> PHI_AIR_SYNTH = BLOCKS.register(
             "phi_air_synth", () -> new PhiAirSynthBlock(towerFacilityProps()));
     public static final DeferredBlock<PhiWaterPurifierBlock> PHI_WATER_PURIFIER = BLOCKS.register(

@@ -193,6 +193,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.LEAD_FOIL.get());
                         output.accept(ModItems.OMEGA_WASTE.get());
                         output.accept(ModItems.OMEGA_FILTER.get());
+                        output.accept(ModItems.OMEGA_ROD.get());
                         output.accept(ModItems.PHI_CONCRETE.get());
                         output.accept(ModItems.OMEGA_ANCHOR.get());
                         output.accept(ModItems.PHI_BUS.get());

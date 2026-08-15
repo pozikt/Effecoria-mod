@@ -35,6 +35,7 @@ import com.effecoria.client.gui.alchemy.BurnerScreen;
 import com.effecoria.client.gui.alchemy.FormSelectScreen;
 import com.effecoria.client.gui.alchemy.ImprinterScreen;
 import com.effecoria.client.gui.alchemy.PhiIncubatorScreen;
+import com.effecoria.client.gui.alchemy.OmegaDamperScreen;
 import com.effecoria.client.gui.alchemy.MortarScreen;
 import com.effecoria.client.gui.alchemy.SealInscriberScreen;
 import com.effecoria.client.gui.alchemy.SparkReactorScreen;
@@ -95,6 +96,7 @@ public final class EffecoriaClient {
         event.register(ModMenus.ALEMBIC.get(), AlembicScreen::new);
         event.register(ModMenus.IMPRINTER.get(), ImprinterScreen::new);
         event.register(ModMenus.PHI_INCUBATOR.get(), PhiIncubatorScreen::new);
+        event.register(ModMenus.OMEGA_DAMPER.get(), OmegaDamperScreen::new);
         event.register(ModMenus.SHAFT_LATHE.get(), FormSelectScreen::new);
         event.register(ModMenus.FACET_CUTTER.get(), FormSelectScreen::new);
         event.register(ModMenus.ARTIFACT_ASSEMBLER.get(), AssemblerScreen::new);

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "O": { "item": "effecoria:void_obsidian" },
+    "L": { "item": "effecoria:lead_ingot" },
+    "F": { "item": "effecoria:omega_filter" }
+  },
+  "pattern": [" L ", "FOF", " L "],
+  "result": { "count": 1, "id": "effecoria:omega_rod" }
+}

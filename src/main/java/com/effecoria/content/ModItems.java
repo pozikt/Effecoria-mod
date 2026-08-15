@@ -446,6 +446,8 @@ public final class ModItems {
             ITEMS.register("omega_waste", () -> new OmegaWasteItem(new Item.Properties()));
     public static final DeferredItem<Item> OMEGA_FILTER =
             ITEMS.register("omega_filter", () -> new OmegaFilterItem(new Item.Properties()));
+    public static final DeferredItem<Item> OMEGA_ROD =
+            ITEMS.register("omega_rod", () -> new OmegaRodItem(new Item.Properties()));
     public static final DeferredItem<Item> DEEP_PHI_CATALYST = ITEMS.register(
             "deep_phi_catalyst",
             () -> new HintItem(new Item.Properties(), "item.effecoria.deep_phi_catalyst.hint"));

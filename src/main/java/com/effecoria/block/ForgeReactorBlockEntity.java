@@ -241,6 +241,10 @@ public final class ForgeReactorBlockEntity extends BaseContainerBlockEntity
         return Mth.clamp(omegaCentis / 100, 0, 100);
     }
 
+    public int omegaCentis() {
+        return omegaCentis;
+    }
+
     /** Clears Ω contamination (omega_filter). */
     public boolean clearOmegaMeter() {
         if (omegaCentis <= 0) {
@@ -252,6 +256,17 @@ public final class ForgeReactorBlockEntity extends BaseContainerBlockEntity
             level.playSound(null, worldPosition, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 1.2f);
         }
         return true;
+    }
+
+    /** Remove up to {@code centis}; returns how much was removed. */
+    public int reduceOmega(int centis) {
+        if (centis <= 0 || omegaCentis <= 0) {
+            return 0;
+        }
+        int taken = Math.min(omegaCentis, centis);
+        omegaCentis -= taken;
+        setChanged();
+        return taken;
     }
 
     private boolean isActivelyPowering() {

@@ -95,7 +95,7 @@ Two items: **`phi_crusher`** base (BE + GUI) + **`phi_crusher_hopper`** on top. 
 | COARSE | 40 | 1 |
 | FINE | 160 | 3 |
 
-Power via `PhiPower.consumeTick` or optional Φ-cell in the drive slot. Heat pauses at ≥100; void-obsidian crush raises Ω meter — at ≥20, RMB `lead_foil` on the base clears it and drops `omega_waste`, or RMB `omega_filter` (also works on Forge core; no waste drop).
+Power via `PhiPower.consumeTick` or optional Φ-cell in the drive slot. Heat pauses at ≥100; void-obsidian crush raises Ω meter — at ≥20, RMB `lead_foil` on the base clears it and drops `omega_waste`, or RMB `omega_filter` (also works on Forge core; no waste drop). **Tower / Forge facility Ω** is scrubbed by an `omega_damper` loaded with `omega_rod` (replace when saturated; bury on Scar). `omega_filter` remains the quick clear for crusher / geo / coupler / accumulator.
 
 ### Crusher / forge byproduct sinks
 
@@ -107,6 +107,7 @@ Power via `PhiPower.consumeTick` or optional Φ-cell in the drive slot. Heat pau
 | `phi_wood_shavings` | Furnace fuel (300 ticks) |
 | `phi_fiber` | `phi_cloth` / `phi_rope` → cloak / lead |
 | `obsidian_grit` | Craft `omega_filter` (+ foil) |
+| `omega_rod` | Damper sockets; scrub tower+Forge Ω; bury when saturated |
 | `omega_nugget` | 9→`omega_dust`; Ω-turret ammo |
 | `soul_shard` | Cheap Ψ-imprinter focus (consumed) |
 | `omega_waste` | Bury on Ω-Scar surfaces |

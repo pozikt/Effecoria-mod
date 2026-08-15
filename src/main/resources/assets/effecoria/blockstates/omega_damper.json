@@ -1,5 +1,6 @@
 ﻿{
   "variants": {
-    "": { "model": "effecoria:block/omega_damper" }
+    "lit=false": { "model": "effecoria:block/omega_damper" },
+    "lit=true": { "model": "effecoria:block/omega_damper" }
   }
 }

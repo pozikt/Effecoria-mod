@@ -295,6 +295,18 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
         return true;
     }
 
+    /** Remove up to {@code centis}; returns how much was removed. */
+    public int reduceOmega(int centis) {
+        if (centis <= 0 || omegaCentis <= 0) {
+            return 0;
+        }
+        int taken = Math.min(omegaCentis, centis);
+        omegaCentis -= taken;
+        setChanged();
+        sync();
+        return taken;
+    }
+
     public void addOmegaPercent(int percent) {
         if (percent <= 0) {
             return;

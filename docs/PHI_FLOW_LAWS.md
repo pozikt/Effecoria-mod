@@ -59,7 +59,9 @@ $$
 \Omega_{level} \propto \sum I_{\Omega} \cdot t
 $$
 
-Долгая работа + утечки → критический Ω → очистка (демпфер / фильтр) или Ω-прорыв.
+Долгая работа + утечки → критический Ω → очистка (**Ω-демпфер** со сменными `omega_rod`, либо `omega_filter` на машинах) или Ω-прорыв.
+
+**Ω-стержни:** void-obsidian adsorbers in the damper’s three sockets. They gradually pull Ω from the Ψ-anchor and Forge cores in the same Φ-glue component. Saturation is item damage; bury a full rod on an Ω-Scar. Forge CLEANSE regen is later.
 
 ## Аналогия для инженеров (не модель)
 

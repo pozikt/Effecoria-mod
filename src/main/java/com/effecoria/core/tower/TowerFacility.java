@@ -238,8 +238,20 @@ public final class TowerFacility {
                 } else {
                     out.add(entry("amulet", pos, "uncharged", MonitorEntry.BAD));
                 }
-            } else if (be instanceof OmegaDamperBlockEntity) {
-                out.add(entry("damper", pos, towerLive ? "ready" : "idle", towerLive ? MonitorEntry.OK : MonitorEntry.IDLE));
+            } else if (be instanceof OmegaDamperBlockEntity damper) {
+                String status = switch (damper.statusCode()) {
+                    case OmegaDamperBlockEntity.STATUS_NEED_RODS -> "need_rods";
+                    case OmegaDamperBlockEntity.STATUS_SCRUBBING -> "scrubbing";
+                    case OmegaDamperBlockEntity.STATUS_SATURATED -> "saturated";
+                    default -> towerLive ? "idle" : "idle";
+                };
+                int sev = switch (damper.statusCode()) {
+                    case OmegaDamperBlockEntity.STATUS_NEED_RODS -> MonitorEntry.WARN;
+                    case OmegaDamperBlockEntity.STATUS_SCRUBBING -> MonitorEntry.OK;
+                    case OmegaDamperBlockEntity.STATUS_SATURATED -> MonitorEntry.BAD;
+                    default -> MonitorEntry.IDLE;
+                };
+                out.add(entry("damper", pos, status, sev));
             } else if (be instanceof PhiAirSynthBlockEntity) {
                 out.add(lifeEntry("air_synth", pos, towerLive, phi));
             } else if (be instanceof PhiWaterPurifierBlockEntity) {

@@ -28,6 +28,7 @@ public final class AlchemyGui {
     public static final ResourceLocation PHI_TURRET = EffecoriaMod.id("textures/gui/phi_turret.png");
     public static final ResourceLocation PHI_CRUSHER = EffecoriaMod.id("textures/gui/phi_crusher.png");
     public static final ResourceLocation PHI_INCUBATOR = EffecoriaMod.id("textures/gui/phi_incubator.png");
+    public static final ResourceLocation OMEGA_DAMPER = EffecoriaMod.id("textures/gui/omega_damper.png");
 
     private AlchemyGui() {}
 
