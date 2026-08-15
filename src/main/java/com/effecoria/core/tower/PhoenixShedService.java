@@ -105,9 +105,7 @@ public final class PhoenixShedService {
             program = LexLociCompiler.defaultProgram();
         }
         var dead = program.actuationsFor(LociEvent.SOUL_DEAD);
-        if (hasActuator(dead, LociActuator.SHED)) {
-            applyShed(level, anchorPos);
-        }
+        applyShedActuations(level, anchorPos, ofActuator(dead, LociActuator.SHED));
         applyTurretAutonomy(level, anchorPos, ofActuator(dead, LociActuator.AUTONOM));
         applyArm(level, anchorPos, ofActuator(dead, LociActuator.ARM));
         applyDisarm(level, anchorPos, ofActuator(dead, LociActuator.DISARM));
@@ -117,15 +115,6 @@ public final class PhoenixShedService {
         if (notifyAlarm && wantSignal) {
             notifyOwnerAlarm(level, anchor);
         }
-    }
-
-    private static boolean hasActuator(List<LexLociCompiler.Actuation> list, LociActuator actuator) {
-        for (LexLociCompiler.Actuation a : list) {
-            if (a.actuator() == actuator) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static List<LexLociCompiler.Actuation> ofActuator(
@@ -176,7 +165,23 @@ public final class PhoenixShedService {
         return list;
     }
 
-    private static void applyShed(ServerLevel level, BlockPos anchorPos) {
+    private static void applyShedActuations(
+            ServerLevel level, BlockPos anchorPos, List<LexLociCompiler.Actuation> sheds) {
+        if (sheds.isEmpty()) {
+            return;
+        }
+        for (LexLociCompiler.Actuation shed : sheds) {
+            LociAddress target = shed.target();
+            if (target == null) {
+                applyShedDefault(level, anchorPos);
+            } else if (target.isBus()) {
+                target.phiChannel().ifPresent(channel -> applyShedChannel(level, anchorPos, channel));
+            }
+        }
+    }
+
+    /** Classic Phoenix: open non-life contactors, keep life-path closed. */
+    private static void applyShedDefault(ServerLevel level, BlockPos anchorPos) {
         for (BlockPos pos : EssenceGlueData.get(level).component(anchorPos)) {
             BlockState state = level.getBlockState(pos);
             if (!state.is(ModBlocks.PHI_CONTACTOR.get())) {
@@ -184,6 +189,19 @@ public final class PhoenixShedService {
             }
             boolean keepLife = protectsLife(level, pos);
             PhiContactorBlock.setClosed(level, pos, keepLife);
+        }
+    }
+
+    /** Open only contactors whose island is stamped with the given channel. */
+    private static void applyShedChannel(ServerLevel level, BlockPos anchorPos, PhiChannel channel) {
+        for (BlockPos pos : EssenceGlueData.get(level).component(anchorPos)) {
+            BlockState state = level.getBlockState(pos);
+            if (!state.is(ModBlocks.PHI_CONTACTOR.get())) {
+                continue;
+            }
+            if (PhiBusNetwork.channelAt(level, pos) == channel) {
+                PhiContactorBlock.setClosed(level, pos, false);
+            }
         }
     }
 
