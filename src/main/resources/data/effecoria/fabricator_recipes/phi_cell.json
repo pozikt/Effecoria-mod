@@ -1,0 +1,12 @@
+{
+  "result": { "item": "effecoria:phi_cell", "count": 1 },
+  "ingredients": [
+    { "item": "minecraft:amethyst_shard", "count": 1 },
+    { "item": "effecoria:essonite_dust", "count": 4 },
+    { "item": "minecraft:redstone", "count": 4 }
+  ],
+  "cook_ticks": 200,
+  "power_per_tick": 3,
+  "min_class": 3,
+  "omega_percent": 2
+}

@@ -133,6 +133,7 @@ Materials that were “craft only” in Stage I get proper sources here.
 | Item | Notes |
 |------|-------|
 | **Technomagic catalog + Era I–III** | **In progress / shipped scaffold** — see [TECHNOMAGIC.md](TECHNOMAGIC.md): free craft, discovery UI, Era I–II machines, Era III imprinter/construct/telegraph |
+| **Φ-fabricator I–III** | **Shipped** — datapack recipes + memory-crystal scan; Class IV later — [TECHNOMAGIC.md](TECHNOMAGIC.md#era-ivvi-φ-fabricator-classes-iiii) |
 | Phi Cell → reactor tiers | Multiblocks, failure modes (Era III–V catalog `planned`) |
 | Mage towers | Regional Φ, beacons; **Soulbound Conclave (multi-owner)** — [planned](SOULBOUND_CONCLAVE.md); **Lex Loci** tower edicts + Φ-channels — [planned](LEX_LOCI.md) / [PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md) |
 | Rune circuits / wiring | `technomagicPower()` path → Essential Flow Solver (frequency channels, ΔQ, I_Ω) |

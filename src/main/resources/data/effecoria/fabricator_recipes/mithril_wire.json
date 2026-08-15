@@ -1,0 +1,8 @@
+{
+  "result": { "item": "effecoria:mithril_wire", "count": 4 },
+  "ingredients": [{ "item": "effecoria:mithril_ingot", "count": 2 }],
+  "cook_ticks": 80,
+  "power_per_tick": 1,
+  "min_class": 1,
+  "omega_percent": 1
+}

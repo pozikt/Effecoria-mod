@@ -1,0 +1,12 @@
+{
+  "result": { "item": "effecoria:omega_rod", "count": 1 },
+  "ingredients": [
+    { "item": "effecoria:void_obsidian", "count": 1 },
+    { "item": "effecoria:lead_ingot", "count": 2 },
+    { "item": "effecoria:omega_filter", "count": 1 }
+  ],
+  "cook_ticks": 240,
+  "power_per_tick": 3,
+  "min_class": 3,
+  "omega_percent": 3
+}

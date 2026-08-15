@@ -1,0 +1,8 @@
+﻿{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "effecoria:block/phi_fabricator_ii_top",
+    "front": "effecoria:block/phi_fabricator_ii_front",
+    "side": "effecoria:block/phi_fabricator_ii_side"
+  }
+}

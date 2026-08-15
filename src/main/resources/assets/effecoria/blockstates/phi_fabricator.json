@@ -1,0 +1,6 @@
+﻿{
+  "variants": {
+    "lit=false": { "model": "effecoria:block/phi_fabricator" },
+    "lit=true": { "model": "effecoria:block/phi_fabricator_on" }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "F": { "item": "effecoria:phi_fabricator" },
+    "H": { "item": "effecoria:heart_reactor_core" },
+    "S": { "item": "effecoria:phi_steel_ingot" },
+    "C": { "item": "effecoria:memory_crystal" }
+  },
+  "pattern": [" S ", "CFC", " H "],
+  "result": { "count": 1, "id": "effecoria:phi_fabricator_ii" }
+}

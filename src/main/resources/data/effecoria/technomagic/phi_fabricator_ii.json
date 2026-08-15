@@ -1,0 +1,13 @@
+{
+  "id": "effecoria:phi_fabricator_ii",
+  "era": 4,
+  "icon": "effecoria:phi_fabricator_ii",
+  "status": "available",
+  "requires": [
+    "effecoria:phi_fabricator",
+    "effecoria:heart_reactor"
+  ],
+  "display_unlocks": [
+    "effecoria:phi_fabricator_iii"
+  ]
+}

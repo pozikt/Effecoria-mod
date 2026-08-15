@@ -1,0 +1,14 @@
+{
+  "id": "effecoria:phi_fabricator",
+  "era": 4,
+  "icon": "effecoria:phi_fabricator",
+  "status": "available",
+  "requires": [
+    "effecoria:spark_reactor",
+    "effecoria:phi_crusher"
+  ],
+  "display_unlocks": [
+    "effecoria:memory_crystal",
+    "effecoria:phi_fabricator_ii"
+  ]
+}

@@ -8,6 +8,7 @@ import com.effecoria.alchemy.menu.FormSelectMenu;
 import com.effecoria.alchemy.menu.ImprinterMenu;
 import com.effecoria.alchemy.menu.PhiIncubatorMenu;
 import com.effecoria.alchemy.menu.OmegaDamperMenu;
+import com.effecoria.alchemy.menu.PhiFabricatorMenu;
 import com.effecoria.alchemy.menu.MortarMenu;
 import com.effecoria.alchemy.menu.SealInscriberMenu;
 import com.effecoria.alchemy.menu.SparkReactorMenu;
@@ -88,6 +89,9 @@ public final class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<OmegaDamperMenu>> OMEGA_DAMPER =
             MENUS.register("omega_damper", () -> IMenuTypeExtension.create(OmegaDamperMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<PhiFabricatorMenu>> PHI_FABRICATOR =
+            MENUS.register("phi_fabricator", () -> IMenuTypeExtension.create(PhiFabricatorMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<FormSelectMenu>> SHAFT_LATHE =
             MENUS.register("shaft_lathe", () -> IMenuTypeExtension.create(FormSelectMenu::lathe));

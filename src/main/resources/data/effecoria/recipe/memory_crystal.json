@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": { "item": "effecoria:essonite_shard" },
+    "G": { "item": "minecraft:glass" },
+    "P": { "item": "effecoria:phi_paper" }
+  },
+  "pattern": [" G ", "PEP", " G "],
+  "result": { "count": 1, "id": "effecoria:memory_crystal" }
+}

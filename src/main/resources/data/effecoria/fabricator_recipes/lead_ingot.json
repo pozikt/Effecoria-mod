@@ -1,0 +1,8 @@
+{
+  "result": { "item": "effecoria:lead_ingot", "count": 1 },
+  "ingredients": [{ "item": "effecoria:lead_nugget", "count": 9 }],
+  "cook_ticks": 120,
+  "power_per_tick": 2,
+  "min_class": 2,
+  "omega_percent": 1
+}

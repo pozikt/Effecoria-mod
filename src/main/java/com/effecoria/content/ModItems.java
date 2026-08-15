@@ -354,6 +354,20 @@ public final class ModItems {
             "phi_watchdog",
             () -> new HintBlockItem(
                     ModBlocks.PHI_WATCHDOG.get(), new Item.Properties(), "tooltip.effecoria.phi_watchdog"));
+    public static final DeferredItem<BlockItem> PHI_FABRICATOR = ITEMS.register(
+            "phi_fabricator",
+            () -> new HintBlockItem(
+                    ModBlocks.PHI_FABRICATOR.get(), new Item.Properties(), "tooltip.effecoria.phi_fabricator"));
+    public static final DeferredItem<BlockItem> PHI_FABRICATOR_II = ITEMS.register(
+            "phi_fabricator_ii",
+            () -> new HintBlockItem(
+                    ModBlocks.PHI_FABRICATOR_II.get(), new Item.Properties(), "tooltip.effecoria.phi_fabricator_ii"));
+    public static final DeferredItem<BlockItem> PHI_FABRICATOR_III = ITEMS.register(
+            "phi_fabricator_iii",
+            () -> new HintBlockItem(
+                    ModBlocks.PHI_FABRICATOR_III.get(),
+                    new Item.Properties(),
+                    "tooltip.effecoria.phi_fabricator_iii"));
     public static final DeferredItem<BlockItem> PHI_ACCUMULATOR = ITEMS.register(
             "phi_accumulator",
             () -> new HintBlockItem(
@@ -448,6 +462,8 @@ public final class ModItems {
             ITEMS.register("omega_filter", () -> new OmegaFilterItem(new Item.Properties()));
     public static final DeferredItem<Item> OMEGA_ROD =
             ITEMS.register("omega_rod", () -> new OmegaRodItem(new Item.Properties()));
+    public static final DeferredItem<Item> MEMORY_CRYSTAL = ITEMS.register(
+            "memory_crystal", () -> new MemoryCrystalItem(new Item.Properties()));
     public static final DeferredItem<Item> DEEP_PHI_CATALYST = ITEMS.register(
             "deep_phi_catalyst",
             () -> new HintItem(new Item.Properties(), "item.effecoria.deep_phi_catalyst.hint"));

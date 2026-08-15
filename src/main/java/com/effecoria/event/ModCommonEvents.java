@@ -87,6 +87,7 @@ public final class ModCommonEvents {
         event.addListener(com.effecoria.core.artifact.ArtifactCatalog.SHAFT_FORMS_LISTENER);
         event.addListener(com.effecoria.core.artifact.ArtifactCatalog.FOCUS_CUTS_LISTENER);
         event.addListener(com.effecoria.core.artifact.ArtifactCatalog.ASSEMBLE_LISTENER);
+        event.addListener(com.effecoria.core.fabricator.FabricatorCatalog.RELOAD_LISTENER);
         event.addListener(com.effecoria.core.artifact.MaterialConductivity.RELOAD_LISTENER);
         event.addListener(com.effecoria.core.artifact.ItemSealCatalog.RELOAD_LISTENER);
     }

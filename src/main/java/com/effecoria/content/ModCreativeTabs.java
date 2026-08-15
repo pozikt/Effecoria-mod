@@ -194,6 +194,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.OMEGA_WASTE.get());
                         output.accept(ModItems.OMEGA_FILTER.get());
                         output.accept(ModItems.OMEGA_ROD.get());
+                        output.accept(ModItems.MEMORY_CRYSTAL.get());
                         output.accept(ModItems.PHI_CONCRETE.get());
                         output.accept(ModItems.OMEGA_ANCHOR.get());
                         output.accept(ModItems.PHI_BUS.get());
@@ -203,6 +204,9 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PHI_INCUBATOR.get());
                         output.accept(ModItems.PHI_SIGNAL.get());
                         output.accept(ModItems.PHI_WATCHDOG.get());
+                        output.accept(ModItems.PHI_FABRICATOR.get());
+                        output.accept(ModItems.PHI_FABRICATOR_II.get());
+                        output.accept(ModItems.PHI_FABRICATOR_III.get());
                         output.accept(ModItems.PHI_ACCUMULATOR.get());
                         output.accept(ModItems.TURRET_MOUNT.get());
                         output.accept(ModItems.PLASMA_TURRET.get());

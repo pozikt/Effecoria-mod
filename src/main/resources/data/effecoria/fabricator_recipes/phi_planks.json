@@ -1,0 +1,8 @@
+{
+  "result": { "item": "effecoria:phi_planks", "count": 4 },
+  "ingredients": [{ "item": "effecoria:phi_log", "count": 1 }],
+  "cook_ticks": 40,
+  "power_per_tick": 1,
+  "min_class": 1,
+  "omega_percent": 1
+}

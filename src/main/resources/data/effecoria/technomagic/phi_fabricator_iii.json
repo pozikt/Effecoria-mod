@@ -1,0 +1,11 @@
+{
+  "id": "effecoria:phi_fabricator_iii",
+  "era": 6,
+  "icon": "effecoria:phi_fabricator_iii",
+  "status": "available",
+  "requires": [
+    "effecoria:phi_fabricator_ii",
+    "effecoria:portal_gate"
+  ],
+  "display_unlocks": []
+}

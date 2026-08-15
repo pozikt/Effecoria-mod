@@ -1,0 +1,11 @@
+{
+  "result": { "item": "effecoria:omega_filter", "count": 1 },
+  "ingredients": [
+    { "item": "effecoria:obsidian_grit", "count": 1 },
+    { "item": "effecoria:lead_foil", "count": 1 }
+  ],
+  "cook_ticks": 80,
+  "power_per_tick": 1,
+  "min_class": 1,
+  "omega_percent": 1
+}

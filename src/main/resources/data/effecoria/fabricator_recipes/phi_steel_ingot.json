@@ -1,0 +1,12 @@
+{
+  "result": { "item": "effecoria:phi_steel_ingot", "count": 1 },
+  "ingredients": [
+    { "item": "minecraft:iron_ingot", "count": 1 },
+    { "item": "effecoria:essonite_dust", "count": 1 },
+    { "item": "effecoria:phi_stone_grit", "count": 1 }
+  ],
+  "cook_ticks": 160,
+  "power_per_tick": 2,
+  "min_class": 2,
+  "omega_percent": 2
+}

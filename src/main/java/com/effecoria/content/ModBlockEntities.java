@@ -43,6 +43,7 @@ import com.effecoria.block.PhiMatcherBlockEntity;
 import com.effecoria.block.PhiIncubatorBlockEntity;
 import com.effecoria.block.PhiSignalBlockEntity;
 import com.effecoria.block.PhiWatchdogBlockEntity;
+import com.effecoria.block.PhiFabricatorBlockEntity;
 import com.effecoria.block.PhiAccumulatorBlockEntity;
 import com.effecoria.block.PhiCrusherBlockEntity;
 import com.effecoria.block.PhiCrusherHopperBlockEntity;
@@ -221,6 +222,16 @@ public final class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register(
                     "phi_watchdog",
                     () -> BlockEntityType.Builder.of(PhiWatchdogBlockEntity::new, ModBlocks.PHI_WATCHDOG.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiFabricatorBlockEntity>> PHI_FABRICATOR =
+            BLOCK_ENTITY_TYPES.register(
+                    "phi_fabricator",
+                    () -> BlockEntityType.Builder.of(
+                                    PhiFabricatorBlockEntity::new,
+                                    ModBlocks.PHI_FABRICATOR.get(),
+                                    ModBlocks.PHI_FABRICATOR_II.get(),
+                                    ModBlocks.PHI_FABRICATOR_III.get())
                             .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiAccumulatorBlockEntity>> PHI_ACCUMULATOR =

@@ -1,0 +1,8 @@
+{
+  "result": { "item": "effecoria:obsidian_grit", "count": 2 },
+  "ingredients": [{ "item": "minecraft:obsidian", "count": 1 }],
+  "cook_ticks": 100,
+  "power_per_tick": 1,
+  "min_class": 1,
+  "omega_percent": 1
+}

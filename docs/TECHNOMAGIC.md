@@ -20,8 +20,9 @@ See also [ROADMAP.md](ROADMAP.md) Stage IV.
 | I — Hearth | Torch, campfire heat, crucible, mortar | **Playable** |
 | II — Workshop | Burner, Φ-furnace, glass/flasks, alembic, filters, cell, focus | **Playable** |
 | III — Imprint | Ψ-imprinter, golem / telegraph, artifact craft, seals, jewelry, **Φ-crusher** | **Playable** |
-| IV — Reactors | Spark, Heart 3×3×3, Φ-bus, Forge 3×4×3, **Φ-turrets** | **Playable** |
+| IV — Reactors | Spark, Heart 3×3×3, Φ-bus, Forge 3×4×3, **Φ-turrets**, **Φ-fabricator I–II** | **Playable** |
 | V — Geo | Geo Well 3×3×3, Climate Array, mithril-frame Portal | **Playable** |
+| VI — Sky | **Φ-fabricator III**; further sky tech planned | **Partial** |
 
 ## Era IV Heart multiblock (3×3×3)
 
@@ -96,6 +97,28 @@ Two items: **`phi_crusher`** base (BE + GUI) + **`phi_crusher_hopper`** on top. 
 | FINE | 160 | 3 |
 
 Power via `PhiPower.consumeTick` or optional Φ-cell in the drive slot. Heat pauses at ≥100; void-obsidian crush raises Ω meter — at ≥20, RMB `lead_foil` on the base clears it and drops `omega_waste`, or RMB `omega_filter` (also works on Forge core; no waste drop). **Tower / Forge facility Ω** is scrubbed by an `omega_damper` loaded with `omega_rod` (replace when saturated; bury on Scar). `omega_filter` remains the quick clear for crusher / geo / coupler / accumulator.
+
+## Era IV–VI Φ-fabricator (classes I–III)
+
+Three blocks share one BE: `phi_fabricator` / `phi_fabricator_ii` / `phi_fabricator_iii`. Datapack recipes live in `data/*/fabricator_recipes/*.json` (no elemental transmutation — only listed ingredients).
+
+| Slot | Role |
+|------|------|
+| Program | `memory_crystal` (blank or inscribed) |
+| Scan | Sample item for Write (not consumed) |
+| A/B/C | Ingredients |
+| Out | Result |
+
+**Scan (2C):** blank crystal + sample whose item matches a recipe `result` with `min_class ≤` machine tier → GUI **Write** stores the recipe id in CustomData. Crafting then needs Φ-power (`power_per_tick`), matching mats, and successful cook → small tower `addOmegaPercent` when glued to a facility.
+
+| Class | Operate era | Notes |
+|-------|-------------|--------|
+| I | IV | Spark-radius Φ is enough |
+| II | IV | Higher load recipes |
+| III | VI | Cells / Ω-rods tier |
+| IV | — | Lonver / atomic — later |
+
+Blank crystal craft: essonite shard + glass + Φ-paper.
 
 ### Crusher / forge byproduct sinks
 

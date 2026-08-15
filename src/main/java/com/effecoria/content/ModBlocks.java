@@ -48,7 +48,9 @@ import com.effecoria.block.PhiMatcherBlock;
 import com.effecoria.block.PhiIncubatorBlock;
 import com.effecoria.block.PhiSignalBlock;
 import com.effecoria.block.PhiWatchdogBlock;
+import com.effecoria.block.PhiFabricatorBlock;
 import com.effecoria.block.PhiAccumulatorBlock;
+import com.effecoria.core.fabricator.FabricatorClass;
 import com.effecoria.block.RottenMossBlock;
 import com.effecoria.block.SparkReactorBlock;
 import com.effecoria.block.HeartReactorBlock;
@@ -1047,6 +1049,27 @@ public final class ModBlocks {
                     .sound(SoundType.STONE)
                     .requiresCorrectToolForDrops()
                     .lightLevel(s -> s.getValue(PhiWatchdogBlock.LIT) ? 12 : 2)));
+
+    private static BlockBehaviour.Properties fabricatorProps(MapColor color) {
+        return BlockBehaviour.Properties.of()
+                .mapColor(color)
+                .strength(3.0f, 8f)
+                .sound(SoundType.METAL)
+                .requiresCorrectToolForDrops()
+                .lightLevel(s -> s.getValue(PhiFabricatorBlock.LIT) ? 9 : 3);
+    }
+
+    public static final DeferredBlock<PhiFabricatorBlock> PHI_FABRICATOR = BLOCKS.register(
+            "phi_fabricator",
+            () -> new PhiFabricatorBlock(fabricatorProps(MapColor.COLOR_LIGHT_BLUE), FabricatorClass.I));
+
+    public static final DeferredBlock<PhiFabricatorBlock> PHI_FABRICATOR_II = BLOCKS.register(
+            "phi_fabricator_ii",
+            () -> new PhiFabricatorBlock(fabricatorProps(MapColor.COLOR_CYAN), FabricatorClass.II));
+
+    public static final DeferredBlock<PhiFabricatorBlock> PHI_FABRICATOR_III = BLOCKS.register(
+            "phi_fabricator_iii",
+            () -> new PhiFabricatorBlock(fabricatorProps(MapColor.COLOR_PURPLE), FabricatorClass.III));
 
     public static final DeferredBlock<PhiAccumulatorBlock> PHI_ACCUMULATOR = BLOCKS.register(
             "phi_accumulator",

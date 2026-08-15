@@ -1,0 +1,11 @@
+{
+  "result": { "item": "effecoria:phi_concrete", "count": 4 },
+  "ingredients": [
+    { "item": "effecoria:phi_stone_grit", "count": 3 },
+    { "item": "minecraft:clay_ball", "count": 1 }
+  ],
+  "cook_ticks": 100,
+  "power_per_tick": 1,
+  "min_class": 1,
+  "omega_percent": 1
+}
