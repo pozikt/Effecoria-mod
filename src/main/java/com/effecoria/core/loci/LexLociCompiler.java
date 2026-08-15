@@ -4,14 +4,15 @@ import com.effecoria.EffecoriaMod;
 
 import net.minecraft.resources.ResourceLocation;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Phoenix compiler: one or two {@code WHEN} rules.
- * {@code soul_dead} drives shed / signal / autonom; {@code soul_ghost} may add {@code beacon}.
- * Empty stored tokens mean the built-in death edict.
+ * Phoenix compiler: {@code WHEN} rules with optional {@code kind*} / {@code kind#name} before
+ * {@code autonom} / {@code signal}. Tokens are strings (RL words or address literals).
  */
 public final class LexLociCompiler {
     public static final ResourceLocation WHEN = EffecoriaMod.id("when");
@@ -22,45 +23,102 @@ public final class LexLociCompiler {
     public static final ResourceLocation AUTONOM = EffecoriaMod.id("autonom");
     public static final ResourceLocation BEACON = EffecoriaMod.id("beacon");
 
-    public static final int MAX_TOKENS = 8;
+    public static final String WHEN_TOKEN = WHEN.toString();
+    public static final String SOUL_DEAD_TOKEN = SOUL_DEAD.toString();
+    public static final String SOUL_GHOST_TOKEN = SOUL_GHOST.toString();
+    public static final String SHED_TOKEN = SHED.toString();
+    public static final String SIGNAL_TOKEN = SIGNAL.toString();
+    public static final String AUTONOM_TOKEN = AUTONOM.toString();
+    public static final String BEACON_TOKEN = BEACON.toString();
+
+    public static final int MAX_TOKENS = 12;
     public static final int MAX_RULES = 2;
 
-    public record Rule(LociEvent event, EnumSet<LociActuator> actuators) {}
+    public record Actuation(LociActuator actuator, @Nullable LociAddress target) {}
+
+    public record Rule(LociEvent event, List<Actuation> actuations) {
+        public boolean has(LociActuator actuator) {
+            for (Actuation a : actuations) {
+                if (a.actuator() == actuator) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public EnumSet<LociActuator> actuatorSet() {
+            EnumSet<LociActuator> set = EnumSet.noneOf(LociActuator.class);
+            for (Actuation a : actuations) {
+                set.add(a.actuator());
+            }
+            return set;
+        }
+
+        public List<Actuation> of(LociActuator actuator) {
+            List<Actuation> out = new ArrayList<>();
+            for (Actuation a : actuations) {
+                if (a.actuator() == actuator) {
+                    out.add(a);
+                }
+            }
+            return out;
+        }
+    }
 
     public record CompileResult(List<Rule> rules, List<String> errors) {
         public boolean ok() {
             return errors.isEmpty() && !rules.isEmpty();
         }
 
+        public List<Actuation> actuationsFor(LociEvent event) {
+            for (Rule rule : rules) {
+                if (rule.event() == event) {
+                    return rule.actuations();
+                }
+            }
+            return List.of();
+        }
+
         public EnumSet<LociActuator> actuatorsFor(LociEvent event) {
             for (Rule rule : rules) {
                 if (rule.event() == event) {
-                    return rule.actuators();
+                    return rule.actuatorSet();
                 }
             }
             return EnumSet.noneOf(LociActuator.class);
+        }
+
+        public boolean has(LociEvent event, LociActuator actuator) {
+            return actuatorsFor(event).contains(actuator);
         }
     }
 
     private LexLociCompiler() {}
 
-    public static List<ResourceLocation> defaultPhoenixTokens() {
-        return List.of(WHEN, SOUL_DEAD, SHED, SIGNAL, AUTONOM);
+    public static List<String> defaultPhoenixTokens() {
+        return List.of(WHEN_TOKEN, SOUL_DEAD_TOKEN, SHED_TOKEN, SIGNAL_TOKEN, AUTONOM_TOKEN);
     }
 
-    public static List<ResourceLocation> palette() {
-        return List.of(WHEN, SOUL_DEAD, SOUL_GHOST, SHED, SIGNAL, AUTONOM, BEACON);
+    public static List<String> palette() {
+        return List.of(
+                WHEN_TOKEN,
+                SOUL_DEAD_TOKEN,
+                SOUL_GHOST_TOKEN,
+                SHED_TOKEN,
+                SIGNAL_TOKEN,
+                AUTONOM_TOKEN,
+                BEACON_TOKEN);
     }
 
     /** Empty / null storage is the shipped Phoenix edict. */
-    public static List<ResourceLocation> effectiveTokens(List<ResourceLocation> stored) {
+    public static List<String> effectiveTokens(List<String> stored) {
         if (stored == null || stored.isEmpty()) {
             return defaultPhoenixTokens();
         }
         return List.copyOf(stored);
     }
 
-    public static boolean isDefault(List<ResourceLocation> stored) {
+    public static boolean isDefault(List<String> stored) {
         return stored == null || stored.isEmpty() || stored.equals(defaultPhoenixTokens());
     }
 
@@ -68,59 +126,89 @@ public final class LexLociCompiler {
         return new CompileResult(
                 List.of(new Rule(
                         LociEvent.SOUL_DEAD,
-                        EnumSet.of(LociActuator.SHED, LociActuator.SIGNAL, LociActuator.AUTONOM))),
+                        List.of(
+                                new Actuation(LociActuator.SHED, null),
+                                new Actuation(LociActuator.SIGNAL, null),
+                                new Actuation(LociActuator.AUTONOM, null)))),
                 List.of());
     }
 
-    public static CompileResult compile(List<ResourceLocation> stored) {
+    public static CompileResult compile(List<String> stored) {
         return parse(effectiveTokens(stored), true);
     }
 
-    public static boolean canAppend(List<ResourceLocation> draft, ResourceLocation word) {
-        if (word == null || draft == null || draft.size() >= MAX_TOKENS) {
+    public static boolean canAppend(List<String> draft, String token) {
+        if (token == null || token.isEmpty() || draft == null || draft.size() >= MAX_TOKENS) {
             return false;
         }
-        List<ResourceLocation> next = new ArrayList<>(draft);
-        next.add(word);
-        CompileResult prefix = parse(next, false);
-        return prefix.errors().isEmpty();
+        List<String> next = new ArrayList<>(draft);
+        next.add(token);
+        return parse(next, false).errors().isEmpty();
+    }
+
+    public static boolean isSense(String token) {
+        return SOUL_DEAD_TOKEN.equals(token) || SOUL_GHOST_TOKEN.equals(token);
     }
 
     public static boolean isSense(ResourceLocation id) {
-        return SOUL_DEAD.equals(id) || SOUL_GHOST.equals(id);
+        return id != null && isSense(id.toString());
     }
 
-    public static LociActuator actuatorOf(ResourceLocation id) {
-        if (SHED.equals(id)) {
+    public static boolean isAddressToken(String token) {
+        return LociAddress.parse(token).isPresent();
+    }
+
+    @Nullable
+    public static LociActuator actuatorOf(String token) {
+        if (SHED_TOKEN.equals(token)) {
             return LociActuator.SHED;
         }
-        if (SIGNAL.equals(id)) {
+        if (SIGNAL_TOKEN.equals(token)) {
             return LociActuator.SIGNAL;
         }
-        if (AUTONOM.equals(id)) {
+        if (AUTONOM_TOKEN.equals(token)) {
             return LociActuator.AUTONOM;
         }
-        if (BEACON.equals(id)) {
+        if (BEACON_TOKEN.equals(token)) {
             return LociActuator.BEACON;
         }
         return null;
     }
 
-    public static LociEvent eventOf(ResourceLocation id) {
-        if (SOUL_DEAD.equals(id)) {
+    @Nullable
+    public static LociActuator actuatorOf(ResourceLocation id) {
+        return id == null ? null : actuatorOf(id.toString());
+    }
+
+    @Nullable
+    public static LociEvent eventOf(String token) {
+        if (SOUL_DEAD_TOKEN.equals(token)) {
             return LociEvent.SOUL_DEAD;
         }
-        if (SOUL_GHOST.equals(id)) {
+        if (SOUL_GHOST_TOKEN.equals(token)) {
             return LociEvent.SOUL_GHOST;
         }
         return null;
+    }
+
+    @Nullable
+    public static LociEvent eventOf(ResourceLocation id) {
+        return id == null ? null : eventOf(id.toString());
+    }
+
+    public static String wordLabelKey(String token) {
+        ResourceLocation id = ResourceLocation.tryParse(token);
+        if (id == null) {
+            return "loci_word.effecoria.unknown";
+        }
+        return wordLabelKey(id);
     }
 
     public static String wordLabelKey(ResourceLocation id) {
         return "loci_word.effecoria." + id.getPath();
     }
 
-    private static CompileResult parse(List<ResourceLocation> tokens, boolean requireComplete) {
+    private static CompileResult parse(List<String> tokens, boolean requireComplete) {
         List<String> errors = new ArrayList<>();
         if (tokens.size() > MAX_TOKENS) {
             errors.add("too_many");
@@ -135,14 +223,19 @@ public final class LexLociCompiler {
         }
         Phase phase = Phase.IDLE;
         LociEvent openEvent = null;
-        EnumSet<LociActuator> openActs = EnumSet.noneOf(LociActuator.class);
+        List<Actuation> openActs = new ArrayList<>();
+        LociAddress pendingAddr = null;
 
-        for (ResourceLocation id : tokens) {
-            if (WHEN.equals(id)) {
+        for (String token : tokens) {
+            if (WHEN_TOKEN.equals(token)) {
+                if (pendingAddr != null) {
+                    errors.add("dangling_addr");
+                    break;
+                }
                 if (phase == Phase.ACTION && openEvent != null && !openActs.isEmpty()) {
-                    rules.add(new Rule(openEvent, EnumSet.copyOf(openActs)));
+                    rules.add(new Rule(openEvent, List.copyOf(openActs)));
                     openEvent = null;
-                    openActs = EnumSet.noneOf(LociActuator.class);
+                    openActs = new ArrayList<>();
                     phase = Phase.IDLE;
                 }
                 if (phase != Phase.IDLE) {
@@ -156,8 +249,27 @@ public final class LexLociCompiler {
                 phase = Phase.SENSE;
                 continue;
             }
-            LociEvent event = eventOf(id);
+
+            Optional<LociAddress> addrOpt = LociAddress.parse(token);
+            if (addrOpt.isPresent()) {
+                if (phase != Phase.ACTION || openEvent == null) {
+                    errors.add("need_sense");
+                    break;
+                }
+                if (pendingAddr != null) {
+                    errors.add("dup_addr");
+                    break;
+                }
+                pendingAddr = addrOpt.get();
+                continue;
+            }
+
+            LociEvent event = eventOf(token);
             if (event != null) {
+                if (pendingAddr != null) {
+                    errors.add("dangling_addr");
+                    break;
+                }
                 if (phase != Phase.SENSE) {
                     errors.add("need_when");
                     break;
@@ -167,33 +279,46 @@ public final class LexLociCompiler {
                     break;
                 }
                 openEvent = event;
-                openActs = EnumSet.noneOf(LociActuator.class);
+                openActs = new ArrayList<>();
                 phase = Phase.ACTION;
                 continue;
             }
-            LociActuator actuator = actuatorOf(id);
+
+            LociActuator actuator = actuatorOf(token);
             if (actuator != null) {
                 if (phase != Phase.ACTION || openEvent == null) {
                     errors.add("need_sense");
                     break;
                 }
-                if (!openActs.add(actuator)) {
-                    errors.add("dup:" + id);
-                    break;
+                Optional<String> neededKind = LociAddress.kindForActuator(actuator);
+                if (pendingAddr != null) {
+                    if (neededKind.isEmpty() || !neededKind.get().equals(pendingAddr.kind())) {
+                        errors.add("bad_target");
+                        break;
+                    }
+                    openActs.add(new Actuation(actuator, pendingAddr));
+                    pendingAddr = null;
+                } else {
+                    openActs.add(new Actuation(actuator, null));
                 }
                 continue;
             }
-            errors.add("unknown:" + id);
+
+            errors.add("unknown:" + token);
             break;
         }
 
-        if (openEvent != null) {
+        if (pendingAddr != null) {
+            if (requireComplete) {
+                errors.add("dangling_addr");
+            }
+        } else if (openEvent != null) {
             if (openActs.isEmpty()) {
                 if (requireComplete) {
                     errors.add("no_action");
                 }
             } else {
-                rules.add(new Rule(openEvent, EnumSet.copyOf(openActs)));
+                rules.add(new Rule(openEvent, List.copyOf(openActs)));
             }
         } else if (phase == Phase.SENSE && requireComplete) {
             errors.add("need_sense");

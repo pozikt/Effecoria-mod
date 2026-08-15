@@ -15,7 +15,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.ContainerHelper;
@@ -67,7 +66,7 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
     private boolean phoenixEdictEnabled = true;
 
     /** Empty = built-in Phoenix word program. */
-    private final List<ResourceLocation> lociTokens = new ArrayList<>();
+    private final List<String> lociTokens = new ArrayList<>();
 
     /** Re-apply Phoenix shed / turret autonomy every 2s while snapshot is held. */
     public static final int PHOENIX_WATCHDOG_INTERVAL = 40;
@@ -237,16 +236,16 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
         sync();
     }
 
-    public List<ResourceLocation> lociTokens() {
+    public List<String> lociTokens() {
         return Collections.unmodifiableList(lociTokens);
     }
 
-    public void setLociTokens(List<ResourceLocation> tokens) {
+    public void setLociTokens(List<String> tokens) {
         lociTokens.clear();
         if (tokens != null) {
-            for (ResourceLocation id : tokens) {
-                if (id != null) {
-                    lociTokens.add(id);
+            for (String token : tokens) {
+                if (token != null && !token.isEmpty()) {
+                    lociTokens.add(token);
                 }
             }
         }
@@ -452,8 +451,8 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
         tag.putBoolean("PhoenixEdict", phoenixEdictEnabled);
         if (!lociTokens.isEmpty()) {
             ListTag tokens = new ListTag();
-            for (ResourceLocation id : lociTokens) {
-                tokens.add(StringTag.valueOf(id.toString()));
+            for (String token : lociTokens) {
+                tokens.add(StringTag.valueOf(token));
             }
             tag.put("LociTokens", tokens);
         }
@@ -494,12 +493,8 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
             ListTag tokens = tag.getList("LociTokens", Tag.TAG_STRING);
             for (int i = 0; i < tokens.size(); i++) {
                 String raw = tokens.getString(i);
-                if (raw.isEmpty()) {
-                    continue;
-                }
-                ResourceLocation id = ResourceLocation.tryParse(raw);
-                if (id != null) {
-                    lociTokens.add(id);
+                if (!raw.isEmpty()) {
+                    lociTokens.add(raw);
                 }
             }
         }

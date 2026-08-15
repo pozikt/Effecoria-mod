@@ -3,6 +3,7 @@ package com.effecoria.core.tower;
 import com.effecoria.block.PhiContactorBlock;
 import com.effecoria.block.PhiCouplerBlock;
 import com.effecoria.block.PhiSignalBlock;
+import com.effecoria.block.PhiSignalBlockEntity;
 import com.effecoria.block.PhiTurretBlockEntity;
 import com.effecoria.block.TowerAnchorBlockEntity;
 import com.effecoria.content.ModBlockTags;
@@ -12,6 +13,7 @@ import com.effecoria.core.circuit.PhiChannel;
 import com.effecoria.core.glue.EssenceGlueData;
 import com.effecoria.core.loci.LexLociCompiler;
 import com.effecoria.core.loci.LociActuator;
+import com.effecoria.core.loci.LociAddress;
 import com.effecoria.core.loci.LociEvent;
 
 import net.minecraft.core.BlockPos;
@@ -26,6 +28,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -57,7 +60,7 @@ public final class PhoenixShedService {
             return;
         }
         clearTurretAutonomy(level, anchorPos);
-        setSignals(level, anchorPos, false);
+        setSignals(level, anchorPos, List.of());
         ListTag snap = anchor.takePhoenixSnapshot();
         if (snap == null || snap.isEmpty()) {
             return;
@@ -91,20 +94,48 @@ public final class PhoenixShedService {
         if (!program.ok()) {
             program = LexLociCompiler.defaultProgram();
         }
-        var dead = program.actuatorsFor(LociEvent.SOUL_DEAD);
-        if (dead.contains(LociActuator.SHED)) {
+        var dead = program.actuationsFor(LociEvent.SOUL_DEAD);
+        if (hasActuator(dead, LociActuator.SHED)) {
             applyShed(level, anchorPos);
         }
-        if (dead.contains(LociActuator.AUTONOM)) {
-            armTurretsAutonomous(level, anchorPos);
-        } else {
-            clearTurretAutonomy(level, anchorPos);
-        }
-        boolean wantSignal = dead.contains(LociActuator.SIGNAL);
-        setSignals(level, anchorPos, wantSignal);
+        applyTurretAutonomy(level, anchorPos, ofActuator(dead, LociActuator.AUTONOM));
+        List<LexLociCompiler.Actuation> signals = ofActuator(dead, LociActuator.SIGNAL);
+        boolean wantSignal = !signals.isEmpty();
+        setSignals(level, anchorPos, signals);
         if (notifyAlarm && wantSignal) {
             notifyOwnerAlarm(level, anchor);
         }
+    }
+
+    private static boolean hasActuator(List<LexLociCompiler.Actuation> list, LociActuator actuator) {
+        for (LexLociCompiler.Actuation a : list) {
+            if (a.actuator() == actuator) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static List<LexLociCompiler.Actuation> ofActuator(
+            List<LexLociCompiler.Actuation> list, LociActuator actuator) {
+        return list.stream().filter(a -> a.actuator() == actuator).toList();
+    }
+
+    private static boolean matchesAny(
+            String kind, NamedFacilityDevice named, List<LexLociCompiler.Actuation> actuations) {
+        if (actuations.isEmpty()) {
+            return false;
+        }
+        for (LexLociCompiler.Actuation a : actuations) {
+            LociAddress target = a.target();
+            if (target == null) {
+                return true;
+            }
+            if (target.matchesDevice(kind, named)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Extinguish facility lamps when the edict is disarmed while a snapshot is still held. */
@@ -113,7 +144,7 @@ public final class PhoenixShedService {
                 || anchor.phoenixEdictEnabled()) {
             return;
         }
-        setSignals(level, anchorPos, false);
+        setSignals(level, anchorPos, List.of());
     }
 
     private static ListTag snapshotContactors(ServerLevel level, BlockPos anchorPos) {
@@ -155,11 +186,21 @@ public final class PhoenixShedService {
         }
     }
 
-    private static void armTurretsAutonomous(ServerLevel level, BlockPos anchorPos) {
+    private static void applyTurretAutonomy(
+            ServerLevel level, BlockPos anchorPos, List<LexLociCompiler.Actuation> autonom) {
+        if (autonom.isEmpty()) {
+            clearTurretAutonomy(level, anchorPos);
+            return;
+        }
         for (BlockPos pos : EssenceGlueData.get(level).component(anchorPos)) {
             BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof PhiTurretBlockEntity turret) {
+            if (!(be instanceof PhiTurretBlockEntity turret)) {
+                continue;
+            }
+            if (matchesAny("turret", turret, autonom)) {
                 turret.setAutonomous(true);
+            } else {
+                turret.clearAutonomy();
             }
         }
     }
@@ -173,19 +214,30 @@ public final class PhoenixShedService {
         }
     }
 
-    private static void setSignals(ServerLevel level, BlockPos anchorPos, boolean lit) {
+    /** Empty actuations extinguish all facility signal lamps. */
+    private static void setSignals(
+            ServerLevel level, BlockPos anchorPos, List<LexLociCompiler.Actuation> signals) {
         BlockPos soundAt = null;
+        boolean anyLit = false;
         for (BlockPos pos : EssenceGlueData.get(level).component(anchorPos)) {
             BlockState state = level.getBlockState(pos);
             if (!state.is(ModBlocks.PHI_SIGNAL.get())) {
                 continue;
             }
+            boolean lit = false;
+            if (!signals.isEmpty()
+                    && level.getBlockEntity(pos) instanceof PhiSignalBlockEntity signal) {
+                lit = matchesAny("signal", signal, signals);
+            }
             PhiSignalBlock.setLit(level, pos, lit);
-            if (soundAt == null) {
-                soundAt = pos.immutable();
+            if (lit) {
+                anyLit = true;
+                if (soundAt == null) {
+                    soundAt = pos.immutable();
+                }
             }
         }
-        if (lit && soundAt != null) {
+        if (anyLit && soundAt != null) {
             level.playSound(null, soundAt, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 0.85f, 0.55f);
         }
     }

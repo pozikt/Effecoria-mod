@@ -1951,6 +1951,7 @@
   "gui.effecoria.tower_console.edict.signal_alarm": "Сигнал: тревога",
   "gui.effecoria.tower_console.edict.signal_idle": "Сигнал: покой",
   "gui.effecoria.tower_console.edict.symbols": "Символы (живой инвентарь)",
+  "gui.effecoria.tower_console.edict.addr_hint": "Клик — вставить адрес перед АВТОНОМ / СИГНАЛ",
   "gui.effecoria.tower_console.phoenix_on": "Феникс ВКЛ",
   "gui.effecoria.tower_console.phoenix_off": "Феникс ВЫКЛ",
   "gui.effecoria.tower_console.phoenix_tip": "Shed non-life контакторов при смерти владельца",

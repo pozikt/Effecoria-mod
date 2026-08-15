@@ -15,7 +15,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -79,7 +78,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
     private int watchdogActive;
 
     private List<TowerFacility.MonitorEntry> monitors = new ArrayList<>();
-    private List<ResourceLocation> lociTokens = new ArrayList<>();
+    private List<String> lociTokens = new ArrayList<>();
 
     private final ContainerData data = new ContainerData() {
         @Override
@@ -154,7 +153,7 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         return Collections.unmodifiableList(monitors);
     }
 
-    public List<ResourceLocation> lociTokens() {
+    public List<String> lociTokens() {
         return Collections.unmodifiableList(lociTokens);
     }
 
@@ -375,8 +374,8 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
         tag.putInt("Watchdog", watchdogActive);
         tag.put("Monitors", TowerFacility.saveMonitorList(monitors));
         ListTag tokens = new ListTag();
-        for (ResourceLocation id : lociTokens) {
-            tokens.add(StringTag.valueOf(id.toString()));
+        for (String token : lociTokens) {
+            tokens.add(StringTag.valueOf(token));
         }
         tag.put("LociTokens", tokens);
     }
@@ -412,12 +411,8 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
             ListTag tokens = tag.getList("LociTokens", Tag.TAG_STRING);
             for (int i = 0; i < tokens.size(); i++) {
                 String raw = tokens.getString(i);
-                if (raw.isEmpty()) {
-                    continue;
-                }
-                ResourceLocation id = ResourceLocation.tryParse(raw);
-                if (id != null) {
-                    lociTokens.add(id);
+                if (!raw.isEmpty()) {
+                    lociTokens.add(raw);
                 }
             }
         }

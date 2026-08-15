@@ -8,7 +8,6 @@ import com.effecoria.core.tower.TowerFacility;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -28,7 +27,7 @@ public final class LexLociService {
         BAD_PROGRAM
     }
 
-    public static ApplyStatus apply(ServerPlayer player, BlockPos consolePos, List<ResourceLocation> tokens) {
+    public static ApplyStatus apply(ServerPlayer player, BlockPos consolePos, List<String> tokens) {
         if (!TechnomagicGates.checkOperate(player, TechnomagicEra.VI)) {
             return ApplyStatus.NO_CONSOLE;
         }
@@ -45,7 +44,7 @@ public final class LexLociService {
             player.displayClientMessage(Component.translatable("message.effecoria.tower.not_owner"), true);
             return ApplyStatus.NOT_OWNER;
         }
-        List<ResourceLocation> incoming = tokens == null ? List.of() : new ArrayList<>(tokens);
+        List<String> incoming = tokens == null ? List.of() : new ArrayList<>(tokens);
         if (incoming.size() > LexLociCompiler.MAX_TOKENS) {
             return ApplyStatus.BAD_PROGRAM;
         }

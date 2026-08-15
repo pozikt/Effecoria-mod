@@ -1958,6 +1958,7 @@
   "gui.effecoria.tower_console.edict.signal_alarm": "Signal: alarm",
   "gui.effecoria.tower_console.edict.signal_idle": "Signal: idle",
   "gui.effecoria.tower_console.edict.symbols": "Symbols (live inventory)",
+  "gui.effecoria.tower_console.edict.addr_hint": "Click to insert address before AUTONOM / SIGNAL",
   "gui.effecoria.tower_console.phoenix_on": "Phoenix ON",
   "gui.effecoria.tower_console.phoenix_off": "Phoenix OFF",
   "gui.effecoria.tower_console.phoenix_tip": "Toggle death shed of non-life Φ contactors",

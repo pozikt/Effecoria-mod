@@ -4,6 +4,7 @@ import com.effecoria.alchemy.menu.TowerConsoleMenu;
 import com.effecoria.client.ClientPhiSonarMap;
 import com.effecoria.core.loci.LexLociCompiler;
 import com.effecoria.core.loci.LociActuator;
+import com.effecoria.core.loci.LociAddress;
 import com.effecoria.core.loci.LociEvent;
 import com.effecoria.core.tower.PhiSonarService;
 import com.effecoria.core.tower.TowerFacility;
@@ -14,12 +15,13 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Dedicated Mage Tower console — no player inventory.
@@ -41,6 +43,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     private static final int CHIP_SENSE = 0xFF1A4A5C;
     private static final int CHIP_TRIGGER = 0xFF4A3A20;
     private static final int CHIP_PALETTE = 0xFF2A2438;
+    private static final int CHIP_ADDR = 0xFF2A4050;
     private static final int CHIP_HOVER = 0xFF554488;
     private static final int CHIP_DISABLED = 0xFF1A2028;
 
@@ -80,7 +83,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     private Button phoenixBtn;
     private Button lociApplyBtn;
     private Button lociResetBtn;
-    private final List<ResourceLocation> lociDraft = new ArrayList<>();
+    private final List<String> lociDraft = new ArrayList<>();
     private boolean lociDirty;
 
     public TowerConsoleScreen(TowerConsoleMenu menu, Inventory inv, Component title) {
@@ -197,8 +200,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         if (!lociDraftValid()) {
             return;
         }
-        List<ResourceLocation> send =
-                LexLociCompiler.isDefault(lociDraft) ? List.of() : List.copyOf(lociDraft);
+        List<String> send = LexLociCompiler.isDefault(lociDraft) ? List.of() : List.copyOf(lociDraft);
         PacketDistributor.sendToServer(
                 new ModNetworking.ApplyLociProgramPayload(menu.blockEntity().getBlockPos(), send));
         lociDirty = false;
@@ -256,6 +258,13 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         out.add("шина:defense");
         out.add("шина:psi");
         out.add("шина:broadband");
+        Set<String> stars = new LinkedHashSet<>();
+        for (TowerFacility.MonitorEntry e : menu.monitors()) {
+            if (LociAddress.isAddressableKind(e.kind())) {
+                stars.add(e.kind() + "*");
+            }
+        }
+        out.addAll(stars);
         for (TowerFacility.MonitorEntry e : menu.monitors()) {
             out.add(e.symbol());
         }
@@ -371,6 +380,27 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
             if (hit[0]) {
                 return true;
             }
+            if (mouseX >= leftPos + 10
+                    && mouseX <= leftPos + PANEL_W - 10
+                    && mouseY >= topPos + EDICT_LIST_Y + 10
+                    && mouseY <= topPos + EDICT_LIST_Y + 10 + EDICT_LIST_H) {
+                List<String> rows = symbolRows();
+                int listY = topPos + EDICT_LIST_Y + 10;
+                int end = Math.min(rows.size(), edictScroll + edictVisibleRows());
+                for (int i = edictScroll; i < end; i++) {
+                    int rowY = listY + (i - edictScroll) * 12;
+                    if (mouseY < rowY || mouseY >= rowY + 12) {
+                        continue;
+                    }
+                    String row = rows.get(i);
+                    if (LexLociCompiler.isAddressToken(row) && LexLociCompiler.canAppend(lociDraft, row)) {
+                        lociDraft.add(row);
+                        lociDirty = true;
+                        return true;
+                    }
+                    break;
+                }
+            }
         }
         if (tab == Tab.MAP && mapPainter.mouseClicked(mapX(), mapY(), MAP_SIZE, mouseX, mouseY, button)) {
             return true;
@@ -415,7 +445,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
             lociResetBtn.active = menu.linked() && menu.bound();
         }
         if (!lociDirty) {
-            List<ResourceLocation> server = LexLociCompiler.effectiveTokens(menu.lociTokens());
+            List<String> server = LexLociCompiler.effectiveTokens(menu.lociTokens());
             if (!lociDraft.equals(server)) {
                 lociDraft.clear();
                 lociDraft.addAll(server);
@@ -553,26 +583,40 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         int end = Math.min(rows.size(), edictScroll + edictVisibleRows());
         for (int i = edictScroll; i < end; i++) {
             int rowY = listY + (i - edictScroll) * 12;
-            graphics.drawString(font, rows.get(i), x, rowY, MUTED, false);
+            String row = rows.get(i);
+            boolean addr = LexLociCompiler.isAddressToken(row);
+            boolean hover = addr
+                    && mouseX >= leftPos + 10
+                    && mouseX < leftPos + PANEL_W - 10
+                    && mouseY >= rowY
+                    && mouseY < rowY + 12;
+            int color = addr ? (hover && LexLociCompiler.canAppend(lociDraft, row) ? TITLE : LABEL) : MUTED;
+            graphics.drawString(font, row, x, rowY, color, false);
         }
     }
 
-    private String lociLabel(ResourceLocation id) {
-        return Component.translatable(LexLociCompiler.wordLabelKey(id)).getString();
+    private String lociLabel(String token) {
+        if (LexLociCompiler.isAddressToken(token)) {
+            return token;
+        }
+        return Component.translatable(LexLociCompiler.wordLabelKey(token)).getString();
     }
 
-    private int chipColor(ResourceLocation id) {
-        if (LexLociCompiler.WHEN.equals(id)) {
+    private int chipColor(String token) {
+        if (LexLociCompiler.isAddressToken(token)) {
+            return CHIP_ADDR;
+        }
+        if (LexLociCompiler.WHEN_TOKEN.equals(token)) {
             return CHIP_PROGRAM;
         }
-        if (LexLociCompiler.isSense(id)) {
+        if (LexLociCompiler.isSense(token)) {
             return CHIP_SENSE;
         }
         return CHIP_TRIGGER;
     }
 
-    private int chipWidth(ResourceLocation id) {
-        return Math.max(28, font.width(lociLabel(id)) + 8);
+    private int chipWidth(String token) {
+        return Math.max(28, font.width(lociLabel(token)) + 8);
     }
 
     private int thenWidth() {
@@ -581,7 +625,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
 
     @FunctionalInterface
     private interface ChipVisitor {
-        void accept(ResourceLocation id, int x, int y, int w, int h, boolean last);
+        void accept(String id, int x, int y, int w, int h, boolean last);
     }
 
     private void visitProgramChips(ChipVisitor visitor) {
@@ -589,10 +633,10 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         int y = topPos + 34;
         int maxX = leftPos + PANEL_W - 10;
         for (int i = 0; i < lociDraft.size(); i++) {
-            ResourceLocation id = lociDraft.get(i);
+            String id = lociDraft.get(i);
             int w = chipWidth(id);
             int extra = LexLociCompiler.isSense(id) ? thenWidth() : 0;
-            if ((LexLociCompiler.WHEN.equals(id) && i > 0) || x + w + extra > maxX) {
+            if ((LexLociCompiler.WHEN_TOKEN.equals(id) && i > 0) || x + w + extra > maxX) {
                 x = leftPos + 10;
                 y += CHIP_H + 2;
             }
@@ -604,10 +648,10 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     private void visitPaletteChips(ChipVisitor visitor) {
         int x = leftPos + 10;
         int y = topPos + 90;
-        List<ResourceLocation> palette = LexLociCompiler.palette();
+        List<String> palette = LexLociCompiler.palette();
         int slot = Math.max(36, (PANEL_W - 24) / Math.max(1, palette.size()));
         for (int i = 0; i < palette.size(); i++) {
-            ResourceLocation id = palette.get(i);
+            String id = palette.get(i);
             int w = slot - 4;
             visitor.accept(id, x, y, w, CHIP_H, false);
             x += slot;
@@ -903,10 +947,24 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                         mouseY);
             }
         } else if (tab == Tab.EDICTS) {
-            ResourceLocation hovered = hoveredLociWord(mouseX, mouseY);
+            String hovered = hoveredLociWord(mouseX, mouseY);
             if (hovered != null) {
+                if (LexLociCompiler.isAddressToken(hovered)) {
+                    graphics.renderTooltip(
+                            font,
+                            Component.translatable("gui.effecoria.tower_console.edict.addr_hint"),
+                            mouseX,
+                            mouseY);
+                } else {
+                    graphics.renderTooltip(
+                            font, Component.translatable(LexLociCompiler.wordLabelKey(hovered)), mouseX, mouseY);
+                }
+            } else if (hoveredAddressSymbol(mouseX, mouseY) != null) {
                 graphics.renderTooltip(
-                        font, Component.translatable(LexLociCompiler.wordLabelKey(hovered)), mouseX, mouseY);
+                        font,
+                        Component.translatable("gui.effecoria.tower_console.edict.addr_hint"),
+                        mouseX,
+                        mouseY);
             } else if (isHovering(10, PANEL_H - 28, 80, 18, mouseX, mouseY)) {
                 graphics.renderTooltip(
                         font, Component.translatable("gui.effecoria.tower_console.phoenix_tip"), mouseX, mouseY);
@@ -920,8 +978,31 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         }
     }
 
-    private ResourceLocation hoveredLociWord(int mouseX, int mouseY) {
-        final ResourceLocation[] found = {null};
+    private String hoveredAddressSymbol(int mouseX, int mouseY) {
+        if (tab != Tab.EDICTS) {
+            return null;
+        }
+        int listY = topPos + EDICT_LIST_Y + 10;
+        if (mouseX < leftPos + 10
+                || mouseX > leftPos + PANEL_W - 10
+                || mouseY < listY
+                || mouseY > listY + EDICT_LIST_H) {
+            return null;
+        }
+        List<String> rows = symbolRows();
+        int end = Math.min(rows.size(), edictScroll + edictVisibleRows());
+        for (int i = edictScroll; i < end; i++) {
+            int rowY = listY + (i - edictScroll) * 12;
+            if (mouseY >= rowY && mouseY < rowY + 12) {
+                String row = rows.get(i);
+                return LexLociCompiler.isAddressToken(row) ? row : null;
+            }
+        }
+        return null;
+    }
+
+    private String hoveredLociWord(int mouseX, int mouseY) {
+        final String[] found = {null};
         visitProgramChips((id, cx, cy, w, h, last) -> {
             if (found[0] == null && mouseX >= cx && mouseX < cx + w && mouseY >= cy && mouseY < cy + h) {
                 found[0] = id;

@@ -2020,7 +2020,7 @@ public final class ModNetworking {
     }
 
     /** Client → server: apply a Lex Loci Phoenix word program via the tower console. */
-    public record ApplyLociProgramPayload(BlockPos consolePos, List<ResourceLocation> tokens)
+    public record ApplyLociProgramPayload(BlockPos consolePos, List<String> tokens)
             implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<ApplyLociProgramPayload> TYPE =
                 new CustomPacketPayload.Type<>(
@@ -2031,16 +2031,16 @@ public final class ModNetworking {
                         (buf, p) -> {
                             buf.writeBlockPos(p.consolePos());
                             buf.writeVarInt(p.tokens().size());
-                            for (ResourceLocation id : p.tokens()) {
-                                ResourceLocation.STREAM_CODEC.encode(buf, id);
+                            for (String token : p.tokens()) {
+                                buf.writeUtf(token == null ? "" : token, 128);
                             }
                         },
                         buf -> {
                             BlockPos pos = buf.readBlockPos();
                             int n = buf.readVarInt();
-                            List<ResourceLocation> tokens = new ArrayList<>(n);
+                            List<String> tokens = new ArrayList<>(n);
                             for (int i = 0; i < n; i++) {
-                                tokens.add(ResourceLocation.STREAM_CODEC.decode(buf));
+                                tokens.add(buf.readUtf(128));
                             }
                             return new ApplyLociProgramPayload(pos, tokens);
                         });
