@@ -59,8 +59,16 @@ public final class PhoenixShedService {
         if (!(level.getBlockEntity(anchorPos) instanceof TowerAnchorBlockEntity anchor)) {
             return;
         }
-        clearTurretAutonomy(level, anchorPos);
-        setSignals(level, anchorPos, List.of());
+        LexLociCompiler.CompileResult program = LexLociCompiler.compile(anchor.lociTokens());
+        List<LexLociCompiler.Actuation> alive =
+                program.ok() ? program.actuationsFor(LociEvent.SOUL_ALIVE) : List.of();
+        if (alive.isEmpty()) {
+            clearTurretAutonomy(level, anchorPos);
+            setSignals(level, anchorPos, List.of());
+        } else {
+            clearTurretAutonomyMatching(level, anchorPos, ofActuator(alive, LociActuator.AUTONOM));
+            clearSignalsMatching(level, anchorPos, ofActuator(alive, LociActuator.SIGNAL));
+        }
         ListTag snap = anchor.takePhoenixSnapshot();
         if (snap == null || snap.isEmpty()) {
             return;
@@ -214,6 +222,23 @@ public final class PhoenixShedService {
         }
     }
 
+    /** Clear autonomy only on turrets matching the soul_alive AUTONOM targets. */
+    private static void clearTurretAutonomyMatching(
+            ServerLevel level, BlockPos anchorPos, List<LexLociCompiler.Actuation> autonom) {
+        if (autonom.isEmpty()) {
+            return;
+        }
+        for (BlockPos pos : EssenceGlueData.get(level).component(anchorPos)) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (!(be instanceof PhiTurretBlockEntity turret)) {
+                continue;
+            }
+            if (matchesAny("turret", turret, autonom)) {
+                turret.clearAutonomy();
+            }
+        }
+    }
+
     /** Empty actuations extinguish all facility signal lamps. */
     private static void setSignals(
             ServerLevel level, BlockPos anchorPos, List<LexLociCompiler.Actuation> signals) {
@@ -239,6 +264,26 @@ public final class PhoenixShedService {
         }
         if (anyLit && soundAt != null) {
             level.playSound(null, soundAt, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 0.85f, 0.55f);
+        }
+    }
+
+    /** Extinguish only signals matching soul_alive SIGNAL targets; leave others unchanged. */
+    private static void clearSignalsMatching(
+            ServerLevel level, BlockPos anchorPos, List<LexLociCompiler.Actuation> signals) {
+        if (signals.isEmpty()) {
+            return;
+        }
+        for (BlockPos pos : EssenceGlueData.get(level).component(anchorPos)) {
+            BlockState state = level.getBlockState(pos);
+            if (!state.is(ModBlocks.PHI_SIGNAL.get())) {
+                continue;
+            }
+            if (!(level.getBlockEntity(pos) instanceof PhiSignalBlockEntity signal)) {
+                continue;
+            }
+            if (matchesAny("signal", signal, signals)) {
+                PhiSignalBlock.setLit(level, pos, false);
+            }
         }
     }
 

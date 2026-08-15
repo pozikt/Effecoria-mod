@@ -12,12 +12,14 @@ import java.util.Optional;
 
 /**
  * Phoenix compiler: {@code WHEN} rules with optional {@code kind*} / {@code kind#name} before
- * {@code autonom} / {@code signal}. Tokens are strings (RL words or address literals).
+ * {@code autonom} / {@code signal}. {@code soul_alive} only allows SIGNAL/AUTONOM (clear polarity).
+ * Tokens are strings (RL words or address literals).
  */
 public final class LexLociCompiler {
     public static final ResourceLocation WHEN = EffecoriaMod.id("when");
     public static final ResourceLocation SOUL_DEAD = EffecoriaMod.id("soul_dead");
     public static final ResourceLocation SOUL_GHOST = EffecoriaMod.id("soul_ghost");
+    public static final ResourceLocation SOUL_ALIVE = EffecoriaMod.id("soul_alive");
     public static final ResourceLocation SHED = EffecoriaMod.id("shed");
     public static final ResourceLocation SIGNAL = EffecoriaMod.id("signal");
     public static final ResourceLocation AUTONOM = EffecoriaMod.id("autonom");
@@ -26,13 +28,14 @@ public final class LexLociCompiler {
     public static final String WHEN_TOKEN = WHEN.toString();
     public static final String SOUL_DEAD_TOKEN = SOUL_DEAD.toString();
     public static final String SOUL_GHOST_TOKEN = SOUL_GHOST.toString();
+    public static final String SOUL_ALIVE_TOKEN = SOUL_ALIVE.toString();
     public static final String SHED_TOKEN = SHED.toString();
     public static final String SIGNAL_TOKEN = SIGNAL.toString();
     public static final String AUTONOM_TOKEN = AUTONOM.toString();
     public static final String BEACON_TOKEN = BEACON.toString();
 
-    public static final int MAX_TOKENS = 12;
-    public static final int MAX_RULES = 2;
+    public static final int MAX_TOKENS = 16;
+    public static final int MAX_RULES = 3;
 
     public record Actuation(LociActuator actuator, @Nullable LociAddress target) {}
 
@@ -104,6 +107,7 @@ public final class LexLociCompiler {
                 WHEN_TOKEN,
                 SOUL_DEAD_TOKEN,
                 SOUL_GHOST_TOKEN,
+                SOUL_ALIVE_TOKEN,
                 SHED_TOKEN,
                 SIGNAL_TOKEN,
                 AUTONOM_TOKEN,
@@ -147,7 +151,9 @@ public final class LexLociCompiler {
     }
 
     public static boolean isSense(String token) {
-        return SOUL_DEAD_TOKEN.equals(token) || SOUL_GHOST_TOKEN.equals(token);
+        return SOUL_DEAD_TOKEN.equals(token)
+                || SOUL_GHOST_TOKEN.equals(token)
+                || SOUL_ALIVE_TOKEN.equals(token);
     }
 
     public static boolean isSense(ResourceLocation id) {
@@ -187,6 +193,9 @@ public final class LexLociCompiler {
         }
         if (SOUL_GHOST_TOKEN.equals(token)) {
             return LociEvent.SOUL_GHOST;
+        }
+        if (SOUL_ALIVE_TOKEN.equals(token)) {
+            return LociEvent.SOUL_ALIVE;
         }
         return null;
     }
@@ -288,6 +297,12 @@ public final class LexLociCompiler {
             if (actuator != null) {
                 if (phase != Phase.ACTION || openEvent == null) {
                     errors.add("need_sense");
+                    break;
+                }
+                if (openEvent == LociEvent.SOUL_ALIVE
+                        && actuator != LociActuator.SIGNAL
+                        && actuator != LociActuator.AUTONOM) {
+                    errors.add("bad_actuator");
                     break;
                 }
                 Optional<String> neededKind = LociAddress.kindForActuator(actuator);
