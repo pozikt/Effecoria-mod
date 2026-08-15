@@ -24,6 +24,8 @@ public final class LexLociCompiler {
     public static final ResourceLocation SIGNAL = EffecoriaMod.id("signal");
     public static final ResourceLocation AUTONOM = EffecoriaMod.id("autonom");
     public static final ResourceLocation BEACON = EffecoriaMod.id("beacon");
+    public static final ResourceLocation ARM = EffecoriaMod.id("arm");
+    public static final ResourceLocation DISARM = EffecoriaMod.id("disarm");
 
     public static final String WHEN_TOKEN = WHEN.toString();
     public static final String SOUL_DEAD_TOKEN = SOUL_DEAD.toString();
@@ -33,6 +35,8 @@ public final class LexLociCompiler {
     public static final String SIGNAL_TOKEN = SIGNAL.toString();
     public static final String AUTONOM_TOKEN = AUTONOM.toString();
     public static final String BEACON_TOKEN = BEACON.toString();
+    public static final String ARM_TOKEN = ARM.toString();
+    public static final String DISARM_TOKEN = DISARM.toString();
 
     public static final int MAX_TOKENS = 16;
     public static final int MAX_RULES = 3;
@@ -111,6 +115,8 @@ public final class LexLociCompiler {
                 SHED_TOKEN,
                 SIGNAL_TOKEN,
                 AUTONOM_TOKEN,
+                ARM_TOKEN,
+                DISARM_TOKEN,
                 BEACON_TOKEN);
     }
 
@@ -177,6 +183,12 @@ public final class LexLociCompiler {
         }
         if (BEACON_TOKEN.equals(token)) {
             return LociActuator.BEACON;
+        }
+        if (ARM_TOKEN.equals(token)) {
+            return LociActuator.ARM;
+        }
+        if (DISARM_TOKEN.equals(token)) {
+            return LociActuator.DISARM;
         }
         return null;
     }
@@ -299,9 +311,7 @@ public final class LexLociCompiler {
                     errors.add("need_sense");
                     break;
                 }
-                if (openEvent == LociEvent.SOUL_ALIVE
-                        && actuator != LociActuator.SIGNAL
-                        && actuator != LociActuator.AUTONOM) {
+                if (!actuatorAllowed(openEvent, actuator)) {
                     errors.add("bad_actuator");
                     break;
                 }
@@ -346,5 +356,16 @@ public final class LexLociCompiler {
             return new CompileResult(List.of(), errors);
         }
         return new CompileResult(List.copyOf(rules), List.of());
+    }
+
+    private static boolean actuatorAllowed(LociEvent event, LociActuator actuator) {
+        return switch (event) {
+            case SOUL_DEAD -> actuator != LociActuator.BEACON;
+            case SOUL_GHOST -> actuator == LociActuator.BEACON;
+            case SOUL_ALIVE -> actuator == LociActuator.SIGNAL
+                    || actuator == LociActuator.AUTONOM
+                    || actuator == LociActuator.ARM
+                    || actuator == LociActuator.DISARM;
+        };
     }
 }

@@ -43,7 +43,7 @@ public record LociAddress(String kind, boolean all, String name) {
     /** Kind required before this actuator, or empty if the actuator rejects addresses. */
     public static Optional<String> kindForActuator(LociActuator actuator) {
         return switch (actuator) {
-            case AUTONOM -> Optional.of("turret");
+            case AUTONOM, ARM, DISARM -> Optional.of("turret");
             case SIGNAL -> Optional.of("signal");
             case SHED, BEACON -> Optional.empty();
         };

@@ -12,6 +12,7 @@ import com.effecoria.network.ModNetworking;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -21,6 +22,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -42,10 +44,12 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     private static final int CHIP_PROGRAM = 0xFF3A4A5C;
     private static final int CHIP_SENSE = 0xFF1A4A5C;
     private static final int CHIP_TRIGGER = 0xFF4A3A20;
-    private static final int CHIP_PALETTE = 0xFF2A2438;
     private static final int CHIP_ADDR = 0xFF2A4050;
     private static final int CHIP_HOVER = 0xFF554488;
-    private static final int CHIP_DISABLED = 0xFF1A2028;
+    private static final int WORD_BOX_Y = 86;
+    private static final int WORD_BOX_H = 16;
+    private static final int SUGGEST_MAX = 6;
+    private static final int SUGGEST_ROW_H = 12;
 
     private static final int BG_OUTER = 0xCC15202C;
     private static final int BG_INNER = 0xEE1E2E3C;
@@ -83,6 +87,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
     private Button phoenixBtn;
     private Button lociApplyBtn;
     private Button lociResetBtn;
+    private EditBox lociWordBox;
     private final List<String> lociDraft = new ArrayList<>();
     private boolean lociDirty;
 
@@ -128,6 +133,17 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                 Button.builder(Component.translatable("gui.effecoria.tower_console.edict.reset"), b -> resetLoci())
                         .bounds(leftPos + 168, topPos + PANEL_H - 28, 70, 18)
                         .build());
+        lociWordBox = new EditBox(
+                font,
+                leftPos + 10,
+                topPos + WORD_BOX_Y,
+                200,
+                WORD_BOX_H,
+                Component.translatable("gui.effecoria.tower_console.edict.word_hint"));
+        lociWordBox.setMaxLength(48);
+        lociWordBox.setBordered(true);
+        lociWordBox.setHint(Component.translatable("gui.effecoria.tower_console.edict.word_hint"));
+        addRenderableWidget(lociWordBox);
         if (!lociDirty) {
             lociDraft.clear();
             lociDraft.addAll(LexLociCompiler.effectiveTokens(menu.lociTokens()));
@@ -168,6 +184,13 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         lociResetBtn.visible = edicts;
         lociApplyBtn.active = menu.linked() && menu.bound() && lociDraftValid();
         lociResetBtn.active = menu.linked() && menu.bound();
+        if (lociWordBox != null) {
+            lociWordBox.visible = edicts && menu.linked();
+            lociWordBox.active = edicts && menu.linked() && menu.bound();
+            if (!edicts) {
+                lociWordBox.setFocused(false);
+            }
+        }
         if (edicts) {
             phoenixBtn.setMessage(phoenixLabel());
         }
@@ -349,6 +372,21 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
             }
         }
         if (tab == Tab.EDICTS && button == 0 && menu.linked()) {
+            List<String> suggestions = wordSuggestions();
+            if (!suggestions.isEmpty() && lociWordBox != null && lociWordBox.isVisible()) {
+                int sx = leftPos + 10;
+                int sy = topPos + WORD_BOX_Y + WORD_BOX_H + 1;
+                for (int i = 0; i < suggestions.size(); i++) {
+                    int rowY = sy + i * SUGGEST_ROW_H;
+                    if (mouseX >= sx
+                            && mouseX < sx + 200
+                            && mouseY >= rowY
+                            && mouseY < rowY + SUGGEST_ROW_H) {
+                        appendLociToken(suggestions.get(i));
+                        return true;
+                    }
+                }
+            }
             final boolean[] hit = {false};
             visitProgramChips((id, cx, cy, w, h, last) -> {
                 if (hit[0] || !last) {
@@ -356,23 +394,6 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                 }
                 if (mouseX >= cx && mouseX < cx + w && mouseY >= cy && mouseY < cy + h && !lociDraft.isEmpty()) {
                     lociDraft.remove(lociDraft.size() - 1);
-                    lociDirty = true;
-                    hit[0] = true;
-                }
-            });
-            if (hit[0]) {
-                return true;
-            }
-            visitPaletteChips((id, cx, cy, w, h, last) -> {
-                if (hit[0]) {
-                    return;
-                }
-                if (mouseX >= cx
-                        && mouseX < cx + w
-                        && mouseY >= cy
-                        && mouseY < cy + h
-                        && LexLociCompiler.canAppend(lociDraft, id)) {
-                    lociDraft.add(id);
                     lociDirty = true;
                     hit[0] = true;
                 }
@@ -394,8 +415,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
                     }
                     String row = rows.get(i);
                     if (LexLociCompiler.isAddressToken(row) && LexLociCompiler.canAppend(lociDraft, row)) {
-                        lociDraft.add(row);
-                        lociDirty = true;
+                        appendLociToken(row);
                         return true;
                     }
                     break;
@@ -524,51 +544,71 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
             });
         }
 
-        visitPaletteChips((id, cx, cy, w, h, last) -> {
-            boolean can = LexLociCompiler.canAppend(lociDraft, id);
-            boolean hover = mouseX >= cx && mouseX < cx + w && mouseY >= cy && mouseY < cy + h;
-            int fill = !can ? CHIP_DISABLED : (hover ? CHIP_HOVER : CHIP_PALETTE);
-            graphics.fill(cx, cy, cx + w, cy + h, fill);
-            graphics.drawCenteredString(font, lociLabel(id), cx + w / 2, cy + 4, can ? LABEL : MUTED);
-        });
+        graphics.drawString(
+                font,
+                Component.translatable("gui.effecoria.tower_console.edict.word"),
+                x,
+                topPos + WORD_BOX_Y - 10,
+                TITLE,
+                false);
 
-        int flagColor = menu.phoenixEdictEnabled() ? OK : MUTED;
-        graphics.drawString(
-                font,
-                Component.translatable(
-                        menu.phoenixEdictEnabled()
-                                ? "gui.effecoria.tower_console.edict.active"
-                                : "gui.effecoria.tower_console.edict.inactive"),
-                x,
-                topPos + 108,
-                flagColor,
-                false);
-        int watchColor = menu.phoenixWatchdogActive() ? OK : MUTED;
-        graphics.drawString(
-                font,
-                Component.translatable(
-                        menu.phoenixWatchdogActive()
-                                ? "gui.effecoria.tower_console.edict.watchdog_active"
-                                : "gui.effecoria.tower_console.edict.watchdog_idle"),
-                x,
-                topPos + 118,
-                watchColor,
-                false);
-        boolean signalOn = menu.phoenixWatchdogActive()
-                && LexLociCompiler.compile(menu.lociTokens())
-                        .actuatorsFor(LociEvent.SOUL_DEAD)
-                        .contains(LociActuator.SIGNAL);
-        int signalColor = signalOn ? WARN : MUTED;
-        graphics.drawString(
-                font,
-                Component.translatable(
-                        signalOn
-                                ? "gui.effecoria.tower_console.edict.signal_alarm"
-                                : "gui.effecoria.tower_console.edict.signal_idle"),
-                leftPos + 160,
-                topPos + 118,
-                signalColor,
-                false);
+        List<String> suggestions = wordSuggestions();
+        if (!suggestions.isEmpty()) {
+            int sx = leftPos + 10;
+            int sy = topPos + WORD_BOX_Y + WORD_BOX_H + 1;
+            int boxH = suggestions.size() * SUGGEST_ROW_H + 2;
+            graphics.fill(sx, sy, sx + 200, sy + boxH, BG_LIST);
+            for (int i = 0; i < suggestions.size(); i++) {
+                String token = suggestions.get(i);
+                int rowY = sy + 1 + i * SUGGEST_ROW_H;
+                boolean hover = mouseX >= sx
+                        && mouseX < sx + 200
+                        && mouseY >= rowY
+                        && mouseY < rowY + SUGGEST_ROW_H;
+                if (hover) {
+                    graphics.fill(sx + 1, rowY, sx + 199, rowY + SUGGEST_ROW_H, CHIP_HOVER);
+                }
+                graphics.drawString(font, lociLabel(token), sx + 4, rowY + 2, hover ? TITLE : LABEL, false);
+            }
+        } else {
+            int flagColor = menu.phoenixEdictEnabled() ? OK : MUTED;
+            graphics.drawString(
+                    font,
+                    Component.translatable(
+                            menu.phoenixEdictEnabled()
+                                    ? "gui.effecoria.tower_console.edict.active"
+                                    : "gui.effecoria.tower_console.edict.inactive"),
+                    leftPos + 216,
+                    topPos + WORD_BOX_Y,
+                    flagColor,
+                    false);
+            int watchColor = menu.phoenixWatchdogActive() ? OK : MUTED;
+            graphics.drawString(
+                    font,
+                    Component.translatable(
+                            menu.phoenixWatchdogActive()
+                                    ? "gui.effecoria.tower_console.edict.watchdog_active"
+                                    : "gui.effecoria.tower_console.edict.watchdog_idle"),
+                    leftPos + 216,
+                    topPos + WORD_BOX_Y + 10,
+                    watchColor,
+                    false);
+            boolean signalOn = menu.phoenixWatchdogActive()
+                    && LexLociCompiler.compile(menu.lociTokens())
+                            .actuatorsFor(LociEvent.SOUL_DEAD)
+                            .contains(LociActuator.SIGNAL);
+            int signalColor = signalOn ? WARN : MUTED;
+            graphics.drawString(
+                    font,
+                    Component.translatable(
+                            signalOn
+                                    ? "gui.effecoria.tower_console.edict.signal_alarm"
+                                    : "gui.effecoria.tower_console.edict.signal_idle"),
+                    leftPos + 216,
+                    topPos + WORD_BOX_Y + 20,
+                    signalColor,
+                    false);
+        }
 
         graphics.drawString(
                 font,
@@ -645,17 +685,68 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         }
     }
 
-    private void visitPaletteChips(ChipVisitor visitor) {
-        int x = leftPos + 10;
-        int y = topPos + 90;
-        List<String> palette = LexLociCompiler.palette();
-        int slot = Math.max(36, (PANEL_W - 24) / Math.max(1, palette.size()));
-        for (int i = 0; i < palette.size(); i++) {
-            String id = palette.get(i);
-            int w = slot - 4;
-            visitor.accept(id, x, y, w, CHIP_H, false);
-            x += slot;
+    private void appendLociToken(String token) {
+        if (!LexLociCompiler.canAppend(lociDraft, token)) {
+            return;
         }
+        lociDraft.add(token);
+        lociDirty = true;
+        if (lociWordBox != null) {
+            lociWordBox.setValue("");
+        }
+    }
+
+    /** Palette words (+ address symbols when typing) that match the input and can append. */
+    private List<String> wordSuggestions() {
+        if (lociWordBox == null || !lociWordBox.isVisible() || !menu.linked() || !menu.bound()) {
+            return List.of();
+        }
+        boolean focused = lociWordBox.isFocused();
+        String raw = lociWordBox.getValue() == null ? "" : lociWordBox.getValue().trim();
+        if (!focused && raw.isEmpty()) {
+            return List.of();
+        }
+        String ql = raw.toLowerCase(Locale.ROOT);
+        List<String> out = new ArrayList<>();
+        for (String id : LexLociCompiler.palette()) {
+            if (!LexLociCompiler.canAppend(lociDraft, id)) {
+                continue;
+            }
+            if (!ql.isEmpty() && !matchesWordQuery(id, ql)) {
+                continue;
+            }
+            out.add(id);
+            if (out.size() >= SUGGEST_MAX) {
+                return out;
+            }
+        }
+        if (!ql.isEmpty()) {
+            for (String row : symbolRows()) {
+                if (!LexLociCompiler.isAddressToken(row) || !LexLociCompiler.canAppend(lociDraft, row)) {
+                    continue;
+                }
+                if (!row.toLowerCase(Locale.ROOT).contains(ql)) {
+                    continue;
+                }
+                out.add(row);
+                if (out.size() >= SUGGEST_MAX) {
+                    break;
+                }
+            }
+        }
+        return out;
+    }
+
+    private boolean matchesWordQuery(String token, String ql) {
+        if (token.toLowerCase(Locale.ROOT).contains(ql)) {
+            return true;
+        }
+        int colon = token.indexOf(':');
+        String path = colon >= 0 ? token.substring(colon + 1) : token;
+        if (path.toLowerCase(Locale.ROOT).contains(ql)) {
+            return true;
+        }
+        return lociLabel(token).toLowerCase(Locale.ROOT).contains(ql);
     }
 
     private void drawMapTab(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -1011,12 +1102,39 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         if (found[0] != null) {
             return found[0];
         }
-        visitPaletteChips((id, cx, cy, w, h, last) -> {
-            if (found[0] == null && mouseX >= cx && mouseX < cx + w && mouseY >= cy && mouseY < cy + h) {
-                found[0] = id;
+        List<String> suggestions = wordSuggestions();
+        if (!suggestions.isEmpty()) {
+            int sx = leftPos + 10;
+            int sy = topPos + WORD_BOX_Y + WORD_BOX_H + 1;
+            for (int i = 0; i < suggestions.size(); i++) {
+                int rowY = sy + i * SUGGEST_ROW_H;
+                if (mouseX >= sx && mouseX < sx + 200 && mouseY >= rowY && mouseY < rowY + SUGGEST_ROW_H) {
+                    return suggestions.get(i);
+                }
             }
-        });
-        return found[0];
+        }
+        return null;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (tab == Tab.EDICTS && lociWordBox != null && lociWordBox.isVisible() && lociWordBox.isFocused()) {
+            if (keyCode == 256) {
+                lociWordBox.setFocused(false);
+                return true;
+            }
+            if (keyCode == 257 || keyCode == 335) {
+                List<String> suggestions = wordSuggestions();
+                if (!suggestions.isEmpty()) {
+                    appendLociToken(suggestions.get(0));
+                    return true;
+                }
+            }
+            return lociWordBox.keyPressed(keyCode, scanCode, modifiers)
+                    || lociWordBox.canConsumeInput()
+                    || super.keyPressed(keyCode, scanCode, modifiers);
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     private static int severityColor(int severity) {

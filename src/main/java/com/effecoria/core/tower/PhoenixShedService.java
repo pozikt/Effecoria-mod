@@ -68,6 +68,8 @@ public final class PhoenixShedService {
         } else {
             clearTurretAutonomyMatching(level, anchorPos, ofActuator(alive, LociActuator.AUTONOM));
             clearSignalsMatching(level, anchorPos, ofActuator(alive, LociActuator.SIGNAL));
+            applyArm(level, anchorPos, ofActuator(alive, LociActuator.ARM));
+            applyDisarm(level, anchorPos, ofActuator(alive, LociActuator.DISARM));
         }
         ListTag snap = anchor.takePhoenixSnapshot();
         if (snap == null || snap.isEmpty()) {
@@ -107,6 +109,8 @@ public final class PhoenixShedService {
             applyShed(level, anchorPos);
         }
         applyTurretAutonomy(level, anchorPos, ofActuator(dead, LociActuator.AUTONOM));
+        applyArm(level, anchorPos, ofActuator(dead, LociActuator.ARM));
+        applyDisarm(level, anchorPos, ofActuator(dead, LociActuator.DISARM));
         List<LexLociCompiler.Actuation> signals = ofActuator(dead, LociActuator.SIGNAL);
         boolean wantSignal = !signals.isEmpty();
         setSignals(level, anchorPos, signals);
@@ -209,6 +213,38 @@ public final class PhoenixShedService {
                 turret.setAutonomous(true);
             } else {
                 turret.clearAutonomy();
+            }
+        }
+    }
+
+    private static void applyArm(
+            ServerLevel level, BlockPos anchorPos, List<LexLociCompiler.Actuation> arms) {
+        if (arms.isEmpty()) {
+            return;
+        }
+        for (BlockPos pos : EssenceGlueData.get(level).component(anchorPos)) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (!(be instanceof PhiTurretBlockEntity turret)) {
+                continue;
+            }
+            if (matchesAny("turret", turret, arms)) {
+                turret.setArmed(true);
+            }
+        }
+    }
+
+    private static void applyDisarm(
+            ServerLevel level, BlockPos anchorPos, List<LexLociCompiler.Actuation> disarms) {
+        if (disarms.isEmpty()) {
+            return;
+        }
+        for (BlockPos pos : EssenceGlueData.get(level).component(anchorPos)) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (!(be instanceof PhiTurretBlockEntity turret)) {
+                continue;
+            }
+            if (matchesAny("turret", turret, disarms)) {
+                turret.setArmed(false);
             }
         }
     }

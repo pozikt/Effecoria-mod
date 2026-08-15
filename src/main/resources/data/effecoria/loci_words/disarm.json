@@ -1,0 +1,5 @@
+{
+  "id": "effecoria:disarm",
+  "kind": "trigger",
+  "effect": "disarm"
+}

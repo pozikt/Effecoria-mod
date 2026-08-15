@@ -253,13 +253,30 @@ public final class PhiTurretBlockEntity extends BaseContainerBlockEntity
         syncAim();
     }
 
+    /**
+     * Lex / remote: set combat arm. No-op if unformed. Disarm clears autonomy first so the barrel
+     * can leave combat mode after Phoenix.
+     */
+    public void setArmed(boolean value) {
+        if (!formed()) {
+            return;
+        }
+        if (!value && autonomous) {
+            clearAutonomy();
+        }
+        if (armed == value) {
+            return;
+        }
+        armed = value;
+        setChanged();
+        syncAim();
+    }
+
     public void toggleArmed() {
         if (!formed() || autonomous) {
             return;
         }
-        armed = !armed;
-        setChanged();
-        syncAim();
+        setArmed(!armed);
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, PhiTurretBlockEntity be) {
