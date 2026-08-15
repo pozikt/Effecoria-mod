@@ -350,6 +350,10 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> PHI_SIGNAL = ITEMS.register(
             "phi_signal",
             () -> new HintBlockItem(ModBlocks.PHI_SIGNAL.get(), new Item.Properties(), "tooltip.effecoria.phi_signal"));
+    public static final DeferredItem<BlockItem> PHI_WATCHDOG = ITEMS.register(
+            "phi_watchdog",
+            () -> new HintBlockItem(
+                    ModBlocks.PHI_WATCHDOG.get(), new Item.Properties(), "tooltip.effecoria.phi_watchdog"));
     public static final DeferredItem<BlockItem> PHI_ACCUMULATOR = ITEMS.register(
             "phi_accumulator",
             () -> new HintBlockItem(

@@ -7,6 +7,7 @@ import com.effecoria.block.PhiBeaconBlockEntity;
 import com.effecoria.block.PhiCartographyTableBlockEntity;
 import com.effecoria.block.PhiIncubatorBlockEntity;
 import com.effecoria.block.PhiSignalBlockEntity;
+import com.effecoria.block.PhiWatchdogBlockEntity;
 import com.effecoria.block.PhiSonarBlockEntity;
 import com.effecoria.block.PhiTelegraphBlock;
 import com.effecoria.block.PhiTurretBlockEntity;
@@ -281,6 +282,15 @@ public final class TowerFacility {
                         alarm ? "alarm" : "idle",
                         alarm ? MonitorEntry.WARN : MonitorEntry.IDLE,
                         signal));
+            } else if (be instanceof PhiWatchdogBlockEntity watchdog) {
+                boolean silence = state.hasProperty(com.effecoria.block.PhiWatchdogBlock.LIT)
+                        && state.getValue(com.effecoria.block.PhiWatchdogBlock.LIT);
+                out.add(namedEntry(
+                        "watchdog",
+                        pos,
+                        silence ? "silence" : "watch",
+                        silence ? MonitorEntry.BAD : MonitorEntry.OK,
+                        watchdog));
             } else if (be instanceof TowerConsoleBlockEntity) {
                 out.add(entry("console", pos, "online", MonitorEntry.OK));
             } else if (be instanceof PhiSonarBlockEntity sonar) {
@@ -397,13 +407,14 @@ public final class TowerFacility {
             case "regen_chamber" -> 6;
             case "incubator" -> 7;
             case "signal" -> 8;
-            case "sonar" -> 9;
-            case "cartography" -> 10;
-            case "turret" -> 11;
-            case "beacon" -> 12;
-            case "telegraph" -> 13;
-            case "spark_reactor", "heart_reactor", "forge_reactor" -> 14;
-            case "contactor", "coupler", "matcher", "accumulator" -> 15;
+            case "watchdog" -> 9;
+            case "sonar" -> 10;
+            case "cartography" -> 11;
+            case "turret" -> 12;
+            case "beacon" -> 13;
+            case "telegraph" -> 14;
+            case "spark_reactor", "heart_reactor", "forge_reactor" -> 15;
+            case "contactor", "coupler", "matcher", "accumulator" -> 16;
             default -> 50;
         };
     }

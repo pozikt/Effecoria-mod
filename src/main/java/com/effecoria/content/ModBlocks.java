@@ -47,6 +47,7 @@ import com.effecoria.block.PhiCouplerBlock;
 import com.effecoria.block.PhiMatcherBlock;
 import com.effecoria.block.PhiIncubatorBlock;
 import com.effecoria.block.PhiSignalBlock;
+import com.effecoria.block.PhiWatchdogBlock;
 import com.effecoria.block.PhiAccumulatorBlock;
 import com.effecoria.block.RottenMossBlock;
 import com.effecoria.block.SparkReactorBlock;
@@ -1031,6 +1032,15 @@ public final class ModBlocks {
                     .sound(SoundType.GLASS)
                     .requiresCorrectToolForDrops()
                     .lightLevel(s -> s.getValue(PhiSignalBlock.LIT) ? 15 : 3)));
+
+    public static final DeferredBlock<PhiWatchdogBlock> PHI_WATCHDOG = BLOCKS.register(
+            "phi_watchdog",
+            () -> new PhiWatchdogBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(2.5f, 6f)
+                    .sound(SoundType.STONE)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(s -> s.getValue(PhiWatchdogBlock.LIT) ? 12 : 2)));
 
     public static final DeferredBlock<PhiAccumulatorBlock> PHI_ACCUMULATOR = BLOCKS.register(
             "phi_accumulator",

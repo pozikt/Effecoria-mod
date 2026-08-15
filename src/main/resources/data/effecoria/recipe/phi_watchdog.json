@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "R": { "item": "minecraft:comparator" },
+    "W": { "item": "effecoria:mithril_wire" },
+    "C": { "item": "effecoria:phi_coupler" }
+  },
+  "pattern": [" W ", "CRC", " W "],
+  "result": { "count": 1, "id": "effecoria:phi_watchdog" }
+}

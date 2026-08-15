@@ -200,7 +200,11 @@ public final class TowerConsoleBlockEntity extends BlockEntity implements MenuPr
                 ? 1
                 : 0;
         phoenixEdict = computer.phoenixEdictEnabled() ? 1 : 0;
-        watchdogActive = computer.hasPhoenixSnapshot() && computer.phoenixEdictEnabled() ? 1 : 0;
+        boolean hasWatchdog =
+                TowerFacility.findInComponent(level, worldPosition, com.effecoria.block.PhiWatchdogBlockEntity.class)
+                        .isPresent();
+        watchdogActive =
+                hasWatchdog && computer.hasPhoenixSnapshot() && computer.phoenixEdictEnabled() ? 1 : 0;
         lociTokens = new ArrayList<>(computer.lociTokens());
         setChanged();
         syncClient();

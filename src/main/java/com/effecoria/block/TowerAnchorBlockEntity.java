@@ -68,7 +68,7 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
     /** Empty = built-in Phoenix word program. */
     private final List<String> lociTokens = new ArrayList<>();
 
-    /** Re-apply Phoenix shed / turret autonomy every 2s while snapshot is held. */
+    /** Soft re-shed interval used by {@link PhiWatchdogBlockEntity} (~2s). */
     public static final int PHOENIX_WATCHDOG_INTERVAL = 40;
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(INV_SIZE, ItemStack.EMPTY);
@@ -79,13 +79,6 @@ public final class TowerAnchorBlockEntity extends BlockEntity {
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, TowerAnchorBlockEntity be) {
         TowerDomeService.serverTick(level, pos, be);
-        if (!(level instanceof ServerLevel server)
-                || !be.hasPhoenixSnapshot()
-                || !be.phoenixEdictEnabled()
-                || level.getGameTime() % PHOENIX_WATCHDOG_INTERVAL != 0L) {
-            return;
-        }
-        PhoenixShedService.reenforceIfNeeded(server, pos);
     }
 
     public boolean consecrated() {

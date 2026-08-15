@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "lit=false": { "model": "effecoria:block/phi_watchdog" },
+    "lit=true": { "model": "effecoria:block/phi_watchdog_on" }
+  }
+}
