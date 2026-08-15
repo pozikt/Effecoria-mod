@@ -4,6 +4,8 @@ import com.effecoria.alchemy.menu.PhiIncubatorMenu;
 import com.effecoria.content.ModBlockEntities;
 import com.effecoria.content.ModItems;
 import com.effecoria.core.alchemy.PhiPower;
+import com.effecoria.core.tower.FacilityNames;
+import com.effecoria.core.tower.NamedFacilityDevice;
 import com.effecoria.core.tower.TowerBodyType;
 import com.effecoria.core.tower.TowerFacility;
 
@@ -37,7 +39,8 @@ import java.util.Optional;
  * Incubates a prepaid tower body from the same materials as
  * {@link TowerAnchorBlockEntity#payBodyCosts}. Target type follows the linked Ψ-anchor.
  */
-public final class PhiIncubatorBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer {
+public final class PhiIncubatorBlockEntity extends BaseContainerBlockEntity
+        implements WorldlyContainer, NamedFacilityDevice {
     public static final int SLOT_COUNT = 3;
 
     public static final int DATA_PROGRESS = 0;
@@ -64,6 +67,7 @@ public final class PhiIncubatorBlockEntity extends BaseContainerBlockEntity impl
     /** Cached for ContainerData sync (client never resolves glue/anchor itself). */
     private int syncedTargetOrdinal;
     private boolean syncedLinked;
+    private String facilityName = "";
 
     private final ContainerData data = new ContainerData() {
         @Override
@@ -103,6 +107,22 @@ public final class PhiIncubatorBlockEntity extends BaseContainerBlockEntity impl
 
     public ContainerData getData() {
         return data;
+    }
+
+    @Override
+    public String facilityName() {
+        return facilityName;
+    }
+
+    @Override
+    public boolean setFacilityName(String name) {
+        String next = FacilityNames.sanitize(name);
+        if (next.equals(facilityName)) {
+            return true;
+        }
+        facilityName = next;
+        FacilityNames.markNamed(this);
+        return true;
     }
 
     @Nullable
@@ -353,6 +373,7 @@ public final class PhiIncubatorBlockEntity extends BaseContainerBlockEntity impl
         if (readyBody != null) {
             tag.putString("ReadyBody", readyBody.getSerializedName());
         }
+        FacilityNames.save(tag, facilityName);
     }
 
     @Override
@@ -367,5 +388,6 @@ public final class PhiIncubatorBlockEntity extends BaseContainerBlockEntity impl
         } else {
             readyBody = null;
         }
+        facilityName = FacilityNames.load(tag);
     }
 }

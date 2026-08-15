@@ -37,7 +37,7 @@ public final class TowerFacility {
     private TowerFacility() {}
 
     /** One functional block row for the tower console monitor list. */
-    public record MonitorEntry(String kind, int x, int y, int z, String status, int severity) {
+    public record MonitorEntry(String kind, int x, int y, int z, String status, int severity, String label) {
         public static final int OK = 0;
         public static final int WARN = 1;
         public static final int BAD = 2;
@@ -45,6 +45,18 @@ public final class TowerFacility {
 
         public BlockPos pos() {
             return new BlockPos(x, y, z);
+        }
+
+        public boolean named() {
+            return label != null && !label.isEmpty();
+        }
+
+        /** Lex symbol form: {@code kind#label} or {@code kind@x,y,z}. */
+        public String symbol() {
+            if (named()) {
+                return kind + "#" + label;
+            }
+            return kind + "@" + x + "," + y + "," + z;
         }
 
         public CompoundTag save() {
@@ -55,6 +67,9 @@ public final class TowerFacility {
             tag.putInt("Z", z);
             tag.putString("Status", status);
             tag.putInt("Sev", severity);
+            if (named()) {
+                tag.putString("Label", label);
+            }
             return tag;
         }
 
@@ -65,7 +80,8 @@ public final class TowerFacility {
                     tag.getInt("Y"),
                     tag.getInt("Z"),
                     tag.getString("Status"),
-                    tag.getInt("Sev"));
+                    tag.getInt("Sev"),
+                    tag.contains("Label") ? tag.getString("Label") : "");
         }
 
         public static ListTag saveList(List<MonitorEntry> entries) {
@@ -241,47 +257,53 @@ public final class TowerFacility {
                 }
             } else if (be instanceof PhiIncubatorBlockEntity incubator) {
                 if (incubator.readyBody() != null) {
-                    out.add(entry(
+                    out.add(namedEntry(
                             "incubator",
                             pos,
                             "ready_" + incubator.readyBody().getSerializedName(),
-                            MonitorEntry.OK));
+                            MonitorEntry.OK,
+                            incubator));
                 } else if (!towerLive) {
-                    out.add(entry("incubator", pos, "tower_offline", MonitorEntry.IDLE));
+                    out.add(namedEntry("incubator", pos, "tower_offline", MonitorEntry.IDLE, incubator));
                 } else if (!PhiPower.hasPower(level, pos)) {
-                    out.add(entry("incubator", pos, "no_power", MonitorEntry.BAD));
+                    out.add(namedEntry("incubator", pos, "no_power", MonitorEntry.BAD, incubator));
                 } else if (incubator.progress() > 0 || incubator.hasTargetMaterials()) {
-                    out.add(entry("incubator", pos, "incubating", MonitorEntry.WARN));
+                    out.add(namedEntry("incubator", pos, "incubating", MonitorEntry.WARN, incubator));
                 } else {
-                    out.add(entry("incubator", pos, "idle", MonitorEntry.IDLE));
+                    out.add(namedEntry("incubator", pos, "idle", MonitorEntry.IDLE, incubator));
                 }
-            } else if (be instanceof PhiSignalBlockEntity) {
+            } else if (be instanceof PhiSignalBlockEntity signal) {
                 boolean alarm = state.hasProperty(com.effecoria.block.PhiSignalBlock.LIT)
                         && state.getValue(com.effecoria.block.PhiSignalBlock.LIT);
-                out.add(entry("signal", pos, alarm ? "alarm" : "idle", alarm ? MonitorEntry.WARN : MonitorEntry.IDLE));
+                out.add(namedEntry(
+                        "signal",
+                        pos,
+                        alarm ? "alarm" : "idle",
+                        alarm ? MonitorEntry.WARN : MonitorEntry.IDLE,
+                        signal));
             } else if (be instanceof TowerConsoleBlockEntity) {
                 out.add(entry("console", pos, "online", MonitorEntry.OK));
             } else if (be instanceof PhiSonarBlockEntity sonar) {
                 if (!towerLive) {
-                    out.add(entry("sonar", pos, "tower_offline", MonitorEntry.IDLE));
+                    out.add(namedEntry("sonar", pos, "tower_offline", MonitorEntry.IDLE, sonar));
                 } else if (!phi) {
-                    out.add(entry("sonar", pos, "no_power", MonitorEntry.BAD));
+                    out.add(namedEntry("sonar", pos, "no_power", MonitorEntry.BAD, sonar));
                 } else if (!sonar.ready()) {
-                    out.add(entry("sonar", pos, "cooldown", MonitorEntry.WARN));
+                    out.add(namedEntry("sonar", pos, "cooldown", MonitorEntry.WARN, sonar));
                 } else {
-                    out.add(entry("sonar", pos, "ready", MonitorEntry.OK));
+                    out.add(namedEntry("sonar", pos, "ready", MonitorEntry.OK, sonar));
                 }
             } else if (be instanceof PhiCartographyTableBlockEntity) {
                 out.add(entry("cartography", pos, towerLive ? "online" : "idle", towerLive ? MonitorEntry.OK : MonitorEntry.IDLE));
             } else if (be instanceof PhiTurretBlockEntity turret) {
                 if (!turret.formed()) {
-                    out.add(entry("turret", pos, "unformed", MonitorEntry.BAD));
+                    out.add(namedEntry("turret", pos, "unformed", MonitorEntry.BAD, turret));
                 } else if (!phi) {
-                    out.add(entry("turret", pos, "no_power", MonitorEntry.BAD));
+                    out.add(namedEntry("turret", pos, "no_power", MonitorEntry.BAD, turret));
                 } else if (turret.armed()) {
-                    out.add(entry("turret", pos, "armed", MonitorEntry.OK));
+                    out.add(namedEntry("turret", pos, "armed", MonitorEntry.OK, turret));
                 } else {
-                    out.add(entry("turret", pos, "idle", MonitorEntry.IDLE));
+                    out.add(namedEntry("turret", pos, "idle", MonitorEntry.IDLE, turret));
                 }
             } else if (be instanceof PhiBeaconBlockEntity beacon) {
                 String status = beacon.beaconName().isEmpty() ? "unnamed" : "online";
@@ -289,22 +311,28 @@ public final class TowerFacility {
                 if (!phi && !beacon.beaconName().isEmpty()) {
                     status = "no_power";
                 }
-                out.add(entry("beacon", pos, status, sev));
+                out.add(namedEntry("beacon", pos, status, sev, beacon));
             } else if (be instanceof PhiTelegraphBlock.PhiTelegraphBlockEntity telegraph) {
-                out.add(entry(
+                out.add(namedEntry(
                         "telegraph",
                         pos,
                         telegraph.hasLink() ? "linked" : "unlinked",
-                        telegraph.hasLink() ? MonitorEntry.OK : MonitorEntry.WARN));
+                        telegraph.hasLink() ? MonitorEntry.OK : MonitorEntry.WARN,
+                        telegraph));
             } else if (state.is(ModBlocks.SPARK_REACTOR.get())) {
                 out.add(reactorEntry("spark_reactor", pos, PhiPower.hasPower(level, pos)));
             } else if (state.is(ModBlocks.HEART_REACTOR_CORE.get())) {
                 out.add(reactorEntry("heart_reactor", pos, PhiPower.hasPower(level, pos)));
             } else if (state.is(ModBlocks.FORGE_REACTOR_CORE.get())) {
                 out.add(reactorEntry("forge_reactor", pos, PhiPower.hasPower(level, pos)));
-            } else if (be instanceof com.effecoria.block.PhiContactorBlockEntity) {
+            } else if (be instanceof com.effecoria.block.PhiContactorBlockEntity contactor) {
                 boolean closed = state.getValue(com.effecoria.block.PhiContactorBlock.CLOSED);
-                out.add(entry("contactor", pos, closed ? "closed" : "open", closed ? MonitorEntry.OK : MonitorEntry.IDLE));
+                out.add(namedEntry(
+                        "contactor",
+                        pos,
+                        closed ? "closed" : "open",
+                        closed ? MonitorEntry.OK : MonitorEntry.IDLE,
+                        contactor));
             } else if (be instanceof com.effecoria.block.PhiCouplerBlockEntity coupler) {
                 String ch = coupler.phiChannel().getSerializedName();
                 int sev = coupler.omegaPercent() >= 70f ? MonitorEntry.BAD
@@ -344,7 +372,18 @@ public final class TowerFacility {
     }
 
     private static MonitorEntry entry(String kind, BlockPos pos, String status, int severity) {
-        return new MonitorEntry(kind, pos.getX(), pos.getY(), pos.getZ(), status, severity);
+        return entry(kind, pos, status, severity, "");
+    }
+
+    private static MonitorEntry entry(String kind, BlockPos pos, String status, int severity, String label) {
+        return new MonitorEntry(
+                kind, pos.getX(), pos.getY(), pos.getZ(), status, severity, label == null ? "" : label);
+    }
+
+    private static MonitorEntry namedEntry(
+            String kind, BlockPos pos, String status, int severity, BlockEntity be) {
+        String label = be instanceof NamedFacilityDevice named ? named.facilityName() : "";
+        return entry(kind, pos, status, severity, label);
     }
 
     private static int kindOrder(MonitorEntry entry) {

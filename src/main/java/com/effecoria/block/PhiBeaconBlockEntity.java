@@ -3,6 +3,8 @@ package com.effecoria.block;
 import com.effecoria.alchemy.menu.PhiBeaconMenu;
 import com.effecoria.content.ModBlockEntities;
 import com.effecoria.core.alchemy.PhiBeaconIndex;
+import com.effecoria.core.tower.FacilityNames;
+import com.effecoria.core.tower.NamedFacilityDevice;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -18,7 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 
-public final class PhiBeaconBlockEntity extends BlockEntity implements MenuProvider {
+public final class PhiBeaconBlockEntity extends BlockEntity implements MenuProvider, NamedFacilityDevice {
     private String beaconName = "";
 
     public PhiBeaconBlockEntity(BlockPos pos, BlockState state) {
@@ -29,14 +31,21 @@ public final class PhiBeaconBlockEntity extends BlockEntity implements MenuProvi
         return beaconName;
     }
 
+    @Override
+    public String facilityName() {
+        return beaconName;
+    }
+
+    @Override
+    public boolean setFacilityName(String name) {
+        return setBeaconName(name);
+    }
+
     public boolean setBeaconName(String name) {
         if (level == null) {
             return false;
         }
-        String trimmed = name == null ? "" : name.trim();
-        if (trimmed.length() > 32) {
-            trimmed = trimmed.substring(0, 32);
-        }
+        String trimmed = FacilityNames.sanitize(name);
         if (!trimmed.isEmpty()
                 && PhiBeaconIndex.isNameTaken(level.dimension(), trimmed, worldPosition)) {
             return false;

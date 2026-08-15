@@ -257,7 +257,7 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
         out.add("шина:psi");
         out.add("шина:broadband");
         for (TowerFacility.MonitorEntry e : menu.monitors()) {
-            out.add(e.kind() + "@" + e.x() + "," + e.y() + "," + e.z());
+            out.add(e.symbol());
         }
         return out;
     }
@@ -795,6 +795,9 @@ public final class TowerConsoleScreen extends AbstractContainerScreen<TowerConso
             graphics.fill(lx + 2, rowY + 3, lx + 5, rowY + ROW_H - 3, sevColor);
 
             Component name = Component.translatable("gui.effecoria.tower_console.device." + entry.kind());
+            if (entry.named()) {
+                name = name.copy().append(Component.literal("#" + entry.label()).withColor(MUTED & 0xFFFFFF));
+            }
             Component status = Component.translatable("gui.effecoria.tower_console.devstat." + entry.status());
             graphics.drawString(font, name, lx + 8, rowY + 5, LABEL, false);
 

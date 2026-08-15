@@ -1,6 +1,6 @@
 # Lex Loci — язык программирования башни
 
-**Status:** design — full edict language not shipped. Physical Φ-circuitry playable ([PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md)). **Phoenix shed / E0.5 / Phase C inrush shipped**. **Phase D matcher shipped** (`phi_matcher` + Ψ-imprinter Δω penalty). **Phase G0 watchdog shipped** (re-shed while phoenix snapshot held; turrets autonomous). **Phase G incubator shipped** (`phi_incubator` prepays body costs). **Phase G+ signal shipped** (`phi_signal` LIT+redstone while snapshot held). **Phase E1 shipped** (Phoenix word chips + compiler for shed / signal / autonom). **Phase E2 shipped** (`soul_ghost` + `beacon` path to regen chamber). Full word editor = later phase E.  
+**Status:** design — full edict language not shipped. Physical Φ-circuitry playable ([PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md)). **Phoenix shed / E0.5 / Phase C inrush shipped**. **Phase D matcher shipped** (`phi_matcher` + Ψ-imprinter Δω penalty). **Phase G0 watchdog shipped** (re-shed while phoenix snapshot held; turrets autonomous). **Phase G incubator shipped** (`phi_incubator` prepays body costs). **Phase G+ signal shipped** (`phi_signal` LIT+redstone while snapshot held). **Phase E1 shipped** (Phoenix word chips + compiler for shed / signal / autonom). **Phase E2 shipped** (`soul_ghost` + `beacon` path to regen chamber). **Phase E3 shipped** (name tag → `kind#имя` in monitor / symbol table; compiler addressing later). Full word editor = later phase E.  
 **Depends on:** [PHI_FLOW_LAWS.md](PHI_FLOW_LAWS.md), seals word grammar ([SEAL_PROGRAMMING.md](SEAL_PROGRAMMING.md)), tower facility (`TowerFacility`, console, Ψ-computer).  
 **Roadmap:** Stage IV / Technomagic Era VI (nervous system atop Era IV–V reactors).
 
@@ -148,6 +148,7 @@ Lex Loci («закон места») — словесные **эдикты** д�
 | E0.5 | **Console Edicts tab (shipped)** — встроенный текст Феникса, тумблер, живые символы facility; без компилятора |
 | E1 | **Слова Феникса (shipped)** — 5 `loci_words` в консоли; компилятор `WHEN soul_dead` + `shed`/`signal`/`autonom`; пустые токены = встроенный эдикт |
 | E2 | **Проводник призрака (shipped)** — второе правило `WHEN soul_ghost` + `beacon`: action-bar координаты камеры регена и SOUL-частицы, пока владелец призрак |
+| E3 | **Имена устройств (shipped)** — бирка на facility → `kind#имя` в Status / символах Edicts; компилятор адресов позже |
 | E | Редактор Lex Loci + общий компилятор (адреса kind*, шины, телеграфы) |
 | F | **Φ-нить + клеммы (shipped)** — `PhiFilamentEntity` + mithril wire |
 | G0 | **Сторож + автономия турелей (shipped)** — пока на якоре phoenix-snapshot: каждые 2 с re-shed; турели `autonomous`+armed; clear на revive |

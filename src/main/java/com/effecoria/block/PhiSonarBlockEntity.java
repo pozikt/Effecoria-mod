@@ -1,6 +1,8 @@
 package com.effecoria.block;
 
 import com.effecoria.content.ModBlockEntities;
+import com.effecoria.core.tower.FacilityNames;
+import com.effecoria.core.tower.NamedFacilityDevice;
 import com.effecoria.core.tower.PhiSonarService;
 import com.effecoria.network.ModNetworking;
 
@@ -9,6 +11,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -18,11 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Cooldown + last Φ-sonar sweep (for console / cartography / goggles). */
-public final class PhiSonarBlockEntity extends BlockEntity {
+public final class PhiSonarBlockEntity extends BlockEntity implements NamedFacilityDevice {
     public static final int SCAN_COOLDOWN_TICKS = 160; // 8s
 
     private int cooldownTicks;
     private long lastScanGameTime = -1L;
+    private String facilityName = "";
 
     private int lastOriginX;
     private int lastOriginY;
@@ -39,6 +43,22 @@ public final class PhiSonarBlockEntity extends BlockEntity {
 
     public PhiSonarBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.PHI_SONAR.get(), pos, state);
+    }
+
+    @Override
+    public String facilityName() {
+        return facilityName;
+    }
+
+    @Override
+    public boolean setFacilityName(String name) {
+        String next = FacilityNames.sanitize(name);
+        if (next.equals(facilityName)) {
+            return true;
+        }
+        facilityName = next;
+        FacilityNames.markNamed(this);
+        return true;
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, PhiSonarBlockEntity be) {
@@ -139,6 +159,7 @@ public final class PhiSonarBlockEntity extends BlockEntity {
             }
             tag.put("ScanBlips", blipList);
         }
+        FacilityNames.save(tag, facilityName);
     }
 
     @Override
@@ -169,5 +190,16 @@ public final class PhiSonarBlockEntity extends BlockEntity {
             lastBlips = List.of();
             lastWidth = 0;
         }
+        facilityName = FacilityNames.load(tag);
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+        return saveWithoutMetadata(provider);
     }
 }

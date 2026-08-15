@@ -4,6 +4,8 @@ import com.effecoria.content.ModBlockEntities;
 import com.effecoria.content.ModItems;
 import com.effecoria.content.PhiHarnessItems;
 import com.effecoria.core.technomagic.TelegraphService;
+import com.effecoria.core.tower.FacilityNames;
+import com.effecoria.core.tower.NamedFacilityDevice;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.core.BlockPos;
@@ -159,7 +161,7 @@ public final class PhiTelegraphBlock extends BaseEntityBlock {
         super.onRemove(state, level, pos, newState, moved);
     }
 
-    public static final class PhiTelegraphBlockEntity extends BlockEntity {
+    public static final class PhiTelegraphBlockEntity extends BlockEntity implements NamedFacilityDevice {
         public static final float PULSE_CELL_COST = 0.05f;
         private ItemStack cell = ItemStack.EMPTY;
         @Nullable
@@ -168,9 +170,26 @@ public final class PhiTelegraphBlock extends BaseEntityBlock {
         private BlockPos linkedPos;
         private int pulseCooldown;
         private String lastMessage = "";
+        private String facilityName = "";
 
         public PhiTelegraphBlockEntity(BlockPos pos, BlockState state) {
             super(ModBlockEntities.PHI_TELEGRAPH.get(), pos, state);
+        }
+
+        @Override
+        public String facilityName() {
+            return facilityName;
+        }
+
+        @Override
+        public boolean setFacilityName(String name) {
+            String next = FacilityNames.sanitize(name);
+            if (next.equals(facilityName)) {
+                return true;
+            }
+            facilityName = next;
+            FacilityNames.markNamed(this);
+            return true;
         }
 
         public boolean hasLink() {
@@ -269,6 +288,7 @@ public final class PhiTelegraphBlock extends BaseEntityBlock {
             }
             tag.putInt("Cooldown", pulseCooldown);
             tag.putString("LastMsg", lastMessage);
+            FacilityNames.save(tag, facilityName);
         }
 
         @Override
@@ -288,6 +308,7 @@ public final class PhiTelegraphBlock extends BaseEntityBlock {
             }
             pulseCooldown = tag.getInt("Cooldown");
             lastMessage = tag.getString("LastMsg");
+            facilityName = FacilityNames.load(tag);
         }
     }
 }

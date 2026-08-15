@@ -7,6 +7,8 @@ import com.effecoria.core.alchemy.PhiPower;
 import com.effecoria.core.alchemy.TurretAim;
 import com.effecoria.core.alchemy.TurretAssembly;
 import com.effecoria.core.alchemy.TurretKind;
+import com.effecoria.core.tower.FacilityNames;
+import com.effecoria.core.tower.NamedFacilityDevice;
 import com.effecoria.entity.TurretBoltEntity;
 
 import net.minecraft.core.BlockPos;
@@ -49,7 +51,8 @@ import java.util.List;
 import java.util.UUID;
 
 /** Logic lives on the mount; fires only when a barrel is assembled. */
-public final class PhiTurretBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer {
+public final class PhiTurretBlockEntity extends BaseContainerBlockEntity
+        implements WorldlyContainer, NamedFacilityDevice {
     public static final int SLOT_AMMO = 0;
     public static final int SLOT_COUNT = 1;
 
@@ -87,6 +90,7 @@ public final class PhiTurretBlockEntity extends BaseContainerBlockEntity impleme
     private boolean aimInitialized;
     /** Game time when breech kick started; -1 = idle. */
     private long breechStartTick = -1L;
+    private String facilityName = "";
 
     private final ContainerData data = new ContainerData() {
         @Override
@@ -150,6 +154,22 @@ public final class PhiTurretBlockEntity extends BaseContainerBlockEntity impleme
 
     public TurretKind kind() {
         return kind;
+    }
+
+    @Override
+    public String facilityName() {
+        return facilityName;
+    }
+
+    @Override
+    public boolean setFacilityName(String name) {
+        String next = FacilityNames.sanitize(name);
+        if (next.equals(facilityName)) {
+            return true;
+        }
+        facilityName = next;
+        FacilityNames.markNamed(this);
+        return true;
     }
 
     public boolean formed() {
@@ -559,6 +579,7 @@ public final class PhiTurretBlockEntity extends BaseContainerBlockEntity impleme
         if (lastTargetId != null) {
             tag.putUUID("Target", lastTargetId);
         }
+        FacilityNames.save(tag, facilityName);
     }
 
     @Override
@@ -586,6 +607,7 @@ public final class PhiTurretBlockEntity extends BaseContainerBlockEntity impleme
         if (tag.hasUUID("Target")) {
             lastTargetId = tag.getUUID("Target");
         }
+        facilityName = FacilityNames.load(tag);
     }
 
     @Override
