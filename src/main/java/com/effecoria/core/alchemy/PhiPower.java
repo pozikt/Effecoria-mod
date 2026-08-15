@@ -236,7 +236,8 @@ public final class PhiPower {
             BlockState state = level.getBlockState(check);
             if (state.is(ModBlocks.HEART_REACTOR_PART.get())
                     || state.is(ModBlocks.FORGE_REACTOR_PART.get())
-                    || state.is(ModBlocks.GEO_WELL_PART.get())) {
+                    || state.is(ModBlocks.GEO_WELL_PART.get())
+                    || state.is(ModBlocks.STAR_REACTOR_PART.get())) {
                 continue;
             }
             // Conductors are Φ-transparent for wireless LOS through cabling / mithril frames.

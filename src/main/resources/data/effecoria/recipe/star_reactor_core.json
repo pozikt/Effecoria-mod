@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": { "item": "effecoria:geo_well_core" },
+    "P": { "item": "effecoria:purified_obsidian" },
+    "M": { "item": "effecoria:mithril_block" },
+    "S": { "item": "effecoria:star_essonite" },
+    "C": { "item": "effecoria:reactor_casing" }
+  },
+  "pattern": ["PMP", "CGS", "PMP"],
+  "result": { "count": 1, "id": "effecoria:star_reactor_core" }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:phi_artillery",
+  "era": 6,
+  "icon": "effecoria:phi_artillery_base",
+  "status": "available",
+  "requires": [
+    "effecoria:star_reactor"
+  ],
+  "display_unlocks": [
+    "effecoria:phi_beam_lens"
+  ]
+}

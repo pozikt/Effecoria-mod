@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": { "item": "effecoria:phi_glass" },
+    "S": { "item": "effecoria:star_essonite" },
+    "P": { "item": "effecoria:pure_essonite" },
+    "A": { "item": "minecraft:amethyst_shard" }
+  },
+  "pattern": [" G ", "ASA", " P "],
+  "result": { "count": 1, "id": "effecoria:phi_beam_lens" }
+}

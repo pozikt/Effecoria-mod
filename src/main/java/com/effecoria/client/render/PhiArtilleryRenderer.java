@@ -1,0 +1,149 @@
+package com.effecoria.client.render;
+
+import com.effecoria.EffecoriaMod;
+import com.effecoria.block.PhiArtilleryBaseBlock;
+import com.effecoria.block.PhiArtilleryBlockEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
+
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+
+import org.joml.Matrix4f;
+
+/**
+ * Formed Φ-artillery: yaw/pitch barrel + lens drawn above the floor pedestal.
+ * Local space: +Z is muzzle forward (matches {@link PhiArtilleryBlockEntity} aim).
+ */
+public final class PhiArtilleryRenderer implements BlockEntityRenderer<PhiArtilleryBlockEntity> {
+    private static final int OVERLAY = OverlayTexture.NO_OVERLAY;
+    private static final ResourceLocation HULL =
+            ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "textures/block/phi_artillery_base.png");
+    private static final ResourceLocation LENS =
+            ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "textures/block/phi_beam_lens.png");
+    private static final ResourceLocation LENS_ON =
+            ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "textures/block/phi_beam_lens_on.png");
+
+    public PhiArtilleryRenderer(BlockEntityRendererProvider.Context context) {}
+
+    @Override
+    public void render(
+            PhiArtilleryBlockEntity be,
+            float partialTick,
+            PoseStack poseStack,
+            MultiBufferSource buffer,
+            int packedLight,
+            int packedOverlay) {
+        BlockState state = be.getBlockState();
+        if (!(state.getBlock() instanceof PhiArtilleryBaseBlock) || !state.getValue(PhiArtilleryBaseBlock.FORMED)) {
+            return;
+        }
+        boolean lit = state.getValue(PhiArtilleryBaseBlock.LIT);
+        float yaw = be.yaw();
+        float pitch = be.pitch();
+
+        poseStack.pushPose();
+        poseStack.translate(0.5, 1.15, 0.5);
+        poseStack.mulPose(Axis.YP.rotationDegrees(-yaw));
+        poseStack.mulPose(Axis.XP.rotationDegrees(pitch));
+
+        {
+            VertexConsumer consumer = buffer.getBuffer(RenderType.entityCutoutNoCull(HULL));
+            drawBox(consumer, poseStack, -0.28f, -0.18f, -0.35f, 0.28f, 0.18f, 0.15f, packedLight);
+            drawBox(consumer, poseStack, -0.16f, -0.16f, 0.15f, 0.16f, 0.16f, 0.95f, packedLight);
+            drawBox(consumer, poseStack, -0.22f, -0.22f, 0.95f, 0.22f, 0.22f, 1.12f, packedLight);
+        }
+        {
+            VertexConsumer consumer = buffer.getBuffer(RenderType.entityCutoutNoCull(lit ? LENS_ON : LENS));
+            drawBox(consumer, poseStack, -0.12f, -0.12f, 0.25f, 0.12f, 0.12f, 1.05f, packedLight);
+            drawBox(consumer, poseStack, -0.18f, -0.18f, 1.05f, 0.18f, 0.18f, 1.22f, packedLight);
+        }
+
+        poseStack.popPose();
+    }
+
+    private static void drawBox(
+            VertexConsumer consumer,
+            PoseStack poseStack,
+            float x0,
+            float y0,
+            float z0,
+            float x1,
+            float y1,
+            float z1,
+            int light) {
+        Matrix4f mat = poseStack.last().pose();
+        PoseStack.Pose pose = poseStack.last();
+        quad(consumer, pose, mat, x0, y0, z1, x0, y0, z0, x1, y0, z0, x1, y0, z1, 0, -1, 0, light);
+        quad(consumer, pose, mat, x0, y1, z0, x0, y1, z1, x1, y1, z1, x1, y1, z0, 0, 1, 0, light);
+        quad(consumer, pose, mat, x1, y1, z0, x1, y0, z0, x0, y0, z0, x0, y1, z0, 0, 0, -1, light);
+        quad(consumer, pose, mat, x0, y1, z1, x0, y0, z1, x1, y0, z1, x1, y1, z1, 0, 0, 1, light);
+        quad(consumer, pose, mat, x0, y1, z0, x0, y0, z0, x0, y0, z1, x0, y1, z1, -1, 0, 0, light);
+        quad(consumer, pose, mat, x1, y1, z1, x1, y0, z1, x1, y0, z0, x1, y1, z0, 1, 0, 0, light);
+    }
+
+    private static void quad(
+            VertexConsumer consumer,
+            PoseStack.Pose pose,
+            Matrix4f mat,
+            float x0,
+            float y0,
+            float z0,
+            float x1,
+            float y1,
+            float z1,
+            float x2,
+            float y2,
+            float z2,
+            float x3,
+            float y3,
+            float z3,
+            float nx,
+            float ny,
+            float nz,
+            int light) {
+        vert(consumer, pose, mat, x0, y0, z0, 0f, 0f, nx, ny, nz, light);
+        vert(consumer, pose, mat, x1, y1, z1, 0f, 1f, nx, ny, nz, light);
+        vert(consumer, pose, mat, x2, y2, z2, 1f, 1f, nx, ny, nz, light);
+        vert(consumer, pose, mat, x3, y3, z3, 1f, 0f, nx, ny, nz, light);
+    }
+
+    private static void vert(
+            VertexConsumer consumer,
+            PoseStack.Pose pose,
+            Matrix4f mat,
+            float x,
+            float y,
+            float z,
+            float u,
+            float v,
+            float nx,
+            float ny,
+            float nz,
+            int light) {
+        consumer.addVertex(mat, x, y, z)
+                .setColor(255, 255, 255, 255)
+                .setUv(u, v)
+                .setOverlay(OVERLAY)
+                .setLight(light)
+                .setNormal(pose, nx, ny, nz);
+    }
+
+    @Override
+    public boolean shouldRenderOffScreen(PhiArtilleryBlockEntity be) {
+        return be.getBlockState().hasProperty(PhiArtilleryBaseBlock.FORMED)
+                && be.getBlockState().getValue(PhiArtilleryBaseBlock.FORMED);
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(PhiArtilleryBlockEntity be) {
+        return new AABB(be.getBlockPos()).inflate(2.5);
+    }
+}

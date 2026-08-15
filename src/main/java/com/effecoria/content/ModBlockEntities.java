@@ -21,6 +21,9 @@ import com.effecoria.block.ForgeReactorBlockEntity;
 import com.effecoria.block.ForgeReactorPartBlockEntity;
 import com.effecoria.block.GeoWellBlockEntity;
 import com.effecoria.block.GeoWellPartBlockEntity;
+import com.effecoria.block.StarReactorBlockEntity;
+import com.effecoria.block.StarReactorPartBlockEntity;
+import com.effecoria.block.PhiArtilleryBlockEntity;
 import com.effecoria.block.ClimateArrayBlockEntity;
 import com.effecoria.block.PortalGateBlockEntity;
 import com.effecoria.block.MithrilBlockEntity;
@@ -123,6 +126,26 @@ public final class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register(
                     "geo_well_part",
                     () -> BlockEntityType.Builder.of(GeoWellPartBlockEntity::new, ModBlocks.GEO_WELL_PART.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StarReactorBlockEntity>> STAR_REACTOR_CORE =
+            BLOCK_ENTITY_TYPES.register(
+                    "star_reactor_core",
+                    () -> BlockEntityType.Builder.of(StarReactorBlockEntity::new, ModBlocks.STAR_REACTOR_CORE.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StarReactorPartBlockEntity>> STAR_REACTOR_PART =
+            BLOCK_ENTITY_TYPES.register(
+                    "star_reactor_part",
+                    () -> BlockEntityType.Builder.of(
+                                    StarReactorPartBlockEntity::new, ModBlocks.STAR_REACTOR_PART.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhiArtilleryBlockEntity>> PHI_ARTILLERY =
+            BLOCK_ENTITY_TYPES.register(
+                    "phi_artillery",
+                    () -> BlockEntityType.Builder.of(
+                                    PhiArtilleryBlockEntity::new, ModBlocks.PHI_ARTILLERY_BASE.get())
                             .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ClimateArrayBlockEntity>> CLIMATE_ARRAY =

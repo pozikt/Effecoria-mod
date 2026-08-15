@@ -1,0 +1,14 @@
+{
+  "id": "effecoria:star_reactor",
+  "era": 6,
+  "icon": "effecoria:star_reactor_core",
+  "status": "available",
+  "requires": [
+    "effecoria:geo_well",
+    "effecoria:forge_reactor"
+  ],
+  "display_unlocks": [
+    "effecoria:star_reactor_core",
+    "effecoria:phi_artillery_base"
+  ]
+}

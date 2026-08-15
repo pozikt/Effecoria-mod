@@ -43,6 +43,8 @@ import com.effecoria.client.gui.alchemy.SparkReactorScreen;
 import com.effecoria.client.gui.alchemy.HeartReactorScreen;
 import com.effecoria.client.gui.alchemy.ForgeReactorScreen;
 import com.effecoria.client.gui.alchemy.GeoWellScreen;
+import com.effecoria.client.gui.alchemy.StarReactorScreen;
+import com.effecoria.client.gui.alchemy.PhiArtilleryScreen;
 import com.effecoria.client.gui.alchemy.ClimateArrayScreen;
 import com.effecoria.client.gui.alchemy.PhiCartographyScreen;
 import com.effecoria.client.gui.alchemy.TowerConsoleScreen;
@@ -55,6 +57,8 @@ import com.effecoria.client.gui.alchemy.PhiWaterPurifierScreen;
 import com.effecoria.client.render.PhiConstructRenderer;
 import com.effecoria.client.render.VitrifiedGolemRenderer;
 import com.effecoria.client.render.GeoWellRenderer;
+import com.effecoria.client.render.PhiArtilleryRenderer;
+import com.effecoria.client.render.StarReactorRenderer;
 import com.effecoria.content.ModBlocks;
 import com.effecoria.content.ModEntities;
 import com.effecoria.content.ModFluids;
@@ -86,6 +90,8 @@ public final class EffecoriaClient {
         event.register(ModMenus.HEART_REACTOR.get(), HeartReactorScreen::new);
         event.register(ModMenus.FORGE_REACTOR.get(), ForgeReactorScreen::new);
         event.register(ModMenus.GEO_WELL.get(), GeoWellScreen::new);
+        event.register(ModMenus.STAR_REACTOR.get(), StarReactorScreen::new);
+        event.register(ModMenus.PHI_ARTILLERY.get(), PhiArtilleryScreen::new);
         event.register(ModMenus.CLIMATE_ARRAY.get(), ClimateArrayScreen::new);
         event.register(ModMenus.TOWER_CONSOLE.get(), TowerConsoleScreen::new);
         event.register(ModMenus.PHI_CARTOGRAPHY_TABLE.get(), PhiCartographyScreen::new);
@@ -186,12 +192,16 @@ public final class EffecoriaClient {
         event.registerBlockEntityRenderer(
                 com.effecoria.content.ModBlockEntities.GEO_WELL_CORE.get(), GeoWellRenderer::new);
         event.registerBlockEntityRenderer(
+                com.effecoria.content.ModBlockEntities.STAR_REACTOR_CORE.get(), StarReactorRenderer::new);
+        event.registerBlockEntityRenderer(
                 com.effecoria.content.ModBlockEntities.PHI_SONAR.get(), PhiSonarRenderer::new);
         event.registerBlockEntityRenderer(
                 com.effecoria.content.ModBlockEntities.PORTAL_GATE.get(),
                 com.effecoria.client.render.PortalGateRenderer::new);
         event.registerBlockEntityRenderer(
                 com.effecoria.content.ModBlockEntities.PHI_TURRET.get(), TurretMountRenderer::new);
+        event.registerBlockEntityRenderer(
+                com.effecoria.content.ModBlockEntities.PHI_ARTILLERY.get(), PhiArtilleryRenderer::new);
     }
 
     @SubscribeEvent

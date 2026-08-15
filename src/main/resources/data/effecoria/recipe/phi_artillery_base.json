@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": { "item": "effecoria:reactor_casing" },
+    "M": { "item": "effecoria:mithril_ingot" },
+    "L": { "item": "effecoria:lead_block" },
+    "S": { "item": "effecoria:star_essonite" }
+  },
+  "pattern": ["CMC", "LSL", "CMC"],
+  "result": { "count": 1, "id": "effecoria:phi_artillery_base" }
+}

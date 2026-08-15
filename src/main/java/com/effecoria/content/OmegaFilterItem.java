@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.effecoria.block.ForgeReactorBlockEntity;
 import com.effecoria.block.GeoWellBlockEntity;
+import com.effecoria.block.StarReactorBlockEntity;
 import com.effecoria.block.PhiAccumulatorBlockEntity;
 import com.effecoria.block.PhiCouplerBlockEntity;
 import com.effecoria.block.PhiCrusherBlockEntity;
@@ -45,6 +46,8 @@ public final class OmegaFilterItem extends Item {
             cleared = forge.clearOmegaMeter();
         } else if (be instanceof GeoWellBlockEntity well) {
             cleared = well.clearOmegaMeter();
+        } else if (be instanceof StarReactorBlockEntity star) {
+            cleared = star.clearOmegaMeter();
         } else if (be instanceof PhiCouplerBlockEntity coupler) {
             cleared = coupler.clearOmegaMeter();
         } else if (be instanceof PhiAccumulatorBlockEntity acc) {

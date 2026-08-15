@@ -22,7 +22,7 @@ See also [ROADMAP.md](ROADMAP.md) Stage IV.
 | III — Imprint | Ψ-imprinter, golem / telegraph, artifact craft, seals, jewelry, **Φ-crusher** | **Playable** |
 | IV — Reactors | Spark, Heart 3×3×3, Φ-bus, Forge 3×4×3, **Φ-turrets**, **Φ-fabricator I–II** | **Playable** |
 | V — Geo | Geo Well 3×3×3, Climate Array, mithril-frame Portal | **Playable** |
-| VI — Sky | **Φ-fabricator III**; further sky tech planned | **Partial** |
+| VI — Sky | **Star Reactor 5×5×5**, **Φ-artillery** (thermal beam); further sky tech planned | **Partial** |
 
 ## Era IV Heart multiblock (3×3×3)
 
@@ -120,6 +120,24 @@ Three blocks share one BE: `phi_fabricator` / `phi_fabricator_ii` / `phi_fabrica
 
 Blank crystal craft: essonite shard + glass + Φ-paper.
 
+## Era VI Star Reactor (5×5×5)
+
+Around `star_reactor_core` (offsets ∈ {-2..2}):
+
+| Cell | Block |
+|------|--------|
+| Outer corners (`max==2`, all abs==2) | `purified_obsidian` |
+| Outer edges (`max==2`, two abs==2) | `mithril_block` |
+| Outer faces (`max==2`, one abs==2) | `phi_glass` |
+| Inner shell (`max==1`) | `reactor_casing` |
+| Center | `star_reactor_core` |
+
+Assembles like Heart/Geo (invisible `star_reactor_part` + BER 5×5×5 hull). Fuel: `star_essonite` / `pure_essonite` / charged Φ-cell (≥85%). Coolant on Chebyshev ring **3**. While formed+running+cooled+Ω&lt;25%: `PhiPowerProvider` radius **40**, factor **3.0**, hub registration. Clear Ω with `omega_filter`. Operate gate Era VI.
+
+## Era VI Φ-artillery (thermal beam)
+
+`phi_artillery_base` (floor) + `phi_beam_lens` on top → `FORMED`. GUI: yaw/pitch ±5°, Fire pulse, Hold toggle. Needs `PhiPower` factor ≥ **2.5** (Star wireless hub or Forge ENERGY + bus). Continuous Hold drains ~100 load/tick. Ray range 64: melts soft stone path, ignites entities; bumps facility Ω. Ψ/Ω/Spatial/Chrono beams later.
+
 ### Crusher / forge byproduct sinks
 
 | Output | Sink |
@@ -150,6 +168,9 @@ flowchart LR
   geo --> bus
   geo --> climate[climate_array]
   geo --> portal[portal_modulator]
+  geo --> star[star_reactor]
+  star --> bus
+  star --> arty[phi_artillery]
   mithril[mithril_block] --> portal
   portal --> film[portal_film]
   beacon[phi_beacon] --> portal

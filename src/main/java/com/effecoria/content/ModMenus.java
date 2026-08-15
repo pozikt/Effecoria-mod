@@ -15,6 +15,8 @@ import com.effecoria.alchemy.menu.SparkReactorMenu;
 import com.effecoria.alchemy.menu.HeartReactorMenu;
 import com.effecoria.alchemy.menu.ForgeReactorMenu;
 import com.effecoria.alchemy.menu.GeoWellMenu;
+import com.effecoria.alchemy.menu.StarReactorMenu;
+import com.effecoria.alchemy.menu.PhiArtilleryMenu;
 import com.effecoria.alchemy.menu.ClimateArrayMenu;
 import com.effecoria.alchemy.menu.PhiCartographyMenu;
 import com.effecoria.alchemy.menu.TowerConsoleMenu;
@@ -53,6 +55,12 @@ public final class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<GeoWellMenu>> GEO_WELL =
             MENUS.register("geo_well", () -> IMenuTypeExtension.create(GeoWellMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<StarReactorMenu>> STAR_REACTOR =
+            MENUS.register("star_reactor", () -> IMenuTypeExtension.create(StarReactorMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<PhiArtilleryMenu>> PHI_ARTILLERY =
+            MENUS.register("phi_artillery", () -> IMenuTypeExtension.create(PhiArtilleryMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<ClimateArrayMenu>> CLIMATE_ARRAY =
             MENUS.register("climate_array", () -> IMenuTypeExtension.create(ClimateArrayMenu::new));

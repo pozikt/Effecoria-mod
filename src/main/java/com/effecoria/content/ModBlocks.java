@@ -15,6 +15,10 @@ import com.effecoria.block.OmegaBladesBlock;
 import com.effecoria.block.OmegaAnchorBlock;
 import com.effecoria.block.GeoWellBlock;
 import com.effecoria.block.GeoWellPartBlock;
+import com.effecoria.block.StarReactorBlock;
+import com.effecoria.block.StarReactorPartBlock;
+import com.effecoria.block.PhiArtilleryBaseBlock;
+import com.effecoria.block.PhiBeamLensBlock;
 import com.effecoria.block.ClimateArrayBlock;
 import com.effecoria.block.PortalGateBlock;
 import com.effecoria.block.PortalModulatorBlock;
@@ -879,6 +883,45 @@ public final class ModBlocks {
                     .noLootTable()
                     .isViewBlocking((state, level, pos) -> true)
                     .isSuffocating((state, level, pos) -> true)));
+
+    /** Era VI Star Reactor core — 5×5×5 high-tier Φ hub. */
+    public static final DeferredBlock<StarReactorBlock> STAR_REACTOR_CORE = BLOCKS.register(
+            "star_reactor_core",
+            () -> new StarReactorBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.GOLD)
+                    .strength(6.0f, 12f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> state.getValue(StarReactorBlock.LIT) ? 15 : 2)));
+
+    public static final DeferredBlock<StarReactorPartBlock> STAR_REACTOR_PART = BLOCKS.register(
+            "star_reactor_part",
+            () -> new StarReactorPartBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.GOLD)
+                    .strength(6.0f, 12f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noLootTable()
+                    .isViewBlocking((state, level, pos) -> true)
+                    .isSuffocating((state, level, pos) -> true)));
+
+    public static final DeferredBlock<PhiArtilleryBaseBlock> PHI_ARTILLERY_BASE = BLOCKS.register(
+            "phi_artillery_base",
+            () -> new PhiArtilleryBaseBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(4.0f, 10f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(s -> s.getValue(PhiArtilleryBaseBlock.LIT) ? 12 : 0)));
+
+    public static final DeferredBlock<PhiBeamLensBlock> PHI_BEAM_LENS = BLOCKS.register(
+            "phi_beam_lens",
+            () -> new PhiBeamLensBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(3.5f, 8f)
+                    .sound(SoundType.GLASS)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
 
     /** Era V Climate Array — local Φ-weather emitter. */
     public static final DeferredBlock<ClimateArrayBlock> CLIMATE_ARRAY = BLOCKS.register(

@@ -1,15 +1,15 @@
 package com.effecoria.client.gui.alchemy;
 
-import com.effecoria.alchemy.menu.HeartReactorMenu;
+import com.effecoria.alchemy.menu.StarReactorMenu;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
-/** Heart Reactor — tower-console chrome. */
-public final class HeartReactorScreen extends AbstractContainerScreen<HeartReactorMenu> {
-    public HeartReactorScreen(HeartReactorMenu menu, Inventory inv, Component title) {
+/** Star Reactor — tower-console chrome. */
+public final class StarReactorScreen extends AbstractContainerScreen<StarReactorMenu> {
+    public StarReactorScreen(StarReactorMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         this.imageWidth = AlchemyGui.WIDTH;
         this.imageHeight = AlchemyGui.HEIGHT;
@@ -24,7 +24,7 @@ public final class HeartReactorScreen extends AbstractContainerScreen<HeartReact
 
     private void toggle() {
         if (minecraft != null && minecraft.gameMode != null) {
-            minecraft.gameMode.handleInventoryButtonClick(menu.containerId, HeartReactorMenu.BUTTON_TOGGLE);
+            minecraft.gameMode.handleInventoryButtonClick(menu.containerId, StarReactorMenu.BUTTON_TOGGLE);
         }
     }
 
@@ -33,30 +33,34 @@ public final class HeartReactorScreen extends AbstractContainerScreen<HeartReact
         TowerChrome.drawReactorShell(graphics, leftPos, topPos);
         TowerChrome.drawSlot(graphics, leftPos, topPos, 80, 35, false);
 
-        float factor = Math.min(1f, menu.powerFactor() / 2f);
-        TowerChrome.drawGauge(graphics, leftPos, topPos, 53, 54, 70, 4, factor, TowerChrome.ACCENT);
+        float fuel = Math.min(1f, menu.fuelTicks() / 24000f);
+        TowerChrome.drawGauge(graphics, leftPos, topPos, 53, 54, 70, 4, fuel, TowerChrome.WARN);
+        float omega = Math.min(1f, menu.omegaCentis() / 10000f);
+        TowerChrome.drawGauge(graphics, leftPos, topPos, 53, 49, 70, 3, omega, TowerChrome.OMEGA);
 
         boolean running = menu.running();
-        TowerChrome.drawChip(graphics, leftPos, topPos, 61, 58, 54, 16, running, menu.overheatCooldown() > 0);
-        String toggleKey = running ? "gui.effecoria.heart_reactor.stop" : "gui.effecoria.heart_reactor.start";
+        TowerChrome.drawChip(graphics, leftPos, topPos, 61, 58, 54, 16, running, !menu.cooled() && running);
+        String toggleKey = running ? "gui.effecoria.star_reactor.stop" : "gui.effecoria.star_reactor.start";
         graphics.drawCenteredString(
                 font, Component.translatable(toggleKey), leftPos + 88, topPos + 62, TowerChrome.LABEL);
 
         if (!menu.formed()) {
             TowerChrome.drawStatus(
-                    graphics, font, Component.translatable("gui.effecoria.heart_reactor.not_formed"), leftPos, topPos, TowerChrome.BAD);
-        } else if (menu.overheatCooldown() > 0) {
-            TowerChrome.drawStatus(
-                    graphics, font, Component.translatable("gui.effecoria.heart_reactor.overheated"), leftPos, topPos, TowerChrome.BAD);
-        } else if (menu.boostTicks() > 0) {
-            TowerChrome.drawStatus(
-                    graphics, font, Component.translatable("gui.effecoria.heart_reactor.boost"), leftPos, topPos, TowerChrome.WARN);
+                    graphics, font, Component.translatable("gui.effecoria.star_reactor.not_formed"), leftPos, topPos, TowerChrome.BAD);
         } else if (menu.running() && !menu.cooled()) {
             TowerChrome.drawStatus(
-                    graphics, font, Component.translatable("gui.effecoria.heart_reactor.hot"), leftPos, topPos, TowerChrome.WARN);
-        } else if (menu.formed() && menu.primed()) {
+                    graphics, font, Component.translatable("gui.effecoria.star_reactor.hot"), leftPos, topPos, TowerChrome.WARN);
+        } else if (menu.running()) {
             TowerChrome.drawStatus(
-                    graphics, font, Component.translatable("gui.effecoria.heart_reactor.formed"), leftPos, topPos, TowerChrome.OK);
+                    graphics,
+                    font,
+                    Component.translatable("gui.effecoria.star_reactor.running", String.format("%.1f", menu.powerFactor())),
+                    leftPos,
+                    topPos,
+                    TowerChrome.OK);
+        } else if (menu.formed()) {
+            TowerChrome.drawStatus(
+                    graphics, font, Component.translatable("gui.effecoria.star_reactor.formed"), leftPos, topPos, TowerChrome.IDLE);
         }
     }
 
@@ -73,14 +77,22 @@ public final class HeartReactorScreen extends AbstractContainerScreen<HeartReact
         super.render(graphics, mouseX, mouseY, partialTick);
         renderTooltip(graphics, mouseX, mouseY);
         if (isHovering(80, 35, 16, 16, mouseX, mouseY)) {
-            graphics.renderTooltip(font, Component.translatable("gui.effecoria.heart_reactor.catalyst"), mouseX, mouseY);
+            graphics.renderTooltip(
+                    font, Component.translatable("gui.effecoria.star_reactor.fuel", menu.fuelTicks()), mouseX, mouseY);
         } else if (isHovering(61, 58, 54, 16, mouseX, mouseY)) {
             graphics.renderTooltip(
                     font,
                     Component.translatable(
                             menu.running()
-                                    ? "gui.effecoria.heart_reactor.stop"
-                                    : "gui.effecoria.heart_reactor.start"),
+                                    ? "gui.effecoria.star_reactor.stop"
+                                    : "gui.effecoria.star_reactor.start"),
+                    mouseX,
+                    mouseY);
+        } else if (isHovering(53, 49, 70, 9, mouseX, mouseY)) {
+            graphics.renderTooltip(
+                    font,
+                    Component.translatable(
+                            "gui.effecoria.star_reactor.omega", menu.omegaCentis() / 100, menu.fuelTicks()),
                     mouseX,
                     mouseY);
         }

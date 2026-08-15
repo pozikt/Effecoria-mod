@@ -148,6 +148,9 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.FORGE_REACTOR_CORE.get());
                         output.accept(ModItems.GEO_CASING.get());
                         output.accept(ModItems.GEO_WELL_CORE.get());
+                        output.accept(ModItems.STAR_REACTOR_CORE.get());
+                        output.accept(ModItems.PHI_ARTILLERY_BASE.get());
+                        output.accept(ModItems.PHI_BEAM_LENS.get());
                         output.accept(ModItems.CLIMATE_ARRAY.get());
                         output.accept(ModItems.PORTAL_MODULATOR.get());
                         output.accept(ModItems.PHI_BEACON.get());

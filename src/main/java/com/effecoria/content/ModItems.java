@@ -271,6 +271,20 @@ public final class ModItems {
             "geo_well_core",
             () -> new HintBlockItem(
                     ModBlocks.GEO_WELL_CORE.get(), new Item.Properties(), "tooltip.effecoria.geo_well"));
+    public static final DeferredItem<BlockItem> STAR_REACTOR_CORE = ITEMS.register(
+            "star_reactor_core",
+            () -> new HintBlockItem(
+                    ModBlocks.STAR_REACTOR_CORE.get(), new Item.Properties(), "tooltip.effecoria.star_reactor"));
+    public static final DeferredItem<BlockItem> PHI_ARTILLERY_BASE = ITEMS.register(
+            "phi_artillery_base",
+            () -> new HintBlockItem(
+                    ModBlocks.PHI_ARTILLERY_BASE.get(),
+                    new Item.Properties(),
+                    "tooltip.effecoria.phi_artillery_base"));
+    public static final DeferredItem<BlockItem> PHI_BEAM_LENS = ITEMS.register(
+            "phi_beam_lens",
+            () -> new HintBlockItem(
+                    ModBlocks.PHI_BEAM_LENS.get(), new Item.Properties(), "tooltip.effecoria.phi_beam_lens"));
     public static final DeferredItem<BlockItem> CLIMATE_ARRAY = ITEMS.register(
             "climate_array",
             () -> new HintBlockItem(
