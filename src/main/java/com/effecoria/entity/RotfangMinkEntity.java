@@ -21,8 +21,20 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.PlayState;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
+
 /** Rotfang Mink — Scar fox-analogue; Ω-bite wounds refuse to heal. */
-public class RotfangMinkEntity extends Fox {
+public class RotfangMinkEntity extends Fox implements GeoEntity {
+    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.rotfang_mink.idle");
+    private static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.rotfang_mink.walk");
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+
     public RotfangMinkEntity(EntityType<? extends RotfangMinkEntity> type, Level level) {
         super(type, level);
     }
@@ -64,5 +76,22 @@ public class RotfangMinkEntity extends Fox {
         if (random.nextFloat() < 0.65f) {
             spawnAtLocation(new ItemStack(ModItems.DISTORTED_BONE.get(), 1 + random.nextInt(2)));
         }
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "main", 3, state -> {
+            if (state.isMoving() || state.getLimbSwingAmount() > 0.02f) {
+                state.setAnimation(WALK);
+            } else {
+                state.setAnimation(IDLE);
+            }
+            return PlayState.CONTINUE;
+        }));
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
     }
 }

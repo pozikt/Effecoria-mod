@@ -12,8 +12,20 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.PlayState;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
+
 /** Emerald Canopy treant — neutral guardian until the Forest Mind turns hostile. */
-public class PhiEntEntity extends IronGolem {
+public class PhiEntEntity extends IronGolem implements GeoEntity {
+    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.phi_ent.idle");
+    private static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.phi_ent.walk");
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+
     public PhiEntEntity(EntityType<? extends PhiEntEntity> type, Level level) {
         super(type, level);
     }
@@ -50,5 +62,22 @@ public class PhiEntEntity extends IronGolem {
                             return EmeraldCanopyService.isHostileMind(blockPosition())
                                     && EmeraldCanopyService.hasHarmedForest(player);
                         }));
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "main", 3, state -> {
+            if (state.isMoving() || state.getLimbSwingAmount() > 0.02f) {
+                state.setAnimation(WALK);
+            } else {
+                state.setAnimation(IDLE);
+            }
+            return PlayState.CONTINUE;
+        }));
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
     }
 }

@@ -20,8 +20,20 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.PlayState;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
+
 /** Ω-Worm — oversized Scar silverfish that feeds on Ω-soil. */
-public class OmegaWormEntity extends Silverfish {
+public class OmegaWormEntity extends Silverfish implements GeoEntity {
+    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.omega_worm.idle");
+    private static final RawAnimation CRAWL = RawAnimation.begin().thenLoop("animation.omega_worm.crawl");
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+
     public OmegaWormEntity(EntityType<? extends OmegaWormEntity> type, Level level) {
         super(type, level);
     }
@@ -65,5 +77,22 @@ public class OmegaWormEntity extends Silverfish {
         if (random.nextFloat() < 0.25f) {
             spawnAtLocation(new ItemStack(ModItems.DISTORTED_BONE.get()));
         }
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "main", 3, state -> {
+            if (state.isMoving() || state.getLimbSwingAmount() > 0.02f) {
+                state.setAnimation(CRAWL);
+            } else {
+                state.setAnimation(IDLE);
+            }
+            return PlayState.CONTINUE;
+        }));
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
     }
 }

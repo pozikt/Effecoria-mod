@@ -1,0 +1,217 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.omega_shade.idle": {
+      "loop": true,
+      "animation_length": 2.0,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0": {
+              "vector": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "0.5": {
+              "vector": [
+                0,
+                0,
+                1
+              ]
+            },
+            "1.0": {
+              "vector": [
+                0,
+                0,
+                -1
+              ]
+            }
+          }
+        },
+        "head": {
+          "rotation": {
+            "0": {
+              "vector": [
+                0,
+                -3,
+                0
+              ]
+            },
+            "0.5": {
+              "vector": [
+                0,
+                3,
+                0
+              ]
+            },
+            "1.0": {
+              "vector": [
+                0,
+                -3,
+                0
+              ]
+            }
+          }
+        }
+      }
+    },
+    "animation.omega_shade.fly": {
+      "loop": true,
+      "animation_length": 1.0,
+      "bones": {
+        "left_leg": {
+          "rotation": {
+            "0": {
+              "vector": [
+                20,
+                0,
+                0
+              ]
+            },
+            "0.5": {
+              "vector": [
+                -20,
+                0,
+                0
+              ]
+            },
+            "1.0": {
+              "vector": [
+                20,
+                0,
+                0
+              ]
+            }
+          }
+        },
+        "right_leg": {
+          "rotation": {
+            "0": {
+              "vector": [
+                -20,
+                0,
+                0
+              ]
+            },
+            "0.5": {
+              "vector": [
+                20,
+                0,
+                0
+              ]
+            },
+            "1.0": {
+              "vector": [
+                -20,
+                0,
+                0
+              ]
+            }
+          }
+        },
+        "left_arm": {
+          "rotation": {
+            "0": {
+              "vector": [
+                -15,
+                0,
+                4
+              ]
+            },
+            "0.5": {
+              "vector": [
+                15,
+                0,
+                4
+              ]
+            },
+            "1.0": {
+              "vector": [
+                -15,
+                0,
+                4
+              ]
+            }
+          }
+        },
+        "right_arm": {
+          "rotation": {
+            "0": {
+              "vector": [
+                15,
+                0,
+                4
+              ]
+            },
+            "0.5": {
+              "vector": [
+                -15,
+                0,
+                4
+              ]
+            },
+            "1.0": {
+              "vector": [
+                15,
+                0,
+                4
+              ]
+            }
+          }
+        },
+        "cloak_l": {
+          "rotation": {
+            "0": {
+              "vector": [
+                0,
+                0,
+                -35
+              ]
+            },
+            "0.5": {
+              "vector": [
+                0,
+                0,
+                35
+              ]
+            },
+            "1.0": {
+              "vector": [
+                0,
+                0,
+                -35
+              ]
+            }
+          }
+        },
+        "cloak_r": {
+          "rotation": {
+            "0": {
+              "vector": [
+                0,
+                0,
+                -35
+              ]
+            },
+            "0.5": {
+              "vector": [
+                0,
+                0,
+                35
+              ]
+            },
+            "1.0": {
+              "vector": [
+                0,
+                0,
+                -35
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -13,9 +13,20 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.PlayState;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
+
 /** Shy canopy lemur — panics easily and fades when stared at. */
-public class PhiLemurEntity extends Fox {
+public class PhiLemurEntity extends Fox implements GeoEntity {
     private static final double LOOK_DOT_THRESHOLD = 0.96;
+    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.phi_lemur.idle");
+    private static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.phi_lemur.walk");
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     public PhiLemurEntity(EntityType<? extends PhiLemurEntity> type, Level level) {
         super(type, level);
@@ -61,5 +72,22 @@ public class PhiLemurEntity extends Fox {
                         getZ() - player.getZ())
                 .normalize();
         return view.dot(toMob) >= LOOK_DOT_THRESHOLD;
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "main", 3, state -> {
+            if (state.isMoving() || state.getLimbSwingAmount() > 0.02f) {
+                state.setAnimation(WALK);
+            } else {
+                state.setAnimation(IDLE);
+            }
+            return PlayState.CONTINUE;
+        }));
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
     }
 }

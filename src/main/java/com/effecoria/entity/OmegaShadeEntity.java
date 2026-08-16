@@ -16,10 +16,22 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.PlayState;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
+
 import java.util.EnumSet;
 
 /** Ω-Shade — Scar parasite built on vex flight; drains Ψ when latched. */
-public class OmegaShadeEntity extends Vex {
+public class OmegaShadeEntity extends Vex implements GeoEntity {
+    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.omega_shade.idle");
+    private static final RawAnimation FLY = RawAnimation.begin().thenLoop("animation.omega_shade.fly");
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+
     public OmegaShadeEntity(EntityType<? extends OmegaShadeEntity> type, Level level) {
         super(type, level);
     }
@@ -108,5 +120,22 @@ public class OmegaShadeEntity extends Vex {
                 }
             }
         }
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "main", 3, state -> {
+            if (state.isMoving() || state.getLimbSwingAmount() > 0.02f) {
+                state.setAnimation(FLY);
+            } else {
+                state.setAnimation(IDLE);
+            }
+            return PlayState.CONTINUE;
+        }));
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
     }
 }
