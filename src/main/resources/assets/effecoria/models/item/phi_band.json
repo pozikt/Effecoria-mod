@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "effecoria:item/phi_cell"
+    "layer0": "effecoria:item/phi_band"
   }
 }

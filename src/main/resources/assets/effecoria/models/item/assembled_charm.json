@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "effecoria:item/lead_filter"
+    "layer0": "effecoria:item/assembled_charm"
   }
 }

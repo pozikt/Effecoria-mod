@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "effecoria:item/resonance_focus"
+    "layer0": "effecoria:item/faceted_focus"
   }
 }

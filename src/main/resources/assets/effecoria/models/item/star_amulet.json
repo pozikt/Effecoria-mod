@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "effecoria:item/star_essonite"
+    "layer0": "effecoria:item/star_amulet"
   }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "effecoria:item/essonite_shard"
+    "layer0": "effecoria:item/jewelry_gem"
   }
 }

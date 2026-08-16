@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "effecoria:item/gold_amulet"
+    "layer0": "effecoria:item/assembled_amulet"
   }
 }
