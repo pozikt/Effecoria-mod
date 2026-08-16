@@ -136,7 +136,7 @@ Assembles like Heart/Geo (invisible `star_reactor_part` + BER 5×5×5 hull). Fue
 
 ## Era VI Φ-artillery (thermal beam)
 
-`phi_artillery_base` (floor) + `phi_beam_lens` on top → `FORMED`. GUI: yaw/pitch ±5°, Fire pulse, Hold toggle. Needs `PhiPower` factor ≥ **2.5** (Star wireless hub or Forge ENERGY + bus). Continuous Hold drains ~100 load/tick. Ray range 64: melts soft stone path, ignites entities; bumps facility Ω. Ψ/Ω/Spatial/Chrono beams later.
+`phi_artillery_base` (floor) + `phi_beam_lens` on top → `FORMED`. GUI: yaw/pitch ±5°, Fire pulse, Hold toggle. Needs `PhiPower` factor ≥ **2.5** (Star wireless hub or Forge ENERGY + bus). Continuous Hold drains ~100 load/tick. Ray range **128**: force-loads chunks along the path (siege bore past view distance), melts a budget of blocks/tick (incl. soft neighbors; obsidian cracks), heavy fire damage; client BER draws a cyan laser beam. Bumps facility Ω. Ψ/Ω/Spatial/Chrono beams later.
 
 ### Crusher / forge byproduct sinks
 
