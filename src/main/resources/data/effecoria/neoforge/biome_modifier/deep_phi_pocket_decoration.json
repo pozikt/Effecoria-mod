@@ -1,0 +1,9 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#effecoria:is_deep_phi_pocket",
+  "features": [
+    "effecoria:deep_phi_essonite_druze",
+    "effecoria:deep_phi_essonite_dripstone"
+  ],
+  "step": "underground_decoration"
+}

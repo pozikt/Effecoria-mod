@@ -3,6 +3,11 @@
 Rare **jagged-peak mountain** (TerraBlender `PEAK_*` + `EROSION_0`, surface only).
 `/locate biome` should land on a highland summit — not an orphan cave pocket.
 
+**Not Stage III deep Φ:** plateau crystal caverns stay column-gated under the peak
+(`effecoria:under_plateau_surface`). Overworld **Deep Φ pockets** (`effecoria:deep_phi_pocket`)
+are a separate underground biome (dripstone-cave niche) with entropy/Darkness ambient —
+see [ROADMAP.md](ROADMAP.md) Stage III.
+
 Under that mountain, Φ generation follows the **surface column** to bedrock
 (`effecoria:under_plateau_surface`), even when 3D underground biomes differ:
 

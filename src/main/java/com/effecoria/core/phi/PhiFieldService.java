@@ -6,6 +6,7 @@ import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.world.CrystalForestService;
 import com.effecoria.world.DeadWastelandService;
+import com.effecoria.world.DeepPhiPocketService;
 import com.effecoria.world.EmeraldCanopyService;
 import com.effecoria.world.EssencePlateauService;
 import com.effecoria.world.OmegaScarService;
@@ -62,6 +63,7 @@ public final class PhiFieldService {
         value += CrystalForestService.phiEnvironmentBonus(level, pos);
         value += EmeraldCanopyService.phiEnvironmentBonus(level, pos);
         value += OmegaScarService.phiEnvironmentBonus(level, pos);
+        value += DeepPhiPocketService.phiEnvironmentBonus(level, pos);
         value += WhisperingSpireService.phiBonus(level, pos);
         value += com.effecoria.world.weather.PhiWeatherService.phiEnvironmentBonus(level, pos);
 

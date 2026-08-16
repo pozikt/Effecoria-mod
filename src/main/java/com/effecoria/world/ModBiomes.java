@@ -31,4 +31,8 @@ public final class ModBiomes {
     /** Ω causality rupture — fog/rain and Blood Rain eligibility. */
     public static final ResourceKey<Biome> OMEGA_SCAR =
             ResourceKey.create(Registries.BIOME, EffecoriaMod.id("omega_scar"));
+
+    /** Deep Φ pocket — low light, high entropy underground cave biome. */
+    public static final ResourceKey<Biome> DEEP_PHI_POCKET =
+            ResourceKey.create(Registries.BIOME, EffecoriaMod.id("deep_phi_pocket"));
 }

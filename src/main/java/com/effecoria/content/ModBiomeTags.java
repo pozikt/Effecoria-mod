@@ -32,4 +32,8 @@ public final class ModBiomeTags {
     /** Ω-Scar — causality rupture biome. */
     public static final TagKey<Biome> OMEGA_SCAR = TagKey.create(
             Registries.BIOME, EffecoriaMod.id("is_omega_scar"));
+
+    /** Deep Φ pocket — high-entropy underground caves. */
+    public static final TagKey<Biome> DEEP_PHI_POCKET = TagKey.create(
+            Registries.BIOME, EffecoriaMod.id("is_deep_phi_pocket"));
 }

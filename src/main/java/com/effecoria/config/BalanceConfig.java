@@ -598,6 +598,23 @@ public final class BalanceConfig {
             .comment("Chance every 5s (after long exposure) to snag a micro time-loop")
             .defineInRange("omega_scar_loop_chance", 0.04, 0.0, 0.5);
 
+    // --- Deep Φ pocket ---
+    public static final ModConfigSpec.DoubleValue DEEP_PHI_POCKET_PHI_BONUS = BUILDER
+            .comment("Additive Φ bonus in deep Φ pocket caves (offsets underground Φ nerf)")
+            .defineInRange("deep_phi_pocket_phi_bonus", 0.22, -2.0, 3.0);
+
+    public static final ModConfigSpec.DoubleValue DEEP_PHI_POCKET_ENTROPY_PULSE = BUILDER
+            .comment("Entropy (b) pulse every 2s after short exposure in deep Φ pockets")
+            .defineInRange("deep_phi_pocket_entropy_pulse", 0.028, 0.0, 1.0);
+
+    public static final ModConfigSpec.IntValue DEEP_PHI_POCKET_DARKNESS_COOLDOWN = BUILDER
+            .comment("Game-time ticks between brief Darkness pulses in deep Φ pockets (default 120s; survives biome border flicker)")
+            .defineInRange("deep_phi_pocket_darkness_cooldown", 2400, 200, 12000);
+
+    public static final ModConfigSpec.IntValue DEEP_PHI_POCKET_DARKNESS_DURATION = BUILDER
+            .comment("Brief Darkness pulse duration (ticks) in deep Φ pockets; 0 disables the pulse")
+            .defineInRange("deep_phi_pocket_darkness_duration", 30, 0, 200);
+
     public static final ModConfigSpec.IntValue GEYSER_DORMANT_MIN_TICKS = BUILDER
             .comment("Minimum Φ-geyser dormant phase duration")
             .defineInRange("geyser_dormant_min_ticks", 4800, 200, 240000);
