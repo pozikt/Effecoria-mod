@@ -1,1 +1,6 @@
-{ "parent": "minecraft:item/generated", "textures": { "layer0": "effecoria:item/potion_phi_stimulant" } }
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "effecoria:item/anti_phi_serum"
+  }
+}

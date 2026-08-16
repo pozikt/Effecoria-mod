@@ -1,1 +1,6 @@
-{ "parent": "minecraft:item/generated", "textures": { "layer0": "effecoria:item/potion_phi_resistance" } }
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "effecoria:item/potion_omega_cleanse"
+  }
+}

@@ -1,1 +1,6 @@
-{ "parent": "minecraft:item/generated", "textures": { "layer0": "effecoria:item/essence_clay_salve" } }
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "effecoria:item/omega_amputation_salve"
+  }
+}

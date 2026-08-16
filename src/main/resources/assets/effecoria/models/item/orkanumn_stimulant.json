@@ -1,1 +1,6 @@
-{ "parent": "minecraft:item/generated", "textures": { "layer0": "effecoria:item/potion_phi_resonance" } }
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "effecoria:item/orkanumn_stimulant"
+  }
+}

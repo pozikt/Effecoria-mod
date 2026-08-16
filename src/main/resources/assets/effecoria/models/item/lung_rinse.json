@@ -1,1 +1,6 @@
-{ "parent": "minecraft:item/generated", "textures": { "layer0": "effecoria:item/potion_phi_tonic" } }
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "effecoria:item/lung_rinse"
+  }
+}
