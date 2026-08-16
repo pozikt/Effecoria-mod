@@ -72,10 +72,12 @@ public final class PhoenixShedService {
             applyDisarm(level, anchorPos, ofActuator(alive, LociActuator.DISARM));
         }
         ListTag snap = anchor.takePhoenixSnapshot();
-        if (snap == null || snap.isEmpty()) {
-            return;
+        if (snap != null && !snap.isEmpty()) {
+            restoreSnapshot(level, snap);
         }
-        restoreSnapshot(level, snap);
+        if (!alive.isEmpty()) {
+            applyFeedActuations(level, anchorPos, ofActuator(alive, LociActuator.FEED));
+        }
     }
 
     /**
@@ -106,6 +108,7 @@ public final class PhoenixShedService {
         }
         var dead = program.actuationsFor(LociEvent.SOUL_DEAD);
         applyShedActuations(level, anchorPos, ofActuator(dead, LociActuator.SHED));
+        applyFeedActuations(level, anchorPos, ofActuator(dead, LociActuator.FEED));
         applyTurretAutonomy(level, anchorPos, ofActuator(dead, LociActuator.AUTONOM));
         applyArm(level, anchorPos, ofActuator(dead, LociActuator.ARM));
         applyDisarm(level, anchorPos, ofActuator(dead, LociActuator.DISARM));
@@ -201,6 +204,47 @@ public final class PhoenixShedService {
             }
             if (PhiBusNetwork.channelAt(level, pos) == channel) {
                 PhiContactorBlock.setClosed(level, pos, false);
+            }
+        }
+    }
+
+    private static void applyFeedActuations(
+            ServerLevel level, BlockPos anchorPos, List<LexLociCompiler.Actuation> feeds) {
+        if (feeds.isEmpty()) {
+            return;
+        }
+        for (LexLociCompiler.Actuation feed : feeds) {
+            LociAddress target = feed.target();
+            if (target == null) {
+                applyFeedDefault(level, anchorPos);
+            } else if (target.isBus()) {
+                target.phiChannel().ifPresent(channel -> applyFeedChannel(level, anchorPos, channel));
+            }
+        }
+    }
+
+    /** Bare FEED: close life-path contactors so life stays powered. */
+    private static void applyFeedDefault(ServerLevel level, BlockPos anchorPos) {
+        for (BlockPos pos : EssenceGlueData.get(level).component(anchorPos)) {
+            BlockState state = level.getBlockState(pos);
+            if (!state.is(ModBlocks.PHI_CONTACTOR.get())) {
+                continue;
+            }
+            if (protectsLife(level, pos)) {
+                PhiContactorBlock.setClosed(level, pos, true);
+            }
+        }
+    }
+
+    /** Close contactors whose island is stamped with the given channel. */
+    private static void applyFeedChannel(ServerLevel level, BlockPos anchorPos, PhiChannel channel) {
+        for (BlockPos pos : EssenceGlueData.get(level).component(anchorPos)) {
+            BlockState state = level.getBlockState(pos);
+            if (!state.is(ModBlocks.PHI_CONTACTOR.get())) {
+                continue;
+            }
+            if (PhiBusNetwork.channelAt(level, pos) == channel) {
+                PhiContactorBlock.setClosed(level, pos, true);
             }
         }
     }

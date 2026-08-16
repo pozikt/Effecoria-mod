@@ -78,13 +78,13 @@ public record LociAddress(String kind, boolean all, String name) {
 
     /**
      * Kind required when an address precedes this actuator. Empty = addresses forbidden.
-     * SHED accepts only {@code bus}; null target (bare SHED) is always allowed by the compiler.
+     * SHED / FEED accept only {@code bus}; null target (bare) is always allowed by the compiler.
      */
     public static Optional<String> kindForActuator(LociActuator actuator) {
         return switch (actuator) {
             case AUTONOM, ARM, DISARM -> Optional.of("turret");
             case SIGNAL -> Optional.of("signal");
-            case SHED -> Optional.of(KIND_BUS);
+            case SHED, FEED -> Optional.of(KIND_BUS);
             case BEACON -> Optional.empty();
         };
     }

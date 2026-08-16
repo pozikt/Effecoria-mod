@@ -12,7 +12,8 @@ import java.util.Optional;
 
 /**
  * Phoenix compiler: {@code WHEN} rules with optional {@code kind*} / {@code kind#name} before
- * {@code autonom} / {@code signal}. {@code soul_alive} only allows SIGNAL/AUTONOM (clear polarity).
+ * {@code autonom} / {@code signal}, or {@code bus:}/{@code шина:} before {@code shed}/{@code feed}.
+ * {@code soul_alive} allows SIGNAL/AUTONOM/ARM/DISARM/FEED.
  * Tokens are strings (RL words or address literals).
  */
 public final class LexLociCompiler {
@@ -21,6 +22,7 @@ public final class LexLociCompiler {
     public static final ResourceLocation SOUL_GHOST = EffecoriaMod.id("soul_ghost");
     public static final ResourceLocation SOUL_ALIVE = EffecoriaMod.id("soul_alive");
     public static final ResourceLocation SHED = EffecoriaMod.id("shed");
+    public static final ResourceLocation FEED = EffecoriaMod.id("feed");
     public static final ResourceLocation SIGNAL = EffecoriaMod.id("signal");
     public static final ResourceLocation AUTONOM = EffecoriaMod.id("autonom");
     public static final ResourceLocation BEACON = EffecoriaMod.id("beacon");
@@ -32,6 +34,7 @@ public final class LexLociCompiler {
     public static final String SOUL_GHOST_TOKEN = SOUL_GHOST.toString();
     public static final String SOUL_ALIVE_TOKEN = SOUL_ALIVE.toString();
     public static final String SHED_TOKEN = SHED.toString();
+    public static final String FEED_TOKEN = FEED.toString();
     public static final String SIGNAL_TOKEN = SIGNAL.toString();
     public static final String AUTONOM_TOKEN = AUTONOM.toString();
     public static final String BEACON_TOKEN = BEACON.toString();
@@ -113,6 +116,7 @@ public final class LexLociCompiler {
                 SOUL_GHOST_TOKEN,
                 SOUL_ALIVE_TOKEN,
                 SHED_TOKEN,
+                FEED_TOKEN,
                 SIGNAL_TOKEN,
                 AUTONOM_TOKEN,
                 ARM_TOKEN,
@@ -174,6 +178,9 @@ public final class LexLociCompiler {
     public static LociActuator actuatorOf(String token) {
         if (SHED_TOKEN.equals(token)) {
             return LociActuator.SHED;
+        }
+        if (FEED_TOKEN.equals(token)) {
+            return LociActuator.FEED;
         }
         if (SIGNAL_TOKEN.equals(token)) {
             return LociActuator.SIGNAL;
@@ -365,7 +372,8 @@ public final class LexLociCompiler {
             case SOUL_ALIVE -> actuator == LociActuator.SIGNAL
                     || actuator == LociActuator.AUTONOM
                     || actuator == LociActuator.ARM
-                    || actuator == LociActuator.DISARM;
+                    || actuator == LociActuator.DISARM
+                    || actuator == LociActuator.FEED;
         };
     }
 }
