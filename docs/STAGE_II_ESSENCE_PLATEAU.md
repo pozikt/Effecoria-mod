@@ -16,6 +16,7 @@ Under that mountain, Φ generation follows the **surface column** to bedrock
 
 ## Crystal caverns (ETP)
 
+- **Ores** — rich `mithril_ore` / deepslate veins under the plateau; outside the plateau, mithril is sparse Overworld-deep only. Lead and essonite use normal Overworld (and Nether for essonite) modifiers.
 - **Essonite spikes** (`essonite_pointed`) — dripstone-style stalactites/stalagmites; merged tips form Φ-columns. Drops shards; tips can yield pure essonite.
 - **Druze** — multi-facing crystal buds/clusters on walls; silk touch keeps the cluster.
 - **Essonite geodes** — rare hollow pockets lined with dripstone + crystals.

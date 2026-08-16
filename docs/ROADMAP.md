@@ -119,9 +119,9 @@ Races / Orkanum baselines — shipped MVP (see [docs/RACES.md](RACES.md)).
 
 | Item | Notes |
 |------|-------|
-| Essonite & new ores | Real worldgen veins |
-| Cave biomes / deep Φ | Low light, high entropy pockets |
-| Underground structures | Small mage ruins, sealed chambers |
+| Essonite / lead / mithril veins | **Shipped** — lead + essonite: Overworld (essonite also Nether); mithril: rich on Essence Plateau + sparse Overworld deep veins |
+| Cave biomes / deep Φ | Low light, high entropy pockets — still planned |
+| Underground structures | Small mage ruins, sealed chambers — still planned |
 | **Magic (light touch)** | Material / deep-Φ hooks as ores unlock (not a full school rewrite) |
 
 Materials that were “craft only” in Stage I get proper sources here.

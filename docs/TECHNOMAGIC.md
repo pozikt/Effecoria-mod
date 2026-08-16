@@ -2,7 +2,7 @@
 
 Craft stays **free**. Operating Era N machines requires completing **all available** catalog nodes of eras 1..N−1 (craft their icon items to discover them). Machines also consume prior-era resources (Φ-heat, charged cells, Φ-flux slugs).
 
-See also [ROADMAP.md](ROADMAP.md) Stage IV.
+See also [ROADMAP.md](ROADMAP.md) Stage IV. Ore sinks: lead/essonite Overworld veins; mithril rich on Essence Plateau, sparse elsewhere (Stage III shipped).
 
 ## Progression rules
 
