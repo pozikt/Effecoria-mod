@@ -78,6 +78,10 @@ public final class PlayerPsiData {
                         ResourceLocation.STREAM_CODEC.encode(buf, token);
                     }
                 }
+                ByteBufCodecs.INT.encode(buf, data.savedSealScripts.size());
+                for (String script : data.savedSealScripts) {
+                    ByteBufCodecs.STRING_UTF8.encode(buf, script);
+                }
                 ByteBufCodecs.INT.encode(buf, data.spellCastCounts.size());
                 for (Map.Entry<ResourceLocation, Integer> entry : data.spellCastCounts.entrySet()) {
                     ResourceLocation.STREAM_CODEC.encode(buf, entry.getKey());
@@ -157,6 +161,11 @@ public final class PlayerPsiData {
                     }
                     data.savedSealExpressions.add(expression);
                 }
+                int scriptCount = ByteBufCodecs.INT.decode(buf);
+                data.savedSealScripts = new ArrayList<>(scriptCount);
+                for (int i = 0; i < scriptCount; i++) {
+                    data.savedSealScripts.add(ByteBufCodecs.STRING_UTF8.decode(buf));
+                }
                 int castCountEntries = ByteBufCodecs.INT.decode(buf);
                 data.spellCastCounts = new HashMap<>(castCountEntries);
                 for (int i = 0; i < castCountEntries; i++) {
@@ -195,6 +204,7 @@ public final class PlayerPsiData {
     private List<ResourceLocation> knownSealWords = new ArrayList<>();
     private List<ResourceLocation> knownItemSeals = new ArrayList<>();
     private List<List<ResourceLocation>> savedSealExpressions = new ArrayList<>();
+    private List<String> savedSealScripts = new ArrayList<>();
     private long phiSenseUntil;
     private float breathingMastery;
     private float trainingXp;
@@ -375,6 +385,27 @@ public final class PlayerPsiData {
             savedSealExpressions.add(new ArrayList<>());
         }
         savedSealExpressions.set(slot, new ArrayList<>(tokens));
+    }
+
+    public List<String> savedSealScripts() {
+        return savedSealScripts;
+    }
+
+    public String savedSealScript(int slot) {
+        if (slot < 0 || slot >= savedSealScripts.size()) {
+            return "";
+        }
+        return savedSealScripts.get(slot);
+    }
+
+    public void saveSealScript(int slot, String source) {
+        if (slot < 0) {
+            return;
+        }
+        while (savedSealScripts.size() <= slot) {
+            savedSealScripts.add("");
+        }
+        savedSealScripts.set(slot, source == null ? "" : source);
     }
 
     public boolean knowsSealWord(ResourceLocation id) {
@@ -1149,6 +1180,11 @@ public final class PlayerPsiData {
             expressionsList.add(expressionTag);
         }
         tag.put("savedSealExpressions", expressionsList);
+        ListTag scriptsList = new ListTag();
+        for (String script : savedSealScripts) {
+            scriptsList.add(StringTag.valueOf(script == null ? "" : script));
+        }
+        tag.put("savedSealScripts", scriptsList);
 
         CompoundTag castCounts = new CompoundTag();
         for (Map.Entry<ResourceLocation, Integer> entry : spellCastCounts.entrySet()) {
@@ -1316,6 +1352,13 @@ public final class PlayerPsiData {
                 savedSealExpressions.add(expression);
             }
         }
+        savedSealScripts = new ArrayList<>();
+        if (tag.contains("savedSealScripts", Tag.TAG_LIST)) {
+            ListTag scriptsList = tag.getList("savedSealScripts", Tag.TAG_STRING);
+            for (Tag entry : scriptsList) {
+                savedSealScripts.add(entry.getAsString());
+            }
+        }
 
         spellCastCounts = new HashMap<>();
         spellLastCastAt = new HashMap<>();
@@ -1388,6 +1431,7 @@ public final class PlayerPsiData {
         for (List<ResourceLocation> expression : savedSealExpressions) {
             copy.savedSealExpressions.add(new ArrayList<>(expression));
         }
+        copy.savedSealScripts = new ArrayList<>(savedSealScripts);
         copy.phiSenseUntil = phiSenseUntil;
         copy.breathingMastery = breathingMastery;
         copy.trainingXp = trainingXp;

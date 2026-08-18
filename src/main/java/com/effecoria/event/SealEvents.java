@@ -72,7 +72,7 @@ public final class SealEvents {
         if (event.getEntity() instanceof ServerPlayer player
                 && player.isShiftKeyDown()
                 && player.getMainHandItem().isEmpty()
-                && com.effecoria.core.seal.SealProgramService.clear(player, event.getPos())) {
+                && com.effecoria.core.seal.SealProgramService.clearComponent(player, event.getPos())) {
             event.setCanceled(true);
             return;
         }

@@ -16,6 +16,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 /** Per-dimension union-find of Φ-glued block positions — backbone for smart structures. */
 public final class EssenceGlueData extends SavedData {
     private final Map<Long, Long> parent = new HashMap<>();
+    private final Map<Long, String> aliases = new HashMap<>();
 
     public EssenceGlueData() {}
 
@@ -57,13 +58,42 @@ public final class EssenceGlueData extends SavedData {
         }
     }
 
+    public void setAlias(BlockPos pos, String alias) {
+        long k = pos.asLong();
+        if (alias == null || alias.isBlank()) {
+            if (aliases.remove(k) != null) {
+                setDirty();
+            }
+            return;
+        }
+        String clean = alias.trim();
+        if (clean.startsWith("#")) {
+            clean = clean.substring(1);
+        }
+        if (clean.length() > 24) {
+            clean = clean.substring(0, 24);
+        }
+        if (clean.equals(aliases.get(k))) {
+            return;
+        }
+        aliases.put(k, clean);
+        setDirty();
+    }
+
+    public String alias(BlockPos pos) {
+        String value = aliases.get(pos.asLong());
+        return value == null ? "" : value;
+    }
+
     public void remove(BlockPos pos) {
         long k = pos.asLong();
         if (!parent.containsKey(k)) {
+            aliases.remove(k);
             return;
         }
         long root = find(k);
         parent.remove(k);
+        aliases.remove(k);
         parent.entrySet().removeIf(e -> e.getKey() == k);
         Set<Long> members = new HashSet<>();
         for (Map.Entry<Long, Long> e : new HashMap<>(parent).entrySet()) {
@@ -123,6 +153,14 @@ public final class EssenceGlueData extends SavedData {
             list.add(pair);
         }
         tag.put("Parent", list);
+        ListTag aliasList = new ListTag();
+        for (Map.Entry<Long, String> e : aliases.entrySet()) {
+            CompoundTag row = new CompoundTag();
+            row.putLong("K", e.getKey());
+            row.putString("A", e.getValue());
+            aliasList.add(row);
+        }
+        tag.put("Aliases", aliasList);
         return tag;
     }
 
@@ -132,6 +170,14 @@ public final class EssenceGlueData extends SavedData {
         for (Tag t : list) {
             CompoundTag pair = (CompoundTag) t;
             data.parent.put(pair.getLong("K"), pair.getLong("P"));
+        }
+        ListTag aliasList = tag.getList("Aliases", Tag.TAG_COMPOUND);
+        for (Tag t : aliasList) {
+            CompoundTag row = (CompoundTag) t;
+            String alias = row.getString("A");
+            if (!alias.isBlank()) {
+                data.aliases.put(row.getLong("K"), alias);
+            }
         }
         return data;
     }

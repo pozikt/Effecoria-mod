@@ -57,6 +57,9 @@ public final class ClientSealEffects {
                         if (seal.isExpired(gameTime)) {
                             continue;
                         }
+                        if (com.effecoria.core.seal.SealLightOverlay.emission(level, pos) > 0) {
+                            level.getLightEngine().checkBlock(pos);
+                        }
                         spawnClientParticles(level, pos, seal);
                     }
                 }

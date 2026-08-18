@@ -43,6 +43,7 @@ public final class SealProgramCompiler {
     public static final String COUNT_NEED = "count_need";
     public static final String UNTIL_MAX = "until_max";
     public static final String LOOP_REPEATS = "loop";
+    public static final String SCRIPT_TAG = "script";
 
     /** @deprecated v1 flat keys — still read for migration of old inscriptions */
     @Deprecated public static final String HARDNESS_MULT = "hardness_mult";
@@ -69,6 +70,38 @@ public final class SealProgramCompiler {
 
     public static int maxTokens(float breathingMasteryRatio) {
         return Mth.clamp(8 + Math.round(breathingMasteryRatio * 8f), 8, 16);
+    }
+
+    /** Distinct cells a seal script may inscribe. */
+    public static int maxTargets(float breathingMasteryRatio) {
+        return Mth.clamp(4 + Math.round(breathingMasteryRatio * 8f), 4, 12);
+    }
+
+    public static CompoundTag assemble(ListTag passives, ListTag rules, String script) {
+        CompoundTag params = new CompoundTag();
+        params.putInt(VERSION_TAG, PROGRAM_VERSION);
+        params.put(PASSIVES_TAG, passives);
+        params.put(RULES_TAG, rules);
+        if (script != null && !script.isBlank()) {
+            params.putString(SCRIPT_TAG, script);
+        }
+        return params;
+    }
+
+    public static CompoundTag createAction(String effect, float magnitude) {
+        CompoundTag action = new CompoundTag();
+        String resolved = switch (effect) {
+            case "lux", "light" -> "glow";
+            case "firmitas" -> "hardness";
+            default -> effect;
+        };
+        action.putString(EFFECT, resolved);
+        applyMagnitude(action, resolved, magnitude);
+        if ("sound".equals(resolved)) {
+            action.putString(SOUND_EVENT, "minecraft:block.note_block.pling");
+            action.putFloat(SOUND_VOLUME, 0.55f);
+        }
+        return action;
     }
 
     public static CompileResult compile(List<ResourceLocation> tokenIds) {
@@ -371,7 +404,7 @@ public final class SealProgramCompiler {
             case "hurt", "acies" -> Mth.clamp(magnitude, 0.5f, 12f);
             case "slow" -> Mth.clamp(magnitude, 1f, 5f);
             case "push" -> Mth.clamp(magnitude, 0.5f, 5f);
-            case "glow", "light" -> Mth.clamp(magnitude, 6f, 15f);
+            case "glow", "light" -> Mth.clamp(magnitude, 1f, 15f);
             case "sound" -> Mth.clamp(magnitude, 0.5f, 10f);
             case "calor" -> Mth.clamp(magnitude, 1f, 10f);
             case "extrahere", "haustus", "ordo", "absolutum" -> Mth.clamp(magnitude, 1f, 16f);

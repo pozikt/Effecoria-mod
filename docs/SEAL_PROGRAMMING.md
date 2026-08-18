@@ -1,51 +1,43 @@
 # Seal word programming
 
-Seals school programs blocks with a linear word scheme (key **G**).
+Seals school programs **matter** with a typed overlay on named cells (key **Y**). Lex Loci (tower edicts) stays separate.
 
-## Grammar
+## Glue symbols
 
-Left → right pipeline:
+Look at a block and press **Y**. If it is Φ-glued, the editor imports the whole component.
 
-1. **Passive** — `ACTION NUMBER? MODIFIER*` always on  
-   Example: `Hardness Five` → block stays hard.
-2. **Reactive** — `SENSE SPEC* ACTION NUMBER? MODIFIER* (Time NUMBER)?`  
-   Sense emits a unit pulse on a matching event; then the action runs.  
-   Example: `See Step Sound Five` → on step, play sound.  
-   Example: `See Hardness Five Time Ten` → on sense, harden for 10 ticks.
+- One dirt in the bundle → `dirt` / `земля`
+- Several dirt blocks → conflict until renamed `dirt#north` (list + alias field, Enter)
+- A lone unglued block is still one symbol by type
 
-Put always-on properties first; after `Time N` the rule closes so another passive may follow.
+Click a name in the list to insert it. World outlines: blue = imported cells, red = unnamed duplicates, green = selected.
 
-### Sense specs (subwords)
+## Language
 
-After `See`, optional filters:
+```
+dirt#north:
+  glow = 5
+  hardness = 8
+  when step:
+    sound = 5
+```
 
-| Word | Meaning |
-|------|---------|
-| Player / Mob | who |
-| Approach | enter radius |
-| Step | stand on block |
-| Hit | left-click |
-| Use | right-click |
-| Break | block broken |
+Russian aliases work (`светимость`, `твёрдость`, `когда шаг`, `звук`). `import glue` is optional.
 
-No specs → any of these events can pulse the sense. Number right after `See` (before an action) sets sense radius.
+Properties are **seal overlays**, not vanilla BlockState. `glow = 5` on dirt does not replace dirt and does not place a `minecraft:light` block — light comes from the inscription.
 
-### Notable actions
+Numbers are literals. Known overlay keys: glow/light, hardness, sound, hurt, slow, push, plus existing seal-word actions. Sense specs after `when`: step, hit, use, break, approach, player, mob.
 
-| Word | Effect |
-|------|--------|
-| Sound | Local note at the block |
-| **Vigil** | Alerts the seal's caster remotely (coords + chime) |
-| Hurt / Slow / Push | Standing combat |
-| Extrahere | Drain Ψ in a radius |
-| **Haustus** | Drain Ψ from players **on** the seal; refund half to caster |
+Tab inserts an autocomplete suggestion. Save/Load slots store the **source text**.
 
-## Datapack
+## Limits
 
-Words under `data/effecoria/seal_words/*.json` (`kind`: number, property, trigger, sense, spec, modifier, duration).
+Distinct inscribed cells scale with breathing mastery (4–12). Ψ cost is the sum of used words across cells.
 
 ## Runtime
 
-Compiled to `program_version: 2` with `passives` + `rules`. Rising-edge pulse fires actions; **Step** also re-fires about every 15 ticks while you stay on the block. Leaving the block clears the latch so the next step works again. Timed overlays live in `_rt.timed`.
+Compiled to `program_version: 3` with `passives` + `rules` (same evaluator as before). Timed overlays live in `_rt.timed`. Erase: editor button or Shift + empty-hand RMB (clears the imported component).
+
+Legacy chip sequences still apply if sent, and can be pretty-printed when loaded from old save slots.
 
 Combat seal casting on **R** is deferred.

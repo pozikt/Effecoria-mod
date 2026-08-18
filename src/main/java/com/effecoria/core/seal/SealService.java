@@ -127,6 +127,7 @@ public final class SealService {
         chunk.setData(ModAttachments.CHUNK_SEALS.get(), data);
         chunk.setUnsaved(true);
         syncChunk(chunk);
+        refreshLight(level, pos);
     }
 
     public static boolean remove(ServerLevel level, BlockPos pos) {
@@ -143,6 +144,7 @@ public final class SealService {
         chunk.setData(ModAttachments.CHUNK_SEALS.get(), data);
         chunk.setUnsaved(true);
         syncChunk(chunk);
+        refreshLight(level, pos);
         return true;
     }
 
@@ -223,7 +225,11 @@ public final class SealService {
                 ? SealProgramRuntime.effectiveGlow(seal, gameTime)
                 : 0;
         boolean programGlow = programGlowLevel > 0;
-        if (!seal.typeId().equals(SealTypes.GLOW) && !programGlow) {
+        if (programGlow) {
+            refreshLight(level, sealedPos);
+            return;
+        }
+        if (!seal.typeId().equals(SealTypes.GLOW)) {
             return;
         }
         CompoundTag params = seal.params();
@@ -238,9 +244,6 @@ public final class SealService {
         updated.remove(LIGHT_Y);
         updated.remove(LIGHT_Z);
         float strength = seal.strength();
-        if (programGlow) {
-            strength = programGlowLevel * 5f;
-        }
         attachGlowLight(level, sealedPos, strength, updated);
         if (!updated.contains(LIGHT_X)) {
             return;
@@ -284,6 +287,13 @@ public final class SealService {
             }
         }
         return null;
+    }
+
+    /** Recompute vanilla light at the sealed cell (overlay emission, no extra Light block). */
+    public static void refreshLight(net.minecraft.world.level.Level level, BlockPos pos) {
+        if (level != null) {
+            level.getLightEngine().checkBlock(pos);
+        }
     }
 
     public static void syncChunk(LevelChunk chunk) {

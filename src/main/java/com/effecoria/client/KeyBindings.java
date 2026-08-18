@@ -37,7 +37,7 @@ public final class KeyBindings {
             "key.effecoria.open_seal_editor",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_G,
+            GLFW.GLFW_KEY_Y,
             "key.categories.effecoria");
 
     /** Link / double-tap throw for environmental matter casting (Elemental). */

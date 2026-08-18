@@ -170,7 +170,8 @@ public final class ClientInputEvents {
                 break;
             }
             var blockHit = (net.minecraft.world.phys.BlockHitResult) hit;
-            minecraft.setScreen(new com.effecoria.client.gui.SealProgramScreen(blockHit.getBlockPos()));
+            net.neoforged.neoforge.network.PacketDistributor.sendToServer(
+                    new com.effecoria.network.ModNetworking.RequestSealEditorPayload(blockHit.getBlockPos()));
         }
 
         if (minecraft.screen == null) {

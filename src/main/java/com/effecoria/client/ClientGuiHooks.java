@@ -4,6 +4,7 @@ import com.effecoria.client.gui.GeneEditorScreen;
 import com.effecoria.client.gui.MagicGuideScreen;
 import com.effecoria.client.gui.RaceSelectScreen;
 import com.effecoria.client.gui.SchoolSelectScreen;
+import com.effecoria.client.gui.SealProgramScreen;
 import com.effecoria.client.gui.SpellHubScreen;
 import com.effecoria.client.gui.TechnomagicScreen;
 import com.effecoria.core.progression.PrimerChapters;
@@ -65,5 +66,13 @@ public final class ClientGuiHooks {
         Minecraft.getInstance()
                 .setScreen(new GeneEditorScreen(
                         entityId, targetName, current, unlocked, maxSlots, dnaLocked, canLock));
+    }
+
+    public static void openSealEditor(
+            net.minecraft.core.BlockPos anchor,
+            int maxTargets,
+            String source,
+            java.util.List<com.effecoria.network.ModNetworking.SealEditorMember> members) {
+        Minecraft.getInstance().setScreen(new SealProgramScreen(anchor, maxTargets, source, members));
     }
 }

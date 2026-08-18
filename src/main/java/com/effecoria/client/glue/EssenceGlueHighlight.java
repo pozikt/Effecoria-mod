@@ -1,5 +1,6 @@
 package com.effecoria.client.glue;
 
+import com.effecoria.client.gui.SealEditorHighlights;
 import com.effecoria.content.ModItems;
 import com.effecoria.core.glue.EssenceGlueService;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -40,14 +41,15 @@ public final class EssenceGlueHighlight {
 
         boolean holdingGlue = mc.player.getMainHandItem().is(ModItems.ESSENCE_GLUE.get())
                 || mc.player.getOffhandItem().is(ModItems.ESSENCE_GLUE.get());
-        if (!holdingGlue) {
+        boolean editor = SealEditorHighlights.active();
+        if (!holdingGlue && !editor) {
             return;
         }
 
         BlockPos pending = EssenceGlueClient.pending();
         boolean hasSession = !EssenceGlueClient.session().isEmpty();
         boolean hasGlued = !EssenceGlueClient.glued().isEmpty();
-        if (!hasGlued && !hasSession && pending == null) {
+        if (!hasGlued && !hasSession && pending == null && !editor) {
             return;
         }
 
@@ -62,6 +64,23 @@ public final class EssenceGlueHighlight {
                 continue;
             }
             drawAxeOutline(pose, lines, mc, pos, 1.0f, 0.88f, 0.25f, 0.85f);
+        }
+
+        if (editor) {
+            BlockPos selected = SealEditorHighlights.selected();
+            for (var member : SealEditorHighlights.members()) {
+                BlockPos pos = member.pos();
+                if (mc.player.distanceToSqr(Vec3.atCenterOf(pos)) > 96 * 96) {
+                    continue;
+                }
+                if (member.conflict()) {
+                    drawAxeOutline(pose, lines, mc, pos, 1.0f, 0.35f, 0.3f, 0.95f);
+                } else if (pos.equals(selected) || pos.equals(SealEditorHighlights.anchor())) {
+                    drawAxeOutline(pose, lines, mc, pos, 0.45f, 1.0f, 0.55f, 1.0f);
+                } else {
+                    drawAxeOutline(pose, lines, mc, pos, 0.55f, 0.75f, 1.0f, 0.8f);
+                }
+            }
         }
 
         // Last confirmed volume — one outer wireframe (WE-style).

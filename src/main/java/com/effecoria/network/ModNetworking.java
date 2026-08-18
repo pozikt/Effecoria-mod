@@ -1,7 +1,9 @@
 package com.effecoria.network;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.effecoria.EffecoriaMod;
 import com.effecoria.client.ClientSteamCloudEffects;
@@ -1193,7 +1195,7 @@ public final class ModNetworking {
                 if (player.blockPosition().distSqr(payload.pos()) > 16 * 16) {
                     return;
                 }
-                com.effecoria.core.seal.SealProgramService.clear(player, payload.pos());
+                com.effecoria.core.seal.SealProgramService.clearComponent(player, payload.pos());
             });
         }
     }
@@ -1238,6 +1240,222 @@ public final class ModNetworking {
                 }
                 PlayerPsiData data = PsiHelper.get(player);
                 data.saveSealExpression(payload.slot(), payload.tokens());
+                PsiHelper.set(player, data);
+                player.syncData(ModAttachments.PSI.get());
+                player.displayClientMessage(
+                        Component.translatable("message.effecoria.seal.expression_saved", payload.slot() + 1),
+                        true);
+            });
+        }
+    }
+
+    public record SealEditorMember(BlockPos pos, String typeKey, String alias, boolean conflict) {}
+
+    /** Client → server: open the seal script editor for the looked-at block. */
+    public record RequestSealEditorPayload(BlockPos pos) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<RequestSealEditorPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "request_seal_editor"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, RequestSealEditorPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        BlockPos.STREAM_CODEC, RequestSealEditorPayload::pos, RequestSealEditorPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(RequestSealEditorPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                if (player.blockPosition().distSqr(payload.pos()) > 64 * 64) {
+                    return;
+                }
+                var data = PsiHelper.get(player);
+                if (!data.initiated() || data.school() != MagicSchool.SEALS) {
+                    player.displayClientMessage(
+                            Component.translatable("message.effecoria.seal.need_school"), true);
+                    return;
+                }
+                var level = player.serverLevel();
+                if (level.getBlockState(payload.pos()).isAir()) {
+                    player.displayClientMessage(
+                            Component.translatable("message.effecoria.seal.need_block"), true);
+                    return;
+                }
+                var table = com.effecoria.core.seal.SealSymbolTable.build(level, payload.pos());
+                String source = com.effecoria.core.seal.SealSymbolTable.existingSource(level, table);
+                if (source.isBlank()) {
+                    String symbol = com.effecoria.core.seal.SealSymbolTable.typeKey(level.getBlockState(payload.pos()));
+                    for (var member : table.members()) {
+                        if (member.pos().equals(payload.pos()) && !member.conflict()) {
+                            symbol = member.symbol();
+                            break;
+                        }
+                    }
+                    source = symbol + ":\n  glow = 5\n";
+                }
+                float mastery = com.effecoria.core.progression.BreathingService.referenceRatio(data.breathingMastery());
+                int maxTargets = com.effecoria.core.seal.SealProgramCompiler.maxTargets(mastery);
+                List<SealEditorMember> members = new ArrayList<>();
+                for (var member : table.members()) {
+                    members.add(new SealEditorMember(
+                            member.pos(), member.typeKey(), member.alias(), member.conflict()));
+                }
+                PacketDistributor.sendToPlayer(
+                        player, new OpenSealEditorPayload(payload.pos(), maxTargets, source, members));
+            });
+        }
+    }
+
+    /** Server → client: glue snapshot + reconstructed script. */
+    public record OpenSealEditorPayload(
+            BlockPos anchor, int maxTargets, String source, List<SealEditorMember> members)
+            implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<OpenSealEditorPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "open_seal_editor"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, OpenSealEditorPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, p) -> {
+                            buf.writeBlockPos(p.anchor());
+                            buf.writeVarInt(p.maxTargets());
+                            ByteBufCodecs.STRING_UTF8.encode(buf, p.source());
+                            buf.writeVarInt(p.members().size());
+                            for (SealEditorMember m : p.members()) {
+                                buf.writeBlockPos(m.pos());
+                                ByteBufCodecs.STRING_UTF8.encode(buf, m.typeKey());
+                                ByteBufCodecs.STRING_UTF8.encode(buf, m.alias());
+                                buf.writeBoolean(m.conflict());
+                            }
+                        },
+                        buf -> {
+                            BlockPos anchor = buf.readBlockPos();
+                            int maxTargets = buf.readVarInt();
+                            String source = ByteBufCodecs.STRING_UTF8.decode(buf);
+                            int n = buf.readVarInt();
+                            List<SealEditorMember> members = new ArrayList<>(n);
+                            for (int i = 0; i < n; i++) {
+                                members.add(new SealEditorMember(
+                                        buf.readBlockPos(),
+                                        ByteBufCodecs.STRING_UTF8.decode(buf),
+                                        ByteBufCodecs.STRING_UTF8.decode(buf),
+                                        buf.readBoolean()));
+                            }
+                            return new OpenSealEditorPayload(anchor, maxTargets, source, members);
+                        });
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(OpenSealEditorPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> com.effecoria.client.ClientGuiHooks.openSealEditor(
+                    payload.anchor(), payload.maxTargets(), payload.source(), payload.members()));
+        }
+    }
+
+    /** Client → server: inscribe a seal script on named glue cells. */
+    public record ApplySealScriptPayload(
+            BlockPos anchor, String source, List<SealEditorMember> aliases) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<ApplySealScriptPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "apply_seal_script"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, ApplySealScriptPayload> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, p) -> {
+                            buf.writeBlockPos(p.anchor());
+                            ByteBufCodecs.STRING_UTF8.encode(buf, p.source());
+                            buf.writeVarInt(p.aliases().size());
+                            for (SealEditorMember m : p.aliases()) {
+                                buf.writeBlockPos(m.pos());
+                                ByteBufCodecs.STRING_UTF8.encode(buf, m.alias());
+                            }
+                        },
+                        buf -> {
+                            BlockPos anchor = buf.readBlockPos();
+                            String source = ByteBufCodecs.STRING_UTF8.decode(buf);
+                            int n = buf.readVarInt();
+                            List<SealEditorMember> aliases = new ArrayList<>(n);
+                            for (int i = 0; i < n; i++) {
+                                aliases.add(new SealEditorMember(
+                                        buf.readBlockPos(), "", ByteBufCodecs.STRING_UTF8.decode(buf), false));
+                            }
+                            return new ApplySealScriptPayload(anchor, source, aliases);
+                        });
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(ApplySealScriptPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                if (payload.source().length() > 8000 || payload.aliases().size() > 64) {
+                    return;
+                }
+                if (player.blockPosition().distSqr(payload.anchor()) > 64 * 64) {
+                    return;
+                }
+                Map<BlockPos, String> aliases = new HashMap<>();
+                for (SealEditorMember m : payload.aliases()) {
+                    if (!m.alias().isBlank()) {
+                        aliases.put(m.pos(), m.alias());
+                    }
+                }
+                var status = com.effecoria.core.seal.SealProgramService.applyScript(
+                        player, payload.anchor(), payload.source(), aliases);
+                if (status != com.effecoria.core.seal.SealProgramService.ApplyStatus.OK) {
+                    player.displayClientMessage(
+                            Component.translatable(
+                                    "message.effecoria.seal.apply_failed." + status.name().toLowerCase()),
+                            true);
+                } else {
+                    com.effecoria.core.progression.FirstHourTips.tryShow(
+                            player, com.effecoria.core.progression.FirstHourTips.Tip.SEALS);
+                }
+            });
+        }
+    }
+
+    /** Client → server: save current seal script into a reusable slot. */
+    public record SaveSealScriptPayload(int slot, String source) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<SaveSealScriptPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "save_seal_script"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, SaveSealScriptPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.VAR_INT,
+                        SaveSealScriptPayload::slot,
+                        ByteBufCodecs.STRING_UTF8,
+                        SaveSealScriptPayload::source,
+                        SaveSealScriptPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(SaveSealScriptPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                if (payload.slot() < 0 || payload.slot() > 7 || payload.source().length() > 8000) {
+                    return;
+                }
+                PlayerPsiData data = PsiHelper.get(player);
+                data.saveSealScript(payload.slot(), payload.source());
                 PsiHelper.set(player, data);
                 player.syncData(ModAttachments.PSI.get());
                 player.displayClientMessage(
