@@ -95,6 +95,11 @@ public enum GeneMod {
         return playerOnly;
     }
 
+    /** Φ-field adaptation grafts need phi synthetic tissue to skip metabolic cost. */
+    public boolean phiField() {
+        return this == ORKANUMN_WEAVE || this == PHI_HEART || this == SYMBIOTE_COLONY;
+    }
+
     public GeneAnatomySlot slot() {
         return slot;
     }

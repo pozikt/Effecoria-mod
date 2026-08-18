@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "effecoria:phi_bone_paste" },
+    { "item": "effecoria:phi_fiber" },
+    { "item": "minecraft:slime_ball" }
+  ],
+  "result": { "count": 2, "id": "effecoria:synth_tissue" }
+}

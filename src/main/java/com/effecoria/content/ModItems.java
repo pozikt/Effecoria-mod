@@ -453,6 +453,14 @@ public final class ModItems {
             ITEMS.register("bone_grit", () -> new BoneGritItem(new Item.Properties()));
     public static final DeferredItem<Item> PHI_BONE_PASTE = ITEMS.register(
             "phi_bone_paste", () -> new HintItem(new Item.Properties(), "item.effecoria.phi_bone_paste.hint"));
+    /** Scaffold for ordinary gene grafts — host skips hunger/health tax. */
+    public static final DeferredItem<Item> SYNTH_TISSUE = ITEMS.register(
+            "synth_tissue",
+            () -> new HintItem(new Item.Properties().stacksTo(16), "item.effecoria.synth_tissue.hint"));
+    /** Scaffold for Φ-field adaptation grafts (Orkanum weave, Φ-heart, symbiont). */
+    public static final DeferredItem<Item> PHI_SYNTH_TISSUE = ITEMS.register(
+            "phi_synth_tissue",
+            () -> new HintItem(new Item.Properties().stacksTo(16), "item.effecoria.phi_synth_tissue.hint"));
     public static final DeferredItem<Item> PHI_WOOD_SHAVINGS = ITEMS.register(
             "phi_wood_shavings",
             () -> new FuelItem(new Item.Properties(), 300, "item.effecoria.phi_wood_shavings.hint"));

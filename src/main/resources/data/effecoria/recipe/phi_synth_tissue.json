@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "effecoria:synth_tissue" },
+    { "item": "effecoria:essence_dew" },
+    { "item": "effecoria:essonite_dust" }
+  ],
+  "result": { "count": 1, "id": "effecoria:phi_synth_tissue" }
+}

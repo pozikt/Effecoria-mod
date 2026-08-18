@@ -27,6 +27,8 @@ public final class GeneProfile {
                 ByteBufCodecs.FLOAT.encode(buf, data.phiBonusApplied);
                 ByteBufCodecs.VAR_INT.encode(buf, data.mutationCycles);
                 ByteBufCodecs.BOOL.encode(buf, data.dnaLocked);
+                ByteBufCodecs.BOOL.encode(buf, data.tissueBuffered);
+                ByteBufCodecs.BOOL.encode(buf, data.phiTissueBuffered);
                 ByteBufCodecs.BOOL.encode(buf, data.engineerId != null);
                 if (data.engineerId != null) {
                     buf.writeUUID(data.engineerId);
@@ -41,6 +43,8 @@ public final class GeneProfile {
                 data.phiBonusApplied = ByteBufCodecs.FLOAT.decode(buf);
                 data.mutationCycles = ByteBufCodecs.VAR_INT.decode(buf);
                 data.dnaLocked = ByteBufCodecs.BOOL.decode(buf);
+                data.tissueBuffered = ByteBufCodecs.BOOL.decode(buf);
+                data.phiTissueBuffered = ByteBufCodecs.BOOL.decode(buf);
                 if (ByteBufCodecs.BOOL.decode(buf)) {
                     data.engineerId = buf.readUUID();
                 }
@@ -58,6 +62,10 @@ public final class GeneProfile {
     private int mutationCycles;
     /** When true, grafts cannot be rewritten/erased and copy to offspring. */
     private boolean dnaLocked;
+    /** Ordinary grafts were inscribed with synth tissue — skip hunger/health tax. */
+    private boolean tissueBuffered;
+    /** Φ-adaptation grafts were inscribed with Φ-synth tissue. */
+    private boolean phiTissueBuffered;
     @Nullable
     private UUID engineerId;
 
@@ -126,6 +134,24 @@ public final class GeneProfile {
         this.dnaLocked = locked;
     }
 
+    public boolean tissueBuffered() {
+        return tissueBuffered;
+    }
+
+    public boolean phiTissueBuffered() {
+        return phiTissueBuffered;
+    }
+
+    public void setTissueBuffers(boolean ordinary, boolean phiField) {
+        this.tissueBuffered = ordinary;
+        this.phiTissueBuffered = phiField;
+    }
+
+    /** True when this graft's hunger/health tax is absorbed by synthetic tissue. */
+    public boolean buffers(GeneMod mod) {
+        return mod.phiField() ? phiTissueBuffered : tissueBuffered;
+    }
+
     @Nullable
     public UUID engineerId() {
         return engineerId;
@@ -136,6 +162,8 @@ public final class GeneProfile {
         this.engineerId = engineer;
         this.appliedGameTime = gameTime;
         this.regenAccruedFraction = 0f;
+        this.tissueBuffered = false;
+        this.phiTissueBuffered = false;
         // Keep mutationCycles across rewrites — DNA remembers strain.
     }
 
@@ -147,6 +175,8 @@ public final class GeneProfile {
         phiBonusApplied = 0f;
         engineerId = null;
         dnaLocked = false;
+        tissueBuffered = false;
+        phiTissueBuffered = false;
         // mutationCycles intentionally kept
     }
 
@@ -174,6 +204,8 @@ public final class GeneProfile {
         phiBonusApplied = tag.contains("phiBonus") ? tag.getFloat("phiBonus") : 0f;
         mutationCycles = tag.contains("mutationCycles") ? tag.getInt("mutationCycles") : 0;
         dnaLocked = tag.contains("dnaLocked") && tag.getBoolean("dnaLocked");
+        tissueBuffered = tag.contains("tissueBuffered") && tag.getBoolean("tissueBuffered");
+        phiTissueBuffered = tag.contains("phiTissueBuffered") && tag.getBoolean("phiTissueBuffered");
         engineerId = tag.hasUUID("engineer") ? tag.getUUID("engineer") : null;
     }
 
@@ -191,6 +223,8 @@ public final class GeneProfile {
         tag.putFloat("phiBonus", phiBonusApplied);
         tag.putInt("mutationCycles", mutationCycles);
         tag.putBoolean("dnaLocked", dnaLocked);
+        tag.putBoolean("tissueBuffered", tissueBuffered);
+        tag.putBoolean("phiTissueBuffered", phiTissueBuffered);
         if (engineerId != null) {
             tag.putUUID("engineer", engineerId);
         }

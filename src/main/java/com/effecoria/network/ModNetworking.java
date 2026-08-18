@@ -1837,11 +1837,17 @@ public final class ModNetworking {
                 }
                 boolean ok = com.effecoria.effect.organic.gene.GeneEngineeringService.applyFromEngineer(
                         player, living, payload.mods(), 8.0);
-                String key = ok
-                        ? "message.effecoria.gene.applied"
-                        : (com.effecoria.effect.organic.gene.GeneEngineeringService.get(living).dnaLocked()
-                                ? "message.effecoria.gene.dna_locked"
-                                : "message.effecoria.gene.failed");
+                if (!ok) {
+                    String fail = com.effecoria.effect.organic.gene.GeneEngineeringService.get(living).dnaLocked()
+                            ? "message.effecoria.gene.dna_locked"
+                            : "message.effecoria.gene.failed";
+                    player.displayClientMessage(Component.translatable(fail), true);
+                    return;
+                }
+                var profile = com.effecoria.effect.organic.gene.GeneEngineeringService.get(living);
+                String key = profile.tissueBuffered() || profile.phiTissueBuffered()
+                        ? "message.effecoria.gene.applied_buffered"
+                        : "message.effecoria.gene.applied";
                 player.displayClientMessage(Component.translatable(key), true);
             });
         }

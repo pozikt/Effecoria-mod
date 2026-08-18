@@ -7,6 +7,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.effecoria.EffecoriaMod;
+import com.effecoria.content.ModItems;
 import com.effecoria.core.formula.BreathDebuffs;
 import com.effecoria.core.magic.MagicSchool;
 import com.effecoria.core.phi.CreativeGodMode;
@@ -26,6 +27,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 
 /** Apply / tick / clear gene grafts on living hosts. */
@@ -122,6 +125,7 @@ public final class GeneEngineeringService {
         clearAttributeMods(host);
         clearChannelBonuses(host, profile);
         profile.setMods(chosen, engineer.getUUID(), host.level().getGameTime());
+        absorbTissue(engineer, profile, chosen);
         set(host, profile);
         applyAttributeMods(host, profile);
         applyChannelBonuses(host, profile);
@@ -224,6 +228,9 @@ public final class GeneEngineeringService {
         UUID engineer = a.engineerId() != null ? a.engineerId() : b.engineerId();
         childProfile.setMods(chosen, engineer, child.level().getGameTime());
         childProfile.setDnaLocked(true);
+        childProfile.setTissueBuffers(
+                (aLock && a.tissueBuffered()) || (bLock && b.tissueBuffered()),
+                (aLock && a.phiTissueBuffered()) || (bLock && b.phiTissueBuffered()));
         set(child, childProfile);
         reapplyOnLoad(child);
     }
@@ -264,21 +271,29 @@ public final class GeneEngineeringService {
         if (profile.has(GeneMod.GILL_BUDS) && host.tickCount % 20 == 0) {
             tickGillBuds(host);
         }
-        if (profile.has(GeneMod.KERATIN_PLATES) && host instanceof Player player && host.tickCount % 60 == 0) {
+        if (profile.has(GeneMod.KERATIN_PLATES)
+                && host instanceof Player player
+                && host.tickCount % 60 == 0
+                && !profile.buffers(GeneMod.KERATIN_PLATES)) {
             player.causeFoodExhaustion(0.35f);
         }
-        if (profile.has(GeneMod.SPRINT_LIMBS) && host instanceof Player player && player.isSprinting()
-                && host.tickCount % 20 == 0) {
+        if (profile.has(GeneMod.SPRINT_LIMBS)
+                && host instanceof Player player
+                && player.isSprinting()
+                && host.tickCount % 20 == 0
+                && !profile.buffers(GeneMod.SPRINT_LIMBS)) {
             player.causeFoodExhaustion(0.25f);
         }
         if (profile.has(GeneMod.MUSCLE_HYPERTROPHY) && host instanceof Player player && host.tickCount % 40 == 0) {
-            player.causeFoodExhaustion(0.45f);
-            if (player.getFoodData().getFoodLevel() <= 4) {
-                BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.WEAKNESS, 60, 0, true, false, true));
+            if (!profile.buffers(GeneMod.MUSCLE_HYPERTROPHY)) {
+                player.causeFoodExhaustion(0.45f);
+                if (player.getFoodData().getFoodLevel() <= 4) {
+                    BreathDebuffs.apply(player, new MobEffectInstance(MobEffects.WEAKNESS, 60, 0, true, false, true));
+                }
             }
         }
         if (profile.has(GeneMod.MEMBRANE_WINGS) && host.tickCount % 20 == 0) {
-            tickWings(host);
+            tickWings(host, profile);
         }
         if (profile.has(GeneMod.EXTRA_LIMBS) && host.tickCount % 160 == 0) {
             // Brain lag — brief chaotic control.
@@ -288,9 +303,12 @@ public final class GeneEngineeringService {
             }
         }
         if (profile.has(GeneMod.BEAST_MORPH) && host.tickCount % 20 == 0) {
-            tickBeastMorph(host);
+            tickBeastMorph(host, profile);
         }
-        if (profile.has(GeneMod.PHI_HEART) && host instanceof ServerPlayer player && host.tickCount % 40 == 0) {
+        if (profile.has(GeneMod.PHI_HEART)
+                && host instanceof ServerPlayer player
+                && host.tickCount % 40 == 0
+                && !profile.buffers(GeneMod.PHI_HEART)) {
             // Overcharge risk — entropy rises faster while the second Orkanum runs.
             PlayerPsiData psi = PsiHelper.get(player);
             psi.setEntropyB(psi.entropyB() + 0.015f);
@@ -313,7 +331,9 @@ public final class GeneEngineeringService {
         if (profile.has(GeneMod.TOXIN_GLANDS) && attacker != null && attacker.isAlive()) {
             BreathDebuffs.apply(attacker, new MobEffectInstance(MobEffects.POISON, 70, 0));
         }
-        if (profile.has(GeneMod.BONE_WEAPONS) && host.getRandom().nextFloat() < 0.18f) {
+        if (profile.has(GeneMod.BONE_WEAPONS)
+                && host.getRandom().nextFloat() < 0.18f
+                && !profile.buffers(GeneMod.BONE_WEAPONS)) {
             // Improper folding — self bleed.
             host.hurt(host.damageSources().magic(), 1.0f);
         }
@@ -334,7 +354,7 @@ public final class GeneEngineeringService {
         if (profile.has(GeneMod.TOXIN_GLANDS)) {
             BreathDebuffs.apply(target, new MobEffectInstance(MobEffects.POISON, 80, 0));
             // Self-poison risk on botched synthesis.
-            if (host.getRandom().nextFloat() < 0.08f) {
+            if (host.getRandom().nextFloat() < 0.08f && !profile.buffers(GeneMod.TOXIN_GLANDS)) {
                 BreathDebuffs.apply(host, new MobEffectInstance(MobEffects.POISON, 40, 0));
             }
         }
@@ -355,6 +375,9 @@ public final class GeneEngineeringService {
         host.heal(healAmount);
         float healed = host.getHealth() - before;
         if (healed <= 0.01f) {
+            return;
+        }
+        if (profile.buffers(GeneMod.HYPER_REGEN) || profile.buffers(GeneMod.LIMB_REGEN)) {
             return;
         }
         profile.addRegenAccrued(healed / max);
@@ -408,15 +431,15 @@ public final class GeneEngineeringService {
         } else {
             BreathDebuffs.apply(host, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0, true, false, true));
             // Folding risk — brief air hunger.
-            if (host.getRandom().nextFloat() < 0.05f) {
+            if (host.getRandom().nextFloat() < 0.05f && !get(host).buffers(GeneMod.GILL_BUDS)) {
                 host.setAirSupply(Math.max(-20, host.getAirSupply() - 40));
             }
         }
     }
 
-    private static void tickWings(LivingEntity host) {
+    private static void tickWings(LivingEntity host, GeneProfile profile) {
         BreathDebuffs.apply(host, new MobEffectInstance(MobEffects.SLOW_FALLING, 40, 0, true, false, true));
-        if (!host.onGround()) {
+        if (!host.onGround() && !profile.buffers(GeneMod.MEMBRANE_WINGS)) {
             if (host instanceof Player player) {
                 player.causeFoodExhaustion(0.6f);
                 PlayerPsiData psi = player instanceof ServerPlayer sp ? PsiHelper.get(sp) : null;
@@ -430,12 +453,12 @@ public final class GeneEngineeringService {
         }
     }
 
-    private static void tickBeastMorph(LivingEntity host) {
+    private static void tickBeastMorph(LivingEntity host, GeneProfile profile) {
         BreathDebuffs.apply(host, new MobEffectInstance(MobEffects.DAMAGE_BOOST, 40, 0, true, false, true));
-        if (host instanceof Player player) {
+        if (host instanceof Player player && !profile.buffers(GeneMod.BEAST_MORPH)) {
             player.causeFoodExhaustion(0.5f);
         }
-        if (host.getRandom().nextFloat() < 0.08f) {
+        if (host.getRandom().nextFloat() < 0.08f && !profile.buffers(GeneMod.BEAST_MORPH)) {
             // Animal mind slips through.
             BreathDebuffs.apply(host, new MobEffectInstance(MobEffects.BLINDNESS, 35, 0, true, false, true));
             BreathDebuffs.apply(host, new MobEffectInstance(MobEffects.CONFUSION, 45, 0, true, false, true));
@@ -449,6 +472,9 @@ public final class GeneEngineeringService {
             set(host, profile);
         }
         int cycles = profile.mutationCycles();
+        if (profile.buffers(GeneMod.CELL_IMMORTAL)) {
+            return;
+        }
         if (cycles >= 5 && host.tickCount % 200 == 0) {
             BreathDebuffs.apply(host, new MobEffectInstance(MobEffects.WITHER, 60, 0, true, false, true));
         }
@@ -468,13 +494,13 @@ public final class GeneEngineeringService {
                 // Symbionts feed from Φ — spare a little hunger.
                 food.setFoodLevel(Math.min(20, food.getFoodLevel() + 1));
             }
-            if (food.getFoodLevel() <= 3) {
+            if (food.getFoodLevel() <= 3 && !get(host).buffers(GeneMod.SYMBIOTE_COLONY)) {
                 // Colony turns on the host.
                 player.hurt(player.damageSources().magic(), 1.5f);
             }
         } else {
             host.heal(0.25f);
-            if (host.getRandom().nextFloat() < 0.1f) {
+            if (host.getRandom().nextFloat() < 0.1f && !get(host).buffers(GeneMod.SYMBIOTE_COLONY)) {
                 host.hurt(host.damageSources().magic(), 1.0f);
             }
         }
@@ -639,5 +665,49 @@ public final class GeneEngineeringService {
     public static int slotsFor(ServerPlayer engineer) {
         PlayerPsiData data = PsiHelper.get(engineer);
         return GeneMod.maxSlots(BreathingService.referenceRatio(data.breathingMastery()));
+    }
+
+    private static void absorbTissue(ServerPlayer engineer, GeneProfile profile, EnumSet<GeneMod> chosen) {
+        boolean needOrdinary = false;
+        boolean needPhi = false;
+        for (GeneMod mod : chosen) {
+            if (mod.phiField()) {
+                needPhi = true;
+            } else {
+                needOrdinary = true;
+            }
+        }
+        boolean ordinary =
+                needOrdinary && consumeOne(engineer, ModItems.SYNTH_TISSUE.get());
+        boolean phi = needPhi && consumeOne(engineer, ModItems.PHI_SYNTH_TISSUE.get());
+        profile.setTissueBuffers(ordinary, phi);
+    }
+
+    private static boolean consumeOne(ServerPlayer player, Item item) {
+        if (CreativeGodMode.isActive(player) || player.getAbilities().instabuild) {
+            return true;
+        }
+        var inv = player.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack stack = inv.getItem(i);
+            if (stack.is(item)) {
+                stack.shrink(1);
+                player.containerMenu.broadcastChanges();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static int countItem(Player player, Item item) {
+        int n = 0;
+        var inv = player.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack stack = inv.getItem(i);
+            if (stack.is(item)) {
+                n += stack.getCount();
+            }
+        }
+        return n;
     }
 }

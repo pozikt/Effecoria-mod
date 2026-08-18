@@ -5,6 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.effecoria.content.ModItems;
 import com.effecoria.effect.organic.gene.GeneAnatomySlot;
 import com.effecoria.effect.organic.gene.GeneMod;
 import com.effecoria.network.ModNetworking;
@@ -212,6 +213,54 @@ public class GeneEditorScreen extends Screen {
                     return Component.literal(this.font.plainSubstrByWidth(raw, LIST_W - 8));
                 })
                 .orElse(Component.literal(id));
+    }
+
+    private Component tissueHint() {
+        int synth = count(ModItems.SYNTH_TISSUE.get());
+        int phi = count(ModItems.PHI_SYNTH_TISSUE.get());
+        boolean needOrdinary = false;
+        boolean needPhi = false;
+        for (GeneMod mod : selectedMods()) {
+            if (mod.phiField()) {
+                needPhi = true;
+            } else {
+                needOrdinary = true;
+            }
+        }
+        if (selected.isEmpty()) {
+            return Component.translatable("gui.effecoria.gene_editor.tissue_idle", synth, phi);
+        }
+        boolean covered = (!needOrdinary || synth > 0) && (!needPhi || phi > 0);
+        if (covered) {
+            return Component.translatable("gui.effecoria.gene_editor.tissue_ready", synth, phi);
+        }
+        return Component.translatable("gui.effecoria.gene_editor.tissue_missing", synth, phi);
+    }
+
+    private int tissueHintColor() {
+        if (selected.isEmpty()) {
+            return 0xFFA8C898;
+        }
+        boolean needOrdinary = false;
+        boolean needPhi = false;
+        for (GeneMod mod : selectedMods()) {
+            if (mod.phiField()) {
+                needPhi = true;
+            } else {
+                needOrdinary = true;
+            }
+        }
+        boolean covered =
+                (!needOrdinary || count(ModItems.SYNTH_TISSUE.get()) > 0)
+                        && (!needPhi || count(ModItems.PHI_SYNTH_TISSUE.get()) > 0);
+        return covered ? 0xFFB8F0C8 : 0xFFE0A070;
+    }
+
+    private int count(net.minecraft.world.item.Item item) {
+        if (this.minecraft == null || this.minecraft.player == null) {
+            return 0;
+        }
+        return com.effecoria.effect.organic.gene.GeneEngineeringService.countItem(this.minecraft.player, item);
     }
 
     private void toggle(String id) {
@@ -423,6 +472,8 @@ public class GeneEditorScreen extends Screen {
                 infoW,
                 0xFFA8C898,
                 yMax);
+        y += 4;
+        y = drawWrapped(graphics, tissueHint(), infoX, y, infoW, tissueHintColor(), yMax);
         y += 6;
         if (dnaLocked) {
             y = drawWrapped(

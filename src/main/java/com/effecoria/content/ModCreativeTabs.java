@@ -186,6 +186,8 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.PHI_STONE_GRIT.get());
                         output.accept(ModItems.BONE_GRIT.get());
                         output.accept(ModItems.PHI_BONE_PASTE.get());
+                        output.accept(ModItems.SYNTH_TISSUE.get());
+                        output.accept(ModItems.PHI_SYNTH_TISSUE.get());
                         output.accept(ModItems.PHI_WOOD_SHAVINGS.get());
                         output.accept(ModItems.PHI_FIBER.get());
                         output.accept(ModItems.PHI_CLOTH.get());
