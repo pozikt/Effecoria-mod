@@ -1089,7 +1089,7 @@
   "message.effecoria.organic.bio_fission": "Organic matter shattered: %s blocks",
   "gui.effecoria.gene_editor": "Gene Engineering",
   "gui.effecoria.gene_editor.host": "Host: %s",
-  "gui.effecoria.gene_editor.hint": "Click a body part, then pick grafts. Up to %s at once.",
+  "gui.effecoria.gene_editor.hint": "Click a body part, drag to rotate. Up to %s grafts at once.",
   "gui.effecoria.gene_editor.apply": "Inscribe",
   "gui.effecoria.gene_editor.clear": "Erase",
   "gui.effecoria.gene_editor.lock_dna": "Lock DNA",

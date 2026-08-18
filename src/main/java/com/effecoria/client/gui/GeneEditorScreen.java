@@ -15,8 +15,12 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
+
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 /** Organic gene editor — clickable host preview, per-part graft list. */
 public class GeneEditorScreen extends Screen {
@@ -25,6 +29,9 @@ public class GeneEditorScreen extends Screen {
     private static final int LIST_W = 158;
     private static final int PREVIEW_W = 128;
     private static final int PREVIEW_H = 176;
+    private static final int PREVIEW_SCALE = 42;
+    private static final float PREVIEW_Y_OFFSET = 0.0625f;
+    private static final double DRAG_THRESHOLD = 4.0;
 
     private final int targetEntityId;
     private final String targetName;
@@ -37,6 +44,15 @@ public class GeneEditorScreen extends Screen {
     private int scroll;
     private String focusId = "";
     private GeneAnatomySlot slot = GeneAnatomySlot.HEAD;
+
+    private float previewYaw;
+    private float previewPitch;
+    private boolean previewPress;
+    private boolean previewDrag;
+    private double pressX;
+    private double pressY;
+    private double lastDragX;
+    private double lastDragY;
 
     public GeneEditorScreen(
             int targetEntityId,
@@ -61,12 +77,26 @@ public class GeneEditorScreen extends Screen {
     }
 
     private void pickInitialFocus() {
+        ensureHostSlot();
         List<String> visible = visibleMods();
         if (!visible.isEmpty()) {
             focusId = visible.get(0);
         } else if (!unlocked.isEmpty()) {
             focusId = unlocked.get(0);
             GeneMod.byId(focusId).ifPresent(mod -> slot = mod.slot());
+        }
+    }
+
+    private void ensureHostSlot() {
+        LivingEntity host = host();
+        if (host == null || GeneBodyPick.hasSlot(host, slot)) {
+            return;
+        }
+        for (GeneAnatomySlot candidate : GeneAnatomySlot.values()) {
+            if (GeneBodyPick.hasSlot(host, candidate)) {
+                slot = candidate;
+                return;
+            }
         }
     }
 
@@ -84,6 +114,21 @@ public class GeneEditorScreen extends Screen {
 
     private int previewTop() {
         return 44;
+    }
+
+    private int previewRight() {
+        return previewLeft() + PREVIEW_W;
+    }
+
+    private int previewBottom() {
+        return previewTop() + PREVIEW_H;
+    }
+
+    private boolean inPreview(double mouseX, double mouseY) {
+        return mouseX >= previewLeft()
+                && mouseY >= previewTop()
+                && mouseX < previewRight()
+                && mouseY < previewBottom();
     }
 
     private int listLeft() {
@@ -106,7 +151,7 @@ public class GeneEditorScreen extends Screen {
                 if (mod.slot() != slot) {
                     return;
                 }
-                if (host != null && !GeneAnatomySlot.presentOn(host, slot)) {
+                if (host != null && !GeneBodyPick.hasSlot(host, slot)) {
                     return;
                 }
                 out.add(id);
@@ -125,6 +170,7 @@ public class GeneEditorScreen extends Screen {
 
     @Override
     protected void init() {
+        ensureHostSlot();
         List<String> visible = visibleMods();
         int maxScroll = Math.max(0, visible.size() - VISIBLE_ROWS);
         scroll = Math.min(scroll, maxScroll);
@@ -258,57 +304,76 @@ public class GeneEditorScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        GeneAnatomySlot hit = hitSlot(mouseX, mouseY);
-        if (hit != null) {
-            slot = hit;
-            scroll = 0;
-            List<String> visible = visibleMods();
-            if (!visible.isEmpty()) {
-                focusId = visible.get(0);
-            }
-            rebuildButtons();
+        if (button == 0 && inPreview(mouseX, mouseY)) {
+            previewPress = true;
+            previewDrag = false;
+            pressX = mouseX;
+            pressY = mouseY;
+            lastDragX = mouseX;
+            lastDragY = mouseY;
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    private GeneAnatomySlot hitSlot(double mouseX, double mouseY) {
-        int x = previewLeft();
-        int y = previewTop();
-        if (mouseX < x || mouseY < y || mouseX >= x + PREVIEW_W || mouseY >= y + PREVIEW_H) {
-            return null;
-        }
-        float u = (float) ((mouseX - x) / PREVIEW_W);
-        float v = (float) ((mouseY - y) / PREVIEW_H);
-        LivingEntity host = host();
-        GeneAnatomySlot[] order = {
-            GeneAnatomySlot.HEAD,
-            GeneAnatomySlot.DORSUM,
-            GeneAnatomySlot.FORE,
-            GeneAnatomySlot.TAIL,
-            GeneAnatomySlot.HIND,
-            GeneAnatomySlot.TORSO
-        };
-        for (GeneAnatomySlot candidate : order) {
-            if (host != null && !GeneAnatomySlot.presentOn(host, candidate)) {
-                continue;
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (previewPress && button == 0) {
+            if (Math.hypot(mouseX - pressX, mouseY - pressY) > DRAG_THRESHOLD) {
+                previewDrag = true;
             }
-            if (inBox(u, v, candidate)) {
-                return candidate;
+            if (previewDrag) {
+                previewYaw += (float) (mouseX - lastDragX) * 0.9f;
+                previewPitch = Mth.clamp(previewPitch + (float) (mouseY - lastDragY) * 0.55f, -55.0f, 55.0f);
             }
+            lastDragX = mouseX;
+            lastDragY = mouseY;
+            return true;
         }
-        return GeneAnatomySlot.TORSO;
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
-    private static boolean inBox(float u, float v, GeneAnatomySlot slot) {
-        return switch (slot) {
-            case HEAD -> u >= 0.28f && u <= 0.72f && v >= 0.04f && v <= 0.28f;
-            case DORSUM -> u >= 0.06f && u <= 0.34f && v >= 0.18f && v <= 0.50f;
-            case FORE -> u >= 0.66f && u <= 0.96f && v >= 0.28f && v <= 0.62f;
-            case TORSO -> u >= 0.30f && u <= 0.70f && v >= 0.28f && v <= 0.58f;
-            case HIND -> u >= 0.28f && u <= 0.72f && v >= 0.58f && v <= 0.86f;
-            case TAIL -> u >= 0.68f && u <= 0.98f && v >= 0.62f && v <= 0.94f;
-        };
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (previewPress && button == 0) {
+            boolean wasDrag = previewDrag;
+            previewPress = false;
+            previewDrag = false;
+            if (!wasDrag) {
+                selectPartAt(mouseX, mouseY);
+            }
+            return true;
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    private void selectPartAt(double mouseX, double mouseY) {
+        LivingEntity living = host();
+        if (living == null || !inPreview(mouseX, mouseY)) {
+            return;
+        }
+        GeneAnatomySlot hit = GeneBodyPick.hit(
+                living,
+                mouseX,
+                mouseY,
+                previewLeft(),
+                previewTop(),
+                previewRight(),
+                previewBottom(),
+                PREVIEW_SCALE,
+                PREVIEW_Y_OFFSET,
+                previewYaw,
+                previewPitch);
+        if (hit == null || hit == slot) {
+            return;
+        }
+        slot = hit;
+        scroll = 0;
+        List<String> visible = visibleMods();
+        if (!visible.isEmpty()) {
+            focusId = visible.get(0);
+        }
+        rebuildButtons();
     }
 
     @Override
@@ -333,12 +398,9 @@ public class GeneEditorScreen extends Screen {
         graphics.fill(px, py, px + PREVIEW_W, py + PREVIEW_H, 0xFF0C140C);
         LivingEntity living = host();
         if (living != null) {
-            graphics.enableScissor(px, py, px + PREVIEW_W, py + PREVIEW_H);
-            InventoryScreen.renderEntityInInventoryFollowsMouse(
-                    graphics, px, py, px + PREVIEW_W, py + PREVIEW_H, 42, 0.0625f, mouseX, mouseY, living);
-            graphics.disableScissor();
+            renderHostPreview(graphics, living);
+            drawPartHighlights(graphics, living, mouseX, mouseY);
         }
-        drawSlotHints(graphics, mouseX, mouseY);
 
         int infoX = detailLeft();
         int infoW = detailWidth();
@@ -434,35 +496,93 @@ public class GeneEditorScreen extends Screen {
         }
     }
 
-    private void drawSlotHints(GuiGraphics graphics, int mouseX, int mouseY) {
-        GeneAnatomySlot hover = hitSlot(mouseX, mouseY);
-        LivingEntity host = host();
-        for (GeneAnatomySlot candidate : GeneAnatomySlot.values()) {
-            if (host != null && !GeneAnatomySlot.presentOn(host, candidate)) {
+    private void renderHostPreview(GuiGraphics graphics, LivingEntity living) {
+        int px = previewLeft();
+        int py = previewTop();
+        float cx = (px + previewRight()) / 2.0f;
+        float cy = (py + previewBottom()) / 2.0f;
+        float pitchRad = previewPitch * ((float) Math.PI / 180.0f);
+        Quaternionf pose = new Quaternionf().rotateZ((float) Math.PI).rotateX(pitchRad);
+        Quaternionf camera = new Quaternionf().rotateX(pitchRad);
+        float bodyRot = living.yBodyRot;
+        float bodyRotO = living.yBodyRotO;
+        float yRot = living.getYRot();
+        float xRot = living.getXRot();
+        float headO = living.yHeadRotO;
+        float head = living.yHeadRot;
+        living.yBodyRot = 180.0f + previewYaw;
+        living.yBodyRotO = living.yBodyRot;
+        living.setYRot(living.yBodyRot);
+        living.setXRot(-previewPitch);
+        living.yHeadRot = living.getYRot();
+        living.yHeadRotO = living.getYRot();
+        Vector3f translation = new Vector3f(0.0f, living.getBbHeight() / 2.0f + PREVIEW_Y_OFFSET, 0.0f);
+        graphics.enableScissor(px, py, previewRight(), previewBottom());
+        InventoryScreen.renderEntityInInventory(
+                graphics, cx, cy, PREVIEW_SCALE, translation, pose, camera, living);
+        graphics.disableScissor();
+        living.yBodyRot = bodyRot;
+        living.yBodyRotO = bodyRotO;
+        living.setYRot(yRot);
+        living.setXRot(xRot);
+        living.yHeadRotO = headO;
+        living.yHeadRot = head;
+    }
+
+    private void drawPartHighlights(GuiGraphics graphics, LivingEntity living, int mouseX, int mouseY) {
+        GeneAnatomySlot hover = null;
+        if (!previewDrag && inPreview(mouseX, mouseY)) {
+            hover = GeneBodyPick.hit(
+                    living,
+                    mouseX,
+                    mouseY,
+                    previewLeft(),
+                    previewTop(),
+                    previewRight(),
+                    previewBottom(),
+                    PREVIEW_SCALE,
+                    PREVIEW_Y_OFFSET,
+                    previewYaw,
+                    previewPitch);
+        }
+        graphics.enableScissor(previewLeft(), previewTop(), previewRight(), previewBottom());
+        if (hover != null && hover != slot) {
+            fillPartBoxes(graphics, living, hover, 0x33FFFFFF, 0x88FFFFFF);
+        }
+        fillPartBoxes(graphics, living, slot, 0x44C8F0A0, 0xFFC8F0A0);
+        graphics.disableScissor();
+    }
+
+    private void fillPartBoxes(
+            GuiGraphics graphics, LivingEntity living, GeneAnatomySlot part, int fill, int outline) {
+        for (GeneBodyPick.ScreenBox box : GeneBodyPick.screenBoxesForSlot(
+                living,
+                part,
+                previewLeft(),
+                previewTop(),
+                previewRight(),
+                previewBottom(),
+                PREVIEW_SCALE,
+                PREVIEW_Y_OFFSET,
+                previewYaw,
+                previewPitch)) {
+            int x0 = Math.max(box.x0(), previewLeft());
+            int y0 = Math.max(box.y0(), previewTop());
+            int x1 = Math.min(box.x1(), previewRight());
+            int y1 = Math.min(box.y1(), previewBottom());
+            if (x1 <= x0 || y1 <= y0) {
                 continue;
             }
-            int color = candidate == slot ? 0x66C8F0A0 : candidate == hover ? 0x44FFFFFF : 0x22000000;
-            fillSlot(graphics, candidate, color);
+            graphics.fill(x0, y0, x1, y1, fill);
+            outlineBox(graphics, x0, y0, x1, y1, outline);
         }
     }
 
-    private void fillSlot(GuiGraphics graphics, GeneAnatomySlot candidate, int color) {
-        float[] box = switch (candidate) {
-            case HEAD -> new float[] {0.28f, 0.04f, 0.72f, 0.28f};
-            case DORSUM -> new float[] {0.06f, 0.18f, 0.34f, 0.50f};
-            case FORE -> new float[] {0.66f, 0.28f, 0.96f, 0.62f};
-            case TORSO -> new float[] {0.30f, 0.28f, 0.70f, 0.58f};
-            case HIND -> new float[] {0.28f, 0.58f, 0.72f, 0.86f};
-            case TAIL -> new float[] {0.68f, 0.62f, 0.98f, 0.94f};
-        };
-        int x = previewLeft();
-        int y = previewTop();
-        graphics.fill(
-                x + (int) (box[0] * PREVIEW_W),
-                y + (int) (box[1] * PREVIEW_H),
-                x + (int) (box[2] * PREVIEW_W),
-                y + (int) (box[3] * PREVIEW_H),
-                color);
+    private static void outlineBox(GuiGraphics graphics, int x0, int y0, int x1, int y1, int color) {
+        graphics.fill(x0, y0, x1, y0 + 1, color);
+        graphics.fill(x0, y1 - 1, x1, y1, color);
+        graphics.fill(x0, y0, x0 + 1, y1, color);
+        graphics.fill(x1 - 1, y0, x1, y1, color);
     }
 
     private void updateFocusFromHover(int mouseX, int mouseY) {

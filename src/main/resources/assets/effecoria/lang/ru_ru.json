@@ -1089,7 +1089,7 @@
   "message.effecoria.organic.bio_fission": "Разрушено органики: %s блоков",
   "gui.effecoria.gene_editor": "Генная инженерия",
   "gui.effecoria.gene_editor.host": "Хозяин: %s",
-  "gui.effecoria.gene_editor.hint": "Кликни часть тела, затем выбери прививки. Не больше %s сразу.",
+  "gui.effecoria.gene_editor.hint": "Кликни часть тела, перетащи чтобы повернуть. Не больше %s прививок сразу.",
   "gui.effecoria.gene_editor.apply": "Начертать",
   "gui.effecoria.gene_editor.clear": "Стереть",
   "gui.effecoria.gene_editor.lock_dna": "Зафиксировать ДНК",
