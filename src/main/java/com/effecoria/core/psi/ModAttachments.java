@@ -133,6 +133,7 @@ public final class ModAttachments {
                         }
                     })
                     .copyOnDeath()
+                    .sync(GeneProfile.STREAM_CODEC)
                     .build());
 
     /** Φ-disease profile — survives death unless clear_on_death is set. */

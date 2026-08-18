@@ -59,7 +59,11 @@ public final class ClientGuiHooks {
             String targetName,
             java.util.List<String> current,
             java.util.List<String> unlocked,
-            int maxSlots) {
-        Minecraft.getInstance().setScreen(new GeneEditorScreen(entityId, targetName, current, unlocked, maxSlots));
+            int maxSlots,
+            boolean dnaLocked,
+            boolean canLock) {
+        Minecraft.getInstance()
+                .setScreen(new GeneEditorScreen(
+                        entityId, targetName, current, unlocked, maxSlots, dnaLocked, canLock));
     }
 }

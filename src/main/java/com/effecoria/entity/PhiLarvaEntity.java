@@ -4,6 +4,7 @@ import com.effecoria.content.ModEntities;
 import com.effecoria.content.ModItems;
 import com.effecoria.content.PhiHarnessItems;
 import com.effecoria.core.psi.PsiHelper;
+import com.effecoria.effect.organic.gene.GeneEngineeringService;
 
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -124,7 +125,11 @@ public class PhiLarvaEntity extends Animal implements GeoEntity {
 
     @Override
     public PhiLarvaEntity getBreedOffspring(ServerLevel level, AgeableMob partner) {
-        return ModEntities.PHI_LARVA.get().create(level);
+        PhiLarvaEntity baby = ModEntities.PHI_LARVA.get().create(level);
+        if (baby != null) {
+            GeneEngineeringService.inheritLockedDna(this, partner, baby);
+        }
+        return baby;
     }
 
     @Override

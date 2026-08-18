@@ -16,24 +16,28 @@ import net.minecraft.network.chat.Component;
  */
 public enum GeneMod {
     // —— Tier 1 (existing bits 0–7 kept) ——
-    HYPER_REGEN(0, Tier.BASIC, 0.55f, 18f, false),
-    SPRINT_LIMBS(1, Tier.BASIC, 0.40f, 12f, false),
-    KEEN_EYES(2, Tier.BASIC, 0.40f, 10f, false),
-    ECHO_SENSE(3, Tier.ADVANCED, 0.65f, 16f, false),
-    ORKANUMN_WEAVE(4, Tier.BASIC, 0.50f, 14f, false),
-    KERATIN_PLATES(5, Tier.BASIC, 0.45f, 12f, false),
-    GILL_BUDS(6, Tier.BASIC, 0.50f, 12f, false),
-    TOXIN_GLANDS(7, Tier.ADVANCED, 0.70f, 16f, false),
+    HYPER_REGEN(0, Tier.BASIC, 0.55f, 18f, false, GeneAnatomySlot.TORSO),
+    SPRINT_LIMBS(1, Tier.BASIC, 0.40f, 12f, false, GeneAnatomySlot.HIND),
+    KEEN_EYES(2, Tier.BASIC, 0.40f, 10f, false, GeneAnatomySlot.HEAD),
+    ECHO_SENSE(3, Tier.ADVANCED, 0.65f, 16f, false, GeneAnatomySlot.HEAD),
+    ORKANUMN_WEAVE(4, Tier.BASIC, 0.50f, 14f, false, GeneAnatomySlot.TORSO),
+    KERATIN_PLATES(5, Tier.BASIC, 0.45f, 12f, false, GeneAnatomySlot.TORSO),
+    GILL_BUDS(6, Tier.BASIC, 0.50f, 12f, false, GeneAnatomySlot.TORSO),
+    TOXIN_GLANDS(7, Tier.ADVANCED, 0.70f, 16f, false, GeneAnatomySlot.TORSO),
     // —— New ——
-    BONE_WEAPONS(8, Tier.BASIC, 0.42f, 12f, false),
-    MUSCLE_HYPERTROPHY(9, Tier.BASIC, 0.48f, 14f, false),
-    MEMBRANE_WINGS(10, Tier.ADVANCED, 0.72f, 22f, false),
-    EXTRA_LIMBS(11, Tier.ADVANCED, 0.75f, 20f, false),
-    LIMB_REGEN(12, Tier.ADVANCED, 0.78f, 24f, false),
-    BEAST_MORPH(13, Tier.MASTER, 0.88f, 28f, false),
-    PHI_HEART(14, Tier.MASTER, 0.90f, 32f, true),
-    CELL_IMMORTAL(15, Tier.MASTER, 0.92f, 30f, true),
-    SYMBIOTE_COLONY(16, Tier.MASTER, 0.85f, 26f, true);
+    BONE_WEAPONS(8, Tier.BASIC, 0.42f, 12f, false, GeneAnatomySlot.HEAD),
+    MUSCLE_HYPERTROPHY(9, Tier.BASIC, 0.48f, 14f, false, GeneAnatomySlot.FORE),
+    MEMBRANE_WINGS(10, Tier.ADVANCED, 0.72f, 22f, false, GeneAnatomySlot.DORSUM),
+    EXTRA_LIMBS(11, Tier.ADVANCED, 0.75f, 20f, false, GeneAnatomySlot.FORE),
+    LIMB_REGEN(12, Tier.ADVANCED, 0.78f, 24f, false, GeneAnatomySlot.HIND),
+    BEAST_MORPH(13, Tier.MASTER, 0.88f, 28f, false, GeneAnatomySlot.DORSUM),
+    PHI_HEART(14, Tier.MASTER, 0.90f, 32f, true, GeneAnatomySlot.TORSO),
+    CELL_IMMORTAL(15, Tier.MASTER, 0.92f, 30f, true, GeneAnatomySlot.TORSO),
+    SYMBIOTE_COLONY(16, Tier.MASTER, 0.85f, 26f, true, GeneAnatomySlot.TORSO);
+
+    /** Mastery required to lock grafts into heritable DNA. */
+    public static final float DNA_LOCK_MASTERY = 0.88f;
+    public static final float DNA_LOCK_PSI_COST = 40f;
 
     public enum Tier {
         BASIC,
@@ -46,13 +50,21 @@ public enum GeneMod {
     private final float minMastery;
     private final float applyPsiCost;
     private final boolean playerOnly;
+    private final GeneAnatomySlot slot;
 
-    GeneMod(int bitIndex, Tier tier, float minMastery, float applyPsiCost, boolean playerOnly) {
+    GeneMod(
+            int bitIndex,
+            Tier tier,
+            float minMastery,
+            float applyPsiCost,
+            boolean playerOnly,
+            GeneAnatomySlot slot) {
         this.bitIndex = bitIndex;
         this.tier = tier;
         this.minMastery = minMastery;
         this.applyPsiCost = applyPsiCost;
         this.playerOnly = playerOnly;
+        this.slot = slot;
     }
 
     public int bitIndex() {
@@ -81,6 +93,10 @@ public enum GeneMod {
 
     public boolean playerOnly() {
         return playerOnly;
+    }
+
+    public GeneAnatomySlot slot() {
+        return slot;
     }
 
     public Component title() {

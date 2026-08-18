@@ -750,10 +750,11 @@ public final class OrganicEffects {
         }
         String name = host.getName().getString();
         int slots = com.effecoria.effect.organic.gene.GeneEngineeringService.slotsFor(caster);
+        boolean canLock = com.effecoria.effect.organic.gene.GeneEngineeringService.canLockDna(caster);
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
                 caster,
                 new com.effecoria.network.ModNetworking.OpenGeneEditorPayload(
-                        host.getId(), name, profile.modIds(), unlocked, slots));
+                        host.getId(), name, profile.modIds(), unlocked, slots, profile.dnaLocked(), canLock));
         spawnDna(caster.serverLevel(), host.position().add(0, 1, 0));
         caster.serverLevel()
                 .playSound(

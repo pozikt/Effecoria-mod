@@ -2,6 +2,7 @@ package com.effecoria.effect.organic.gene;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -84,6 +85,10 @@ public final class GeneEngineeringService {
         if (data.school() != MagicSchool.ORGANIC) {
             return false;
         }
+        GeneProfile profile = get(host);
+        if (profile.dnaLocked()) {
+            return false;
+        }
         float mastery = BreathingService.referenceRatio(data.breathingMastery());
         EnumSet<GeneMod> chosen = EnumSet.noneOf(GeneMod.class);
         for (String id : modIds) {
@@ -114,7 +119,6 @@ public final class GeneEngineeringService {
             engineer.syncData(ModAttachments.PSI.get());
         }
 
-        GeneProfile profile = get(host);
         clearAttributeMods(host);
         clearChannelBonuses(host, profile);
         profile.setMods(chosen, engineer.getUUID(), host.level().getGameTime());
@@ -131,15 +135,97 @@ public final class GeneEngineeringService {
         return true;
     }
 
-    public static void clearFromEngineer(ServerPlayer engineer, LivingEntity host, double maxRange) {
+    public static boolean clearFromEngineer(ServerPlayer engineer, LivingEntity host, double maxRange) {
         if (host == null || engineer.distanceToSqr(host) > maxRange * maxRange) {
-            return;
+            return false;
+        }
+        PlayerPsiData data = PsiHelper.get(engineer);
+        if (data.school() != MagicSchool.ORGANIC) {
+            return false;
         }
         GeneProfile profile = get(host);
+        if (profile.dnaLocked()) {
+            return false;
+        }
         clearAttributeMods(host);
         clearChannelBonuses(host, profile);
         profile.clear();
         set(host, profile);
+        return true;
+    }
+
+    public static boolean lockFromEngineer(
+            ServerPlayer engineer, LivingEntity host, boolean locked, double maxRange) {
+        if (host == null || !host.isAlive()) {
+            return false;
+        }
+        if (engineer.distanceToSqr(host) > maxRange * maxRange) {
+            return false;
+        }
+        PlayerPsiData data = PsiHelper.get(engineer);
+        if (data.school() != MagicSchool.ORGANIC) {
+            return false;
+        }
+        float mastery = BreathingService.referenceRatio(data.breathingMastery());
+        if (mastery + 1.0e-4f < GeneMod.DNA_LOCK_MASTERY) {
+            return false;
+        }
+        GeneProfile profile = get(host);
+        if (locked && profile.isEmpty()) {
+            return false;
+        }
+        if (profile.dnaLocked() == locked) {
+            return true;
+        }
+        if (!CreativeGodMode.isActive(engineer) && data.currentPsi() < GeneMod.DNA_LOCK_PSI_COST) {
+            return false;
+        }
+        if (!CreativeGodMode.isActive(engineer)) {
+            data.setCurrentPsi(data.currentPsi() - GeneMod.DNA_LOCK_PSI_COST);
+            PsiHelper.set(engineer, data);
+            engineer.syncData(ModAttachments.PSI.get());
+        }
+        profile.setDnaLocked(locked);
+        set(host, profile);
+        return true;
+    }
+
+    public static boolean canLockDna(ServerPlayer engineer) {
+        PlayerPsiData data = PsiHelper.get(engineer);
+        if (data.school() != MagicSchool.ORGANIC) {
+            return false;
+        }
+        return BreathingService.referenceRatio(data.breathingMastery()) + 1.0e-4f >= GeneMod.DNA_LOCK_MASTERY;
+    }
+
+    public static void inheritLockedDna(
+            @Nullable LivingEntity parentA, @Nullable LivingEntity parentB, LivingEntity child) {
+        if (child == null || !child.isAlive()) {
+            return;
+        }
+        GeneProfile a = parentA != null ? get(parentA) : GeneProfile.createDefault();
+        GeneProfile b = parentB != null ? get(parentB) : GeneProfile.createDefault();
+        boolean aLock = a.dnaLocked() && !a.isEmpty();
+        boolean bLock = b.dnaLocked() && !b.isEmpty();
+        if (!aLock && !bLock) {
+            return;
+        }
+        EnumSet<GeneMod> chosen;
+        if (aLock && bLock) {
+            chosen = EnumSet.copyOf(a.mods());
+            chosen.addAll(b.mods());
+            if (!GeneMod.compatible(chosen)) {
+                chosen = EnumSet.copyOf(a.mods());
+            }
+        } else {
+            chosen = EnumSet.copyOf(aLock ? a.mods() : b.mods());
+        }
+        GeneProfile childProfile = get(child);
+        UUID engineer = a.engineerId() != null ? a.engineerId() : b.engineerId();
+        childProfile.setMods(chosen, engineer, child.level().getGameTime());
+        childProfile.setDnaLocked(true);
+        set(child, childProfile);
+        reapplyOnLoad(child);
     }
 
     public static void reapplyOnLoad(LivingEntity host) {

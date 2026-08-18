@@ -5,73 +5,134 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.effecoria.effect.organic.gene.GeneAnatomySlot;
 import com.effecoria.effect.organic.gene.GeneMod;
 import com.effecoria.network.ModNetworking;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-/** Organic gene-engineering editor — pick grafts up to the engineer's slot budget. */
+/** Organic gene editor — clickable host preview, per-part graft list. */
 public class GeneEditorScreen extends Screen {
     private static final int ROW_H = 20;
-    private static final int VISIBLE_ROWS = 9;
-    private static final int LIST_W = 168;
-    private static final int DETAIL_PAD = 12;
+    private static final int VISIBLE_ROWS = 8;
+    private static final int LIST_W = 158;
+    private static final int PREVIEW_W = 128;
+    private static final int PREVIEW_H = 176;
 
     private final int targetEntityId;
     private final String targetName;
     private final List<String> unlocked;
     private final int maxSlots;
+    private final boolean canLock;
     private final Set<String> selected = new LinkedHashSet<>();
+    private boolean dnaLocked;
     private String status = "";
     private int scroll;
-    /** Graft shown in the detail pane (last toggled / hovered). */
     private String focusId = "";
+    private GeneAnatomySlot slot = GeneAnatomySlot.HEAD;
 
     public GeneEditorScreen(
-            int targetEntityId, String targetName, List<String> current, List<String> unlocked, int maxSlots) {
+            int targetEntityId,
+            String targetName,
+            List<String> current,
+            List<String> unlocked,
+            int maxSlots,
+            boolean dnaLocked,
+            boolean canLock) {
         super(Component.translatable("gui.effecoria.gene_editor"));
         this.targetEntityId = targetEntityId;
         this.targetName = targetName == null ? "?" : targetName;
         this.unlocked = List.copyOf(unlocked);
         this.maxSlots = Math.max(1, maxSlots);
+        this.dnaLocked = dnaLocked;
+        this.canLock = canLock;
         this.selected.addAll(current);
         while (this.selected.size() > this.maxSlots) {
             this.selected.remove(this.selected.iterator().next());
         }
-        if (!this.selected.isEmpty()) {
-            this.focusId = this.selected.iterator().next();
-        } else if (!this.unlocked.isEmpty()) {
-            this.focusId = this.unlocked.get(0);
+        pickInitialFocus();
+    }
+
+    private void pickInitialFocus() {
+        List<String> visible = visibleMods();
+        if (!visible.isEmpty()) {
+            focusId = visible.get(0);
+        } else if (!unlocked.isEmpty()) {
+            focusId = unlocked.get(0);
+            GeneMod.byId(focusId).ifPresent(mod -> slot = mod.slot());
         }
     }
 
+    private LivingEntity host() {
+        if (this.minecraft == null || this.minecraft.level == null) {
+            return null;
+        }
+        var entity = this.minecraft.level.getEntity(targetEntityId);
+        return entity instanceof LivingEntity living ? living : null;
+    }
+
+    private int previewLeft() {
+        return 16;
+    }
+
+    private int previewTop() {
+        return 44;
+    }
+
     private int listLeft() {
-        return this.width / 2 - 170;
+        return previewLeft() + PREVIEW_W + 12;
     }
 
     private int detailLeft() {
-        return listLeft() + LIST_W + DETAIL_PAD;
+        return listLeft() + LIST_W + 12;
     }
 
     private int detailWidth() {
-        return Math.max(120, this.width - detailLeft() - 16);
+        return Math.max(110, this.width - detailLeft() - 16);
+    }
+
+    private List<String> visibleMods() {
+        LivingEntity host = host();
+        List<String> out = new ArrayList<>();
+        for (String id : unlocked) {
+            GeneMod.byId(id).ifPresent(mod -> {
+                if (mod.slot() != slot) {
+                    return;
+                }
+                if (host != null && !GeneAnatomySlot.presentOn(host, slot)) {
+                    return;
+                }
+                out.add(id);
+            });
+        }
+        return out;
+    }
+
+    private Set<GeneMod> selectedMods() {
+        Set<GeneMod> set = new LinkedHashSet<>();
+        for (String id : selected) {
+            GeneMod.byId(id).ifPresent(set::add);
+        }
+        return set;
     }
 
     @Override
     protected void init() {
-        int left = listLeft();
-        int listTop = 48;
-        int maxScroll = Math.max(0, unlocked.size() - VISIBLE_ROWS);
+        List<String> visible = visibleMods();
+        int maxScroll = Math.max(0, visible.size() - VISIBLE_ROWS);
         scroll = Math.min(scroll, maxScroll);
-        int end = Math.min(unlocked.size(), scroll + VISIBLE_ROWS);
-        int y = listTop;
+        int end = Math.min(visible.size(), scroll + VISIBLE_ROWS);
+        int y = previewTop();
+        int left = listLeft();
         for (int i = scroll; i < end; i++) {
-            String modId = unlocked.get(i);
+            String modId = visible.get(i);
             addRenderableWidget(Button.builder(buttonLabel(modId), b -> toggle(modId))
                     .bounds(left, y, LIST_W, 18)
                     .build());
@@ -80,13 +141,20 @@ public class GeneEditorScreen extends Screen {
         int bottom = this.height - 28;
         int cx = this.width / 2;
         addRenderableWidget(Button.builder(Component.translatable("gui.effecoria.gene_editor.apply"), b -> apply())
-                .bounds(cx - 100, bottom, 90, 20)
+                .bounds(cx - 150, bottom, 72, 20)
                 .build());
         addRenderableWidget(Button.builder(Component.translatable("gui.effecoria.gene_editor.clear"), b -> clear())
-                .bounds(cx - 5, bottom, 70, 20)
+                .bounds(cx - 74, bottom, 64, 20)
                 .build());
+        if (canLock) {
+            Component lockLabel = Component.translatable(
+                    dnaLocked ? "gui.effecoria.gene_editor.unlock_dna" : "gui.effecoria.gene_editor.lock_dna");
+            addRenderableWidget(Button.builder(lockLabel, b -> toggleLock())
+                    .bounds(cx - 6, bottom, 92, 20)
+                    .build());
+        }
         addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
-                .bounds(cx + 70, bottom, 50, 20)
+                .bounds(cx + 92, bottom, 50, 20)
                 .build());
     }
 
@@ -102,6 +170,10 @@ public class GeneEditorScreen extends Screen {
 
     private void toggle(String id) {
         focusId = id;
+        if (dnaLocked) {
+            status = Component.translatable("gui.effecoria.gene_editor.dna_locked").getString();
+            return;
+        }
         if (selected.contains(id)) {
             selected.remove(id);
             status = "";
@@ -112,10 +184,7 @@ public class GeneEditorScreen extends Screen {
             status = Component.translatable("gui.effecoria.gene_editor.slots_full", maxSlots).getString();
             return;
         }
-        Set<GeneMod> trial = new LinkedHashSet<>();
-        for (String s : selected) {
-            GeneMod.byId(s).ifPresent(trial::add);
-        }
+        Set<GeneMod> trial = selectedMods();
         GeneMod.byId(id).ifPresent(trial::add);
         if (!GeneMod.compatible(trial)) {
             status = Component.translatable("gui.effecoria.gene_editor.incompatible").getString();
@@ -132,20 +201,50 @@ public class GeneEditorScreen extends Screen {
     }
 
     private void apply() {
+        if (dnaLocked) {
+            status = Component.translatable("gui.effecoria.gene_editor.dna_locked").getString();
+            return;
+        }
         PacketDistributor.sendToServer(
                 new ModNetworking.ApplyGeneModsPayload(targetEntityId, new ArrayList<>(selected)));
         onClose();
     }
 
     private void clear() {
+        if (dnaLocked) {
+            status = Component.translatable("gui.effecoria.gene_editor.dna_locked").getString();
+            return;
+        }
         PacketDistributor.sendToServer(new ModNetworking.ClearGeneModsPayload(targetEntityId));
         selected.clear();
         onClose();
     }
 
+    private void toggleLock() {
+        if (!canLock) {
+            return;
+        }
+        boolean next = !dnaLocked;
+        if (next && selected.isEmpty()) {
+            status = Component.translatable("gui.effecoria.gene_editor.lock_empty").getString();
+            return;
+        }
+        if (next) {
+            PacketDistributor.sendToServer(
+                    new ModNetworking.ApplyGeneModsPayload(targetEntityId, new ArrayList<>(selected)));
+        }
+        PacketDistributor.sendToServer(new ModNetworking.LockGeneDnaPayload(targetEntityId, next));
+        dnaLocked = next;
+        status = Component.translatable(
+                        next ? "gui.effecoria.gene_editor.dna_locked" : "gui.effecoria.gene_editor.dna_unlocked")
+                .getString();
+        rebuildButtons();
+    }
+
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        int maxScroll = Math.max(0, unlocked.size() - VISIBLE_ROWS);
+        List<String> visible = visibleMods();
+        int maxScroll = Math.max(0, visible.size() - VISIBLE_ROWS);
         if (maxScroll > 0) {
             int before = scroll;
             scroll = Math.max(0, Math.min(maxScroll, scroll - (int) Math.signum(scrollY)));
@@ -158,6 +257,61 @@ public class GeneEditorScreen extends Screen {
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        GeneAnatomySlot hit = hitSlot(mouseX, mouseY);
+        if (hit != null) {
+            slot = hit;
+            scroll = 0;
+            List<String> visible = visibleMods();
+            if (!visible.isEmpty()) {
+                focusId = visible.get(0);
+            }
+            rebuildButtons();
+            return true;
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    private GeneAnatomySlot hitSlot(double mouseX, double mouseY) {
+        int x = previewLeft();
+        int y = previewTop();
+        if (mouseX < x || mouseY < y || mouseX >= x + PREVIEW_W || mouseY >= y + PREVIEW_H) {
+            return null;
+        }
+        float u = (float) ((mouseX - x) / PREVIEW_W);
+        float v = (float) ((mouseY - y) / PREVIEW_H);
+        LivingEntity host = host();
+        GeneAnatomySlot[] order = {
+            GeneAnatomySlot.HEAD,
+            GeneAnatomySlot.DORSUM,
+            GeneAnatomySlot.FORE,
+            GeneAnatomySlot.TAIL,
+            GeneAnatomySlot.HIND,
+            GeneAnatomySlot.TORSO
+        };
+        for (GeneAnatomySlot candidate : order) {
+            if (host != null && !GeneAnatomySlot.presentOn(host, candidate)) {
+                continue;
+            }
+            if (inBox(u, v, candidate)) {
+                return candidate;
+            }
+        }
+        return GeneAnatomySlot.TORSO;
+    }
+
+    private static boolean inBox(float u, float v, GeneAnatomySlot slot) {
+        return switch (slot) {
+            case HEAD -> u >= 0.28f && u <= 0.72f && v >= 0.04f && v <= 0.28f;
+            case DORSUM -> u >= 0.06f && u <= 0.34f && v >= 0.18f && v <= 0.50f;
+            case FORE -> u >= 0.66f && u <= 0.96f && v >= 0.28f && v <= 0.62f;
+            case TORSO -> u >= 0.30f && u <= 0.70f && v >= 0.28f && v <= 0.58f;
+            case HIND -> u >= 0.28f && u <= 0.72f && v >= 0.58f && v <= 0.86f;
+            case TAIL -> u >= 0.68f && u <= 0.98f && v >= 0.62f && v <= 0.94f;
+        };
+    }
+
+    @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         graphics.fill(0, 0, this.width, this.height, 0x88081010);
     }
@@ -165,19 +319,40 @@ public class GeneEditorScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(graphics, mouseX, mouseY, partialTick);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, 12, 0xFFE8F8E0);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, 10, 0xFFE8F8E0);
         graphics.drawCenteredString(
                 this.font,
                 Component.translatable("gui.effecoria.gene_editor.host", targetName),
                 this.width / 2,
-                26,
+                24,
                 0xFFB8D8A8);
+
+        int px = previewLeft();
+        int py = previewTop();
+        graphics.fill(px - 1, py - 1, px + PREVIEW_W + 1, py + PREVIEW_H + 1, 0xFF1A2A18);
+        graphics.fill(px, py, px + PREVIEW_W, py + PREVIEW_H, 0xFF0C140C);
+        LivingEntity living = host();
+        if (living != null) {
+            graphics.enableScissor(px, py, px + PREVIEW_W, py + PREVIEW_H);
+            InventoryScreen.renderEntityInInventoryFollowsMouse(
+                    graphics, px, py, px + PREVIEW_W, py + PREVIEW_H, 42, 0.0625f, mouseX, mouseY, living);
+            graphics.disableScissor();
+        }
+        drawSlotHints(graphics, mouseX, mouseY);
 
         int infoX = detailLeft();
         int infoW = detailWidth();
         int yMax = this.height - 56;
-        int y = 48;
-
+        int y = previewTop();
+        y = drawWrapped(
+                graphics,
+                Component.translatable("gui.effecoria.gene_editor.part", slot.title()),
+                infoX,
+                y,
+                infoW,
+                0xFFE8FFD0,
+                yMax);
+        y += 4;
         y = drawWrapped(
                 graphics,
                 Component.translatable("gui.effecoria.gene_editor.hint", maxSlots),
@@ -187,7 +362,17 @@ public class GeneEditorScreen extends Screen {
                 0xFFA8C898,
                 yMax);
         y += 6;
-
+        if (dnaLocked) {
+            y = drawWrapped(
+                    graphics,
+                    Component.translatable("gui.effecoria.gene_editor.dna_locked"),
+                    infoX,
+                    y,
+                    infoW,
+                    0xFFE0C070,
+                    yMax);
+            y += 6;
+        }
         if (!selected.isEmpty()) {
             y = drawWrapped(
                     graphics,
@@ -241,15 +426,6 @@ public class GeneEditorScreen extends Screen {
             drawWrapped(graphics, mod.cost(), infoX, y, infoW, 0xFFCC8888, yMax);
         }
 
-        if (unlocked.size() > VISIBLE_ROWS) {
-            graphics.drawString(
-                    this.font,
-                    Component.translatable("gui.effecoria.gene_editor.scroll"),
-                    listLeft(),
-                    this.height - 48,
-                    0xFF889988,
-                    false);
-        }
         if (!status.isEmpty()) {
             graphics.drawCenteredString(this.font, status, this.width / 2, this.height - 48, 0xFFFFAA66);
         }
@@ -258,14 +434,45 @@ public class GeneEditorScreen extends Screen {
         }
     }
 
+    private void drawSlotHints(GuiGraphics graphics, int mouseX, int mouseY) {
+        GeneAnatomySlot hover = hitSlot(mouseX, mouseY);
+        LivingEntity host = host();
+        for (GeneAnatomySlot candidate : GeneAnatomySlot.values()) {
+            if (host != null && !GeneAnatomySlot.presentOn(host, candidate)) {
+                continue;
+            }
+            int color = candidate == slot ? 0x66C8F0A0 : candidate == hover ? 0x44FFFFFF : 0x22000000;
+            fillSlot(graphics, candidate, color);
+        }
+    }
+
+    private void fillSlot(GuiGraphics graphics, GeneAnatomySlot candidate, int color) {
+        float[] box = switch (candidate) {
+            case HEAD -> new float[] {0.28f, 0.04f, 0.72f, 0.28f};
+            case DORSUM -> new float[] {0.06f, 0.18f, 0.34f, 0.50f};
+            case FORE -> new float[] {0.66f, 0.28f, 0.96f, 0.62f};
+            case TORSO -> new float[] {0.30f, 0.28f, 0.70f, 0.58f};
+            case HIND -> new float[] {0.28f, 0.58f, 0.72f, 0.86f};
+            case TAIL -> new float[] {0.68f, 0.62f, 0.98f, 0.94f};
+        };
+        int x = previewLeft();
+        int y = previewTop();
+        graphics.fill(
+                x + (int) (box[0] * PREVIEW_W),
+                y + (int) (box[1] * PREVIEW_H),
+                x + (int) (box[2] * PREVIEW_W),
+                y + (int) (box[3] * PREVIEW_H),
+                color);
+    }
+
     private void updateFocusFromHover(int mouseX, int mouseY) {
-        int listTop = 48;
-        int end = Math.min(unlocked.size(), scroll + VISIBLE_ROWS);
+        List<String> visible = visibleMods();
+        int end = Math.min(visible.size(), scroll + VISIBLE_ROWS);
         for (int i = scroll; i < end; i++) {
             int row = i - scroll;
-            int by = listTop + row * ROW_H;
+            int by = previewTop() + row * ROW_H;
             if (mouseX >= listLeft() && mouseX <= listLeft() + LIST_W && mouseY >= by && mouseY < by + 18) {
-                focusId = unlocked.get(i);
+                focusId = visible.get(i);
                 return;
             }
         }

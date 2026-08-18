@@ -1531,7 +1531,13 @@ public final class ModNetworking {
 
     /** Server opens Organic gene editor for a living host. */
     public record OpenGeneEditorPayload(
-            int entityId, String targetName, List<String> current, List<String> unlocked, int maxSlots)
+            int entityId,
+            String targetName,
+            List<String> current,
+            List<String> unlocked,
+            int maxSlots,
+            boolean dnaLocked,
+            boolean canLock)
             implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<OpenGeneEditorPayload> TYPE =
                 new CustomPacketPayload.Type<>(
@@ -1541,18 +1547,24 @@ public final class ModNetworking {
                 ByteBufCodecs.collection(ArrayList::new, ByteBufCodecs.STRING_UTF8);
 
         public static final StreamCodec<RegistryFriendlyByteBuf, OpenGeneEditorPayload> STREAM_CODEC =
-                StreamCodec.composite(
-                        ByteBufCodecs.VAR_INT,
-                        OpenGeneEditorPayload::entityId,
-                        ByteBufCodecs.STRING_UTF8,
-                        OpenGeneEditorPayload::targetName,
-                        STRING_LIST,
-                        OpenGeneEditorPayload::current,
-                        STRING_LIST,
-                        OpenGeneEditorPayload::unlocked,
-                        ByteBufCodecs.VAR_INT,
-                        OpenGeneEditorPayload::maxSlots,
-                        OpenGeneEditorPayload::new);
+                StreamCodec.of(
+                        (buf, payload) -> {
+                            ByteBufCodecs.VAR_INT.encode(buf, payload.entityId());
+                            ByteBufCodecs.STRING_UTF8.encode(buf, payload.targetName());
+                            STRING_LIST.encode(buf, payload.current());
+                            STRING_LIST.encode(buf, payload.unlocked());
+                            ByteBufCodecs.VAR_INT.encode(buf, payload.maxSlots());
+                            ByteBufCodecs.BOOL.encode(buf, payload.dnaLocked());
+                            ByteBufCodecs.BOOL.encode(buf, payload.canLock());
+                        },
+                        buf -> new OpenGeneEditorPayload(
+                                ByteBufCodecs.VAR_INT.decode(buf),
+                                ByteBufCodecs.STRING_UTF8.decode(buf),
+                                STRING_LIST.decode(buf),
+                                STRING_LIST.decode(buf),
+                                ByteBufCodecs.VAR_INT.decode(buf),
+                                ByteBufCodecs.BOOL.decode(buf),
+                                ByteBufCodecs.BOOL.decode(buf)));
 
         @Override
         public Type<? extends CustomPacketPayload> type() {
@@ -1565,7 +1577,9 @@ public final class ModNetworking {
                     payload.targetName(),
                     payload.current(),
                     payload.unlocked(),
-                    payload.maxSlots()));
+                    payload.maxSlots(),
+                    payload.dnaLocked(),
+                    payload.canLock()));
         }
     }
 
@@ -1605,10 +1619,12 @@ public final class ModNetworking {
                 }
                 boolean ok = com.effecoria.effect.organic.gene.GeneEngineeringService.applyFromEngineer(
                         player, living, payload.mods(), 8.0);
-                player.displayClientMessage(
-                        Component.translatable(
-                                ok ? "message.effecoria.gene.applied" : "message.effecoria.gene.failed"),
-                        true);
+                String key = ok
+                        ? "message.effecoria.gene.applied"
+                        : (com.effecoria.effect.organic.gene.GeneEngineeringService.get(living).dnaLocked()
+                                ? "message.effecoria.gene.dna_locked"
+                                : "message.effecoria.gene.failed");
+                player.displayClientMessage(Component.translatable(key), true);
             });
         }
     }
@@ -1637,8 +1653,54 @@ public final class ModNetworking {
                 if (!(entity instanceof net.minecraft.world.entity.LivingEntity living)) {
                     return;
                 }
-                com.effecoria.effect.organic.gene.GeneEngineeringService.clearFromEngineer(player, living, 8.0);
-                player.displayClientMessage(Component.translatable("message.effecoria.gene.cleared"), true);
+                boolean ok =
+                        com.effecoria.effect.organic.gene.GeneEngineeringService.clearFromEngineer(player, living, 8.0);
+                player.displayClientMessage(
+                        Component.translatable(
+                                ok ? "message.effecoria.gene.cleared" : "message.effecoria.gene.dna_locked"),
+                        true);
+            });
+        }
+    }
+
+    /** Lock or unlock a host gene profile as heritable DNA. */
+    public record LockGeneDnaPayload(int entityId, boolean locked) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<LockGeneDnaPayload> TYPE =
+                new CustomPacketPayload.Type<>(
+                        ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "lock_gene_dna"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, LockGeneDnaPayload> STREAM_CODEC =
+                StreamCodec.composite(
+                        ByteBufCodecs.VAR_INT,
+                        LockGeneDnaPayload::entityId,
+                        ByteBufCodecs.BOOL,
+                        LockGeneDnaPayload::locked,
+                        LockGeneDnaPayload::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+
+        public static void handle(LockGeneDnaPayload payload, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                var entity = player.serverLevel().getEntity(payload.entityId());
+                if (!(entity instanceof net.minecraft.world.entity.LivingEntity living)) {
+                    player.displayClientMessage(
+                            Component.translatable("message.effecoria.gene.no_host"), true);
+                    return;
+                }
+                boolean ok = com.effecoria.effect.organic.gene.GeneEngineeringService.lockFromEngineer(
+                        player, living, payload.locked(), 8.0);
+                String key = ok
+                        ? (payload.locked()
+                                ? "message.effecoria.gene.dna_locked"
+                                : "message.effecoria.gene.dna_unlocked")
+                        : "message.effecoria.gene.lock_failed";
+                player.displayClientMessage(Component.translatable(key), true);
             });
         }
     }

@@ -26,6 +26,7 @@ public final class GeneProfile {
                 ByteBufCodecs.FLOAT.encode(buf, data.psiBonusApplied);
                 ByteBufCodecs.FLOAT.encode(buf, data.phiBonusApplied);
                 ByteBufCodecs.VAR_INT.encode(buf, data.mutationCycles);
+                ByteBufCodecs.BOOL.encode(buf, data.dnaLocked);
                 ByteBufCodecs.BOOL.encode(buf, data.engineerId != null);
                 if (data.engineerId != null) {
                     buf.writeUUID(data.engineerId);
@@ -39,6 +40,7 @@ public final class GeneProfile {
                 data.psiBonusApplied = ByteBufCodecs.FLOAT.decode(buf);
                 data.phiBonusApplied = ByteBufCodecs.FLOAT.decode(buf);
                 data.mutationCycles = ByteBufCodecs.VAR_INT.decode(buf);
+                data.dnaLocked = ByteBufCodecs.BOOL.decode(buf);
                 if (ByteBufCodecs.BOOL.decode(buf)) {
                     data.engineerId = buf.readUUID();
                 }
@@ -54,6 +56,8 @@ public final class GeneProfile {
     private float phiBonusApplied;
     /** Cell-immortality replication error counter. */
     private int mutationCycles;
+    /** When true, grafts cannot be rewritten/erased and copy to offspring. */
+    private boolean dnaLocked;
     @Nullable
     private UUID engineerId;
 
@@ -114,6 +118,14 @@ public final class GeneProfile {
         mutationCycles = Math.min(99, mutationCycles + 1);
     }
 
+    public boolean dnaLocked() {
+        return dnaLocked;
+    }
+
+    public void setDnaLocked(boolean locked) {
+        this.dnaLocked = locked;
+    }
+
     @Nullable
     public UUID engineerId() {
         return engineerId;
@@ -134,6 +146,7 @@ public final class GeneProfile {
         psiBonusApplied = 0f;
         phiBonusApplied = 0f;
         engineerId = null;
+        dnaLocked = false;
         // mutationCycles intentionally kept
     }
 
@@ -160,6 +173,7 @@ public final class GeneProfile {
         psiBonusApplied = tag.contains("psiBonus") ? tag.getFloat("psiBonus") : 0f;
         phiBonusApplied = tag.contains("phiBonus") ? tag.getFloat("phiBonus") : 0f;
         mutationCycles = tag.contains("mutationCycles") ? tag.getInt("mutationCycles") : 0;
+        dnaLocked = tag.contains("dnaLocked") && tag.getBoolean("dnaLocked");
         engineerId = tag.hasUUID("engineer") ? tag.getUUID("engineer") : null;
     }
 
@@ -176,6 +190,7 @@ public final class GeneProfile {
         tag.putFloat("psiBonus", psiBonusApplied);
         tag.putFloat("phiBonus", phiBonusApplied);
         tag.putInt("mutationCycles", mutationCycles);
+        tag.putBoolean("dnaLocked", dnaLocked);
         if (engineerId != null) {
             tag.putUUID("engineer", engineerId);
         }

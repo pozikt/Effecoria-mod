@@ -9,6 +9,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -23,6 +24,15 @@ public final class GeneEngineeringEvents {
             return;
         }
         GeneEngineeringService.tickLiving(living);
+    }
+
+    @SubscribeEvent
+    public static void onBabySpawn(BabyEntitySpawnEvent event) {
+        var child = event.getChild();
+        if (child == null) {
+            return;
+        }
+        GeneEngineeringService.inheritLockedDna(event.getParentA(), event.getParentB(), child);
     }
 
     @SubscribeEvent

@@ -329,6 +329,10 @@ public class EffecoriaMod {
                 ModNetworking.ClearGeneModsPayload.TYPE,
                 ModNetworking.ClearGeneModsPayload.STREAM_CODEC,
                 ModNetworking.ClearGeneModsPayload::handle);
+        registrar.playToServer(
+                ModNetworking.LockGeneDnaPayload.TYPE,
+                ModNetworking.LockGeneDnaPayload.STREAM_CODEC,
+                ModNetworking.LockGeneDnaPayload::handle);
         registrar.playToClient(
                 ModNetworking.PhiWeatherSyncPayload.TYPE,
                 ModNetworking.PhiWeatherSyncPayload.STREAM_CODEC,
