@@ -2,7 +2,7 @@
 
 Honest list for Discord / GitHub release notes. Update when shipping a demo build.
 
-## Current (`0.2.6-alpha`)
+## Current (`0.2.7-alpha`)
 
 | Issue | Severity | Notes |
 |-------|----------|-------|

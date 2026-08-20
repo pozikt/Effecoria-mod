@@ -59,6 +59,10 @@ public final class ChunkSealData {
         return seals;
     }
 
+    public boolean isEmpty() {
+        return seals.isEmpty();
+    }
+
     /** First layer if any — prefer fortify for break-speed callers when present. */
     public Optional<SealInstance> get(BlockPos pos) {
         List<SealInstance> layers = seals.get(pos.immutable());
@@ -163,10 +167,6 @@ public final class ChunkSealData {
     public List<SealInstance> removeAll(BlockPos pos) {
         List<SealInstance> removed = seals.remove(pos.immutable());
         return removed == null ? List.of() : removed;
-    }
-
-    public boolean isEmpty() {
-        return seals.isEmpty();
     }
 
     /** Removes expired seals; returns true if anything changed. */

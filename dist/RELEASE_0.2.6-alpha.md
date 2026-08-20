@@ -2,6 +2,9 @@
 
 NeoForge **1.21.1** · jar: `effecoria-0.2.6-alpha.jar`
 
+> **Superseded by [`0.2.7-alpha`](https://github.com/pozikt/Effecoria-mod/releases/tag/v0.2.7-alpha).**  
+> `0.2.6-alpha` can hang forever at 0% when creating/loading a world. Use the hotfix.
+
 **Theme:** Demo 5 expanded into a fuller sandbox: tower control, Φ-technomagic progression, reality-program seals, and deeper organic body engineering.
 
 ## Highlights
