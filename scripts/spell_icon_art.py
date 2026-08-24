@@ -797,33 +797,134 @@ def m_crown(d, cx, cy, p: Pal):
     disc(d, cx, cy - 2, 4, rgba(p.secondary))
 
 
+def m_seal_plate(d, cx, cy, p: Pal):
+    """Filled gold program-plate — seals need density, not outline-only glyphs."""
+    disc(d, cx, cy, 16, rgba(p.ink, 230))
+    disc(d, cx, cy, 14, rgba(p.primary, 90))
+    disc(d, cx, cy, 16, None, outline=rgba(p.secondary), width=2)
+    for ang in range(0, 360, 45):
+        rad = math.radians(ang)
+        x1 = cx + int(math.cos(rad) * 12)
+        y1 = cy + int(math.sin(rad) * 12)
+        x2 = cx + int(math.cos(rad) * 16)
+        y2 = cy + int(math.sin(rad) * 16)
+        d.line([(x1, y1), (x2, y2)], fill=rgba(p.glow), width=2)
+
+
 def m_trap(d, cx, cy, p: Pal):
-    d.polygon([(cx, cy - 14), (cx + 14, cy + 12), (cx - 14, cy + 12)], outline=rgba(p.primary), width=3)
-    disc(d, cx, cy + 2, 4, rgba(p.glow))
-    d.line([(cx, cy - 8), (cx, cy + 8)], fill=rgba(p.secondary), width=2)
+    m_seal_plate(d, cx, cy, p)
+    d.polygon(
+        [(cx, cy - 12), (cx + 13, cy + 10), (cx - 13, cy + 10)],
+        fill=rgba(p.primary, 220),
+    )
+    d.polygon(
+        [(cx, cy - 7), (cx + 8, cy + 6), (cx - 8, cy + 6)],
+        fill=rgba(p.ink, 200),
+    )
+    disc(d, cx, cy + 1, 3, rgba(p.spark))
+
+
+def m_shock_glyph(d, cx, cy, p: Pal):
+    m_seal_plate(d, cx, cy, p)
+    d.polygon(
+        [
+            (cx + 1, cy - 14), (cx + 8, cy - 1), (cx + 2, cy - 1),
+            (cx + 8, cy + 14), (cx - 2, cy + 1), (cx + 2, cy + 1), (cx - 7, cy - 14),
+        ],
+        fill=rgba(p.secondary),
+    )
+    d.line([(cx, cy - 10), (cx + 4, cy - 1), (cx - 1, cy + 1), (cx + 3, cy + 10)], fill=rgba(p.spark), width=1)
+
+
+def m_shock_trap(d, cx, cy, p: Pal):
+    m_trap(d, cx, cy, p)
+    d.polygon(
+        [
+            (cx, cy - 6), (cx + 4, cy), (cx + 1, cy),
+            (cx + 5, cy + 8), (cx - 1, cy + 1), (cx + 1, cy + 1), (cx - 4, cy - 6),
+        ],
+        fill=rgba(p.spark),
+    )
 
 
 def m_glyph(d, cx, cy, p: Pal):
-    disc(d, cx, cy, 12, None, outline=rgba(p.primary), width=3)
-    d.polygon([(cx, cy - 8), (cx + 7, cy + 5), (cx - 7, cy + 5)], fill=rgba(p.secondary))
-    disc(d, cx, cy, 2, rgba(p.spark))
+    m_seal_plate(d, cx, cy, p)
+    d.polygon([(cx, cy - 10), (cx + 9, cy + 6), (cx - 9, cy + 6)], fill=rgba(p.secondary))
+    disc(d, cx, cy, 3, rgba(p.spark))
 
 
 def m_snare(d, cx, cy, p: Pal):
-    disc(d, cx, cy, 14, None, outline=rgba(p.primary), width=3)
-    d.line([(cx - 10, cy - 10), (cx + 10, cy + 10)], fill=rgba(p.secondary), width=3)
-    d.line([(cx + 10, cy - 10), (cx - 10, cy + 10)], fill=rgba(p.secondary), width=3)
+    m_seal_plate(d, cx, cy, p)
+    disc(d, cx, cy, 10, None, outline=rgba(p.secondary), width=3)
+    d.line([(cx - 9, cy - 9), (cx + 9, cy + 9)], fill=rgba(p.primary), width=3)
+    d.line([(cx + 9, cy - 9), (cx - 9, cy + 9)], fill=rgba(p.primary), width=3)
+    disc(d, cx, cy, 3, rgba(p.spark))
+
+
+def m_snare_matrix(d, cx, cy, p: Pal):
+    m_snare(d, cx, cy, p)
+    for ox, oy in ((-8, 0), (8, 0), (0, -8), (0, 8)):
+        disc(d, cx + ox, cy + oy, 2, rgba(p.glow))
 
 
 def m_beacon(d, cx, cy, p: Pal):
-    d.polygon([(cx, cy - 16), (cx + 8, cy + 12), (cx - 8, cy + 12)], fill=rgba(p.primary))
-    d.line([(cx, cy - 16), (cx, cy + 18)], fill=rgba(p.glow), width=3)
-    disc(d, cx, cy - 16, 3, rgba(p.spark))
+    m_seal_plate(d, cx, cy, p)
+    d.polygon([(cx - 10, cy + 12), (cx + 10, cy + 12), (cx + 4, cy + 2), (cx - 4, cy + 2)], fill=rgba(p.primary))
+    d.polygon([(cx - 4, cy + 2), (cx + 4, cy + 2), (cx + 2, cy - 8), (cx - 2, cy - 8)], fill=rgba(p.secondary))
+    d.line([(cx, cy - 8), (cx, cy - 16)], fill=rgba(p.glow), width=3)
+    disc(d, cx, cy - 16, 4, rgba(p.spark))
 
 
 def m_glow(d, cx, cy, p: Pal):
     for r, a in ((16, 50), (11, 100), (7, 180)):
         disc(d, cx, cy, r, rgba(p.primary, a))
+    disc(d, cx, cy, 4, rgba(p.spark))
+
+
+def m_seal_glow(d, cx, cy, p: Pal):
+    m_seal_plate(d, cx, cy, p)
+    for r, a in ((11, 90), (8, 160), (5, 220)):
+        disc(d, cx, cy, r, rgba(p.primary, a))
+    for ang in (20, 110, 200, 290):
+        rad = math.radians(ang)
+        d.line(
+            [(cx, cy), (cx + int(math.cos(rad) * 13), cy + int(math.sin(rad) * 13))],
+            fill=rgba(p.secondary, 220),
+            width=2,
+        )
+    disc(d, cx, cy, 3, rgba(p.spark))
+
+
+def m_perm_glow(d, cx, cy, p: Pal):
+    m_seal_glow(d, cx, cy, p)
+    disc(d, cx, cy, 14, None, outline=rgba(p.glow), width=2)
+    disc(d, cx, cy, 2, rgba(p.spark))
+
+
+def m_fortify(d, cx, cy, p: Pal):
+    m_seal_plate(d, cx, cy, p)
+    m_shield(d, cx, cy, p)
+
+
+def m_anchor_fortify(d, cx, cy, p: Pal):
+    m_fortify(d, cx, cy, p)
+    d.polygon([(cx - 6, cy + 12), (cx, cy + 4), (cx + 6, cy + 12)], fill=rgba(p.ink))
+    d.line([(cx, cy + 6), (cx, cy + 16)], fill=rgba(p.secondary), width=2)
+
+
+def m_repulsion(d, cx, cy, p: Pal):
+    m_seal_plate(d, cx, cy, p)
+    m_wind(d, cx, cy, p)
+
+
+def m_ward_glyph(d, cx, cy, p: Pal):
+    m_seal_plate(d, cx, cy, p)
+    m_frost_wall(d, cx, cy, p)
+
+
+def m_omega_ward(d, cx, cy, p: Pal):
+    m_ward_glyph(d, cx, cy, p)
+    disc(d, cx, cy, 17, None, outline=rgba(p.spark, 200), width=2)
     disc(d, cx, cy, 4, rgba(p.spark))
 
 
@@ -971,7 +1072,7 @@ _reg(["water_stream", "water_shroud"], m_water)
 _reg(["steam_jet", "steam_veil"], m_steam)
 _reg(["ember_volley"], m_embers)
 _reg(["ice_shard", "hyper_cooling"], m_ice)
-_reg(["frost_bastion", "ice_prison", "ward_glyph", "omega_ward"], m_frost_wall)
+_reg(["frost_bastion", "ice_prison"], m_frost_wall)
 _reg(["plasma_bolt", "thermonuclear_pulse"], m_plasma)
 _reg(["hydro_slice"], m_hydro_slice)
 _reg(["steam_flight"], lambda d, cx, cy, p: (m_steam(d, cx, cy + 2, p), m_wind(d, cx, cy - 8, p)))
@@ -1066,12 +1167,19 @@ _reg(["blight_field"], lambda d, cx, cy, p: (m_fog(d, cx, cy, p), m_blight(d, cx
 _reg(["entropy_aegis"], m_shield)
 _reg(["plague_crown"], m_crown)
 
-_reg(["trap_seal", "shock_glyph", "shock_trap"], m_trap)
-_reg(["fortify_seal", "anchor_fortify"], m_shield)
-_reg(["glow_seal", "permanent_glow"], m_glow)
-_reg(["snare_glyph", "snare_matrix"], m_snare)
+_reg(["trap_seal"], m_trap)
+_reg(["shock_glyph"], m_shock_glyph)
+_reg(["shock_trap"], m_shock_trap)
+_reg(["fortify_seal"], m_fortify)
+_reg(["anchor_fortify"], m_anchor_fortify)
+_reg(["glow_seal"], m_seal_glow)
+_reg(["permanent_glow"], m_perm_glow)
+_reg(["snare_glyph"], m_snare)
+_reg(["snare_matrix"], m_snare_matrix)
 _reg(["beacon_seal"], m_beacon)
-_reg(["repulsion_seal"], m_wind)
+_reg(["repulsion_seal"], m_repulsion)
+_reg(["ward_glyph"], m_ward_glyph)
+_reg(["omega_ward"], m_omega_ward)
 
 _reg(["psi_adrenaline"], m_adrenaline)
 _reg(["phi_glow"], m_glow)
