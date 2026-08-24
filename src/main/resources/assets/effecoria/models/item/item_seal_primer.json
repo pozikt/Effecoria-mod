@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "effecoria:item/phi_paper"
+    "layer0": "effecoria:item/item_seal_primer"
   }
 }
