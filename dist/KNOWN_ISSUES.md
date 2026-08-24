@@ -7,7 +7,7 @@ Honest list for Discord / GitHub release notes. Update when shipping a demo buil
 | Issue | Severity | Notes |
 |-------|----------|-------|
 | New biomes / structures need **new chunks** (or a new world) | Medium | Already-explored regions stay old terrain |
-| Ω-Scar / Crystal Forest fauna — first custom atlas pass | Low | Playtest in-game; canopy (Ent / Lemur / Wailer) still stub |
+| Ω-Scar / Crystal Forest / Emerald Canopy fauna — first custom atlas pass | Low | Playtest in-game; Φ-larva / wyvern already had unique atlases |
 | Magic Primer uses vanilla writable-book look | Low | Content is custom; cover art optional |
 | Identity / school spell icons — some placeholders | Low | Art pass later |
 | Race Orkanum baselines not content yet | Low | Hook ready for later Stage II |

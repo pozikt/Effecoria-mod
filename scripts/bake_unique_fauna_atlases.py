@@ -1,4 +1,4 @@
-"""Bake opaque GeckoLib entity atlases for Ω-Scar + Crystal Forest fauna."""
+"""Bake opaque GeckoLib entity atlases for Scar, Forest, and Canopy fauna."""
 from __future__ import annotations
 
 import json
@@ -158,6 +158,28 @@ EIDOS = {
     "glow": [(240, 180, 48), (248, 216, 104), (208, 160, 64)],
     "eye": (255, 240, 160),
     "pupil": (24, 16, 8),
+}
+ENT = {
+    "bark": [(90, 58, 36), (122, 82, 52), (64, 42, 28), (80, 52, 32)],
+    "moss": [(58, 106, 56), (90, 138, 72), (42, 84, 44)],
+    "antler": [(90, 72, 48), (74, 58, 38), (110, 88, 60)],
+    "eye": (20, 16, 12),
+    "amber": (200, 160, 80),
+}
+LEMUR = {
+    "fur": [(42, 56, 64), (58, 76, 72), (32, 44, 48)],
+    "cream": [(232, 220, 196), (208, 196, 168), (184, 172, 148)],
+    "eye": (16, 20, 24),
+}
+BAT = {
+    "fur": [(26, 36, 56), (36, 48, 72), (18, 26, 40)],
+    "membrane": [(154, 176, 200), (196, 212, 224), (120, 148, 176)],
+    "edge": [(42, 56, 80)],
+    "eye": (232, 224, 160),
+}
+GLASS = {
+    "glass": [(40, 72, 160), (58, 104, 200), (26, 48, 104), (80, 128, 216)],
+    "gold": [(212, 176, 96), (240, 208, 128)],
 }
 
 
@@ -347,11 +369,116 @@ def bake_eidos() -> None:
     print("wrote eidos", dest.stat().st_size)
 
 
+def bake_phi_ent() -> None:
+    geo = ASSETS / "geo" / "phi_ent.geo.json"
+    img = Image.new("RGBA", (128, 128), (0, 0, 0, 0))
+    rng = random.Random(0xE071)
+    for name, u, v, w, h, d in parse_cubes(geo):
+        if name == "body" and w >= 11:
+            paint_cube(img, u, v, w, h, d, ENT["moss"], rng)
+        elif name == "body":
+            faces = paint_cube(img, u, v, w, h, d, ENT["bark"], rng)
+            fx, fy, fw, fh = faces["F"]
+            # bark splits, not a Φ mark
+            for row in range(2, fh - 1, 3):
+                paint_face(img, fx + 2, fy + row, max(1, fw - 4), 1, darken(ENT["bark"][0], 18))
+        elif name == "head" and w >= 6:
+            faces = paint_cube(img, u, v, w, h, d, ENT["bark"], rng)
+            fx, fy, fw, fh = faces["F"]
+            paint_face(img, fx + 1, fy + 2, 2, 2, ENT["eye"])
+            paint_face(img, fx + fw - 3, fy + 2, 2, 2, ENT["eye"])
+            paint_face(img, fx + 2, fy + 3, 1, 1, ENT["amber"])
+            paint_face(img, fx + fw - 2, fy + 3, 1, 1, ENT["amber"])
+        elif name == "head":
+            paint_cube(img, u, v, w, h, d, ENT["antler"], rng)
+        elif "arm" in name:
+            faces = paint_cube(img, u, v, w, h, d, ENT["bark"], rng)
+            tx, ty, tw, th = faces["T"]
+            fill_rect(img, tx, ty, tw, max(1, th // 2), ENT["moss"], rng)
+        else:
+            paint_cube(img, u, v, w, h, d, ENT["bark"], rng)
+    save_atlas(img, ROOT / "art" / "canopy" / "phi_ent", "phi_ent")
+
+
+def bake_phi_lemur() -> None:
+    geo = ASSETS / "geo" / "phi_lemur.geo.json"
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    rng = random.Random(0x1E00)
+    for name, u, v, w, h, d in parse_cubes(geo):
+        if name == "body":
+            faces = paint_cube(img, u, v, w, h, d, LEMUR["fur"], rng)
+            bx, by, bw, bh = faces["Bo"]
+            fill_rect(img, bx, by, bw, bh, LEMUR["cream"], rng)
+            fx, fy, fw, fh = faces["F"]
+            fill_rect(img, fx + 1, fy + fh - 2, max(1, fw - 2), 2, LEMUR["cream"], rng)
+        elif name == "head" and w >= 5:
+            faces = paint_cube(img, u, v, w, h, d, LEMUR["fur"], rng)
+            fx, fy, fw, fh = faces["F"]
+            fill_rect(img, fx + 1, fy + fh - 2, max(1, fw - 2), 2, LEMUR["cream"], rng)
+            paint_face(img, fx + 1, fy + 1, 1, 1, LEMUR["eye"])
+            paint_face(img, fx + fw - 2, fy + 1, 1, 1, LEMUR["eye"])
+            paint_face(img, fx, fy + 1, 1, 1, LEMUR["cream"][0])
+            paint_face(img, fx + fw - 1, fy + 1, 1, 1, LEMUR["cream"][0])
+        elif name == "head":
+            faces = paint_cube(img, u, v, w, h, d, LEMUR["fur"], rng)
+            fx, fy, fw, fh = faces["F"]
+            fill_rect(img, fx, fy, fw, fh, LEMUR["cream"], rng)
+        elif name == "tail":
+            pal = LEMUR["cream"] if w <= 2 else LEMUR["fur"]
+            paint_cube(img, u, v, w, h, d, pal, rng)
+        else:
+            paint_cube(img, u, v, w, h, d, LEMUR["fur"], rng)
+    save_atlas(img, ROOT / "art" / "canopy" / "phi_lemur", "phi_lemur")
+
+
+def bake_wailer_bat() -> None:
+    geo = ASSETS / "geo" / "wailer_bat.geo.json"
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    rng = random.Random(0xBA7)
+    for name, u, v, w, h, d in parse_cubes(geo):
+        if "wing" in name:
+            faces = paint_cube(img, u, v, w, h, d, BAT["membrane"], rng)
+            tx, ty, tw, th = faces["T"]
+            fill_rect(img, tx, ty, tw, 1, BAT["edge"], rng)
+            fx, fy, fw, fh = faces["F"]
+            paint_face(img, fx, fy, 1, fh, BAT["edge"][0])
+        elif name == "head" and w >= 4:
+            faces = paint_cube(img, u, v, w, h, d, BAT["fur"], rng)
+            fx, fy, fw, fh = faces["F"]
+            paint_face(img, fx + 1, fy + 1, 1, 1, BAT["eye"])
+            paint_face(img, fx + fw - 2, fy + 1, 1, 1, BAT["eye"])
+        elif name == "head":
+            paint_cube(img, u, v, w, h, d, BAT["fur"], rng)
+        else:
+            paint_cube(img, u, v, w, h, d, BAT["fur"], rng)
+    save_atlas(img, ROOT / "art" / "canopy" / "wailer_bat", "wailer_bat")
+
+
+def bake_glass_worm() -> None:
+    geo = ASSETS / "geo" / "glass_worm.geo.json"
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    rng = random.Random(0x61A5)
+    for name, u, v, w, h, d in parse_cubes(geo):
+        faces = paint_cube(img, u, v, w, h, d, GLASS["glass"], rng)
+        fx, fy, fw, fh = faces["F"]
+        paint_face(img, fx + fw // 2, fy + 1, 1, max(1, fh - 2), GLASS["gold"][0])
+        tx, ty, tw, th = faces["T"]
+        paint_face(img, tx + 1, ty + th // 2, max(1, tw - 2), 1, GLASS["gold"][1])
+        if name == "head" and w >= 3:
+            paint_face(img, fx + 1, fy + 1, 1, 1, GLASS["gold"][1])
+            paint_face(img, fx + fw - 2, fy + 1, 1, 1, GLASS["gold"][1])
+    save_atlas(img, ROOT / "art" / "vitrified_wastes" / "glass_worm", "glass_worm")
+
+
 def copy_concepts() -> None:
     mapping = {
         "omega_shade_concept_turnaround.png": ROOT / "art" / "scar" / "omega_shade" / "concept_turnaround.png",
         "omega_worm_concept_turnaround.png": ROOT / "art" / "scar" / "omega_worm" / "concept_turnaround.png",
         "rotfang_mink_concept_turnaround.png": ROOT / "art" / "scar" / "rotfang_mink" / "concept_turnaround.png",
+        "phi_ent_concept_turnaround.png": ROOT / "art" / "canopy" / "phi_ent" / "concept_turnaround.png",
+        "phi_lemur_concept_turnaround.png": ROOT / "art" / "canopy" / "phi_lemur" / "concept_turnaround.png",
+        "wailer_bat_concept_turnaround.png": ROOT / "art" / "canopy" / "wailer_bat" / "concept_turnaround.png",
+        "glass_worm_concept_turnaround.png": ROOT / "art" / "vitrified_wastes" / "glass_worm" / "concept_turnaround.png",
     }
     for src_name, dest in mapping.items():
         src = GEN / src_name
@@ -370,6 +497,10 @@ def main() -> None:
     bake_rotfang_mink()
     bake_crystal_crab()
     bake_eidos()
+    bake_phi_ent()
+    bake_phi_lemur()
+    bake_wailer_bat()
+    bake_glass_worm()
 
 
 if __name__ == "__main__":
