@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#effecoria:is_dead_wasteland",
+  "features": "effecoria:strip_wasteland_water",
+  "step": "local_modifications"
+}

@@ -27,6 +27,9 @@ public final class DeadWastelandWaterEvents {
             return;
         }
         BlockPos pos = event.getPos();
+        if (!DeadWastelandHydrology.chunkReadyForHydrology(level, pos.getX(), pos.getZ())) {
+            return;
+        }
         // Border rim is left alone so ocean/river edges do not collapse into trenches.
         if (!DeadWastelandHydrology.isInteriorDryCell(level, pos)) {
             return;
@@ -46,6 +49,9 @@ public final class DeadWastelandWaterEvents {
             return;
         }
         BlockPos pos = event.getPos();
+        if (!DeadWastelandHydrology.chunkReadyForHydrology(level, pos.getX(), pos.getZ())) {
+            return;
+        }
         if (!DeadWastelandHydrology.isInteriorDryCell(level, pos)) {
             return;
         }

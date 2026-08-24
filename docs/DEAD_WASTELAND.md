@@ -23,10 +23,15 @@ See `docs/VITRIFIED_WASTES.md`.
 
 ## Dry hydrology
 
-**Currently disabled** (`DeadWastelandHydrology.DRYING_ENABLED = false`). Water bodies stay.
-Re-enable later: flip the flag and restore `neoforge/biome_modifier/wasteland_strip_water.json`.
+**Shipped inland-only.** `DeadWastelandHydrology.DRYING_ENABLED` is on:
 
-Reserved design (when re-enabled): inland-only strip + border buffer so ocean edges do not trench.
+- Worldgen `strip_wasteland_water` evaporates inland lakes (air); one pass per chunk
+- Biome reads use the noise map (never `getBiome` during features — that crashed WorldGenRegion)
+- Ocean shelves stay wet: desert climate keeps water tagged as wasteland far past the beach, so we also skip columns within 80 blocks of ocean / beach / river noise
+- Runtime: reject buckets / fluid spread inland only; slow local strip near the player
+- Never dries on chunk load (that OOM'd `/locate biome`)
+
+Needs **new chunks** for the worldgen strip; standing in old soaked chunks still dries a small radius around the player.
 
 ## Gameplay
 
