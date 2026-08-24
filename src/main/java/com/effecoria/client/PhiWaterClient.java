@@ -12,10 +12,10 @@ import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsE
 
 import org.joml.Vector3f;
 
-/** Aquamarine client look for cave Φ-hydrolat. */
+/** Aquamarine client look for cave Φ-hydrolat and filtered regen bath. */
 @EventBusSubscriber(modid = EffecoriaMod.MOD_ID, value = Dist.CLIENT)
 public final class PhiWaterClient {
-    private static final int PHI_WATER_TINT = 0xFF2A8B9A;
+    private static final int NO_TINT = 0xFFFFFFFF;
 
     private PhiWaterClient() {}
 
@@ -25,22 +25,22 @@ public final class PhiWaterClient {
                 new IClientFluidTypeExtensions() {
                     @Override
                     public ResourceLocation getStillTexture() {
-                        return ResourceLocation.withDefaultNamespace("block/water_still");
+                        return ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "block/phi_water_still");
                     }
 
                     @Override
                     public ResourceLocation getFlowingTexture() {
-                        return ResourceLocation.withDefaultNamespace("block/water_flow");
+                        return ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "block/phi_water_flow");
                     }
 
                     @Override
                     public ResourceLocation getOverlayTexture() {
-                        return ResourceLocation.withDefaultNamespace("block/water_overlay");
+                        return ResourceLocation.fromNamespaceAndPath(EffecoriaMod.MOD_ID, "block/phi_water_overlay");
                     }
 
                     @Override
                     public int getTintColor() {
-                        return PHI_WATER_TINT;
+                        return NO_TINT;
                     }
 
                     @Override
@@ -48,7 +48,7 @@ public final class PhiWaterClient {
                             net.minecraft.world.level.material.FluidState state,
                             net.minecraft.world.level.BlockAndTintGetter getter,
                             net.minecraft.core.BlockPos pos) {
-                        return PHI_WATER_TINT;
+                        return NO_TINT;
                     }
 
                     @Override
@@ -66,26 +66,27 @@ public final class PhiWaterClient {
 
         event.registerFluidType(
                 new IClientFluidTypeExtensions() {
-                    private static final int TINT = 0xFF3EC8B0;
-
                     @Override
                     public ResourceLocation getStillTexture() {
-                        return ResourceLocation.withDefaultNamespace("block/water_still");
+                        return ResourceLocation.fromNamespaceAndPath(
+                                EffecoriaMod.MOD_ID, "block/purified_phi_water_still");
                     }
 
                     @Override
                     public ResourceLocation getFlowingTexture() {
-                        return ResourceLocation.withDefaultNamespace("block/water_flow");
+                        return ResourceLocation.fromNamespaceAndPath(
+                                EffecoriaMod.MOD_ID, "block/purified_phi_water_flow");
                     }
 
                     @Override
                     public ResourceLocation getOverlayTexture() {
-                        return ResourceLocation.withDefaultNamespace("block/water_overlay");
+                        return ResourceLocation.fromNamespaceAndPath(
+                                EffecoriaMod.MOD_ID, "block/purified_phi_water_overlay");
                     }
 
                     @Override
                     public int getTintColor() {
-                        return TINT;
+                        return NO_TINT;
                     }
 
                     @Override
@@ -93,7 +94,7 @@ public final class PhiWaterClient {
                             net.minecraft.world.level.material.FluidState state,
                             net.minecraft.world.level.BlockAndTintGetter getter,
                             net.minecraft.core.BlockPos pos) {
-                        return TINT;
+                        return NO_TINT;
                     }
 
                     @Override

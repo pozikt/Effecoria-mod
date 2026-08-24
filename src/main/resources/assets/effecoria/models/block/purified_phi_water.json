@@ -1,5 +1,5 @@
 {
   "textures": {
-    "particle": "minecraft:block/water_still"
+    "particle": "effecoria:block/purified_phi_water_still"
   }
 }
