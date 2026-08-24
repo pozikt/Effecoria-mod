@@ -8,7 +8,7 @@ Honest list for Discord / GitHub release notes. Update when shipping a demo buil
 |-------|----------|-------|
 | New biomes / structures need **new chunks** (or a new world) | Medium | Already-explored regions stay old terrain |
 | Ω-Scar / Crystal Forest / Emerald Canopy fauna — first custom atlas pass | Low | Playtest in-game; Φ-larva / wyvern already had unique atlases |
-| Magic Primer uses vanilla writable-book look | Low | Content is custom; cover art optional |
+| Magic Primer cover is a vanilla-book recolor | Low | Consciousness Matrix successor is planned — see MAGIC_PLAN.md |
 | Identity / school spell icons — some placeholders | Low | Art pass later |
 | Race Orkanum baselines not content yet | Low | Hook ready for later Stage II |
 | Lich ascension / dragon thrall intentionally disabled | Info | Stage IV+ |

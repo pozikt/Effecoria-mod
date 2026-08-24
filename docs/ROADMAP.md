@@ -67,7 +67,7 @@ Rule of thumb: **do not invent a huge school rewrite in Stage I “just because.
 | **Seals** | Word pack: `vigil` (remote alarm) + `haustus` (standing Ψ siphon); conflicts/stacking done |
 | **Anti-magic** | Lead (ZNΦ), cold iron — tag-based; deeper world presence with II/III |
 | **School depth** | Identity packs: Corruption, Spatial, Mental, Necromancy, Organic parasite |
-| **Player-facing magic** | Teach the loop without wiki: Patchouli / in-game tips / hub clarity |
+| **Player-facing magic** | Primer + tips + hub shipped. **Planned:** Consciousness Matrix (graph of knowns, blurred unknowns, puzzle paths) — [MAGIC_PLAN.md](MAGIC_PLAN.md#consciousness-matrix-planned--replaces-magic-primer) |
 
 Optional inside I (only if it serves magic feel): initiation ritual block.
 

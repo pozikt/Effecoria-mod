@@ -199,7 +199,7 @@ If choosing a single slice for the next implementation session:
 12. Phase **C** Φ harness (dust / focus / Phi Cell / tiers) — ✅ done.
 13. Death Mark thralls + mastery control budget + additive Φ stacking — ✅ baseline shipped.
 14. Phase **D4** seal conflicts + inspect HUD — ✅ done.
-15. Magic **presentation** (Primer guide + first-hour tips + hub/HUD clarity) — ✅ done.
+15. Magic **presentation** (Primer guide + first-hour tips + hub/HUD clarity) — ✅ baseline shipped. **Successor planned:** Consciousness Matrix (below).
 16. Phase **E** breathing/body (air/hunger → Orkanum, soft cast scale, HUD, train rate-limit, tip) — ✅ done.
 17. Stage I **exit polish** (tip sequencing, seal tip, funnel/known-issues docs) — ✅ done.
 18. Dedicated-server smoke (`runServer` → Done) — ✅ Primer/Focus no longer pull client classes on DEDICATED_SERVER.
@@ -209,7 +209,42 @@ If choosing a single slice for the next implementation session:
 22. Necromancy **identity pack** — `thrall_focus` + `mark_reap` (Death Mark + army) — ✅ shipped.
 23. Organic **identity pack** — `parasite_seed` + `spore_burst` (host drain + rupture) — ✅ shipped.
 24. **Form mutate (recast)** — reshape living forms: `steam_veil` → scald / frost (sneak); `root_bind` → venom+thorns. ✅ `FormMutateService` (~50% Ψ).
-25. **Next:** Stage II environment / materials slice; keep [KNOWN_ISSUES.md](KNOWN_ISSUES.md) current when cutting jars.
+25. **Next (content):** Stage II environment / materials slice; keep [KNOWN_ISSUES.md](KNOWN_ISSUES.md) current when cutting jars.
+26. **Planned (presentation):** replace the Magic Primer book with a **Consciousness Matrix** — see section below. Do not start until the current primer/hub loop is still the fallback.
+
+---
+
+## Consciousness Matrix (planned — replaces Magic Primer)
+
+**Status:** design only. Current Magic Primer + first-hour tips + spell hub stay the live teaching loop until this ships.
+
+**Fantasy:** not a textbook. A **matrix of consciousness** — knowns, routes to new knowns, and the fog of what is not yet thinkable. Knowledge is a graph, not a page list.
+
+### Player-facing shape
+
+| Layer | What the player sees |
+|-------|----------------------|
+| **Known nodes** | Clear, named, connected. Spells, laws, body/breathing facts, local Φ phenomena — anything the operator has actually integrated. |
+| **Edges** | Paths between knowns: “this follows from that.” Several knowns can share a cluster; a new fact may sit on more than one edge. |
+| **Blurred nodes** | Visible as silhouettes / noise / unnamed wells. The player *knows something is there*, not what it is. Unlocking turns blur → known and may spawn new blur around it. |
+| **Puzzle gates** | Some edges do not open from XP/essence alone. The player must solve a **головоломка** (in-world, in-GUI, or hybrid) to walk that path. |
+
+The matrix holds **more than spell IDs**: recipes of thought, warnings, research leads, school identity, seal grammar, environmental tells. Spells remain one kind of node. The existing radial hub can stay as the *cast* surface; the matrix is the *understanding* surface.
+
+### Design constraints (when implementing)
+
+1. **Replace the primer item/UI**, not add a second wiki beside it. Same open gesture (item + hold-X funnel) should land in the matrix.
+2. **Do not dump the encyclopedia.** Blurred nodes are the default; spoilers stay locked.
+3. **Puzzles are content**, not captcha. Prefer Φ/Ψ/seal/spatial riddles that reuse existing systems (place a seal, sense Φ, mutate a form, follow a locus) over abstract minigames.
+4. **Progression stays honest.** Essence/mastery gates can still exist; puzzles are an additional *path type*, not a replacement for all unlocks.
+5. **Unknown stays unknown.** Blurred nodes must not leak names, full icons, or exact recipes until the gate is passed.
+
+### Open questions (resolve at implementation)
+
+- Data: datapack graph vs generated from `SpellProgression` + lore pages.
+- How much of the current spell-hub constellation is reused vs a new graph camera.
+- Whether puzzles are per-player (Ψ-memory) or can be “shown” by another operator.
+- Item identity: keep `magic_primer` id with new model, or a new matrix focus item.
 
 ---
 

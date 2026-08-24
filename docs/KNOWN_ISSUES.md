@@ -10,7 +10,7 @@ Honest list for Discord / GitHub release notes. Update when shipping a demo buil
 | Ω-Scar / Crystal Forest / Emerald Canopy fauna — first custom atlas pass | Low | Playtest in-game; Φ-larva / wyvern already had unique atlases |
 | Races: **no player model morph** (Origins-style visuals later) | Info | Passives + Orkanum baseline only |
 | Vampire sun / blood drink is rough MVP | Low | Helmet blocks sun; vials restore Ψ |
-| Magic Primer uses vanilla writable-book look | Low | Content is custom; cover art optional |
+| Magic Primer cover is a vanilla-book recolor | Low | Consciousness Matrix successor is planned — see MAGIC_PLAN.md |
 | Identity / school spell icons — some placeholders | Low | Art pass later |
 | Lich ascension / dragon thrall intentionally disabled | Info | Stage IV+ |
 | Full automated cast/biome smoke not in CI | Info | Manual locate + walk recommended |
