@@ -2,6 +2,7 @@ package com.effecoria.core.phi;
 
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.content.ModBlockTags;
+import com.effecoria.content.ModBlocks;
 import com.effecoria.core.formula.PhiSample;
 import com.effecoria.core.psi.PsiHelper;
 import com.effecoria.world.CrystalForestService;
@@ -43,13 +44,17 @@ public final class PhiFieldService {
         return sample(level, position, null);
     }
 
-    /** Samples Φ for a player — creative god mode overrides environmental limits. */
+    /** Samples Φ for a player — creative god mode overrides environmental limits except ZNΦ. */
     public static PhiSample sample(Level level, Vec3 position, Player player) {
+        BlockPos pos = BlockPos.containing(position);
+        boolean solar = isSolarDay(level);
+        if (isInsideZeroFluxZone(level, pos) || isIronInsulated(player) || DeadWastelandService.isBiome(level, pos)) {
+            return new PhiSample(0f, true, solar);
+        }
         if (CreativeGodMode.isActive(player)) {
             float phi = BalanceConfig.CREATIVE_PHI_OVERRIDE.get().floatValue();
-            return new PhiSample(phi, false, isSolarDay(level));
+            return new PhiSample(phi, false, solar);
         }
-        BlockPos pos = BlockPos.containing(position);
         float value = 1f;
 
         value += dimensionBonus(level);
@@ -67,9 +72,6 @@ public final class PhiFieldService {
         value += WhisperingSpireService.phiBonus(level, pos);
         value += com.effecoria.world.weather.PhiWeatherService.phiEnvironmentBonus(level, pos);
 
-        if (isInsideZeroFluxZone(level, pos) || isIronInsulated(player) || DeadWastelandService.isBiome(level, pos)) {
-            return new PhiSample(0f, true, isSolarDay(level));
-        }
         if (player != null) {
             float mult = Math.max(0f, PsiHelper.get(player).phiMultiplier());
             float cap = BalanceConfig.PHI_MULTIPLIER_BONUS_CAP.get().floatValue();
@@ -99,7 +101,7 @@ public final class PhiFieldService {
         int r = ZERO_FLUX_RANGE;
         for (BlockPos offset : BlockPos.betweenClosed(center.offset(-r, -r, -r), center.offset(r, r, r))) {
             BlockState state = level.getBlockState(offset);
-            if (state.is(ModBlockTags.ZERO_FLUX)) {
+            if (state.is(ModBlockTags.ZERO_FLUX) || state.is(ModBlocks.ZNPHI_CRUST.get())) {
                 return true;
             }
             if (state.is(ModBlockTags.COLD_IRON) && chebyshev(center, offset) <= COLD_IRON_RANGE) {

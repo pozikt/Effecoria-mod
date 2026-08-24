@@ -32,6 +32,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.LEAD_ORE.get());
                         output.accept(ModItems.DEEPSLATE_LEAD_ORE.get());
                         output.accept(ModItems.LEAD_BLOCK.get());
+                        output.accept(ModItems.ZNPHI_CRUST.get());
                         output.accept(ModItems.RAW_LEAD.get());
                         output.accept(ModItems.LEAD_INGOT.get());
                         output.accept(ModItems.LEAD_NUGGET.get());

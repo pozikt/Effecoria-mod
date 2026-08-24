@@ -129,6 +129,15 @@ public final class ModBlocks {
                     .strength(5.0f, 6.0f)
                     .sound(SoundType.METAL)));
 
+    /** Surface ZNΦ mute crust — tagged `#effecoria:zero_flux`. */
+    public static final DeferredBlock<Block> ZNPHI_CRUST = BLOCKS.register(
+            "znphi_crust",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .requiresCorrectToolForDrops()
+                    .strength(2.5f, 4.0f)
+                    .sound(SoundType.GRAVEL)));
+
     /** Φ-superconductor — rare veins in the Essence Plateau. */
     public static final DeferredBlock<Block> MITHRIL_ORE =
             registerOre("mithril_ore", MapColor.STONE, 3.5f, 3f, SoundType.STONE);

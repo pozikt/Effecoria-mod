@@ -21,6 +21,7 @@ import com.effecoria.world.feature.VitrifiedGroveFeature;
 import com.effecoria.world.feature.VitrifiedMageTowerFeature;
 import com.effecoria.world.feature.VitrifiedTreeFeature;
 import com.effecoria.world.feature.WhisperingSpireFeature;
+import com.effecoria.world.feature.ZnPhiMutePatchFeature;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -100,4 +101,7 @@ public final class ModFeatures {
 
     public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> WHISPERING_SPIRE =
             FEATURES.register("whispering_spire", () -> new WhisperingSpireFeature(NoneFeatureConfiguration.CODEC));
+
+    public static final DeferredHolder<Feature<?>, Feature<NoneFeatureConfiguration>> ZNPHI_MUTE_PATCH =
+            FEATURES.register("znphi_mute_patch", () -> new ZnPhiMutePatchFeature(NoneFeatureConfiguration.CODEC));
 }

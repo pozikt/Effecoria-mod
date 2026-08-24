@@ -44,6 +44,8 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("deepslate_lead_ore", ModBlocks.DEEPSLATE_LEAD_ORE);
     public static final DeferredItem<BlockItem> LEAD_BLOCK =
             ITEMS.registerSimpleBlockItem("lead_block", ModBlocks.LEAD_BLOCK);
+    public static final DeferredItem<BlockItem> ZNPHI_CRUST =
+            ITEMS.registerSimpleBlockItem("znphi_crust", ModBlocks.ZNPHI_CRUST);
     public static final DeferredItem<BlockItem> MITHRIL_ORE =
             ITEMS.registerSimpleBlockItem("mithril_ore", ModBlocks.MITHRIL_ORE);
     public static final DeferredItem<BlockItem> DEEPSLATE_MITHRIL_ORE =

@@ -12,6 +12,7 @@
     "minecraft:iron_door",
     "minecraft:iron_trapdoor",
     "minecraft:lodestone",
-    "effecoria:lead_block"
+    "effecoria:lead_block",
+    "effecoria:znphi_crust"
   ]
 }

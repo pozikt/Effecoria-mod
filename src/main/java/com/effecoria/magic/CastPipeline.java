@@ -95,6 +95,15 @@ public final class CastPipeline {
         PsiContext ctx = PsiHelper.toContext(player, data);
         boolean godMode = CreativeGodMode.isActive(player);
         PhiSample phi = PhiFieldService.sample(player.level(), player.position(), player);
+        if (phi.zeroFlux()) {
+            if (com.effecoria.world.DeadWastelandService.isIn(player.level(), player.position())) {
+                player.displayClientMessage(Component.translatable("message.effecoria.dead_wasteland_cast"), true);
+            } else {
+                player.displayClientMessage(Component.translatable(CastBlockReason.ZERO_FLUX.messageKey()), true);
+            }
+            FirstHourTips.tryShow(player, FirstHourTips.Tip.ZNPHI);
+            return CastResult.CANNOT_CAST;
+        }
         if (!godMode) {
             phi = PhiHarness.assistCast(player, phi);
         }
@@ -103,17 +112,9 @@ public final class CastPipeline {
         if (!godMode) {
             var block = FormulaEngine.diagnoseCannotCast(ctx, phi, spell, usablePsi);
             if (block.isPresent()) {
-                if (block.get() == CastBlockReason.ZERO_FLUX
-                        && com.effecoria.world.DeadWastelandService.isIn(player.level(), player.position())) {
-                    player.displayClientMessage(
-                            Component.translatable("message.effecoria.dead_wasteland_cast"), true);
-                } else {
-                    player.displayClientMessage(Component.translatable(block.get().messageKey()), true);
-                }
+                player.displayClientMessage(Component.translatable(block.get().messageKey()), true);
                 if (block.get() == CastBlockReason.LOW_PHI) {
                     FirstHourTips.tryShow(player, FirstHourTips.Tip.HARNESS);
-                } else if (block.get() == CastBlockReason.ZERO_FLUX) {
-                    FirstHourTips.tryShow(player, FirstHourTips.Tip.ZNPHI);
                 }
                 return CastResult.CANNOT_CAST;
             }

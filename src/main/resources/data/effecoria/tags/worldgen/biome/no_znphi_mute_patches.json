@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "#effecoria:is_dead_wasteland",
+    "#effecoria:is_essence_plateau",
+    "#effecoria:is_emerald_canopy",
+    "#effecoria:is_crystal_forest",
+    "#effecoria:is_omega_scar",
+    "#effecoria:is_vitrified_wastes",
+    "#effecoria:is_deep_phi_pocket"
+  ]
+}

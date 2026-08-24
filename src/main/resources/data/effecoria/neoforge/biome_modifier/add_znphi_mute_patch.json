@@ -1,0 +1,15 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": {
+    "type": "neoforge:and",
+    "values": [
+      "#c:is_overworld",
+      {
+        "type": "neoforge:not",
+        "value": "#effecoria:no_znphi_mute_patches"
+      }
+    ]
+  },
+  "features": "effecoria:znphi_mute_patch",
+  "step": "local_modifications"
+}

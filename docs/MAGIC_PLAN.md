@@ -64,7 +64,7 @@ Goal: bridge lore formulas to items players can craft.
 Goal: ZNΦ and wards are gameplay, not lore text.
 
 1. **Lead (ZNΦ) tag** — blocks or items reduce Φ_sample in radius; blocks cast in chambers.
-   - **Deferred (box):** Stage II+ environment / materials — not while Stage I is pure magic loop.
+   - Surface mute patches shipped (`znphi_crust`). Lead ore / chambers still environment materials.
 2. **Cold iron** tag — optional school-specific debuff (necro/corruption first).
    - **Deferred** with D1 (world tags / materials).
 3. **Seal stacking rules** — one offensive + fortify and/or glow per block. ✅ *see `SealLayer` / `SealPlaceResult`*
@@ -173,7 +173,7 @@ Guides / Patchouli / first-hour teaching wait until **each school has a satisfyi
 
 | Item | Why deferred |
 |------|----------------|
-| **D1 Lead / ZNΦ world tags** | Needs environment, ores, structures — Stage II–III |
+| **D1 Lead / ZNΦ world tags** | Surface mute patches shipped (`znphi_crust`). Lead ore / chambers still Stage II–III materials |
 | **D2 Cold iron** | Same — material tags / world content |
 | First-join school menu | ✅ shipped (`ClientFirstJoinSchoolPrompt`) |
 | Lich re-enable | Stage IV tower / phylactery |
