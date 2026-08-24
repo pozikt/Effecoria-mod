@@ -7,7 +7,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.effecoria.config.BalanceConfig;
+import com.effecoria.content.ModBlocks;
 import com.effecoria.content.ModParticleTypes;
+import com.effecoria.core.formula.SpellCombat;
 import com.effecoria.core.magic.MagicSchool;
 import com.effecoria.core.psi.ModAttachments;
 import com.effecoria.core.psi.PlayerPsiData;
@@ -16,12 +18,16 @@ import com.effecoria.network.ModNetworking;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
@@ -33,13 +39,15 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
- * Environmental matter casting MVP — bond to water/ice, channel a defensive sheet, throw a form.
+ * Environmental matter casting — bond to water/ice/lava/dust, channel a barrier, throw a form.
  * Instinct for Elemental school; see docs/MAGIC_PLAN.md.
  */
 public final class MatterBondService {
     public enum Kind {
         WATER,
-        ICE
+        ICE,
+        LAVA,
+        DUST
     }
 
     public record Bond(BlockPos source, Kind kind, float strength) {}
@@ -66,7 +74,6 @@ public final class MatterBondService {
         BONDS.remove(id);
         CHANNELING.remove(id);
         List<BlockPos> wall = ACTIVE_WALLS.remove(id);
-        // walls expire via ElementalBlockService timers
         if (wall != null) {
             wall.clear();
         }
@@ -74,19 +81,18 @@ public final class MatterBondService {
 
     public static void tryLink(ServerPlayer player) {
         if (!canUse(player)) {
-            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.effecoria.matter_need_elemental"), true);
+            player.displayClientMessage(Component.translatable("message.effecoria.matter_need_elemental"), true);
             return;
         }
         ServerLevel level = player.serverLevel();
         BlockHitResult hit = rayMatter(player, BalanceConfig.MATTER_BOND_RANGE.get());
         if (hit.getType() != HitResult.Type.BLOCK) {
-            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.effecoria.matter_no_source"), true);
+            player.displayClientMessage(Component.translatable("message.effecoria.matter_no_source"), true);
             return;
         }
         BlockPos pos = hit.getBlockPos();
         Kind kind = classify(level, pos);
         if (kind == null) {
-            // try fluid inside / adjacent
             BlockPos fluidPos = pos.relative(hit.getDirection());
             kind = classify(level, fluidPos);
             if (kind != null) {
@@ -94,7 +100,7 @@ public final class MatterBondService {
             }
         }
         if (kind == null) {
-            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.effecoria.matter_no_source"), true);
+            player.displayClientMessage(Component.translatable("message.effecoria.matter_no_source"), true);
             return;
         }
         float strength = measureStrength(level, pos, kind);
@@ -102,7 +108,8 @@ public final class MatterBondService {
         BONDS.put(player.getUUID(), bond);
         syncBond(player, bond);
         spawnBondFx(level, pos, kind);
-        player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.effecoria.matter_bonded", kind.name().toLowerCase()), true);
+        player.displayClientMessage(
+                Component.translatable("message.effecoria.matter_bonded", kindLabel(kind)), true);
     }
 
     public static void setChanneling(ServerPlayer player, boolean active) {
@@ -129,13 +136,13 @@ public final class MatterBondService {
         Bond bond = BONDS.get(player.getUUID());
         if (bond == null || !bondValid(player, bond)) {
             clearBondOnly(player);
-            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.effecoria.matter_no_bond"), true);
+            player.displayClientMessage(Component.translatable("message.effecoria.matter_no_bond"), true);
             return;
         }
         float cost = BalanceConfig.MATTER_THROW_PSI.get().floatValue();
         PlayerPsiData data = PsiHelper.get(player);
         if (data.currentPsi() < cost) {
-            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.effecoria.matter_no_psi"), true);
+            player.displayClientMessage(Component.translatable("message.effecoria.matter_no_psi"), true);
             return;
         }
         data.setCurrentPsi(data.currentPsi() - cost);
@@ -145,21 +152,16 @@ public final class MatterBondService {
         Snowball shard = new Snowball(level, player);
         shard.setPos(player.getX(), player.getEyeY() - 0.1, player.getZ());
         Vec3 look = player.getLookAngle();
-        shard.shoot(look.x, look.y, look.z, 1.35f, 1.5f);
+        shard.shoot(look.x, look.y, look.z, throwSpeed(bond.kind()), 1.5f);
         shard.getPersistentData().putBoolean(ElementalTags.PROJECTILE, true);
-        if (bond.kind() == Kind.ICE) {
-            shard.getPersistentData().putString(ElementalTags.KIND, ElementalTags.KIND_MATTER_ICE);
-            shard.getPersistentData().putFloat(ElementalTags.POWER, 4f + bond.strength() * 0.5f);
-        } else {
-            shard.getPersistentData().putString(ElementalTags.KIND, ElementalTags.KIND_MATTER_WATER);
-            shard.getPersistentData().putFloat(ElementalTags.POWER, 2.5f + bond.strength() * 0.35f);
-        }
+        shard.getPersistentData().putString(ElementalTags.KIND, projectileKind(bond.kind()));
+        shard.getPersistentData().putFloat(ElementalTags.POWER, throwPower(bond));
         level.addFreshEntity(shard);
 
         float next = Math.max(0f, bond.strength() - BalanceConfig.MATTER_THROW_SOURCE_DRAIN.get().floatValue());
         if (next <= 0.05f) {
             clearBondOnly(player);
-            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.effecoria.matter_source_spent"), true);
+            player.displayClientMessage(Component.translatable("message.effecoria.matter_source_spent"), true);
         } else {
             Bond updated = new Bond(bond.source(), bond.kind(), next);
             BONDS.put(player.getUUID(), updated);
@@ -202,10 +204,7 @@ public final class MatterBondService {
         Direction facing = player.getDirection();
         Direction left = facing.getCounterClockWise();
         BlockPos feet = player.blockPosition().relative(facing, 2);
-        BlockState sheet = bond.kind() == Kind.ICE ? Blocks.ICE.defaultBlockState() : Blocks.BLUE_ICE.defaultBlockState();
-        if (bond.kind() == Kind.WATER) {
-            sheet = Blocks.PACKED_ICE.defaultBlockState(); // solid water-sheet stand-in
-        }
+        BlockState sheet = wallBlock(bond.kind());
         List<BlockPos> placed = new ArrayList<>();
         for (int w = -2; w <= 2; w++) {
             for (int h = 0; h <= 2; h++) {
@@ -213,7 +212,7 @@ public final class MatterBondService {
                 if (ElementalBlockService.placeTemporary(level, pos, sheet, 40)) {
                     placed.add(pos.immutable());
                     level.sendParticles(
-                            bond.kind() == Kind.ICE ? ModParticleTypes.ICE_CRYSTAL.get() : ModParticleTypes.WATER_SPLASH.get(),
+                            bondParticle(bond.kind()),
                             pos.getX() + 0.5,
                             pos.getY() + 0.5,
                             pos.getZ() + 0.5,
@@ -231,14 +230,42 @@ public final class MatterBondService {
     private static void drainSourceBlock(ServerLevel level, Bond bond) {
         BlockState state = level.getBlockState(bond.source());
         FluidState fluid = level.getFluidState(bond.source());
-        if (fluid.is(FluidTags.WATER) && fluid.isSource()) {
-            level.setBlock(bond.source(), Blocks.AIR.defaultBlockState(), 3);
-        } else if (state.is(Blocks.ICE) || state.is(Blocks.PACKED_ICE) || state.is(Blocks.BLUE_ICE) || state.is(Blocks.FROSTED_ICE)) {
-            if (level.random.nextFloat() < 0.35f) {
-                level.setBlock(bond.source(), Blocks.WATER.defaultBlockState(), 3);
+        switch (bond.kind()) {
+            case WATER -> {
+                if (fluid.is(FluidTags.WATER) && fluid.isSource()) {
+                    level.setBlock(bond.source(), Blocks.AIR.defaultBlockState(), 3);
+                }
             }
-        } else if (state.is(BlockTags.SNOW) || state.is(Blocks.SNOW_BLOCK) || state.is(Blocks.POWDER_SNOW)) {
-            level.destroyBlock(bond.source(), false);
+            case ICE -> {
+                if (state.is(Blocks.ICE)
+                        || state.is(Blocks.PACKED_ICE)
+                        || state.is(Blocks.BLUE_ICE)
+                        || state.is(Blocks.FROSTED_ICE)) {
+                    if (level.random.nextFloat() < 0.35f) {
+                        level.setBlock(bond.source(), Blocks.WATER.defaultBlockState(), 3);
+                    }
+                } else if (state.is(BlockTags.SNOW)
+                        || state.is(Blocks.SNOW_BLOCK)
+                        || state.is(Blocks.POWDER_SNOW)) {
+                    level.destroyBlock(bond.source(), false);
+                }
+            }
+            case LAVA -> {
+                if (fluid.is(FluidTags.LAVA) && fluid.isSource()) {
+                    if (level.random.nextFloat() < 0.3f) {
+                        level.setBlock(bond.source(), Blocks.OBSIDIAN.defaultBlockState(), 3);
+                    }
+                } else if (state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)) {
+                    level.removeBlock(bond.source(), false);
+                } else if (state.is(Blocks.MAGMA_BLOCK) && level.random.nextFloat() < 0.2f) {
+                    level.setBlock(bond.source(), Blocks.NETHERRACK.defaultBlockState(), 3);
+                }
+            }
+            case DUST -> {
+                if (isDustSource(state) && level.random.nextFloat() < 0.4f) {
+                    level.destroyBlock(bond.source(), false);
+                }
+            }
         }
     }
 
@@ -270,7 +297,7 @@ public final class MatterBondService {
 
     private static void spawnBondFx(ServerLevel level, BlockPos pos, Kind kind) {
         level.sendParticles(
-                kind == Kind.ICE ? ModParticleTypes.ICE_CRYSTAL.get() : ModParticleTypes.WATER_WAVE.get(),
+                bondParticle(kind),
                 pos.getX() + 0.5,
                 pos.getY() + 0.8,
                 pos.getZ() + 0.5,
@@ -279,6 +306,18 @@ public final class MatterBondService {
                 0.35,
                 0.35,
                 0.02);
+        if (kind == Kind.LAVA) {
+            level.sendParticles(
+                    ParticleTypes.LAVA,
+                    pos.getX() + 0.5,
+                    pos.getY() + 0.9,
+                    pos.getZ() + 0.5,
+                    4,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.01);
+        }
     }
 
     private static BlockHitResult rayMatter(ServerPlayer player, double range) {
@@ -289,10 +328,21 @@ public final class MatterBondService {
 
     private static Kind classify(ServerLevel level, BlockPos pos) {
         FluidState fluid = level.getFluidState(pos);
+        if (fluid.is(FluidTags.LAVA)) {
+            return Kind.LAVA;
+        }
         if (fluid.is(FluidTags.WATER)) {
             return Kind.WATER;
         }
         BlockState state = level.getBlockState(pos);
+        if (state.is(Blocks.MAGMA_BLOCK)
+                || state.is(Blocks.FIRE)
+                || state.is(Blocks.SOUL_FIRE)
+                || state.is(Blocks.CAMPFIRE)
+                || state.is(Blocks.SOUL_CAMPFIRE)
+                || state.is(Blocks.LAVA_CAULDRON)) {
+            return Kind.LAVA;
+        }
         if (state.is(Blocks.ICE)
                 || state.is(Blocks.PACKED_ICE)
                 || state.is(Blocks.BLUE_ICE)
@@ -302,7 +352,18 @@ public final class MatterBondService {
                 || state.is(Blocks.POWDER_SNOW)) {
             return Kind.ICE;
         }
+        if (isDustSource(state)) {
+            return Kind.DUST;
+        }
         return null;
+    }
+
+    private static boolean isDustSource(BlockState state) {
+        return state.is(BlockTags.SAND)
+                || state.is(ModBlocks.PARCHED_SAND.get())
+                || state.is(ModBlocks.ASH_SOIL.get())
+                || state.is(ModBlocks.VITRIFIED_SAND.get())
+                || state.is(ModBlocks.VITRIFIED_DIRT.get());
     }
 
     private static float measureStrength(ServerLevel level, BlockPos origin, Kind kind) {
@@ -321,35 +382,119 @@ public final class MatterBondService {
         return Math.min(8f, 1f + count * 0.25f);
     }
 
+    private static BlockState wallBlock(Kind kind) {
+        return switch (kind) {
+            case ICE -> Blocks.ICE.defaultBlockState();
+            case WATER -> Blocks.PACKED_ICE.defaultBlockState();
+            case LAVA -> Blocks.MAGMA_BLOCK.defaultBlockState();
+            case DUST -> Blocks.SANDSTONE.defaultBlockState();
+        };
+    }
+
+    private static SimpleParticleType bondParticle(Kind kind) {
+        return switch (kind) {
+            case ICE -> ModParticleTypes.ICE_CRYSTAL.get();
+            case WATER -> ModParticleTypes.WATER_SPLASH.get();
+            case LAVA -> ModParticleTypes.ELEMENTAL_EMBER.get();
+            case DUST -> ModParticleTypes.CORRUPTION_ENTROPY.get();
+        };
+    }
+
+    private static String projectileKind(Kind kind) {
+        return switch (kind) {
+            case ICE -> ElementalTags.KIND_MATTER_ICE;
+            case WATER -> ElementalTags.KIND_MATTER_WATER;
+            case LAVA -> ElementalTags.KIND_MATTER_LAVA;
+            case DUST -> ElementalTags.KIND_MATTER_DUST;
+        };
+    }
+
+    private static float throwPower(Bond bond) {
+        return switch (bond.kind()) {
+            case ICE -> 4f + bond.strength() * 0.5f;
+            case WATER -> 2.5f + bond.strength() * 0.35f;
+            case LAVA -> 3.5f + bond.strength() * 0.45f;
+            case DUST -> 2f + bond.strength() * 0.3f;
+        };
+    }
+
+    private static float throwSpeed(Kind kind) {
+        return switch (kind) {
+            case LAVA -> 1.2f;
+            case DUST -> 1.45f;
+            default -> 1.35f;
+        };
+    }
+
+    private static Component kindLabel(Kind kind) {
+        return Component.translatable("message.effecoria.matter_kind." + kind.name().toLowerCase());
+    }
+
     public static void tickLevel(ServerLevel level) {
         // no global cleanup needed beyond player ticks
     }
 
-    /** Apply wet / brittle effects for matter projectiles. */
+    /** Apply wet / brittle / burn / blind effects for matter projectiles. */
     public static void applyMatterHit(LivingHit hit) {
         hit.target().hurt(hit.source(), hit.damage());
-        if (hit.ice()) {
-            hit.target().addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1));
-            ElementalEffects.spawnIceParticles(hit.level(), hit.target().position().add(0, 1, 0));
-        } else {
-            hit.target().addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0));
-            hit.level().sendParticles(
-                    ModParticleTypes.WATER_SPLASH.get(),
-                    hit.target().getX(),
-                    hit.target().getY() + 1,
-                    hit.target().getZ(),
-                    8,
-                    0.2,
-                    0.2,
-                    0.2,
-                    0.02);
+        switch (hit.kind()) {
+            case ICE -> {
+                hit.target().addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1));
+                ElementalEffects.spawnIceParticles(hit.level(), hit.target().position().add(0, 1, 0));
+            }
+            case WATER -> {
+                hit.target().addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0));
+                hit.level().sendParticles(
+                        ModParticleTypes.WATER_SPLASH.get(),
+                        hit.target().getX(),
+                        hit.target().getY() + 1,
+                        hit.target().getZ(),
+                        8,
+                        0.2,
+                        0.2,
+                        0.2,
+                        0.02);
+            }
+            case LAVA -> {
+                hit.target().igniteForSeconds(Math.max(3, Math.round(2f + hit.damage() * 0.35f)));
+                ElementalEffects.spawnFireParticles(hit.level(), hit.target().position());
+                ElementalEffects.ignitePatch(hit.level(), hit.target().blockPosition(), 0, 2);
+                if (hit.owner() != null) {
+                    SpellCombat.alert(hit.target(), hit.owner());
+                }
+            }
+            case DUST -> {
+                hit.target().addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 50, 0));
+                hit.target().addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 50, 0));
+                hit.level().sendParticles(
+                        ParticleTypes.CLOUD,
+                        hit.target().getX(),
+                        hit.target().getY() + 1,
+                        hit.target().getZ(),
+                        14,
+                        0.35,
+                        0.35,
+                        0.35,
+                        0.02);
+                hit.level().sendParticles(
+                        ModParticleTypes.CORRUPTION_ENTROPY.get(),
+                        hit.target().getX(),
+                        hit.target().getY() + 1,
+                        hit.target().getZ(),
+                        6,
+                        0.25,
+                        0.25,
+                        0.25,
+                        0.01);
+            }
         }
     }
 
     public record LivingHit(
             ServerLevel level,
-            net.minecraft.world.entity.LivingEntity target,
+            LivingEntity target,
             net.minecraft.world.damagesource.DamageSource source,
             float damage,
-            boolean ice) {}
+            Kind kind,
+            LivingEntity owner) {}
 }

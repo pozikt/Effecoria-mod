@@ -12,6 +12,8 @@ public final class ElementalTags {
     public static final String KIND_GREAT_FIRE = "great_fire";
     public static final String KIND_MATTER_WATER = "matter_water";
     public static final String KIND_MATTER_ICE = "matter_ice";
+    public static final String KIND_MATTER_LAVA = "matter_lava";
+    public static final String KIND_MATTER_DUST = "matter_dust";
 
     /** Remaining fire mass units for shedding fireballs. */
     public static final String FIRE_MASS = "effecoria_fire_mass";

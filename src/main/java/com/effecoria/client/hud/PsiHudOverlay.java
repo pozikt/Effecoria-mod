@@ -1,6 +1,7 @@
 package com.effecoria.client.hud;
 
 import com.effecoria.client.ClientInputEvents;
+import com.effecoria.client.ClientMatterBondState;
 import com.effecoria.config.BalanceConfig;
 import com.effecoria.core.formula.FormulaEngine;
 import com.effecoria.core.formula.PhiSample;
@@ -101,6 +102,18 @@ public final class PsiHudOverlay {
         }
 
         int lineY = y + (weather.kind() != com.effecoria.world.weather.PhiWeatherKind.CLEAR ? 50 : 40);
+        if (ClientMatterBondState.active()) {
+            graphics.drawString(
+                    minecraft.font,
+                    Component.translatable(
+                            "hud.effecoria.matter_bond",
+                            Component.translatable("message.effecoria.matter_kind." + ClientMatterBondState.kind()),
+                            String.format(java.util.Locale.ROOT, "%.1f", ClientMatterBondState.strength())),
+                    x,
+                    lineY,
+                    0xFF9AD4FF);
+            lineY += 12;
+        }
         float armorCharge = com.effecoria.armor.EssoniteArmorData.poolCharge(minecraft.player);
         if (com.effecoria.armor.EssoniteArmorService.hasAny(minecraft.player)) {
             drawBar(graphics, x, lineY, 90, 5, armorCharge, 0xFFD4A84B, 0xFF3A2A14);

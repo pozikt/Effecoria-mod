@@ -78,9 +78,37 @@ public final class ElementalProjectileEvents {
                         ElementalEffects.spawnIceParticles(level, target.position().add(0, 1, 0));
                     }
                     case ElementalTags.KIND_MATTER_WATER -> MatterBondService.applyMatterHit(
-                            new MatterBondService.LivingHit(level, target, source, damage, false));
+                            new MatterBondService.LivingHit(
+                                    level,
+                                    target,
+                                    source,
+                                    damage,
+                                    MatterBondService.Kind.WATER,
+                                    projectile.getOwner() instanceof LivingEntity owner ? owner : null));
                     case ElementalTags.KIND_MATTER_ICE -> MatterBondService.applyMatterHit(
-                            new MatterBondService.LivingHit(level, target, source, damage, true));
+                            new MatterBondService.LivingHit(
+                                    level,
+                                    target,
+                                    source,
+                                    damage,
+                                    MatterBondService.Kind.ICE,
+                                    projectile.getOwner() instanceof LivingEntity owner ? owner : null));
+                    case ElementalTags.KIND_MATTER_LAVA -> MatterBondService.applyMatterHit(
+                            new MatterBondService.LivingHit(
+                                    level,
+                                    target,
+                                    source,
+                                    damage,
+                                    MatterBondService.Kind.LAVA,
+                                    projectile.getOwner() instanceof LivingEntity owner ? owner : null));
+                    case ElementalTags.KIND_MATTER_DUST -> MatterBondService.applyMatterHit(
+                            new MatterBondService.LivingHit(
+                                    level,
+                                    target,
+                                    source,
+                                    damage,
+                                    MatterBondService.Kind.DUST,
+                                    projectile.getOwner() instanceof LivingEntity owner ? owner : null));
                     case ElementalTags.KIND_PLASMA -> {
                         target.hurt(source, damage);
                         target.hurt(level.damageSources().onFire(), damage * 0.4f);
@@ -102,10 +130,13 @@ public final class ElementalProjectileEvents {
             }
         }
 
-        if (hit.getType() == HitResult.Type.BLOCK
-                && ElementalTags.KIND_WEAK_FIRE.equals(kind)
-                && hit instanceof BlockHitResult blockHit) {
-            ElementalEffects.ignitePatch(level, blockHit.getBlockPos().relative(blockHit.getDirection()), 0, 1);
+        if (hit.getType() == HitResult.Type.BLOCK && hit instanceof BlockHitResult blockHit) {
+            if (ElementalTags.KIND_WEAK_FIRE.equals(kind) || ElementalTags.KIND_MATTER_LAVA.equals(kind)) {
+                ElementalEffects.ignitePatch(level, blockHit.getBlockPos().relative(blockHit.getDirection()), 0, 1);
+            } else if (ElementalTags.KIND_MATTER_DUST.equals(kind)) {
+                Vec3 loc = blockHit.getLocation();
+                level.sendParticles(ParticleTypes.CLOUD, loc.x, loc.y + 0.2, loc.z, 10, 0.3, 0.2, 0.3, 0.02);
+            }
         }
 
         if (projectile instanceof Snowball || projectile instanceof SmallFireball) {
@@ -216,7 +247,9 @@ public final class ElementalProjectileEvents {
             }
             return;
         }
-        if (ElementalTags.KIND_WEAK_FIRE.equals(kind) || ElementalTags.KIND_PLASMA.equals(kind)) {
+        if (ElementalTags.KIND_WEAK_FIRE.equals(kind)
+                || ElementalTags.KIND_PLASMA.equals(kind)
+                || ElementalTags.KIND_MATTER_LAVA.equals(kind)) {
             level.sendParticles(
                     ParticleTypes.FLAME,
                     projectile.getX(),
@@ -239,6 +272,19 @@ public final class ElementalProjectileEvents {
                         0.05,
                         0.015);
             }
+            return;
+        }
+        if (ElementalTags.KIND_MATTER_DUST.equals(kind) && projectile.tickCount % 2 == 0) {
+            level.sendParticles(
+                    ParticleTypes.CLOUD,
+                    projectile.getX(),
+                    projectile.getY(),
+                    projectile.getZ(),
+                    1,
+                    0.06,
+                    0.06,
+                    0.06,
+                    0.01);
         }
     }
 }

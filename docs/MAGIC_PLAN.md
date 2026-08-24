@@ -115,7 +115,7 @@ Ship only after Stage I magic **presentation** and thrall budget feel solid.
 
 ## Environmental matter casting (Elemental — MVP shipped)
 
-**Status:** MVP shipped — water + ice/snow sources.  
+**Status:** Wave 2 shipped — water/ice + lava/fire + sand/ash dust.  
 **Fantasy:** “крутейшая прокачка” стихийной школы — магия из **окружения**, не из пустого воздуха. Форма берётся из ближайшего источника вещества; без источника — слабый/недоступный каст.
 
 ### Fantasy examples
@@ -134,16 +134,16 @@ Power and duration scale with **source size / proximity / Φ**, not only Ψ spen
 
 Keys (defaults): **V** link / double-tap throw, **B** hold barrier — orthogonal to R-cast:
 
-1. **Link** — look at / near water or ice → **matter bond** (sync cue). Bond breaks if you leave range or source is destroyed/emptied.
-2. **Hold (B)** — while bonded: channel a **defensive ice sheet** from that matter. Drain source and Ψ while held.
-3. **Double-tap V (throw)** — while bonded: throws a water/ice form at the look direction. Consumes bond strength.
+1. **Link** — look at / near water, ice, lava/fire, or sand/ash → **matter bond** (sync cue). Bond breaks if you leave range or source is destroyed/emptied.
+2. **Hold (B)** — while bonded: channel a **defensive sheet** from that matter (ice/packed ice, magma, sandstone). Drain source and Ψ while held.
+3. **Double-tap V (throw)** — while bonded: throws a water/ice/ember/dust form at the look direction. Consumes bond strength.
 
 ### Design constraints
 
 - Requires **Elemental** + breathing mastery gate (`matter_cast_min_mastery`).
-- Sources are **world blocks/fluids** (water, ice, snow).
+- Sources are **world blocks/fluids** (water, ice, snow, lava, fire/magma, sand, ash, vitrified dust).
 - Readable: wall/stream originates from the pool.
-- Wave 2: lava, dust, sand after water/ice playtest.
+- Wave 2: lava + sand/ash dust — ✅ shipped (`MatterBondService`).
 
 Wire under Stage II **Magic: Elemental expansion** in [ROADMAP.md](ROADMAP.md).
 
