@@ -31,4 +31,5 @@
 - [x] lore / concept / SEGMENT_LOCK
 - [x] geo / atlas / idle+gift
 - [x] synced GIFTING
+- [x] atlas paint pass (`scripts/bake_unique_fauna_atlases.py`)
 - [ ] in-game playtest

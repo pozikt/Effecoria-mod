@@ -7,7 +7,7 @@ Honest list for Discord / GitHub release notes. Update when shipping a demo buil
 | Issue | Severity | Notes |
 |-------|----------|-------|
 | New biomes / structures need **new chunks** (or a new world) | Medium | Already-explored regions stay old terrain |
-| Ω-Scar / Crystal Forest fauna use **placeholder** skins (vanilla templates) | Low | Custom GeckoLib art later |
+| Ω-Scar / Crystal Forest fauna — first custom atlas pass | Low | Playtest in-game; canopy (Ent / Lemur / Wailer) still stub |
 | Races: **no player model morph** (Origins-style visuals later) | Info | Passives + Orkanum baseline only |
 | Vampire sun / blood drink is rough MVP | Low | Helmet blocks sun; vials restore Ψ |
 | Magic Primer uses vanilla writable-book look | Low | Content is custom; cover art optional |
