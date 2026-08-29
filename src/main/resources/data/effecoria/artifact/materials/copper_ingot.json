@@ -1,6 +1,10 @@
 {
   "id": "effecoria:mat_copper_ingot",
   "item": "minecraft:copper_ingot",
-  "conductivity": 0.82,
-  "notes": "classic conductor"
+  "conductivity": 0.68,
+  "positive_bias": 0.08,
+  "implicit_affixes": [
+    { "affix": "effecoria:cast_efficiency", "tier": 1, "chance": 0.14 }
+  ],
+  "notes": "accessible conductor"
 }

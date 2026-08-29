@@ -3,12 +3,15 @@ package com.effecoria.core.artifact;
 import com.effecoria.armor.EssonitePhoneme;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /** Rolls bonus affixes when jewelry is assembled. */
 public final class AffixRollService {
@@ -18,8 +21,10 @@ public final class AffixRollService {
             ItemStack out, String template, ItemStack band, ItemStack gem, RandomSource random) {
         List<AssembledGearData.AffixEntry> affixes = new ArrayList<>();
         affixes.addAll(phonemeAffixes(out));
+        affixes.addAll(materialAffixes(band, gem, random));
+        dedupeAffixes(affixes);
         Optional<AssembledGearData.AffixEntry> bonus = rollBonusAffix(template, band, gem, random);
-        bonus.ifPresent(affixes::add);
+        bonus.ifPresent(entry -> addIfAbsent(affixes, entry));
         if (!affixes.isEmpty()) {
             AssembledGearData.setAffixes(out, affixes);
         }
@@ -42,24 +47,53 @@ public final class AffixRollService {
         return outList;
     }
 
+    private static List<AssembledGearData.AffixEntry> materialAffixes(
+            ItemStack band, ItemStack gem, RandomSource random) {
+        List<AssembledGearData.AffixEntry> out = new ArrayList<>();
+        for (ItemStack part : List.of(band, gem)) {
+            if (part.isEmpty()) {
+                continue;
+            }
+            MaterialDefinition def = MaterialConductivity.resolveStack(part);
+            for (MaterialDefinition.ImplicitAffix implicit : def.implicitAffixes()) {
+                if (AffixCatalog.get(implicit.affixId()).isEmpty()) {
+                    continue;
+                }
+                if (random.nextFloat() <= implicit.chance()) {
+                    out.add(new AssembledGearData.AffixEntry(implicit.affixId(), implicit.tier(), "material"));
+                }
+            }
+        }
+        return out;
+    }
+
     private static Optional<AssembledGearData.AffixEntry> rollBonusAffix(
             String template, ItemStack band, ItemStack gem, RandomSource random) {
+        MaterialDefinition bandDef = MaterialConductivity.resolveStack(band);
+        MaterialDefinition gemDef = MaterialConductivity.resolveStack(gem);
+        float posBias = (bandDef.positiveBias() + gemDef.positiveBias()) * 0.5f;
+        float negBias = (bandDef.negativeBias() + gemDef.negativeBias()) * 0.5f;
+        float conductivity = (bandDef.conductivity() + gemDef.conductivity()) * 0.5f;
+
         int roll = random.nextInt(100);
+        int standardCap = Mth.clamp(Math.round(70f - posBias * 18f + negBias * 10f), 45, 82);
+        int positiveCap = Mth.clamp(Math.round(90f - posBias * 8f + negBias * 6f), standardCap + 5, 94);
+        int negativeCap = Mth.clamp(Math.round(97f + negBias * 4f - posBias * 6f), positiveCap + 2, 99);
+
         String polarity;
         String rollKind;
-        if (roll < 70) {
+        if (roll < standardCap) {
             return Optional.empty();
-        } else if (roll < 90) {
+        } else if (roll < positiveCap) {
             polarity = "positive";
             rollKind = "positive";
-        } else if (roll < 97) {
+        } else if (roll < negativeCap) {
             polarity = "negative";
             rollKind = "negative";
         } else {
             polarity = "incredible";
             rollKind = "incredible";
         }
-        float conductivity = (MaterialConductivity.ofStack(band) + MaterialConductivity.ofStack(gem)) * 0.5f;
         return pickWeighted(polarity, template, conductivity, random)
                 .map(id -> new AssembledGearData.AffixEntry(id, tierForRoll(rollKind, random), rollKind));
     }
@@ -105,5 +139,16 @@ public final class AffixRollService {
             w = (int) (w * 1.25f);
         }
         return Math.max(1, w);
+    }
+
+    private static void dedupeAffixes(List<AssembledGearData.AffixEntry> affixes) {
+        Set<ResourceLocation> seen = new LinkedHashSet<>();
+        affixes.removeIf(entry -> !seen.add(entry.id()));
+    }
+
+    private static void addIfAbsent(List<AssembledGearData.AffixEntry> affixes, AssembledGearData.AffixEntry entry) {
+        if (affixes.stream().noneMatch(a -> a.id().equals(entry.id()))) {
+            affixes.add(entry);
+        }
     }
 }

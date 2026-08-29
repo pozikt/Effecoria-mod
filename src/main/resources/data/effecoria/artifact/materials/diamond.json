@@ -1,6 +1,10 @@
 {
   "id": "effecoria:mat_diamond",
   "item": "minecraft:diamond",
-  "conductivity": 0.48,
-  "notes": "hard lattice, middling \u03a6"
+  "conductivity": 0.58,
+  "positive_bias": 0.12,
+  "implicit_affixes": [
+    { "affix": "effecoria:elemental_boost", "tier": 1, "chance": 0.22 }
+  ],
+  "notes": "hard focus gem"
 }

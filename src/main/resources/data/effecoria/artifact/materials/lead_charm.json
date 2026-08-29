@@ -2,5 +2,11 @@
   "id": "effecoria:mat_lead_charm",
   "item": "effecoria:lead_charm",
   "conductivity": 0.15,
-  "notes": "prebuilt jewelry"
+  "positive_bias": 0.02,
+  "negative_bias": 0.25,
+  "implicit_affixes": [
+    { "affix": "effecoria:weight", "tier": 1, "chance": 0.35 },
+    { "affix": "effecoria:omega_pull", "tier": 1, "chance": 0.08 }
+  ],
+  "notes": "Ω damper jewelry"
 }

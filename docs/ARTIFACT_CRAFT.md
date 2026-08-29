@@ -38,7 +38,7 @@ Item models use scaled vanilla stick / blaze rod textures per form (`custom_mode
 
 Do **not** draw texels in Python — crops from the concept sheet and downscales to 16×16. Preview: `art/artifact_stations/baked_preview.png`. Shaft lathe & facet cutter are **half-height** benches; rotate with block `facing` like a stonecutter.
 
-**Artifact assembler** uses the mortar panel; the same grid picks **staff / ring / amulet / charm**; craft slots at `(44,35)`, `(80,35)`, output `(134,35)`. Reform expands the family grid (see below).
+**Artifact assembler** uses a technomagic Φ-bonding panel (`AssemblerGui`): blueprint tabs for **staff / ring / amulet / charm**; craft slots at `(44,35)`, `(80,35)`, output `(134,35)`. Reform expands the family grid (see below).
 
 ## Φ-conductivity
 
@@ -50,12 +50,33 @@ Each craft material has a datapack conductivity `0..1` under `data/effecoria/art
 
 Examples: stick/planks ~0.2, copper/gold high, star essonite ~0.95, lead charm low (damper).
 
+Optional per material: `positive_bias`, `negative_bias` (0..1, shift affix roll odds), and `implicit_affixes` (chance rolls at assemble from band/gem material).
+
+## Jewelry affixes (shipped)
+
+Assembled ring/amulet/charm roll affixes at the **Artifact Assembler**:
+
+| Roll | Chance (base) | Result |
+|------|---------------|--------|
+| Standard | ~70% | Phoneme + material implicit affixes only |
+| Bonus | ~20% | +1 positive affix |
+| Curse | ~7% | +1 negative affix |
+| Incredible | ~3% | +1 incredible affix |
+
+- **Phonemes** on band/gem → deterministic affix (Firmitas → physical ward, etc.).
+- **Material profile** (`artifact/materials/`) → `implicit_affixes` + bias modifiers.
+- **Effects** hook via `JewelryAffixService` / `JewelryAffixEvents` (Φ-shield, cast cost, regen, mental ward, …).
+- NBT: `effecoria_gear.affixes[]` with `{ id, tier, roll }`.
+
+Craft `jewelry_band` / `jewelry_gem` from `#effecoria:jewelry_band_materials` / `#jewelry_gem_materials` — output is stamped with material conductivity (`ArtifactCraftEvents`).
+
 ## Datapack
 
 | Path | Content |
 |------|---------|
 | `data/effecoria/artifact/shaft_forms/` | Length profiles + reach/cost |
-| `data/effecoria/artifact/materials/` | Item → Φ-conductivity |
+| `data/effecoria/artifact/materials/` | Item → Φ-conductivity, affix bias, implicit affixes |
+| `data/effecoria/artifact/affixes/` | Rolled jewelry affix definitions |
 | `data/effecoria/artifact/focus_cuts/` | Cuts + power/tier |
 | `data/effecoria/artifact/assemble_recipes/` | staff/ring/amulet/charm |
 | `data/effecoria/item_seals/` | Vanilla-analogue + Effecoria seals |

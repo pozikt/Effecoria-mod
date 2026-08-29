@@ -1,6 +1,10 @@
 {
   "id": "effecoria:mat_iron_ingot",
   "item": "minecraft:iron_ingot",
-  "conductivity": 0.6,
-  "notes": "solid metal"
+  "conductivity": 0.55,
+  "positive_bias": 0.05,
+  "implicit_affixes": [
+    { "affix": "effecoria:physical_ward", "tier": 1, "chance": 0.12 }
+  ],
+  "notes": "sturdy band material"
 }

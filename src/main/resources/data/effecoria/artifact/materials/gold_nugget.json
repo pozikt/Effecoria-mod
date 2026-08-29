@@ -1,6 +1,10 @@
 {
   "id": "effecoria:mat_gold_nugget",
   "item": "minecraft:gold_nugget",
-  "conductivity": 0.86,
-  "notes": "gold fragment"
+  "conductivity": 0.75,
+  "positive_bias": 0.08,
+  "implicit_affixes": [
+    { "affix": "effecoria:phi_shield", "tier": 1, "chance": 0.1 }
+  ],
+  "notes": "small gold reflector"
 }

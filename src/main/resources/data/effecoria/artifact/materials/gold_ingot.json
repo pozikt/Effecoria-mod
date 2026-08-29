@@ -2,5 +2,10 @@
   "id": "effecoria:mat_gold_ingot",
   "item": "minecraft:gold_ingot",
   "conductivity": 0.88,
-  "notes": "excellent metal reflector"
+  "positive_bias": 0.15,
+  "negative_bias": 0.04,
+  "implicit_affixes": [
+    { "affix": "effecoria:phi_shield", "tier": 1, "chance": 0.18 }
+  ],
+  "notes": "excellent metal reflector; screens corruption"
 }

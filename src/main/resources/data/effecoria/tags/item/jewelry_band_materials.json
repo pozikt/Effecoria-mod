@@ -4,6 +4,7 @@
     "minecraft:gold_ingot",
     "minecraft:iron_ingot",
     "minecraft:copper_ingot",
-    "effecoria:pure_essonite"
+    "effecoria:pure_essonite",
+    "effecoria:mithril_ingot"
   ]
 }

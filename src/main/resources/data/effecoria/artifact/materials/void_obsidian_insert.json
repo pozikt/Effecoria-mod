@@ -1,0 +1,12 @@
+{
+  "id": "effecoria:mat_void_obsidian_insert",
+  "item": "effecoria:void_obsidian_insert",
+  "conductivity": 0.22,
+  "positive_bias": 0.04,
+  "negative_bias": 0.22,
+  "implicit_affixes": [
+    { "affix": "effecoria:omega_pull", "tier": 1, "chance": 0.3 },
+    { "affix": "effecoria:mental_ward", "tier": 1, "chance": 0.15 }
+  ],
+  "notes": "void Ω filter"
+}

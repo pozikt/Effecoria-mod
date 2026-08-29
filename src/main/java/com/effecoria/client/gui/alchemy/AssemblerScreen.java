@@ -78,6 +78,14 @@ public final class AssemblerScreen extends AbstractContainerScreen<AssemblerMenu
             int pct = Math.round(100f * menu.progress() / menu.maxProgress());
             return Component.translatable("gui.effecoria.assembler.bonding", pct);
         }
+        ItemStack a = menu.getSlot(0).getItem();
+        ItemStack b = menu.getSlot(1).getItem();
+        if (!a.isEmpty() && !b.isEmpty()) {
+            float c = (com.effecoria.core.artifact.MaterialConductivity.ofStack(a)
+                            + com.effecoria.core.artifact.MaterialConductivity.ofStack(b))
+                    * 0.5f;
+            return Component.translatable("gui.effecoria.assembler.conductivity", Math.round(c * 100f));
+        }
         return Component.translatable(
                 "gui.effecoria.assembler.ready",
                 AssemblerGui.templateName(Math.floorMod(menu.template(), AssemblerGui.TEMPLATE_COUNT)));

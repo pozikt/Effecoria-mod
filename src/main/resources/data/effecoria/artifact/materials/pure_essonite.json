@@ -1,6 +1,10 @@
 {
   "id": "effecoria:mat_pure_essonite",
   "item": "effecoria:pure_essonite",
-  "conductivity": 0.85,
-  "notes": "refined gem"
+  "conductivity": 0.82,
+  "positive_bias": 0.18,
+  "implicit_affixes": [
+    { "affix": "effecoria:phi_regen", "tier": 1, "chance": 0.2 }
+  ],
+  "notes": "essonite core material"
 }

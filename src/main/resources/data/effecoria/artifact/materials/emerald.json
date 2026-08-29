@@ -2,5 +2,9 @@
   "id": "effecoria:mat_emerald",
   "item": "minecraft:emerald",
   "conductivity": 0.52,
-  "notes": "village gem"
+  "positive_bias": 0.1,
+  "implicit_affixes": [
+    { "affix": "effecoria:phi_regen", "tier": 1, "chance": 0.18 }
+  ],
+  "notes": "organic-resonant gem"
 }

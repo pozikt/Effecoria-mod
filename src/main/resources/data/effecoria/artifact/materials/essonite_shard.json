@@ -1,6 +1,10 @@
 {
   "id": "effecoria:mat_essonite_shard",
   "item": "effecoria:essonite_shard",
-  "conductivity": 0.7,
-  "notes": "crystal seed"
+  "conductivity": 0.72,
+  "positive_bias": 0.1,
+  "implicit_affixes": [
+    { "affix": "effecoria:phi_shield", "tier": 1, "chance": 0.15 }
+  ],
+  "notes": "common essonite gem"
 }
