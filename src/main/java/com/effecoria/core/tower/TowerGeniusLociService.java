@@ -73,11 +73,6 @@ public final class TowerGeniusLociService {
             boolean inside = hull.contains(player.position());
             if (inside && TowerDomeService.isOnline(towerLevel, anchor)) {
                 data.setCurrentPsi(data.currentPsi() + PSI_REGEN_INSIDE);
-                if (player.tickCount % 100 == 0) {
-                    int pct = (int) Math.round(integrity * 100.0);
-                    player.displayClientMessage(
-                            Component.translatable("message.effecoria.tower.loci_home", pct), true);
-                }
             }
         }
 
