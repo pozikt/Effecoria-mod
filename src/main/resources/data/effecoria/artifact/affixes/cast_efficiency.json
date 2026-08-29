@@ -1,0 +1,9 @@
+{
+  "id": "effecoria:cast_efficiency",
+  "polarity": "positive",
+  "effect": "cast_efficiency",
+  "weight": 11,
+  "templates": ["ring", "amulet", "charm"],
+  "params": { "per_tier": 0.06 },
+  "max_tier": 2
+}

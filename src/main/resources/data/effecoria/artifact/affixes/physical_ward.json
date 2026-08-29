@@ -1,0 +1,9 @@
+{
+  "id": "effecoria:physical_ward",
+  "polarity": "positive",
+  "effect": "physical_ward",
+  "weight": 7,
+  "templates": ["ring", "amulet", "charm"],
+  "params": { "per_tier": 0.12 },
+  "max_tier": 2
+}

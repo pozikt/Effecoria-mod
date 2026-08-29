@@ -1,0 +1,9 @@
+{
+  "id": "effecoria:weight",
+  "polarity": "negative",
+  "effect": "weight",
+  "weight": 9,
+  "templates": ["ring", "amulet", "charm"],
+  "params": { "per_tier": 1.0 },
+  "max_tier": 2
+}

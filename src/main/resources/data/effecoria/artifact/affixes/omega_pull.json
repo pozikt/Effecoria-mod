@@ -1,0 +1,9 @@
+{
+  "id": "effecoria:omega_pull",
+  "polarity": "negative",
+  "effect": "omega_pull",
+  "weight": 6,
+  "templates": ["amulet", "charm"],
+  "params": {},
+  "max_tier": 1
+}

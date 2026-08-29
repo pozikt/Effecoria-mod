@@ -31,5 +31,15 @@ public class AssembledJewelryItem extends JewelryItem {
         }
         AssembledGearData.seals(stack).forEach((id, lvl) -> tooltip.add(Component.translatable(
                 "item_seal.effecoria." + id.getPath())));
+        if (!AssembledGearData.affixes(stack).isEmpty()) {
+            tooltip.add(Component.empty());
+            tooltip.add(Component.translatable("tooltip.effecoria.affixes_header"));
+            for (AssembledGearData.AffixEntry entry : AssembledGearData.affixes(stack)) {
+                tooltip.add(Component.translatable(
+                        "affix.effecoria." + entry.id().getPath(),
+                        entry.tier(),
+                        Component.translatable("affix.effecoria.roll." + entry.rollKind())));
+            }
+        }
     }
 }

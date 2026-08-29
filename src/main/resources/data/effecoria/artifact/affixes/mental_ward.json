@@ -1,0 +1,9 @@
+{
+  "id": "effecoria:mental_ward",
+  "polarity": "positive",
+  "effect": "mental_ward",
+  "weight": 8,
+  "templates": ["amulet", "charm"],
+  "params": {},
+  "max_tier": 1
+}

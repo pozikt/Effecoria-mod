@@ -1,0 +1,9 @@
+{
+  "id": "effecoria:psi_whisper",
+  "polarity": "negative",
+  "effect": "psi_whisper",
+  "weight": 7,
+  "templates": ["amulet", "charm"],
+  "params": {},
+  "max_tier": 1
+}

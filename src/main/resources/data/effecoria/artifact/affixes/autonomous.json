@@ -1,0 +1,9 @@
+{
+  "id": "effecoria:autonomous",
+  "polarity": "incredible",
+  "effect": "autonomous",
+  "weight": 4,
+  "templates": ["amulet", "charm"],
+  "params": {},
+  "max_tier": 1
+}

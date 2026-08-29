@@ -33,6 +33,8 @@ public final class PsiHelper {
         PhiHarness.FocusBonuses focus = PhiHarness.focusBonuses(player);
         com.effecoria.core.artifact.StaffStats.Bundle staff =
                 com.effecoria.core.artifact.StaffStats.ofHeld(player);
+        float jewelryCost = com.effecoria.core.artifact.JewelryAffixService.castCostMul(player);
+        float jewelryPower = com.effecoria.core.artifact.JewelryAffixService.powerMul(player, data.school());
         return new PsiContext(
                 data.soulStrength(),
                 data.currentPsi(),
@@ -48,8 +50,8 @@ public final class PsiHelper {
                 focus.costFloorRatio(),
                 focus.resonanceWidthBonus(),
                 data.overcastRegenMultiplier(now),
-                staff.castCostMul(),
-                staff.powerMul());
+                staff.castCostMul() * jewelryCost,
+                staff.powerMul() * jewelryPower);
     }
 
     public static void initiate(Player player, MagicSchool school) {

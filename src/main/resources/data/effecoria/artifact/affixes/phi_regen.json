@@ -1,0 +1,9 @@
+{
+  "id": "effecoria:phi_regen",
+  "polarity": "positive",
+  "effect": "phi_regen",
+  "weight": 9,
+  "templates": ["amulet", "ring"],
+  "params": { "per_tier": 0.25 },
+  "max_tier": 2
+}

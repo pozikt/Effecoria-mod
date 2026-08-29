@@ -91,6 +91,7 @@ public final class ModCommonEvents {
         event.addListener(com.effecoria.core.fabricator.FabricatorCatalog.RELOAD_LISTENER);
         event.addListener(com.effecoria.core.artifact.MaterialConductivity.RELOAD_LISTENER);
         event.addListener(com.effecoria.core.artifact.ItemSealCatalog.RELOAD_LISTENER);
+        event.addListener(com.effecoria.core.artifact.AffixCatalog.RELOAD_LISTENER);
     }
 
     @SubscribeEvent

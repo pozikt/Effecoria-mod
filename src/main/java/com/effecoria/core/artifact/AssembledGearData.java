@@ -26,8 +26,12 @@ public final class AssembledGearData {
     public static final String BAND = "band";
     public static final String GEM = "gem";
     public static final String SEALS = "seals";
+    public static final String AFFIXES = "affixes";
     public static final String SEAL_ID = "id";
     public static final String SEAL_LVL = "lvl";
+    public static final String AFFIX_ID = "id";
+    public static final String AFFIX_TIER = "tier";
+    public static final String AFFIX_ROLL = "roll";
     public static final String CONDUCTIVITY = "conductivity";
     public static final String LENGTH_M = "length_m";
 
@@ -189,6 +193,60 @@ public final class AssembledGearData {
         setSeals(stack, Map.of());
     }
 
+    public record AffixEntry(ResourceLocation id, int tier, String rollKind) {}
+
+    public static List<AffixEntry> affixes(ItemStack stack) {
+        List<AffixEntry> out = new ArrayList<>();
+        gearTag(stack).ifPresent(tag -> {
+            ListTag list = tag.getList(AFFIXES, Tag.TAG_COMPOUND);
+            for (int i = 0; i < list.size(); i++) {
+                CompoundTag entry = list.getCompound(i);
+                if (!entry.contains(AFFIX_ID)) {
+                    continue;
+                }
+                ResourceLocation id = ResourceLocation.parse(entry.getString(AFFIX_ID));
+                int tier = Math.max(1, entry.getInt(AFFIX_TIER));
+                String roll = entry.contains(AFFIX_ROLL) ? entry.getString(AFFIX_ROLL) : "standard";
+                out.add(new AffixEntry(id, tier, roll));
+            }
+        });
+        return out;
+    }
+
+    public static boolean hasAffix(ItemStack stack, ResourceLocation affixId) {
+        for (AffixEntry entry : affixes(stack)) {
+            if (entry.id().equals(affixId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static int affixTier(ItemStack stack, ResourceLocation affixId) {
+        for (AffixEntry entry : affixes(stack)) {
+            if (entry.id().equals(affixId)) {
+                return entry.tier();
+            }
+        }
+        return 0;
+    }
+
+    public static void setAffixes(ItemStack stack, List<AffixEntry> affixes) {
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, root -> {
+            CompoundTag gear = root.contains(ROOT) ? root.getCompound(ROOT) : new CompoundTag();
+            ListTag list = new ListTag();
+            for (AffixEntry entry : affixes) {
+                CompoundTag tag = new CompoundTag();
+                tag.putString(AFFIX_ID, entry.id().toString());
+                tag.putInt(AFFIX_TIER, Math.max(1, entry.tier()));
+                tag.putString(AFFIX_ROLL, entry.rollKind());
+                list.add(tag);
+            }
+            gear.put(AFFIXES, list);
+            root.put(ROOT, gear);
+        });
+    }
+
     public static ItemStack assembleStaff(ItemStack shaft, ItemStack focus) {
         ItemStack out = new ItemStack(ModItems.MODULAR_STAFF.get());
         writeGear(out, TEMPLATE_STAFF, Map.of(
@@ -200,12 +258,17 @@ public final class AssembledGearData {
     }
 
     public static ItemStack assembleJewelry(
-            String template, net.minecraft.world.item.Item item, ItemStack band, ItemStack gem) {
+            String template,
+            net.minecraft.world.item.Item item,
+            ItemStack band,
+            ItemStack gem,
+            net.minecraft.util.RandomSource random) {
         ItemStack out = new ItemStack(item);
         writeGear(out, template, Map.of(
                 BAND, ModularPartData.copyPartTag(band),
                 GEM, ModularPartData.copyPartTag(gem)));
         stampMergedStats(out, band, gem, false);
+        AffixRollService.rollOnAssemble(out, template, band, gem, random);
         return out;
     }
 

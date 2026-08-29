@@ -178,7 +178,7 @@ public final class ArtifactAssemblerBlockEntity extends BaseContainerBlockEntity
                 result = AssembledGearData.assembleStaff(a, b);
             } else {
                 Item item = BuiltInRegistries.ITEM.get(recipe.resultItem());
-                result = AssembledGearData.assembleJewelry(tmpl, item, a, b);
+                result = AssembledGearData.assembleJewelry(tmpl, item, a, b, level.getRandom());
             }
             be.items.set(SLOT_OUT, result);
             a.shrink(1);

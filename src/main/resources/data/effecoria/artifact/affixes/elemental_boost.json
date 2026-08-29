@@ -1,0 +1,9 @@
+{
+  "id": "effecoria:elemental_boost",
+  "polarity": "positive",
+  "effect": "elemental_boost",
+  "weight": 10,
+  "templates": ["ring", "charm"],
+  "params": { "per_tier": 0.1 },
+  "max_tier": 2
+}

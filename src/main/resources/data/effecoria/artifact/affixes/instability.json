@@ -1,0 +1,9 @@
+{
+  "id": "effecoria:instability",
+  "polarity": "negative",
+  "effect": "instability",
+  "weight": 8,
+  "templates": ["ring", "charm"],
+  "params": { "per_tier": 0.05 },
+  "max_tier": 2
+}

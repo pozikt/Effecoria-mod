@@ -1,0 +1,9 @@
+{
+  "id": "effecoria:user_fed",
+  "polarity": "incredible",
+  "effect": "user_fed",
+  "weight": 5,
+  "templates": ["ring", "amulet", "charm"],
+  "params": {},
+  "max_tier": 1
+}

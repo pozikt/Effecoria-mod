@@ -1,0 +1,9 @@
+{
+  "id": "effecoria:phi_shield",
+  "polarity": "positive",
+  "effect": "phi_shield",
+  "weight": 12,
+  "templates": ["ring", "amulet", "charm"],
+  "params": { "per_tier": 0.08 },
+  "max_tier": 2
+}

@@ -6,6 +6,8 @@ import net.minecraft.world.item.ItemStack;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotResult;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,6 +33,16 @@ public final class CuriosAccess {
         });
         ItemStack stack = found.get();
         return stack.isEmpty() ? Optional.empty() : Optional.of(stack);
+    }
+
+    public static List<ItemStack> allEquipped(LivingEntity entity, Predicate<ItemStack> predicate) {
+        List<ItemStack> out = new ArrayList<>();
+        CuriosApi.getCuriosInventory(entity).ifPresent(inv -> {
+            for (SlotResult result : inv.findCurios(predicate)) {
+                out.add(result.stack());
+            }
+        });
+        return out;
     }
 
     public static boolean anyEquipped(LivingEntity entity, Item... items) {
